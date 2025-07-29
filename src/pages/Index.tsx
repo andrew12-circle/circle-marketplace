@@ -5,7 +5,8 @@ import { Marketplace } from "./Marketplace";
 import { Academy } from "./Academy";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles, Crown } from "lucide-react";
+import { Crown } from "lucide-react";
+import circleLogoUrl from "@/assets/circle-logo.png";
 import { CartProvider } from "@/contexts/CartContext";
 import { CartDrawer } from "@/components/marketplace/CartDrawer";
 import { UserMenu } from "@/components/UserMenu";
@@ -23,9 +24,11 @@ const Index = () => {
           <div className="container mx-auto px-4 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-circle-primary to-circle-primary-light rounded-lg flex items-center justify-center">
-                  <Sparkles className="w-6 h-6 text-primary-foreground" />
-                </div>
+                <img 
+                  src={circleLogoUrl} 
+                  alt="Circle Logo" 
+                  className="w-10 h-10 object-contain"
+                />
                 <div>
                   <h1 className="text-2xl font-bold">Circle</h1>
                   <p className="text-sm text-muted-foreground">Grow Smarter</p>

@@ -7,7 +7,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { Sparkles, ArrowLeft, Eye, EyeOff, Loader2 } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, Loader2 } from "lucide-react";
+import circleLogoUrl from "@/assets/circle-logo.png";
 import { useEffect } from "react";
 
 export const Auth = () => {
@@ -168,9 +169,11 @@ export const Auth = () => {
           </Link>
           
           <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-circle-primary to-circle-primary-light rounded-lg flex items-center justify-center">
-              <Sparkles className="w-6 h-6 text-primary-foreground" />
-            </div>
+            <img 
+              src={circleLogoUrl} 
+              alt="Circle Logo" 
+              className="w-12 h-12 object-contain"
+            />
             <div>
               <h1 className="text-2xl font-bold">Circle</h1>
               <p className="text-sm text-muted-foreground">Grow Smarter</p>
@@ -364,15 +367,15 @@ export const Auth = () => {
           </p>
           <div className="grid grid-cols-1 gap-2 text-xs text-muted-foreground">
             <div className="flex items-center justify-center gap-2">
-              <Sparkles className="w-3 h-3 text-circle-primary" />
+              <img src={circleLogoUrl} alt="Circle" className="w-3 h-3" />
               <span>100 Circle Points™ welcome bonus</span>
             </div>
             <div className="flex items-center justify-center gap-2">
-              <Sparkles className="w-3 h-3 text-circle-accent" />
+              <img src={circleLogoUrl} alt="Circle" className="w-3 h-3" />
               <span>Exclusive member pricing</span>
             </div>
             <div className="flex items-center justify-center gap-2">
-              <Sparkles className="w-3 h-3 text-circle-success" />
+              <img src={circleLogoUrl} alt="Circle" className="w-3 h-3" />
               <span>Order tracking & history</span>
             </div>
           </div>
