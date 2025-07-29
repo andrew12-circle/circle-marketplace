@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -19,7 +20,8 @@ import {
   Calendar,
   ArrowUpRight,
   ArrowDownLeft,
-  Clock
+  Clock,
+  ArrowLeft
 } from "lucide-react";
 
 export const AgentWallet = () => {
@@ -106,11 +108,19 @@ export const AgentWallet = () => {
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Agent Wallet</h1>
-            <p className="text-muted-foreground">
-              Manage your Circle Points and track your earnings
-            </p>
+          <div className="flex items-center space-x-4">
+            <Button asChild variant="outline" size="sm">
+              <Link to="/" className="flex items-center space-x-2">
+                <ArrowLeft className="h-4 w-4" />
+                <span>Back to Marketplace</span>
+              </Link>
+            </Button>
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">Agent Wallet</h1>
+              <p className="text-muted-foreground">
+                Manage your Circle Points and track your earnings
+              </p>
+            </div>
           </div>
           <div className="flex items-center space-x-3">
             <Badge variant="secondary" className="flex items-center space-x-1">
