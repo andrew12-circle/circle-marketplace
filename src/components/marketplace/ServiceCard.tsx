@@ -301,7 +301,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
         {/* Action Buttons - Fixed at bottom */}
         <div className="flex gap-2 mt-auto">
           <Button 
-            variant="outline"
+            variant={service.requires_quote ? "outline" : "default"}
             className="flex-1"
             onClick={handleAddToCart}
           >
