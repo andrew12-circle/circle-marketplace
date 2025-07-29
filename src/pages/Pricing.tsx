@@ -5,11 +5,13 @@ import { Link } from "react-router-dom";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 import circleLogo from "@/assets/circle-logo.png";
 
 export const Pricing = () => {
   const [loading, setLoading] = useState<string | null>(null);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const handleSubscription = async (plan: "solo" | "team") => {
     try {
@@ -107,12 +109,21 @@ export const Pricing = () => {
                 <h3 className="text-xl font-semibold mb-2">Circle Starter</h3>
                 <div className="text-3xl font-bold mb-4">$0<span className="text-sm font-normal text-muted-foreground">/month</span></div>
                 <p className="text-sm text-muted-foreground mb-6">Agents exploring the marketplace</p>
-                <Button 
-                  className="w-full bg-teal-600 hover:bg-teal-700 text-white"
-                  asChild
-                >
-                  <Link to="/auth">Create Free Account</Link>
-                </Button>
+                {user ? (
+                  <Button 
+                    className="w-full bg-teal-600 hover:bg-teal-700 text-white"
+                    asChild
+                  >
+                    <Link to="/">Go to Marketplace</Link>
+                  </Button>
+                ) : (
+                  <Button 
+                    className="w-full bg-teal-600 hover:bg-teal-700 text-white"
+                    asChild
+                  >
+                    <Link to="/auth">Create Free Account</Link>
+                  </Button>
+                )}
               </div>
 
               {/* Circle Pro (Solo) - Most Popular */}
