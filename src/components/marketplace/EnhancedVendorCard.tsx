@@ -4,8 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAuth } from "@/contexts/AuthContext";
-import { Star, MapPin, Users, TrendingUp, ExternalLink, Info, Building, Globe, AlertTriangle, Shield, CheckCircle } from "lucide-react";
+import { Star, MapPin, Users, TrendingUp, ExternalLink, Info, Building, Globe, AlertTriangle, Shield, CheckCircle, ArrowRight } from "lucide-react";
 import { getRiskBadge, getComplianceAlert, determineServiceRisk } from "./RESPAComplianceSystem";
+import { useState } from "react";
 
 interface Vendor {
   id: string;
@@ -31,6 +32,7 @@ interface EnhancedVendorCardProps {
 }
 
 export const EnhancedVendorCard = ({ vendor, onConnect, onViewProfile }: EnhancedVendorCardProps) => {
+  const [isHovered, setIsHovered] = useState(false);
   // Determine risk level based on vendor name/description
   const riskLevel = determineServiceRisk(vendor.name, vendor.description);
   
@@ -46,7 +48,11 @@ export const EnhancedVendorCard = ({ vendor, onConnect, onViewProfile }: Enhance
   };
 
   return (
-    <Card className={`h-full flex flex-col hover:shadow-lg transition-shadow ${getCardBorderClass()}`}>
+    <Card 
+      className={`h-full flex flex-col hover:shadow-lg transition-shadow ${getCardBorderClass()}`}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       <CardContent className="p-4 flex-1">
         {/* Header with Logo and Risk Badge */}
         <div className="flex items-start justify-between mb-3">
@@ -161,19 +167,20 @@ export const EnhancedVendorCard = ({ vendor, onConnect, onViewProfile }: Enhance
         )}
       </CardContent>
 
-      <CardFooter className="p-4 pt-0 flex flex-col gap-2">
+      <CardFooter className="p-4 pt-0 flex gap-2">
         <Button 
           onClick={() => onConnect?.(vendor.id)}
-          className="w-full"
+          className="flex-1"
         >
-          Contact
+          Request Co-pay Support
         </Button>
         <Button 
           variant="outline"
           onClick={() => onViewProfile?.(vendor.id)}
-          className="w-full"
         >
-          View Profile
+          <ArrowRight className={`h-4 w-4 transition-transform ${
+            isHovered ? "translate-x-1" : ""
+          }`} />
         </Button>
       </CardFooter>
     </Card>
