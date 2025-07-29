@@ -23,12 +23,12 @@ const Index = () => {
         <header className="border-b bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/50 sticky top-0 z-50">
           <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4">
             <div className="flex items-center justify-between">
-              {/* Logo - smaller on mobile */}
+              {/* Logo */}
               <div className="flex items-center gap-2 sm:gap-3">
                 <img 
                   src={circleLogoUrl} 
                   alt="Circle Logo" 
-                  className="w-8 h-8 sm:w-12 sm:h-12 object-contain"
+                  className="w-10 h-10 sm:w-12 sm:h-12 object-contain"
                 />
               </div>
               
