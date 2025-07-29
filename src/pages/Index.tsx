@@ -53,7 +53,7 @@ const Index = () => {
                 
                 {/* Pro upgrade button for non-pro users */}
                 {user && profile && !profile.is_pro_member && (
-                  <Button asChild className="bg-circle-accent hover:bg-circle-accent/90 text-foreground">
+                  <Button asChild variant="secondary" className="bg-gradient-to-r from-circle-primary to-circle-primary border-none text-white hover:from-circle-primary/90 hover:to-circle-primary/90 shadow-lg">
                     <Link to="/pricing">
                       <Crown className="w-4 h-4 mr-2" />
                       Upgrade to Pro
