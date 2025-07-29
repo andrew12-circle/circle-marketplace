@@ -7,6 +7,7 @@ import { ShoppingCart, Plus, Minus, Trash2, CreditCard, MessageCircle, Calendar 
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { ConsultationSequenceFlow } from "./ConsultationSequenceFlow";
 
 export const CartDrawer = () => {
   const { 
@@ -21,6 +22,7 @@ export const CartDrawer = () => {
   } = useCart();
   
   const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [isConsultationFlowOpen, setIsConsultationFlowOpen] = useState(false);
   const { toast } = useToast();
 
   const handleCheckout = async () => {
@@ -95,12 +97,18 @@ export const CartDrawer = () => {
   const handleRequestQuotes = () => {
     const quoteItems = cartItems.filter(item => item.requiresQuote);
     if (quoteItems.length > 0) {
-      toast({
-        title: "Consultation Items Noted",
-        description: `${quoteItems.length} consultation service(s) ready. Use the service cards to book individual consultations.`,
-      });
-      setIsOpen(false); // Close the cart so user can book consultations
+      setIsConsultationFlowOpen(true);
+      setIsOpen(false);
     }
+  };
+
+  const handleConsultationComplete = () => {
+    const quoteItems = cartItems.filter(item => item.requiresQuote);
+    quoteItems.forEach(item => removeFromCart(item.serviceId));
+    toast({
+      title: "Consultations Scheduled",
+      description: "All consultations have been booked and preparation courses completed!",
+    });
   };
 
   const purchasableItems = cartItems.filter(item => !item.requiresQuote);
@@ -144,31 +152,36 @@ export const CartDrawer = () => {
               <div className="flex-1 overflow-auto py-4 space-y-4">
                 {cartItems.map((item) => (
                   <div key={item.serviceId} className="flex gap-3 p-3 border rounded-lg">
-                    <div className="w-16 h-16 bg-muted rounded-lg overflow-hidden">
-                      <img
-                        src={item.image_url || "/placeholder.svg"}
-                        alt={item.title}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
+                     <div className="w-20 h-16 bg-muted rounded-lg overflow-hidden">
+                       <img
+                         src={item.image_url || "/placeholder.svg"}
+                         alt={item.title}
+                         className="w-full h-full object-cover"
+                       />
+                     </div>
                     
                     <div className="flex-1 min-w-0">
                       <h4 className="font-medium text-sm line-clamp-2">{item.title}</h4>
                       <p className="text-xs text-muted-foreground">{item.vendor}</p>
                       
                       <div className="flex items-center justify-between mt-2">
-                        <div className="flex items-center gap-2">
-                           {item.requiresQuote ? (
-                            <Badge variant="outline" className="text-blue-600 border-blue-600 text-xs">
-                              <Calendar className="w-3 h-3 mr-1" />
-                              Consultation
-                            </Badge>
-                          ) : (
-                            <span className="font-semibold text-circle-primary">
-                              ${item.price}
-                            </span>
-                          )}
-                        </div>
+                         <div className="flex items-center gap-2">
+                            {item.requiresQuote ? (
+                             <div className="flex items-center gap-2">
+                               <Badge variant="outline" className="text-blue-600 border-blue-600 text-xs">
+                                 <Calendar className="w-3 h-3 mr-1" />
+                                 Consultation
+                               </Badge>
+                               <span className="font-semibold text-muted-foreground line-through">
+                                 ${item.price}
+                               </span>
+                             </div>
+                           ) : (
+                             <span className="font-semibold text-circle-primary">
+                               ${item.price}
+                             </span>
+                           )}
+                         </div>
                         
                         <div className="flex items-center gap-1">
                           {!item.requiresQuote && (
@@ -243,16 +256,15 @@ export const CartDrawer = () => {
                     </Button>
                   )}
                   
-                  {quoteItems.length > 0 && (
-                    <Button 
-                      variant="outline" 
-                      className="w-full text-blue-600 border-blue-600 hover:bg-blue-50"
-                      onClick={handleRequestQuotes}
-                    >
-                      <Calendar className="w-4 h-4 mr-2" />
-                      Schedule Consultations ({quoteItems.length} item(s))
-                    </Button>
-                  )}
+                   {quoteItems.length > 0 && (
+                     <Button 
+                       className="w-full"
+                       onClick={handleRequestQuotes}
+                     >
+                       <Calendar className="w-4 h-4 mr-2" />
+                       Schedule Consultations ({quoteItems.length} item(s))
+                     </Button>
+                   )}
                   
                   <Button 
                     variant="ghost" 
@@ -263,10 +275,23 @@ export const CartDrawer = () => {
                   </Button>
                 </div>
               </div>
-            </>
-          )}
-        </div>
-      </SheetContent>
-    </Sheet>
-  );
-};
+             </>
+           )}
+         </div>
+       </SheetContent>
+       
+       <ConsultationSequenceFlow
+         isOpen={isConsultationFlowOpen}
+         onClose={() => setIsConsultationFlowOpen(false)}
+         consultationItems={quoteItems.map(item => ({
+           serviceId: item.serviceId,
+           title: item.title,
+           vendor: item.vendor,
+           image_url: item.image_url,
+           price: item.price
+         }))}
+         onComplete={handleConsultationComplete}
+       />
+     </Sheet>
+   );
+ };
