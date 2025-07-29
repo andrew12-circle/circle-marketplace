@@ -66,139 +66,151 @@ export const EnhancedVendorCard = ({ vendor, onConnect, onViewProfile }: Enhance
         onMouseLeave={() => setIsHovered(false)}
         onClick={handleCardClick}
       >
-      <CardContent className="p-4 flex-1">
-        {/* Header with Logo and Risk Badge */}
-        <div className="flex items-start justify-between mb-3">
-          <div className="flex items-center gap-3">
-            {vendor.logo_url ? (
-              <img 
-                src={vendor.logo_url} 
-                alt={vendor.name}
-                className="w-12 h-12 rounded-lg object-cover"
-              />
-            ) : (
-              <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center">
-                <Building className="w-6 h-6 text-muted-foreground" />
-              </div>
-            )}
-            <div>
-              <h3 className="font-semibold text-base">{vendor.name}</h3>
-              <div className="flex items-center gap-2 mt-1">
-                {vendor.rating > 0 && (
-                  <div className="flex items-center gap-1">
-                    <Star className="w-4 h-4 fill-circle-accent text-circle-accent" />
-                    <span className="text-sm font-medium">{vendor.rating}</span>
-                    <span className="text-xs text-muted-foreground">({vendor.review_count})</span>
-                  </div>
-                )}
-                {vendor.is_verified && (
-                  <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-800">
-                    ✓ Verified
-                  </Badge>
-                )}
-              </div>
+      <CardContent className="p-0 flex-1">
+        {/* Vendor Image at Top */}
+        <div className="relative w-full h-48 bg-muted rounded-t-lg overflow-hidden">
+          {vendor.logo_url ? (
+            <img 
+              src={vendor.logo_url} 
+              alt={vendor.name}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
+              <Building className="w-16 h-16 text-muted-foreground" />
             </div>
+          )}
+          
+          {/* Overlays */}
+          <div className="absolute top-3 left-3">
+            {vendor.is_verified && (
+              <Badge className="bg-white/90 text-blue-800 border-0">
+                ✓ Verified
+              </Badge>
+            )}
           </div>
-          {getRiskBadge(riskLevel)}
-        </div>
-
-        {/* Compliance Alert - smaller and more subtle */}
-        {getComplianceAlert(riskLevel) && (
-          <div className="mb-4">
-            {getComplianceAlert(riskLevel)}
+          
+          <div className="absolute top-3 right-3">
+            {getRiskBadge(riskLevel)}
           </div>
-        )}
-
-        {/* Description */}
-        {vendor.description && (
-          <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-            {vendor.description}
-          </p>
-        )}
-
-        {/* Service Information */}
-        <div className="space-y-2 mb-4">
-          <div className="flex items-center gap-2 text-sm">
-            <MapPin className="w-4 h-4 text-muted-foreground" />
-            <span>Service Area: {serviceArea}</span>
-          </div>
-          <div className="flex items-center gap-2 text-sm">
-            <TrendingUp className="w-4 h-4 text-muted-foreground" />
-            <span>Ad Budget: {mockBudgetRange}</span>
-          </div>
-          {vendor.service_radius_miles && (
-            <div className="flex items-center gap-2 text-sm">
-              <span className="text-muted-foreground">Radius: {vendor.service_radius_miles} miles</span>
+          
+          {/* Rating overlay */}
+          {vendor.rating > 0 && (
+            <div className="absolute bottom-3 left-3 flex items-center gap-1 bg-white/90 px-2 py-1 rounded">
+              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+              <span className="text-sm font-medium">{vendor.rating}</span>
+              <span className="text-xs text-muted-foreground">({vendor.review_count})</span>
             </div>
           )}
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 gap-4 mb-4">
-          <div className="text-center p-2 bg-muted/50 rounded">
-            <div className="text-lg font-bold text-circle-primary">{vendor.co_marketing_agents}</div>
-            <div className="text-xs text-muted-foreground">Co-Marketing Agents</div>
-          </div>
-          <div className="text-center p-2 bg-muted/50 rounded">
-            <div className="text-lg font-bold text-circle-primary">{vendor.campaigns_funded}</div>
-            <div className="text-xs text-muted-foreground">Campaigns Funded</div>
-          </div>
-        </div>
-
-        {/* Available Services */}
-        <div className="mb-4">
-          <h4 className="text-sm font-medium mb-2">Available for:</h4>
-          <div className="flex flex-wrap gap-1">
-            {riskLevel === 'high' ? (
-              <>
-                <Badge variant="outline" className="text-xs">Digital Ads</Badge>
-                <Badge variant="outline" className="text-xs">Print Ads</Badge>
-                <Badge variant="outline" className="text-xs">Billboards</Badge>
-              </>
-            ) : riskLevel === 'medium' ? (
-              <>
-                <Badge variant="outline" className="text-xs">Digital</Badge>
-                <Badge variant="outline" className="text-xs">Events</Badge>
-                <Badge variant="outline" className="text-xs">Direct Mail</Badge>
-              </>
-            ) : (
-              <>
-                <Badge variant="outline" className="text-xs">All Advertising</Badge>
-                <Badge variant="outline" className="text-xs">Events</Badge>
-                <Badge variant="outline" className="text-xs">Co-Marketing</Badge>
-              </>
+        {/* Content Section */}
+        <div className="p-4 space-y-4">
+          {/* Header */}
+          <div>
+            <h3 className="font-semibold text-lg leading-tight mb-1">{vendor.name}</h3>
+            {vendor.location && (
+              <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                <MapPin className="h-3 w-3" />
+                <span>{vendor.location}</span>
+              </div>
             )}
           </div>
-        </div>
 
-        {/* Contact Info */}
-        {(vendor.website_url) && (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Globe className="w-4 h-4" />
-            <span className="truncate">{vendor.website_url}</span>
+          {/* Compliance Alert - smaller and more subtle */}
+          {getComplianceAlert(riskLevel) && (
+            <div className="mb-4">
+              {getComplianceAlert(riskLevel)}
+            </div>
+          )}
+
+          {/* Description */}
+          {vendor.description && (
+            <p className="text-sm text-muted-foreground line-clamp-2">
+              {vendor.description}
+            </p>
+          )}
+
+          {/* Service Information */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-sm">
+              <TrendingUp className="w-4 h-4 text-muted-foreground" />
+              <span>Ad Budget: {mockBudgetRange}</span>
+            </div>
+            {vendor.service_radius_miles && (
+              <div className="flex items-center gap-2 text-sm">
+                <span className="text-muted-foreground">Radius: {vendor.service_radius_miles} miles</span>
+              </div>
+            )}
           </div>
-        )}
+
+          {/* Stats */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="text-center p-2 bg-muted/50 rounded">
+              <div className="text-lg font-bold text-circle-primary">{vendor.co_marketing_agents}</div>
+              <div className="text-xs text-muted-foreground">Co-Marketing Agents</div>
+            </div>
+            <div className="text-center p-2 bg-muted/50 rounded">
+              <div className="text-lg font-bold text-circle-primary">{vendor.campaigns_funded}</div>
+              <div className="text-xs text-muted-foreground">Campaigns Funded</div>
+            </div>
+          </div>
+
+          {/* Available Services */}
+          <div>
+            <h4 className="text-sm font-medium mb-2">Available for:</h4>
+            <div className="flex flex-wrap gap-1">
+              {riskLevel === 'high' ? (
+                <>
+                  <Badge variant="outline" className="text-xs">Digital Ads</Badge>
+                  <Badge variant="outline" className="text-xs">Print Ads</Badge>
+                  <Badge variant="outline" className="text-xs">Billboards</Badge>
+                </>
+              ) : riskLevel === 'medium' ? (
+                <>
+                  <Badge variant="outline" className="text-xs">Digital</Badge>
+                  <Badge variant="outline" className="text-xs">Events</Badge>
+                  <Badge variant="outline" className="text-xs">Direct Mail</Badge>
+                </>
+              ) : (
+                <>
+                  <Badge variant="outline" className="text-xs">All Advertising</Badge>
+                  <Badge variant="outline" className="text-xs">Events</Badge>
+                  <Badge variant="outline" className="text-xs">Co-Marketing</Badge>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Contact Info */}
+          {(vendor.website_url) && (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Globe className="w-4 h-4" />
+              <span className="truncate">{vendor.website_url}</span>
+            </div>
+          )}
+        </div>
       </CardContent>
 
-        <CardFooter className="p-4 pt-0 flex gap-2">
-          <Button 
-            onClick={(e) => {
-              e.stopPropagation();
-              onConnect?.(vendor.id);
-            }}
-            className="flex-1"
-          >
-            Request Co-pay Support
-          </Button>
-          <Button 
-            variant="outline"
-            onClick={handleArrowClick}
-          >
-            <ArrowRight className={`h-4 w-4 transition-transform ${
-              isHovered ? "translate-x-1" : ""
-            }`} />
-          </Button>
-        </CardFooter>
+      <CardFooter className="p-4 pt-0 flex gap-2">
+        <Button 
+          onClick={(e) => {
+            e.stopPropagation();
+            onConnect?.(vendor.id);
+          }}
+          className="flex-1"
+        >
+          Request Co-pay Support
+        </Button>
+        <Button 
+          variant="outline"
+          onClick={handleArrowClick}
+        >
+          <ArrowRight className={`h-4 w-4 transition-transform ${
+            isHovered ? "translate-x-1" : ""
+          }`} />
+        </Button>
+      </CardFooter>
       </Card>
 
       <VendorFunnelModal
