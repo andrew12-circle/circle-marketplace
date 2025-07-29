@@ -14,7 +14,196 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          business_name: string | null
+          circle_points: number | null
+          created_at: string
+          display_name: string | null
+          id: string
+          is_pro_member: boolean | null
+          location: string | null
+          phone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          business_name?: string | null
+          circle_points?: number | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          is_pro_member?: boolean | null
+          location?: string | null
+          phone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          business_name?: string | null
+          circle_points?: number | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          is_pro_member?: boolean | null
+          location?: string | null
+          phone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      saved_services: {
+        Row: {
+          created_at: string
+          id: string
+          service_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          service_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          service_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_services_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      services: {
+        Row: {
+          category: string | null
+          contribution_amount: number | null
+          created_at: string
+          description: string | null
+          discount_percentage: number | null
+          duration: string | null
+          estimated_roi: number | null
+          id: string
+          image_url: string | null
+          is_featured: boolean | null
+          is_top_pick: boolean | null
+          original_price: number | null
+          price: number | null
+          tags: string[] | null
+          title: string
+          updated_at: string
+          vendor_id: string
+        }
+        Insert: {
+          category?: string | null
+          contribution_amount?: number | null
+          created_at?: string
+          description?: string | null
+          discount_percentage?: number | null
+          duration?: string | null
+          estimated_roi?: number | null
+          id?: string
+          image_url?: string | null
+          is_featured?: boolean | null
+          is_top_pick?: boolean | null
+          original_price?: number | null
+          price?: number | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+          vendor_id: string
+        }
+        Update: {
+          category?: string | null
+          contribution_amount?: number | null
+          created_at?: string
+          description?: string | null
+          discount_percentage?: number | null
+          duration?: string | null
+          estimated_roi?: number | null
+          id?: string
+          image_url?: string | null
+          is_featured?: boolean | null
+          is_top_pick?: boolean | null
+          original_price?: number | null
+          price?: number | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "services_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendors: {
+        Row: {
+          campaigns_funded: number | null
+          co_marketing_agents: number | null
+          contact_email: string | null
+          created_at: string
+          description: string | null
+          id: string
+          is_verified: boolean | null
+          location: string | null
+          logo_url: string | null
+          name: string
+          phone: string | null
+          rating: number | null
+          review_count: number | null
+          updated_at: string
+          website_url: string | null
+        }
+        Insert: {
+          campaigns_funded?: number | null
+          co_marketing_agents?: number | null
+          contact_email?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_verified?: boolean | null
+          location?: string | null
+          logo_url?: string | null
+          name: string
+          phone?: string | null
+          rating?: number | null
+          review_count?: number | null
+          updated_at?: string
+          website_url?: string | null
+        }
+        Update: {
+          campaigns_funded?: number | null
+          co_marketing_agents?: number | null
+          contact_email?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_verified?: boolean | null
+          location?: string | null
+          logo_url?: string | null
+          name?: string
+          phone?: string | null
+          rating?: number | null
+          review_count?: number | null
+          updated_at?: string
+          website_url?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
