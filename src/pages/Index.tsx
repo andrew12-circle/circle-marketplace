@@ -47,35 +47,12 @@ const Index = () => {
         </div>
       </header>
 
-      {/* Hero Section */}
-      <section className="bg-gradient-to-br from-circle-primary/10 via-background to-circle-accent/10 py-16">
-        <div className="container mx-auto px-4 text-center">
-          <h1 className="text-5xl font-bold mb-6 bg-gradient-to-r from-circle-primary to-circle-accent bg-clip-text text-transparent">
-            Grow Smarter with Circle
-          </h1>
-          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            The ultimate platform combining real estate growth tools and on-demand education. 
-            Get Circle Pro pricing and accelerate your success.
-          </p>
-          
-          <div className="flex items-center justify-center gap-8 mb-8">
-            <div className="flex items-center gap-2">
-              <Zap className="w-5 h-5 text-circle-primary" />
-              <span className="text-sm font-medium">10% Off All Tools</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Crown className="w-5 h-5 text-circle-accent" />
-              <span className="text-sm font-medium">Pro Content Access</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-circle-success" />
-              <span className="text-sm font-medium">Co-Marketing Options</span>
-            </div>
-          </div>
-          
+      {/* Navigation */}
+      <div className="border-b bg-card/50 backdrop-blur">
+        <div className="container mx-auto px-4 py-4">
           <NavigationTabs activeTab={activeTab} onTabChange={setActiveTab} />
         </div>
-      </section>
+      </div>
 
       {/* Main Content */}
       <main>
