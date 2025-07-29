@@ -67,6 +67,7 @@ export const SavedItems = () => {
             co_pay_price,
             image_url,
             tags,
+            vendor_id,
             vendors!inner(
               name,
               rating,

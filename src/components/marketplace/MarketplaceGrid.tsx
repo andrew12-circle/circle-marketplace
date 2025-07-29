@@ -63,6 +63,7 @@ export const MarketplaceGrid = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>("services");
+  const [savedServiceIds, setSavedServiceIds] = useState<string[]>([]);
   const [filters, setFilters] = useState({
     category: "all",
     priceRange: [0, 2000],
@@ -76,6 +77,29 @@ export const MarketplaceGrid = () => {
   useEffect(() => {
     loadData();
   }, []);
+
+  useEffect(() => {
+    if (profile?.user_id) {
+      loadSavedServices();
+    }
+  }, [profile?.user_id]);
+
+  const loadSavedServices = async () => {
+    if (!profile?.user_id) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('saved_services')
+        .select('service_id')
+        .eq('user_id', profile.user_id);
+
+      if (error) throw error;
+
+      setSavedServiceIds(data?.map(item => item.service_id) || []);
+    } catch (error) {
+      console.error('Error loading saved services:', error);
+    }
+  };
 
   const loadData = async () => {
     try {
@@ -160,11 +184,69 @@ export const MarketplaceGrid = () => {
   });
 
   const handleSaveService = async (serviceId: string) => {
-    // This would integrate with user authentication and saved services
-    toast({
-      title: "Feature coming soon",
-      description: "Service saving will be available after user authentication is implemented.",
-    });
+    if (!profile?.user_id) {
+      toast({
+        title: "Please sign in",
+        description: "You need to be signed in to save services.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      // Check if already saved
+      const { data: existingSave } = await supabase
+        .from('saved_services')
+        .select('id')
+        .eq('user_id', profile.user_id)
+        .eq('service_id', serviceId)
+        .maybeSingle();
+
+      if (existingSave) {
+        // Remove from saved
+        const { error } = await supabase
+          .from('saved_services')
+          .delete()
+          .eq('user_id', profile.user_id)
+          .eq('service_id', serviceId);
+
+        if (error) throw error;
+
+        // Update local state
+        setSavedServiceIds(prev => prev.filter(id => id !== serviceId));
+
+        toast({
+          title: "Removed from saved",
+          description: "Service removed from your saved list",
+        });
+      } else {
+        // Add to saved
+        const { error } = await supabase
+          .from('saved_services')
+          .insert({
+            user_id: profile.user_id,
+            service_id: serviceId,
+            notes: ''
+          });
+
+        if (error) throw error;
+
+        // Update local state
+        setSavedServiceIds(prev => [...prev, serviceId]);
+
+        toast({
+          title: "Saved successfully",
+          description: "Service added to your saved list",
+        });
+      }
+    } catch (error) {
+      console.error('Error saving service:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save service. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleViewServiceDetails = (serviceId: string) => {
@@ -271,6 +353,7 @@ export const MarketplaceGrid = () => {
                 service={service}
                 onSave={handleSaveService}
                 onViewDetails={handleViewServiceDetails}
+                isSaved={savedServiceIds.includes(service.id)}
               />
             ))}
           </div>
