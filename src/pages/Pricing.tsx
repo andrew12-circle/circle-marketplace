@@ -113,9 +113,10 @@ export const Pricing = () => {
           </div>
 
           <div className="max-w-6xl mx-auto">
-            {/* Pricing Cards - aligned with subscription columns only */}
+            {/* Pricing Cards - aligned with last 3 columns only */}
             <div className="grid grid-cols-[auto_1fr_1fr_1fr] gap-0 mb-8">
-              <div></div>
+              <div></div> {/* Empty space to align with Features column */}
+              <div className="grid grid-cols-3 gap-0 col-span-3">
               
               {/* Circle Starter */}
               <div className="bg-white rounded-lg border p-6 text-center">
@@ -168,7 +169,8 @@ export const Pricing = () => {
                 >
                   {loading === "team" ? "Loading..." : "Start Your Free Trial"}
                 </Button>
-              </div>
+               </div>
+             </div>
             </div>
 
             {/* Features Comparison Table */}
