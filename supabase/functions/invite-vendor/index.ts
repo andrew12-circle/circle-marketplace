@@ -24,6 +24,9 @@ interface VendorData {
   logo_url: string;
   specialties: string[];
   years_experience: number | null;
+  service_states: string[];
+  mls_areas: string[];
+  service_radius_miles: number | null;
 }
 
 serve(async (req) => {
@@ -91,6 +94,9 @@ serve(async (req) => {
       is_verified: false, // Will be verified manually
       co_marketing_agents: 0,
       campaigns_funded: 0,
+      service_states: vendorData.service_states || [],
+      mls_areas: vendorData.mls_areas || [],
+      service_radius_miles: vendorData.service_radius_miles || null,
     };
 
     // Insert vendor into database

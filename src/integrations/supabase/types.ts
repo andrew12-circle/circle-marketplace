@@ -53,6 +53,7 @@ export type Database = {
           bio: string | null
           business_name: string | null
           circle_points: number | null
+          city: string | null
           created_at: string
           display_name: string | null
           id: string
@@ -60,16 +61,19 @@ export type Database = {
           location: string | null
           phone: string | null
           specialties: string[] | null
+          state: string | null
           updated_at: string
           user_id: string
           website_url: string | null
           years_experience: number | null
+          zip_code: string | null
         }
         Insert: {
           avatar_url?: string | null
           bio?: string | null
           business_name?: string | null
           circle_points?: number | null
+          city?: string | null
           created_at?: string
           display_name?: string | null
           id?: string
@@ -77,16 +81,19 @@ export type Database = {
           location?: string | null
           phone?: string | null
           specialties?: string[] | null
+          state?: string | null
           updated_at?: string
           user_id: string
           website_url?: string | null
           years_experience?: number | null
+          zip_code?: string | null
         }
         Update: {
           avatar_url?: string | null
           bio?: string | null
           business_name?: string | null
           circle_points?: number | null
+          city?: string | null
           created_at?: string
           display_name?: string | null
           id?: string
@@ -94,10 +101,12 @@ export type Database = {
           location?: string | null
           phone?: string | null
           specialties?: string[] | null
+          state?: string | null
           updated_at?: string
           user_id?: string
           website_url?: string | null
           years_experience?: number | null
+          zip_code?: string | null
         }
         Relationships: []
       }
@@ -248,10 +257,13 @@ export type Database = {
           is_verified: boolean | null
           location: string | null
           logo_url: string | null
+          mls_areas: string[] | null
           name: string
           phone: string | null
           rating: number | null
           review_count: number | null
+          service_radius_miles: number | null
+          service_states: string[] | null
           updated_at: string
           website_url: string | null
         }
@@ -265,10 +277,13 @@ export type Database = {
           is_verified?: boolean | null
           location?: string | null
           logo_url?: string | null
+          mls_areas?: string[] | null
           name: string
           phone?: string | null
           rating?: number | null
           review_count?: number | null
+          service_radius_miles?: number | null
+          service_states?: string[] | null
           updated_at?: string
           website_url?: string | null
         }
@@ -282,10 +297,13 @@ export type Database = {
           is_verified?: boolean | null
           location?: string | null
           logo_url?: string | null
+          mls_areas?: string[] | null
           name?: string
           phone?: string | null
           rating?: number | null
           review_count?: number | null
+          service_radius_miles?: number | null
+          service_states?: string[] | null
           updated_at?: string
           website_url?: string | null
         }

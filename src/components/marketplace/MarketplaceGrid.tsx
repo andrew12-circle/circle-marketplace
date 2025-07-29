@@ -10,6 +10,7 @@ import { Search, Filter, Sparkles, Zap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLocation } from "@/hooks/useLocation";
 
 interface Service {
   id: string;
@@ -46,6 +47,9 @@ interface Vendor {
   is_verified: boolean;
   co_marketing_agents: number;
   campaigns_funded: number;
+  service_states?: string[];
+  mls_areas?: string[];
+  service_radius_miles?: number;
 }
 
 type ViewMode = "services" | "vendors";
@@ -64,6 +68,7 @@ export const MarketplaceGrid = () => {
   });
   const { toast } = useToast();
   const { user, profile } = useAuth();
+  const { location } = useLocation();
 
   useEffect(() => {
     loadData();
@@ -88,11 +93,13 @@ export const MarketplaceGrid = () => {
 
       if (servicesError) throw servicesError;
 
-      // Load vendors
-      const { data: vendorsData, error: vendorsError } = await supabase
+      // Load vendors with location filtering if user has location
+      let vendorQuery = supabase
         .from('vendors')
         .select('*')
         .order('rating', { ascending: false });
+
+      const { data: vendorsData, error: vendorsError } = await vendorQuery;
 
       if (vendorsError) throw vendorsError;
 
@@ -139,8 +146,14 @@ export const MarketplaceGrid = () => {
                          vendor.description.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesVerified = !filters.verified || vendor.is_verified;
+    
+    // Location-based filtering
+    const matchesLocation = !location || !location.state || 
+                          !vendor.service_states || 
+                          vendor.service_states.length === 0 ||
+                          vendor.service_states.includes(location.state);
 
-    return matchesSearch && matchesVerified;
+    return matchesSearch && matchesVerified && matchesLocation;
   });
 
   const handleSaveService = async (serviceId: string) => {

@@ -27,6 +27,9 @@ interface VendorFormData {
   logo_url: string;
   specialties: string[];
   years_experience: number | null;
+  service_states: string[];
+  mls_areas: string[];
+  service_radius_miles: number | null;
 }
 
 const VENDOR_TYPES = {
@@ -79,6 +82,9 @@ export const InviteVendorModal = ({ open, onOpenChange }: InviteVendorModalProps
     logo_url: "",
     specialties: [],
     years_experience: null,
+    service_states: [],
+    mls_areas: [],
+    service_radius_miles: null,
   });
   const { toast } = useToast();
 
@@ -145,6 +151,9 @@ export const InviteVendorModal = ({ open, onOpenChange }: InviteVendorModalProps
         logo_url: "",
         specialties: [],
         years_experience: null,
+        service_states: [],
+        mls_areas: [],
+        service_radius_miles: null,
       });
       setStep('type');
       onOpenChange(false);
@@ -174,6 +183,9 @@ export const InviteVendorModal = ({ open, onOpenChange }: InviteVendorModalProps
       logo_url: "",
       specialties: [],
       years_experience: null,
+      service_states: [],
+      mls_areas: [],
+      service_radius_miles: null,
     });
   };
 
@@ -381,6 +393,58 @@ export const InviteVendorModal = ({ open, onOpenChange }: InviteVendorModalProps
                   }
                 }}
               />
+            </div>
+
+            <div className="space-y-4 border-t pt-4">
+              <h4 className="font-medium text-sm">Service Areas & Coverage</h4>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="service_states">Service States</Label>
+                  <Input
+                    id="service_states"
+                    value={formData.service_states.join(', ')}
+                    onChange={(e) => setFormData({ 
+                      ...formData, 
+                      service_states: e.target.value.split(',').map(s => s.trim().toUpperCase()).filter(s => s) 
+                    })}
+                    placeholder="CA, TX, NY (comma separated)"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Enter state codes where vendor provides services
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="service_radius_miles">Service Radius (miles)</Label>
+                  <Input
+                    id="service_radius_miles"
+                    type="number"
+                    value={formData.service_radius_miles || ""}
+                    onChange={(e) => setFormData({ 
+                      ...formData, 
+                      service_radius_miles: e.target.value ? parseInt(e.target.value) : null 
+                    })}
+                    placeholder="50"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="mls_areas">MLS Areas (Optional)</Label>
+                <Input
+                  id="mls_areas"
+                  value={formData.mls_areas.join(', ')}
+                  onChange={(e) => setFormData({ 
+                    ...formData, 
+                    mls_areas: e.target.value.split(',').map(s => s.trim()).filter(s => s) 
+                  })}
+                  placeholder="CRMLS, NWMLS, GAMLS (comma separated)"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Enter MLS systems the vendor is approved to work with
+                </p>
+              </div>
             </div>
 
             <div className="flex gap-3 pt-4">
