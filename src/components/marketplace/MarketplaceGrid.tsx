@@ -2,11 +2,13 @@ import { useState, useEffect } from "react";
 import { ServiceCard } from "./ServiceCard";
 import { EnhancedVendorCard } from "./EnhancedVendorCard";
 import { MarketplaceFilters } from "./MarketplaceFilters";
+import { CircleProBanner } from "./CircleProBanner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Filter, Sparkles, Zap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Service {
   id: string;
@@ -60,6 +62,7 @@ export const MarketplaceGrid = () => {
     featured: false,
   });
   const { toast } = useToast();
+  const { user, profile } = useAuth();
 
   useEffect(() => {
     loadData();
@@ -193,6 +196,11 @@ export const MarketplaceGrid = () => {
             Finally, we silenced the noise. Welcome to the Marketplace. Discover premium marketing services and connect with top-performing vendors who will actually move your business forward.
           </p>
         </div>
+
+        {/* Circle Pro Banner - Only show for non-pro members */}
+        {user && profile && !profile.is_pro_member && (
+          <CircleProBanner />
+        )}
 
         {/* Search and View Toggle - Mobile Optimized */}
         <div className="flex flex-col gap-3 sm:gap-4 mb-4 sm:mb-6">
