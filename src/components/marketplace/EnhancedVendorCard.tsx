@@ -106,23 +106,33 @@ export const EnhancedVendorCard = ({ vendor, onConnect, onViewProfile }: Enhance
 
         {/* Pricing Section */}
         {(vendor.retailPrice || vendor.proPrice || vendor.coPayPrice) && (
-          <div className="space-y-2 border-t border-border/50 pt-3">
-            {/* Always show retail price for context */}
+          <div className="space-y-3 border-t border-border/50 pt-4">
+            {/* Retail Price - crossed out */}
             {vendor.retailPrice && (
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Retail Price:</span>
-                <span className="text-sm line-through">${vendor.retailPrice}</span>
+              <div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium text-muted-foreground">Retail Price:</span>
+                  <span className="text-lg font-medium line-through text-muted-foreground">${vendor.retailPrice}</span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Standard pricing; pro membership and co-pay options available.
+                </p>
               </div>
             )}
             
-            {/* Always show Circle Pro price */}
+            {/* Circle Pro Price */}
             {vendor.proPrice && (
               <div className="flex justify-between items-center">
-                <span className="text-sm font-medium">Circle Pro:</span>
                 <div className="flex items-center gap-2">
-                  <span className="text-lg font-bold text-circle-primary">${vendor.proPrice}</span>
+                  <div className="w-6 h-6 rounded-full bg-circle-primary flex items-center justify-center">
+                    <span className="text-xs font-bold text-white">C</span>
+                  </div>
+                  <span className="font-medium text-circle-primary">Circle Pro Price:</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xl font-bold text-circle-primary">${vendor.proPrice}/month</span>
                   {!isProMember && (
-                    <Badge variant="outline" className="text-xs">
+                    <Badge variant="outline" className="text-xs border-circle-primary text-circle-primary">
                       Requires Pro
                     </Badge>
                   )}
@@ -130,15 +140,15 @@ export const EnhancedVendorCard = ({ vendor, onConnect, onViewProfile }: Enhance
               </div>
             )}
             
-            {/* Always show Co-Pay price with hover explanation */}
+            {/* Co-Pay Price */}
             {vendor.coPayPrice && (
-              <div className="flex justify-between items-center bg-circle-success/10 p-2 rounded border">
-                <div className="flex items-center gap-1">
-                  <span className="text-sm font-medium text-circle-success">Co-Pay Price:</span>
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <span className="font-medium text-circle-success">Co-pay Price:</span>
                   <Popover>
                     <PopoverTrigger asChild>
                       <button className="hover:text-circle-primary transition-colors">
-                        <Info className="w-3 h-3" />
+                        <Info className="w-4 h-4 text-circle-success" />
                       </button>
                     </PopoverTrigger>
                     <PopoverContent className="w-80">
@@ -154,25 +164,7 @@ export const EnhancedVendorCard = ({ vendor, onConnect, onViewProfile }: Enhance
                     </PopoverContent>
                   </Popover>
                 </div>
-                <span className="text-lg font-bold text-circle-success">${vendor.coPayPrice}</span>
-              </div>
-            )}
-            
-            {vendor.avgAgentCost && (
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Avg Agent Cost:</span>
-                <span className="text-sm font-medium">${vendor.avgAgentCost}</span>
-              </div>
-            )}
-            
-            {vendor.coPayPrice && vendor.retailPrice && (
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium text-circle-success">
-                  {isProMember ? `Co-Pay Saves: ${coPaySavings - percentSaved}% more` : `You Save: ${coPaySavings}%`}
-                </span>
-                <span className="text-sm font-bold text-circle-success">
-                  {isProMember ? `${coPaySavings - percentSaved}%` : `${coPaySavings}%`}
-                </span>
+                <span className="text-xl font-bold text-circle-success">${vendor.coPayPrice}/month</span>
               </div>
             )}
           </div>
