@@ -13,9 +13,6 @@ export const Pricing = () => {
           <div className="flex items-center justify-between">
             <Link to="/" className="flex items-center gap-3">
               <img src={circleLogo} alt="Circle Logo" className="w-10 h-10" />
-              <div>
-                <h1 className="text-2xl font-bold">Circle</h1>
-              </div>
             </Link>
             <div className="flex items-center gap-4">
               <Link to="/" className="text-sm text-muted-foreground hover:text-foreground">
