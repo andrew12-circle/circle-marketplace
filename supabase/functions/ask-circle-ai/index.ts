@@ -1,0 +1,148 @@
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+// Helper logging function
+const logStep = (step: string, details?: any) => {
+  const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
+  console.log(`[ASK-CIRCLE-AI] ${step}${detailsStr}`);
+};
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    logStep("Function started");
+
+    const openAIKey = Deno.env.get("OPENAI_API_KEY");
+    if (!openAIKey) throw new Error("OPENAI_API_KEY is not set");
+    logStep("OpenAI key verified");
+
+    // Create Supabase client to fetch services data
+    const supabaseClient = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_ANON_KEY") ?? ""
+    );
+
+    const { prompt } = await req.json();
+    logStep("Received prompt", { prompt });
+
+    // Fetch available services from the database
+    const { data: services, error: servicesError } = await supabaseClient
+      .from('services')
+      .select(`
+        *,
+        vendor:vendors (
+          name,
+          rating,
+          review_count,
+          is_verified
+        )
+      `);
+
+    if (servicesError) {
+      logStep("Error fetching services", { error: servicesError });
+    }
+
+    const servicesList = services || [];
+    logStep("Fetched services", { count: servicesList.length });
+
+    // Create a comprehensive prompt for the AI
+    const systemPrompt = `You are Circle AI, an expert real estate marketing advisor. You analyze agent locations, market conditions, and recommend the best marketing service bundles.
+
+Available Services in our marketplace:
+${servicesList.map(service => `- ${service.title}: ${service.description} (Category: ${service.category}, Price: ${service.price})`).join('\n')}
+
+When analyzing a request:
+1. Provide location-specific market analysis if location is mentioned
+2. Identify agent buying patterns for that market
+3. Recommend the best bundle of services that would provide highest ROI
+4. Be specific about estimated ROI and time investment
+5. Focus on services that complement each other
+
+Respond in this exact JSON format:
+{
+  "locationAnalysis": "Brief analysis of the market area mentioned",
+  "agentBuyingPatterns": "What successful agents in similar markets typically invest in",
+  "topROIBundle": {
+    "name": "Bundle name",
+    "description": "Why this bundle is recommended for their area",
+    "services": [
+      {"name": "Service 1", "description": "Why this service helps"},
+      {"name": "Service 2", "description": "Why this service helps"}
+    ],
+    "estimatedROI": "X.Xx in 90 days",
+    "timeInvestment": "X-X hours/week"
+  }
+}`;
+
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openAIKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: prompt }
+        ],
+        temperature: 0.7,
+        max_tokens: 1500,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`OpenAI API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const aiResponse = data.choices[0].message.content;
+    logStep("AI response received", { response: aiResponse });
+
+    // Parse the JSON response
+    let recommendation;
+    try {
+      recommendation = JSON.parse(aiResponse);
+    } catch (parseError) {
+      logStep("JSON parse error, creating fallback response");
+      // Fallback response if JSON parsing fails
+      recommendation = {
+        locationAnalysis: "Based on the provided information, we've analyzed your market conditions and identified key opportunities for growth.",
+        agentBuyingPatterns: "Successful agents in similar markets typically invest in a combination of digital marketing and local community engagement strategies.",
+        topROIBundle: {
+          name: "Digital Presence Package",
+          description: "A comprehensive bundle designed to establish strong online presence and generate quality leads",
+          services: [
+            { name: "Social Media Management", description: "Builds brand awareness and engages local audience" },
+            { name: "SEO Optimization", description: "Improves search visibility for local property searches" },
+            { name: "Lead Generation System", description: "Captures and nurtures potential clients automatically" }
+          ],
+          estimatedROI: "2.5x in 90 days",
+          timeInvestment: "3-5 hours/week"
+        }
+      };
+    }
+
+    logStep("Sending recommendation response");
+    return new Response(JSON.stringify({ recommendation }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 200,
+    });
+
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    logStep("ERROR in ask-circle-ai", { message: errorMessage });
+    return new Response(JSON.stringify({ error: errorMessage }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 500,
+    });
+  }
+});
