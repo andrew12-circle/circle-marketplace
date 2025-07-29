@@ -5,6 +5,8 @@ import { Separator } from "@/components/ui/separator";
 import { useCart } from "@/contexts/CartContext";
 import { ShoppingCart, Plus, Minus, Trash2, CreditCard, MessageCircle } from "lucide-react";
 import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 export const CartDrawer = () => {
   const { 
@@ -19,6 +21,7 @@ export const CartDrawer = () => {
   } = useCart();
   
   const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const { toast } = useToast();
 
   const handleCheckout = async () => {
     const purchasableItems = cartItems.filter(item => !item.requiresQuote);
@@ -26,17 +29,65 @@ export const CartDrawer = () => {
     
     if (purchasableItems.length > 0) {
       setIsCheckingOut(true);
-      // TODO: Implement Stripe checkout
-      setTimeout(() => {
+      
+      try {
+        // Get current session to include auth header if user is logged in
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        const { data, error } = await supabase.functions.invoke('create-checkout', {
+          body: { 
+            items: purchasableItems.map(item => ({
+              title: item.title,
+              price: item.price,
+              quantity: item.quantity,
+              vendor: item.vendor,
+              image_url: item.image_url
+            }))
+          },
+          headers: session?.access_token ? {
+            Authorization: `Bearer ${session.access_token}`,
+          } : {},
+        });
+
+        if (error) {
+          throw error;
+        }
+
+        if (data?.url) {
+          // Open Stripe checkout in new tab
+          window.open(data.url, '_blank');
+          
+          // Clear purchasable items from cart after successful checkout initiation
+          purchasableItems.forEach(item => removeFromCart(item.serviceId));
+          
+          toast({
+            title: "Redirecting to checkout",
+            description: "Opening Stripe checkout in new tab...",
+          });
+        } else {
+          throw new Error("No checkout URL received");
+        }
+      } catch (error) {
+        console.error("Checkout error:", error);
+        toast({
+          title: "Checkout failed",
+          description: "Unable to process checkout. Please try again.",
+          variant: "destructive",
+        });
+      } finally {
         setIsCheckingOut(false);
-        // This will be replaced with actual Stripe integration
-        alert("Stripe checkout will be implemented here!");
-      }, 1000);
+      }
     }
 
     if (quoteItems.length > 0) {
       // Handle quote requests
-      alert(`Quote requested for ${quoteItems.length} item(s). You'll be contacted within 24 hours.`);
+      toast({
+        title: "Quote requested",
+        description: `Quote requested for ${quoteItems.length} item(s). You'll be contacted within 24 hours.`,
+      });
+      
+      // Remove quote items from cart after requesting
+      quoteItems.forEach(item => removeFromCart(item.serviceId));
     }
   };
 
