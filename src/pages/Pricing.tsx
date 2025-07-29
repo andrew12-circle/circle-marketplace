@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles, Check, X } from "lucide-react";
+import { Check, X } from "lucide-react";
 import { Link } from "react-router-dom";
+import circleLogo from "@/assets/circle-logo.png";
 
 export const Pricing = () => {
   return (
@@ -11,9 +12,7 @@ export const Pricing = () => {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <Link to="/" className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-circle-primary to-circle-primary-light rounded-full flex items-center justify-center">
-                <Sparkles className="w-6 h-6 text-white" />
-              </div>
+              <img src={circleLogo} alt="Circle Logo" className="w-10 h-10" />
               <div>
                 <h1 className="text-2xl font-bold">Circle</h1>
               </div>
