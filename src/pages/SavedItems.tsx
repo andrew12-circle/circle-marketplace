@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,8 +7,9 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { Trash2, MessageCircle, ArrowRight, Crown, Loader2 } from "lucide-react";
+import { Trash2, MessageCircle, ArrowRight, Crown, Loader2, ArrowLeft } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Link } from "react-router-dom";
 
 interface SavedService {
   id: string;
@@ -43,6 +44,7 @@ export const SavedItems = () => {
   const [loading, setLoading] = useState(true);
   const [aiAnalysis, setAiAnalysis] = useState("");
   const [analyzingWithAI, setAnalyzingWithAI] = useState(false);
+  const [notesTimers, setNotesTimers] = useState<Record<string, NodeJS.Timeout>>({});
   const isProMember = profile?.is_pro_member || false;
 
   useEffect(() => {
@@ -103,34 +105,55 @@ export const SavedItems = () => {
     }
   };
 
-  const updateNotes = async (savedServiceId: string, notes: string) => {
-    try {
-      const { error } = await supabase
-        .from('saved_services')
-        .update({ notes })
-        .eq('id', savedServiceId);
-
-      if (error) throw error;
-
-      setSavedServices(prev => 
-        prev.map(item => 
-          item.id === savedServiceId ? { ...item, notes } : item
-        )
-      );
-
-      toast({
-        title: "Notes updated",
-        description: "Your notes have been saved",
-      });
-    } catch (error) {
-      console.error('Error updating notes:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update notes",
-        variant: "destructive",
-      });
+  const debouncedUpdateNotes = useCallback((savedServiceId: string, notes: string) => {
+    // Clear existing timer for this service
+    if (notesTimers[savedServiceId]) {
+      clearTimeout(notesTimers[savedServiceId]);
     }
-  };
+
+    // Update local state immediately for responsive UI
+    setSavedServices(prev => 
+      prev.map(item => 
+        item.id === savedServiceId ? { ...item, notes } : item
+      )
+    );
+
+    // Set new timer to save to database after user stops typing
+    const timer = setTimeout(async () => {
+      try {
+        const { error } = await supabase
+          .from('saved_services')
+          .update({ notes })
+          .eq('id', savedServiceId);
+
+        if (error) throw error;
+
+        toast({
+          title: "Notes saved",
+          description: "Your notes have been automatically saved",
+        });
+      } catch (error) {
+        console.error('Error updating notes:', error);
+        toast({
+          title: "Error",
+          description: "Failed to save notes",
+          variant: "destructive",
+        });
+      }
+    }, 1000); // Wait 1 second after user stops typing
+
+    setNotesTimers(prev => ({
+      ...prev,
+      [savedServiceId]: timer
+    }));
+  }, [notesTimers, toast]);
+
+  // Cleanup timers on unmount
+  useEffect(() => {
+    return () => {
+      Object.values(notesTimers).forEach(timer => clearTimeout(timer));
+    };
+  }, [notesTimers]);
 
   const removeSavedService = async (savedServiceId: string) => {
     try {
@@ -241,6 +264,16 @@ export const SavedItems = () => {
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-6">
+      {/* Back to Marketplace Button */}
+      <div className="flex items-center gap-3">
+        <Button variant="outline" asChild className="flex items-center gap-2">
+          <Link to="/">
+            <ArrowLeft className="w-4 h-4" />
+            Back to Marketplace
+          </Link>
+        </Button>
+      </div>
+
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Saved Services</h1>
@@ -475,7 +508,7 @@ export const SavedItems = () => {
                   <Textarea
                     placeholder="Add your thoughts about this service..."
                     value={item.notes || ""}
-                    onChange={(e) => updateNotes(item.id, e.target.value)}
+                    onChange={(e) => debouncedUpdateNotes(item.id, e.target.value)}
                     className="min-h-[80px] text-sm"
                   />
                 </div>
