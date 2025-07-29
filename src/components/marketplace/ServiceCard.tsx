@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Heart, Star, ArrowRight, ShoppingCart, MessageCircle, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useCart } from "@/contexts/CartContext";
@@ -72,6 +73,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
   };
 
   return (
+    <TooltipProvider>
     <Card 
       className="group relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 bg-card border border-border/50"
       onMouseEnter={() => setIsHovered(true)}
@@ -217,33 +219,47 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
               )}
               
               {service.pro_price && (
-                <div className="flex items-center justify-between p-2 bg-circle-primary/5 rounded-lg border border-circle-primary/20 opacity-75">
-                  <div className="flex items-center gap-1">
-                    <Lock className="w-3 h-3 text-circle-primary" />
-                    <span className="text-sm font-medium text-circle-primary">Circle Pro Price:</span>
-                    <div className="w-4 h-4 rounded-full bg-circle-primary flex items-center justify-center">
-                      <span className="text-xs text-white font-bold">C</span>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center justify-between p-2 bg-circle-primary/5 rounded-lg border border-circle-primary/20 opacity-75 cursor-pointer">
+                      <div className="flex items-center gap-1">
+                        <Lock className="w-3 h-3 text-circle-primary" />
+                        <span className="text-sm font-medium text-circle-primary">Circle Pro Price:</span>
+                        <div className="w-4 h-4 rounded-full bg-circle-primary flex items-center justify-center">
+                          <span className="text-xs text-white font-bold">C</span>
+                        </div>
+                      </div>
+                      <span className="text-lg font-bold text-circle-primary">
+                        ${service.pro_price}
+                      </span>
                     </div>
-                  </div>
-                  <span className="text-lg font-bold text-circle-primary">
-                    ${service.pro_price}
-                  </span>
-                </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Join Circle Pro membership to unlock this price</p>
+                  </TooltipContent>
+                </Tooltip>
               )}
               
               {service.co_pay_price && (
-                <div className="flex items-center justify-between p-2 bg-green-50 rounded-lg border border-green-200 opacity-75">
-                  <div className="flex items-center gap-1">
-                    <Lock className="w-3 h-3 text-green-600" />
-                    <span className="text-sm font-medium text-green-600">Your Co-Pay:</span>
-                    <div className="w-3 h-3 rounded-full bg-green-600 flex items-center justify-center">
-                      <span className="text-xs text-white">i</span>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center justify-between p-2 bg-green-50 rounded-lg border border-green-200 opacity-75 cursor-pointer">
+                      <div className="flex items-center gap-1">
+                        <Lock className="w-3 h-3 text-green-600" />
+                        <span className="text-sm font-medium text-green-600">Your Co-Pay:</span>
+                        <div className="w-3 h-3 rounded-full bg-green-600 flex items-center justify-center">
+                          <span className="text-xs text-white">i</span>
+                        </div>
+                      </div>
+                      <span className="text-lg font-bold text-green-600">
+                        ${service.co_pay_price}
+                      </span>
                     </div>
-                  </div>
-                  <span className="text-lg font-bold text-green-600">
-                    ${service.co_pay_price}
-                  </span>
-                </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Join Circle Pro membership to unlock this price</p>
+                  </TooltipContent>
+                </Tooltip>
               )}
             </>
           )}
@@ -293,5 +309,6 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
         </div>
       </CardContent>
     </Card>
+    </TooltipProvider>
   );
 };
