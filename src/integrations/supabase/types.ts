@@ -97,6 +97,7 @@ export type Database = {
           is_top_pick: boolean | null
           original_price: number | null
           price: number | null
+          requires_quote: boolean | null
           tags: string[] | null
           title: string
           updated_at: string
@@ -116,6 +117,7 @@ export type Database = {
           is_top_pick?: boolean | null
           original_price?: number | null
           price?: number | null
+          requires_quote?: boolean | null
           tags?: string[] | null
           title: string
           updated_at?: string
@@ -135,6 +137,7 @@ export type Database = {
           is_top_pick?: boolean | null
           original_price?: number | null
           price?: number | null
+          requires_quote?: boolean | null
           tags?: string[] | null
           title?: string
           updated_at?: string
