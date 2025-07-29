@@ -23,6 +23,24 @@ export const LegalFooter = () => {
               <Link to="/cookies" className="block text-sm text-muted-foreground hover:text-primary">
                 Cookie Policy
               </Link>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <button className="block text-sm text-muted-foreground hover:text-primary text-left">
+                    Compliance Info
+                  </button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl">
+                  <DialogHeader>
+                    <DialogTitle>RESPA Compliance Statement</DialogTitle>
+                    <DialogDescription className="text-sm leading-relaxed pt-4">
+                      CircleMarketplace.io facilitates connections for RESPA-compliant joint advertising only. 
+                      We do not facilitate co-payment arrangements for CRM systems, lead generation tools, or 
+                      other business operations platforms. All co-marketing must involve true advertising with 
+                      proportional benefit to all parties.
+                    </DialogDescription>
+                  </DialogHeader>
+                </DialogContent>
+              </Dialog>
             </div>
           </div>
           
@@ -115,28 +133,6 @@ export const LegalFooter = () => {
         
         <Separator className="my-6" />
         
-        {/* RESPA Compliance Notice */}
-        <div className="mb-6 flex justify-center">
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="outline" size="sm" className="text-xs">
-                <Info className="w-3 h-3 mr-2" />
-                RESPA Compliance Info
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl">
-              <DialogHeader>
-                <DialogTitle>RESPA Compliance Statement</DialogTitle>
-                <DialogDescription className="text-sm leading-relaxed pt-4">
-                  CircleMarketplace.io facilitates connections for RESPA-compliant joint advertising only. 
-                  We do not facilitate co-payment arrangements for CRM systems, lead generation tools, or 
-                  other business operations platforms. All co-marketing must involve true advertising with 
-                  proportional benefit to all parties.
-                </DialogDescription>
-              </DialogHeader>
-            </DialogContent>
-          </Dialog>
-        </div>
 
         {/* Copyright and Final Info */}
         <div className="flex flex-col md:flex-row justify-between items-center">
