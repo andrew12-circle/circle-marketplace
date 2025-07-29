@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Heart, Star, ArrowRight, ShoppingCart, MessageCircle } from "lucide-react";
+import { Heart, Star, ArrowRight, ShoppingCart, MessageCircle, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -217,8 +217,9 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
               )}
               
               {service.pro_price && (
-                <div className="flex items-center justify-between p-2 bg-circle-primary/5 rounded-lg border border-circle-primary/20">
+                <div className="flex items-center justify-between p-2 bg-circle-primary/5 rounded-lg border border-circle-primary/20 opacity-75">
                   <div className="flex items-center gap-1">
+                    <Lock className="w-3 h-3 text-circle-primary" />
                     <span className="text-sm font-medium text-circle-primary">Circle Pro Price:</span>
                     <div className="w-4 h-4 rounded-full bg-circle-primary flex items-center justify-center">
                       <span className="text-xs text-white font-bold">C</span>
@@ -231,8 +232,9 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
               )}
               
               {service.co_pay_price && (
-                <div className="flex items-center justify-between p-2 bg-green-50 rounded-lg border border-green-200">
+                <div className="flex items-center justify-between p-2 bg-green-50 rounded-lg border border-green-200 opacity-75">
                   <div className="flex items-center gap-1">
+                    <Lock className="w-3 h-3 text-green-600" />
                     <span className="text-sm font-medium text-green-600">Your Co-Pay:</span>
                     <div className="w-3 h-3 rounded-full bg-green-600 flex items-center justify-center">
                       <span className="text-xs text-white">i</span>
