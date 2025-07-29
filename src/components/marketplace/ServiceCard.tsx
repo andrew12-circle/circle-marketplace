@@ -81,7 +81,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
   return (
     <TooltipProvider>
     <Card 
-      className="group relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 bg-card border border-border/50"
+      className="group relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 bg-card border border-border/50 h-full flex flex-col"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -113,8 +113,8 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
         />
       </Button>
 
-      {/* Image */}
-      <div className="relative h-48 overflow-hidden bg-muted">
+      {/* Image - Fixed height */}
+      <div className="relative h-48 overflow-hidden bg-muted flex-shrink-0">
         <img
           src={service.image_url || "/public/placeholder.svg"}
           alt={service.title}
@@ -122,9 +122,9 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
         />
       </div>
 
-      <CardContent className="p-4 space-y-3">
-        {/* Vendor Info */}
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+      <CardContent className="p-4 flex flex-col flex-grow">
+        {/* Vendor Info - Fixed height */}
+        <div className="flex items-center gap-2 text-sm text-muted-foreground h-6 mb-3">
           <span className="font-medium text-foreground">{service.vendor.name}</span>
           {service.vendor.is_verified && (
             <Badge variant="secondary" className="text-xs">
@@ -139,34 +139,36 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
           </div>
         </div>
 
-        {/* Title */}
-        <h3 className="font-semibold text-foreground leading-tight line-clamp-2">
+        {/* Title - Fixed height */}
+        <h3 className="font-semibold text-foreground leading-tight line-clamp-2 h-12 mb-3">
           {service.title}
         </h3>
 
-        {/* Description */}
-        <p className="text-sm text-muted-foreground line-clamp-2">
+        {/* Description - Fixed height */}
+        <p className="text-sm text-muted-foreground line-clamp-2 h-10 mb-3">
           {service.description}
         </p>
 
-        {/* Tags */}
-        {service.tags && service.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1">
-            {service.tags.slice(0, 3).map((tag) => (
-              <Badge key={tag} variant="outline" className="text-xs">
-                {tag}
-              </Badge>
-            ))}
-            {service.tags.length > 3 && (
-              <span className="text-xs text-muted-foreground">
-                +{service.tags.length - 3} more
-              </span>
-            )}
-          </div>
-        )}
+        {/* Tags - Fixed height */}
+        <div className="h-8 mb-3">
+          {service.tags && service.tags.length > 0 && (
+            <div className="flex flex-wrap gap-1">
+              {service.tags.slice(0, 3).map((tag) => (
+                <Badge key={tag} variant="outline" className="text-xs">
+                  {tag}
+                </Badge>
+              ))}
+              {service.tags.length > 3 && (
+                <span className="text-xs text-muted-foreground">
+                  +{service.tags.length - 3} more
+                </span>
+              )}
+            </div>
+          )}
+        </div>
 
-        {/* New Pricing Structure */}
-        <div className="space-y-2 pt-2">
+        {/* Pricing Structure - Flexible but consistent */}
+        <div className="space-y-2 mb-3 flex-grow">
           {isProMember ? (
             <>
               {/* Pro Member View: Show retail with line-through, pro price as main */}
@@ -282,20 +284,22 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
           )}
         </div>
 
-        {/* ROI and Duration */}
-        {(service.estimated_roi || service.duration) && (
-          <div className="flex items-center justify-between text-xs text-muted-foreground">
-            {service.estimated_roi && (
-              <span>Est. ROI: {service.estimated_roi}x</span>
-            )}
-            {service.duration && (
-              <span>{service.duration}</span>
-            )}
-          </div>
-        )}
+        {/* ROI and Duration - Fixed height */}
+        <div className="h-4 mb-4">
+          {(service.estimated_roi || service.duration) && (
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
+              {service.estimated_roi && (
+                <span>Est. ROI: {service.estimated_roi}x</span>
+              )}
+              {service.duration && (
+                <span>{service.duration}</span>
+              )}
+            </div>
+          )}
+        </div>
 
-        {/* Action Buttons */}
-        <div className="flex gap-2 mt-4">
+        {/* Action Buttons - Fixed at bottom */}
+        <div className="flex gap-2 mt-auto">
           <Button 
             variant="outline"
             className="flex-1"
