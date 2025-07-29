@@ -1,11 +1,11 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { CategoryMegaMenu } from "./CategoryMegaMenu";
 
 interface FilterState {
   category: string; // Should be "all" or a valid category, never empty string
@@ -65,21 +65,10 @@ export const MarketplaceFilters = ({ filters, onFiltersChange, categories }: Mar
           {/* Category Filter */}
           <div className="space-y-2">
             <Label className="text-sm font-medium">Category</Label>
-            <Select value={safeFilters.category} onValueChange={(value) => updateFilter("category", value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="All Categories" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
-                {categories
-                  .filter(category => category && typeof category === 'string' && category.trim() !== '')
-                  .map((category) => (
-                    <SelectItem key={category} value={category}>
-                      {category}
-                    </SelectItem>
-                  ))}
-              </SelectContent>
-            </Select>
+            <CategoryMegaMenu 
+              selectedCategory={safeFilters.category}
+              onCategorySelect={(value) => updateFilter("category", value)}
+            />
           </div>
 
           {/* Price Range Filter */}
