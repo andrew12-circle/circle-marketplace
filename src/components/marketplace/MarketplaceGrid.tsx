@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLocation } from "@/hooks/useLocation";
+import { determineServiceRisk } from "./RESPAComplianceSystem";
 
 interface Service {
   id: string;
@@ -74,6 +75,7 @@ export const MarketplaceGrid = () => {
     verified: false,
     featured: false,
     coPayEligible: false,
+    riskLevel: "all",
   });
   const { toast } = useToast();
   const { user, profile } = useAuth();
@@ -206,11 +208,18 @@ export const MarketplaceGrid = () => {
         tags.some(tag => tag.includes(keyword))
       );
       
-      // Only show services that are eligible for co-pay (safe keywords and no restricted keywords)
+    // Only show services that are eligible for co-pay (safe keywords and no restricted keywords)
       matchesCoPayEligible = hasSafe && !hasRestricted;
     }
 
-    return matchesSearch && matchesCategory && matchesPrice && matchesVerified && matchesFeatured && matchesCoPayEligible;
+    // Risk level filtering
+    let matchesRiskLevel = true;
+    if (filters.riskLevel !== "all") {
+      const serviceRisk = determineServiceRisk(service.category, service.title);
+      matchesRiskLevel = serviceRisk === filters.riskLevel;
+    }
+
+    return matchesSearch && matchesCategory && matchesPrice && matchesVerified && matchesFeatured && matchesCoPayEligible && matchesRiskLevel;
   });
 
   const filteredVendors = vendors.filter(vendor => {
@@ -445,6 +454,7 @@ export const MarketplaceGrid = () => {
                     verified: false,
                     featured: false,
                     coPayEligible: false,
+                    riskLevel: "all",
                   });
                 }}
               >

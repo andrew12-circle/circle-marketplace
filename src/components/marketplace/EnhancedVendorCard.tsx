@@ -1,9 +1,11 @@
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAuth } from "@/contexts/AuthContext";
-import { Star, MapPin, Users, TrendingUp, ExternalLink, Info } from "lucide-react";
+import { Star, MapPin, Users, TrendingUp, ExternalLink, Info, Building, Globe, AlertTriangle, Shield, CheckCircle } from "lucide-react";
+import { getRiskBadge, getComplianceAlert, determineServiceRisk } from "./RESPAComplianceSystem";
 
 interface Vendor {
   id: string;
@@ -17,10 +19,9 @@ interface Vendor {
   is_verified: boolean;
   co_marketing_agents: number;
   campaigns_funded: number;
-  retailPrice?: number;
-  proPrice?: number;
-  coPayPrice?: number;
-  avgAgentCost?: number;
+  service_states?: string[];
+  mls_areas?: string[];
+  service_radius_miles?: number;
 }
 
 interface EnhancedVendorCardProps {
@@ -30,173 +31,193 @@ interface EnhancedVendorCardProps {
 }
 
 export const EnhancedVendorCard = ({ vendor, onConnect, onViewProfile }: EnhancedVendorCardProps) => {
-  const { profile } = useAuth();
-  const isProMember = profile?.is_pro_member || false;
+  // Determine risk level based on vendor name/description
+  const riskLevel = determineServiceRisk(vendor.name, vendor.description);
   
-  const percentSaved = vendor.retailPrice && vendor.proPrice 
-    ? Math.round(((vendor.retailPrice - vendor.proPrice) / vendor.retailPrice) * 100)
-    : 0;
-  const coPaySavings = vendor.retailPrice && vendor.coPayPrice 
-    ? Math.round(((vendor.retailPrice - vendor.coPayPrice) / vendor.retailPrice) * 100)
-    : 0;
+  // Mock service area and budget data
+  const serviceArea = vendor.location || "Service area not specified";
+  const mockBudgetRange = riskLevel === 'high' ? "$1,000-2,500/mo" : 
+                          riskLevel === 'medium' ? "$500-1,500/mo" : 
+                          "$1,000-3,000/mo";
+
+  const getCardBorderClass = () => {
+    switch (riskLevel) {
+      case 'high':
+        return "border-red-200 bg-red-50/30";
+      case 'medium':
+        return "border-orange-200 bg-orange-50/30";
+      case 'low':
+        return "border-green-200 bg-green-50/30";
+      default:
+        return "border-border";
+    }
+  };
 
   return (
-    <Card className="group relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 bg-card border border-border/50">
-      <CardContent className="p-6 space-y-4">
-        {/* Header */}
-        <div className="flex items-start gap-4">
-          <div className="w-16 h-16 rounded-lg overflow-hidden bg-muted flex-shrink-0">
-            <img
-              src={vendor.logo_url || "/placeholder.svg"}
-              alt={vendor.name}
-              className="w-full h-full object-cover"
-            />
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1">
-              <h3 className="font-semibold text-foreground truncate">
-                {vendor.name}
-              </h3>
-              {vendor.is_verified && (
-                <Badge className="bg-circle-primary text-primary-foreground text-xs">
-                  Verified
-                </Badge>
-              )}
-            </div>
-            <div className="flex items-center gap-1 mb-2">
-              <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-              <span className="text-sm font-medium">
-                {vendor.rating}
-              </span>
-              <span className="text-sm text-muted-foreground">
-                ({vendor.review_count} reviews)
-              </span>
-            </div>
-            {vendor.location && (
-              <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                <MapPin className="h-3 w-3" />
-                <span>{vendor.location}</span>
+    <Card className={`h-full flex flex-col hover:shadow-lg transition-shadow ${getCardBorderClass()}`}>
+      <CardContent className="p-4 flex-1">
+        {/* Header with Logo and Risk Badge */}
+        <div className="flex items-start justify-between mb-3">
+          <div className="flex items-center gap-3">
+            {vendor.logo_url ? (
+              <img 
+                src={vendor.logo_url} 
+                alt={vendor.name}
+                className="w-12 h-12 rounded-lg object-cover"
+              />
+            ) : (
+              <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center">
+                <Building className="w-6 h-6 text-muted-foreground" />
               </div>
             )}
+            <div>
+              <h3 className="font-semibold text-base">{vendor.name}</h3>
+              <div className="flex items-center gap-2 mt-1">
+                {vendor.rating > 0 && (
+                  <div className="flex items-center gap-1">
+                    <Star className="w-4 h-4 fill-circle-accent text-circle-accent" />
+                    <span className="text-sm font-medium">{vendor.rating}</span>
+                    <span className="text-xs text-muted-foreground">({vendor.review_count})</span>
+                  </div>
+                )}
+                {vendor.is_verified && (
+                  <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-800">
+                    ✓ Verified
+                  </Badge>
+                )}
+              </div>
+            </div>
           </div>
+          {getRiskBadge(riskLevel)}
+        </div>
+
+        {/* Compliance Alert */}
+        <div className="mb-4">
+          {getComplianceAlert(riskLevel)}
         </div>
 
         {/* Description */}
-        <p className="text-sm text-muted-foreground line-clamp-2">
-          {vendor.description}
-        </p>
-
-        {/* Stats */}
-        <div className="grid grid-cols-2 gap-4 py-3 border-t border-border/50">
-          <div className="text-center">
-            <div className="flex items-center justify-center gap-1 text-circle-primary mb-1">
-              <Users className="h-4 w-4" />
-              <span className="font-semibold">{vendor.co_marketing_agents}</span>
-            </div>
-            <span className="text-xs text-muted-foreground">Co-marketing</span>
-          </div>
-          <div className="text-center">
-            <div className="flex items-center justify-center gap-1 text-circle-accent mb-1">
-              <TrendingUp className="h-4 w-4" />
-              <span className="font-semibold">{vendor.campaigns_funded}</span>
-            </div>
-            <span className="text-xs text-muted-foreground">Campaigns</span>
-          </div>
-        </div>
-
-        {/* Pricing Section */}
-        {(vendor.retailPrice || vendor.proPrice || vendor.coPayPrice) && (
-          <div className="space-y-3 border-t border-border/50 pt-4">
-            {/* Retail Price - crossed out */}
-            {vendor.retailPrice && (
-              <div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium text-muted-foreground">Retail Price:</span>
-                  <span className="text-lg font-medium line-through text-muted-foreground">${vendor.retailPrice}</span>
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Standard pricing; pro membership and co-pay options available.
-                </p>
-              </div>
-            )}
-            
-            {/* Circle Pro Price */}
-            {vendor.proPrice && (
-              <div className="flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 rounded-full bg-circle-primary flex items-center justify-center">
-                    <span className="text-xs font-bold text-white">C</span>
-                  </div>
-                  <span className="font-medium text-circle-primary">Circle Pro Price:</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xl font-bold text-circle-primary">${vendor.proPrice}/month</span>
-                  {!isProMember && (
-                    <Badge variant="outline" className="text-xs border-circle-primary text-circle-primary">
-                      Requires Pro
-                    </Badge>
-                  )}
-                </div>
-              </div>
-            )}
-            
-            {/* Co-Pay Price */}
-            {vendor.coPayPrice && (
-              <div className="flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                  <span className="font-medium text-circle-success">Co-pay Price:</span>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <button className="hover:text-circle-primary transition-colors">
-                        <Info className="w-4 h-4 text-circle-success" />
-                      </button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-80">
-                      <div className="space-y-2">
-                        <h4 className="font-medium">What is Co-Pay?</h4>
-                        <p className="text-sm text-muted-foreground">
-                          Co-Pay is our vendor partnership program where approved vendors help cover up to 50% of your costs.
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          *50% coverage is an average. Actual coverage varies by vendor and agreement.
-                        </p>
-                      </div>
-                    </PopoverContent>
-                  </Popover>
-                </div>
-                <span className="text-xl font-bold text-circle-success">${vendor.coPayPrice}/month</span>
-              </div>
-            )}
-          </div>
+        {vendor.description && (
+          <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+            {vendor.description}
+          </p>
         )}
 
-        {/* Investment Highlight */}
-        <div className="bg-muted/50 rounded-lg p-3 border border-border/50">
-          <p className="text-sm font-medium text-circle-primary mb-1">
-            💰 Invests in Your Business
-          </p>
-          <p className="text-xs text-muted-foreground">
-            This vendor provides financial support for marketing campaigns
-          </p>
+        {/* Service Information */}
+        <div className="space-y-2 mb-4">
+          <div className="flex items-center gap-2 text-sm">
+            <MapPin className="w-4 h-4 text-muted-foreground" />
+            <span>Service Area: {serviceArea}</span>
+          </div>
+          <div className="flex items-center gap-2 text-sm">
+            <TrendingUp className="w-4 h-4 text-muted-foreground" />
+            <span>Ad Budget: {mockBudgetRange}</span>
+          </div>
+          {vendor.service_radius_miles && (
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-muted-foreground">Radius: {vendor.service_radius_miles} miles</span>
+            </div>
+          )}
         </div>
 
-        {/* Actions */}
-        <div className="flex gap-2 pt-2">
-          <Button 
-            className="flex-1"
-            onClick={() => onConnect?.(vendor.id)}
-          >
-            Connect
-          </Button>
-          <Button 
-            variant="outline" 
-            size="icon"
-            onClick={() => onViewProfile?.(vendor.id)}
-          >
-            <ExternalLink className="h-4 w-4" />
-          </Button>
+        {/* Stats */}
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          <div className="text-center p-2 bg-muted/50 rounded">
+            <div className="text-lg font-bold text-circle-primary">{vendor.co_marketing_agents}</div>
+            <div className="text-xs text-muted-foreground">Co-Marketing Agents</div>
+          </div>
+          <div className="text-center p-2 bg-muted/50 rounded">
+            <div className="text-lg font-bold text-circle-primary">{vendor.campaigns_funded}</div>
+            <div className="text-xs text-muted-foreground">Campaigns Funded</div>
+          </div>
         </div>
+
+        {/* Available Services */}
+        <div className="mb-4">
+          <h4 className="text-sm font-medium mb-2">Available for:</h4>
+          <div className="flex flex-wrap gap-1">
+            {riskLevel === 'high' ? (
+              <>
+                <Badge variant="outline" className="text-xs">Digital Ads</Badge>
+                <Badge variant="outline" className="text-xs">Print Ads</Badge>
+                <Badge variant="outline" className="text-xs">Billboards</Badge>
+              </>
+            ) : riskLevel === 'medium' ? (
+              <>
+                <Badge variant="outline" className="text-xs">Digital</Badge>
+                <Badge variant="outline" className="text-xs">Events</Badge>
+                <Badge variant="outline" className="text-xs">Direct Mail</Badge>
+              </>
+            ) : (
+              <>
+                <Badge variant="outline" className="text-xs">All Advertising</Badge>
+                <Badge variant="outline" className="text-xs">Events</Badge>
+                <Badge variant="outline" className="text-xs">Co-Marketing</Badge>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Contact Info */}
+        {(vendor.website_url) && (
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Globe className="w-4 h-4" />
+            <span className="truncate">{vendor.website_url}</span>
+          </div>
+        )}
       </CardContent>
+
+      <CardFooter className="p-4 pt-0 flex flex-col gap-2">
+        {riskLevel === 'high' ? (
+          <>
+            <Button 
+              variant="outline"
+              onClick={() => onViewProfile?.(vendor.id)}
+              className="w-full"
+            >
+              View Compliance Guide
+            </Button>
+            <Button 
+              onClick={() => onConnect?.(vendor.id)}
+              className="w-full bg-red-600 hover:bg-red-700"
+            >
+              Contact with Caution
+            </Button>
+          </>
+        ) : riskLevel === 'medium' ? (
+          <>
+            <Button 
+              variant="outline"
+              onClick={() => onViewProfile?.(vendor.id)}
+              className="w-full"
+            >
+              View Guidelines
+            </Button>
+            <Button 
+              onClick={() => onConnect?.(vendor.id)}
+              className="w-full bg-orange-600 hover:bg-orange-700"
+            >
+              Contact
+            </Button>
+          </>
+        ) : (
+          <>
+            <Button 
+              onClick={() => onConnect?.(vendor.id)}
+              className="w-full"
+            >
+              Contact
+            </Button>
+            <Button 
+              variant="outline"
+              onClick={() => onViewProfile?.(vendor.id)}
+              className="w-full"
+            >
+              View Profile
+            </Button>
+          </>
+        )}
+      </CardFooter>
     </Card>
   );
 };

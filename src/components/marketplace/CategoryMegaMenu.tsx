@@ -2,99 +2,30 @@ import { useState } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ChevronDown, Monitor, Mail, Share2, Video, Calendar, Gift, Brain } from "lucide-react";
+import { ChevronDown, Building2, Home, Truck, Camera, Briefcase, AlertTriangle, Shield, CheckCircle } from "lucide-react";
+import { SERVICE_CATEGORIES, getRiskBadge } from "./RESPAComplianceSystem";
 
 interface CategoryMegaMenuProps {
   selectedCategory: string;
   onCategorySelect: (category: string) => void;
 }
 
-const categoryGroups = [
-  {
-    title: "Digital Marketing",
-    icon: Monitor,
-    items: [
-      "Digital Ads",
-      "Retargeting Ads", 
-      "Google Business Profile Opt.",
-      "Lead Capture Funnels",
-      "Real Estate Drip Emails",
-      "AI Text Follow-Up Sequences",
-      "SEO Campaigns",
-      "Landing Page Creation",
-      "Chatbot or AI SMS Bot Setup"
-    ]
-  },
-  {
-    title: "Print Marketing",
-    icon: Mail,
-    items: [
-      "Just Listed / Just Sold Postcards",
-      "Geo-Farm Postcard Campaigns", 
-      "Expired/FSBO Direct Mail",
-      "Client Anniversary Mailers",
-      "Luxury Listing Brochures",
-      "Door Hangers / Leave-Behinds",
-      "Business Cards / Signs"
-    ]
-  },
-  {
-    title: "Social Media Management",
-    icon: Share2,
-    items: [
-      "Done-for-You Weekly Posting",
-      "Instagram Reels / TikTok Editing",
-      "Facebook Group Management", 
-      "LinkedIn Branding & Posts",
-      "Content Calendar & Hashtags"
-    ]
-  },
-  {
-    title: "Video & Content",
-    icon: Video,
-    items: [
-      "Social Media Video Packs",
-      "Listing Videos / Walkthroughs",
-      "Drone Footage",
-      "Lifestyle/Brand Promo Videos",
-      "About Me Agent Intro Videos", 
-      "Client Testimonial Editing",
-      "AI-Generated Scripted Video"
-    ]
-  },
-  {
-    title: "Event & Open House",
-    icon: Calendar,
-    items: [
-      "Open House Kit",
-      "Client Appreciation Events",
-      "Pop-By Gifts Coordination",
-      "Housewarming Gift Packs",
-      "Homebuyer Seminar Marketing"
-    ]
-  },
-  {
-    title: "Client Retention",
-    icon: Gift,
-    items: [
-      "Closing Gifts Fulfillment",
-      "Birthday & Holiday Automation",
-      "Referral Gift Packs",
-      "Past Client Re-Engagement",
-      "Custom Branded Swag"
-    ]
-  },
-  {
-    title: "Coaching & Strategy",
-    icon: Brain,
-    items: [
-      "1-on-1 Marketing Strategy",
-      "Business Planning & Audit",
-      "Monthly Accountability",
-      "Circle Jumpstart Workshop"
-    ]
+const getIconForCategory = (categoryId: string) => {
+  switch (categoryId) {
+    case 'settlement-services':
+      return Building2;
+    case 'home-services':
+      return Home;
+    case 'moving-relocation':
+      return Truck;
+    case 'property-services':
+      return Camera;
+    case 'professional-services':
+      return Briefcase;
+    default:
+      return Building2;
   }
-];
+};
 
 export const CategoryMegaMenu = ({ selectedCategory, onCategorySelect }: CategoryMegaMenuProps) => {
   const [open, setOpen] = useState(false);
@@ -138,27 +69,34 @@ export const CategoryMegaMenu = ({ selectedCategory, onCategorySelect }: Categor
             </div>
           </div>
           
-          <div className="grid grid-cols-2 gap-6 p-6">
-            {categoryGroups.map((group) => {
-              const Icon = group.icon;
+          <div className="grid grid-cols-1 gap-6 p-6">
+            {SERVICE_CATEGORIES.map((category) => {
+              const Icon = getIconForCategory(category.id);
               return (
-                <div key={group.title} className="space-y-3">
-                  <div className="flex items-center gap-2 pb-2 border-b border-border/50">
-                    <Icon className="h-4 w-4 text-circle-primary" />
-                    <h4 className="font-medium text-sm text-foreground">{group.title}</h4>
+                <div key={category.id} className="space-y-3">
+                  <div className="flex items-center justify-between pb-2 border-b border-border/50">
+                    <div className="flex items-center gap-2">
+                      <Icon className="h-4 w-4 text-circle-primary" />
+                      <h4 className="font-medium text-sm text-foreground">{category.name}</h4>
+                    </div>
+                    {getRiskBadge(category.riskLevel)}
                   </div>
-                  <div className="space-y-1">
-                    {group.items.map((item) => (
-                      <button
-                        key={item}
-                        onClick={() => handleCategorySelect(item)}
-                        className={`w-full text-left text-sm px-2 py-1.5 rounded hover:bg-accent transition-colors ${
-                          selectedCategory === item ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:text-foreground"
-                        }`}
-                      >
-                        {item}
-                      </button>
-                    ))}
+                  <div className="grid grid-cols-2 gap-1">
+                    {category.subcategories.map((subcategory) => {
+                      const itemCount = Math.floor(Math.random() * 50) + 5; // Mock count
+                      return (
+                        <button
+                          key={subcategory}
+                          onClick={() => handleCategorySelect(subcategory)}
+                          className={`w-full text-left text-sm px-2 py-1.5 rounded hover:bg-accent transition-colors flex items-center justify-between ${
+                            selectedCategory === subcategory ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:text-foreground"
+                          }`}
+                        >
+                          <span>{subcategory}</span>
+                          <span className="text-xs bg-muted px-1 rounded">({itemCount})</span>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               );
