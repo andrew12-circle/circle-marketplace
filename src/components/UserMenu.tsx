@@ -13,11 +13,13 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { User, Settings, ShoppingBag, Crown, LogOut, Loader2 } from "lucide-react";
+import { useLocation } from "@/hooks/useLocation";
+import { User, Settings, ShoppingBag, Crown, LogOut, Loader2, MapPin } from "lucide-react";
 
 export const UserMenu = () => {
   const { user, profile, signOut } = useAuth();
   const { toast } = useToast();
+  const { location } = useLocation();
   const [isSigningOut, setIsSigningOut] = useState(false);
 
   const handleSignOut = async () => {
@@ -81,6 +83,12 @@ export const UserMenu = () => {
             {profile?.business_name && (
               <p className="text-xs leading-none text-muted-foreground">
                 {profile.business_name}
+              </p>
+            )}
+            {location && (
+              <p className="text-xs leading-none text-muted-foreground flex items-center gap-1">
+                <MapPin className="w-3 h-3" />
+                {location.city}, {location.state}
               </p>
             )}
           </div>
