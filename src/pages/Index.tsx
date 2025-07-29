@@ -29,10 +29,6 @@ const Index = () => {
                   alt="Circle Logo" 
                   className="w-10 h-10 object-contain"
                 />
-                <div>
-                  <h1 className="text-2xl font-bold">Circle</h1>
-                  <p className="text-sm text-muted-foreground">Grow Smarter</p>
-                </div>
               </div>
               
               {/* Navigation Tabs in Center */}

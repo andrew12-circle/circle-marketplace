@@ -174,10 +174,6 @@ export const Auth = () => {
               alt="Circle Logo" 
               className="w-12 h-12 object-contain"
             />
-            <div>
-              <h1 className="text-2xl font-bold">Circle</h1>
-              <p className="text-sm text-muted-foreground">Grow Smarter</p>
-            </div>
           </div>
         </div>
 
