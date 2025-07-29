@@ -60,12 +60,25 @@ export const Pricing = () => {
               <img src={circleLogo} alt="Circle Logo" className="w-10 h-10" />
             </Link>
             <div className="flex items-center gap-4">
-              <Link to="/" className="text-sm text-muted-foreground hover:text-foreground">
-                Login
-              </Link>
-              <Button asChild className="bg-gradient-to-r from-circle-primary to-circle-primary-light text-white">
-                <Link to="/">Join Free & Explore</Link>
-              </Button>
+              {user ? (
+                <>
+                  <Link to="/" className="text-sm text-muted-foreground hover:text-foreground">
+                    Marketplace
+                  </Link>
+                  <Button asChild className="bg-gradient-to-r from-circle-primary to-circle-primary-light text-white">
+                    <Link to="/profile-settings">Profile</Link>
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Link to="/auth" className="text-sm text-muted-foreground hover:text-foreground">
+                    Login
+                  </Link>
+                  <Button asChild className="bg-gradient-to-r from-circle-primary to-circle-primary-light text-white">
+                    <Link to="/auth">Join Free & Explore</Link>
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </div>
