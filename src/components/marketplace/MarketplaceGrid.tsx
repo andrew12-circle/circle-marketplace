@@ -174,48 +174,48 @@ export const MarketplaceGrid = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8">
-        {/* Hero Section */}
-        <div className="mb-12">
-          <h1 className="font-inter font-black text-[72px] leading-[72px] text-gray-900 mb-6">Marketplace.</h1>
-          <p className="text-lg text-muted-foreground max-w-4xl">
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
+        {/* Hero Section - Mobile Optimized */}
+        <div className="mb-6 sm:mb-12">
+          <h1 className="font-inter font-black text-4xl sm:text-6xl lg:text-[72px] leading-tight sm:leading-[72px] text-gray-900 mb-3 sm:mb-6">Marketplace.</h1>
+          <p className="text-sm sm:text-lg text-muted-foreground max-w-4xl">
             Finally, we silenced the noise. Welcome to the Marketplace. Discover premium marketing services and connect with top-performing vendors who will actually move your business forward.
           </p>
         </div>
 
-        {/* Search and View Toggle */}
-        <div className="flex flex-col md:flex-row gap-4 mb-6">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
+        {/* Search and View Toggle - Mobile Optimized */}
+        <div className="flex flex-col gap-3 sm:gap-4 mb-4 sm:mb-6">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4 sm:w-5 sm:h-5" />
             <Input
               placeholder="Search services, vendors, or categories..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-12"
+              className="pl-10 sm:pl-12 h-10 sm:h-11 text-sm sm:text-base"
             />
           </div>
           <div className="flex gap-2">
             <Button
               variant={viewMode === "services" ? "default" : "outline"}
               onClick={() => setViewMode("services")}
-              className="flex items-center gap-2"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-9 sm:h-10 text-sm sm:text-base"
             >
-              <Sparkles className="w-4 h-4" />
+              <Sparkles className="w-3 h-3 sm:w-4 sm:h-4" />
               Services
             </Button>
             <Button
               variant={viewMode === "vendors" ? "default" : "outline"}
               onClick={() => setViewMode("vendors")}
-              className="flex items-center gap-2"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-9 sm:h-10 text-sm sm:text-base"
             >
-              <Zap className="w-4 h-4" />
+              <Zap className="w-3 h-3 sm:w-4 sm:h-4" />
               Vendors
             </Button>
           </div>
         </div>
 
-        {/* Filters */}
-        <div className="mb-8">
+        {/* Filters - Mobile Optimized */}
+        <div className="mb-6 sm:mb-8">
           <MarketplaceFilters
             filters={filters}
             onFiltersChange={setFilters}
@@ -223,9 +223,9 @@ export const MarketplaceGrid = () => {
           />
         </div>
 
-        {/* Grid */}
+        {/* Grid - Mobile Responsive */}
         {viewMode === "services" ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
             {filteredServices.map((service) => (
               <ServiceCard
                 key={service.id}
@@ -236,7 +236,7 @@ export const MarketplaceGrid = () => {
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {filteredVendors.map((vendor) => (
               <EnhancedVendorCard
                 key={vendor.id}

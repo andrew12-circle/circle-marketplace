@@ -19,57 +19,85 @@ const Index = () => {
   return (
     <CartProvider>
       <div className="min-h-screen bg-background">
-        {/* Header */}
-        <header className="border-b bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/50">
-          <div className="container mx-auto px-4 py-4">
+        {/* Mobile-Optimized Header */}
+        <header className="border-b bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/50 sticky top-0 z-50">
+          <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
+              {/* Logo - smaller on mobile */}
+              <div className="flex items-center gap-2 sm:gap-3">
                 <img 
                   src={circleLogoUrl} 
                   alt="Circle Logo" 
-                  className="w-12 h-12 object-contain"
+                  className="w-8 h-8 sm:w-12 sm:h-12 object-contain"
                 />
+                <span className="font-bold text-lg sm:text-xl md:hidden">Circle</span>
               </div>
               
-              {/* Navigation Tabs in Center */}
-              <div className="flex-1 flex justify-center">
+              {/* Navigation Tabs - Responsive */}
+              <div className="hidden sm:flex flex-1 justify-center">
                 <NavigationTabs activeTab={activeTab} onTabChange={setActiveTab} />
               </div>
               
-              <div className="flex items-center gap-4">
+              {/* Mobile Navigation Tabs */}
+              <div className="sm:hidden flex-1 px-4">
+                <div className="flex bg-muted rounded-full p-1">
+                  <button
+                    onClick={() => setActiveTab("marketplace")}
+                    className={`flex-1 text-xs py-2 px-3 rounded-full font-medium transition-all ${
+                      activeTab === "marketplace" 
+                        ? "bg-background text-foreground shadow-sm" 
+                        : "text-muted-foreground"
+                    }`}
+                  >
+                    Market
+                  </button>
+                  <button
+                    onClick={() => setActiveTab("academy")}
+                    className={`flex-1 text-xs py-2 px-3 rounded-full font-medium transition-all ${
+                      activeTab === "academy" 
+                        ? "bg-background text-foreground shadow-sm" 
+                        : "text-muted-foreground"
+                    }`}
+                  >
+                    Academy
+                  </button>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-2 sm:gap-4">
                 {/* Cart Button - only show on marketplace */}
                 {activeTab === "marketplace" && (
                   <CartDrawer />
                 )}
                 
-                {/* Show Circle Points for authenticated users */}
+                {/* Circle Points - Mobile Optimized */}
                 {user && profile && (
-                  <Link to="/wallet" className="flex items-center gap-2 text-sm hover:bg-accent hover:text-accent-foreground rounded-md px-3 py-2 transition-colors cursor-pointer">
-                    <Crown className="w-4 h-4 text-yellow-500" />
+                  <Link to="/wallet" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm hover:bg-accent hover:text-accent-foreground rounded-md px-2 sm:px-3 py-1.5 sm:py-2 transition-colors cursor-pointer touch-target">
+                    <Crown className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-500" />
                     <span className="font-medium">{profile.circle_points}</span>
-                    <span className="text-muted-foreground">Points</span>
+                    <span className="text-muted-foreground hidden sm:inline">Points</span>
                   </Link>
                 )}
                 
-                {/* Pro upgrade button for non-pro users */}
+                {/* Pro upgrade button - hidden on small mobile */}
                 {user && profile && !profile.is_pro_member && (
-                  <Button asChild variant="secondary" className="bg-gradient-to-r from-circle-primary to-circle-primary border-none text-white hover:from-circle-primary/90 hover:to-circle-primary/90 shadow-lg">
+                  <Button asChild variant="secondary" className="hidden sm:flex bg-gradient-to-r from-circle-primary to-circle-primary border-none text-white hover:from-circle-primary/90 hover:to-circle-primary/90 shadow-lg text-xs sm:text-sm">
                     <Link to="/pricing">
-                      <Crown className="w-4 h-4 mr-2" />
-                      Upgrade to Pro
+                      <Crown className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                      <span className="hidden md:inline">Upgrade to</span> Pro
                     </Link>
                   </Button>
                 )}
                 
-                {/* Pro badge for pro users */}
+                {/* Pro badge */}
                 {user && profile?.is_pro_member && (
-                  <Badge variant="secondary" className="bg-circle-accent text-foreground">
-                    <Crown className="w-4 h-4 mr-1" />
-                    Circle Pro
+                  <Badge variant="secondary" className="bg-circle-accent text-foreground text-xs px-2 py-1">
+                    <Crown className="w-3 h-3 mr-1" />
+                    <span className="hidden sm:inline">Circle </span>Pro
                   </Badge>
                 )}
                 
-                {/* User menu or sign in button */}
+                {/* User menu */}
                 <UserMenu />
               </div>
             </div>
@@ -81,10 +109,10 @@ const Index = () => {
           {activeTab === "marketplace" ? <Marketplace /> : <Academy />}
         </main>
 
-        {/* Footer */}
-        <footer className="border-t bg-card/50 mt-16">
-          <div className="container mx-auto px-4 py-8">
-            <div className="text-center text-muted-foreground">
+        {/* Footer - Mobile Optimized */}
+        <footer className="border-t bg-card/50 mt-8 sm:mt-16">
+          <div className="container mx-auto px-3 sm:px-4 py-6 sm:py-8">
+            <div className="text-center text-muted-foreground text-xs sm:text-sm">
               <p>&copy; 2024 Circle. Empowering real estate professionals to grow smarter.</p>
             </div>
           </div>

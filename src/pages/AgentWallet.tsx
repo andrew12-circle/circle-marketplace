@@ -104,20 +104,20 @@ export const AgentWallet = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="max-w-7xl mx-auto space-y-8">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <Button asChild variant="outline" size="sm">
+    <div className="min-h-screen bg-background p-3 sm:p-6">
+      <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
+        {/* Header - Mobile Optimized */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
+            <Button asChild variant="outline" size="sm" className="self-start">
               <Link to="/" className="flex items-center space-x-2">
                 <ArrowLeft className="h-4 w-4" />
                 <span>Back to Marketplace</span>
               </Link>
             </Button>
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">Agent Wallet</h1>
-              <p className="text-muted-foreground">
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Agent Wallet</h1>
+              <p className="text-muted-foreground text-sm sm:text-base">
                 Manage your Circle Points and track your earnings
               </p>
             </div>
@@ -127,32 +127,32 @@ export const AgentWallet = () => {
               <Crown className="h-4 w-4 text-yellow-500" />
               <span>{walletData.tier} Tier</span>
             </Badge>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" className="hidden sm:flex">
               <Download className="h-4 w-4 mr-2" />
               Export
             </Button>
           </div>
         </div>
 
-        {/* Points Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Points Summary Cards - Mobile Responsive */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
           {pointsSummary.map((item, index) => (
             <Card key={index} className="hover:shadow-lg transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">
+              <CardContent className="p-3 sm:p-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex-1">
+                    <p className="text-xs sm:text-sm font-medium text-muted-foreground">
                       {item.title}
                     </p>
-                    <p className="text-2xl font-bold">
+                    <p className="text-lg sm:text-2xl font-bold">
                       {item.value.toLocaleString()}
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
                       {item.description}
                     </p>
                   </div>
-                  <div className={`p-3 rounded-full bg-muted ${item.color}`}>
-                    <item.icon className="h-6 w-6" />
+                  <div className={`mt-2 sm:mt-0 p-2 sm:p-3 rounded-full bg-muted ${item.color} self-end sm:self-auto`}>
+                    <item.icon className="h-4 w-4 sm:h-6 sm:w-6" />
                   </div>
                 </div>
               </CardContent>
@@ -160,18 +160,18 @@ export const AgentWallet = () => {
           ))}
         </div>
 
-        {/* Main Content Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="earn">Earn Points</TabsTrigger>
-            <TabsTrigger value="spend">Spend Points</TabsTrigger>
-            <TabsTrigger value="history">History</TabsTrigger>
+        {/* Main Content Tabs - Mobile Optimized */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 sm:space-y-6">
+          <TabsList className="grid w-full grid-cols-4 h-9 sm:h-10">
+            <TabsTrigger value="overview" className="text-xs sm:text-sm">Overview</TabsTrigger>
+            <TabsTrigger value="earn" className="text-xs sm:text-sm">Earn</TabsTrigger>
+            <TabsTrigger value="spend" className="text-xs sm:text-sm">Spend</TabsTrigger>
+            <TabsTrigger value="history" className="text-xs sm:text-sm">History</TabsTrigger>
           </TabsList>
 
-          {/* Overview Tab */}
-          <TabsContent value="overview" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Overview Tab - Mobile Responsive */}
+          <TabsContent value="overview" className="space-y-4 sm:space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
               {/* Current Goal */}
               <Card>
                 <CardHeader>
