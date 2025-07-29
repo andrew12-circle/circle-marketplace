@@ -44,11 +44,11 @@ const Index = () => {
                 
                 {/* Show Circle Points for authenticated users */}
                 {user && profile && (
-                  <div className="flex items-center gap-2 text-sm">
+                  <Link to="/wallet" className="flex items-center gap-2 text-sm hover:bg-accent hover:text-accent-foreground rounded-md px-3 py-2 transition-colors cursor-pointer">
                     <Crown className="w-4 h-4 text-yellow-500" />
                     <span className="font-medium">{profile.circle_points}</span>
                     <span className="text-muted-foreground">Points</span>
-                  </div>
+                  </Link>
                 )}
                 
                 {/* Pro upgrade button for non-pro users */}
