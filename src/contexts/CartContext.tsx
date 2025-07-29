@@ -57,6 +57,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [cartItems]);
 
   const addToCart = (item: Omit<CartItem, 'quantity'>) => {
+    console.log('ADDING TO CART - ITEM RECEIVED:', item);
+    console.log('ITEM PRICE TYPE:', typeof item.price);
+    console.log('ITEM PRICE VALUE:', item.price);
+    
     setCartItems(prev => {
       const existingItem = prev.find(cartItem => cartItem.serviceId === item.serviceId);
       
@@ -71,11 +75,14 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
             : cartItem
         );
       } else {
+        const newItem = { ...item, quantity: 1 };
+        console.log('NEW CART ITEM CREATED:', newItem);
+        
         toast({
           title: "Added to cart",
           description: `"${item.title}" has been added to your cart`,
         });
-        return [...prev, { ...item, quantity: 1 }];
+        return [...prev, newItem];
       }
     });
   };

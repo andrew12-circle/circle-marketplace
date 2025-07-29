@@ -71,14 +71,17 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
     if (service.requires_quote) {
       setIsExplanationModalOpen(true);
     } else {
-      const servicePrice = parseFloat(service.price) || parseFloat(service.retail_price) || parseFloat(service.pro_price) || 0;
-      console.log('Adding to cart:', { 
-        serviceTitle: service.title, 
-        originalPrice: service.price, 
-        retailPrice: service.retail_price,
-        proPrice: service.pro_price,
-        parsedPrice: servicePrice 
+      // Debug the entire service object
+      console.log('FULL SERVICE OBJECT:', service);
+      console.log('SERVICE PRICE FIELDS:', {
+        price: service.price,
+        retail_price: service.retail_price,
+        pro_price: service.pro_price,
+        co_pay_price: service.co_pay_price
       });
+      
+      const servicePrice = parseFloat(service.price) || parseFloat(service.retail_price) || parseFloat(service.pro_price) || 0;
+      console.log('FINAL PARSED PRICE:', servicePrice);
       
       addToCart({
         serviceId: service.id,
