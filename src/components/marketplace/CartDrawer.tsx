@@ -119,7 +119,12 @@ export const CartDrawer = () => {
     setIsOpen(false);
   };
 
-  const getCircleProPrice = (price: number) => Math.round(price * 0.8 * 100) / 100; // 20% discount for Circle Pro members
+  const getCircleProPrice = (price: number) => {
+    const numPrice = typeof price === 'string' ? parseFloat(price) : price;
+    const proPrice = Math.round(numPrice * 0.8 * 100) / 100;
+    console.log('Circle Pro Price Calculation:', { originalPrice: price, numPrice, proPrice });
+    return proPrice;
+  };
   const getCircleProTotal = () => Math.round(purchasableItems.reduce((sum, item) => sum + (getCircleProPrice(item.price) * item.quantity), 0) * 100) / 100;
 
   const purchasableItems = cartItems.filter(item => !item.requiresQuote);
