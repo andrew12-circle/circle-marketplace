@@ -92,8 +92,7 @@ serve(async (req) => {
             },
             unit_amount: priceAmount,
             recurring: { 
-              interval: "month",
-              trial_period_days: 30
+              interval: "month"
             },
           },
           quantity: 1,
