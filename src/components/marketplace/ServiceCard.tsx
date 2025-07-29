@@ -9,7 +9,6 @@ import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { ConsultationFlow } from "./ConsultationFlow";
-import { ConsultationExplanationModal } from "./ConsultationExplanationModal";
 
 interface Service {
   id: string;
@@ -48,7 +47,6 @@ interface ServiceCardProps {
 export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }: ServiceCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isConsultationFlowOpen, setIsConsultationFlowOpen] = useState(false);
-  const [isExplanationModalOpen, setIsExplanationModalOpen] = useState(false);
   const { toast } = useToast();
   const { addToCart } = useCart();
   const { profile } = useAuth();
@@ -68,55 +66,18 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
   };
 
   const handleAddToCart = () => {
-    if (service.requires_quote) {
-      setIsExplanationModalOpen(true);
-    } else {
-      // Debug the entire service object
-      console.log('FULL SERVICE OBJECT:', service);
-      console.log('SERVICE PRICE FIELDS:', {
-        price: service.price,
-        retail_price: service.retail_price,
-        pro_price: service.pro_price,
-        co_pay_price: service.co_pay_price
-      });
-      
-      const servicePrice = parseFloat(service.price) || parseFloat(service.retail_price) || parseFloat(service.pro_price) || 0;
-      console.log('FINAL PARSED PRICE:', servicePrice);
-      
-      addToCart({
-        serviceId: service.id,
-        title: service.title,
-        price: servicePrice,
-        vendor: service.vendor.name,
-        image_url: service.image_url,
-        requiresQuote: service.requires_quote,
-      });
-    }
-  };
-
-  const handleUpgradeClick = () => {
-    navigate('/pricing');
-  };
-
-  const handleBookConsultation = () => {
-    setIsExplanationModalOpen(false);
-    const servicePrice = parseFloat(service.price) || parseFloat(service.retail_price) || parseFloat(service.pro_price) || 0;
-    console.log('Booking consultation for:', { 
-      serviceTitle: service.title, 
-      originalPrice: service.price, 
-      retailPrice: service.retail_price,
-      proPrice: service.pro_price,
-      parsedPrice: servicePrice 
-    });
-    
     addToCart({
       serviceId: service.id,
       title: service.title,
-      price: servicePrice,
+      price: parseFloat(service.price) || 0,
       vendor: service.vendor.name,
       image_url: service.image_url,
       requiresQuote: service.requires_quote,
     });
+  };
+
+  const handleUpgradeClick = () => {
+    navigate('/pricing');
   };
 
   return (
@@ -208,49 +169,9 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
           )}
         </div>
 
-        {/* Pricing Structure - Enhanced for no-price services */}
+        {/* Pricing Structure - Flexible but consistent */}
         <div className="space-y-2 mb-3 flex-grow">
-          {/* Check if this is a no-price consultation service */}
-          {service.requires_quote && (!service.price || parseFloat(service.price) === 0) ? (
-            <div className="space-y-3">
-              <div className="text-center py-2">
-                <div className="text-2xl font-bold text-circle-primary mb-1">
-                  Premium Service
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  Investment varies based on scope
-                </div>
-              </div>
-              
-              <div className="flex items-center justify-center gap-2 mb-2">
-                <Badge variant="outline" className="text-blue-600 border-blue-600">
-                  <Calendar className="w-3 h-3 mr-1" />
-                  Consultation Required
-                </Badge>
-                <span className="text-xs text-blue-600 font-medium">
-                  Free initial consultation
-                </span>
-              </div>
-              
-              {/* Value Propositions for No-Price Services */}
-              <div className="space-y-2">
-                <div className="flex flex-wrap gap-1 justify-center">
-                  <Badge variant="secondary" className="text-xs bg-green-100 text-green-700">
-                    ✓ Results-Driven
-                  </Badge>
-                  <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-700">
-                    ✓ Expert-Led
-                  </Badge>
-                  <Badge variant="secondary" className="text-xs bg-purple-100 text-purple-700">
-                    ✓ Customized
-                  </Badge>
-                </div>
-                <p className="text-xs text-muted-foreground text-center">
-                  Premium service with pricing based on your unique requirements and desired outcomes
-                </p>
-              </div>
-            </div>
-          ) : isProMember ? (
+          {isProMember ? (
             <>
               {/* Pro Member View: Show retail with line-through, pro price as main */}
               {service.retail_price && (
@@ -296,37 +217,18 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                   )}
                 </div>
               )}
-              
-              {/* Fallback to regular price for pro members if no special pricing */}
-              {!service.pro_price && !service.retail_price && service.price && parseFloat(service.price) > 0 && (
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Price:</span>
-                  <span className="text-2xl font-bold text-circle-primary">
-                    {service.requires_quote && "Starting at "}
-                    ${parseFloat(service.price).toLocaleString()}
-                  </span>
-                </div>
-              )}
             </>
           ) : (
             <>
-              {/* Non-Pro Member View */}
-              {service.retail_price ? (
+              {/* Non-Pro Member View: Show retail as main price, others as incentives */}
+              {service.retail_price && (
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">Price:</span>
                   <span className="text-xl font-bold text-foreground">
                     ${service.retail_price}
                   </span>
                 </div>
-              ) : service.price && parseFloat(service.price) > 0 ? (
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Price:</span>
-                  <span className="text-2xl font-bold text-circle-primary">
-                    {service.requires_quote && "Starting at "}
-                    ${parseFloat(service.price).toLocaleString()}
-                  </span>
-                </div>
-              ) : null}
+              )}
               
               {service.pro_price && (
                 <Tooltip>
@@ -382,16 +284,6 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
               )}
             </>
           )}
-          
-          {/* Add consultation badge for services with pricing that require quotes */}
-          {service.requires_quote && service.price && parseFloat(service.price) > 0 && (
-            <div className="flex items-center justify-center gap-2 mt-2">
-              <Badge variant="outline" className="text-blue-600 border-blue-600">
-                <Calendar className="w-3 h-3 mr-1" />
-                Consultation Required
-              </Badge>
-            </div>
-          )}
         </div>
 
         {/* ROI and Duration - Fixed height */}
@@ -415,17 +307,8 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
             onClick={handleAddToCart}
           >
             <>
-              {service.requires_quote && (!service.price || parseFloat(service.price) === 0) ? (
-                <>
-                  <Calendar className="w-4 h-4 mr-2" />
-                  Get Custom Quote
-                </>
-              ) : (
-                <>
-                  <ShoppingCart className="w-4 h-4 mr-2" />
-                  Add to Cart
-                </>
-              )}
+              <ShoppingCart className="w-4 h-4 mr-2" />
+              Add to Cart
             </>
           </Button>
           
@@ -450,13 +333,6 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
             name: service.vendor.name
           }
         }}
-      />
-      
-      <ConsultationExplanationModal
-        isOpen={isExplanationModalOpen}
-        onClose={() => setIsExplanationModalOpen(false)}
-        service={service}
-        onBookConsultation={handleBookConsultation}
       />
     </Card>
     </TooltipProvider>
