@@ -100,11 +100,11 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
       </Button>
 
       {/* Image */}
-      <div className="relative h-48 overflow-hidden">
+      <div className="relative h-48 overflow-hidden bg-muted">
         <img
           src={service.image_url || "/public/placeholder.svg"}
           alt={service.title}
-          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          className="w-full h-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
         />
         {service.discount_percentage && (
           <Badge className="absolute bottom-3 left-3 bg-destructive text-destructive-foreground">
