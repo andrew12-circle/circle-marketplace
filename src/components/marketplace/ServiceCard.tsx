@@ -161,17 +161,19 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
 
         {/* New Pricing Structure */}
         <div className="space-y-2 pt-2">
+          {/* Main Price - Retail for non-pro, Pro price for pro members */}
           {service.retail_price && (
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Retail Price:</span>
-              <span className="text-sm text-muted-foreground line-through">
+              <span className="text-sm text-muted-foreground">Price:</span>
+              <span className="text-xl font-bold text-foreground">
                 ${service.retail_price}
               </span>
             </div>
           )}
           
+          {/* Circle Pro Price - shown as incentive for non-pro members */}
           {service.pro_price && (
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between p-2 bg-circle-primary/5 rounded-lg border border-circle-primary/20">
               <div className="flex items-center gap-1">
                 <span className="text-sm font-medium text-circle-primary">Circle Pro Price:</span>
                 <div className="w-4 h-4 rounded-full bg-circle-primary flex items-center justify-center">
@@ -184,8 +186,9 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
             </div>
           )}
           
+          {/* Co-Pay Price - shown as additional incentive */}
           {service.co_pay_price && (
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between p-2 bg-green-50 rounded-lg border border-green-200">
               <div className="flex items-center gap-1">
                 <span className="text-sm font-medium text-green-600">Your Co-Pay:</span>
                 <div className="w-3 h-3 rounded-full bg-green-600 flex items-center justify-center">
