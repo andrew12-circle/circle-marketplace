@@ -21,24 +21,32 @@ export interface MarketplaceFiltersProps {
 }
 
 export const MarketplaceFilters = ({ filters, onFiltersChange, categories }: MarketplaceFiltersProps) => {
+  // Provide default values to prevent undefined errors
+  const safeFilters = filters || {
+    category: "all",
+    priceRange: [0, 2000],
+    verified: false,
+    featured: false,
+  };
   const updateFilter = (key: keyof FilterState, value: any) => {
     onFiltersChange({
-      ...filters,
+      ...safeFilters,
       [key]: value,
     });
   };
 
   const clearFilters = () => {
     onFiltersChange({
-      category: "",
+      category: "all",
       priceRange: [0, 2000],
       verified: false,
       featured: false,
     });
   };
 
-  const hasActiveFilters = filters.category || filters.verified || filters.featured || 
-    filters.priceRange[0] > 0 || filters.priceRange[1] < 2000;
+  const hasActiveFilters = (safeFilters.category && safeFilters.category !== "all") || 
+    safeFilters.verified || safeFilters.featured || 
+    safeFilters.priceRange[0] > 0 || safeFilters.priceRange[1] < 2000;
 
   return (
     <Card className="bg-card border border-border/50">
@@ -59,12 +67,12 @@ export const MarketplaceFilters = ({ filters, onFiltersChange, categories }: Mar
           {/* Category Filter */}
           <div className="space-y-2">
             <Label className="text-sm font-medium">Category</Label>
-            <Select value={filters.category} onValueChange={(value) => updateFilter("category", value)}>
+            <Select value={safeFilters.category} onValueChange={(value) => updateFilter("category", value)}>
               <SelectTrigger>
                 <SelectValue placeholder="All Categories" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Categories</SelectItem>
+                <SelectItem value="all">All Categories</SelectItem>
                 {categories.map((category) => (
                   <SelectItem key={category} value={category}>
                     {category}
@@ -77,10 +85,10 @@ export const MarketplaceFilters = ({ filters, onFiltersChange, categories }: Mar
           {/* Price Range Filter */}
           <div className="space-y-3">
             <Label className="text-sm font-medium">
-              Price Range: ${filters.priceRange[0]} - ${filters.priceRange[1]}
+              Price Range: ${safeFilters.priceRange[0]} - ${safeFilters.priceRange[1]}
             </Label>
             <Slider
-              value={filters.priceRange}
+              value={safeFilters.priceRange}
               onValueChange={(value) => updateFilter("priceRange", value)}
               max={2000}
               min={0}
@@ -95,7 +103,7 @@ export const MarketplaceFilters = ({ filters, onFiltersChange, categories }: Mar
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="verified"
-                checked={filters.verified}
+                checked={safeFilters.verified}
                 onCheckedChange={(checked) => updateFilter("verified", checked)}
               />
               <Label htmlFor="verified" className="text-sm">
@@ -110,7 +118,7 @@ export const MarketplaceFilters = ({ filters, onFiltersChange, categories }: Mar
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="featured"
-                checked={filters.featured}
+                checked={safeFilters.featured}
                 onCheckedChange={(checked) => updateFilter("featured", checked)}
               />
               <Label htmlFor="featured" className="text-sm">
@@ -124,16 +132,16 @@ export const MarketplaceFilters = ({ filters, onFiltersChange, categories }: Mar
         {hasActiveFilters && (
           <div className="mt-4 pt-4 border-t border-border/50">
             <div className="flex flex-wrap gap-2">
-              {filters.category && (
+              {safeFilters.category && safeFilters.category !== "all" && (
                 <Badge variant="secondary" className="flex items-center gap-1">
-                  {filters.category}
+                  {safeFilters.category}
                   <X 
                     className="w-3 h-3 cursor-pointer" 
-                    onClick={() => updateFilter("category", "")}
+                    onClick={() => updateFilter("category", "all")}
                   />
                 </Badge>
               )}
-              {filters.verified && (
+              {safeFilters.verified && (
                 <Badge variant="secondary" className="flex items-center gap-1">
                   Verified
                   <X 
@@ -142,7 +150,7 @@ export const MarketplaceFilters = ({ filters, onFiltersChange, categories }: Mar
                   />
                 </Badge>
               )}
-              {filters.featured && (
+              {safeFilters.featured && (
                 <Badge variant="secondary" className="flex items-center gap-1">
                   Featured
                   <X 
@@ -151,9 +159,9 @@ export const MarketplaceFilters = ({ filters, onFiltersChange, categories }: Mar
                   />
                 </Badge>
               )}
-              {(filters.priceRange[0] > 0 || filters.priceRange[1] < 2000) && (
+              {(safeFilters.priceRange[0] > 0 || safeFilters.priceRange[1] < 2000) && (
                 <Badge variant="secondary" className="flex items-center gap-1">
-                  ${filters.priceRange[0]} - ${filters.priceRange[1]}
+                  ${safeFilters.priceRange[0]} - ${safeFilters.priceRange[1]}
                   <X 
                     className="w-3 h-3 cursor-pointer" 
                     onClick={() => updateFilter("priceRange", [0, 2000])}

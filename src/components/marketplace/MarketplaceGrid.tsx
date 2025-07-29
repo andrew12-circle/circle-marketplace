@@ -54,7 +54,7 @@ export const MarketplaceGrid = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>("services");
   const [filters, setFilters] = useState({
-    category: "",
+    category: "all",
     priceRange: [0, 2000],
     verified: false,
     featured: false,
@@ -112,7 +112,7 @@ export const MarketplaceGrid = () => {
                          service.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          service.vendor.name.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesCategory = !filters.category || service.category === filters.category;
+    const matchesCategory = filters.category === "all" || service.category === filters.category;
     const matchesPrice = service.price >= filters.priceRange[0] && service.price <= filters.priceRange[1];
     const matchesVerified = !filters.verified || service.vendor.is_verified;
     const matchesFeatured = !filters.featured || service.is_featured;
@@ -267,7 +267,7 @@ export const MarketplaceGrid = () => {
               onClick={() => {
                 setSearchTerm("");
                 setFilters({
-                  category: "",
+                  category: "all",
                   priceRange: [0, 2000],
                   verified: false,
                   featured: false,
