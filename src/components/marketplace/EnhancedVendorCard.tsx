@@ -24,6 +24,24 @@ interface Vendor {
   service_states?: string[];
   mls_areas?: string[];
   service_radius_miles?: number;
+  license_states?: string[];
+  latitude?: number;
+  longitude?: number;
+  vendor_type?: string;
+  local_representatives?: any; // JSON data from database
+}
+
+interface LocalRepresentative {
+  id: string;
+  name: string;
+  title: string;
+  phone: string;
+  email: string;
+  license_number?: string;
+  nmls_id?: string;
+  location: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 interface EnhancedVendorCardProps {
@@ -137,6 +155,17 @@ export const EnhancedVendorCard = ({ vendor, onConnect, onViewProfile }: Enhance
               <TrendingUp className="w-4 h-4 text-muted-foreground" />
               <span>Ad Budget: {mockBudgetRange}</span>
             </div>
+            {vendor.license_states && vendor.license_states.length > 0 && (
+              <div className="flex flex-wrap gap-1">
+                <span className="text-xs text-muted-foreground">Licensed in:</span>
+                {vendor.license_states.slice(0, 3).map((state) => (
+                  <Badge key={state} variant="outline" className="text-xs">{state}</Badge>
+                ))}
+                {vendor.license_states.length > 3 && (
+                  <Badge variant="outline" className="text-xs">+{vendor.license_states.length - 3} more</Badge>
+                )}
+              </div>
+            )}
             {vendor.service_radius_miles && (
               <div className="flex items-center gap-2 text-sm">
                 <span className="text-muted-foreground">Radius: {vendor.service_radius_miles} miles</span>
@@ -155,6 +184,27 @@ export const EnhancedVendorCard = ({ vendor, onConnect, onViewProfile }: Enhance
               <div className="text-xs text-muted-foreground">Campaigns Funded</div>
             </div>
           </div>
+
+          {/* Local Representatives */}
+          {vendor.local_representatives && vendor.local_representatives.length > 0 && (
+            <div>
+              <h4 className="text-sm font-medium mb-2">Local Representatives:</h4>
+              <div className="space-y-2 max-h-20 overflow-y-auto">
+                {vendor.local_representatives.slice(0, 2).map((rep) => (
+                  <div key={rep.id} className="text-xs bg-muted/30 p-2 rounded">
+                    <div className="font-medium">{rep.name}</div>
+                    <div className="text-muted-foreground">{rep.title}</div>
+                    <div className="text-muted-foreground">{rep.location}</div>
+                  </div>
+                ))}
+                {vendor.local_representatives.length > 2 && (
+                  <div className="text-xs text-muted-foreground">
+                    +{vendor.local_representatives.length - 2} more representatives
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Available Services */}
           <div>

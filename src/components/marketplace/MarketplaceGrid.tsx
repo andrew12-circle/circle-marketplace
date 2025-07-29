@@ -5,6 +5,7 @@ import { MarketplaceFilters } from "./MarketplaceFilters";
 import { CampaignServicesHeader } from "./CampaignServicesHeader";
 import { CircleProBanner } from "./CircleProBanner";
 import { ServiceDetailsModal } from "./ServiceDetailsModal";
+import { LocationFilterBanner } from "./LocationFilterBanner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Filter, Sparkles, Zap } from "lucide-react";
@@ -64,6 +65,24 @@ interface Vendor {
   service_states?: string[];
   mls_areas?: string[];
   service_radius_miles?: number;
+  license_states?: string[];
+  latitude?: number;
+  longitude?: number;
+  vendor_type?: string;
+  local_representatives?: any; // JSON data from database
+}
+
+interface LocalRepresentative {
+  id: string;
+  name: string;
+  title: string;
+  phone: string;
+  email: string;
+  license_number?: string;
+  nmls_id?: string;
+  location: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 type ViewMode = "services" | "vendors";
@@ -77,6 +96,7 @@ export const MarketplaceGrid = () => {
   const [savedServiceIds, setSavedServiceIds] = useState<string[]>([]);
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
+  const [isLocationFilterActive, setIsLocationFilterActive] = useState(false);
   const [filters, setFilters] = useState<FilterState>({
     category: "all",
     priceRange: [0, 2000],
@@ -134,11 +154,17 @@ export const MarketplaceGrid = () => {
 
       if (servicesError) throw servicesError;
 
-      // Load vendors with location filtering if user has location
+      // Load vendors with location filtering
       let vendorQuery = supabase
-        .from('vendors')
-        .select('*')
-        .order('rating', { ascending: false });
+        .from('vendors_with_local_reps')
+        .select('*');
+
+      // Apply location-based filtering if user has location
+      if (location?.state) {
+        vendorQuery = vendorQuery.or(`license_states.cs.{${location.state}},service_states.cs.{${location.state}}`);
+      }
+
+      vendorQuery = vendorQuery.order('rating', { ascending: false });
 
       const { data: vendorsData, error: vendorsError } = await vendorQuery;
 
@@ -154,7 +180,14 @@ export const MarketplaceGrid = () => {
       }));
       
       setServices(formattedServices);
-      setVendors(vendorsData || []);
+      
+      // Format vendors data and parse JSON representatives
+      const formattedVendors = (vendorsData || []).map(vendor => ({
+        ...vendor,
+        local_representatives: vendor.local_representatives || []
+      }));
+      
+      setVendors(formattedVendors);
     } catch (error) {
       // Log error for internal tracking without exposing details
       const errorId = Date.now();
@@ -229,13 +262,21 @@ export const MarketplaceGrid = () => {
     const matchesVerified = !filters.verified || vendor.is_verified;
     
     // Location-based filtering
-    const matchesLocation = !location || !location.state || 
-                          !vendor.service_states || 
-                          vendor.service_states.length === 0 ||
-                          vendor.service_states.includes(location.state);
+    let matchesLocation = true;
+    if (isLocationFilterActive && location?.state) {
+      matchesLocation = vendor.license_states?.includes(location.state) ||
+                       vendor.service_states?.includes(location.state) ||
+                       false;
+    }
 
     return matchesSearch && matchesVerified && matchesLocation;
   });
+
+  // Count local vendors for the banner
+  const localVendorCount = location?.state ? vendors.filter(vendor => 
+    vendor.license_states?.includes(location.state) ||
+    vendor.service_states?.includes(location.state)
+  ).length : 0;
 
   const handleSaveService = async (serviceId: string) => {
     if (!profile?.user_id) {
@@ -395,6 +436,16 @@ export const MarketplaceGrid = () => {
               </Button>
             </div>
           </div>
+
+          {/* Location Filter Banner - Only for vendors */}
+          {viewMode === "vendors" && (
+            <LocationFilterBanner 
+              onToggleLocationFilter={() => setIsLocationFilterActive(!isLocationFilterActive)}
+              isLocationFilterActive={isLocationFilterActive}
+              vendorCount={vendors.length}
+              localVendorCount={localVendorCount}
+            />
+          )}
 
           {/* Filters - Mobile Optimized */}
           <div className="mb-6 sm:mb-8">
