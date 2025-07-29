@@ -167,7 +167,8 @@ export const CartDrawer = () => {
                        <img
                          src={item.image_url || "/placeholder.svg"}
                          alt={item.title}
-                         className="w-full h-full object-cover"
+                         className="w-full h-full object-cover object-center"
+                         style={{ objectPosition: 'center' }}
                        />
                      </div>
                     
