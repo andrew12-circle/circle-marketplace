@@ -14,6 +14,103 @@ export type Database = {
   }
   public: {
     Tables: {
+      consultation_bookings: {
+        Row: {
+          budget_range: string | null
+          client_email: string
+          client_name: string
+          client_phone: string | null
+          consultation_notes: string | null
+          created_at: string
+          id: string
+          project_details: string | null
+          scheduled_date: string
+          scheduled_time: string
+          service_id: string
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          budget_range?: string | null
+          client_email: string
+          client_name: string
+          client_phone?: string | null
+          consultation_notes?: string | null
+          created_at?: string
+          id?: string
+          project_details?: string | null
+          scheduled_date: string
+          scheduled_time: string
+          service_id: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          budget_range?: string | null
+          client_email?: string
+          client_name?: string
+          client_phone?: string | null
+          consultation_notes?: string | null
+          created_at?: string
+          id?: string
+          project_details?: string | null
+          scheduled_date?: string
+          scheduled_time?: string
+          service_id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consultation_bookings_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      course_progress: {
+        Row: {
+          completed_modules: string[] | null
+          consultation_id: string
+          created_at: string
+          id: string
+          progress_percentage: number | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          completed_modules?: string[] | null
+          consultation_id: string
+          created_at?: string
+          id?: string
+          progress_percentage?: number | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          completed_modules?: string[] | null
+          consultation_id?: string
+          created_at?: string
+          id?: string
+          progress_percentage?: number | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_progress_consultation_id_fkey"
+            columns: ["consultation_id"]
+            isOneToOne: false
+            referencedRelation: "consultation_bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       orders: {
         Row: {
           amount: number | null

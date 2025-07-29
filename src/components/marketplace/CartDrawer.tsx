@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useCart } from "@/contexts/CartContext";
-import { ShoppingCart, Plus, Minus, Trash2, CreditCard, MessageCircle } from "lucide-react";
+import { ShoppingCart, Plus, Minus, Trash2, CreditCard, MessageCircle, Calendar } from "lucide-react";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -96,11 +96,10 @@ export const CartDrawer = () => {
     const quoteItems = cartItems.filter(item => item.requiresQuote);
     if (quoteItems.length > 0) {
       toast({
-        title: "Quote requested",
-        description: `Quote requested for ${quoteItems.length} item(s). You'll be contacted within 24 hours.`,
+        title: "Consultation Items Noted",
+        description: `${quoteItems.length} consultation service(s) ready. Use the service cards to book individual consultations.`,
       });
-      // Remove quote items from cart after requesting
-      quoteItems.forEach(item => removeFromCart(item.serviceId));
+      setIsOpen(false); // Close the cart so user can book consultations
     }
   };
 
@@ -159,9 +158,10 @@ export const CartDrawer = () => {
                       
                       <div className="flex items-center justify-between mt-2">
                         <div className="flex items-center gap-2">
-                          {item.requiresQuote ? (
-                            <Badge variant="outline" className="text-xs">
-                              Custom Quote
+                           {item.requiresQuote ? (
+                            <Badge variant="outline" className="text-blue-600 border-blue-600 text-xs">
+                              <Calendar className="w-3 h-3 mr-1" />
+                              Consultation
                             </Badge>
                           ) : (
                             <span className="font-semibold text-circle-primary">
@@ -171,23 +171,27 @@ export const CartDrawer = () => {
                         </div>
                         
                         <div className="flex items-center gap-1">
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            className="h-6 w-6"
-                            onClick={() => updateQuantity(item.serviceId, item.quantity - 1)}
-                          >
-                            <Minus className="w-3 h-3" />
-                          </Button>
-                          <span className="w-8 text-center text-sm">{item.quantity}</span>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            className="h-6 w-6"
-                            onClick={() => updateQuantity(item.serviceId, item.quantity + 1)}
-                          >
-                            <Plus className="w-3 h-3" />
-                          </Button>
+                          {!item.requiresQuote && (
+                            <>
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                className="h-6 w-6"
+                                onClick={() => updateQuantity(item.serviceId, item.quantity - 1)}
+                              >
+                                <Minus className="w-3 h-3" />
+                              </Button>
+                              <span className="w-8 text-center text-sm">{item.quantity}</span>
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                className="h-6 w-6"
+                                onClick={() => updateQuantity(item.serviceId, item.quantity + 1)}
+                              >
+                                <Plus className="w-3 h-3" />
+                              </Button>
+                            </>
+                          )}
                           <Button
                             variant="ghost"
                             size="icon"
@@ -215,8 +219,11 @@ export const CartDrawer = () => {
                   
                   {quoteItems.length > 0 && (
                     <div className="flex justify-between">
-                      <span>Quote items ({quoteItems.reduce((count, item) => count + item.quantity, 0)}):</span>
-                      <span className="text-muted-foreground">Custom pricing</span>
+                      <span className="flex items-center gap-1">
+                        <Calendar className="w-3 h-3" />
+                        Consultation items ({quoteItems.length}):
+                      </span>
+                      <span className="text-blue-600 font-medium">Consultation required</span>
                     </div>
                   )}
                 </div>
@@ -239,11 +246,11 @@ export const CartDrawer = () => {
                   {quoteItems.length > 0 && (
                     <Button 
                       variant="outline" 
-                      className="w-full"
+                      className="w-full text-blue-600 border-blue-600 hover:bg-blue-50"
                       onClick={handleRequestQuotes}
                     >
-                      <MessageCircle className="w-4 h-4 mr-2" />
-                      Request Quote for {quoteItems.length} item(s)
+                      <Calendar className="w-4 h-4 mr-2" />
+                      Schedule Consultations ({quoteItems.length} item(s))
                     </Button>
                   )}
                   

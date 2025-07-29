@@ -3,11 +3,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Heart, Star, ArrowRight, ShoppingCart, MessageCircle, Lock, Crown } from "lucide-react";
+import { Heart, Star, ArrowRight, ShoppingCart, MessageCircle, Lock, Crown, Calendar } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { ConsultationFlow } from "./ConsultationFlow";
 
 interface Service {
   id: string;
@@ -45,6 +46,7 @@ interface ServiceCardProps {
 
 export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }: ServiceCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
+  const [isConsultationFlowOpen, setIsConsultationFlowOpen] = useState(false);
   const { toast } = useToast();
   const { addToCart } = useCart();
   const { profile } = useAuth();
@@ -64,14 +66,18 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
   };
 
   const handleAddToCart = () => {
-    addToCart({
-      serviceId: service.id,
-      title: service.title,
-      price: parseFloat(service.price) || 0,
-      vendor: service.vendor.name,
-      image_url: service.image_url,
-      requiresQuote: service.requires_quote,
-    });
+    if (service.requires_quote) {
+      setIsConsultationFlowOpen(true);
+    } else {
+      addToCart({
+        serviceId: service.id,
+        title: service.title,
+        price: parseFloat(service.price) || 0,
+        vendor: service.vendor.name,
+        image_url: service.image_url,
+        requiresQuote: service.requires_quote,
+      });
+    }
   };
 
   const handleUpgradeClick = () => {
@@ -307,8 +313,8 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
           >
             {service.requires_quote ? (
               <>
-                <MessageCircle className="w-4 h-4 mr-2" />
-                Request Quote
+                <Calendar className="w-4 h-4 mr-2" />
+                Book Consultation
               </>
             ) : (
               <>
@@ -328,6 +334,18 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
           </Button>
         </div>
       </CardContent>
+      
+      <ConsultationFlow
+        isOpen={isConsultationFlowOpen}
+        onClose={() => setIsConsultationFlowOpen(false)}
+        service={{
+          id: service.id,
+          title: service.title,
+          vendor: {
+            name: service.vendor.name
+          }
+        }}
+      />
     </Card>
     </TooltipProvider>
   );

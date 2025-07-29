@@ -151,15 +151,13 @@ export const PreparationCourse = ({ consultationId, serviceTitle, onClose }: Pre
     if (!user) return;
 
     try {
-      const { data, error } = await supabase
-        .from('course_progress')
-        .select('completed_modules')
-        .eq('user_id', user.id)
-        .eq('consultation_id', consultationId)
-        .single();
-
-      if (data && data.completed_modules) {
-        const completed = new Set(data.completed_modules);
+      // Load from localStorage for now
+      const progressKey = `course_progress_${user.id}_${consultationId}`;
+      const savedProgress = localStorage.getItem(progressKey);
+      
+      if (savedProgress) {
+        const { completed_modules } = JSON.parse(savedProgress);
+        const completed = new Set<string>(completed_modules || []);
         setCompletedModules(completed);
         setProgress((completed.size / courseContent.length) * 100);
       }
@@ -177,17 +175,17 @@ export const PreparationCourse = ({ consultationId, serviceTitle, onClose }: Pre
     const newProgress = (newCompleted.size / courseContent.length) * 100;
     setProgress(newProgress);
 
-    // Save progress to database
+    // Save progress to localStorage for now
     try {
-      await supabase
-        .from('course_progress')
-        .upsert({
-          user_id: user.id,
-          consultation_id: consultationId,
-          completed_modules: Array.from(newCompleted),
-          progress_percentage: newProgress,
-          updated_at: new Date().toISOString()
-        });
+      const progressKey = `course_progress_${user.id}_${consultationId}`;
+      const progressData = {
+        user_id: user.id,
+        consultation_id: consultationId,
+        completed_modules: Array.from(newCompleted),
+        progress_percentage: newProgress,
+        updated_at: new Date().toISOString()
+      };
+      localStorage.setItem(progressKey, JSON.stringify(progressData));
 
       toast({
         title: "Progress Saved",

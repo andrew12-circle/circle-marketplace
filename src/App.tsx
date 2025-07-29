@@ -13,6 +13,7 @@ import { Pricing } from "./pages/Pricing";
 import { ProfileSettings } from "./pages/ProfileSettings";
 import { AgentWallet } from "./pages/AgentWallet";
 import { SavedItems } from "./pages/SavedItems";
+import { ConsultationDemo } from "./pages/ConsultationDemo";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ const App = () => (
             <Route path="/saved" element={<SavedItems />} />
             <Route path="/payment-success" element={<PaymentSuccess />} />
             <Route path="/payment-canceled" element={<PaymentCanceled />} />
+            <Route path="/consultation-demo" element={<ConsultationDemo />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
