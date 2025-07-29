@@ -60,7 +60,7 @@ export const Pricing = () => {
 
           <div className="max-w-6xl mx-auto">
             {/* Pricing Table Header */}
-            <div className="grid grid-cols-4 gap-6 mb-8">
+            <div className="grid grid-cols-[auto_1fr_1fr_1fr] gap-6 mb-8">
               <div className="p-6"></div>
               
               {/* Circle Starter */}
@@ -99,7 +99,7 @@ export const Pricing = () => {
 
             {/* Features Comparison Table */}
             <div className="bg-white rounded-lg border overflow-hidden mt-8">
-              <div className="grid grid-cols-4 gap-0">
+              <div className="grid grid-cols-[auto_1fr_1fr_1fr] gap-0">
                 {/* Header Row */}
                 <div className="bg-gray-50 p-4 border-r border-b">
                   <span className="font-semibold">Features</span>
