@@ -9,6 +9,7 @@ import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { ConsultationFlow } from "./ConsultationFlow";
+import { ConsultationExplanationModal } from "./ConsultationExplanationModal";
 
 interface Service {
   id: string;
@@ -47,6 +48,7 @@ interface ServiceCardProps {
 export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }: ServiceCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isConsultationFlowOpen, setIsConsultationFlowOpen] = useState(false);
+  const [isExplanationModalOpen, setIsExplanationModalOpen] = useState(false);
   const { toast } = useToast();
   const { addToCart } = useCart();
   const { profile } = useAuth();
@@ -66,6 +68,26 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
   };
 
   const handleAddToCart = () => {
+    if (service.requires_quote) {
+      setIsExplanationModalOpen(true);
+    } else {
+      addToCart({
+        serviceId: service.id,
+        title: service.title,
+        price: parseFloat(service.price) || 0,
+        vendor: service.vendor.name,
+        image_url: service.image_url,
+        requiresQuote: service.requires_quote,
+      });
+    }
+  };
+
+  const handleUpgradeClick = () => {
+    navigate('/pricing');
+  };
+
+  const handleBookConsultation = () => {
+    setIsExplanationModalOpen(false);
     addToCart({
       serviceId: service.id,
       title: service.title,
@@ -74,10 +96,6 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
       image_url: service.image_url,
       requiresQuote: service.requires_quote,
     });
-  };
-
-  const handleUpgradeClick = () => {
-    navigate('/pricing');
   };
 
   return (
@@ -333,6 +351,13 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
             name: service.vendor.name
           }
         }}
+      />
+      
+      <ConsultationExplanationModal
+        isOpen={isExplanationModalOpen}
+        onClose={() => setIsExplanationModalOpen(false)}
+        service={service}
+        onBookConsultation={handleBookConsultation}
       />
     </Card>
     </TooltipProvider>
