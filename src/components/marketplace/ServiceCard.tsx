@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Heart, Star, ArrowRight, ShoppingCart, MessageCircle, Lock, Crown, Calendar, CheckCircle, XCircle, Info } from "lucide-react";
+import { Heart, Star, ArrowRight, ShoppingCart, MessageCircle, Lock, Crown, Calendar } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -53,48 +53,6 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
   const navigate = useNavigate();
   const isProMember = profile?.is_pro_member || false;
 
-  // Determine co-pay eligibility based on RESPA compliance rules
-  const getCoPayEligibility = () => {
-    const category = service.category?.toLowerCase() || '';
-    const title = service.title?.toLowerCase() || '';
-    const tags = service.tags?.map(tag => tag.toLowerCase()) || [];
-    
-    // Safe for co-pay (True advertising)
-    const safeKeywords = [
-      'digital ads', 'facebook ads', 'google ads', 'display ads', 'retargeting',
-      'postcards', 'direct mail', 'flyers', 'door hangers', 'brochures',
-      'educational', 'seminar', 'workshop', 'market report', 'buyer education',
-      'joint advertising', 'co-branded', 'print advertising'
-    ];
-    
-    // Never allow co-pay (Business tools/lead generation)
-    const restrictedKeywords = [
-      'crm', 'lead capture', 'lead generation', 'funnel', 'drip email',
-      'follow-up', 'seo', 'landing page', 'chatbot', 'sms', 'automation',
-      'business card', 'sign', 'social media management', 'posting',
-      'content calendar', 'listing video', 'drone', 'agent video',
-      'testimonial', 'open house', 'appreciation', 'pop-by', 'gift',
-      'closing gift', 'referral', 'past client', 'database', 'strategy',
-      'coaching', 'consulting', 'accountability'
-    ];
-    
-    const hasRestricted = restrictedKeywords.some(keyword => 
-      title.includes(keyword) || category.includes(keyword) || 
-      tags.some(tag => tag.includes(keyword))
-    );
-    
-    const hasSafe = safeKeywords.some(keyword => 
-      title.includes(keyword) || category.includes(keyword) || 
-      tags.some(tag => tag.includes(keyword))
-    );
-    
-    if (hasRestricted) return 'not-eligible';
-    if (hasSafe) return 'eligible';
-    return 'review-needed';
-  };
-
-  const coPayEligibility = getCoPayEligibility();
-
   const handleSave = () => {
     onSave?.(service.id);
     toast({
@@ -130,7 +88,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Top Badges */}
-      <div className="absolute top-3 left-3 z-10 flex gap-2 flex-wrap max-w-[60%]">
+      <div className="absolute top-3 left-3 z-10 flex gap-2">
         {service.is_featured && (
           <Badge className="bg-circle-primary text-primary-foreground text-xs font-medium">
             Featured
@@ -141,61 +99,6 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
             Top Pick
           </Badge>
         )}
-        
-        {/* Co-Pay Eligibility Badge */}
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Badge 
-              className={`text-xs font-medium cursor-help ${
-                coPayEligibility === 'eligible' 
-                  ? 'bg-green-100 text-green-800 border-green-200' 
-                  : coPayEligibility === 'not-eligible'
-                  ? 'bg-red-100 text-red-800 border-red-200'
-                  : 'bg-yellow-100 text-yellow-800 border-yellow-200'
-              }`}
-              variant="outline"
-            >
-              {coPayEligibility === 'eligible' && (
-                <>
-                  <CheckCircle className="w-3 h-3 mr-1" />
-                  Co-Pay OK
-                </>
-              )}
-              {coPayEligibility === 'not-eligible' && (
-                <>
-                  <XCircle className="w-3 h-3 mr-1" />
-                  No Co-Pay
-                </>
-              )}
-              {coPayEligibility === 'review-needed' && (
-                <>
-                  <Info className="w-3 h-3 mr-1" />
-                  Review Needed
-                </>
-              )}
-            </Badge>
-          </TooltipTrigger>
-          <TooltipContent className="max-w-xs p-3">
-            <div className="space-y-2">
-              <p className="font-semibold text-sm">
-                {coPayEligibility === 'eligible' && 'RESPA Compliant Co-Pay'}
-                {coPayEligibility === 'not-eligible' && 'No Co-Pay Allowed'}
-                {coPayEligibility === 'review-needed' && 'Requires Review'}
-              </p>
-              <p className="text-xs leading-relaxed">
-                {coPayEligibility === 'eligible' && 
-                  'This service qualifies for co-payment arrangements as it involves true public advertising where both parties can be equally represented.'
-                }
-                {coPayEligibility === 'not-eligible' && 
-                  'This service involves business tools, lead generation, or individual marketing materials that cannot be co-paid under RESPA compliance rules.'
-                }
-                {coPayEligibility === 'review-needed' && 
-                  'This service requires individual review to determine RESPA compliance for co-payment arrangements.'
-                }
-              </p>
-            </div>
-          </TooltipContent>
-        </Tooltip>
       </div>
 
       {/* Save Button */}

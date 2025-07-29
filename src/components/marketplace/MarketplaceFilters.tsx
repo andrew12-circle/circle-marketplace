@@ -12,6 +12,7 @@ interface FilterState {
   priceRange: number[];
   verified: boolean;
   featured: boolean;
+  coPayEligible: boolean;
 }
 
 export interface MarketplaceFiltersProps {
@@ -27,6 +28,7 @@ export const MarketplaceFilters = ({ filters, onFiltersChange, categories }: Mar
     priceRange: [0, 2000],
     verified: false,
     featured: false,
+    coPayEligible: false,
   };
   const updateFilter = (key: keyof FilterState, value: any) => {
     onFiltersChange({
@@ -41,11 +43,12 @@ export const MarketplaceFilters = ({ filters, onFiltersChange, categories }: Mar
       priceRange: [0, 2000],
       verified: false,
       featured: false,
+      coPayEligible: false,
     });
   };
 
   const hasActiveFilters = (safeFilters.category && safeFilters.category !== "all") || 
-    safeFilters.verified || safeFilters.featured || 
+    safeFilters.verified || safeFilters.featured || safeFilters.coPayEligible ||
     safeFilters.priceRange[0] > 0 || safeFilters.priceRange[1] < 2000;
 
   return (
@@ -61,7 +64,7 @@ export const MarketplaceFilters = ({ filters, onFiltersChange, categories }: Mar
           )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
           {/* Category Filter */}
           <div>
             <CategoryMegaMenu 
@@ -108,6 +111,18 @@ export const MarketplaceFilters = ({ filters, onFiltersChange, categories }: Mar
               Featured Only
             </Label>
           </div>
+
+          {/* Co-Pay Eligible Filter */}
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="coPayEligible"
+              checked={safeFilters.coPayEligible}
+              onCheckedChange={(checked) => updateFilter("coPayEligible", checked)}
+            />
+            <Label htmlFor="coPayEligible" className="text-sm">
+              Co-Pay Eligible
+            </Label>
+          </div>
         </div>
 
         {/* Active Filters Display */}
@@ -138,6 +153,15 @@ export const MarketplaceFilters = ({ filters, onFiltersChange, categories }: Mar
                   <X 
                     className="w-3 h-3 cursor-pointer" 
                     onClick={() => updateFilter("featured", false)}
+                  />
+                </Badge>
+              )}
+              {safeFilters.coPayEligible && (
+                <Badge variant="secondary" className="flex items-center gap-1">
+                  Co-Pay Eligible
+                  <X 
+                    className="w-3 h-3 cursor-pointer" 
+                    onClick={() => updateFilter("coPayEligible", false)}
                   />
                 </Badge>
               )}

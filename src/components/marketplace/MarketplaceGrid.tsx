@@ -73,6 +73,7 @@ export const MarketplaceGrid = () => {
     priceRange: [0, 2000],
     verified: false,
     featured: false,
+    coPayEligible: false,
   });
   const { toast } = useToast();
   const { user, profile } = useAuth();
@@ -169,7 +170,47 @@ export const MarketplaceGrid = () => {
     const matchesVerified = !filters.verified || service.vendor.is_verified;
     const matchesFeatured = !filters.featured || service.is_featured;
 
-    return matchesSearch && matchesCategory && matchesPrice && matchesVerified && matchesFeatured;
+    // Co-pay eligibility filtering
+    let matchesCoPayEligible = true;
+    if (filters.coPayEligible) {
+      const category = service.category?.toLowerCase() || '';
+      const title = service.title?.toLowerCase() || '';
+      const tags = service.tags?.map(tag => tag.toLowerCase()) || [];
+      
+      // Safe for co-pay (True advertising)
+      const safeKeywords = [
+        'digital ads', 'facebook ads', 'google ads', 'display ads', 'retargeting',
+        'postcards', 'direct mail', 'flyers', 'door hangers', 'brochures',
+        'educational', 'seminar', 'workshop', 'market report', 'buyer education',
+        'joint advertising', 'co-branded', 'print advertising'
+      ];
+      
+      // Never allow co-pay (Business tools/lead generation)
+      const restrictedKeywords = [
+        'crm', 'lead capture', 'lead generation', 'funnel', 'drip email',
+        'follow-up', 'seo', 'landing page', 'chatbot', 'sms', 'automation',
+        'business card', 'sign', 'social media management', 'posting',
+        'content calendar', 'listing video', 'drone', 'agent video',
+        'testimonial', 'open house', 'appreciation', 'pop-by', 'gift',
+        'closing gift', 'referral', 'past client', 'database', 'strategy',
+        'coaching', 'consulting', 'accountability'
+      ];
+      
+      const hasRestricted = restrictedKeywords.some(keyword => 
+        title.includes(keyword) || category.includes(keyword) || 
+        tags.some(tag => tag.includes(keyword))
+      );
+      
+      const hasSafe = safeKeywords.some(keyword => 
+        title.includes(keyword) || category.includes(keyword) || 
+        tags.some(tag => tag.includes(keyword))
+      );
+      
+      // Only show services that are eligible for co-pay (safe keywords and no restricted keywords)
+      matchesCoPayEligible = hasSafe && !hasRestricted;
+    }
+
+    return matchesSearch && matchesCategory && matchesPrice && matchesVerified && matchesFeatured && matchesCoPayEligible;
   });
 
   const filteredVendors = vendors.filter(vendor => {
@@ -403,6 +444,7 @@ export const MarketplaceGrid = () => {
                     priceRange: [0, 2000],
                     verified: false,
                     featured: false,
+                    coPayEligible: false,
                   });
                 }}
               >
