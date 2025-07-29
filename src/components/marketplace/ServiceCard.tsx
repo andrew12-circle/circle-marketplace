@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Heart, Star, ArrowRight, ShoppingCart, MessageCircle, Lock } from "lucide-react";
+import { Heart, Star, ArrowRight, ShoppingCart, MessageCircle, Lock, Crown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -182,9 +182,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1">
                     <span className="text-sm font-medium text-circle-primary">Circle Pro Price:</span>
-                    <div className="w-4 h-4 rounded-full bg-circle-primary flex items-center justify-center">
-                      <span className="text-xs text-white font-bold">C</span>
-                    </div>
+                    <Crown className="w-4 h-4 text-circle-primary" />
                   </div>
                   <span className="text-xl font-bold text-circle-primary">
                     ${service.pro_price}
@@ -225,16 +223,14 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                       <div className="flex items-center gap-1">
                         <Lock className="w-3 h-3 text-circle-primary" />
                         <span className="text-sm font-medium text-circle-primary">Circle Pro Price:</span>
-                        <div className="w-4 h-4 rounded-full bg-circle-primary flex items-center justify-center">
-                          <span className="text-xs text-white font-bold">C</span>
-                        </div>
+                        <Crown className="w-4 h-4 text-circle-primary" />
                       </div>
                       <span className="text-lg font-bold text-circle-primary">
                         ${service.pro_price}
                       </span>
                     </div>
                   </TooltipTrigger>
-                  <TooltipContent className="max-w-xs p-3">
+                  <TooltipContent className="w-48 p-3">
                     <p className="text-sm leading-relaxed">Join Circle Pro membership to unlock this price</p>
                   </TooltipContent>
                 </Tooltip>
@@ -256,7 +252,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                       </span>
                     </div>
                   </TooltipTrigger>
-                  <TooltipContent className="max-w-xs p-3">
+                  <TooltipContent className="w-48 p-3">
                     <p className="text-sm leading-relaxed">Join Circle Pro membership to unlock this price</p>
                   </TooltipContent>
                 </Tooltip>
