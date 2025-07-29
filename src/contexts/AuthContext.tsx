@@ -29,6 +29,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<{ error: any }>;
   updateProfile: (updates: Partial<Profile>) => Promise<{ error: any }>;
+  fetchProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -48,7 +49,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   // Fetch user profile
-  const fetchProfile = async (userId: string) => {
+  const fetchUserProfile = async (userId: string) => {
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -67,6 +68,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // Public fetchProfile function
+  const fetchProfile = async () => {
+    if (!user) return;
+    const profileData = await fetchUserProfile(user.id);
+    setProfile(profileData);
+  };
+
   useEffect(() => {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -77,7 +85,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Defer profile fetching to avoid deadlocks
         if (session?.user) {
           setTimeout(async () => {
-            const profileData = await fetchProfile(session.user.id);
+            const profileData = await fetchUserProfile(session.user.id);
             setProfile(profileData);
           }, 0);
         } else {
@@ -95,7 +103,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       if (session?.user) {
         setTimeout(async () => {
-          const profileData = await fetchProfile(session.user.id);
+          const profileData = await fetchUserProfile(session.user.id);
           setProfile(profileData);
         }, 0);
       }
@@ -159,6 +167,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signIn,
     signOut,
     updateProfile,
+    fetchProfile,
   };
 
   return (
