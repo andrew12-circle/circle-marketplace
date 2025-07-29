@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Star, MapPin, Users, TrendingUp, ExternalLink, Info, Building, Globe, AlertTriangle, Shield, CheckCircle, ArrowRight } from "lucide-react";
 import { getRiskBadge, getComplianceAlert, determineServiceRisk } from "./RESPAComplianceSystem";
 import { useState } from "react";
+import { VendorFunnelModal } from "./VendorFunnelModal";
 
 interface Vendor {
   id: string;
@@ -33,6 +34,7 @@ interface EnhancedVendorCardProps {
 
 export const EnhancedVendorCard = ({ vendor, onConnect, onViewProfile }: EnhancedVendorCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
+  const [isFunnelModalOpen, setIsFunnelModalOpen] = useState(false);
   // Determine risk level based on vendor name/description
   const riskLevel = determineServiceRisk(vendor.name, vendor.description);
   
@@ -47,12 +49,23 @@ export const EnhancedVendorCard = ({ vendor, onConnect, onViewProfile }: Enhance
     return "border-border";
   };
 
+  const handleCardClick = () => {
+    setIsFunnelModalOpen(true);
+  };
+
+  const handleArrowClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsFunnelModalOpen(true);
+  };
+
   return (
-    <Card 
-      className={`h-full flex flex-col hover:shadow-lg transition-shadow ${getCardBorderClass()}`}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
+    <>
+      <Card 
+        className={`h-full flex flex-col hover:shadow-lg transition-shadow cursor-pointer ${getCardBorderClass()}`}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        onClick={handleCardClick}
+      >
       <CardContent className="p-4 flex-1">
         {/* Header with Logo and Risk Badge */}
         <div className="flex items-start justify-between mb-3">
@@ -167,22 +180,33 @@ export const EnhancedVendorCard = ({ vendor, onConnect, onViewProfile }: Enhance
         )}
       </CardContent>
 
-      <CardFooter className="p-4 pt-0 flex gap-2">
-        <Button 
-          onClick={() => onConnect?.(vendor.id)}
-          className="flex-1"
-        >
-          Request Co-pay Support
-        </Button>
-        <Button 
-          variant="outline"
-          onClick={() => onViewProfile?.(vendor.id)}
-        >
-          <ArrowRight className={`h-4 w-4 transition-transform ${
-            isHovered ? "translate-x-1" : ""
-          }`} />
-        </Button>
-      </CardFooter>
-    </Card>
+        <CardFooter className="p-4 pt-0 flex gap-2">
+          <Button 
+            onClick={(e) => {
+              e.stopPropagation();
+              onConnect?.(vendor.id);
+            }}
+            className="flex-1"
+          >
+            Request Co-pay Support
+          </Button>
+          <Button 
+            variant="outline"
+            onClick={handleArrowClick}
+          >
+            <ArrowRight className={`h-4 w-4 transition-transform ${
+              isHovered ? "translate-x-1" : ""
+            }`} />
+          </Button>
+        </CardFooter>
+      </Card>
+
+      <VendorFunnelModal
+        isOpen={isFunnelModalOpen}
+        onClose={() => setIsFunnelModalOpen(false)}
+        vendor={vendor}
+        onRequestCoMarketing={onConnect || (() => {})}
+      />
+    </>
   );
 };
