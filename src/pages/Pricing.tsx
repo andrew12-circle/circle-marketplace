@@ -172,7 +172,7 @@ export const Pricing = () => {
             </div>
 
             {/* Features Comparison Table */}
-            <div className="bg-white rounded-lg border overflow-hidden mt-8">
+            <div className="bg-white rounded-lg border overflow-hidden">
               <div className="grid grid-cols-[auto_1fr_1fr_1fr] gap-0">
                 {/* Header Row */}
                 <div className="bg-gray-50 p-4 border-r border-b">
