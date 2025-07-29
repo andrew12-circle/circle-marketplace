@@ -1,7 +1,9 @@
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Star, TrendingUp, MapPin, Award } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useAuth } from "@/contexts/AuthContext";
+import { Star, TrendingUp, MapPin, Award, Info } from "lucide-react";
 
 interface VendorCardProps {
   vendor: {
@@ -10,6 +12,7 @@ interface VendorCardProps {
     category: string;
     retailPrice: number;
     proPrice: number;
+    coPayPrice: number;
     avgAgentCost: number;
     imageUrl?: string;
     rating?: number;
@@ -19,10 +22,15 @@ interface VendorCardProps {
   };
   onAddToWallet: (vendorId: string) => void;
   onRequestCoMarketing: (vendorId: string) => void;
+  onNavigateToVendors?: () => void;
 }
 
-export const VendorCard = ({ vendor, onAddToWallet, onRequestCoMarketing }: VendorCardProps) => {
+export const VendorCard = ({ vendor, onAddToWallet, onRequestCoMarketing, onNavigateToVendors }: VendorCardProps) => {
+  const { profile } = useAuth();
+  const isProMember = profile?.is_pro_member || false;
+  
   const percentSaved = Math.round(((vendor.retailPrice - vendor.proPrice) / vendor.retailPrice) * 100);
+  const coPaySavings = Math.round(((vendor.retailPrice - vendor.coPayPrice) / vendor.retailPrice) * 100);
 
   const getTagIcon = (tag: string) => {
     switch (tag.toLowerCase()) {
@@ -95,21 +103,67 @@ export const VendorCard = ({ vendor, onAddToWallet, onRequestCoMarketing }: Vend
         )}
 
         <div className="space-y-2">
-          <div className="flex justify-between items-center">
-            <span className="text-sm text-muted-foreground">Retail Price:</span>
-            <span className="text-sm line-through">${vendor.retailPrice}</span>
+          {/* Show retail price only if user is NOT pro */}
+          {!isProMember && (
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-muted-foreground">Retail Price:</span>
+              <span className="text-sm line-through">${vendor.retailPrice}</span>
+            </div>
+          )}
+          
+          {/* Show Circle Pro price if user IS pro */}
+          {isProMember && (
+            <div className="flex justify-between items-center">
+              <span className="text-sm font-medium">Circle Pro:</span>
+              <span className="text-lg font-bold text-circle-primary">${vendor.proPrice}</span>
+            </div>
+          )}
+          
+          {/* Always show Co-Pay price with hover explanation */}
+          <div className="flex justify-between items-center bg-circle-success/10 p-2 rounded border">
+            <div className="flex items-center gap-1">
+              <span className="text-sm font-medium text-circle-success">Co-Pay Price:</span>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button className="hover:text-circle-primary transition-colors">
+                    <Info className="w-3 h-3" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80">
+                  <div className="space-y-2">
+                    <h4 className="font-medium">What is Co-Pay?</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Co-Pay is our vendor partnership program where approved vendors help cover up to 50% of your costs.
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      *50% coverage is an average. Actual coverage varies by vendor and agreement.
+                    </p>
+                    <Button 
+                      size="sm" 
+                      onClick={onNavigateToVendors}
+                      className="w-full mt-2"
+                    >
+                      Find Vendors
+                    </Button>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            </div>
+            <span className="text-lg font-bold text-circle-success">${vendor.coPayPrice}</span>
           </div>
-          <div className="flex justify-between items-center">
-            <span className="text-sm font-medium">Circle Pro:</span>
-            <span className="text-lg font-bold text-circle-primary">${vendor.proPrice}</span>
-          </div>
+          
           <div className="flex justify-between items-center">
             <span className="text-sm text-muted-foreground">Avg Agent Cost:</span>
             <span className="text-sm font-medium">${vendor.avgAgentCost}</span>
           </div>
+          
           <div className="flex justify-between items-center">
-            <span className="text-sm font-medium text-circle-success">You Save:</span>
-            <span className="text-sm font-bold text-circle-success">{percentSaved}%</span>
+            <span className="text-sm font-medium text-circle-success">
+              {isProMember ? `Co-Pay Saves: ${coPaySavings - percentSaved}% more` : `You Save: ${coPaySavings}%`}
+            </span>
+            <span className="text-sm font-bold text-circle-success">
+              {isProMember ? `${coPaySavings - percentSaved}%` : `${coPaySavings}%`}
+            </span>
           </div>
         </div>
       </CardContent>
