@@ -49,6 +49,8 @@ export type Database = {
       }
       profiles: {
         Row: {
+          avatar_url: string | null
+          bio: string | null
           business_name: string | null
           circle_points: number | null
           created_at: string
@@ -57,10 +59,15 @@ export type Database = {
           is_pro_member: boolean | null
           location: string | null
           phone: string | null
+          specialties: string[] | null
           updated_at: string
           user_id: string
+          website_url: string | null
+          years_experience: number | null
         }
         Insert: {
+          avatar_url?: string | null
+          bio?: string | null
           business_name?: string | null
           circle_points?: number | null
           created_at?: string
@@ -69,10 +76,15 @@ export type Database = {
           is_pro_member?: boolean | null
           location?: string | null
           phone?: string | null
+          specialties?: string[] | null
           updated_at?: string
           user_id: string
+          website_url?: string | null
+          years_experience?: number | null
         }
         Update: {
+          avatar_url?: string | null
+          bio?: string | null
           business_name?: string | null
           circle_points?: number | null
           created_at?: string
@@ -81,8 +93,11 @@ export type Database = {
           is_pro_member?: boolean | null
           location?: string | null
           phone?: string | null
+          specialties?: string[] | null
           updated_at?: string
           user_id?: string
+          website_url?: string | null
+          years_experience?: number | null
         }
         Relationships: []
       }

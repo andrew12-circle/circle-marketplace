@@ -7,12 +7,12 @@ import { Badge } from "@/components/ui/badge";
 import { Sparkles, Crown } from "lucide-react";
 import { CartProvider } from "@/contexts/CartContext";
 import { CartDrawer } from "@/components/marketplace/CartDrawer";
+import { UserMenu } from "@/components/UserMenu";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<"marketplace" | "academy">("marketplace");
-  
-  // Mock user state - replace with actual auth
-  const isProUser = false;
+  const { user, profile } = useAuth();
 
   return (
     <CartProvider>
@@ -42,19 +42,33 @@ const Index = () => {
                   <CartDrawer />
                 )}
                 
-                {!isProUser && (
+                {/* Show Circle Points for authenticated users */}
+                {user && profile && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <Crown className="w-4 h-4 text-yellow-500" />
+                    <span className="font-medium">{profile.circle_points}</span>
+                    <span className="text-muted-foreground">Points</span>
+                  </div>
+                )}
+                
+                {/* Pro upgrade button for non-pro users */}
+                {user && profile && !profile.is_pro_member && (
                   <Button className="bg-circle-accent hover:bg-circle-accent/90 text-foreground">
                     <Crown className="w-4 h-4 mr-2" />
                     Upgrade to Pro
                   </Button>
                 )}
-                {isProUser && (
+                
+                {/* Pro badge for pro users */}
+                {user && profile?.is_pro_member && (
                   <Badge variant="secondary" className="bg-circle-accent text-foreground">
                     <Crown className="w-4 h-4 mr-1" />
                     Circle Pro
                   </Badge>
                 )}
-                <Button variant="outline">Sign In</Button>
+                
+                {/* User menu or sign in button */}
+                <UserMenu />
               </div>
             </div>
           </div>
