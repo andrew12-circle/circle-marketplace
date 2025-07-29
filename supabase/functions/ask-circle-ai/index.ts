@@ -30,31 +30,48 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_ANON_KEY") ?? ""
     );
 
-    const { prompt } = await req.json();
-    logStep("Received prompt", { prompt });
+    const { message, prompt } = await req.json();
+    const userPrompt = message || prompt;
+    logStep("Received prompt", { prompt: userPrompt });
 
-    // Fetch available services from the database
-    const { data: services, error: servicesError } = await supabaseClient
-      .from('services')
-      .select(`
-        *,
-        vendor:vendors (
-          name,
-          rating,
-          review_count,
-          is_verified
-        )
-      `);
+    // Check if this is a service comparison request
+    const isComparison = userPrompt.includes('analyze and compare these services');
+    
+    let systemPrompt;
+    
+    if (isComparison) {
+      systemPrompt = `You are Circle AI, an expert real estate marketing advisor. Analyze and compare the services provided by a real estate agent.
 
-    if (servicesError) {
-      logStep("Error fetching services", { error: servicesError });
-    }
+For service comparisons:
+1. Analyze the pricing differences and value propositions
+2. Compare features and benefits of each service
+3. Recommend which service might be best for different scenarios
+4. Provide insights on ROI and effectiveness
+5. Keep the response clear and actionable
 
-    const servicesList = services || [];
-    logStep("Fetched services", { count: servicesList.length });
+Provide a detailed comparison analysis in plain text format.`;
+    } else {
+      // Fetch available services from the database for general queries
+      const { data: services, error: servicesError } = await supabaseClient
+        .from('services')
+        .select(`
+          *,
+          vendor:vendors (
+            name,
+            rating,
+            review_count,
+            is_verified
+          )
+        `);
 
-    // Create a comprehensive prompt for the AI
-    const systemPrompt = `You are Circle AI, an expert real estate marketing advisor. You analyze agent locations, market conditions, and recommend the best marketing service bundles.
+      if (servicesError) {
+        logStep("Error fetching services", { error: servicesError });
+      }
+
+      const servicesList = services || [];
+      logStep("Fetched services", { count: servicesList.length });
+
+      systemPrompt = `You are Circle AI, an expert real estate marketing advisor. You analyze agent locations, market conditions, and recommend the best marketing service bundles.
 
 Available Services in our marketplace:
 ${servicesList.map(service => `- ${service.title}: ${service.description} (Category: ${service.category}, Price: ${service.price})`).join('\n')}
@@ -81,6 +98,7 @@ Respond in this exact JSON format:
     "timeInvestment": "X-X hours/week"
   }
 }`;
+    }
 
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${geminiKey}`, {
       method: 'POST',
@@ -92,7 +110,7 @@ Respond in this exact JSON format:
           {
             parts: [
               {
-                text: `${systemPrompt}\n\nUser request: ${prompt}`
+                text: `${systemPrompt}\n\nUser request: ${userPrompt}`
               }
             ]
           }
@@ -105,14 +123,24 @@ Respond in this exact JSON format:
     });
 
     if (!response.ok) {
-      throw new Error(`Gemini API error: ${response.status}`);
+      const errorText = await response.text();
+      logStep("Gemini API error", { status: response.status, error: errorText });
+      throw new Error(`Gemini API error: ${response.status} - ${errorText}`);
     }
 
     const data = await response.json();
     const aiResponse = data.candidates[0].content.parts[0].text;
     logStep("AI response received", { response: aiResponse });
 
-    // Parse the JSON response
+    // For comparison requests, return the response directly
+    if (isComparison) {
+      return new Response(JSON.stringify({ response: aiResponse }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
+
+    // For general queries, parse the JSON response
     let recommendation;
     try {
       recommendation = JSON.parse(aiResponse);
