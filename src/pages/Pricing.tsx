@@ -113,9 +113,9 @@ export const Pricing = () => {
           </div>
 
           <div className="max-w-6xl mx-auto">
-            {/* Pricing Table Header */}
+            {/* Pricing Cards - aligned with subscription columns only */}
             <div className="grid grid-cols-[auto_1fr_1fr_1fr] gap-0 mb-8">
-              <div className="p-6"></div>
+              <div></div>
               
               {/* Circle Starter */}
               <div className="bg-white rounded-lg border p-6 text-center">
