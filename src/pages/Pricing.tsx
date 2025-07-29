@@ -116,7 +116,7 @@ export const Pricing = () => {
             {/* Pricing Cards - aligned with last 3 columns only */}
             <div className="grid grid-cols-[auto_1fr_1fr_1fr] gap-0 mb-8">
               <div></div> {/* Empty space to align with Features column */}
-              <div className="grid grid-cols-3 gap-0 col-span-3">
+              <div className="grid grid-cols-3 gap-6 col-span-3">
               
               {/* Circle Starter */}
               <div className="bg-white rounded-lg border p-6 text-center">
