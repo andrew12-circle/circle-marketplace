@@ -71,10 +71,19 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
     if (service.requires_quote) {
       setIsExplanationModalOpen(true);
     } else {
+      const servicePrice = parseFloat(service.price) || parseFloat(service.retail_price) || parseFloat(service.pro_price) || 0;
+      console.log('Adding to cart:', { 
+        serviceTitle: service.title, 
+        originalPrice: service.price, 
+        retailPrice: service.retail_price,
+        proPrice: service.pro_price,
+        parsedPrice: servicePrice 
+      });
+      
       addToCart({
         serviceId: service.id,
         title: service.title,
-        price: parseFloat(service.price) || 0,
+        price: servicePrice,
         vendor: service.vendor.name,
         image_url: service.image_url,
         requiresQuote: service.requires_quote,
@@ -88,10 +97,19 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
 
   const handleBookConsultation = () => {
     setIsExplanationModalOpen(false);
+    const servicePrice = parseFloat(service.price) || parseFloat(service.retail_price) || parseFloat(service.pro_price) || 0;
+    console.log('Booking consultation for:', { 
+      serviceTitle: service.title, 
+      originalPrice: service.price, 
+      retailPrice: service.retail_price,
+      proPrice: service.pro_price,
+      parsedPrice: servicePrice 
+    });
+    
     addToCart({
       serviceId: service.id,
       title: service.title,
-      price: parseFloat(service.price) || 0,
+      price: servicePrice,
       vendor: service.vendor.name,
       image_url: service.image_url,
       requiresQuote: service.requires_quote,
