@@ -234,8 +234,8 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                       </span>
                     </div>
                   </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Join Circle Pro membership to unlock this price</p>
+                  <TooltipContent className="max-w-xs p-3">
+                    <p className="text-sm leading-relaxed">Join Circle Pro membership to unlock this price</p>
                   </TooltipContent>
                 </Tooltip>
               )}
@@ -256,8 +256,8 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                       </span>
                     </div>
                   </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Join Circle Pro membership to unlock this price</p>
+                  <TooltipContent className="max-w-xs p-3">
+                    <p className="text-sm leading-relaxed">Join Circle Pro membership to unlock this price</p>
                   </TooltipContent>
                 </Tooltip>
               )}
