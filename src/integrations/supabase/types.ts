@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      audit_log: {
+        Row: {
+          id: string
+          new_data: Json | null
+          old_data: Json | null
+          operation: string
+          table_name: string
+          timestamp: string
+          user_id: string | null
+        }
+        Insert: {
+          id?: string
+          new_data?: Json | null
+          old_data?: Json | null
+          operation: string
+          table_name: string
+          timestamp?: string
+          user_id?: string | null
+        }
+        Update: {
+          id?: string
+          new_data?: Json | null
+          old_data?: Json | null
+          operation?: string
+          table_name?: string
+          timestamp?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       consultation_bookings: {
         Row: {
           budget_range: string | null
@@ -522,74 +552,6 @@ export type Database = {
           vendor_type: string | null
           website_url: string | null
         }
-        Insert: {
-          campaigns_funded?: number | null
-          co_marketing_agents?: number | null
-          contact_email?: string | null
-          created_at?: string | null
-          description?: string | null
-          id?: string | null
-          individual_email?: string | null
-          individual_license_number?: string | null
-          individual_name?: string | null
-          individual_phone?: string | null
-          individual_title?: string | null
-          is_active?: boolean | null
-          is_verified?: boolean | null
-          latitude?: number | null
-          license_states?: string[] | null
-          local_representatives?: never
-          location?: string | null
-          logo_url?: string | null
-          longitude?: number | null
-          mls_areas?: string[] | null
-          name?: string | null
-          nmls_id?: string | null
-          parent_vendor_id?: string | null
-          phone?: string | null
-          rating?: number | null
-          review_count?: number | null
-          service_radius_miles?: number | null
-          service_states?: string[] | null
-          service_zip_codes?: string[] | null
-          updated_at?: string | null
-          vendor_type?: string | null
-          website_url?: string | null
-        }
-        Update: {
-          campaigns_funded?: number | null
-          co_marketing_agents?: number | null
-          contact_email?: string | null
-          created_at?: string | null
-          description?: string | null
-          id?: string | null
-          individual_email?: string | null
-          individual_license_number?: string | null
-          individual_name?: string | null
-          individual_phone?: string | null
-          individual_title?: string | null
-          is_active?: boolean | null
-          is_verified?: boolean | null
-          latitude?: number | null
-          license_states?: string[] | null
-          local_representatives?: never
-          location?: string | null
-          logo_url?: string | null
-          longitude?: number | null
-          mls_areas?: string[] | null
-          name?: string | null
-          nmls_id?: string | null
-          parent_vendor_id?: string | null
-          phone?: string | null
-          rating?: number | null
-          review_count?: number | null
-          service_radius_miles?: number | null
-          service_states?: string[] | null
-          service_zip_codes?: string[] | null
-          updated_at?: string | null
-          vendor_type?: string | null
-          website_url?: string | null
-        }
         Relationships: [
           {
             foreignKeyName: "vendors_parent_vendor_id_fkey"
@@ -612,6 +574,19 @@ export type Database = {
       calculate_distance: {
         Args: { lat1: number; lon1: number; lat2: number; lon2: number }
         Returns: number
+      }
+      get_public_profile: {
+        Args: { profile_id: string }
+        Returns: {
+          id: string
+          display_name: string
+          business_name: string
+          location: string
+          specialties: string[]
+          years_experience: number
+          website_url: string
+          avatar_url: string
+        }[]
       }
     }
     Enums: {
