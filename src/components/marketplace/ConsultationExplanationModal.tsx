@@ -107,7 +107,12 @@ export const ConsultationExplanationModal = ({
                     <Calendar className="w-3 h-3 mr-1" />
                     Consultation Required
                   </Badge>
-                  <p className="text-sm text-muted-foreground mt-1">Starting at ${service.price}</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {service.price && parseFloat(service.price) > 0 
+                      ? `Starting at $${service.price}` 
+                      : "Custom pricing based on your needs"
+                    }
+                  </p>
                 </div>
               </div>
             </CardContent>
