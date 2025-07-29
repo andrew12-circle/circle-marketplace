@@ -33,8 +33,8 @@ export const AcademyFilters = ({
   onClearFilters,
 }: AcademyFiltersProps) => {
   return (
-    <div className="bg-card border rounded-lg p-4 mb-6">
-      <div className="flex items-center justify-end mb-4">
+    <div className="bg-card border rounded-lg p-3 mb-4">
+      <div className="flex items-center justify-end mb-2">
         <Button variant="ghost" size="sm" onClick={onClearFilters}>
           Clear All
         </Button>
@@ -93,7 +93,7 @@ export const AcademyFilters = ({
         </Select>
       </div>
       
-      <div className="flex items-center space-x-2 mt-4">
+      <div className="flex items-center space-x-2 mt-3">
         <Switch 
           id="pro-only" 
           checked={showProOnly}
