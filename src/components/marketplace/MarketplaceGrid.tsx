@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { ServiceCard } from "./ServiceCard";
 import { EnhancedVendorCard } from "./EnhancedVendorCard";
 import { MarketplaceFilters } from "./MarketplaceFilters";
+import { CampaignServicesHeader } from "./CampaignServicesHeader";
 import { CircleProBanner } from "./CircleProBanner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -201,6 +202,9 @@ export const MarketplaceGrid = () => {
         {(!user || !profile?.is_pro_member) && (
           <CircleProBanner />
         )}
+
+        {/* Campaign Services Header */}
+        <CampaignServicesHeader />
 
         {/* Search and View Toggle - Mobile Optimized */}
         <div className="flex flex-col gap-3 sm:gap-4 mb-4 sm:mb-6">
