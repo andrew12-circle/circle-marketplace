@@ -2,11 +2,13 @@ import { Button } from "@/components/ui/button";
 import { Sparkles, MessageCircle, UserPlus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { AskCircleAIModal } from "./AskCircleAIModal";
+import { InviteVendorModal } from "./InviteVendorModal";
 import { useState } from "react";
 
 export const CampaignServicesHeader = () => {
   const { toast } = useToast();
   const [isAIModalOpen, setIsAIModalOpen] = useState(false);
+  const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
 
   const handleFindCampaign = () => {
     toast({
@@ -20,10 +22,7 @@ export const CampaignServicesHeader = () => {
   };
 
   const handleInviteVendor = () => {
-    toast({
-      title: "Invite Your Vendor",
-      description: "Vendor invitation feature coming soon!",
-    });
+    setIsInviteModalOpen(true);
   };
 
   return (
@@ -65,6 +64,11 @@ export const CampaignServicesHeader = () => {
       <AskCircleAIModal 
         open={isAIModalOpen} 
         onOpenChange={setIsAIModalOpen} 
+      />
+      
+      <InviteVendorModal 
+        open={isInviteModalOpen} 
+        onOpenChange={setIsInviteModalOpen} 
       />
     </>
   );
