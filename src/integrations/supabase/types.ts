@@ -142,6 +142,7 @@ export type Database = {
       services: {
         Row: {
           category: string | null
+          co_pay_price: string | null
           contribution_amount: string | null
           created_at: string | null
           description: string | null
@@ -154,7 +155,9 @@ export type Database = {
           is_top_pick: boolean | null
           original_price: string | null
           price: string | null
+          pro_price: string | null
           requires_quote: boolean | null
+          retail_price: string | null
           tags: string[] | null
           title: string
           updated_at: string | null
@@ -162,6 +165,7 @@ export type Database = {
         }
         Insert: {
           category?: string | null
+          co_pay_price?: string | null
           contribution_amount?: string | null
           created_at?: string | null
           description?: string | null
@@ -174,7 +178,9 @@ export type Database = {
           is_top_pick?: boolean | null
           original_price?: string | null
           price?: string | null
+          pro_price?: string | null
           requires_quote?: boolean | null
+          retail_price?: string | null
           tags?: string[] | null
           title: string
           updated_at?: string | null
@@ -182,6 +188,7 @@ export type Database = {
         }
         Update: {
           category?: string | null
+          co_pay_price?: string | null
           contribution_amount?: string | null
           created_at?: string | null
           description?: string | null
@@ -194,7 +201,9 @@ export type Database = {
           is_top_pick?: boolean | null
           original_price?: string | null
           price?: string | null
+          pro_price?: string | null
           requires_quote?: boolean | null
+          retail_price?: string | null
           tags?: string[] | null
           title?: string
           updated_at?: string | null

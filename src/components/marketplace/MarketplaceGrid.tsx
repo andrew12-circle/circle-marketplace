@@ -20,6 +20,9 @@ interface Service {
   price: string;
   original_price?: string;
   discount_percentage?: string;
+  retail_price?: string;
+  pro_price?: string;
+  co_pay_price?: string;
   image_url?: string;
   tags?: string[];
   is_featured: boolean;

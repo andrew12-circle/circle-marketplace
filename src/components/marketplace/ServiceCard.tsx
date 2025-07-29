@@ -14,6 +14,9 @@ interface Service {
   price: string;
   original_price?: string;
   discount_percentage?: string;
+  retail_price?: string;
+  pro_price?: string;
+  co_pay_price?: string;
   image_url?: string;
   tags?: string[];
   is_featured: boolean;
@@ -156,22 +159,43 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
           </div>
         )}
 
-        {/* Price and Details */}
-        <div className="flex items-center justify-between pt-2">
-          <div className="flex items-center gap-2">
-            <span className="text-lg font-bold text-circle-primary">
-              ${service.price}
-            </span>
-            {service.original_price && parseFloat(service.original_price) > parseFloat(service.price) && (
+        {/* New Pricing Structure */}
+        <div className="space-y-2 pt-2">
+          {service.retail_price && (
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">Retail Price:</span>
               <span className="text-sm text-muted-foreground line-through">
-                ${service.original_price}
+                ${service.retail_price}
               </span>
-            )}
-          </div>
-          {parseFloat(service.contribution_amount) > 0 && (
-            <Badge variant="secondary" className="text-xs">
-              +${service.contribution_amount} contribution
-            </Badge>
+            </div>
+          )}
+          
+          {service.pro_price && (
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1">
+                <span className="text-sm font-medium text-circle-primary">Circle Pro Price:</span>
+                <div className="w-4 h-4 rounded-full bg-circle-primary flex items-center justify-center">
+                  <span className="text-xs text-white font-bold">C</span>
+                </div>
+              </div>
+              <span className="text-lg font-bold text-circle-primary">
+                ${service.pro_price}
+              </span>
+            </div>
+          )}
+          
+          {service.co_pay_price && (
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1">
+                <span className="text-sm font-medium text-green-600">Your Co-Pay:</span>
+                <div className="w-3 h-3 rounded-full bg-green-600 flex items-center justify-center">
+                  <span className="text-xs text-white">i</span>
+                </div>
+              </div>
+              <span className="text-lg font-bold text-green-600">
+                ${service.co_pay_price}
+              </span>
+            </div>
           )}
         </div>
 
