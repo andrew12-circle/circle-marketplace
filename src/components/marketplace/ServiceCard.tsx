@@ -11,14 +11,14 @@ interface Service {
   title: string;
   description: string;
   category: string;
-  price: number;
-  original_price?: number;
-  discount_percentage?: number;
+  price: string;
+  original_price?: string;
+  discount_percentage?: string;
   image_url?: string;
   tags?: string[];
   is_featured: boolean;
   is_top_pick: boolean;
-  contribution_amount: number;
+  contribution_amount: string;
   estimated_roi?: number;
   duration?: string;
   requires_quote?: boolean; // New field to indicate if item needs custom quote
@@ -58,7 +58,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
     addToCart({
       serviceId: service.id,
       title: service.title,
-      price: service.price,
+      price: parseFloat(service.price) || 0,
       vendor: service.vendor.name,
       image_url: service.image_url,
       requiresQuote: service.requires_quote,
@@ -162,13 +162,13 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
             <span className="text-lg font-bold text-circle-primary">
               ${service.price}
             </span>
-            {service.original_price && service.original_price > service.price && (
+            {service.original_price && parseFloat(service.original_price) > parseFloat(service.price) && (
               <span className="text-sm text-muted-foreground line-through">
                 ${service.original_price}
               </span>
             )}
           </div>
-          {service.contribution_amount > 0 && (
+          {parseFloat(service.contribution_amount) > 0 && (
             <Badge variant="secondary" className="text-xs">
               +${service.contribution_amount} contribution
             </Badge>

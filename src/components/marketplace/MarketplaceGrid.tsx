@@ -13,14 +13,14 @@ interface Service {
   title: string;
   description: string;
   category: string;
-  price: number;
-  original_price?: number;
-  discount_percentage?: number;
+  price: string;
+  original_price?: string;
+  discount_percentage?: string;
   image_url?: string;
   tags?: string[];
   is_featured: boolean;
   is_top_pick: boolean;
-  contribution_amount: number;
+  contribution_amount: string;
   estimated_roi?: number;
   duration?: string;
   vendor: {
@@ -92,7 +92,16 @@ export const MarketplaceGrid = () => {
 
       if (vendorsError) throw vendorsError;
 
-      setServices(servicesData || []);
+      // Convert the database response to match our interface
+      const formattedServices = (servicesData || []).map(service => ({
+        ...service,
+        price: String(service.price || "0"),
+        original_price: service.original_price ? String(service.original_price) : undefined,
+        discount_percentage: service.discount_percentage ? String(service.discount_percentage) : undefined,
+        contribution_amount: String(service.contribution_amount || "0"),
+      }));
+      
+      setServices(formattedServices);
       setVendors(vendorsData || []);
     } catch (error) {
       console.error('Error loading data:', error);
@@ -112,7 +121,8 @@ export const MarketplaceGrid = () => {
                          service.vendor.name.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesCategory = filters.category === "all" || service.category === filters.category;
-    const matchesPrice = service.price >= filters.priceRange[0] && service.price <= filters.priceRange[1];
+    const priceValue = parseFloat(service.price) || 0;
+    const matchesPrice = priceValue >= filters.priceRange[0] && priceValue <= filters.priceRange[1];
     const matchesVerified = !filters.verified || service.vendor.is_verified;
     const matchesFeatured = !filters.featured || service.is_featured;
 
