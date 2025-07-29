@@ -66,18 +66,14 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
   };
 
   const handleAddToCart = () => {
-    if (service.requires_quote) {
-      setIsConsultationFlowOpen(true);
-    } else {
-      addToCart({
-        serviceId: service.id,
-        title: service.title,
-        price: parseFloat(service.price) || 0,
-        vendor: service.vendor.name,
-        image_url: service.image_url,
-        requiresQuote: service.requires_quote,
-      });
-    }
+    addToCart({
+      serviceId: service.id,
+      title: service.title,
+      price: parseFloat(service.price) || 0,
+      vendor: service.vendor.name,
+      image_url: service.image_url,
+      requiresQuote: service.requires_quote,
+    });
   };
 
   const handleUpgradeClick = () => {
@@ -311,17 +307,10 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
             className="flex-1"
             onClick={handleAddToCart}
           >
-            {service.requires_quote ? (
-              <>
-                <Calendar className="w-4 h-4 mr-2" />
-                Book Consultation
-              </>
-            ) : (
-              <>
-                <ShoppingCart className="w-4 h-4 mr-2" />
-                Add to Cart
-              </>
-            )}
+            <>
+              <ShoppingCart className="w-4 h-4 mr-2" />
+              Add to Cart
+            </>
           </Button>
           
           <Button 
