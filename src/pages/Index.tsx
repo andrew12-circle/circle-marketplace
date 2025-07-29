@@ -30,7 +30,6 @@ const Index = () => {
                   alt="Circle Logo" 
                   className="w-8 h-8 sm:w-12 sm:h-12 object-contain"
                 />
-                <span className="font-bold text-lg sm:text-xl md:hidden">Circle</span>
               </div>
               
               {/* Navigation Tabs - Responsive */}
