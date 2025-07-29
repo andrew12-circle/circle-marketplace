@@ -7,25 +7,25 @@ interface NavigationTabsProps {
 
 export const NavigationTabs = ({ activeTab, onTabChange }: NavigationTabsProps) => {
   return (
-    <div className="flex bg-circle-neutral rounded-lg p-1 w-fit mx-auto">
+    <div className="flex bg-muted/50 rounded-xl p-1 w-fit mx-auto backdrop-blur-sm border border-border/50">
       <Button
-        variant={activeTab === "marketplace" ? "default" : "ghost"}
+        variant="ghost"
         onClick={() => onTabChange("marketplace")}
-        className={`rounded-md transition-all ${
+        className={`rounded-lg px-6 py-2 font-medium transition-all duration-200 ${
           activeTab === "marketplace" 
-            ? "bg-circle-primary text-primary-foreground" 
-            : "text-muted-foreground hover:text-foreground"
+            ? "bg-background text-foreground shadow-sm" 
+            : "text-muted-foreground hover:text-foreground hover:bg-background/50"
         }`}
       >
         Marketplace
       </Button>
       <Button
-        variant={activeTab === "academy" ? "default" : "ghost"}
+        variant="ghost"
         onClick={() => onTabChange("academy")}
-        className={`rounded-md transition-all ${
+        className={`rounded-lg px-6 py-2 font-medium transition-all duration-200 ${
           activeTab === "academy" 
-            ? "bg-circle-primary text-primary-foreground" 
-            : "text-muted-foreground hover:text-foreground"
+            ? "bg-background text-foreground shadow-sm" 
+            : "text-muted-foreground hover:text-foreground hover:bg-background/50"
         }`}
       >
         Academy
