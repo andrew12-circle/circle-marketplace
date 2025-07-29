@@ -2,8 +2,9 @@ import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Heart, Star, ArrowRight } from "lucide-react";
+import { Heart, Star, ArrowRight, ShoppingCart, MessageCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useCart } from "@/contexts/CartContext";
 
 interface Service {
   id: string;
@@ -20,6 +21,7 @@ interface Service {
   contribution_amount: number;
   estimated_roi?: number;
   duration?: string;
+  requires_quote?: boolean; // New field to indicate if item needs custom quote
   vendor: {
     name: string;
     rating: number;
@@ -38,6 +40,7 @@ interface ServiceCardProps {
 export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }: ServiceCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const { toast } = useToast();
+  const { addToCart } = useCart();
 
   const handleSave = () => {
     onSave?.(service.id);
@@ -49,6 +52,17 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
 
   const handleViewDetails = () => {
     onViewDetails?.(service.id);
+  };
+
+  const handleAddToCart = () => {
+    addToCart({
+      serviceId: service.id,
+      title: service.title,
+      price: service.price,
+      vendor: service.vendor.name,
+      image_url: service.image_url,
+      requiresQuote: service.requires_quote,
+    });
   };
 
   return (
@@ -173,16 +187,36 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
           </div>
         )}
 
-        {/* Action Button */}
-        <Button 
-          className="w-full mt-4 group"
-          onClick={handleViewDetails}
-        >
-          <span>View Details</span>
-          <ArrowRight className={`ml-2 h-4 w-4 transition-transform ${
-            isHovered ? "translate-x-1" : ""
-          }`} />
-        </Button>
+        {/* Action Buttons */}
+        <div className="flex gap-2 mt-4">
+          {service.requires_quote ? (
+            <Button 
+              variant="outline"
+              className="flex-1"
+              onClick={handleAddToCart}
+            >
+              <MessageCircle className="w-4 h-4 mr-2" />
+              Request Quote
+            </Button>
+          ) : (
+            <Button 
+              className="flex-1"
+              onClick={handleAddToCart}
+            >
+              <ShoppingCart className="w-4 h-4 mr-2" />
+              Add to Cart
+            </Button>
+          )}
+          
+          <Button 
+            variant="outline"
+            onClick={handleViewDetails}
+          >
+            <ArrowRight className={`h-4 w-4 transition-transform ${
+              isHovered ? "translate-x-1" : ""
+            }`} />
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );

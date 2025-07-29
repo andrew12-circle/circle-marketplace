@@ -4,7 +4,9 @@ import { Marketplace } from "./Marketplace";
 import { Academy } from "./Academy";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles, Zap, Crown } from "lucide-react";
+import { Sparkles, Crown } from "lucide-react";
+import { CartProvider } from "@/contexts/CartContext";
+import { CartDrawer } from "@/components/marketplace/CartDrawer";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<"marketplace" | "academy">("marketplace");
@@ -13,61 +15,66 @@ const Index = () => {
   const isProUser = false;
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-circle-primary to-circle-primary-light rounded-lg flex items-center justify-center">
-                <Sparkles className="w-6 h-6 text-primary-foreground" />
+    <CartProvider>
+      <div className="min-h-screen bg-background">
+        {/* Header */}
+        <header className="border-b bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/50">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-circle-primary to-circle-primary-light rounded-lg flex items-center justify-center">
+                  <Sparkles className="w-6 h-6 text-primary-foreground" />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold">Circle</h1>
+                  <p className="text-sm text-muted-foreground">Grow Smarter</p>
+                </div>
               </div>
-              <div>
-                <h1 className="text-2xl font-bold">Circle</h1>
-                <p className="text-sm text-muted-foreground">Grow Smarter</p>
+              
+              {/* Navigation Tabs in Center */}
+              <div className="flex-1 flex justify-center">
+                <NavigationTabs activeTab={activeTab} onTabChange={setActiveTab} />
               </div>
-            </div>
-            
-            <div className="flex items-center gap-4">
-              {!isProUser && (
-                <Button className="bg-circle-accent hover:bg-circle-accent/90 text-foreground">
-                  <Crown className="w-4 h-4 mr-2" />
-                  Upgrade to Pro
-                </Button>
-              )}
-              {isProUser && (
-                <Badge variant="secondary" className="bg-circle-accent text-foreground">
-                  <Crown className="w-4 h-4 mr-1" />
-                  Circle Pro
-                </Badge>
-              )}
-              <Button variant="outline">Sign In</Button>
+              
+              <div className="flex items-center gap-4">
+                {/* Cart Button - only show on marketplace */}
+                {activeTab === "marketplace" && (
+                  <CartDrawer />
+                )}
+                
+                {!isProUser && (
+                  <Button className="bg-circle-accent hover:bg-circle-accent/90 text-foreground">
+                    <Crown className="w-4 h-4 mr-2" />
+                    Upgrade to Pro
+                  </Button>
+                )}
+                {isProUser && (
+                  <Badge variant="secondary" className="bg-circle-accent text-foreground">
+                    <Crown className="w-4 h-4 mr-1" />
+                    Circle Pro
+                  </Badge>
+                )}
+                <Button variant="outline">Sign In</Button>
+              </div>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
 
-      {/* Navigation */}
-      <div className="border-b bg-card/50 backdrop-blur">
-        <div className="container mx-auto px-4 py-4">
-          <NavigationTabs activeTab={activeTab} onTabChange={setActiveTab} />
-        </div>
+        {/* Main Content */}
+        <main>
+          {activeTab === "marketplace" ? <Marketplace /> : <Academy />}
+        </main>
+
+        {/* Footer */}
+        <footer className="border-t bg-card/50 mt-16">
+          <div className="container mx-auto px-4 py-8">
+            <div className="text-center text-muted-foreground">
+              <p>&copy; 2024 Circle. Empowering real estate professionals to grow smarter.</p>
+            </div>
+          </div>
+        </footer>
       </div>
-
-      {/* Main Content */}
-      <main>
-        {activeTab === "marketplace" ? <Marketplace /> : <Academy />}
-      </main>
-
-      {/* Footer */}
-      <footer className="border-t bg-card/50 mt-16">
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center text-muted-foreground">
-            <p>&copy; 2024 Circle. Empowering real estate professionals to grow smarter.</p>
-          </div>
-        </div>
-      </footer>
-    </div>
+    </CartProvider>
   );
 };
 
