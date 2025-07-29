@@ -4,7 +4,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
-import { CartProvider } from "@/contexts/CartContext";
 import Index from "./pages/Index";
 import { Auth } from "./pages/Auth";
 import { OrderHistory } from "./pages/OrderHistory";
@@ -23,26 +22,24 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <AuthProvider>
-        <CartProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/orders" element={<OrderHistory />} />
-              <Route path="/pricing" element={<Pricing />} />
-              <Route path="/profile-settings" element={<ProfileSettings />} />
-              <Route path="/wallet" element={<AgentWallet />} />
-              <Route path="/saved" element={<SavedItems />} />
-              <Route path="/payment-success" element={<PaymentSuccess />} />
-              <Route path="/payment-canceled" element={<PaymentCanceled />} />
-              <Route path="/consultation-demo" element={<ConsultationDemo />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </CartProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/orders" element={<OrderHistory />} />
+            <Route path="/pricing" element={<Pricing />} />
+            <Route path="/profile-settings" element={<ProfileSettings />} />
+            <Route path="/wallet" element={<AgentWallet />} />
+            <Route path="/saved" element={<SavedItems />} />
+            <Route path="/payment-success" element={<PaymentSuccess />} />
+            <Route path="/payment-canceled" element={<PaymentCanceled />} />
+            <Route path="/consultation-demo" element={<ConsultationDemo />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
       </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>

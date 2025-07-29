@@ -3,12 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useCart } from "@/contexts/CartContext";
-import { ShoppingCart, Plus, Minus, Trash2, CreditCard, MessageCircle, Calendar, Shield } from "lucide-react";
+import { ShoppingCart, Plus, Minus, Trash2, CreditCard, MessageCircle, Calendar } from "lucide-react";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { ConsultationSequenceFlow } from "./ConsultationSequenceFlow";
-import { CoPayFlow } from "./CoPayFlow";
 
 export const CartDrawer = () => {
   const { 
@@ -24,8 +23,6 @@ export const CartDrawer = () => {
   
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [isConsultationFlowOpen, setIsConsultationFlowOpen] = useState(false);
-  const [isCoPayFlowOpen, setIsCoPayFlowOpen] = useState(false);
-  const [isCircleProMember, setIsCircleProMember] = useState(true); // TODO: Get from user context
   const { toast } = useToast();
 
   const handleCheckout = async () => {
@@ -114,14 +111,6 @@ export const CartDrawer = () => {
     });
   };
 
-  const handleCoPayRequest = () => {
-    setIsCoPayFlowOpen(true);
-    setIsOpen(false);
-  };
-
-  const getCircleProPrice = (price: number) => Math.round(price * 0.8 * 100) / 100; // 20% discount for Circle Pro members
-  const getCircleProTotal = () => Math.round(purchasableItems.reduce((sum, item) => sum + (getCircleProPrice(item.price) * item.quantity), 0) * 100) / 100;
-
   const purchasableItems = cartItems.filter(item => !item.requiresQuote);
   const quoteItems = cartItems.filter(item => item.requiresQuote);
 
@@ -188,16 +177,9 @@ export const CartDrawer = () => {
                                </span>
                              </div>
                            ) : (
-                             <div className="flex flex-col">
-                               {isCircleProMember && (
-                                 <span className="text-xs text-green-600 font-medium">
-                                   Circle Pro: ${getCircleProPrice(item.price).toFixed(2)}
-                                 </span>
-                               )}
-                               <span className={`font-semibold ${isCircleProMember ? 'text-muted-foreground line-through text-sm' : 'text-circle-primary'}`}>
-                                 ${item.price}
-                               </span>
-                             </div>
+                             <span className="font-semibold text-circle-primary">
+                               ${item.price}
+                             </span>
                            )}
                          </div>
                         
@@ -240,30 +222,13 @@ export const CartDrawer = () => {
 
               <div className="border-t pt-4 space-y-4">
                 {/* Summary */}
-                 <div className="space-y-2">
-                   {purchasableItems.length > 0 && (
-                     <div className="space-y-1">
-                       {isCircleProMember && (
-                         <div className="flex justify-between text-green-600">
-                           <span>Circle Pro Subtotal ({purchasableItems.reduce((count, item) => count + item.quantity, 0)} items):</span>
-                           <span className="font-semibold">${getCircleProTotal().toFixed(2)}</span>
-                         </div>
-                       )}
-                       <div className="flex justify-between">
-                         <span className={isCircleProMember ? 'text-muted-foreground line-through' : ''}>
-                           {isCircleProMember ? 'Regular Price:' : `Subtotal (${purchasableItems.reduce((count, item) => count + item.quantity, 0)} items):`}
-                         </span>
-                         <span className={`font-semibold ${isCircleProMember ? 'text-muted-foreground line-through' : ''}`}>
-                           ${getCartTotal()}
-                         </span>
-                       </div>
-                       {isCircleProMember && (
-                         <div className="flex justify-between text-sm text-green-600">
-                           <span>You save: ${(getCartTotal() - getCircleProTotal()).toFixed(2)}</span>
-                         </div>
-                       )}
-                     </div>
-                   )}
+                <div className="space-y-2">
+                  {purchasableItems.length > 0 && (
+                    <div className="flex justify-between">
+                      <span>Subtotal ({purchasableItems.reduce((count, item) => count + item.quantity, 0)} items):</span>
+                      <span className="font-semibold">${getCartTotal()}</span>
+                    </div>
+                  )}
                   
                   {quoteItems.length > 0 && (
                     <div className="flex justify-between">
@@ -279,34 +244,17 @@ export const CartDrawer = () => {
                 <Separator />
 
                 {/* Actions */}
-                 <div className="space-y-2">
-                   {purchasableItems.length > 0 && (
-                     <div className="space-y-2">
-                       <Button 
-                         className="w-full" 
-                         onClick={handleCheckout}
-                         disabled={isCheckingOut}
-                       >
-                         <CreditCard className="w-4 h-4 mr-2" />
-                         {isCheckingOut ? "Processing..." : 
-                           isCircleProMember 
-                             ? `Circle Pro Checkout - $${getCircleProTotal().toFixed(2)}` 
-                             : `Checkout ${purchasableItems.length} item(s) - $${getCartTotal()}`
-                         }
-                       </Button>
-                       
-                       {isCircleProMember && (
-                         <Button 
-                           variant="outline"
-                           className="w-full"
-                           onClick={handleCoPayRequest}
-                         >
-                           <Shield className="w-4 h-4 mr-2" />
-                           Request Co-Pay (20% of ${getCartTotal()})
-                         </Button>
-                       )}
-                     </div>
-                   )}
+                <div className="space-y-2">
+                  {purchasableItems.length > 0 && (
+                    <Button 
+                      className="w-full" 
+                      onClick={handleCheckout}
+                      disabled={isCheckingOut}
+                    >
+                      <CreditCard className="w-4 h-4 mr-2" />
+                      {isCheckingOut ? "Processing..." : `Checkout ${purchasableItems.length} item(s) - $${getCartTotal()}`}
+                    </Button>
+                  )}
                   
                    {quoteItems.length > 0 && (
                      <Button 
@@ -343,18 +291,6 @@ export const CartDrawer = () => {
            price: item.price
          }))}
          onComplete={handleConsultationComplete}
-       />
-       
-       <CoPayFlow
-         isOpen={isCoPayFlowOpen}
-         onClose={() => setIsCoPayFlowOpen(false)}
-         cartItems={purchasableItems.map(item => ({
-           serviceId: item.serviceId,
-           title: item.title,
-           vendor: item.vendor,
-           price: item.price,
-           quantity: item.quantity
-         }))}
        />
      </Sheet>
    );
