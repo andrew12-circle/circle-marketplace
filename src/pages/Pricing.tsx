@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Check, X } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export const Pricing = () => {
@@ -97,23 +97,142 @@ export const Pricing = () => {
               </div>
             </div>
 
-            {/* Features Table */}
-            <div className="bg-white rounded-lg border overflow-hidden">
+            {/* Features Comparison Table */}
+            <div className="bg-white rounded-lg border overflow-hidden mt-8">
               <div className="grid grid-cols-4 gap-0">
-                {/* Row Headers */}
+                {/* Header Row */}
                 <div className="bg-gray-50 p-4 border-r border-b">
-                  <span className="font-medium text-muted-foreground">Price</span>
+                  <span className="font-semibold">Features</span>
                 </div>
-                <div className="p-4 border-r border-b text-center font-bold">$0/month</div>
-                <div className="p-4 border-r border-b text-center font-bold bg-blue-50">$47/month</div>
-                <div className="p-4 border-b text-center font-bold">$97/month</div>
+                <div className="p-4 border-r border-b text-center font-semibold">Circle Starter</div>
+                <div className="p-4 border-r border-b text-center font-semibold bg-blue-50">Circle Pro (Solo)</div>
+                <div className="p-4 border-b text-center font-semibold">Circle Pro (Team)</div>
+
+                {/* Core Features */}
+                <div className="bg-gray-50 p-4 border-r border-b">
+                  <span className="font-medium text-sm">Marketplace Access</span>
+                </div>
+                <div className="p-4 border-r border-b text-center">
+                  <Check className="w-5 h-5 text-green-600 mx-auto" />
+                </div>
+                <div className="p-4 border-r border-b text-center bg-blue-50">
+                  <Check className="w-5 h-5 text-green-600 mx-auto" />
+                </div>
+                <div className="p-4 border-b text-center">
+                  <Check className="w-5 h-5 text-green-600 mx-auto" />
+                </div>
 
                 <div className="bg-gray-50 p-4 border-r border-b">
-                  <span className="font-medium text-muted-foreground">Best For</span>
+                  <span className="font-medium text-sm">Circle Points</span>
                 </div>
-                <div className="p-4 border-r border-b text-center text-sm">Agents exploring the marketplace</div>
-                <div className="p-4 border-r border-b text-center text-sm bg-blue-50">Solo agents automating their marketing</div>
-                <div className="p-4 border-b text-center text-sm">Teams building a growth system</div>
+                <div className="p-4 border-r border-b text-center text-sm">100 to start</div>
+                <div className="p-4 border-r border-b text-center text-sm bg-blue-50">500 monthly</div>
+                <div className="p-4 border-b text-center text-sm">1000 monthly</div>
+
+                <div className="bg-gray-50 p-4 border-r border-b">
+                  <span className="font-medium text-sm">Academy Courses</span>
+                </div>
+                <div className="p-4 border-r border-b text-center text-sm">Basic</div>
+                <div className="p-4 border-r border-b text-center text-sm bg-blue-50">Premium</div>
+                <div className="p-4 border-b text-center text-sm">Premium + Team</div>
+
+                <div className="bg-gray-50 p-4 border-r border-b">
+                  <span className="font-medium text-sm">Marketing Automation</span>
+                </div>
+                <div className="p-4 border-r border-b text-center">
+                  <X className="w-5 h-5 text-gray-400 mx-auto" />
+                </div>
+                <div className="p-4 border-r border-b text-center bg-blue-50">
+                  <Check className="w-5 h-5 text-green-600 mx-auto" />
+                </div>
+                <div className="p-4 border-b text-center">
+                  <Check className="w-5 h-5 text-green-600 mx-auto" />
+                </div>
+
+                <div className="bg-gray-50 p-4 border-r border-b">
+                  <span className="font-medium text-sm">Lead Generation Tools</span>
+                </div>
+                <div className="p-4 border-r border-b text-center">
+                  <X className="w-5 h-5 text-gray-400 mx-auto" />
+                </div>
+                <div className="p-4 border-r border-b text-center bg-blue-50">
+                  <Check className="w-5 h-5 text-green-600 mx-auto" />
+                </div>
+                <div className="p-4 border-b text-center">
+                  <Check className="w-5 h-5 text-green-600 mx-auto" />
+                </div>
+
+                <div className="bg-gray-50 p-4 border-r border-b">
+                  <span className="font-medium text-sm">CRM Integration</span>
+                </div>
+                <div className="p-4 border-r border-b text-center">
+                  <X className="w-5 h-5 text-gray-400 mx-auto" />
+                </div>
+                <div className="p-4 border-r border-b text-center bg-blue-50">
+                  <Check className="w-5 h-5 text-green-600 mx-auto" />
+                </div>
+                <div className="p-4 border-b text-center">
+                  <Check className="w-5 h-5 text-green-600 mx-auto" />
+                </div>
+
+                <div className="bg-gray-50 p-4 border-r border-b">
+                  <span className="font-medium text-sm">Analytics & Reporting</span>
+                </div>
+                <div className="p-4 border-r border-b text-center text-sm">Basic</div>
+                <div className="p-4 border-r border-b text-center text-sm bg-blue-50">Advanced</div>
+                <div className="p-4 border-b text-center text-sm">Team Dashboard</div>
+
+                <div className="bg-gray-50 p-4 border-r border-b">
+                  <span className="font-medium text-sm">1-on-1 Coaching</span>
+                </div>
+                <div className="p-4 border-r border-b text-center">
+                  <X className="w-5 h-5 text-gray-400 mx-auto" />
+                </div>
+                <div className="p-4 border-r border-b text-center bg-blue-50">
+                  <Check className="w-5 h-5 text-green-600 mx-auto" />
+                </div>
+                <div className="p-4 border-b text-center">
+                  <Check className="w-5 h-5 text-green-600 mx-auto" />
+                </div>
+
+                <div className="bg-gray-50 p-4 border-r border-b">
+                  <span className="font-medium text-sm">Team Management</span>
+                </div>
+                <div className="p-4 border-r border-b text-center">
+                  <X className="w-5 h-5 text-gray-400 mx-auto" />
+                </div>
+                <div className="p-4 border-r border-b text-center bg-blue-50">
+                  <X className="w-5 h-5 text-gray-400 mx-auto" />
+                </div>
+                <div className="p-4 border-b text-center">
+                  <Check className="w-5 h-5 text-green-600 mx-auto" />
+                </div>
+
+                <div className="bg-gray-50 p-4 border-r border-b">
+                  <span className="font-medium text-sm">Priority Support</span>
+                </div>
+                <div className="p-4 border-r border-b text-center">
+                  <X className="w-5 h-5 text-gray-400 mx-auto" />
+                </div>
+                <div className="p-4 border-r border-b text-center bg-blue-50">
+                  <Check className="w-5 h-5 text-green-600 mx-auto" />
+                </div>
+                <div className="p-4 border-b text-center">
+                  <Check className="w-5 h-5 text-green-600 mx-auto" />
+                </div>
+
+                <div className="bg-gray-50 p-4 border-r">
+                  <span className="font-medium text-sm">Custom Branding</span>
+                </div>
+                <div className="p-4 border-r text-center">
+                  <X className="w-5 h-5 text-gray-400 mx-auto" />
+                </div>
+                <div className="p-4 border-r text-center bg-blue-50">
+                  <X className="w-5 h-5 text-gray-400 mx-auto" />
+                </div>
+                <div className="p-4 text-center">
+                  <Check className="w-5 h-5 text-green-600 mx-auto" />
+                </div>
               </div>
             </div>
           </div>
