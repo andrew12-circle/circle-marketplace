@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { NavigationTabs } from "@/components/NavigationTabs";
 import { Marketplace } from "./Marketplace";
 import { Academy } from "./Academy";
@@ -53,9 +54,11 @@ const Index = () => {
                 
                 {/* Pro upgrade button for non-pro users */}
                 {user && profile && !profile.is_pro_member && (
-                  <Button className="bg-circle-accent hover:bg-circle-accent/90 text-foreground">
-                    <Crown className="w-4 h-4 mr-2" />
-                    Upgrade to Pro
+                  <Button asChild className="bg-circle-accent hover:bg-circle-accent/90 text-foreground">
+                    <Link to="/pricing">
+                      <Crown className="w-4 h-4 mr-2" />
+                      Upgrade to Pro
+                    </Link>
                   </Button>
                 )}
                 
