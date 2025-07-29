@@ -119,8 +119,8 @@ export const CartDrawer = () => {
     setIsOpen(false);
   };
 
-  const getCircleProPrice = (price: number) => price * 0.8; // 20% discount for Circle Pro members
-  const getCircleProTotal = () => purchasableItems.reduce((sum, item) => sum + (getCircleProPrice(item.price) * item.quantity), 0);
+  const getCircleProPrice = (price: number) => Math.round(price * 0.8 * 100) / 100; // 20% discount for Circle Pro members
+  const getCircleProTotal = () => Math.round(purchasableItems.reduce((sum, item) => sum + (getCircleProPrice(item.price) * item.quantity), 0) * 100) / 100;
 
   const purchasableItems = cartItems.filter(item => !item.requiresQuote);
   const quoteItems = cartItems.filter(item => item.requiresQuote);
@@ -191,7 +191,7 @@ export const CartDrawer = () => {
                              <div className="flex flex-col">
                                {isCircleProMember && (
                                  <span className="text-xs text-green-600 font-medium">
-                                   Circle Pro: ${getCircleProPrice(item.price)}
+                                   Circle Pro: ${getCircleProPrice(item.price).toFixed(2)}
                                  </span>
                                )}
                                <span className={`font-semibold ${isCircleProMember ? 'text-muted-foreground line-through text-sm' : 'text-circle-primary'}`}>
@@ -246,7 +246,7 @@ export const CartDrawer = () => {
                        {isCircleProMember && (
                          <div className="flex justify-between text-green-600">
                            <span>Circle Pro Subtotal ({purchasableItems.reduce((count, item) => count + item.quantity, 0)} items):</span>
-                           <span className="font-semibold">${getCircleProTotal()}</span>
+                           <span className="font-semibold">${getCircleProTotal().toFixed(2)}</span>
                          </div>
                        )}
                        <div className="flex justify-between">
@@ -290,7 +290,7 @@ export const CartDrawer = () => {
                          <CreditCard className="w-4 h-4 mr-2" />
                          {isCheckingOut ? "Processing..." : 
                            isCircleProMember 
-                             ? `Circle Pro Checkout - $${getCircleProTotal()}` 
+                             ? `Circle Pro Checkout - $${getCircleProTotal().toFixed(2)}` 
                              : `Checkout ${purchasableItems.length} item(s) - $${getCartTotal()}`
                          }
                        </Button>
