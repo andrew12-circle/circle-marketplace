@@ -2,9 +2,52 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Check, X } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import circleLogo from "@/assets/circle-logo.png";
 
 export const Pricing = () => {
+  const [loading, setLoading] = useState<string | null>(null);
+  const { toast } = useToast();
+
+  const handleSubscription = async (plan: "solo" | "team") => {
+    try {
+      setLoading(plan);
+      
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        toast({
+          title: "Authentication Required",
+          description: "Please sign in to start your subscription.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const { data, error } = await supabase.functions.invoke('create-subscription-checkout', {
+        body: { plan },
+      });
+
+      if (error) throw error;
+
+      if (data?.url) {
+        // Open Stripe checkout in a new tab
+        window.open(data.url, '_blank');
+      }
+    } catch (error) {
+      console.error('Subscription error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to start subscription process. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(null);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -77,8 +120,12 @@ export const Pricing = () => {
                 <h3 className="text-xl font-semibold mb-2">Circle Pro (Solo)</h3>
                 <div className="text-3xl font-bold mb-4">$47<span className="text-sm font-normal text-muted-foreground">/month</span></div>
                 <p className="text-sm text-muted-foreground mb-6">Solo agents automating their marketing</p>
-                <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white">
-                  Start Your Free Trial
+                <Button 
+                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+                  onClick={() => handleSubscription("solo")}
+                  disabled={loading === "solo"}
+                >
+                  {loading === "solo" ? "Loading..." : "Start Your Free Trial"}
                 </Button>
               </div>
 
@@ -87,8 +134,12 @@ export const Pricing = () => {
                 <h3 className="text-xl font-semibold mb-2">Circle Pro (Team)</h3>
                 <div className="text-3xl font-bold mb-4">$97<span className="text-sm font-normal text-muted-foreground">/month</span></div>
                 <p className="text-sm text-muted-foreground mb-6">Teams building a growth system</p>
-                <Button className="w-full bg-teal-600 hover:bg-teal-700 text-white">
-                  Start Your Free Trial
+                <Button 
+                  className="w-full bg-teal-600 hover:bg-teal-700 text-white"
+                  onClick={() => handleSubscription("team")}
+                  disabled={loading === "team"}
+                >
+                  {loading === "team" ? "Loading..." : "Start Your Free Trial"}
                 </Button>
               </div>
             </div>
