@@ -296,24 +296,23 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
 
         {/* Action Buttons */}
         <div className="flex gap-2 mt-4">
-          {service.requires_quote ? (
-            <Button 
-              variant="outline"
-              className="flex-1"
-              onClick={handleAddToCart}
-            >
-              <MessageCircle className="w-4 h-4 mr-2" />
-              Request Quote
-            </Button>
-          ) : (
-            <Button 
-              className="flex-1"
-              onClick={handleAddToCart}
-            >
-              <ShoppingCart className="w-4 h-4 mr-2" />
-              Add to Cart
-            </Button>
-          )}
+          <Button 
+            variant="outline"
+            className="flex-1"
+            onClick={handleAddToCart}
+          >
+            {service.requires_quote ? (
+              <>
+                <MessageCircle className="w-4 h-4 mr-2" />
+                Request Quote
+              </>
+            ) : (
+              <>
+                <ShoppingCart className="w-4 h-4 mr-2" />
+                Add to Cart
+              </>
+            )}
+          </Button>
           
           <Button 
             variant="outline"
