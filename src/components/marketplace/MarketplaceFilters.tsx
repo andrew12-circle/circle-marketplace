@@ -31,7 +31,6 @@ export const MarketplaceFilters = ({ filters, onFiltersChange, categories, viewM
     verified: false,
     featured: false,
     coPayEligible: false,
-    riskLevel: viewMode === 'services' ? "all" : undefined,
   };
   const updateFilter = (key: keyof FilterState, value: any) => {
     onFiltersChange({
@@ -47,13 +46,11 @@ export const MarketplaceFilters = ({ filters, onFiltersChange, categories, viewM
       verified: false,
       featured: false,
       coPayEligible: false,
-      riskLevel: viewMode === 'services' ? "all" : undefined,
     });
   };
 
   const hasActiveFilters = (safeFilters.category && safeFilters.category !== "all") || 
     safeFilters.verified || safeFilters.featured || safeFilters.coPayEligible ||
-    (viewMode === 'services' && safeFilters.riskLevel && safeFilters.riskLevel !== "all") ||
     safeFilters.priceRange[0] > 0 || safeFilters.priceRange[1] < 2000;
 
   return (
@@ -69,7 +66,7 @@ export const MarketplaceFilters = ({ filters, onFiltersChange, categories, viewM
           )}
         </div>
 
-        <div className={`grid grid-cols-1 md:grid-cols-2 ${viewMode === 'services' ? 'lg:grid-cols-6' : 'lg:grid-cols-5'} gap-3`}>
+        <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3`}>
           {/* Category Filter */}
           <div>
             <CategoryMegaMenu 
@@ -131,22 +128,6 @@ export const MarketplaceFilters = ({ filters, onFiltersChange, categories, viewM
             </div>
           )}
 
-          {/* RESPA Risk Level Filter - Only for services */}
-          {viewMode === 'services' && (
-            <div>
-              <Label className="text-sm font-medium mb-2 block">RESPA Risk Level</Label>
-              <select
-                value={safeFilters.riskLevel || "all"}
-                onChange={(e) => updateFilter("riskLevel", e.target.value)}
-                className="w-full p-2 border border-border rounded-md bg-background text-sm"
-              >
-                <option value="all">All Risk Levels</option>
-                <option value="low">🟢 Low Risk (Non-RESPA)</option>
-                <option value="medium">🟡 Medium Risk (RESPA-Adjacent)</option>
-                <option value="high">🔴 High Risk (Settlement Services)</option>
-              </select>
-            </div>
-          )}
         </div>
 
         {/* Active Filters Display */}
@@ -186,17 +167,6 @@ export const MarketplaceFilters = ({ filters, onFiltersChange, categories, viewM
                   <X 
                     className="w-3 h-3 cursor-pointer" 
                     onClick={() => updateFilter("coPayEligible", false)}
-                  />
-                </Badge>
-              )}
-              {viewMode === 'services' && safeFilters.riskLevel && safeFilters.riskLevel !== "all" && (
-                <Badge variant="secondary" className="flex items-center gap-1">
-                  {safeFilters.riskLevel === "high" && "🔴 High Risk"}
-                  {safeFilters.riskLevel === "medium" && "🟡 Medium Risk"}
-                  {safeFilters.riskLevel === "low" && "🟢 Low Risk"}
-                  <X 
-                    className="w-3 h-3 cursor-pointer" 
-                    onClick={() => updateFilter("riskLevel", "all")}
                   />
                 </Badge>
               )}

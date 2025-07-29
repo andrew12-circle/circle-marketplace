@@ -20,7 +20,6 @@ interface FilterState {
   verified: boolean;
   featured: boolean;
   coPayEligible: boolean;
-  riskLevel?: string;
 }
 
 interface Service {
@@ -84,7 +83,6 @@ export const MarketplaceGrid = () => {
     verified: false,
     featured: false,
     coPayEligible: false,
-    riskLevel: "all",
   });
   const { toast } = useToast();
   const { user, profile } = useAuth();
@@ -221,14 +219,7 @@ export const MarketplaceGrid = () => {
       matchesCoPayEligible = hasSafe && !hasRestricted;
     }
 
-    // Risk level filtering - only for services
-    let matchesRiskLevel = true;
-    if (viewMode === "services" && filters.riskLevel && filters.riskLevel !== "all") {
-      const serviceRisk = determineServiceRisk(service.category, service.title);
-      matchesRiskLevel = serviceRisk === filters.riskLevel;
-    }
-
-    return matchesSearch && matchesCategory && matchesPrice && matchesVerified && matchesFeatured && matchesCoPayEligible && matchesRiskLevel;
+    return matchesSearch && matchesCategory && matchesPrice && matchesVerified && matchesFeatured && matchesCoPayEligible;
   });
 
   const filteredVendors = vendors.filter(vendor => {
@@ -464,7 +455,6 @@ export const MarketplaceGrid = () => {
                     verified: false,
                     featured: false,
                     coPayEligible: false,
-                    riskLevel: viewMode === 'services' ? "all" : undefined,
                   });
                 }}
               >
