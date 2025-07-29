@@ -208,7 +208,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                   </div>
                   {service.discount_percentage && (
                     <div className="flex justify-end">
-                      <Badge className="bg-destructive text-destructive-foreground text-xs">
+                      <Badge className="bg-destructive text-destructive-foreground text-xs hover:bg-green-600 hover:text-white transition-colors">
                         {service.discount_percentage}% OFF
                       </Badge>
                     </div>
@@ -273,7 +273,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                   </Tooltip>
                   {service.discount_percentage && (
                     <div className="flex justify-end">
-                      <Badge className="bg-destructive text-destructive-foreground text-xs">
+                      <Badge className="bg-destructive text-destructive-foreground text-xs hover:bg-green-600 hover:text-white transition-colors">
                         {service.discount_percentage}% OFF
                       </Badge>
                     </div>
