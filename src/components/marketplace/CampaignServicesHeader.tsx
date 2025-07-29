@@ -3,18 +3,17 @@ import { Sparkles, MessageCircle, UserPlus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { AskCircleAIModal } from "./AskCircleAIModal";
 import { InviteVendorModal } from "./InviteVendorModal";
+import { FindPerfectCampaignModal } from "./FindPerfectCampaignModal";
 import { useState } from "react";
 
 export const CampaignServicesHeader = () => {
   const { toast } = useToast();
   const [isAIModalOpen, setIsAIModalOpen] = useState(false);
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+  const [isCampaignModalOpen, setIsCampaignModalOpen] = useState(false);
 
   const handleFindCampaign = () => {
-    toast({
-      title: "Find My Perfect Campaign",
-      description: "Campaign matching feature coming soon!",
-    });
+    setIsCampaignModalOpen(true);
   };
 
   const handleAskCircleAI = () => {
@@ -69,6 +68,11 @@ export const CampaignServicesHeader = () => {
       <InviteVendorModal 
         open={isInviteModalOpen} 
         onOpenChange={setIsInviteModalOpen} 
+      />
+      
+      <FindPerfectCampaignModal 
+        open={isCampaignModalOpen} 
+        onOpenChange={setIsCampaignModalOpen} 
       />
     </>
   );

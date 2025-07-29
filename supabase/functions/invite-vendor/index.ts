@@ -65,7 +65,7 @@ serve(async (req) => {
       .from('vendors')
       .select('id, name')
       .eq('contact_email', vendorData.contact_email)
-      .single();
+      .maybeSingle();
 
     if (existingVendor) {
       logStep("Vendor already exists", { vendorId: existingVendor.id });
