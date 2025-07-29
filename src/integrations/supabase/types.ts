@@ -114,19 +114,25 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          notes: string | null
           service_id: string
+          updated_at: string
           user_id: string
         }
         Insert: {
           created_at?: string
           id?: string
+          notes?: string | null
           service_id: string
+          updated_at?: string
           user_id: string
         }
         Update: {
           created_at?: string
           id?: string
+          notes?: string | null
           service_id?: string
+          updated_at?: string
           user_id?: string
         }
         Relationships: [
@@ -156,6 +162,7 @@ export type Database = {
           original_price: string | null
           price: string | null
           pro_price: string | null
+          rating: number | null
           requires_quote: boolean | null
           retail_price: string | null
           tags: string[] | null
@@ -179,6 +186,7 @@ export type Database = {
           original_price?: string | null
           price?: string | null
           pro_price?: string | null
+          rating?: number | null
           requires_quote?: boolean | null
           retail_price?: string | null
           tags?: string[] | null
@@ -202,6 +210,7 @@ export type Database = {
           original_price?: string | null
           price?: string | null
           pro_price?: string | null
+          rating?: number | null
           requires_quote?: boolean | null
           retail_price?: string | null
           tags?: string[] | null
