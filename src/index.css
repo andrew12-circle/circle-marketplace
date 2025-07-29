@@ -31,9 +31,9 @@
     --chart-5: 27 87% 67%;
     
     /* Circle brand colors - Apple-inspired blue */
-    --circle-primary: 211 100% 50%;
-    --circle-primary-light: 211 100% 65%;
-    --circle-accent: 197 92% 56%;
+    --circle-primary: 211 100% 45%;
+    --circle-primary-light: 211 100% 60%;
+    --circle-accent: 197 92% 51%;
     --circle-success: 122 39% 49%;
     --circle-neutral: 210 15% 90%;
   }
@@ -60,9 +60,9 @@
     --ring: 224.3 76.3% 94.1%;
     
     /* Circle brand colors - Apple-inspired blue dark mode */
-    --circle-primary: 211 100% 65%;
-    --circle-primary-light: 211 100% 75%;
-    --circle-accent: 197 92% 66%;
+    --circle-primary: 211 100% 60%;
+    --circle-primary-light: 211 100% 70%;
+    --circle-accent: 197 92% 61%;
     --circle-success: 122 39% 59%;
     --circle-neutral: 210 15% 20%;
   }
@@ -92,7 +92,7 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 220 9% 6%;
 
-    --primary: 211 100% 50%;
+    --primary: 211 100% 45%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 220 14% 96%;
@@ -109,18 +109,18 @@ All colors MUST be HSL.
 
     --border: 220 13% 91%;
     --input: 220 13% 91%;
-    --ring: 211 100% 50%;
+    --ring: 211 100% 45%;
 
     --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 220 9% 46%;
-    --sidebar-primary: 211 100% 50%;
+    --sidebar-primary: 211 100% 45%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 220 14% 96%;
     --sidebar-accent-foreground: 220 9% 6%;
     --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 211 100% 50%;
+    --sidebar-ring: 211 100% 45%;
   }
 
   .dark {
