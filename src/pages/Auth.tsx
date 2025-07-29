@@ -63,6 +63,12 @@ export const Auth = () => {
             description: "Please check your email and password and try again.",
             variant: "destructive",
           });
+        } else if (error.message.includes("Email not confirmed")) {
+          toast({
+            title: "Email not confirmed",
+            description: "Please check your email and click the confirmation link before signing in.",
+            variant: "destructive",
+          });
         } else {
           toast({
             title: "Sign in failed",
@@ -142,10 +148,10 @@ export const Auth = () => {
         }
       } else {
         toast({
-          title: "Welcome to Circle!",
-          description: "Your account has been created successfully. You've earned 100 Circle Points!",
+          title: "Check your email!",
+          description: "We've sent you a confirmation link. Please check your email and click the link to activate your account.",
         });
-        navigate("/");
+        // Don't navigate - user needs to confirm email first
       }
     } catch (error) {
       toast({
