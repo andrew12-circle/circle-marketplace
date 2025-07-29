@@ -57,7 +57,7 @@ export const Pricing = () => {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <Link to="/" className="flex items-center gap-3">
-              <img src={circleLogo} alt="Circle Logo" className="w-20 h-20" />
+              <img src={circleLogo} alt="Circle Logo" className="w-15 h-15" />
             </Link>
             <div className="flex items-center gap-4">
               {user ? (
