@@ -323,6 +323,13 @@ export type Database = {
             referencedRelation: "vendors"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "services_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors_with_local_reps"
+            referencedColumns: ["id"]
+          },
         ]
       }
       subscribers: {
@@ -369,17 +376,30 @@ export type Database = {
           created_at: string
           description: string | null
           id: string
+          individual_email: string | null
+          individual_license_number: string | null
+          individual_name: string | null
+          individual_phone: string | null
+          individual_title: string | null
+          is_active: boolean | null
           is_verified: boolean | null
+          latitude: number | null
+          license_states: string[] | null
           location: string | null
           logo_url: string | null
+          longitude: number | null
           mls_areas: string[] | null
           name: string
+          nmls_id: string | null
+          parent_vendor_id: string | null
           phone: string | null
           rating: number | null
           review_count: number | null
           service_radius_miles: number | null
           service_states: string[] | null
+          service_zip_codes: string[] | null
           updated_at: string
+          vendor_type: string | null
           website_url: string | null
         }
         Insert: {
@@ -389,17 +409,30 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          individual_email?: string | null
+          individual_license_number?: string | null
+          individual_name?: string | null
+          individual_phone?: string | null
+          individual_title?: string | null
+          is_active?: boolean | null
           is_verified?: boolean | null
+          latitude?: number | null
+          license_states?: string[] | null
           location?: string | null
           logo_url?: string | null
+          longitude?: number | null
           mls_areas?: string[] | null
           name: string
+          nmls_id?: string | null
+          parent_vendor_id?: string | null
           phone?: string | null
           rating?: number | null
           review_count?: number | null
           service_radius_miles?: number | null
           service_states?: string[] | null
+          service_zip_codes?: string[] | null
           updated_at?: string
+          vendor_type?: string | null
           website_url?: string | null
         }
         Update: {
@@ -409,27 +442,177 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          individual_email?: string | null
+          individual_license_number?: string | null
+          individual_name?: string | null
+          individual_phone?: string | null
+          individual_title?: string | null
+          is_active?: boolean | null
           is_verified?: boolean | null
+          latitude?: number | null
+          license_states?: string[] | null
           location?: string | null
           logo_url?: string | null
+          longitude?: number | null
           mls_areas?: string[] | null
           name?: string
+          nmls_id?: string | null
+          parent_vendor_id?: string | null
           phone?: string | null
           rating?: number | null
           review_count?: number | null
           service_radius_miles?: number | null
           service_states?: string[] | null
+          service_zip_codes?: string[] | null
           updated_at?: string
+          vendor_type?: string | null
           website_url?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "vendors_parent_vendor_id_fkey"
+            columns: ["parent_vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendors_parent_vendor_id_fkey"
+            columns: ["parent_vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors_with_local_reps"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
-      [_ in never]: never
+      vendors_with_local_reps: {
+        Row: {
+          campaigns_funded: number | null
+          co_marketing_agents: number | null
+          contact_email: string | null
+          created_at: string | null
+          description: string | null
+          id: string | null
+          individual_email: string | null
+          individual_license_number: string | null
+          individual_name: string | null
+          individual_phone: string | null
+          individual_title: string | null
+          is_active: boolean | null
+          is_verified: boolean | null
+          latitude: number | null
+          license_states: string[] | null
+          local_representatives: Json | null
+          location: string | null
+          logo_url: string | null
+          longitude: number | null
+          mls_areas: string[] | null
+          name: string | null
+          nmls_id: string | null
+          parent_vendor_id: string | null
+          phone: string | null
+          rating: number | null
+          review_count: number | null
+          service_radius_miles: number | null
+          service_states: string[] | null
+          service_zip_codes: string[] | null
+          updated_at: string | null
+          vendor_type: string | null
+          website_url: string | null
+        }
+        Insert: {
+          campaigns_funded?: number | null
+          co_marketing_agents?: number | null
+          contact_email?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          individual_email?: string | null
+          individual_license_number?: string | null
+          individual_name?: string | null
+          individual_phone?: string | null
+          individual_title?: string | null
+          is_active?: boolean | null
+          is_verified?: boolean | null
+          latitude?: number | null
+          license_states?: string[] | null
+          local_representatives?: never
+          location?: string | null
+          logo_url?: string | null
+          longitude?: number | null
+          mls_areas?: string[] | null
+          name?: string | null
+          nmls_id?: string | null
+          parent_vendor_id?: string | null
+          phone?: string | null
+          rating?: number | null
+          review_count?: number | null
+          service_radius_miles?: number | null
+          service_states?: string[] | null
+          service_zip_codes?: string[] | null
+          updated_at?: string | null
+          vendor_type?: string | null
+          website_url?: string | null
+        }
+        Update: {
+          campaigns_funded?: number | null
+          co_marketing_agents?: number | null
+          contact_email?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          individual_email?: string | null
+          individual_license_number?: string | null
+          individual_name?: string | null
+          individual_phone?: string | null
+          individual_title?: string | null
+          is_active?: boolean | null
+          is_verified?: boolean | null
+          latitude?: number | null
+          license_states?: string[] | null
+          local_representatives?: never
+          location?: string | null
+          logo_url?: string | null
+          longitude?: number | null
+          mls_areas?: string[] | null
+          name?: string | null
+          nmls_id?: string | null
+          parent_vendor_id?: string | null
+          phone?: string | null
+          rating?: number | null
+          review_count?: number | null
+          service_radius_miles?: number | null
+          service_states?: string[] | null
+          service_zip_codes?: string[] | null
+          updated_at?: string | null
+          vendor_type?: string | null
+          website_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendors_parent_vendor_id_fkey"
+            columns: ["parent_vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendors_parent_vendor_id_fkey"
+            columns: ["parent_vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors_with_local_reps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
-      [_ in never]: never
+      calculate_distance: {
+        Args: { lat1: number; lon1: number; lat2: number; lon2: number }
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never
