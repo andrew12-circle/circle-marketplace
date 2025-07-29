@@ -8,7 +8,7 @@ import { X, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface FilterState {
-  category: string;
+  category: string; // Should be "all" or a valid category, never empty string
   priceRange: number[];
   verified: boolean;
   featured: boolean;
@@ -73,11 +73,13 @@ export const MarketplaceFilters = ({ filters, onFiltersChange, categories }: Mar
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Categories</SelectItem>
-                {categories.map((category) => (
-                  <SelectItem key={category} value={category}>
-                    {category}
-                  </SelectItem>
-                ))}
+                {categories
+                  .filter(category => category && typeof category === 'string' && category.trim() !== '')
+                  .map((category) => (
+                    <SelectItem key={category} value={category}>
+                      {category}
+                    </SelectItem>
+                  ))}
               </SelectContent>
             </Select>
           </div>

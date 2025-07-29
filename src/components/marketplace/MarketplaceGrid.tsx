@@ -220,7 +220,7 @@ export const MarketplaceGrid = () => {
           <MarketplaceFilters
             filters={filters}
             onFiltersChange={setFilters}
-            categories={Array.from(new Set(services.map(s => s.category)))}
+            categories={Array.from(new Set(services.map(s => s.category).filter(category => category && category.trim() !== "")))}
           />
         </div>
 
