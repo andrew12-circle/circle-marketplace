@@ -75,20 +75,6 @@ export const SERVICE_CATEGORIES: ServiceCategory[] = [
 
 export const getRiskBadge = (riskLevel: 'high' | 'medium' | 'low') => {
   switch (riskLevel) {
-    case 'high':
-      return (
-        <Badge variant="destructive" className="flex items-center gap-1">
-          <AlertTriangle className="w-3 h-3" />
-          RESPA Settlement Service
-        </Badge>
-      );
-    case 'medium':
-      return (
-        <Badge variant="secondary" className="flex items-center gap-1 bg-orange-100 text-orange-800 border-orange-200">
-          <Shield className="w-3 h-3" />
-          RESPA-Adjacent
-        </Badge>
-      );
     case 'low':
       return (
         <Badge variant="secondary" className="flex items-center gap-1 bg-green-100 text-green-800 border-green-200">
@@ -96,6 +82,10 @@ export const getRiskBadge = (riskLevel: 'high' | 'medium' | 'low') => {
           Non-RESPA
         </Badge>
       );
+    case 'high':
+    case 'medium':
+    default:
+      return null; // No badge for RESPA-covered services
   }
 };
 
@@ -103,34 +93,30 @@ export const getComplianceAlert = (riskLevel: 'high' | 'medium' | 'low') => {
   switch (riskLevel) {
     case 'high':
       return (
-        <Alert className="border-red-200 bg-red-50">
-          <AlertTriangle className="h-4 w-4 text-red-600" />
-          <AlertDescription className="text-red-800">
-            <strong>STRICT COMPLIANCE REQUIRED</strong><br />
-            Co-marketing limited to TRUE ADVERTISING only. No referral fees or expectations permitted.
+        <Alert className="border-amber-200 bg-amber-50 p-2">
+          <AlertTriangle className="h-3 w-3 text-amber-600" />
+          <AlertDescription className="text-amber-800 text-xs">
+            <span className="font-medium">Strict compliance required.</span>
+            <span className="ml-1 text-amber-600 cursor-help" title="Co-marketing limited to TRUE ADVERTISING only. No referral fees or expectations permitted. Violations can result in fines up to $10,000 per violation.">
+              Hover for details
+            </span>
           </AlertDescription>
         </Alert>
       );
     case 'medium':
       return (
-        <Alert className="border-orange-200 bg-orange-50">
-          <Shield className="h-4 w-4 text-orange-600" />
-          <AlertDescription className="text-orange-800">
-            <strong>Exercise Caution</strong><br />
-            May be considered settlement-related. Ensure all co-marketing is compliant.
+        <Alert className="border-amber-200 bg-amber-50 p-2">
+          <Shield className="h-3 w-3 text-amber-600" />
+          <AlertDescription className="text-amber-800 text-xs">
+            <span className="font-medium">Exercise caution.</span>
+            <span className="ml-1 text-amber-600 cursor-help" title="May be considered settlement-related. Ensure all co-marketing is compliant and for advertising value only.">
+              Hover for details
+            </span>
           </AlertDescription>
         </Alert>
       );
     case 'low':
-      return (
-        <Alert className="border-green-200 bg-green-50">
-          <CheckCircle className="h-4 w-4 text-green-600" />
-          <AlertDescription className="text-green-800">
-            <strong>Generally safe for co-marketing</strong><br />
-            Standard advertising partnerships welcome.
-          </AlertDescription>
-        </Alert>
-      );
+      return null; // No alert needed for low-risk services
   }
 };
 

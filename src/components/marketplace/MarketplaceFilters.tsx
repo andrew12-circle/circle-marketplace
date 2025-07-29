@@ -13,16 +13,17 @@ interface FilterState {
   verified: boolean;
   featured: boolean;
   coPayEligible: boolean;
-  riskLevel: string; // "all", "high", "medium", "low"
+  riskLevel?: string; // Only for services view
 }
 
 export interface MarketplaceFiltersProps {
   filters: FilterState;
   onFiltersChange: (filters: FilterState) => void;
   categories: string[];
+  viewMode?: 'services' | 'vendors'; // Add viewMode prop
 }
 
-export const MarketplaceFilters = ({ filters, onFiltersChange, categories }: MarketplaceFiltersProps) => {
+export const MarketplaceFilters = ({ filters, onFiltersChange, categories, viewMode = 'services' }: MarketplaceFiltersProps) => {
   // Provide default values to prevent undefined errors
   const safeFilters = filters || {
     category: "all",
@@ -30,7 +31,7 @@ export const MarketplaceFilters = ({ filters, onFiltersChange, categories }: Mar
     verified: false,
     featured: false,
     coPayEligible: false,
-    riskLevel: "all",
+    riskLevel: viewMode === 'services' ? "all" : undefined,
   };
   const updateFilter = (key: keyof FilterState, value: any) => {
     onFiltersChange({
@@ -46,13 +47,13 @@ export const MarketplaceFilters = ({ filters, onFiltersChange, categories }: Mar
       verified: false,
       featured: false,
       coPayEligible: false,
-      riskLevel: "all",
+      riskLevel: viewMode === 'services' ? "all" : undefined,
     });
   };
 
   const hasActiveFilters = (safeFilters.category && safeFilters.category !== "all") || 
     safeFilters.verified || safeFilters.featured || safeFilters.coPayEligible ||
-    (safeFilters.riskLevel && safeFilters.riskLevel !== "all") ||
+    (viewMode === 'services' && safeFilters.riskLevel && safeFilters.riskLevel !== "all") ||
     safeFilters.priceRange[0] > 0 || safeFilters.priceRange[1] < 2000;
 
   return (
@@ -68,7 +69,7 @@ export const MarketplaceFilters = ({ filters, onFiltersChange, categories }: Mar
           )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-3">
+        <div className={`grid grid-cols-1 md:grid-cols-2 ${viewMode === 'services' ? 'lg:grid-cols-6' : 'lg:grid-cols-5'} gap-3`}>
           {/* Category Filter */}
           <div>
             <CategoryMegaMenu 
@@ -116,32 +117,36 @@ export const MarketplaceFilters = ({ filters, onFiltersChange, categories }: Mar
             </Label>
           </div>
 
-          {/* Co-Pay Eligible Filter */}
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="coPayEligible"
-              checked={safeFilters.coPayEligible}
-              onCheckedChange={(checked) => updateFilter("coPayEligible", checked)}
-            />
-            <Label htmlFor="coPayEligible" className="text-sm">
-              Co-Pay Eligible
-            </Label>
-          </div>
+          {/* Co-Pay Eligible Filter - Only for services */}
+          {viewMode === 'services' && (
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="coPayEligible"
+                checked={safeFilters.coPayEligible}
+                onCheckedChange={(checked) => updateFilter("coPayEligible", checked)}
+              />
+              <Label htmlFor="coPayEligible" className="text-sm">
+                Co-Pay Eligible
+              </Label>
+            </div>
+          )}
 
-          {/* RESPA Risk Level Filter */}
-          <div>
-            <Label className="text-sm font-medium mb-2 block">RESPA Risk Level</Label>
-            <select
-              value={safeFilters.riskLevel}
-              onChange={(e) => updateFilter("riskLevel", e.target.value)}
-              className="w-full p-2 border border-border rounded-md bg-background text-sm"
-            >
-              <option value="all">All Risk Levels</option>
-              <option value="low">🟢 Low Risk (Non-RESPA)</option>
-              <option value="medium">🟡 Medium Risk (RESPA-Adjacent)</option>
-              <option value="high">🔴 High Risk (Settlement Services)</option>
-            </select>
-          </div>
+          {/* RESPA Risk Level Filter - Only for services */}
+          {viewMode === 'services' && (
+            <div>
+              <Label className="text-sm font-medium mb-2 block">RESPA Risk Level</Label>
+              <select
+                value={safeFilters.riskLevel || "all"}
+                onChange={(e) => updateFilter("riskLevel", e.target.value)}
+                className="w-full p-2 border border-border rounded-md bg-background text-sm"
+              >
+                <option value="all">All Risk Levels</option>
+                <option value="low">🟢 Low Risk (Non-RESPA)</option>
+                <option value="medium">🟡 Medium Risk (RESPA-Adjacent)</option>
+                <option value="high">🔴 High Risk (Settlement Services)</option>
+              </select>
+            </div>
+          )}
         </div>
 
         {/* Active Filters Display */}
@@ -175,7 +180,7 @@ export const MarketplaceFilters = ({ filters, onFiltersChange, categories }: Mar
                   />
                 </Badge>
               )}
-              {safeFilters.coPayEligible && (
+              {viewMode === 'services' && safeFilters.coPayEligible && (
                 <Badge variant="secondary" className="flex items-center gap-1">
                   Co-Pay Eligible
                   <X 
@@ -184,7 +189,7 @@ export const MarketplaceFilters = ({ filters, onFiltersChange, categories }: Mar
                   />
                 </Badge>
               )}
-              {safeFilters.riskLevel && safeFilters.riskLevel !== "all" && (
+              {viewMode === 'services' && safeFilters.riskLevel && safeFilters.riskLevel !== "all" && (
                 <Badge variant="secondary" className="flex items-center gap-1">
                   {safeFilters.riskLevel === "high" && "🔴 High Risk"}
                   {safeFilters.riskLevel === "medium" && "🟡 Medium Risk"}

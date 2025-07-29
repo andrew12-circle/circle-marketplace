@@ -14,6 +14,15 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLocation } from "@/hooks/useLocation";
 import { determineServiceRisk } from "./RESPAComplianceSystem";
 
+interface FilterState {
+  category: string;
+  priceRange: number[];
+  verified: boolean;
+  featured: boolean;
+  coPayEligible: boolean;
+  riskLevel?: string;
+}
+
 interface Service {
   id: string;
   title: string;
@@ -69,7 +78,7 @@ export const MarketplaceGrid = () => {
   const [savedServiceIds, setSavedServiceIds] = useState<string[]>([]);
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = useState<FilterState>({
     category: "all",
     priceRange: [0, 2000],
     verified: false,
@@ -212,9 +221,9 @@ export const MarketplaceGrid = () => {
       matchesCoPayEligible = hasSafe && !hasRestricted;
     }
 
-    // Risk level filtering
+    // Risk level filtering - only for services
     let matchesRiskLevel = true;
-    if (filters.riskLevel !== "all") {
+    if (viewMode === "services" && filters.riskLevel && filters.riskLevel !== "all") {
       const serviceRisk = determineServiceRisk(service.category, service.title);
       matchesRiskLevel = serviceRisk === filters.riskLevel;
     }
@@ -402,6 +411,7 @@ export const MarketplaceGrid = () => {
               filters={filters}
               onFiltersChange={setFilters}
               categories={Array.from(new Set(services.map(s => s.category).filter(category => category && category.trim() !== "")))}
+              viewMode={viewMode}
             />
           </div>
 
@@ -454,7 +464,7 @@ export const MarketplaceGrid = () => {
                     verified: false,
                     featured: false,
                     coPayEligible: false,
-                    riskLevel: "all",
+                    riskLevel: viewMode === 'services' ? "all" : undefined,
                   });
                 }}
               >

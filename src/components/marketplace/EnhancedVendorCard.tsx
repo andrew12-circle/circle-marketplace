@@ -41,16 +41,8 @@ export const EnhancedVendorCard = ({ vendor, onConnect, onViewProfile }: Enhance
                           "$1,000-3,000/mo";
 
   const getCardBorderClass = () => {
-    switch (riskLevel) {
-      case 'high':
-        return "border-red-200 bg-red-50/30";
-      case 'medium':
-        return "border-orange-200 bg-orange-50/30";
-      case 'low':
-        return "border-green-200 bg-green-50/30";
-      default:
-        return "border-border";
-    }
+    // Remove special border styling - all cards look normal
+    return "border-border";
   };
 
   return (
@@ -91,10 +83,12 @@ export const EnhancedVendorCard = ({ vendor, onConnect, onViewProfile }: Enhance
           {getRiskBadge(riskLevel)}
         </div>
 
-        {/* Compliance Alert */}
-        <div className="mb-4">
-          {getComplianceAlert(riskLevel)}
-        </div>
+        {/* Compliance Alert - smaller and more subtle */}
+        {getComplianceAlert(riskLevel) && (
+          <div className="mb-4">
+            {getComplianceAlert(riskLevel)}
+          </div>
+        )}
 
         {/* Description */}
         {vendor.description && (
@@ -168,55 +162,19 @@ export const EnhancedVendorCard = ({ vendor, onConnect, onViewProfile }: Enhance
       </CardContent>
 
       <CardFooter className="p-4 pt-0 flex flex-col gap-2">
-        {riskLevel === 'high' ? (
-          <>
-            <Button 
-              variant="outline"
-              onClick={() => onViewProfile?.(vendor.id)}
-              className="w-full"
-            >
-              View Compliance Guide
-            </Button>
-            <Button 
-              onClick={() => onConnect?.(vendor.id)}
-              className="w-full bg-red-600 hover:bg-red-700"
-            >
-              Contact with Caution
-            </Button>
-          </>
-        ) : riskLevel === 'medium' ? (
-          <>
-            <Button 
-              variant="outline"
-              onClick={() => onViewProfile?.(vendor.id)}
-              className="w-full"
-            >
-              View Guidelines
-            </Button>
-            <Button 
-              onClick={() => onConnect?.(vendor.id)}
-              className="w-full bg-orange-600 hover:bg-orange-700"
-            >
-              Contact
-            </Button>
-          </>
-        ) : (
-          <>
-            <Button 
-              onClick={() => onConnect?.(vendor.id)}
-              className="w-full"
-            >
-              Contact
-            </Button>
-            <Button 
-              variant="outline"
-              onClick={() => onViewProfile?.(vendor.id)}
-              className="w-full"
-            >
-              View Profile
-            </Button>
-          </>
-        )}
+        <Button 
+          onClick={() => onConnect?.(vendor.id)}
+          className="w-full"
+        >
+          Contact
+        </Button>
+        <Button 
+          variant="outline"
+          onClick={() => onViewProfile?.(vendor.id)}
+          className="w-full"
+        >
+          View Profile
+        </Button>
       </CardFooter>
     </Card>
   );
