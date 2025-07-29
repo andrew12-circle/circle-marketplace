@@ -1,94 +1,169 @@
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Filter } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Slider } from "@/components/ui/slider";
+import { Badge } from "@/components/ui/badge";
+import { X, Filter } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
-interface MarketplaceFiltersProps {
-  searchTerm: string;
-  onSearchChange: (search: string) => void;
-  selectedCategory: string;
-  onCategoryChange: (category: string) => void;
-  priceRange: string;
-  onPriceRangeChange: (range: string) => void;
-  rating: string;
-  onRatingChange: (rating: string) => void;
-  onClearFilters: () => void;
+interface FilterState {
+  category: string;
+  priceRange: number[];
+  verified: boolean;
+  featured: boolean;
 }
 
-export const MarketplaceFilters = ({
-  searchTerm,
-  onSearchChange,
-  selectedCategory,
-  onCategoryChange,
-  priceRange,
-  onPriceRangeChange,
-  rating,
-  onRatingChange,
-  onClearFilters,
-}: MarketplaceFiltersProps) => {
+export interface MarketplaceFiltersProps {
+  filters: FilterState;
+  onFiltersChange: (filters: FilterState) => void;
+  categories: string[];
+}
+
+export const MarketplaceFilters = ({ filters, onFiltersChange, categories }: MarketplaceFiltersProps) => {
+  const updateFilter = (key: keyof FilterState, value: any) => {
+    onFiltersChange({
+      ...filters,
+      [key]: value,
+    });
+  };
+
+  const clearFilters = () => {
+    onFiltersChange({
+      category: "",
+      priceRange: [0, 2000],
+      verified: false,
+      featured: false,
+    });
+  };
+
+  const hasActiveFilters = filters.category || filters.verified || filters.featured || 
+    filters.priceRange[0] > 0 || filters.priceRange[1] < 2000;
+
   return (
-    <div className="bg-card border rounded-lg p-4 mb-6">
-      <div className="flex items-center gap-2 mb-4">
-        <Filter className="w-5 h-5 text-circle-primary" />
-        <h3 className="font-semibold">Filters</h3>
-        <Button variant="ghost" size="sm" onClick={onClearFilters} className="ml-auto">
-          Clear All
-        </Button>
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-          <Input
-            placeholder="Search vendors..."
-            value={searchTerm}
-            onChange={(e) => onSearchChange(e.target.value)}
-            className="pl-10"
-          />
+    <Card className="bg-card border border-border/50">
+      <CardContent className="p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Filter className="w-5 h-5 text-muted-foreground" />
+            <h3 className="font-semibold text-foreground">Filters</h3>
+          </div>
+          {hasActiveFilters && (
+            <Button variant="ghost" size="sm" onClick={clearFilters}>
+              Clear all
+            </Button>
+          )}
         </div>
-        
-        <Select value={selectedCategory} onValueChange={onCategoryChange}>
-          <SelectTrigger>
-            <SelectValue placeholder="Category" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Categories</SelectItem>
-            <SelectItem value="lead-generation">Lead Generation</SelectItem>
-            <SelectItem value="marketing">Marketing</SelectItem>
-            <SelectItem value="crm">CRM</SelectItem>
-            <SelectItem value="photography">Photography</SelectItem>
-            <SelectItem value="design">Design</SelectItem>
-            <SelectItem value="legal">Legal</SelectItem>
-            <SelectItem value="transaction-management">Transaction Management</SelectItem>
-          </SelectContent>
-        </Select>
-        
-        <Select value={priceRange} onValueChange={onPriceRangeChange}>
-          <SelectTrigger>
-            <SelectValue placeholder="Price Range" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Prices</SelectItem>
-            <SelectItem value="0-50">$0 - $50</SelectItem>
-            <SelectItem value="50-100">$50 - $100</SelectItem>
-            <SelectItem value="100-250">$100 - $250</SelectItem>
-            <SelectItem value="250-500">$250 - $500</SelectItem>
-            <SelectItem value="500+">$500+</SelectItem>
-          </SelectContent>
-        </Select>
-        
-        <Select value={rating} onValueChange={onRatingChange}>
-          <SelectTrigger>
-            <SelectValue placeholder="Rating" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Ratings</SelectItem>
-            <SelectItem value="4+">4+ Stars</SelectItem>
-            <SelectItem value="4.5+">4.5+ Stars</SelectItem>
-            <SelectItem value="5">5 Stars</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-    </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* Category Filter */}
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">Category</Label>
+            <Select value={filters.category} onValueChange={(value) => updateFilter("category", value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="All Categories" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">All Categories</SelectItem>
+                {categories.map((category) => (
+                  <SelectItem key={category} value={category}>
+                    {category}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Price Range Filter */}
+          <div className="space-y-3">
+            <Label className="text-sm font-medium">
+              Price Range: ${filters.priceRange[0]} - ${filters.priceRange[1]}
+            </Label>
+            <Slider
+              value={filters.priceRange}
+              onValueChange={(value) => updateFilter("priceRange", value)}
+              max={2000}
+              min={0}
+              step={50}
+              className="w-full"
+            />
+          </div>
+
+          {/* Verification Filter */}
+          <div className="space-y-3">
+            <Label className="text-sm font-medium">Verification</Label>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="verified"
+                checked={filters.verified}
+                onCheckedChange={(checked) => updateFilter("verified", checked)}
+              />
+              <Label htmlFor="verified" className="text-sm">
+                Circle Verified Only
+              </Label>
+            </div>
+          </div>
+
+          {/* Featured Filter */}
+          <div className="space-y-3">
+            <Label className="text-sm font-medium">Special</Label>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="featured"
+                checked={filters.featured}
+                onCheckedChange={(checked) => updateFilter("featured", checked)}
+              />
+              <Label htmlFor="featured" className="text-sm">
+                Featured Only
+              </Label>
+            </div>
+          </div>
+        </div>
+
+        {/* Active Filters Display */}
+        {hasActiveFilters && (
+          <div className="mt-4 pt-4 border-t border-border/50">
+            <div className="flex flex-wrap gap-2">
+              {filters.category && (
+                <Badge variant="secondary" className="flex items-center gap-1">
+                  {filters.category}
+                  <X 
+                    className="w-3 h-3 cursor-pointer" 
+                    onClick={() => updateFilter("category", "")}
+                  />
+                </Badge>
+              )}
+              {filters.verified && (
+                <Badge variant="secondary" className="flex items-center gap-1">
+                  Verified
+                  <X 
+                    className="w-3 h-3 cursor-pointer" 
+                    onClick={() => updateFilter("verified", false)}
+                  />
+                </Badge>
+              )}
+              {filters.featured && (
+                <Badge variant="secondary" className="flex items-center gap-1">
+                  Featured
+                  <X 
+                    className="w-3 h-3 cursor-pointer" 
+                    onClick={() => updateFilter("featured", false)}
+                  />
+                </Badge>
+              )}
+              {(filters.priceRange[0] > 0 || filters.priceRange[1] < 2000) && (
+                <Badge variant="secondary" className="flex items-center gap-1">
+                  ${filters.priceRange[0]} - ${filters.priceRange[1]}
+                  <X 
+                    className="w-3 h-3 cursor-pointer" 
+                    onClick={() => updateFilter("priceRange", [0, 2000])}
+                  />
+                </Badge>
+              )}
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 };
