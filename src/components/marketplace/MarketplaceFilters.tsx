@@ -63,8 +63,7 @@ export const MarketplaceFilters = ({ filters, onFiltersChange, categories }: Mar
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
           {/* Category Filter */}
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">Category</Label>
+          <div>
             <CategoryMegaMenu 
               selectedCategory={safeFilters.category}
               onCategorySelect={(value) => updateFilter("category", value)}
@@ -87,33 +86,27 @@ export const MarketplaceFilters = ({ filters, onFiltersChange, categories }: Mar
           </div>
 
           {/* Verification Filter */}
-          <div className="space-y-3">
-            <Label className="text-sm font-medium">Verification</Label>
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="verified"
-                checked={safeFilters.verified}
-                onCheckedChange={(checked) => updateFilter("verified", checked)}
-              />
-              <Label htmlFor="verified" className="text-sm">
-                Circle Verified Only
-              </Label>
-            </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="verified"
+              checked={safeFilters.verified}
+              onCheckedChange={(checked) => updateFilter("verified", checked)}
+            />
+            <Label htmlFor="verified" className="text-sm">
+              Circle Verified Only
+            </Label>
           </div>
 
           {/* Featured Filter */}
-          <div className="space-y-3">
-            <Label className="text-sm font-medium">Special</Label>
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="featured"
-                checked={safeFilters.featured}
-                onCheckedChange={(checked) => updateFilter("featured", checked)}
-              />
-              <Label htmlFor="featured" className="text-sm">
-                Featured Only
-              </Label>
-            </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="featured"
+              checked={safeFilters.featured}
+              onCheckedChange={(checked) => updateFilter("featured", checked)}
+            />
+            <Label htmlFor="featured" className="text-sm">
+              Featured Only
+            </Label>
           </div>
         </div>
 
