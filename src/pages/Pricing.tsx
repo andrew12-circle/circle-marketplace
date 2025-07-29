@@ -20,11 +20,8 @@ export const Pricing = () => {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
-        toast({
-          title: "Authentication Required",
-          description: "Please sign in to start your subscription.",
-          variant: "destructive",
-        });
+        // Redirect to auth page for a smoother user experience
+        window.location.href = '/auth';
         return;
       }
 
