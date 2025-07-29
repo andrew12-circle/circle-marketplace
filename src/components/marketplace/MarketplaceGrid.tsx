@@ -178,7 +178,7 @@ export const MarketplaceGrid = () => {
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Circle Marketplace</h1>
+          <h1 className="text-3xl font-bold text-foreground mb-2">Marketplace.</h1>
           <p className="text-muted-foreground">
             Discover premium marketing services and connect with top-performing vendors
           </p>
