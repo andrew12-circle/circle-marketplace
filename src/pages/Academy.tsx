@@ -120,21 +120,6 @@ export const Academy = () => {
 
   const renderBrowseView = () => (
     <div className="p-6">
-      {/* Hero Section */}
-      <div className="bg-gradient-to-r from-circle-primary to-circle-accent rounded-lg p-8 mb-8 text-primary-foreground">
-        <h1 className="text-4xl font-bold mb-2">Good morning!</h1>
-        <p className="text-lg opacity-90 mb-6">Ready to continue your learning journey?</p>
-        <div className="flex gap-3">
-          <Button className="bg-white/20 hover:bg-white/30 backdrop-blur">
-            <Play className="w-4 h-4 mr-2" />
-            Resume Learning
-          </Button>
-          <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
-            <Shuffle className="w-4 h-4 mr-2" />
-            Shuffle Play
-          </Button>
-        </div>
-      </div>
 
       {/* Quick Access Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
