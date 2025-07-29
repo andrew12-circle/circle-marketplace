@@ -50,8 +50,8 @@ export const MarketplaceFilters = ({ filters, onFiltersChange, categories }: Mar
 
   return (
     <Card className="bg-card border border-border/50">
-      <CardContent className="p-4">
-        <div className="flex items-center justify-between mb-2">
+      <CardContent className="p-2">
+        <div className="flex items-center justify-between mb-1">
           <div className="flex items-center">
           </div>
           {hasActiveFilters && (
@@ -61,7 +61,7 @@ export const MarketplaceFilters = ({ filters, onFiltersChange, categories }: Mar
           )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
           {/* Category Filter */}
           <div className="space-y-2">
             <Label className="text-sm font-medium">Category</Label>

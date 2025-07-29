@@ -33,14 +33,14 @@ export const AcademyFilters = ({
   onClearFilters,
 }: AcademyFiltersProps) => {
   return (
-    <div className="bg-card border rounded-lg p-3 mb-4">
-      <div className="flex items-center justify-end mb-2">
+    <div className="bg-card border rounded-lg p-2 mb-3">
+      <div className="flex items-center justify-end mb-1">
         <Button variant="ghost" size="sm" onClick={onClearFilters}>
           Clear All
         </Button>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
           <Input
@@ -93,7 +93,7 @@ export const AcademyFilters = ({
         </Select>
       </div>
       
-      <div className="flex items-center space-x-2 mt-3">
+      <div className="flex items-center space-x-2 mt-2">
         <Switch 
           id="pro-only" 
           checked={showProOnly}
