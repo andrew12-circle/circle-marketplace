@@ -133,62 +133,62 @@ export type Database = {
       services: {
         Row: {
           category: string | null
-          contribution_amount: number | null
-          created_at: string
+          contribution_amount: string | null
+          created_at: string | null
           description: string | null
-          discount_percentage: number | null
+          discount_percentage: string | null
           duration: string | null
           estimated_roi: number | null
           id: string
           image_url: string | null
           is_featured: boolean | null
           is_top_pick: boolean | null
-          original_price: number | null
-          price: number | null
+          original_price: string | null
+          price: string | null
           requires_quote: boolean | null
           tags: string[] | null
           title: string
-          updated_at: string
+          updated_at: string | null
           vendor_id: string
         }
         Insert: {
           category?: string | null
-          contribution_amount?: number | null
-          created_at?: string
+          contribution_amount?: string | null
+          created_at?: string | null
           description?: string | null
-          discount_percentage?: number | null
+          discount_percentage?: string | null
           duration?: string | null
           estimated_roi?: number | null
           id?: string
           image_url?: string | null
           is_featured?: boolean | null
           is_top_pick?: boolean | null
-          original_price?: number | null
-          price?: number | null
+          original_price?: string | null
+          price?: string | null
           requires_quote?: boolean | null
           tags?: string[] | null
           title: string
-          updated_at?: string
+          updated_at?: string | null
           vendor_id: string
         }
         Update: {
           category?: string | null
-          contribution_amount?: number | null
-          created_at?: string
+          contribution_amount?: string | null
+          created_at?: string | null
           description?: string | null
-          discount_percentage?: number | null
+          discount_percentage?: string | null
           duration?: string | null
           estimated_roi?: number | null
           id?: string
           image_url?: string | null
           is_featured?: boolean | null
           is_top_pick?: boolean | null
-          original_price?: number | null
-          price?: number | null
+          original_price?: string | null
+          price?: string | null
           requires_quote?: boolean | null
           tags?: string[] | null
           title?: string
-          updated_at?: string
+          updated_at?: string | null
           vendor_id?: string
         }
         Relationships: [
@@ -293,7 +293,45 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      public_profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          business_name: string | null
+          display_name: string | null
+          id: string | null
+          location: string | null
+          specialties: string[] | null
+          user_id: string | null
+          website_url: string | null
+          years_experience: number | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          business_name?: string | null
+          display_name?: string | null
+          id?: string | null
+          location?: string | null
+          specialties?: string[] | null
+          user_id?: string | null
+          website_url?: string | null
+          years_experience?: number | null
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          business_name?: string | null
+          display_name?: string | null
+          id?: string | null
+          location?: string | null
+          specialties?: string[] | null
+          user_id?: string | null
+          website_url?: string | null
+          years_experience?: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
