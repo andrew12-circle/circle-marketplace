@@ -113,7 +113,16 @@ export const MarketplaceGrid = () => {
       }));
       
       setServices(formattedServices);
-      setVendors(vendorsData || []);
+      
+      // Add mock pricing data to vendors for display
+      const vendorsWithPricing = (vendorsData || []).map(vendor => ({
+        ...vendor,
+        retailPrice: 299,
+        proPrice: 199,
+        coPayPrice: 149,
+      }));
+      
+      setVendors(vendorsWithPricing);
     } catch (error) {
       // Log error for internal tracking without exposing details
       const errorId = Date.now();
