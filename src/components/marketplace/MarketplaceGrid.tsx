@@ -4,6 +4,7 @@ import { EnhancedVendorCard } from "./EnhancedVendorCard";
 import { MarketplaceFilters } from "./MarketplaceFilters";
 import { CampaignServicesHeader } from "./CampaignServicesHeader";
 import { CircleProBanner } from "./CircleProBanner";
+import { ServiceDetailsModal } from "./ServiceDetailsModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Filter, Sparkles, Zap } from "lucide-react";
@@ -30,6 +31,7 @@ interface Service {
   contribution_amount: string;
   estimated_roi?: number;
   duration?: string;
+  requires_quote?: boolean;
   vendor: {
     name: string;
     rating: number;
@@ -64,6 +66,8 @@ export const MarketplaceGrid = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>("services");
   const [savedServiceIds, setSavedServiceIds] = useState<string[]>([]);
+  const [selectedService, setSelectedService] = useState<Service | null>(null);
+  const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
   const [filters, setFilters] = useState({
     category: "all",
     priceRange: [0, 2000],
@@ -250,10 +254,16 @@ export const MarketplaceGrid = () => {
   };
 
   const handleViewServiceDetails = (serviceId: string) => {
-    toast({
-      title: "Service Details",
-      description: `Viewing details for service: ${serviceId}`,
-    });
+    const service = services.find(s => s.id === serviceId);
+    if (service) {
+      setSelectedService(service);
+      setIsServiceModalOpen(true);
+    }
+  };
+
+  const handleCloseServiceModal = () => {
+    setIsServiceModalOpen(false);
+    setSelectedService(null);
   };
 
   const handleConnectVendor = (vendorId: string) => {
@@ -286,120 +296,129 @@ export const MarketplaceGrid = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
-        {/* Hero Section - Mobile Optimized */}
-        <div className="mb-6 sm:mb-12">
-          <h1 className="font-inter font-black text-4xl sm:text-6xl lg:text-[72px] leading-tight sm:leading-[72px] text-gray-900 mb-3 sm:mb-6">Marketplace.</h1>
-          <p className="text-sm sm:text-lg text-muted-foreground max-w-4xl">
-            Finally, we silenced the noise. Welcome to the Marketplace. Discover premium marketing services and connect with top-performing vendors who will actually move your business forward.
-          </p>
-        </div>
+    <>
+      <div className="min-h-screen bg-background">
+        <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
+          {/* Hero Section - Mobile Optimized */}
+          <div className="mb-6 sm:mb-12">
+            <h1 className="font-inter font-black text-4xl sm:text-6xl lg:text-[72px] leading-tight sm:leading-[72px] text-gray-900 mb-3 sm:mb-6">Marketplace.</h1>
+            <p className="text-sm sm:text-lg text-muted-foreground max-w-4xl">
+              Finally, we silenced the noise. Welcome to the Marketplace. Discover premium marketing services and connect with top-performing vendors who will actually move your business forward.
+            </p>
+          </div>
 
-        {/* Circle Pro Banner - Show for non-signed-in users and non-pro members */}
-        {(!user || !profile?.is_pro_member) && (
-          <CircleProBanner />
-        )}
+          {/* Circle Pro Banner - Show for non-signed-in users and non-pro members */}
+          {(!user || !profile?.is_pro_member) && (
+            <CircleProBanner />
+          )}
 
-        {/* Campaign Services Header */}
-        <CampaignServicesHeader />
+          {/* Campaign Services Header */}
+          <CampaignServicesHeader />
 
-        {/* Search and View Toggle - Mobile Optimized */}
-        <div className="flex flex-col gap-3 sm:gap-4 mb-4 sm:mb-6">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4 sm:w-5 sm:h-5" />
-            <Input
-              placeholder="Search services, vendors, or categories..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 sm:pl-12 h-10 sm:h-11 text-sm sm:text-base"
+          {/* Search and View Toggle - Mobile Optimized */}
+          <div className="flex flex-col gap-3 sm:gap-4 mb-4 sm:mb-6">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4 sm:w-5 sm:h-5" />
+              <Input
+                placeholder="Search services, vendors, or categories..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 sm:pl-12 h-10 sm:h-11 text-sm sm:text-base"
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant={viewMode === "services" ? "default" : "outline"}
+                onClick={() => setViewMode("services")}
+                className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-9 sm:h-10 text-sm sm:text-base"
+              >
+                <Sparkles className="w-3 h-3 sm:w-4 sm:h-4" />
+                Services
+              </Button>
+              <Button
+                variant={viewMode === "vendors" ? "default" : "outline"}
+                onClick={() => setViewMode("vendors")}
+                className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-9 sm:h-10 text-sm sm:text-base"
+              >
+                <Zap className="w-3 h-3 sm:w-4 sm:h-4" />
+                Vendors
+              </Button>
+            </div>
+          </div>
+
+          {/* Filters - Mobile Optimized */}
+          <div className="mb-6 sm:mb-8">
+            <MarketplaceFilters
+              filters={filters}
+              onFiltersChange={setFilters}
+              categories={Array.from(new Set(services.map(s => s.category).filter(category => category && category.trim() !== "")))}
             />
           </div>
-          <div className="flex gap-2">
-            <Button
-              variant={viewMode === "services" ? "default" : "outline"}
-              onClick={() => setViewMode("services")}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-9 sm:h-10 text-sm sm:text-base"
-            >
-              <Sparkles className="w-3 h-3 sm:w-4 sm:h-4" />
-              Services
-            </Button>
-            <Button
-              variant={viewMode === "vendors" ? "default" : "outline"}
-              onClick={() => setViewMode("vendors")}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-9 sm:h-10 text-sm sm:text-base"
-            >
-              <Zap className="w-3 h-3 sm:w-4 sm:h-4" />
-              Vendors
-            </Button>
-          </div>
-        </div>
 
-        {/* Filters - Mobile Optimized */}
-        <div className="mb-6 sm:mb-8">
-          <MarketplaceFilters
-            filters={filters}
-            onFiltersChange={setFilters}
-            categories={Array.from(new Set(services.map(s => s.category).filter(category => category && category.trim() !== "")))}
-          />
-        </div>
-
-        {/* Grid - Mobile Responsive */}
-        {viewMode === "services" ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-            {filteredServices.map((service) => (
-              <ServiceCard
-                key={service.id}
-                service={service}
-                onSave={handleSaveService}
-                onViewDetails={handleViewServiceDetails}
-                isSaved={savedServiceIds.includes(service.id)}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            {filteredVendors.map((vendor) => (
-              <EnhancedVendorCard
-                key={vendor.id}
-                vendor={vendor}
-                onConnect={handleConnectVendor}
-                onViewProfile={handleViewVendorProfile}
-              />
-            ))}
-          </div>
-        )}
-
-        {/* Empty State */}
-        {((viewMode === "services" && filteredServices.length === 0) || 
-          (viewMode === "vendors" && filteredVendors.length === 0)) && (
-          <div className="text-center py-12">
-            <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-              <Search className="w-8 h-8 text-muted-foreground" />
+          {/* Grid - Mobile Responsive */}
+          {viewMode === "services" ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+              {filteredServices.map((service) => (
+                <ServiceCard
+                  key={service.id}
+                  service={service}
+                  onSave={handleSaveService}
+                  onViewDetails={handleViewServiceDetails}
+                  isSaved={savedServiceIds.includes(service.id)}
+                />
+              ))}
             </div>
-            <h3 className="text-lg font-semibold text-foreground mb-2">
-              No {viewMode} found
-            </h3>
-            <p className="text-muted-foreground mb-4">
-              Try adjusting your search terms or filters
-            </p>
-            <Button 
-              variant="outline" 
-              onClick={() => {
-                setSearchTerm("");
-                setFilters({
-                  category: "all",
-                  priceRange: [0, 2000],
-                  verified: false,
-                  featured: false,
-                });
-              }}
-            >
-              Clear all filters
-            </Button>
-          </div>
-        )}
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+              {filteredVendors.map((vendor) => (
+                <EnhancedVendorCard
+                  key={vendor.id}
+                  vendor={vendor}
+                  onConnect={handleConnectVendor}
+                  onViewProfile={handleViewVendorProfile}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Empty State */}
+          {((viewMode === "services" && filteredServices.length === 0) || 
+            (viewMode === "vendors" && filteredVendors.length === 0)) && (
+            <div className="text-center py-12">
+              <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                <Search className="w-8 h-8 text-muted-foreground" />
+              </div>
+              <h3 className="text-lg font-semibold text-foreground mb-2">
+                No {viewMode} found
+              </h3>
+              <p className="text-muted-foreground mb-4">
+                Try adjusting your search terms or filters
+              </p>
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setSearchTerm("");
+                  setFilters({
+                    category: "all",
+                    priceRange: [0, 2000],
+                    verified: false,
+                    featured: false,
+                  });
+                }}
+              >
+                Clear all filters
+              </Button>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+
+      {/* Service Details Modal */}
+      <ServiceDetailsModal
+        service={selectedService}
+        isOpen={isServiceModalOpen}
+        onClose={handleCloseServiceModal}
+      />
+    </>
   );
 };
