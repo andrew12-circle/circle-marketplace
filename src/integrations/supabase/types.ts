@@ -293,45 +293,7 @@ export type Database = {
       }
     }
     Views: {
-      public_profiles: {
-        Row: {
-          avatar_url: string | null
-          bio: string | null
-          business_name: string | null
-          display_name: string | null
-          id: string | null
-          location: string | null
-          specialties: string[] | null
-          user_id: string | null
-          website_url: string | null
-          years_experience: number | null
-        }
-        Insert: {
-          avatar_url?: string | null
-          bio?: string | null
-          business_name?: string | null
-          display_name?: string | null
-          id?: string | null
-          location?: string | null
-          specialties?: string[] | null
-          user_id?: string | null
-          website_url?: string | null
-          years_experience?: number | null
-        }
-        Update: {
-          avatar_url?: string | null
-          bio?: string | null
-          business_name?: string | null
-          display_name?: string | null
-          id?: string | null
-          location?: string | null
-          specialties?: string[] | null
-          user_id?: string | null
-          website_url?: string | null
-          years_experience?: number | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       [_ in never]: never

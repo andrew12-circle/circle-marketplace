@@ -41,7 +41,7 @@ export const OrderHistory = () => {
       if (error) throw error;
       setOrders(data || []);
     } catch (error) {
-      console.error('Error fetching orders:', error);
+      // Handle error without exposing details
       toast({
         title: "Error loading orders",
         description: "Failed to load your order history. Please try again.",

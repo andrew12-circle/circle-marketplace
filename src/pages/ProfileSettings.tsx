@@ -96,7 +96,7 @@ export const ProfileSettings = () => {
         description: "Your profile picture has been updated successfully.",
       });
     } catch (error) {
-      console.error('Error uploading avatar:', error);
+      // Handle avatar upload error without exposing details
       toast({
         title: "Upload failed",
         description: "Failed to upload avatar. Please try again.",
@@ -126,7 +126,7 @@ export const ProfileSettings = () => {
         description: "Your profile has been updated successfully.",
       });
     } catch (error) {
-      console.error('Error updating profile:', error);
+      // Handle profile update error without exposing details
       toast({
         title: "Update failed",
         description: "Failed to update profile. Please try again.",

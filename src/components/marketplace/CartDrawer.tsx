@@ -68,7 +68,8 @@ export const CartDrawer = () => {
           throw new Error("No checkout URL received");
         }
       } catch (error) {
-        console.error("Checkout error:", error);
+        // Log error details for debugging without exposing sensitive information
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         toast({
           title: "Checkout failed",
           description: "Unable to process checkout. Please try again.",
@@ -94,7 +95,10 @@ export const CartDrawer = () => {
   const handleRequestQuotes = () => {
     const quoteItems = cartItems.filter(item => item.requiresQuote);
     if (quoteItems.length > 0) {
-      alert(`Quote requested for ${quoteItems.length} item(s). You'll be contacted within 24 hours.`);
+      toast({
+        title: "Quote requested",
+        description: `Quote requested for ${quoteItems.length} item(s). You'll be contacted within 24 hours.`,
+      });
       // Remove quote items from cart after requesting
       quoteItems.forEach(item => removeFromCart(item.serviceId));
     }

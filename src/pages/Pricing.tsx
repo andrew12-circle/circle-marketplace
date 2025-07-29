@@ -39,7 +39,7 @@ export const Pricing = () => {
         window.open(data.url, '_blank');
       }
     } catch (error) {
-      console.error('Subscription error:', error);
+      // Handle subscription error without exposing details
       toast({
         title: "Error",
         description: "Failed to start subscription process. Please try again.",

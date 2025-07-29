@@ -58,12 +58,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .single();
       
       if (error) {
-        console.error('Error fetching profile:', error);
+        // Handle profile fetch error silently
         return null;
       }
       return data;
     } catch (error) {
-      console.error('Error fetching profile:', error);
+      // Handle unexpected errors silently
       return null;
     }
   };

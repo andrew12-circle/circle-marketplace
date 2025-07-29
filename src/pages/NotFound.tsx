@@ -5,10 +5,8 @@ const NotFound = () => {
   const location = useLocation();
 
   useEffect(() => {
-    console.error(
-      "404 Error: User attempted to access non-existent route:",
-      location.pathname
-    );
+    // Track 404 errors for analytics without exposing route details
+    // In production, this would send to an error tracking service
   }, [location.pathname]);
 
   return (

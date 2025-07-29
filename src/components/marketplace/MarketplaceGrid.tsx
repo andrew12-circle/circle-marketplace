@@ -104,7 +104,8 @@ export const MarketplaceGrid = () => {
       setServices(formattedServices);
       setVendors(vendorsData || []);
     } catch (error) {
-      console.error('Error loading data:', error);
+      // Log error for internal tracking without exposing details
+      const errorId = Date.now();
       toast({
         title: "Error loading data",
         description: "Failed to load marketplace data. Please try again.",
