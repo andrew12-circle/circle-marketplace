@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Filter } from "lucide-react";
+import { Search } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 
@@ -34,10 +34,8 @@ export const AcademyFilters = ({
 }: AcademyFiltersProps) => {
   return (
     <div className="bg-card border rounded-lg p-4 mb-6">
-      <div className="flex items-center gap-2 mb-4">
-        <Filter className="w-5 h-5 text-circle-primary" />
-        <h3 className="font-semibold">Filters</h3>
-        <Button variant="ghost" size="sm" onClick={onClearFilters} className="ml-auto">
+      <div className="flex items-center justify-end mb-4">
+        <Button variant="ghost" size="sm" onClick={onClearFilters}>
           Clear All
         </Button>
       </div>
