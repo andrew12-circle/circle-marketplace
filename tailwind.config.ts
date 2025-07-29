@@ -61,6 +61,14 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				// Circle brand colors
+				circle: {
+					primary: 'hsl(var(--circle-primary))',
+					'primary-light': 'hsl(var(--circle-primary-light))',
+					accent: 'hsl(var(--circle-accent))',
+					success: 'hsl(var(--circle-success))',
+					neutral: 'hsl(var(--circle-neutral))'
 				}
 			},
 			borderRadius: {
