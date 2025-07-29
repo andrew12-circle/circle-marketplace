@@ -120,11 +120,6 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
           alt={service.title}
           className="w-full h-full object-contain object-center transition-transform duration-300 group-hover:scale-105"
         />
-        {service.discount_percentage && (
-          <Badge className="absolute bottom-3 left-3 bg-destructive text-destructive-foreground">
-            {service.discount_percentage}% OFF
-          </Badge>
-        )}
       </div>
 
       <CardContent className="p-4 space-y-3">
@@ -197,16 +192,25 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
               )}
               
               {service.co_pay_price && (
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1">
-                    <span className="text-sm font-medium text-green-600">Your Co-Pay:</span>
-                    <div className="w-3 h-3 rounded-full bg-green-600 flex items-center justify-center">
-                      <span className="text-xs text-white">i</span>
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1">
+                      <span className="text-sm font-medium text-green-600">Your Co-Pay:</span>
+                      <div className="w-3 h-3 rounded-full bg-green-600 flex items-center justify-center">
+                        <span className="text-xs text-white">i</span>
+                      </div>
                     </div>
+                    <span className="text-lg font-bold text-green-600">
+                      ${service.co_pay_price}
+                    </span>
                   </div>
-                  <span className="text-lg font-bold text-green-600">
-                    ${service.co_pay_price}
-                  </span>
+                  {service.discount_percentage && (
+                    <div className="flex justify-end">
+                      <Badge className="bg-destructive text-destructive-foreground text-xs">
+                        {service.discount_percentage}% OFF
+                      </Badge>
+                    </div>
+                  )}
                 </div>
               )}
             </>
@@ -244,26 +248,35 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
               )}
               
               {service.co_pay_price && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div className="flex items-center justify-between p-2 bg-green-50 rounded-lg border border-green-200 opacity-75 cursor-pointer">
-                      <div className="flex items-center gap-1">
-                        <Lock className="w-3 h-3 text-green-600" />
-                        <span className="text-sm font-medium text-green-600">Your Co-Pay:</span>
-                        <div className="w-3 h-3 rounded-full bg-green-600 flex items-center justify-center">
-                          <span className="text-xs text-white">i</span>
+                <div className="space-y-1">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="flex items-center justify-between p-2 bg-green-50 rounded-lg border border-green-200 opacity-75 cursor-pointer">
+                        <div className="flex items-center gap-1">
+                          <Lock className="w-3 h-3 text-green-600" />
+                          <span className="text-sm font-medium text-green-600">Your Co-Pay:</span>
+                          <div className="w-3 h-3 rounded-full bg-green-600 flex items-center justify-center">
+                            <span className="text-xs text-white">i</span>
+                          </div>
                         </div>
+                        <span className="text-lg font-bold text-green-600">
+                          ${service.co_pay_price}
+                        </span>
                       </div>
-                      <span className="text-lg font-bold text-green-600">
-                        ${service.co_pay_price}
-                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent className="w-48 p-3 cursor-pointer" onClick={handleUpgradeClick}>
+                      <p className="text-sm leading-relaxed">Join Circle Pro membership to unlock this price</p>
+                      <p className="text-xs text-muted-foreground mt-1">Click to upgrade →</p>
+                    </TooltipContent>
+                  </Tooltip>
+                  {service.discount_percentage && (
+                    <div className="flex justify-end">
+                      <Badge className="bg-destructive text-destructive-foreground text-xs">
+                        {service.discount_percentage}% OFF
+                      </Badge>
                     </div>
-                  </TooltipTrigger>
-                  <TooltipContent className="w-48 p-3 cursor-pointer" onClick={handleUpgradeClick}>
-                    <p className="text-sm leading-relaxed">Join Circle Pro membership to unlock this price</p>
-                    <p className="text-xs text-muted-foreground mt-1">Click to upgrade →</p>
-                  </TooltipContent>
-                </Tooltip>
+                  )}
+                </div>
               )}
             </>
           )}
