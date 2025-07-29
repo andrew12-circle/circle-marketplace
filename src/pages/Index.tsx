@@ -27,7 +27,7 @@ const Index = () => {
                 <img 
                   src={circleLogoUrl} 
                   alt="Circle Logo" 
-                  className="w-13 h-13 object-contain"
+                  className="w-12 h-12 object-contain"
                 />
               </div>
               
