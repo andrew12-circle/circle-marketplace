@@ -80,8 +80,7 @@ export const MarketplaceGrid = () => {
             review_count,
             is_verified
           )
-        `)
-        .order('created_at', { ascending: false });
+        `);
 
       if (servicesError) throw servicesError;
 
