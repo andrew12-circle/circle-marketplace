@@ -176,11 +176,11 @@ export const MarketplaceGrid = () => {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Marketplace.</h1>
-          <p className="text-muted-foreground">
-            Discover premium marketing services and connect with top-performing vendors
+        {/* Hero Section */}
+        <div className="mb-12">
+          <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6">Marketplace.</h1>
+          <p className="text-lg text-muted-foreground max-w-4xl">
+            Finally, we silenced the noise. Welcome to the Marketplace. Discover premium marketing services and connect with top-performing vendors who will actually move your business forward.
           </p>
         </div>
 
