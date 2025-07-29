@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "@/hooks/useLocation";
-import { User, Settings, ShoppingBag, Crown, LogOut, Loader2, MapPin } from "lucide-react";
+import { User, Settings, ShoppingBag, Crown, LogOut, Loader2, MapPin, Heart } from "lucide-react";
 
 export const UserMenu = () => {
   const { user, profile, signOut } = useAuth();
@@ -130,6 +130,13 @@ export const UserMenu = () => {
           <Link to="/orders" className="flex items-center">
             <ShoppingBag className="mr-2 h-4 w-4" />
             <span>Order History</span>
+          </Link>
+        </DropdownMenuItem>
+        
+        <DropdownMenuItem asChild>
+          <Link to="/saved" className="flex items-center">
+            <Heart className="mr-2 h-4 w-4" />
+            <span>Saved Services</span>
           </Link>
         </DropdownMenuItem>
         

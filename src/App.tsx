@@ -12,6 +12,7 @@ import { PaymentCanceled } from "./pages/PaymentCanceled";
 import { Pricing } from "./pages/Pricing";
 import { ProfileSettings } from "./pages/ProfileSettings";
 import { AgentWallet } from "./pages/AgentWallet";
+import { SavedItems } from "./pages/SavedItems";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +31,7 @@ const App = () => (
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/profile-settings" element={<ProfileSettings />} />
             <Route path="/wallet" element={<AgentWallet />} />
+            <Route path="/saved" element={<SavedItems />} />
             <Route path="/payment-success" element={<PaymentSuccess />} />
             <Route path="/payment-canceled" element={<PaymentCanceled />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
