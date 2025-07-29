@@ -89,14 +89,16 @@ export const UserMenu = () => {
         <DropdownMenuSeparator />
         
         {/* Circle Points Display */}
-        <DropdownMenuItem className="flex items-center justify-between">
-          <span className="flex items-center">
-            <Crown className="mr-2 h-4 w-4 text-yellow-500" />
-            Circle Points
-          </span>
-          <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
-            {profile?.circle_points || 0}
-          </Badge>
+        <DropdownMenuItem asChild>
+          <Link to="/wallet" className="flex items-center justify-between">
+            <span className="flex items-center">
+              <Crown className="mr-2 h-4 w-4 text-yellow-500" />
+              Circle Points
+            </span>
+            <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
+              {profile?.circle_points || 0}
+            </Badge>
+          </Link>
         </DropdownMenuItem>
         
         {/* Pro Status */}
