@@ -107,19 +107,26 @@ export const EnhancedVendorCard = ({ vendor, onConnect, onViewProfile }: Enhance
         {/* Pricing Section */}
         {(vendor.retailPrice || vendor.proPrice || vendor.coPayPrice) && (
           <div className="space-y-2 border-t border-border/50 pt-3">
-            {/* Show retail price only if user is NOT pro */}
-            {!isProMember && vendor.retailPrice && (
+            {/* Always show retail price for context */}
+            {vendor.retailPrice && (
               <div className="flex justify-between items-center">
                 <span className="text-sm text-muted-foreground">Retail Price:</span>
                 <span className="text-sm line-through">${vendor.retailPrice}</span>
               </div>
             )}
             
-            {/* Show Circle Pro price if user IS pro */}
-            {isProMember && vendor.proPrice && (
+            {/* Always show Circle Pro price */}
+            {vendor.proPrice && (
               <div className="flex justify-between items-center">
                 <span className="text-sm font-medium">Circle Pro:</span>
-                <span className="text-lg font-bold text-circle-primary">${vendor.proPrice}</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-lg font-bold text-circle-primary">${vendor.proPrice}</span>
+                  {!isProMember && (
+                    <Badge variant="outline" className="text-xs">
+                      Requires Pro
+                    </Badge>
+                  )}
+                </div>
               </div>
             )}
             
