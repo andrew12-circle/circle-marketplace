@@ -7,6 +7,7 @@ import { Heart, Star, ArrowRight, ShoppingCart, MessageCircle, Lock, Crown } fro
 import { useToast } from "@/hooks/use-toast";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 interface Service {
   id: string;
@@ -47,6 +48,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
   const { toast } = useToast();
   const { addToCart } = useCart();
   const { profile } = useAuth();
+  const navigate = useNavigate();
   const isProMember = profile?.is_pro_member || false;
 
   const handleSave = () => {
@@ -70,6 +72,10 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
       image_url: service.image_url,
       requiresQuote: service.requires_quote,
     });
+  };
+
+  const handleUpgradeClick = () => {
+    navigate('/pricing');
   };
 
   return (
@@ -230,8 +236,9 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                       </span>
                     </div>
                   </TooltipTrigger>
-                  <TooltipContent className="w-48 p-3">
+                  <TooltipContent className="w-48 p-3 cursor-pointer" onClick={handleUpgradeClick}>
                     <p className="text-sm leading-relaxed">Join Circle Pro membership to unlock this price</p>
+                    <p className="text-xs text-muted-foreground mt-1">Click to upgrade →</p>
                   </TooltipContent>
                 </Tooltip>
               )}
@@ -252,8 +259,9 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                       </span>
                     </div>
                   </TooltipTrigger>
-                  <TooltipContent className="w-48 p-3">
+                  <TooltipContent className="w-48 p-3 cursor-pointer" onClick={handleUpgradeClick}>
                     <p className="text-sm leading-relaxed">Join Circle Pro membership to unlock this price</p>
+                    <p className="text-xs text-muted-foreground mt-1">Click to upgrade →</p>
                   </TooltipContent>
                 </Tooltip>
               )}
