@@ -15,6 +15,12 @@ import { AgentWallet } from "./pages/AgentWallet";
 import { SavedItems } from "./pages/SavedItems";
 import { ConsultationDemo } from "./pages/ConsultationDemo";
 import NotFound from "./pages/NotFound";
+import { TermsOfService } from "./pages/legal/TermsOfService";
+import { PrivacyPolicy } from "./pages/legal/PrivacyPolicy";
+import { CookiePolicy } from "./pages/legal/CookiePolicy";
+import { SellerAgreement } from "./pages/legal/SellerAgreement";
+import { BuyerProtection } from "./pages/legal/BuyerProtection";
+import { ProhibitedItems } from "./pages/legal/ProhibitedItems";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +42,15 @@ const App = () => (
             <Route path="/payment-success" element={<PaymentSuccess />} />
             <Route path="/payment-canceled" element={<PaymentCanceled />} />
             <Route path="/consultation-demo" element={<ConsultationDemo />} />
+            
+            {/* Legal Pages */}
+            <Route path="/terms" element={<TermsOfService />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/cookies" element={<CookiePolicy />} />
+            <Route path="/seller-agreement" element={<SellerAgreement />} />
+            <Route path="/buyer-protection" element={<BuyerProtection />} />
+            <Route path="/prohibited-items" element={<ProhibitedItems />} />
+            
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

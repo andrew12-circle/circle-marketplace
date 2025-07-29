@@ -1,0 +1,138 @@
+import { Link } from "react-router-dom";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+
+export const LegalFooter = () => {
+  return (
+    <footer className="bg-muted/30 border-t mt-16">
+      {/* Legal Links Section */}
+      <div className="container mx-auto px-4 py-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6">
+          <div>
+            <h4 className="font-semibold mb-3 text-sm">Legal</h4>
+            <div className="space-y-2">
+              <Link to="/terms" className="block text-sm text-muted-foreground hover:text-primary">
+                Terms of Service
+              </Link>
+              <Link to="/privacy" className="block text-sm text-muted-foreground hover:text-primary">
+                Privacy Policy
+              </Link>
+              <Link to="/cookies" className="block text-sm text-muted-foreground hover:text-primary">
+                Cookie Policy
+              </Link>
+            </div>
+          </div>
+          
+          <div>
+            <h4 className="font-semibold mb-3 text-sm">Marketplace</h4>
+            <div className="space-y-2">
+              <Link to="/seller-agreement" className="block text-sm text-muted-foreground hover:text-primary">
+                Seller Agreement
+              </Link>
+              <Link to="/buyer-protection" className="block text-sm text-muted-foreground hover:text-primary">
+                Buyer Protection
+              </Link>
+              <Link to="/prohibited-items" className="block text-sm text-muted-foreground hover:text-primary">
+                Prohibited Items
+              </Link>
+            </div>
+          </div>
+          
+          <div>
+            <h4 className="font-semibold mb-3 text-sm">Support</h4>
+            <div className="space-y-2">
+              <Link to="/dispute-resolution" className="block text-sm text-muted-foreground hover:text-primary">
+                Dispute Resolution
+              </Link>
+              <Link to="/refund-policy" className="block text-sm text-muted-foreground hover:text-primary">
+                Refund Policy
+              </Link>
+              <Link to="/contact" className="block text-sm text-muted-foreground hover:text-primary">
+                Contact Support
+              </Link>
+            </div>
+          </div>
+          
+          <div>
+            <h4 className="font-semibold mb-3 text-sm">Security</h4>
+            <div className="space-y-2">
+              <Badge variant="outline" className="text-xs">
+                SSL Secured
+              </Badge>
+              <Badge variant="outline" className="text-xs">
+                PCI Compliant
+              </Badge>
+              <p className="text-xs text-muted-foreground">
+                256-bit encryption
+              </p>
+            </div>
+          </div>
+        </div>
+        
+        <Separator className="my-6" />
+        
+        {/* Marketplace Disclaimer */}
+        <div className="mb-6">
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            <strong>Marketplace Disclaimer:</strong> CircleMarketplace.io is a venue for buyers and sellers. 
+            We are not responsible for the content, quality, or legality of items listed, the ability of sellers 
+            to sell items, or the ability of buyers to pay for items. We do not guarantee the accuracy or 
+            completeness of any listing.
+          </p>
+        </div>
+        
+        {/* Compliance Statements */}
+        <div className="mb-6 space-y-2">
+          <p className="text-xs text-muted-foreground">
+            <strong>Age Restriction:</strong> You must be 18 years or older to use this marketplace.
+          </p>
+          <p className="text-xs text-muted-foreground">
+            <strong>Geographic Restrictions:</strong> Available only where permitted by law.
+          </p>
+          <p className="text-xs text-muted-foreground">
+            <strong>Tax Disclaimer:</strong> Buyers and sellers are responsible for determining and paying applicable taxes.
+          </p>
+        </div>
+        
+        {/* Additional Protection Clauses */}
+        <div className="mb-6 space-y-2">
+          <p className="text-xs text-muted-foreground">
+            <strong>Indemnification Notice:</strong> Users agree to indemnify and hold CircleMarketplace.io 
+            harmless from any claims arising from their use of the platform.
+          </p>
+          <p className="text-xs text-muted-foreground">
+            <strong>As-Is Disclaimer:</strong> This platform is provided "as is" without warranties of any kind, 
+            either express or implied.
+          </p>
+          <p className="text-xs text-muted-foreground">
+            <strong>User-Generated Content:</strong> Users are solely responsible for content they post. 
+            We reserve the right to remove content that violates our policies.
+          </p>
+        </div>
+        
+        <Separator className="my-6" />
+        
+        {/* Copyright and Final Info */}
+        <div className="flex flex-col md:flex-row justify-between items-center">
+          <p className="text-sm text-muted-foreground mb-4 md:mb-0">
+            © 2025 CircleMarketplace.io. All rights reserved.
+          </p>
+          
+          <div className="flex items-center space-x-4">
+            <span className="text-xs text-muted-foreground">
+              Payments secured by industry-leading providers
+            </span>
+            <div className="flex space-x-2">
+              <Badge variant="secondary" className="text-xs">
+                Secure
+              </Badge>
+              <Badge variant="secondary" className="text-xs">
+                Verified
+              </Badge>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+};

@@ -11,6 +11,7 @@ import { CartProvider } from "@/contexts/CartContext";
 import { CartDrawer } from "@/components/marketplace/CartDrawer";
 import { UserMenu } from "@/components/UserMenu";
 import { useAuth } from "@/contexts/AuthContext";
+import { LegalFooter } from "@/components/LegalFooter";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<"marketplace" | "academy">("marketplace");
@@ -108,14 +109,8 @@ const Index = () => {
           {activeTab === "marketplace" ? <Marketplace /> : <Academy />}
         </main>
 
-        {/* Footer - Mobile Optimized */}
-        <footer className="border-t bg-card/50 mt-8 sm:mt-16">
-          <div className="container mx-auto px-3 sm:px-4 py-6 sm:py-8">
-            <div className="text-center text-muted-foreground text-xs sm:text-sm">
-              <p>&copy; 2024 Circle. Empowering real estate professionals to grow smarter.</p>
-            </div>
-          </div>
-        </footer>
+        {/* Legal Footer */}
+        <LegalFooter />
       </div>
     </CartProvider>
   );
