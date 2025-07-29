@@ -64,7 +64,7 @@ export const Pricing = () => {
               <div className="p-6"></div>
               
               {/* Circle Starter */}
-              <div className="bg-white rounded-lg border p-6 text-center">
+              <div className="bg-white rounded-lg border p-6 text-center mx-3">
                 <h3 className="text-xl font-semibold mb-2">Circle Starter</h3>
                 <div className="text-3xl font-bold mb-4">$0<span className="text-sm font-normal text-muted-foreground">/month</span></div>
                 <p className="text-sm text-muted-foreground mb-6">Agents exploring the marketplace</p>
@@ -74,7 +74,7 @@ export const Pricing = () => {
               </div>
 
               {/* Circle Pro (Solo) - Most Popular */}
-              <div className="bg-gradient-to-b from-blue-50 to-purple-50 rounded-lg border-2 border-blue-200 p-6 text-center relative">
+              <div className="bg-gradient-to-b from-blue-50 to-purple-50 rounded-lg border-2 border-blue-200 p-6 text-center relative mx-3">
                 <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white">
                   Most Popular
                 </Badge>
@@ -87,7 +87,7 @@ export const Pricing = () => {
               </div>
 
               {/* Circle Pro (Team) */}
-              <div className="bg-white rounded-lg border p-6 text-center">
+              <div className="bg-white rounded-lg border p-6 text-center mx-3">
                 <h3 className="text-xl font-semibold mb-2">Circle Pro (Team)</h3>
                 <div className="text-3xl font-bold mb-4">$97<span className="text-sm font-normal text-muted-foreground">/month</span></div>
                 <p className="text-sm text-muted-foreground mb-6">Teams building a growth system</p>
