@@ -197,8 +197,8 @@ export const MarketplaceGrid = () => {
           </p>
         </div>
 
-        {/* Circle Pro Banner - Only show for non-pro members */}
-        {user && profile && !profile.is_pro_member && (
+        {/* Circle Pro Banner - Show for non-signed-in users and non-pro members */}
+        {(!user || !profile?.is_pro_member) && (
           <CircleProBanner />
         )}
 
