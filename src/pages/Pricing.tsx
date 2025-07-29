@@ -107,8 +107,11 @@ export const Pricing = () => {
                 <h3 className="text-xl font-semibold mb-2">Circle Starter</h3>
                 <div className="text-3xl font-bold mb-4">$0<span className="text-sm font-normal text-muted-foreground">/month</span></div>
                 <p className="text-sm text-muted-foreground mb-6">Agents exploring the marketplace</p>
-                <Button className="w-full bg-teal-600 hover:bg-teal-700 text-white">
-                  Create Free Account
+                <Button 
+                  className="w-full bg-teal-600 hover:bg-teal-700 text-white"
+                  asChild
+                >
+                  <Link to="/auth">Create Free Account</Link>
                 </Button>
               </div>
 
