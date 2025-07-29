@@ -20,9 +20,9 @@ serve(async (req) => {
   try {
     logStep("Function started");
 
-    const openAIKey = Deno.env.get("OPENAI_API_KEY");
-    if (!openAIKey) throw new Error("OPENAI_API_KEY is not set");
-    logStep("OpenAI key verified");
+    const geminiKey = Deno.env.get("GEMINI_API_KEY");
+    if (!geminiKey) throw new Error("GEMINI_API_KEY is not set");
+    logStep("Gemini key verified");
 
     // Create Supabase client to fetch services data
     const supabaseClient = createClient(
@@ -82,29 +82,34 @@ Respond in this exact JSON format:
   }
 }`;
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${geminiKey}`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${openAIKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: prompt }
+        contents: [
+          {
+            parts: [
+              {
+                text: `${systemPrompt}\n\nUser request: ${prompt}`
+              }
+            ]
+          }
         ],
-        temperature: 0.7,
-        max_tokens: 1500,
+        generationConfig: {
+          temperature: 0.7,
+          maxOutputTokens: 1500,
+        }
       }),
     });
 
     if (!response.ok) {
-      throw new Error(`OpenAI API error: ${response.status}`);
+      throw new Error(`Gemini API error: ${response.status}`);
     }
 
     const data = await response.json();
-    const aiResponse = data.choices[0].message.content;
+    const aiResponse = data.candidates[0].content.parts[0].text;
     logStep("AI response received", { response: aiResponse });
 
     // Parse the JSON response
