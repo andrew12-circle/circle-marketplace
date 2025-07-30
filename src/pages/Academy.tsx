@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { AcademySidebar } from "@/components/academy/AcademySidebar";
 import { VideoSection } from "@/components/academy/VideoSection";
+import { VideoPlayerModal } from "@/components/academy/VideoPlayerModal";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
@@ -185,6 +186,9 @@ const mockVideos = {
 
 export const Academy = () => {
   const [activeView, setActiveView] = useState("home");
+  const [selectedVideo, setSelectedVideo] = useState<any>(null);
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+  const [currentVideoUrl, setCurrentVideoUrl] = useState<string>("");
   const { toast } = useToast();
   
   // Fetch videos using the custom hook
@@ -289,7 +293,7 @@ export const Academy = () => {
   );
 
   const handlePlayVideo = (videoId: string) => {
-    // Find the video in our data to get the content URL
+    // Find the video in our data
     const video = allVideos.find(v => v.id === videoId) || 
                   trendingVideos.find(v => v.id === videoId) || 
                   featuredVideos.find(v => v.id === videoId);
@@ -298,7 +302,7 @@ export const Academy = () => {
       // Increment view count
       incrementView(videoId);
       
-      // Get the content URL from Supabase and open it
+      // Get the content URL from Supabase and play in modal
       supabase
         .from('content')
         .select('content_url')
@@ -306,12 +310,13 @@ export const Academy = () => {
         .single()
         .then(({ data, error }) => {
           if (data?.content_url && !error) {
-            // Open the YouTube video in a new tab
-            window.open(data.content_url, '_blank');
+            setSelectedVideo(video);
+            setCurrentVideoUrl(data.content_url);
+            setIsVideoModalOpen(true);
             
             toast({
-              title: "Opening Video",
-              description: `Playing: ${video.title}`,
+              title: "Playing Video",
+              description: `Now playing: ${video.title}`,
             });
           } else {
             toast({
@@ -442,6 +447,13 @@ export const Academy = () => {
       <div className="flex-1 overflow-auto">
         {renderContent()}
       </div>
+
+      <VideoPlayerModal
+        video={selectedVideo}
+        isOpen={isVideoModalOpen}
+        onClose={() => setIsVideoModalOpen(false)}
+        videoUrl={currentVideoUrl}
+      />
     </div>
   );
 };
