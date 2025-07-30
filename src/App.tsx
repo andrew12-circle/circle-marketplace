@@ -15,7 +15,7 @@ import { AgentWallet } from "./pages/AgentWallet";
 import { SavedItems } from "./pages/SavedItems";
 import { ConsultationDemo } from "./pages/ConsultationDemo";
 import { VendorDashboard } from "./pages/VendorDashboard";
-import VendorRegistration from "./pages/VendorRegistration";
+import { VendorRegistration } from "./pages/VendorRegistration";
 import NotFound from "./pages/NotFound";
 import { TermsOfService } from "./pages/legal/TermsOfService";
 import { PrivacyPolicy } from "./pages/legal/PrivacyPolicy";

@@ -1,4 +1,4 @@
-const VendorRegistration = () => {
+export const VendorRegistration = () => {
   return (
     <div style={{ 
       minHeight: '100vh', 
@@ -16,10 +16,13 @@ const VendorRegistration = () => {
         textAlign: 'center'
       }}>
         <h1 style={{ fontSize: '24px', marginBottom: '20px' }}>
-          Vendor Registration
+          Vendor Registration - Route Working!
         </h1>
         <p style={{ fontSize: '16px', color: '#666' }}>
-          This is a basic test. If you can see this, the route is working!
+          Success! The route is now working. You're on /vendor-registration
+        </p>
+        <p style={{ fontSize: '14px', color: '#999', marginTop: '10px' }}>
+          URL parameters: {window.location.search}
         </p>
         <a 
           href="/" 
@@ -39,5 +42,3 @@ const VendorRegistration = () => {
     </div>
   );
 };
-
-export default VendorRegistration;
