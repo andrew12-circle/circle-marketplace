@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { AcademySidebar } from "@/components/academy/AcademySidebar";
+import { VideoSection } from "@/components/academy/VideoSection";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
@@ -8,7 +9,9 @@ import {
   BookOpen, 
   Video, 
   Headphones, 
-  Book
+  Book,
+  Search,
+  Filter
 } from "lucide-react";
 
 // Mock data - replace with actual data
@@ -79,6 +82,104 @@ const mockPlaylists = [
   { id: "3", name: "Quick Wins", courseCount: 3 },
   { id: "4", name: "My Favorites", courseCount: 12 },
 ];
+
+// Mock video data
+const mockVideos = {
+  trending: [
+    {
+      id: "1",
+      title: "The Psychology of Lead Conversion: What Every Agent Needs to Know",
+      creator: "Sarah Johnson",
+      thumbnail: "/placeholder.svg",
+      duration: "12:34",
+      category: "Lead Generation",
+      rating: 4.9,
+      isPro: true,
+      views: "24K"
+    },
+    {
+      id: "2", 
+      title: "Social Media Branding That Actually Works",
+      creator: "Mike Chen",
+      thumbnail: "/placeholder.svg",
+      duration: "8:45",
+      category: "Marketing",
+      rating: 4.7,
+      isPro: false,
+      views: "18K"
+    },
+    {
+      id: "3",
+      title: "Objection Handling Masterclass",
+      creator: "Tom Ferry",
+      thumbnail: "/placeholder.svg", 
+      duration: "15:22",
+      category: "Sales",
+      rating: 4.8,
+      isPro: true,
+      views: "31K"
+    },
+    {
+      id: "4",
+      title: "Instagram Reels for Real Estate",
+      creator: "Emma Wilson",
+      thumbnail: "/placeholder.svg",
+      duration: "6:18",
+      category: "Social Media",
+      rating: 4.6,
+      isPro: false,
+      views: "12K"
+    },
+    {
+      id: "5",
+      title: "The Mindset of Million Dollar Producers",
+      creator: "Ryan Serhant",
+      thumbnail: "/placeholder.svg",
+      duration: "20:15",
+      category: "Mindset",
+      rating: 4.9,
+      isPro: true,
+      views: "45K"
+    }
+  ],
+  forYou: [
+    {
+      id: "6",
+      title: "Local Market Analysis Deep Dive",
+      creator: "Maria Rodriguez",
+      thumbnail: "/placeholder.svg",
+      duration: "14:30",
+      category: "Market Analysis", 
+      rating: 4.8,
+      isPro: true,
+      views: "16K"
+    },
+    {
+      id: "7",
+      title: "Client Communication Scripts That Work",
+      creator: "David Kim",
+      thumbnail: "/placeholder.svg", 
+      duration: "9:45",
+      category: "Communication",
+      rating: 4.7,
+      isPro: false,
+      views: "22K"
+    }
+  ],
+  newReleases: [
+    {
+      id: "8",
+      title: "AI Tools for Real Estate Agents in 2024",
+      creator: "Tech Real Estate",
+      thumbnail: "/placeholder.svg",
+      duration: "11:20",
+      category: "Technology",
+      rating: 4.5,
+      isPro: true,
+      views: "8K"
+    }
+  ]
+};
 
 export const Academy = () => {
   const [activeView, setActiveView] = useState("home");
@@ -180,10 +281,97 @@ export const Academy = () => {
     </div>
   );
 
+  const handlePlayVideo = (videoId: string) => {
+    toast({
+      title: "Playing Video",
+      description: `Starting video: ${videoId}`,
+    });
+  };
+
+  const renderVideosView = () => (
+    <div className="flex-1 p-8 max-w-7xl">
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-4xl font-bold text-foreground mb-2">Videos</h1>
+        <p className="text-muted-foreground">
+          Curated content from top coaches, influencers, and marketing experts
+        </p>
+      </div>
+
+      {/* Search and Filter Bar */}
+      <div className="flex gap-4 mb-8">
+        <div className="flex-1 relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+          <input 
+            type="text"
+            placeholder="Search videos..."
+            className="w-full pl-10 pr-4 py-2 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+          />
+        </div>
+        <Button variant="outline" className="gap-2">
+          <Filter className="w-4 h-4" />
+          Filters
+        </Button>
+      </div>
+
+      {/* Video Sections */}
+      <VideoSection
+        title="Trending Now"
+        subtitle="Most watched videos this week"
+        videos={mockVideos.trending}
+        onPlayVideo={handlePlayVideo}
+        showSeeAll={true}
+        onSeeAll={() => toast({ title: "See All", description: "Show all trending videos" })}
+        size="large"
+      />
+
+      <VideoSection
+        title="Recommended for You"
+        subtitle="Based on your profile and viewing history"
+        videos={mockVideos.forYou}
+        onPlayVideo={handlePlayVideo}
+        showSeeAll={true}
+        onSeeAll={() => toast({ title: "See All", description: "Show all recommended videos" })}
+        size="medium"
+      />
+
+      <VideoSection
+        title="New Releases"
+        subtitle="Fresh content from our partners"
+        videos={mockVideos.newReleases}
+        onPlayVideo={handlePlayVideo}
+        showSeeAll={true}
+        onSeeAll={() => toast({ title: "See All", description: "Show all new releases" })}
+        size="medium"
+      />
+
+      {/* Categories Grid */}
+      <div className="mt-12">
+        <h2 className="text-2xl font-bold text-foreground mb-6">Browse by Category</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          {[
+            "Lead Generation", "Marketing", "Sales", "Social Media", 
+            "Mindset", "Technology", "Market Analysis", "Communication",
+            "Negotiation", "Listing Presentation", "Buyer Consultation", "Closing"
+          ].map((category) => (
+            <Card 
+              key={category}
+              className="p-4 text-center cursor-pointer hover:bg-muted/50 transition-colors"
+            >
+              <h3 className="font-medium text-sm">{category}</h3>
+            </Card>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
   const renderContent = () => {
     switch (activeView) {
       case "home":
         return renderHomeView();
+      case "videos":
+        return renderVideosView();
       default:
         return (
           <div className="flex-1 p-8">
