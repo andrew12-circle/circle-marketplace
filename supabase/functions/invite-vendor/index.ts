@@ -110,32 +110,55 @@ serve(async (req) => {
       { auth: { persistSession: false } }
     );
 
-    // Require authentication for this endpoint
+    // Enhanced authentication with security logging
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
-      throw new Error("Authentication required");
+      throw new Error("Unauthorized: No authorization header provided");
     }
 
     const token = authHeader.replace("Bearer ", "");
+    if (!token || token.length < 10) {
+      throw new Error("Unauthorized: Invalid authorization token");
+    }
+
     const { data: userData, error: authError } = await supabaseClient.auth.getUser(token);
     
     if (authError || !userData.user) {
-      throw new Error("Invalid authentication token");
+      logStep("Authentication failed", { error: authError?.message });
+      throw new Error("Unauthorized: Invalid token");
     }
 
     const inviterUserId = userData.user.id;
     logStep("User authenticated", { userId: inviterUserId });
 
-    // Check if user has admin privileges (based on our updated RLS policies)
-    const { data: profile } = await supabaseClient
+    // Enhanced admin verification with updated RLS policies
+    const { data: profile, error: profileError } = await supabaseClient
       .from('profiles')
-      .select('specialties')
+      .select('is_admin, specialties')
       .eq('user_id', inviterUserId)
       .single();
 
-    const isAdmin = profile?.specialties?.includes('admin') || false;
+    if (profileError) {
+      logStep("Admin verification error", { error: profileError });
+      throw new Error("Forbidden: Unable to verify admin status");
+    }
+
+    const isAdmin = profile?.is_admin || profile?.specialties?.includes('admin') || false;
+    
     if (!isAdmin) {
-      throw new Error("Insufficient privileges. Admin access required.");
+      // Log unauthorized admin access attempt
+      await supabaseClient
+        .from('security_events')
+        .insert({
+          event_type: 'unauthorized_admin_access',
+          user_id: inviterUserId,
+          event_data: {
+            attempted_action: 'vendor_invitation',
+            profile_data: { is_admin: profile?.is_admin, specialties: profile?.specialties }
+          }
+        });
+      
+      throw new Error("Forbidden: Admin access required");
     }
 
     const requestBody = await req.json();

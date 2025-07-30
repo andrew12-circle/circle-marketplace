@@ -11,6 +11,7 @@ import { Navigate } from 'react-router-dom';
 import { ContentPromotionPanel } from '@/components/admin/ContentPromotionPanel';
 import { YouTubeImportPanel } from '@/components/admin/YouTubeImportPanel';
 import { YouTubeChannelImportPanel } from '@/components/admin/YouTubeChannelImportPanel';
+import SecurityMonitoringPanel from '@/components/admin/SecurityMonitoringPanel';
 
 interface UserProfile {
   id: string;
@@ -199,6 +200,10 @@ export default function AdminDashboard() {
         <ContentPromotionPanel />
         <YouTubeImportPanel />
         <YouTubeChannelImportPanel />
+      </div>
+
+      <div className="mb-6">
+        <SecurityMonitoringPanel />
       </div>
 
       <Card>
