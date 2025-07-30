@@ -398,9 +398,10 @@ export const VendorFunnelModal = ({
         <div className="border-t bg-muted/20">
           <div className="p-6">
             <Tabs defaultValue="details" className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-5">
                 <TabsTrigger value="details">Product Details</TabsTrigger>
                 <TabsTrigger value="reviews">Customer Reviews</TabsTrigger>
+                <TabsTrigger value="agent-reviews">Agent Reviews</TabsTrigger>
                 <TabsTrigger value="qa">Q&A</TabsTrigger>
                 <TabsTrigger value="related">Related Services</TabsTrigger>
               </TabsList>
@@ -484,6 +485,19 @@ export const VendorFunnelModal = ({
                                 <ThumbsDown className="w-3 h-3" />
                                 Not helpful
                               </button>
+                              <button className="hover:text-foreground">
+                                Comment
+                              </button>
+                            </div>
+                            
+                            {/* Comments Section */}
+                            <div className="mt-3 ml-4 space-y-2">
+                              <div className="text-xs bg-muted/50 p-2 rounded">
+                                <span className="font-medium">Mike T.</span> replied: "Completely agree! The ROI has been amazing for our team too."
+                              </div>
+                              <div className="text-xs bg-muted/50 p-2 rounded">
+                                <span className="font-medium">Jennifer K.</span> replied: "How long did it take to see results?"
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -493,12 +507,159 @@ export const VendorFunnelModal = ({
                 </div>
               </TabsContent>
               
+              <TabsContent value="agent-reviews" className="mt-6">
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold">Real Estate Agent Reviews</h3>
+                    <Button size="sm">Write Agent Review</Button>
+                  </div>
+                  
+                  {/* Agent Reviews */}
+                  <div className="space-y-6">
+                    {[
+                      {
+                        id: 1,
+                        agentName: "David Rodriguez",
+                        agentTitle: "Senior Agent, Keller Williams",
+                        license: "CA DRE #01234567",
+                        yearsExperience: 8,
+                        rating: 5,
+                        date: "January 10, 2025",
+                        review: "This co-marketing partnership transformed my business. In 6 months, I went from 2-3 listings per month to 8-10. The lead quality is exceptional and the campaign management is professional.",
+                        helpful: 15,
+                        comments: [
+                          { author: "Ashley M.", text: "What was your favorite part of the partnership?" },
+                          { author: "David Rodriguez", text: "The targeted lead generation - the quality was so much better than other services I've tried." }
+                        ]
+                      },
+                      {
+                        id: 2,
+                        agentName: "Maria Santos",
+                        agentTitle: "Top Producer, Century 21",
+                        license: "TX RE #987654321",
+                        yearsExperience: 12,
+                        rating: 5,
+                        date: "December 28, 2024",
+                        review: "Best ROI I've ever seen from a marketing partnership. The team understood the local market dynamics and created campaigns that really resonated with our target demographic.",
+                        helpful: 22,
+                        comments: [
+                          { author: "Tom K.", text: "How much did you invest initially?" },
+                          { author: "Maria Santos", text: "Started with the Standard package and upgraded to Premium after seeing the results." }
+                        ]
+                      }
+                    ].map((agentReview) => (
+                      <div key={agentReview.id} className="border rounded-lg p-4 bg-background">
+                        <div className="flex items-start gap-3">
+                          <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center text-sm font-medium">
+                            {agentReview.agentName.split(' ').map(n => n[0]).join('')}
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-start justify-between mb-2">
+                              <div>
+                                <div className="flex items-center gap-2 mb-1">
+                                  <span className="font-medium">{agentReview.agentName}</span>
+                                  <Badge variant="outline" className="text-xs">
+                                    ✓ Verified Agent
+                                  </Badge>
+                                </div>
+                                <p className="text-sm text-muted-foreground">{agentReview.agentTitle}</p>
+                                <p className="text-xs text-muted-foreground">
+                                  License: {agentReview.license} • {agentReview.yearsExperience} years experience
+                                </p>
+                              </div>
+                              <div className="text-right">
+                                {renderStarRating(agentReview.rating)}
+                                <p className="text-xs text-muted-foreground mt-1">{agentReview.date}</p>
+                              </div>
+                            </div>
+                            
+                            <p className="text-sm mb-3">{agentReview.review}</p>
+                            
+                            <div className="flex items-center gap-4 text-xs text-muted-foreground mb-3">
+                              <button className="flex items-center gap-1 hover:text-foreground">
+                                <ThumbsUp className="w-3 h-3" />
+                                Helpful ({agentReview.helpful})
+                              </button>
+                              <button className="flex items-center gap-1 hover:text-foreground">
+                                <ThumbsDown className="w-3 h-3" />
+                                Not helpful
+                              </button>
+                              <button className="hover:text-foreground">
+                                Comment
+                              </button>
+                            </div>
+                            
+                            {/* Agent Comments */}
+                            <div className="space-y-2">
+                              {agentReview.comments.map((comment, i) => (
+                                <div key={i} className="bg-muted/30 p-3 rounded-lg text-sm">
+                                  <span className="font-medium text-primary">{comment.author}:</span>
+                                  <span className="ml-2">{comment.text}</span>
+                                </div>
+                              ))}
+                              <Button variant="ghost" size="sm" className="text-xs">
+                                Add a comment
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </TabsContent>
+
               <TabsContent value="qa" className="mt-6">
                 <p className="text-muted-foreground">Questions & Answers section coming soon...</p>
               </TabsContent>
               
               <TabsContent value="related" className="mt-6">
-                <p className="text-muted-foreground">Related services section coming soon...</p>
+                <div className="space-y-6">
+                  {/* More Products Section */}
+                  <div>
+                    <h3 className="font-semibold mb-4">More Products from {vendor.name}</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {[1, 2, 3].map((i) => (
+                        <Card key={i} className="p-4">
+                          <div className="aspect-square bg-muted rounded mb-3">
+                            <div className="w-full h-full flex items-center justify-center">
+                              <Building className="w-12 h-12 text-muted-foreground" />
+                            </div>
+                          </div>
+                          <h4 className="font-medium mb-2">Digital Marketing Package {i}</h4>
+                          <p className="text-sm text-muted-foreground mb-2">Complete online presence solution</p>
+                          <div className="flex items-center justify-between">
+                            <span className="font-bold">${299 + (i * 200)}</span>
+                            <Button size="sm">View Details</Button>
+                          </div>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Videos Section */}
+                  <div>
+                    <h3 className="font-semibold mb-4">Product Videos</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {[1, 2, 3, 4].map((i) => (
+                        <Card key={i} className="p-4">
+                          <div className="aspect-video bg-muted rounded mb-3 relative cursor-pointer hover:bg-muted/80 transition-colors">
+                            <div className="w-full h-full flex items-center justify-center">
+                              <div className="w-16 h-16 bg-black/20 rounded-full flex items-center justify-center">
+                                <div className="w-0 h-0 border-l-[16px] border-l-white border-t-[10px] border-t-transparent border-b-[10px] border-b-transparent ml-1"></div>
+                              </div>
+                            </div>
+                            <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                              {i}:3{i}
+                            </div>
+                          </div>
+                          <h4 className="font-medium mb-1">How Co-Marketing Works - Part {i}</h4>
+                          <p className="text-sm text-muted-foreground">Learn about our partnership process</p>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               </TabsContent>
             </Tabs>
           </div>
