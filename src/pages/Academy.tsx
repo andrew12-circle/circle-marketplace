@@ -1391,7 +1391,7 @@ export const Academy = () => {
         </>
       )}
     </div>
-  };
+  );
 
   const renderContent = () => {
     console.log("Current activeView:", activeView); // Debug log
