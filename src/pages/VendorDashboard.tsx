@@ -16,7 +16,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { VendorPricingModal } from '@/components/marketplace/VendorPricingModal';
 import { ServiceImageUpload } from '@/components/marketplace/ServiceImageUpload';
-import { ServiceFunnelEditor } from '@/components/marketplace/ServiceFunnelEditor';
+import { ServiceFunnelEditorModal } from '@/components/marketplace/ServiceFunnelEditorModal';
 import { 
   Calendar, 
   Clock, 
@@ -169,6 +169,7 @@ export const VendorDashboard = () => {
   const [editingService, setEditingService] = useState<Service | null>(null);
   const [currentStep, setCurrentStep] = useState<'basic' | 'funnel' | 'preview'>('basic');
   const [showPricingModal, setShowPricingModal] = useState(false);
+  const [showFunnelEditor, setShowFunnelEditor] = useState(false);
   const [vendorPlan, setVendorPlan] = useState<string | null>(null);
   const { toast } = useToast();
 
@@ -1035,14 +1036,14 @@ export const VendorDashboard = () => {
                   <Package className="w-4 h-4 mr-2" />
                   Basic Info
                 </Button>
-                <Button
-                  variant={currentStep === 'funnel' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setCurrentStep('funnel')}
-                >
-                  <Layout className="w-4 h-4 mr-2" />
-                  Funnel Page
-                </Button>
+                  <Button
+                    variant={currentStep === 'funnel' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setShowFunnelEditor(true)}
+                  >
+                    <Layout className="w-4 h-4 mr-2" />
+                    Edit Funnel Page
+                  </Button>
                 <Button
                   variant={currentStep === 'preview' ? 'default' : 'outline'}
                   size="sm"
@@ -1140,13 +1141,8 @@ export const VendorDashboard = () => {
                 </div>
               )}
 
-              {/* Funnel Page Step */}
-              {currentStep === 'funnel' && (
-                <ServiceFunnelEditor
-                  funnelContent={serviceForm.funnel_content}
-                  onChange={(content) => setServiceForm(prev => ({ ...prev, funnel_content: content }))}
-                />
-              )}
+              {/* Basic info only - funnel editing is in separate modal */}
+              {/* Note: Funnel editing moved to full-screen modal */}
 
               {/* Preview Step */}
               {currentStep === 'preview' && (
@@ -1262,6 +1258,19 @@ export const VendorDashboard = () => {
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* Full-Screen Funnel Editor Modal */}
+        <ServiceFunnelEditorModal
+          open={showFunnelEditor}
+          onOpenChange={setShowFunnelEditor}
+          funnelContent={serviceForm.funnel_content}
+          onChange={(content) => setServiceForm(prev => ({ ...prev, funnel_content: content }))}
+          onSave={() => {
+            setShowFunnelEditor(false);
+            // Auto-save or show success message
+          }}
+          serviceName={serviceForm.title || 'Untitled Service'}
+        />
 
         {/* Pricing Selection Modal */}
         <VendorPricingModal

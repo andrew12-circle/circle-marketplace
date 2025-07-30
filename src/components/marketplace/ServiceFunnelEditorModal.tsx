@@ -1,0 +1,134 @@
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { X, Save } from 'lucide-react';
+import { ServiceFunnelEditor } from './ServiceFunnelEditor';
+
+interface FunnelContent {
+  headline: string;
+  subheadline: string;
+  heroDescription: string;
+  estimatedRoi: number;
+  duration: string;
+  
+  whyChooseUs: {
+    title: string;
+    benefits: {
+      icon: string;
+      title: string;
+      description: string;
+    }[];
+  };
+  
+  media: {
+    id: string;
+    type: 'image' | 'video' | 'document';
+    url: string;
+    title: string;
+    description?: string;
+  }[];
+  
+  packages: {
+    id: string;
+    name: string;
+    description: string;
+    price: number;
+    originalPrice?: number;
+    features: string[];
+    popular: boolean;
+    proOnly?: boolean;
+    savings?: string;
+  }[];
+  
+  socialProof: {
+    testimonials: {
+      id: string;
+      name: string;
+      role: string;
+      content: string;
+      rating: number;
+    }[];
+    stats: {
+      label: string;
+      value: string;
+    }[];
+  };
+
+  trustIndicators: {
+    guarantee: string;
+    cancellation: string;
+    certification: string;
+  };
+
+  callToAction: {
+    primaryHeadline: string;
+    primaryDescription: string;
+    primaryButtonText: string;
+    secondaryHeadline: string;
+    secondaryDescription: string;
+    contactInfo: {
+      phone: string;
+      email: string;
+      website: string;
+    };
+  };
+
+  urgency: {
+    enabled: boolean;
+    message: string;
+  };
+}
+
+interface ServiceFunnelEditorModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  funnelContent: FunnelContent;
+  onChange: (content: FunnelContent) => void;
+  onSave: () => void;
+  serviceName: string;
+}
+
+export const ServiceFunnelEditorModal = ({ 
+  open, 
+  onOpenChange, 
+  funnelContent, 
+  onChange, 
+  onSave,
+  serviceName 
+}: ServiceFunnelEditorModalProps) => {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-[98vw] max-h-[98vh] w-full h-full p-0 overflow-hidden">
+        <div className="flex flex-col h-full">
+          {/* Header */}
+          <div className="flex items-center justify-between p-6 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+            <div>
+              <h2 className="text-2xl font-bold">Edit Service Funnel</h2>
+              <p className="text-muted-foreground">Editing: {serviceName}</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <Button onClick={onSave} className="flex items-center gap-2">
+                <Save className="w-4 h-4" />
+                Save Changes
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={() => onOpenChange(false)}
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Content */}
+          <div className="flex-1 overflow-hidden p-6">
+            <ServiceFunnelEditor
+              funnelContent={funnelContent}
+              onChange={onChange}
+            />
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
