@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AcademySidebar } from "@/components/academy/AcademySidebar";
 import { VideoSection } from "@/components/academy/VideoSection";
 import { VideoPlayerModal } from "@/components/academy/VideoPlayerModal";
@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useVideos } from "@/hooks/useVideos";
+import { useChannels } from "@/hooks/useChannels";
 import { supabase } from "@/integrations/supabase/client";
 import { 
   GraduationCap, 
@@ -201,6 +202,11 @@ export const Academy = () => {
   const { videos: featuredVideos } = useVideos({ featured: true, limit: 10 });
   const { videos: trendingVideos } = useVideos({ limit: 10 });
   const { videos: shortsVideos } = useVideos({ category: 'shorts', limit: 15 });
+  
+  // Fetch channels using the custom hook
+  const { channels: featuredChannels } = useChannels({ verified: true, limit: 6 });
+  const { channels: newChannels } = useChannels({ orderBy: 'created_at', orderDirection: 'desc', limit: 8 });
+  const { channels: allChannels, loading: channelsLoading } = useChannels();
 
   const categories = [
     { id: "courses", label: "Courses", icon: GraduationCap },
@@ -470,258 +476,152 @@ export const Academy = () => {
         </Button>
       </div>
 
-      {/* Featured Channels */}
-      <div className="mb-12">
-        <h2 className="text-2xl font-bold text-foreground mb-6">Featured Channels</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[
-            {
-              id: "1",
-              name: "Tom Ferry",
-              description: "Real estate coaching legend with over 40,000 agents trained",
-              subscribers: "142K",
-              videos: 89,
-              coverImage: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=200&fit=crop",
-              avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=face",
-              verified: true,
-              category: "Coaching"
-            },
-            {
-              id: "2", 
-              name: "Ryan Serhant",
-              description: "Million Dollar Listing star sharing sales strategies",
-              subscribers: "98K",
-              videos: 156,
-              coverImage: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=400&h=200&fit=crop",
-              avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face",
-              verified: true,
-              category: "Sales"
-            },
-            {
-              id: "3",
-              name: "Circle Academy",
-              description: "Comprehensive real estate education and training",
-              subscribers: "76K",
-              videos: 234,
-              coverImage: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&h=200&fit=crop",
-              avatar: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=80&h=80&fit=crop&crop=face",
-              verified: true,
-              category: "Education"
-            }
-          ].map((channel) => (
-            <Card key={channel.id} className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
-              {/* Cover Image */}
-              <div className="relative h-32 bg-gradient-to-r from-blue-500 to-purple-600">
-                <img 
-                  src={channel.coverImage} 
-                  alt={`${channel.name} cover`}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute top-3 right-3">
-                  <span className="bg-black/50 text-white text-xs px-2 py-1 rounded">
-                    {channel.category}
-                  </span>
-                </div>
-              </div>
-              
-              {/* Channel Info */}
-              <div className="p-4">
-                <div className="flex items-start gap-3">
-                  <img 
-                    src={channel.avatar}
-                    alt={channel.name}
-                    className="w-12 h-12 rounded-full object-cover"
-                  />
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-semibold text-foreground">{channel.name}</h3>
-                      {channel.verified && (
-                        <div className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
-                          <span className="text-white text-xs">✓</span>
+      {channelsLoading ? (
+        <div className="flex justify-center items-center py-12">
+          <div className="text-muted-foreground">Loading channels...</div>
+        </div>
+      ) : (
+        <>
+          {/* Featured Channels */}
+          <div className="mb-12">
+            <h2 className="text-2xl font-bold text-foreground mb-6">Featured Channels</h2>
+            {featuredChannels.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {featuredChannels.map((channel) => (
+                  <Card key={channel.id} className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
+                    {/* Cover Image */}
+                    <div className="relative h-32 bg-gradient-to-r from-blue-500 to-purple-600">
+                      {channel.cover_image_url ? (
+                        <img 
+                          src={channel.cover_image_url} 
+                          alt={`${channel.name} cover`}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
+                          <Video className="w-8 h-8 text-white" />
                         </div>
                       )}
-                    </div>
-                    <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                      {channel.description}
-                    </p>
-                    <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground">
-                      <span>{channel.subscribers} subscribers</span>
-                      <span>{channel.videos} videos</span>
-                    </div>
-                  </div>
-                </div>
-                
-                <Button className="w-full mt-4 bg-red-600 hover:bg-red-700 text-white">
-                  Subscribe
-                </Button>
-              </div>
-            </Card>
-          ))}
-        </div>
-      </div>
-
-      {/* Channel Categories */}
-      <div className="mb-12">
-        <h2 className="text-2xl font-bold text-foreground mb-6">Browse by Category</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          {[
-            { name: "Coaching", count: 15, icon: Users },
-            { name: "Sales Training", count: 23, icon: TrendingUp },
-            { name: "Marketing", count: 18, icon: Sparkles },
-            { name: "Technology", count: 12, icon: Video },
-            { name: "Mindset", count: 9, icon: Heart },
-            { name: "Lead Generation", count: 21, icon: Award }
-          ].map((category) => {
-            const Icon = category.icon;
-            return (
-              <Card 
-                key={category.name}
-                className="p-4 text-center cursor-pointer hover:bg-muted/50 transition-colors"
-              >
-                <Icon className="w-6 h-6 mx-auto mb-2 text-muted-foreground" />
-                <h3 className="font-medium text-sm mb-1">{category.name}</h3>
-                <p className="text-xs text-muted-foreground">{category.count} channels</p>
-              </Card>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Trending Channels */}
-      <div className="mb-12">
-        <h2 className="text-2xl font-bold text-foreground mb-6">Trending This Week</h2>
-        <div className="space-y-4">
-          {[
-            {
-              id: "4",
-              name: "Real Estate Mindset",
-              description: "Transform your mindset, transform your business",
-              subscribers: "34K",
-              videos: 67,
-              avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b29c?w=80&h=80&fit=crop&crop=face",
-              verified: false,
-              growth: "+2.1K this week"
-            },
-            {
-              id: "5",
-              name: "Tech Real Estate",
-              description: "Latest tools and technology for modern agents",
-              subscribers: "28K", 
-              videos: 45,
-              avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=face",
-              verified: true,
-              growth: "+1.8K this week"
-            },
-            {
-              id: "6",
-              name: "Luxury Listings Lab",
-              description: "Strategies for high-end real estate success",
-              subscribers: "19K",
-              videos: 38,
-              avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face",
-              verified: true,
-              growth: "+1.2K this week"
-            }
-          ].map((channel, index) => (
-            <Card key={channel.id} className="p-4 hover:shadow-md transition-shadow cursor-pointer">
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-3 text-muted-foreground font-mono text-sm w-8">
-                  #{index + 1}
-                </div>
-                <img 
-                  src={channel.avatar}
-                  alt={channel.name}
-                  className="w-12 h-12 rounded-full object-cover"
-                />
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-semibold text-foreground">{channel.name}</h3>
-                    {channel.verified && (
-                      <div className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
-                        <span className="text-white text-xs">✓</span>
+                      <div className="absolute top-3 right-3">
+                        <span className="bg-black/50 text-white text-xs px-2 py-1 rounded">
+                          Education
+                        </span>
                       </div>
-                    )}
-                  </div>
-                  <p className="text-sm text-muted-foreground">{channel.description}</p>
-                  <div className="flex items-center gap-4 mt-1 text-xs text-muted-foreground">
-                    <span>{channel.subscribers} subscribers</span>
-                    <span>{channel.videos} videos</span>
-                    <span className="text-green-600">{channel.growth}</span>
-                  </div>
-                </div>
-                <Button variant="outline" size="sm">
-                  Subscribe
+                    </div>
+                    
+                    {/* Channel Info */}
+                    <div className="p-4">
+                      <div className="flex items-start gap-3">
+                        <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
+                          <Video className="w-6 h-6 text-gray-500" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-semibold text-foreground">{channel.name}</h3>
+                            {channel.is_verified && (
+                              <div className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
+                                <span className="text-white text-xs">✓</span>
+                              </div>
+                            )}
+                          </div>
+                          <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                            {channel.description || 'Real estate education and training content'}
+                          </p>
+                          <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground">
+                            <span>{channel.subscriber_count?.toLocaleString() || '0'} subscribers</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <Button className="w-full mt-4 bg-red-600 hover:bg-red-700 text-white">
+                        Subscribe
+                      </Button>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <Video className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">No Featured Channels Yet</h3>
+                <p className="text-muted-foreground mb-4">Import some YouTube channels to get started!</p>
+                <Button onClick={() => toast({ title: "Import Channels", description: "Use the YouTube import feature in Admin Dashboard" })}>
+                  Import YouTube Channels
                 </Button>
               </div>
-            </Card>
-          ))}
-        </div>
-      </div>
+            )}
+          </div>
 
-      {/* New Channels */}
-      <div>
-        <h2 className="text-2xl font-bold text-foreground mb-6">New Channels</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[
-            {
-              id: "7",
-              name: "First Time Agent",
-              description: "Everything new agents need to know",
-              subscribers: "2.1K",
-              videos: 12,
-              avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b29c?w=80&h=80&fit=crop&crop=face",
-              joinedDate: "3 days ago"
-            },
-            {
-              id: "8", 
-              name: "Social Media Real Estate",
-              description: "Master Instagram, TikTok & YouTube for real estate",
-              subscribers: "5.7K",
-              videos: 28,
-              avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=face",
-              joinedDate: "1 week ago"
-            },
-            {
-              id: "9",
-              name: "Investment Property Pro", 
-              description: "Real estate investing strategies and tips",
-              subscribers: "3.4K",
-              videos: 19,
-              avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face",
-              joinedDate: "2 weeks ago"
-            },
-            {
-              id: "10",
-              name: "Closing Coach",
-              description: "Master the art of closing deals",
-              subscribers: "1.8K", 
-              videos: 8,
-              avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=face",
-              joinedDate: "1 month ago"
-            }
-          ].map((channel) => (
-            <Card key={channel.id} className="p-4 hover:shadow-md transition-shadow cursor-pointer">
-              <div className="text-center">
-                <img 
-                  src={channel.avatar}
-                  alt={channel.name}
-                  className="w-16 h-16 rounded-full object-cover mx-auto mb-3"
-                />
-                <h3 className="font-semibold text-foreground mb-1">{channel.name}</h3>
-                <p className="text-xs text-muted-foreground mb-3 line-clamp-2">{channel.description}</p>
-                <div className="text-xs text-muted-foreground mb-3">
-                  <div>{channel.subscribers} subscribers</div>
-                  <div>{channel.videos} videos</div>
-                  <div className="text-green-600">Joined {channel.joinedDate}</div>
-                </div>
-                <Button size="sm" className="w-full bg-red-600 hover:bg-red-700 text-white">
-                  Subscribe
-                </Button>
+          {/* Channel Categories */}
+          <div className="mb-12">
+            <h2 className="text-2xl font-bold text-foreground mb-6">Browse by Category</h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              {[
+                { name: "Coaching", count: 15, icon: Users },
+                { name: "Sales Training", count: 23, icon: TrendingUp },
+                { name: "Marketing", count: 18, icon: Sparkles },
+                { name: "Technology", count: 12, icon: Video },
+                { name: "Mindset", count: 9, icon: Heart },
+                { name: "Lead Generation", count: 21, icon: Award }
+              ].map((category) => {
+                const Icon = category.icon;
+                return (
+                  <Card 
+                    key={category.name}
+                    className="p-4 text-center cursor-pointer hover:bg-muted/50 transition-colors"
+                  >
+                    <Icon className="w-6 h-6 mx-auto mb-2 text-muted-foreground" />
+                    <h3 className="font-medium text-sm mb-1">{category.name}</h3>
+                    <p className="text-xs text-muted-foreground">{category.count} channels</p>
+                  </Card>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* New Channels */}
+          <div>
+            <h2 className="text-2xl font-bold text-foreground mb-6">Recently Added Channels</h2>
+            {newChannels.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {newChannels.map((channel) => (
+                  <Card key={channel.id} className="p-4 hover:shadow-md transition-shadow cursor-pointer">
+                    <div className="text-center">
+                      <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <Video className="w-8 h-8 text-gray-500" />
+                      </div>
+                      <h3 className="font-semibold text-foreground mb-1">{channel.name}</h3>
+                      <p className="text-xs text-muted-foreground mb-3 line-clamp-2">
+                        {channel.description || 'Real estate education content'}
+                      </p>
+                      <div className="text-xs text-muted-foreground mb-3">
+                        <div>{channel.subscriber_count?.toLocaleString() || '0'} subscribers</div>
+                        <div className="text-green-600">
+                          Added {channel.created_at ? new Date(channel.created_at).toLocaleDateString() : 'recently'}
+                        </div>
+                      </div>
+                      <Button size="sm" className="w-full bg-red-600 hover:bg-red-700 text-white">
+                        Subscribe
+                      </Button>
+                    </div>
+                  </Card>
+                ))}
               </div>
-            </Card>
-          ))}
-        </div>
-      </div>
+            ) : (
+              <div className="text-center py-12">
+                <Video className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">No Channels Added Yet</h3>
+                <p className="text-muted-foreground mb-4">
+                  {allChannels.length === 0 
+                    ? "Import YouTube channels to populate this section!"
+                    : "All channels have been here for a while. Check back later for new additions!"
+                  }
+                </p>
+              </div>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 
