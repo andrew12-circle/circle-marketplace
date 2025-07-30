@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Building, User, MapPin, Phone, Mail, Globe, CreditCard, Download, Upload, FileSpreadsheet } from "lucide-react";
+import { ArrowLeft, Building, User, MapPin, Phone, Mail, Globe, CreditCard, Download, Upload, FileSpreadsheet, Calendar } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const SERVICE_PROVIDER_TYPES = [
@@ -70,6 +70,7 @@ export const VendorRegistration = () => {
     individualEmail: "",
     individualPhone: "",
     websiteUrl: "",
+    calendarLink: "",
     
     // Service Provider Specific (for products/services TO realtors)
     productCategories: [] as string[],
@@ -202,6 +203,7 @@ export const VendorRegistration = () => {
     if (!formData.email) newErrors.email = "Email is required";
     if (!formData.phone) newErrors.phone = "Phone number is required";
     if (!formData.description) newErrors.description = "Description is required";
+    if (!formData.calendarLink) newErrors.calendarLink = "Calendar booking link is required";
     if (!formData.agreeToTerms) newErrors.agreeToTerms = "You must agree to the terms";
     
     // Service Provider specific validation
@@ -489,6 +491,30 @@ export const VendorRegistration = () => {
                         placeholder="https://www.yourcompany.com"
                         className="transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary hover:border-primary/50"
                       />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="calendarLink" className="text-sm font-medium text-foreground flex items-center">
+                        <Calendar className="w-4 h-4 mr-1" />
+                        Calendar Booking Link *
+                      </Label>
+                      <Input
+                        id="calendarLink"
+                        value={formData.calendarLink}
+                        onChange={(e) => updateFormData("calendarLink", e.target.value)}
+                        placeholder="https://calendly.com/yourname or https://cal.com/yourname"
+                        className="transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary hover:border-primary/50"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        {registrationType === "service_provider" 
+                          ? "Realtors will use this to book demos, consultations, and onboarding calls"
+                          : "Realtors will use this to book consultation calls and partnership meetings"
+                        }
+                      </p>
+                      {errors.calendarLink && (
+                        <p className="text-sm text-destructive animate-fade-in bg-destructive/10 p-2 rounded-md border border-destructive/20">
+                          {errors.calendarLink}
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>
