@@ -200,7 +200,7 @@ export const ServiceDetailsModal = ({ service, isOpen, onClose }: ServiceDetails
           <div className="flex items-start gap-6">
             <div className="w-24 h-24 bg-white rounded-xl p-4 flex-shrink-0">
               <img
-                src={(service.funnel_content?.media?.[0]?.url) || service.image_url || "/placeholder.svg"}
+                src={service.funnel_content?.media?.[0]?.url || service.image_url || "/placeholder.svg"}
                 alt={service.funnel_content?.headline || service.title}
                 className="w-full h-full object-contain"
               />
@@ -226,11 +226,11 @@ export const ServiceDetailsModal = ({ service, isOpen, onClose }: ServiceDetails
                 </div>
                 <div className="flex items-center gap-1">
                   <TrendingUp className="w-4 h-4" />
-                  <span>{service.funnel_content?.estimatedRoi || service.estimated_roi}x ROI</span>
+                  <span>{service.funnel_content?.estimatedRoi || 3}x ROI</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <Clock className="w-4 h-4" />
-                  <span>{service.funnel_content?.duration || service.duration}</span>
+                  <span>{service.funnel_content?.duration || "30 days"}</span>
                 </div>
               </div>
             </div>
