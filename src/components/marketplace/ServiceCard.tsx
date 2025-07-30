@@ -186,7 +186,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
               {service.description}
             </p>
           </TooltipTrigger>
-          <TooltipContent className="max-w-xs p-3 text-sm z-50">
+          <TooltipContent className="max-w-xs p-3 text-sm text-muted-foreground rounded-lg z-50">
             <p>{service.description}</p>
           </TooltipContent>
         </Tooltip>
