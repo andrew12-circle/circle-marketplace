@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { VendorPricingModal } from '@/components/marketplace/VendorPricingModal';
+import { ServiceImageUpload } from '@/components/marketplace/ServiceImageUpload';
 import { 
   Calendar, 
   Clock, 
@@ -828,15 +829,10 @@ export const VendorDashboard = () => {
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="service-image">Featured Image URL</Label>
-                    <Input
-                      id="service-image"
-                      value={serviceForm.image_url}
-                      onChange={(e) => setServiceForm(prev => ({ ...prev, image_url: e.target.value }))}
-                      placeholder="https://example.com/your-service-image.jpg"
-                    />
-                  </div>
+                  <ServiceImageUpload
+                    value={serviceForm.image_url}
+                    onChange={(url) => setServiceForm(prev => ({ ...prev, image_url: url }))}
+                  />
 
                   <div className="flex items-center space-x-2">
                     <Switch
