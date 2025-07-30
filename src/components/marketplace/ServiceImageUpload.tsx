@@ -165,7 +165,7 @@ export const ServiceImageUpload = ({ value, onChange }: ServiceImageUploadProps)
           <input
             ref={fileInputRef}
             type="file"
-            accept="image/svg+xml,image/png,image/jpeg,image/jpg,.svg,.png,.jpg,.jpeg"
+            accept="image/*"
             onChange={handleFileSelect}
             className="hidden"
           />
