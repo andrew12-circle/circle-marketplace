@@ -32,8 +32,10 @@ import {
   Heart,
   Award,
   ChevronRight,
-  Play
+  Play,
+  Menu
 } from "lucide-react";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 
 // Mock data - replace with actual data
 const mockCourses = [
@@ -1347,9 +1349,9 @@ export const Academy = () => {
   };
 
   const renderCoursesView = () => (
-    <div className="flex-1 p-8 max-w-7xl">
+    <div className="flex-1 p-4 md:p-8 max-w-7xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-4xl font-bold text-foreground mb-2">Courses</h1>
+        <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">Courses</h1>
         <p className="text-muted-foreground">Master real estate with our comprehensive courses</p>
       </div>
 
@@ -1361,8 +1363,8 @@ export const Academy = () => {
         <>
           {/* Featured Courses */}
           <div className="mb-12">
-            <h2 className="text-2xl font-bold text-foreground mb-6">🔥 Featured Courses</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <h2 className="text-xl md:text-2xl font-bold text-foreground mb-6">🔥 Featured Courses</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {featuredCourses.map((course) => (
                 <CourseCard key={course.id} course={course} onEnroll={enrollInCourse} />
               ))}
@@ -1371,8 +1373,8 @@ export const Academy = () => {
 
           {/* Free Courses */}
           <div className="mb-12">
-            <h2 className="text-2xl font-bold text-foreground mb-6">🎁 Free Courses</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <h2 className="text-xl md:text-2xl font-bold text-foreground mb-6">🎁 Free Courses</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {freeCourses.map((course) => (
                 <CourseCard key={course.id} course={course} onEnroll={enrollInCourse} />
               ))}
@@ -1381,8 +1383,8 @@ export const Academy = () => {
 
           {/* Premium Courses */}
           <div className="mb-12">
-            <h2 className="text-2xl font-bold text-foreground mb-6">💎 Premium Courses</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <h2 className="text-xl md:text-2xl font-bold text-foreground mb-6">💎 Premium Courses</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {paidCourses.map((course) => (
                 <CourseCard key={course.id} course={course} onEnroll={enrollInCourse} />
               ))}
@@ -1423,36 +1425,44 @@ export const Academy = () => {
   };
 
   return (
-    <div className="flex h-screen bg-white">
-      <AcademySidebar
-        activeView={activeView}
-        onViewChange={setActiveView}
-      />
-      
-      <div className="flex-1 overflow-auto">
-        {renderContent()}
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full bg-white">
+        {/* Mobile Header with Sidebar Trigger */}
+        <header className="fixed top-0 left-0 right-0 z-50 h-14 bg-white border-b flex items-center px-4 md:hidden">
+          <SidebarTrigger className="mr-2" />
+          <h1 className="text-lg font-semibold">Academy</h1>
+        </header>
+
+        <AcademySidebar
+          activeView={activeView}
+          onViewChange={setActiveView}
+        />
+        
+        <div className="flex-1 overflow-auto pt-14 md:pt-0">
+          {renderContent()}
+        </div>
+
+        <VideoPlayerModal
+          video={selectedVideo}
+          isOpen={isVideoModalOpen}
+          onClose={() => setIsVideoModalOpen(false)}
+          videoUrl={currentVideoUrl}
+        />
+
+        <PodcastPlayerModal
+          podcast={selectedPodcast}
+          isOpen={isPodcastModalOpen}
+          onClose={() => setIsPodcastModalOpen(false)}
+          audioUrl={currentPodcastUrl}
+        />
+
+        <BookReaderModal
+          book={selectedBook}
+          isOpen={isBookModalOpen}
+          onClose={() => setIsBookModalOpen(false)}
+          contentUrl={currentBookUrl}
+        />
       </div>
-
-      <VideoPlayerModal
-        video={selectedVideo}
-        isOpen={isVideoModalOpen}
-        onClose={() => setIsVideoModalOpen(false)}
-        videoUrl={currentVideoUrl}
-      />
-
-      <PodcastPlayerModal
-        podcast={selectedPodcast}
-        isOpen={isPodcastModalOpen}
-        onClose={() => setIsPodcastModalOpen(false)}
-        audioUrl={currentPodcastUrl}
-      />
-
-      <BookReaderModal
-        book={selectedBook}
-        isOpen={isBookModalOpen}
-        onClose={() => setIsBookModalOpen(false)}
-        contentUrl={currentBookUrl}
-      />
-    </div>
+    </SidebarProvider>
   );
 };
