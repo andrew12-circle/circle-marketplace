@@ -41,6 +41,7 @@ import {
   ShoppingCart,
   Eye
 } from 'lucide-react';
+import { ServiceFunnelModal } from './ServiceFunnelModal';
 
 interface MediaItem {
   id: string;
@@ -128,6 +129,7 @@ interface ServiceFunnelEditorProps {
 
 export const ServiceFunnelEditor = ({ funnelContent, onChange }: ServiceFunnelEditorProps) => {
   const [activeTab, setActiveTab] = useState('hero');
+  const [showAgentView, setShowAgentView] = useState(false);
 
   const updateContent = (path: string, value: any) => {
     const keys = path.split('.');
@@ -865,10 +867,21 @@ export const ServiceFunnelEditor = ({ funnelContent, onChange }: ServiceFunnelEd
         {/* Live Preview Panel - Also Scrollable */}
         <div className="space-y-6 overflow-y-auto pl-4 max-h-[calc(100vh-12rem)] border-l">
           <div className="max-w-4xl max-h-[80vh] overflow-y-auto border rounded-lg bg-background">
-            <h3 className="font-semibold p-4 border-b flex items-center gap-2">
-              <Eye className="w-4 h-4" />
-              What Realtors See (Live Preview)
-            </h3>
+            <div className="p-4 border-b flex items-center justify-between">
+              <h3 className="font-semibold flex items-center gap-2">
+                <Eye className="w-4 h-4" />
+                What Realtors See (Live Preview)
+              </h3>
+              <Button 
+                onClick={() => setShowAgentView(true)}
+                variant="outline" 
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                <ExternalLink className="w-4 h-4" />
+                View as Agent
+              </Button>
+            </div>
             
             {/* Full Funnel Modal Preview */}
             <div className="p-0">
@@ -1082,6 +1095,43 @@ export const ServiceFunnelEditor = ({ funnelContent, onChange }: ServiceFunnelEd
           </div>
         </div>
       </div>
+
+      {/* Full Screen Agent View Modal */}
+      <ServiceFunnelModal
+        isOpen={showAgentView}
+        onClose={() => setShowAgentView(false)}
+        service={{
+          id: 'preview',
+          title: funnelContent.headline || 'Service Preview',
+          description: funnelContent.heroDescription,
+          category: 'Marketing',
+          price: funnelContent.packages[0]?.price?.toString() || '299',
+          is_featured: true,
+          is_top_pick: true,
+          contribution_amount: '50',
+          vendor: {
+            name: 'Your Company',
+            rating: 5.0,
+            review_count: 150,
+            is_verified: true
+          },
+          funnel_content: {
+            headline: funnelContent.headline,
+            subHeadline: funnelContent.subheadline,
+            benefits: funnelContent.whyChooseUs.benefits,
+            packages: funnelContent.packages,
+            testimonials: funnelContent.socialProof.testimonials,
+            stats: funnelContent.socialProof.stats,
+            estimatedRoi: funnelContent.estimatedRoi,
+            duration: funnelContent.duration,
+            callToAction: {
+              title: funnelContent.callToAction.primaryHeadline,
+              description: funnelContent.callToAction.primaryDescription,
+              buttonText: funnelContent.callToAction.primaryButtonText
+            }
+          }
+        }}
+      />
     </div>
   );
 };
