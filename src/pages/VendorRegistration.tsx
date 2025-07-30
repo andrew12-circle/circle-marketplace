@@ -164,6 +164,15 @@ export const VendorRegistration = () => {
     updateFormData(field, newStates);
   };
 
+  const handleNationwideToggle = (field: "serviceStates" | "licenseStates") => {
+    const currentStates = formData[field];
+    const isNationwide = currentStates.length === US_STATES.length;
+    
+    // If already nationwide (all states selected), clear all. Otherwise, select all.
+    const newStates = isNationwide ? [] : [...US_STATES];
+    updateFormData(field, newStates);
+  };
+
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
@@ -488,7 +497,22 @@ export const VendorRegistration = () => {
                   </div>
                   
                   <div className="space-y-4">
-                    <Label className="text-sm font-medium text-foreground">States You Service</Label>
+                    <div className="flex items-center justify-between">
+                      <Label className="text-sm font-medium text-foreground">States You Service</Label>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleNationwideToggle("serviceStates")}
+                        className={`transition-all duration-300 ${
+                          formData.serviceStates.length === US_STATES.length
+                            ? "bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-md"
+                            : "hover:bg-primary/10 hover:border-primary/30"
+                        }`}
+                      >
+                        {formData.serviceStates.length === US_STATES.length ? "🇺🇸 Clear All" : "🇺🇸 Nationwide"}
+                      </Button>
+                    </div>
                     <div className="bg-secondary/30 rounded-lg p-4 border border-secondary/50">
                       <div className="grid grid-cols-6 md:grid-cols-10 gap-2">
                         {US_STATES.map((state, index) => (
@@ -509,6 +533,7 @@ export const VendorRegistration = () => {
                           </Button>
                         ))}
                       </div>
+                      </div>
                     </div>
                   </div>
                   
@@ -527,136 +552,169 @@ export const VendorRegistration = () => {
                   </div>
                 </div>
 
-              {/* Professional Credentials */}
-              {(formData.vendorType === "lender" || formData.vendorType === "real_estate" || formData.vendorType === "attorney") && (
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold flex items-center">
-                    <CreditCard className="w-5 h-5 mr-2" />
-                    Professional Credentials
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="licenseNumber">License Number</Label>
-                      <Input
-                        id="licenseNumber"
-                        value={formData.licenseNumber}
-                        onChange={(e) => updateFormData("licenseNumber", e.target.value)}
-                        placeholder="License #"
-                      />
+                {/* Professional Credentials */}
+                {(formData.vendorType === "lender" || formData.vendorType === "real_estate" || formData.vendorType === "attorney") && (
+                  <div className="space-y-6 animate-fade-in">
+                    <div className="flex items-center space-x-3 mb-6">
+                      <div className="p-2 rounded-lg bg-gradient-to-br from-primary/10 to-accent/10">
+                        <CreditCard className="w-6 h-6 text-primary" />
+                      </div>
+                      <h3 className="text-xl font-semibold text-foreground">Professional Credentials</h3>
                     </div>
-                    {formData.vendorType === "lender" && (
-                      <div>
-                        <Label htmlFor="nmlsId">NMLS ID</Label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <Label htmlFor="licenseNumber" className="text-sm font-medium text-foreground">
+                          License Number
+                        </Label>
                         <Input
-                          id="nmlsId"
-                          value={formData.nmlsId}
-                          onChange={(e) => updateFormData("nmlsId", e.target.value)}
-                          placeholder="NMLS #"
+                          id="licenseNumber"
+                          value={formData.licenseNumber}
+                          onChange={(e) => updateFormData("licenseNumber", e.target.value)}
+                          placeholder="License #"
+                          className="transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary hover:border-primary/50"
                         />
                       </div>
-                    )}
-                  </div>
-                  
-                  <div>
-                    <Label>Licensed States</Label>
-                    <div className="grid grid-cols-6 md:grid-cols-10 gap-2 mt-2">
-                      {US_STATES.map((state) => (
-                        <Button
-                          key={state}
-                          type="button"
-                          variant={formData.licenseStates.includes(state) ? "default" : "outline"}
-                          size="sm"
-                          onClick={() => handleStateToggle("licenseStates", state)}
-                          className="h-8"
-                        >
-                          {state}
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Team Members Upload Section - For All Vendor Types */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold flex items-center">
-                  <FileSpreadsheet className="w-5 h-5 mr-2" />
-                  Team Members Registration
-                </h3>
-                <div className="bg-secondary/50 rounded-lg p-4 space-y-4">
-                  <p className="text-sm text-muted-foreground">
-                    Upload details for all team members, agents, representatives, or staff who will be working under your company. 
-                    This could include loan officers, inspectors, agents, sales reps, or any other team members who provide services.
-                  </p>
-                    
-                    <div className="flex flex-col sm:flex-row gap-3">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={downloadTeamTemplate}
-                        className="flex items-center"
-                      >
-                        <Download className="w-4 h-4 mr-2" />
-                        Download Team Template
-                      </Button>
-                      
-                      <div className="flex-1">
-                        <Label htmlFor="teamFile" className="sr-only">Upload Team Spreadsheet</Label>
-                        <div className="relative">
+                      {formData.vendorType === "lender" && (
+                        <div className="space-y-2">
+                          <Label htmlFor="nmlsId" className="text-sm font-medium text-foreground">
+                            NMLS ID
+                          </Label>
                           <Input
-                            id="teamFile"
-                            type="file"
-                            accept=".csv,.xls,.xlsx"
-                            onChange={handleFileUpload}
-                            className="hidden"
+                            id="nmlsId"
+                            value={formData.nmlsId}
+                            onChange={(e) => updateFormData("nmlsId", e.target.value)}
+                            placeholder="NMLS #"
+                            className="transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary hover:border-primary/50"
                           />
-                          <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => document.getElementById("teamFile")?.click()}
-                            className="w-full justify-start"
-                          >
-                            <Upload className="w-4 h-4 mr-2" />
-                            {formData.teamMembersFile 
-                              ? `Uploaded: ${formData.teamMembersFile.name}`
-                              : "Upload Completed Template"
-                            }
-                          </Button>
                         </div>
-                      </div>
+                      )}
                     </div>
-
-                    {formData.teamMembersFile && (
-                      <div className="bg-background rounded border p-3">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-2">
-                            <FileSpreadsheet className="w-4 h-4 text-green-600" />
-                            <span className="text-sm font-medium">{formData.teamMembersFile.name}</span>
-                            <Badge variant="secondary" className="text-xs">
-                              {(formData.teamMembersFile.size / 1024).toFixed(1)} KB
-                            </Badge>
-                          </div>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => updateFormData("teamMembersFile", null)}
-                          >
-                            Remove
-                          </Button>
+                    
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-sm font-medium text-foreground">Licensed States</Label>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleNationwideToggle("licenseStates")}
+                          className={`transition-all duration-300 ${
+                            formData.licenseStates.length === US_STATES.length
+                              ? "bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-md"
+                              : "hover:bg-primary/10 hover:border-primary/30"
+                          }`}
+                        >
+                          {formData.licenseStates.length === US_STATES.length ? "🇺🇸 Clear All" : "🇺🇸 Nationwide"}
+                        </Button>
+                      </div>
+                      <div className="bg-secondary/30 rounded-lg p-4 border border-secondary/50">
+                        <div className="grid grid-cols-6 md:grid-cols-10 gap-2">
+                          {US_STATES.map((state, index) => (
+                            <Button
+                              key={state}
+                              type="button"
+                              variant={formData.licenseStates.includes(state) ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => handleStateToggle("licenseStates", state)}
+                              className={`h-10 text-xs font-medium transition-all duration-300 ${
+                                formData.licenseStates.includes(state)
+                                  ? "bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-lg"
+                                  : "hover:bg-primary/10 hover:border-primary/30"
+                              }`}
+                              style={{ animationDelay: `${index * 20}ms` }}
+                            >
+                              {state}
+                            </Button>
+                          ))}
                         </div>
                       </div>
-                    )}
-
-                    <div className="text-xs text-muted-foreground space-y-1">
-                      <p>• Template includes: Name, Title/Role, Email, Phone, License/Cert Number, License States, Specialties, Experience</p>
-                      <p>• Accepted formats: CSV, Excel (.xls, .xlsx)</p>
-                      <p>• Maximum file size: 5MB</p>
-                      <p>• All team members will be verified individually based on their roles</p>
-                      <p>• Examples: Loan Officers, Home Inspectors, Insurance Agents, Title Reps, Sales Staff, etc.</p>
                     </div>
                   </div>
-                </div>
+                )}
+
+                {/* Team Members Upload Section - For All Vendor Types */}
+                <div className="space-y-6 animate-fade-in">
+                  <div className="flex items-center space-x-3 mb-6">
+                    <div className="p-2 rounded-lg bg-gradient-to-br from-secondary/10 to-accent/10">
+                      <FileSpreadsheet className="w-6 h-6 text-secondary" />
+                    </div>
+                    <h3 className="text-xl font-semibold text-foreground">Team Members Registration</h3>
+                  </div>
+                  <div className="bg-secondary/20 rounded-lg p-6 border border-secondary/30 space-y-4">
+                    <p className="text-sm text-muted-foreground">
+                      Upload details for all team members, agents, representatives, or staff who will be working under your company. 
+                      This could include loan officers, inspectors, agents, sales reps, or any other team members who provide services.
+                    </p>
+                      
+                      <div className="flex flex-col sm:flex-row gap-3">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={downloadTeamTemplate}
+                          className="flex items-center transition-all duration-300 hover:bg-primary/10 hover:border-primary/30"
+                        >
+                          <Download className="w-4 h-4 mr-2" />
+                          Download Team Template
+                        </Button>
+                        
+                        <div className="flex-1">
+                          <Label htmlFor="teamFile" className="sr-only">Upload Team Spreadsheet</Label>
+                          <div className="relative">
+                            <Input
+                              id="teamFile"
+                              type="file"
+                              accept=".csv,.xls,.xlsx"
+                              onChange={handleFileUpload}
+                              className="hidden"
+                            />
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={() => document.getElementById("teamFile")?.click()}
+                              className="w-full justify-start transition-all duration-300 hover:bg-primary/10 hover:border-primary/30"
+                            >
+                              <Upload className="w-4 h-4 mr-2" />
+                              {formData.teamMembersFile 
+                                ? `Uploaded: ${formData.teamMembersFile.name}`
+                                : "Upload Completed Template"
+                              }
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+
+                      {formData.teamMembersFile && (
+                        <div className="bg-background rounded border p-3 animate-fade-in">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-2">
+                              <FileSpreadsheet className="w-4 h-4 text-green-600" />
+                              <span className="text-sm font-medium">{formData.teamMembersFile.name}</span>
+                              <Badge variant="secondary" className="text-xs">
+                                {(formData.teamMembersFile.size / 1024).toFixed(1)} KB
+                              </Badge>
+                            </div>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => updateFormData("teamMembersFile", null)}
+                              className="hover:bg-destructive/10 hover:text-destructive"
+                            >
+                              Remove
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="text-xs text-muted-foreground space-y-1 bg-accent/5 p-3 rounded-md border border-accent/20">
+                        <p>• Template includes: Name, Title/Role, Email, Phone, License/Cert Number, License States, Specialties, Experience</p>
+                        <p>• Accepted formats: CSV, Excel (.xls, .xlsx)</p>
+                        <p>• Maximum file size: 5MB</p>
+                        <p>• All team members will be verified individually based on their roles</p>
+                        <p>• Examples: Loan Officers, Home Inspectors, Insurance Agents, Title Reps, Sales Staff, etc.</p>
+                      </div>
+                    </div>
+                  </div>
 
               {/* Co-Marketing Specific Fields */}
               {formData.isCoMarketing && (
@@ -700,69 +758,80 @@ export const VendorRegistration = () => {
                 </div>
               )}
 
-              {/* Terms and Conditions */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Terms & Agreements</h3>
-                <div className="space-y-3">
-                  <div className="flex items-start space-x-2">
-                    <Checkbox
-                      id="agreeToTerms"
-                      checked={formData.agreeToTerms}
-                      onCheckedChange={(checked) => updateFormData("agreeToTerms", checked)}
-                    />
-                    <Label htmlFor="agreeToTerms" className="text-sm leading-tight">
-                      I agree to the Terms of Service, Privacy Policy, and Vendor Agreement. I understand the platform fees and commission structure.
-                    </Label>
+                {/* Terms and Conditions */}
+                <div className="space-y-6 animate-fade-in">
+                  <div className="flex items-center space-x-3 mb-6">
+                    <div className="p-2 rounded-lg bg-gradient-to-br from-primary/10 to-secondary/10">
+                      <CreditCard className="w-6 h-6 text-primary" />
+                    </div>
+                    <h3 className="text-xl font-semibold text-foreground">Terms & Agreements</h3>
                   </div>
-                  {errors.agreeToTerms && <p className="text-sm text-destructive">{errors.agreeToTerms}</p>}
-                  
-                  <div className="flex items-start space-x-2">
-                    <Checkbox
-                      id="agreeToBackground"
-                      checked={formData.agreeToBackground}
-                      onCheckedChange={(checked) => updateFormData("agreeToBackground", checked)}
-                    />
-                    <Label htmlFor="agreeToBackground" className="text-sm leading-tight">
-                      I consent to background verification and credential checks as part of the approval process.
-                    </Label>
-                  </div>
-                </div>
-              </div>
-
-              {/* Submit Button */}
-              <div className="pt-8 animate-fade-in">
-                <div className="bg-gradient-to-r from-primary/5 via-accent/5 to-secondary/5 rounded-xl p-6 border border-primary/10">
-                  <Button 
-                    type="submit" 
-                    size="lg" 
-                    disabled={isSubmitting}
-                    className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 disabled:transform-none disabled:scale-100 h-12 text-lg font-semibold"
-                  >
-                    {isSubmitting ? (
-                      <div className="flex items-center space-x-2">
-                        <div className="w-5 h-5 border-2 border-primary-foreground/20 border-t-primary-foreground rounded-full animate-spin"></div>
-                        <span>Submitting Application...</span>
-                      </div>
-                    ) : (
-                      <div className="flex items-center space-x-2">
-                        <span>Submit Application</span>
-                        <ArrowLeft className="w-5 h-5 rotate-180" />
-                      </div>
+                  <div className="bg-primary/5 rounded-lg p-6 border border-primary/20 space-y-4">
+                    <div className="flex items-start space-x-3">
+                      <Checkbox
+                        id="agreeToTerms"
+                        checked={formData.agreeToTerms}
+                        onCheckedChange={(checked) => updateFormData("agreeToTerms", checked)}
+                        className="mt-0.5"
+                      />
+                      <Label htmlFor="agreeToTerms" className="text-sm leading-tight text-foreground">
+                        I agree to the Terms of Service, Privacy Policy, and Vendor Agreement. I understand the platform fees and commission structure.
+                      </Label>
+                    </div>
+                    {errors.agreeToTerms && (
+                      <p className="text-sm text-destructive animate-fade-in bg-destructive/10 p-2 rounded-md border border-destructive/20">
+                        {errors.agreeToTerms}
+                      </p>
                     )}
-                  </Button>
-                  <div className="text-center mt-4 space-y-2">
-                    <p className="text-sm text-muted-foreground">
-                      🚀 We'll review your application and respond within 24-48 hours
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Our team carefully reviews each application to ensure quality partnerships
-                    </p>
+                    
+                    <div className="flex items-start space-x-3">
+                      <Checkbox
+                        id="agreeToBackground"
+                        checked={formData.agreeToBackground}
+                        onCheckedChange={(checked) => updateFormData("agreeToBackground", checked)}
+                        className="mt-0.5"
+                      />
+                      <Label htmlFor="agreeToBackground" className="text-sm leading-tight text-foreground">
+                        I consent to background verification and credential checks as part of the approval process.
+                      </Label>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
+
+                {/* Submit Button */}
+                <div className="pt-8 animate-fade-in">
+                  <div className="bg-gradient-to-r from-primary/5 via-accent/5 to-secondary/5 rounded-xl p-6 border border-primary/10">
+                    <Button 
+                      type="submit" 
+                      size="lg" 
+                      disabled={isSubmitting}
+                      className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 disabled:transform-none disabled:scale-100 h-12 text-lg font-semibold"
+                    >
+                      {isSubmitting ? (
+                        <div className="flex items-center space-x-2">
+                          <div className="w-5 h-5 border-2 border-primary-foreground/20 border-t-primary-foreground rounded-full animate-spin"></div>
+                          <span>Submitting Application...</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center space-x-2">
+                          <span>Submit Application</span>
+                          <ArrowLeft className="w-5 h-5 rotate-180" />
+                        </div>
+                      )}
+                    </Button>
+                    <div className="text-center mt-4 space-y-2">
+                      <p className="text-sm text-muted-foreground">
+                        🚀 We'll review your application and respond within 24-48 hours
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Our team carefully reviews each application to ensure quality partnerships
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
