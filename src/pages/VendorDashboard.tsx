@@ -488,6 +488,15 @@ export const VendorDashboard = () => {
     setEditingService(null);
   };
 
+  // Check if basic info is complete for auto-advancement
+  const isBasicInfoComplete = () => {
+    return serviceForm.title.trim() !== '' && 
+           serviceForm.category !== '' && 
+           serviceForm.price.trim() !== '' && 
+           serviceForm.description.trim() !== '' && 
+           serviceForm.image_url !== '';
+  };
+
   const openServiceBuilder = (service?: Service) => {
     if (service) {
       setEditingService(service);
@@ -1111,6 +1120,24 @@ export const VendorDashboard = () => {
                      value={serviceForm.image_url}
                      onChange={(url) => setServiceForm(prev => ({ ...prev, image_url: url }))}
                    />
+
+                   {/* Next Step Button - Appears when basic info is complete */}
+                   {isBasicInfoComplete() && (
+                     <div className="pt-4 border-t">
+                       <div className="flex items-center justify-between">
+                         <div className="text-sm text-muted-foreground">
+                           ✅ Basic information complete! Ready to create your funnel page.
+                         </div>
+                         <Button 
+                           onClick={() => setShowFunnelEditor(true)}
+                           className="bg-gradient-to-r from-primary to-accent text-white"
+                         >
+                           <Layout className="w-4 h-4 mr-2" />
+                           Next: Create Funnel Page
+                         </Button>
+                       </div>
+                     </div>
+                   )}
                  </div>
                )}
 
