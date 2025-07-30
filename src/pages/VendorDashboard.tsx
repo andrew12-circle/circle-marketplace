@@ -14,6 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { VendorPricingModal } from '@/components/marketplace/VendorPricingModal';
 import { ServiceImageUpload } from '@/components/marketplace/ServiceImageUpload';
+import { ServiceFunnelEditor } from '@/components/marketplace/ServiceFunnelEditor';
 import { 
   Calendar, 
   Clock, 
@@ -54,9 +55,52 @@ interface Service {
   funnel_content?: {
     headline: string;
     subheadline: string;
-    features: string[];
-    testimonials: Array<{ name: string; text: string; role: string }>;
-    call_to_action: string;
+    heroDescription: string;
+    whyChooseUs: {
+      title: string;
+      benefits: Array<{
+        icon: string;
+        text: string;
+      }>;
+    };
+    valueProposition: {
+      title: string;
+      items: Array<{
+        icon: string;
+        title: string;
+        description: string;
+      }>;
+    };
+    packages: Array<{
+      id: string;
+      name: string;
+      description: string;
+      price: number;
+      originalPrice?: number;
+      features: string[];
+      popular: boolean;
+    }>;
+    socialProof: Array<{
+      id: string;
+      authorName: string;
+      authorTitle: string;
+      text: string;
+      rating: number;
+      date: string;
+    }>;
+    mediaGallery: Array<{
+      id: string;
+      type: 'image' | 'video' | 'document';
+      url: string;
+      title: string;
+      description?: string;
+    }>;
+    callToAction: string;
+    guarantees: string[];
+    urgency: {
+      enabled: boolean;
+      message: string;
+    };
   };
   created_at: string;
   views: number;
@@ -100,9 +144,52 @@ export const VendorDashboard = () => {
     funnel_content: {
       headline: '',
       subheadline: '',
-      features: [''],
-      testimonials: [{ name: '', text: '', role: '' }],
-      call_to_action: 'Book a Demo'
+      heroDescription: '',
+      whyChooseUs: {
+        title: 'Why Choose Our Service?',
+        benefits: [
+          { icon: 'check', text: 'Proven results' },
+          { icon: 'check', text: 'Expert support' },
+          { icon: 'check', text: 'Fast implementation' }
+        ]
+      },
+      valueProposition: {
+        title: 'What You\'ll Get',
+        items: [
+          {
+            icon: 'target',
+            title: 'Complete Solution',
+            description: 'Everything you need to succeed'
+          }
+        ]
+      },
+      packages: [
+        {
+          id: 'standard',
+          name: 'Standard Package',
+          description: 'Perfect for most businesses',
+          price: 299,
+          features: ['Core features', 'Email support', 'Monthly updates'],
+          popular: true
+        }
+      ],
+      socialProof: [
+        {
+          id: '1',
+          authorName: 'John Smith',
+          authorTitle: 'Real Estate Agent',
+          text: 'This service transformed my business...',
+          rating: 5,
+          date: new Date().toLocaleDateString()
+        }
+      ],
+      mediaGallery: [],
+      callToAction: 'Get Started Today',
+      guarantees: ['30-day money back guarantee', '24/7 support'],
+      urgency: {
+        enabled: false,
+        message: 'Limited time offer!'
+      }
     }
   });
 
@@ -153,50 +240,52 @@ export const VendorDashboard = () => {
           funnel_content: {
             headline: 'Close More Deals with Smart CRM Automation',
             subheadline: 'Automate your lead nurturing and never miss a follow-up again',
-            features: [
-              'Automated email sequences for different lead types',
-              'Smart lead scoring and prioritization',
-              'Real estate transaction pipeline management',
-              'Integration with MLS and showing platforms'
-            ],
-            testimonials: [
+            heroDescription: 'Complete CRM solution with automated email campaigns, lead scoring, and real estate specific workflows.',
+            whyChooseUs: {
+              title: 'Why Choose Our CRM?',
+              benefits: [
+                { icon: 'check', text: 'Proven results' },
+                { icon: 'check', text: 'Expert support' },
+                { icon: 'check', text: 'Fast implementation' }
+              ]
+            },
+            valueProposition: {
+              title: 'What You\'ll Get',
+              items: [
+                {
+                  icon: 'target',
+                  title: 'Complete Solution',
+                  description: 'Everything you need to succeed'
+                }
+              ]
+            },
+            packages: [
               {
-                name: 'Sarah Johnson',
+                id: 'standard',
+                name: 'Standard Package',
+                description: 'Perfect for most businesses',
+                price: 299,
+                features: ['Core features', 'Email support', 'Monthly updates'],
+                popular: true
+              }
+            ],
+            socialProof: [
+              {
+                id: '1',
+                authorName: 'Sarah Johnson',
+                authorTitle: 'Top Producer, Keller Williams',
                 text: 'Increased my conversions by 40% in the first month!',
-                role: 'Top Producer, Keller Williams'
+                rating: 5,
+                date: new Date().toLocaleDateString()
               }
             ],
-            call_to_action: 'Start Free Trial'
-          }
-        },
-        {
-          id: '2',
-          title: 'Premium Yard Signs',
-          description: 'High-quality, weather-resistant yard signs with custom branding and fast turnaround.',
-          category: 'signs_materials',
-          price: '$45 each',
-          pricing_model: 'one_time',
-          is_featured: false,
-          views: 890,
-          conversions: 67,
-          created_at: '2024-01-10T00:00:00Z',
-          funnel_content: {
-            headline: 'Professional Yard Signs That Get Noticed',
-            subheadline: 'Make every listing stand out with premium quality signs',
-            features: [
-              '4mm corrugated plastic - weatherproof',
-              'Full-color, double-sided printing',
-              'Custom branding with your photo and contact info',
-              '24-48 hour production time'
-            ],
-            testimonials: [
-              {
-                name: 'Mike Rodriguez',
-                text: 'These signs look amazing and really help my listings pop!',
-                role: 'Real Estate Agent'
-              }
-            ],
-            call_to_action: 'Order Now'
+            mediaGallery: [],
+            callToAction: 'Start Free Trial',
+            guarantees: ['30-day money back guarantee', '24/7 support'],
+            urgency: {
+              enabled: false,
+              message: 'Limited time offer!'
+            }
           }
         }
       ];
@@ -234,9 +323,52 @@ export const VendorDashboard = () => {
       funnel_content: {
         headline: '',
         subheadline: '',
-        features: [''],
-        testimonials: [{ name: '', text: '', role: '' }],
-        call_to_action: 'Book a Demo'
+        heroDescription: '',
+        whyChooseUs: {
+          title: 'Why Choose Our Service?',
+          benefits: [
+            { icon: 'check', text: 'Proven results' },
+            { icon: 'check', text: 'Expert support' },
+            { icon: 'check', text: 'Fast implementation' }
+          ]
+        },
+        valueProposition: {
+          title: 'What You\'ll Get',
+          items: [
+            {
+              icon: 'target',
+              title: 'Complete Solution',
+              description: 'Everything you need to succeed'
+            }
+          ]
+        },
+        packages: [
+          {
+            id: 'standard',
+            name: 'Standard Package',
+            description: 'Perfect for most businesses',
+            price: 299,
+            features: ['Core features', 'Email support', 'Monthly updates'],
+            popular: true
+          }
+        ],
+        socialProof: [
+          {
+            id: '1',
+            authorName: 'John Smith',
+            authorTitle: 'Real Estate Agent',
+            text: 'This service transformed my business...',
+            rating: 5,
+            date: new Date().toLocaleDateString()
+          }
+        ],
+        mediaGallery: [],
+        callToAction: 'Get Started Today',
+        guarantees: ['30-day money back guarantee', '24/7 support'],
+        urgency: {
+          enabled: false,
+          message: 'Limited time offer!'
+        }
       }
     });
     setCurrentStep('basic');
@@ -257,9 +389,52 @@ export const VendorDashboard = () => {
         funnel_content: service.funnel_content || {
           headline: '',
           subheadline: '',
-          features: [''],
-          testimonials: [{ name: '', text: '', role: '' }],
-          call_to_action: 'Book a Demo'
+          heroDescription: '',
+          whyChooseUs: {
+            title: 'Why Choose Our Service?',
+            benefits: [
+              { icon: 'check', text: 'Proven results' },
+              { icon: 'check', text: 'Expert support' },
+              { icon: 'check', text: 'Fast implementation' }
+            ]
+          },
+          valueProposition: {
+            title: 'What You\'ll Get',
+            items: [
+              {
+                icon: 'target',
+                title: 'Complete Solution',
+                description: 'Everything you need to succeed'
+              }
+            ]
+          },
+          packages: [
+            {
+              id: 'standard',
+              name: 'Standard Package',
+              description: 'Perfect for most businesses',
+              price: 299,
+              features: ['Core features', 'Email support', 'Monthly updates'],
+              popular: true
+            }
+          ],
+          socialProof: [
+            {
+              id: '1',
+              authorName: 'John Smith',
+              authorTitle: 'Real Estate Agent',
+              text: 'This service transformed my business...',
+              rating: 5,
+              date: new Date().toLocaleDateString()
+            }
+          ],
+          mediaGallery: [],
+          callToAction: 'Get Started Today',
+          guarantees: ['30-day money back guarantee', '24/7 support'],
+          urgency: {
+            enabled: false,
+            message: 'Limited time offer!'
+          }
         }
       });
     } else {
@@ -271,68 +446,6 @@ export const VendorDashboard = () => {
   const closeServiceBuilder = () => {
     setShowServiceBuilder(false);
     resetServiceForm();
-  };
-
-  const addFeature = () => {
-    setServiceForm(prev => ({
-      ...prev,
-      funnel_content: {
-        ...prev.funnel_content,
-        features: [...prev.funnel_content.features, '']
-      }
-    }));
-  };
-
-  const removeFeature = (index: number) => {
-    setServiceForm(prev => ({
-      ...prev,
-      funnel_content: {
-        ...prev.funnel_content,
-        features: prev.funnel_content.features.filter((_, i) => i !== index)
-      }
-    }));
-  };
-
-  const updateFeature = (index: number, value: string) => {
-    setServiceForm(prev => ({
-      ...prev,
-      funnel_content: {
-        ...prev.funnel_content,
-        features: prev.funnel_content.features.map((f, i) => i === index ? value : f)
-      }
-    }));
-  };
-
-  const addTestimonial = () => {
-    setServiceForm(prev => ({
-      ...prev,
-      funnel_content: {
-        ...prev.funnel_content,
-        testimonials: [...prev.funnel_content.testimonials, { name: '', text: '', role: '' }]
-      }
-    }));
-  };
-
-  const removeTestimonial = (index: number) => {
-    setServiceForm(prev => ({
-      ...prev,
-      funnel_content: {
-        ...prev.funnel_content,
-        testimonials: prev.funnel_content.testimonials.filter((_, i) => i !== index)
-      }
-    }));
-  };
-
-  const updateTestimonial = (index: number, field: string, value: string) => {
-    setServiceForm(prev => ({
-      ...prev,
-      funnel_content: {
-        ...prev.funnel_content,
-        testimonials: prev.funnel_content.testimonials.map((t, i) => 
-          i === index ? { ...t, [field]: value } : t
-        )
-      }
-    }));
   };
 
   const saveService = () => {
@@ -557,16 +670,6 @@ export const VendorDashboard = () => {
                           <Badge variant="outline" className="text-xs">
                             {service.category.replace('_', ' ')}
                           </Badge>
-                          {service.funnel_content?.features && service.funnel_content.features.slice(0, 2).map((feature) => (
-                            <Badge key={feature} variant="outline" className="text-xs">
-                              {feature}
-                            </Badge>
-                          ))}
-                          {service.funnel_content?.features && service.funnel_content.features.length > 2 && (
-                            <span className="text-xs text-muted-foreground">
-                              +{service.funnel_content.features.length - 2} more
-                            </span>
-                          )}
                         </div>
                       </div>
 
@@ -846,127 +949,10 @@ export const VendorDashboard = () => {
 
               {/* Funnel Page Step */}
               {currentStep === 'funnel' && (
-                <div className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="funnel-headline">Main Headline *</Label>
-                      <Input
-                        id="funnel-headline"
-                        value={serviceForm.funnel_content.headline}
-                        onChange={(e) => setServiceForm(prev => ({
-                          ...prev,
-                          funnel_content: { ...prev.funnel_content, headline: e.target.value }
-                        }))}
-                        placeholder="e.g., Close More Deals with Smart CRM Automation"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="call-to-action">Call to Action Button</Label>
-                      <Input
-                        id="call-to-action"
-                        value={serviceForm.funnel_content.call_to_action}
-                        onChange={(e) => setServiceForm(prev => ({
-                          ...prev,
-                          funnel_content: { ...prev.funnel_content, call_to_action: e.target.value }
-                        }))}
-                        placeholder="e.g., Start Free Trial, Book a Demo"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="funnel-subheadline">Subheadline</Label>
-                    <Input
-                      id="funnel-subheadline"
-                      value={serviceForm.funnel_content.subheadline}
-                      onChange={(e) => setServiceForm(prev => ({
-                        ...prev,
-                        funnel_content: { ...prev.funnel_content, subheadline: e.target.value }
-                      }))}
-                      placeholder="e.g., Automate your lead nurturing and never miss a follow-up again"
-                    />
-                  </div>
-
-                  {/* Features */}
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <Label>Key Features</Label>
-                      <Button type="button" variant="outline" size="sm" onClick={addFeature}>
-                        <Plus className="w-4 h-4 mr-2" />
-                        Add Feature
-                      </Button>
-                    </div>
-                    {serviceForm.funnel_content.features.map((feature, index) => (
-                      <div key={index} className="flex items-center space-x-2">
-                        <Input
-                          value={feature}
-                          onChange={(e) => updateFeature(index, e.target.value)}
-                          placeholder="Describe a key feature or benefit"
-                          className="flex-1"
-                        />
-                        {serviceForm.funnel_content.features.length > 1 && (
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={() => removeFeature(index)}
-                          >
-                            <X className="w-4 h-4" />
-                          </Button>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Testimonials */}
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <Label>Customer Testimonials</Label>
-                      <Button type="button" variant="outline" size="sm" onClick={addTestimonial}>
-                        <Plus className="w-4 h-4 mr-2" />
-                        Add Testimonial
-                      </Button>
-                    </div>
-                    {serviceForm.funnel_content.testimonials.map((testimonial, index) => (
-                      <Card key={index} className="p-4">
-                        <div className="space-y-3">
-                          <div className="flex items-center justify-between">
-                            <h4 className="font-medium">Testimonial {index + 1}</h4>
-                            {serviceForm.funnel_content.testimonials.length > 1 && (
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                onClick={() => removeTestimonial(index)}
-                              >
-                                <X className="w-4 h-4" />
-                              </Button>
-                            )}
-                          </div>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            <Input
-                              value={testimonial.name}
-                              onChange={(e) => updateTestimonial(index, 'name', e.target.value)}
-                              placeholder="Customer name"
-                            />
-                            <Input
-                              value={testimonial.role}
-                              onChange={(e) => updateTestimonial(index, 'role', e.target.value)}
-                              placeholder="Customer role/title"
-                            />
-                          </div>
-                          <Textarea
-                            value={testimonial.text}
-                            onChange={(e) => updateTestimonial(index, 'text', e.target.value)}
-                            placeholder="What did they say about your service?"
-                            rows={2}
-                          />
-                        </div>
-                      </Card>
-                    ))}
-                  </div>
-                </div>
+                <ServiceFunnelEditor
+                  funnelContent={serviceForm.funnel_content}
+                  onChange={(content) => setServiceForm(prev => ({ ...prev, funnel_content: content }))}
+                />
               )}
 
               {/* Preview Step */}
@@ -988,38 +974,37 @@ export const VendorDashboard = () => {
                         </div>
                       </div>
 
-                      {/* Features Section */}
-                      {serviceForm.funnel_content.features.filter(f => f.trim()).length > 0 && (
+                      {/* Value Proposition Section */}
+                      {serviceForm.funnel_content.valueProposition.items.length > 0 && (
                         <div className="space-y-4">
-                          <h2 className="text-2xl font-semibold">Key Features</h2>
+                          <h2 className="text-2xl font-semibold">{serviceForm.funnel_content.valueProposition.title}</h2>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-left">
-                            {serviceForm.funnel_content.features.filter(f => f.trim()).map((feature, index) => (
+                            {serviceForm.funnel_content.valueProposition.items.map((item, index) => (
                               <div key={index} className="flex items-start space-x-2">
                                 <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                                <span>{feature}</span>
+                                <div>
+                                  <h3 className="font-semibold">{item.title}</h3>
+                                  <p className="text-sm text-muted-foreground">{item.description}</p>
+                                </div>
                               </div>
                             ))}
                           </div>
                         </div>
                       )}
 
-                      {/* Testimonials */}
-                      {serviceForm.funnel_content.testimonials.filter(t => t.text.trim()).length > 0 && (
+                      {/* Social Proof */}
+                      {serviceForm.funnel_content.socialProof.length > 0 && (
                         <div className="space-y-4">
                           <h2 className="text-2xl font-semibold">What Our Customers Say</h2>
                           <div className="space-y-4">
-                            {serviceForm.funnel_content.testimonials.filter(t => t.text.trim()).map((testimonial, index) => (
+                            {serviceForm.funnel_content.socialProof.map((proof, index) => (
                               <Card key={index} className="p-4 text-left">
-                                <p className="italic mb-2">"{testimonial.text}"</p>
+                                <p className="italic mb-2">"{proof.text}"</p>
                                 <div className="flex items-center space-x-2">
                                   <Star className="w-4 h-4 text-yellow-500" />
-                                  <span className="font-medium">{testimonial.name || 'Customer'}</span>
-                                  {testimonial.role && (
-                                    <>
-                                      <span className="text-muted-foreground">•</span>
-                                      <span className="text-muted-foreground text-sm">{testimonial.role}</span>
-                                    </>
-                                  )}
+                                  <span className="font-medium">{proof.authorName}</span>
+                                  <span className="text-muted-foreground">•</span>
+                                  <span className="text-muted-foreground text-sm">{proof.authorTitle}</span>
                                 </div>
                               </Card>
                             ))}
@@ -1031,7 +1016,7 @@ export const VendorDashboard = () => {
                       <div className="space-y-4 pt-6 border-t">
                         <h2 className="text-2xl font-semibold">Ready to Get Started?</h2>
                         <Button size="lg" className="bg-gradient-to-r from-primary to-accent text-white">
-                          {serviceForm.funnel_content.call_to_action || 'Book a Demo'}
+                          {serviceForm.funnel_content.callToAction || 'Book a Demo'}
                         </Button>
                         <p className="text-sm text-muted-foreground">
                           {serviceForm.description || 'Your service description will appear here'}
