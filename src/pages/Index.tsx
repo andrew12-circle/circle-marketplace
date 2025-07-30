@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Crown } from "lucide-react";
 import circleLogoUrl from "@/assets/circle-logo.png";
+const newCircleLogoUrl = "/lovable-uploads/97692497-6d98-46a8-b6fc-05cd68bdc160.png";
 import { CartProvider } from "@/contexts/CartContext";
 import { CartDrawer } from "@/components/marketplace/CartDrawer";
 import { UserMenu } from "@/components/UserMenu";
@@ -30,7 +31,7 @@ const Index = () => {
               {/* Logo */}
               <div className="flex items-center gap-2 sm:gap-3">
                 <img 
-                  src={circleLogoUrl} 
+                  src={newCircleLogoUrl} 
                   alt="Circle Logo" 
                   className="w-10 h-10 sm:w-12 sm:h-12 object-contain"
                   style={{
