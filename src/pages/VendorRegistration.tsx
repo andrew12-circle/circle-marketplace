@@ -21,10 +21,14 @@ const VendorRegistration = () => {
 
   // Check URL parameters and auto-select vendor type
   useEffect(() => {
+    console.log('VendorRegistration component mounted');
+    console.log('Search params:', searchParams.toString());
     const typeParam = searchParams.get('type');
+    console.log('Type param:', typeParam);
     if (typeParam === 'service_provider' || typeParam === 'co_marketing') {
       setVendorType(typeParam);
       setStep('form'); // Skip type selection and go directly to form
+      console.log('Auto-selected vendor type:', typeParam);
     }
   }, [searchParams]);
 
