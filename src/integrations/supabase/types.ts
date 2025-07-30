@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_sessions: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          ip_address: unknown | null
+          last_activity: string
+          session_token: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          ip_address?: unknown | null
+          last_activity?: string
+          session_token: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          ip_address?: unknown | null
+          last_activity?: string
+          session_token?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       audit_log: {
         Row: {
           id: string
@@ -399,6 +432,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      login_attempts: {
+        Row: {
+          attempt_time: string
+          email: string
+          id: string
+          ip_address: unknown | null
+          success: boolean
+          user_agent: string | null
+        }
+        Insert: {
+          attempt_time?: string
+          email: string
+          id?: string
+          ip_address?: unknown | null
+          success?: boolean
+          user_agent?: string | null
+        }
+        Update: {
+          attempt_time?: string
+          email?: string
+          id?: string
+          ip_address?: unknown | null
+          success?: boolean
+          user_agent?: string | null
+        }
+        Relationships: []
       }
       orders: {
         Row: {
@@ -1224,6 +1284,10 @@ export type Database = {
         Args: { target_month: string }
         Returns: undefined
       }
+      check_account_lockout: {
+        Args: { user_email: string; client_ip?: unknown }
+        Returns: Json
+      }
       get_public_profile: {
         Args: { profile_id: string }
         Returns: {
@@ -1249,12 +1313,29 @@ export type Database = {
         Args: { video_uuid: string }
         Returns: undefined
       }
+      log_login_attempt: {
+        Args: {
+          user_email: string
+          success: boolean
+          client_ip?: unknown
+          client_user_agent?: string
+        }
+        Returns: undefined
+      }
       trigger_trending_import: {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
       user_has_specialty: {
         Args: { specialty_name: string }
+        Returns: boolean
+      }
+      validate_admin_session: {
+        Args: { session_token: string }
+        Returns: boolean
+      }
+      validate_password_strength: {
+        Args: { password: string }
         Returns: boolean
       }
     }
