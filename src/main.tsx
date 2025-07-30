@@ -22,6 +22,8 @@ import { Pricing } from "./pages/Pricing";
 import { PaymentSuccess } from "./pages/PaymentSuccess";
 import { PaymentCanceled } from "./pages/PaymentCanceled";
 import { ConsultationDemo } from "./pages/ConsultationDemo";
+import { VendorRegistration } from "./pages/VendorRegistration";
+import { VendorDashboard } from "./pages/VendorDashboard";
 import NotFound from "./pages/NotFound";
 
 // Legal pages
@@ -55,6 +57,8 @@ createRoot(document.getElementById("root")!).render(
               <Route path="/payment-success" element={<PaymentSuccess />} />
               <Route path="/payment-canceled" element={<PaymentCanceled />} />
               <Route path="/consultation-demo" element={<ConsultationDemo />} />
+              <Route path="/vendor-registration" element={<VendorRegistration />} />
+              <Route path="/vendor-dashboard" element={<VendorDashboard />} />
               
               {/* Legal routes */}
               <Route path="/legal/terms" element={<TermsOfService />} />
