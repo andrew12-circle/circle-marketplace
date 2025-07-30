@@ -348,17 +348,6 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
         </div>
       </CardContent>
       
-      <ConsultationFlow
-        isOpen={isConsultationFlowOpen}
-        onClose={() => setIsConsultationFlowOpen(false)}
-        service={{
-          id: service.id,
-          title: service.title,
-          vendor: {
-            name: service.vendor.name
-          }
-        }}
-      />
       
       <ServiceFunnelModal
         isOpen={isFunnelModalOpen}
