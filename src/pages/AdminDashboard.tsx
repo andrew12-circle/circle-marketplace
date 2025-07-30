@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Users, Shield, Star } from 'lucide-react';
 import { Navigate } from 'react-router-dom';
 import { ContentPromotionPanel } from '@/components/admin/ContentPromotionPanel';
+import { YouTubeImportPanel } from '@/components/admin/YouTubeImportPanel';
 
 interface UserProfile {
   id: string;
@@ -153,7 +154,10 @@ export default function AdminDashboard() {
         </p>
       </div>
 
-      <ContentPromotionPanel />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <ContentPromotionPanel />
+        <YouTubeImportPanel />
+      </div>
 
       <Card>
         <CardHeader>
