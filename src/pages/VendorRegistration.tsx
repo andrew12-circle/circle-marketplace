@@ -11,6 +11,8 @@ import { Building, ArrowLeft, ShoppingBag, Briefcase } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const VendorRegistration = () => {
+  console.log('=== VendorRegistration Component Started ===');
+  
   const [searchParams] = useSearchParams();
   const [step, setStep] = useState<'type' | 'form'>('type');
   const [vendorType, setVendorType] = useState<'service_provider' | 'co_marketing'>('service_provider');
@@ -19,16 +21,22 @@ const VendorRegistration = () => {
   const { toast } = useToast();
   const { user } = useAuth();
 
+  console.log('Current step:', step);
+  console.log('Current vendorType:', vendorType);
+
   // Check URL parameters and auto-select vendor type
   useEffect(() => {
-    console.log('VendorRegistration component mounted');
+    console.log('=== useEffect triggered ===');
     console.log('Search params:', searchParams.toString());
     const typeParam = searchParams.get('type');
-    console.log('Type param:', typeParam);
+    console.log('Type param from URL:', typeParam);
     if (typeParam === 'service_provider' || typeParam === 'co_marketing') {
+      console.log('Setting vendor type to:', typeParam);
       setVendorType(typeParam);
       setStep('form'); // Skip type selection and go directly to form
-      console.log('Auto-selected vendor type:', typeParam);
+      console.log('Setting step to: form');
+    } else {
+      console.log('No valid type param, staying on type selection');
     }
   }, [searchParams]);
 
@@ -159,16 +167,16 @@ const VendorRegistration = () => {
                 </div>
                 <CardTitle className="text-xl">Service Provider</CardTitle>
                 <CardDescription>
-                  List and sell your professional services to real estate agents
+                  List your professional services for real estate professionals
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2 text-sm text-muted-foreground">
-                  <li>• Create service listings</li>
-                  <li>• Set your own pricing</li>
-                  <li>• Manage bookings and consultations</li>
-                  <li>• Reach real estate professionals</li>
-                  <li>• Track revenue and analytics</li>
+                  <li>• Title & Escrow Services</li>
+                  <li>• Home Inspections & Warranties</li>
+                  <li>• Insurance & Financial Services</li>
+                  <li>• Moving & Handyman Services</li>
+                  <li>• Marketing & Technology Solutions</li>
                 </ul>
                 <Button className="w-full mt-4" variant="outline">
                   Get Started as Service Provider
@@ -185,16 +193,16 @@ const VendorRegistration = () => {
                 </div>
                 <CardTitle className="text-xl">Co-Marketing Partner</CardTitle>
                 <CardDescription>
-                  Partner with agents for lead generation and co-marketing opportunities
+                  Partner with agents for lead generation and referral opportunities
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2 text-sm text-muted-foreground">
-                  <li>• Access agent partnerships</li>
-                  <li>• Co-marketing campaigns</li>
+                  <li>• Mortgage & Lending Partnerships</li>
+                  <li>• Insurance Referral Programs</li>
                   <li>• Lead sharing opportunities</li>
-                  <li>• Lender/mortgage partnerships</li>
-                  <li>• Marketing collaboration tools</li>
+                  <li>• Joint marketing campaigns</li>
+                  <li>• Cross-referral networks</li>
                 </ul>
                 <Button className="w-full mt-4" variant="outline">
                   Join as Co-Marketing Partner
@@ -261,8 +269,8 @@ const VendorRegistration = () => {
           </CardTitle>
           <CardDescription>
             {vendorType === 'service_provider'
-              ? 'Create your business profile and start listing services'
-              : 'Join our co-marketing network for partnership opportunities'
+              ? 'List your services - Title, Insurance, Inspections, Moving, Handyman, and more'
+              : 'Join our referral network for mortgage, insurance, and other partnerships'
             }
           </CardDescription>
         </CardHeader>
@@ -384,7 +392,7 @@ const VendorRegistration = () => {
                   id="specialties"
                   name="specialties"
                   className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                  placeholder="Marketing, Lead Generation, CRM Setup (comma separated)"
+                  placeholder="Title Services, Home Inspection, Insurance, Moving, Handyman, etc."
                   required
                 />
               </div>
