@@ -132,11 +132,14 @@ export const YouTubeImportPanel = () => {
 
     setLoading(true);
     try {
-      // Create a system user for YouTube imports if it doesn't exist
-      const systemUserId = '00000000-0000-0000-0000-000000000000'; // Use a consistent system UUID
+      // Use the current admin user as the creator for YouTube imports
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError || !user) {
+        throw new Error('Must be logged in to import videos');
+      }
       
       const contentData = {
-        creator_id: systemUserId,
+        creator_id: user.id,
         title: videoData.title,
         description: videoData.description,
         content_type: 'video' as const,
