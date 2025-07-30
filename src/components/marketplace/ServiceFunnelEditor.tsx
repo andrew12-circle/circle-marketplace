@@ -46,7 +46,7 @@ interface Package {
   price: number;
   originalPrice?: number;
   features: string[];
-  popular?: boolean;
+  popular: boolean;
 }
 
 interface SocialProofItem {
@@ -82,7 +82,7 @@ interface FunnelContent {
   mediaGallery: MediaItem[];
   callToAction: string;
   guarantees: string[];
-  urgency?: {
+  urgency: {
     enabled: boolean;
     message: string;
   };
@@ -119,7 +119,8 @@ export const ServiceFunnelEditor = ({ funnelContent, onChange }: ServiceFunnelEd
       name: 'New Package',
       description: 'Package description',
       price: 299,
-      features: ['Feature 1', 'Feature 2']
+      features: ['Feature 1', 'Feature 2'],
+      popular: false
     };
     
     updateContent('packages', [...funnelContent.packages, newPackage]);
