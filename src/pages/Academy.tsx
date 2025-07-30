@@ -2,11 +2,14 @@ import { useState, useEffect } from "react";
 import { AcademySidebar } from "@/components/academy/AcademySidebar";
 import { VideoSection } from "@/components/academy/VideoSection";
 import { VideoPlayerModal } from "@/components/academy/VideoPlayerModal";
+import { PodcastSection } from "@/components/academy/PodcastSection";
+import { PodcastPlayerModal } from "@/components/academy/PodcastPlayerModal";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useVideos } from "@/hooks/useVideos";
 import { useChannels } from "@/hooks/useChannels";
+import { usePodcasts } from "@/hooks/usePodcasts";
 import { supabase } from "@/integrations/supabase/client";
 import { 
   GraduationCap, 
@@ -195,6 +198,9 @@ export const Academy = () => {
   const [selectedVideo, setSelectedVideo] = useState<any>(null);
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const [currentVideoUrl, setCurrentVideoUrl] = useState<string>("");
+  const [selectedPodcast, setSelectedPodcast] = useState<any>(null);
+  const [isPodcastModalOpen, setIsPodcastModalOpen] = useState(false);
+  const [currentPodcastUrl, setCurrentPodcastUrl] = useState<string>("");
   const { toast } = useToast();
   
   // Fetch videos using the custom hook
@@ -207,6 +213,11 @@ export const Academy = () => {
   const { channels: featuredChannels } = useChannels({ verified: true, limit: 6 });
   const { channels: newChannels } = useChannels({ orderBy: 'created_at', orderDirection: 'desc', limit: 8 });
   const { channels: allChannels, loading: channelsLoading } = useChannels();
+  
+  // Fetch podcasts using the custom hook
+  const { podcasts: featuredPodcasts } = usePodcasts({ featured: true, limit: 10 });
+  const { podcasts: newPodcasts } = usePodcasts({ orderBy: 'created_at', orderDirection: 'desc', limit: 8 });
+  const { podcasts: allPodcasts, loading: podcastsLoading, incrementPlay } = usePodcasts();
 
   const categories = [
     { id: "courses", label: "Courses", icon: GraduationCap },
@@ -352,6 +363,70 @@ export const Academy = () => {
         variant: "destructive",
       });
     }
+  };
+
+  const handlePlayPodcast = (podcastId: string) => {
+    console.log("handlePlayPodcast called with podcastId:", podcastId);
+    
+    // Find the podcast in our data
+    const podcast = allPodcasts.find(p => p.id === podcastId) || 
+                    featuredPodcasts.find(p => p.id === podcastId) || 
+                    newPodcasts.find(p => p.id === podcastId);
+    
+    console.log("Found podcast:", podcast);
+    
+    if (podcast) {
+      // Increment play count
+      incrementPlay(podcastId);
+      
+      // Get the content URL from Supabase and play in modal
+      supabase
+        .from('content')
+        .select('content_url')
+        .eq('id', podcastId)
+        .single()
+        .then(({ data, error }) => {
+          console.log("Supabase response:", { data, error });
+          
+          if (data?.content_url && !error) {
+            console.log("Setting podcast modal state");
+            setSelectedPodcast(podcast);
+            setCurrentPodcastUrl(data.content_url);
+            setIsPodcastModalOpen(true);
+            
+            toast({
+              title: "Playing Podcast",
+              description: `Now playing: ${podcast.title}`,
+            });
+          } else {
+            toast({
+              title: "Error",
+              description: "Could not load podcast",
+              variant: "destructive",
+            });
+          }
+        });
+    } else {
+      toast({
+        title: "Error", 
+        description: "Podcast not found",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleAddToLibrary = (podcastId: string) => {
+    toast({
+      title: "Added to Library",
+      description: "Podcast saved to your library",
+    });
+  };
+
+  const handleDownloadPodcast = (podcastId: string) => {
+    toast({
+      title: "Download Started",
+      description: "Podcast download has begun",
+    });
   };
 
   const renderVideosView = () => (
@@ -625,6 +700,122 @@ export const Academy = () => {
     </div>
   );
 
+  const renderPodcastsView = () => (
+    <div className="flex-1 p-8 max-w-7xl">
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-4xl font-bold text-foreground mb-2">Podcasts</h1>
+        <p className="text-muted-foreground">
+          Your real estate education on-the-go
+        </p>
+      </div>
+
+      {/* Search and Filter Bar */}
+      <div className="flex gap-4 mb-8">
+        <div className="flex-1 relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+          <input 
+            type="text"
+            placeholder="Search podcasts..."
+            className="w-full pl-10 pr-4 py-2 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+          />
+        </div>
+        <Button variant="outline" className="gap-2">
+          <Filter className="w-4 h-4" />
+          Filters
+        </Button>
+      </div>
+
+      {podcastsLoading ? (
+        <div className="flex justify-center items-center py-12">
+          <div className="text-muted-foreground">Loading podcasts...</div>
+        </div>
+      ) : (
+        <>
+          {/* Featured Shows */}
+          <PodcastSection
+            title="🎯 Featured Shows"
+            subtitle="Hand-picked by real estate experts"
+            podcasts={featuredPodcasts}
+            onPlayPodcast={handlePlayPodcast}
+            onAddToLibrary={handleAddToLibrary}
+            onDownload={handleDownloadPodcast}
+            showSeeAll={true}
+            onSeeAll={() => toast({ title: "See All", description: "Show all featured podcasts" })}
+            size="large"
+          />
+
+          {/* Recently Added */}
+          <PodcastSection
+            title="🆕 New Episodes"
+            subtitle="Latest episodes from your favorite shows"
+            podcasts={newPodcasts}
+            onPlayPodcast={handlePlayPodcast}
+            onAddToLibrary={handleAddToLibrary}
+            onDownload={handleDownloadPodcast}
+            showSeeAll={true}
+            onSeeAll={() => toast({ title: "See All", description: "Show all new episodes" })}
+            size="medium"
+          />
+
+          {/* All Podcasts Grid */}
+          <PodcastSection
+            title="📚 Podcast Library"
+            subtitle="Browse our complete collection of real estate podcasts"
+            podcasts={allPodcasts.slice(0, 12)}
+            onPlayPodcast={handlePlayPodcast}
+            onAddToLibrary={handleAddToLibrary}
+            onDownload={handleDownloadPodcast}
+            showSeeAll={true}
+            onSeeAll={() => toast({ title: "See All", description: "Show all podcasts" })}
+            size="medium"
+            layout="grid"
+          />
+
+          {/* Categories */}
+          <div className="mt-12">
+            <h2 className="text-2xl font-bold text-foreground mb-6">Browse by Category</h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              {[
+                "Lead Generation", "Marketing", "Sales", "Mindset", 
+                "Technology", "Market Trends", "Success Stories", "Industry News",
+                "Coaching", "Team Building", "Personal Branding", "Client Relations"
+              ].map((category) => (
+                <Card 
+                  key={category}
+                  className="p-4 text-center cursor-pointer hover:bg-muted/50 transition-colors"
+                >
+                  <Headphones className="w-6 h-6 mx-auto mb-2 text-muted-foreground" />
+                  <h3 className="font-medium text-sm">{category}</h3>
+                </Card>
+              ))}
+            </div>
+          </div>
+
+          {/* Quick Actions */}
+          <div className="mt-12 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-xl p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-xl font-bold text-foreground mb-2">Never Miss an Episode</h3>
+                <p className="text-muted-foreground">Subscribe to get notified when new podcasts are added</p>
+              </div>
+              <div className="flex gap-3">
+                <Button variant="outline" className="gap-2">
+                  <Heart className="w-4 h-4" />
+                  Follow Shows
+                </Button>
+                <Button className="gap-2">
+                  <Headphones className="w-4 h-4" />
+                  Start Listening
+                </Button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+
   const renderContent = () => {
     console.log("Current activeView:", activeView); // Debug log
     switch (activeView) {
@@ -635,6 +826,9 @@ export const Academy = () => {
       case "channels":
         console.log("Rendering channels view"); // Debug log
         return renderChannelsView();
+      case "podcasts":
+        console.log("Rendering podcasts view"); // Debug log
+        return renderPodcastsView();
       default:
         console.log("Rendering default view for:", activeView); // Debug log
         return (
@@ -662,6 +856,13 @@ export const Academy = () => {
         isOpen={isVideoModalOpen}
         onClose={() => setIsVideoModalOpen(false)}
         videoUrl={currentVideoUrl}
+      />
+
+      <PodcastPlayerModal
+        podcast={selectedPodcast}
+        isOpen={isPodcastModalOpen}
+        onClose={() => setIsPodcastModalOpen(false)}
+        audioUrl={currentPodcastUrl}
       />
     </div>
   );
