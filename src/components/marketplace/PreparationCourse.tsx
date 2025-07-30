@@ -16,6 +16,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { SafeHTML } from '@/utils/htmlSanitizer';
 
 interface PreparationCourseProps {
   consultationId: string;
@@ -237,9 +238,9 @@ export const PreparationCourse = ({ consultationId, serviceTitle, onClose }: Pre
           </div>
         </CardHeader>
         <CardContent>
-          <div 
+          <SafeHTML 
+            html={currentModule.content}
             className="prose max-w-none mb-6"
-            dangerouslySetInnerHTML={{ __html: currentModule.content }}
           />
           <div className="flex justify-between">
             <Button variant="outline" onClick={() => setCurrentModule(null)}>
