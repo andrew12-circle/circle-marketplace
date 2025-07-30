@@ -14,6 +14,8 @@ import { useChannels } from "@/hooks/useChannels";
 import { usePodcasts } from "@/hooks/usePodcasts";
 import { useBooks } from "@/hooks/useBooks";
 import { supabase } from "@/integrations/supabase/client";
+import { Badge } from "@/components/ui/badge";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { 
   GraduationCap, 
   BookOpen, 
@@ -26,7 +28,9 @@ import {
   TrendingUp,
   Sparkles,
   Heart,
-  Award
+  Award,
+  ChevronRight,
+  Play
 } from "lucide-react";
 
 // Mock data - replace with actual data
@@ -779,26 +783,22 @@ export const Academy = () => {
     <div className="flex-1 p-8 max-w-7xl">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-4xl font-bold text-foreground mb-2">Podcasts</h1>
+        <h1 className="text-4xl font-bold text-foreground mb-2">Browse</h1>
         <p className="text-muted-foreground">
-          Your real estate education on-the-go
+          Discover podcasts for real estate professionals
         </p>
       </div>
 
-      {/* Search and Filter Bar */}
-      <div className="flex gap-4 mb-8">
-        <div className="flex-1 relative">
+      {/* Search Bar */}
+      <div className="mb-8">
+        <div className="relative max-w-2xl">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
           <input 
             type="text"
             placeholder="Search podcasts..."
-            className="w-full pl-10 pr-4 py-2 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+            className="w-full pl-10 pr-4 py-3 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </div>
-        <Button variant="outline" className="gap-2">
-          <Filter className="w-4 h-4" />
-          Filters
-        </Button>
       </div>
 
       {podcastsLoading ? (
@@ -807,83 +807,218 @@ export const Academy = () => {
         </div>
       ) : (
         <>
-          {/* Featured Shows */}
-          <PodcastSection
-            title="🎯 Featured Shows"
-            subtitle="Hand-picked by real estate experts"
-            podcasts={featuredPodcasts}
-            onPlayPodcast={handlePlayPodcast}
-            onAddToLibrary={handleAddToLibrary}
-            onDownload={handleDownloadPodcast}
-            showSeeAll={true}
-            onSeeAll={() => toast({ title: "See All", description: "Show all featured podcasts" })}
-            size="large"
-          />
+          {/* Featured Hero Cards */}
+          <div className="mb-12">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Featured Show 1 */}
+              <Card className="relative overflow-hidden cursor-pointer group hover:shadow-lg transition-all duration-200">
+                <div className="aspect-[4/3] bg-gradient-to-br from-blue-600 via-purple-600 to-pink-500 p-6 text-white flex flex-col justify-between">
+                  <div>
+                    <p className="text-xs font-medium opacity-80 mb-2">NEW SHOW</p>
+                    <h3 className="text-lg font-bold leading-tight">
+                      The Real Estate Revolution: AI and the Future of Property
+                    </h3>
+                  </div>
+                  <div className="flex items-center gap-2 mt-4">
+                    <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+                      <Headphones className="w-4 h-4" />
+                    </div>
+                    <span className="text-sm opacity-90">Listen Now</span>
+                  </div>
+                </div>
+              </Card>
 
-          {/* Recently Added */}
-          <PodcastSection
-            title="🆕 New Episodes"
-            subtitle="Latest episodes from your favorite shows"
-            podcasts={newPodcasts}
-            onPlayPodcast={handlePlayPodcast}
-            onAddToLibrary={handleAddToLibrary}
-            onDownload={handleDownloadPodcast}
-            showSeeAll={true}
-            onSeeAll={() => toast({ title: "See All", description: "Show all new episodes" })}
-            size="medium"
-          />
+              {/* Featured Show 2 */}
+              <Card className="relative overflow-hidden cursor-pointer group hover:shadow-lg transition-all duration-200">
+                <div className="aspect-[4/3] bg-gradient-to-br from-green-600 via-teal-600 to-blue-500 p-6 text-white flex flex-col justify-between">
+                  <div>
+                    <p className="text-xs font-medium opacity-80 mb-2">NEW SHOW</p>
+                    <h3 className="text-lg font-bold leading-tight">
+                      Million Dollar Mindset: Psychology of Top Producers
+                    </h3>
+                  </div>
+                  <div className="flex items-center gap-2 mt-4">
+                    <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+                      <Headphones className="w-4 h-4" />
+                    </div>
+                    <span className="text-sm opacity-90">Listen Now</span>
+                  </div>
+                </div>
+              </Card>
 
-          {/* All Podcasts Grid */}
-          <PodcastSection
-            title="📚 Podcast Library"
-            subtitle="Browse our complete collection of real estate podcasts"
-            podcasts={allPodcasts.slice(0, 12)}
-            onPlayPodcast={handlePlayPodcast}
-            onAddToLibrary={handleAddToLibrary}
-            onDownload={handleDownloadPodcast}
-            showSeeAll={true}
-            onSeeAll={() => toast({ title: "See All", description: "Show all podcasts" })}
-            size="medium"
-            layout="grid"
-          />
+              {/* Featured Collection */}
+              <Card className="relative overflow-hidden cursor-pointer group hover:shadow-lg transition-all duration-200">
+                <div className="aspect-[4/3] bg-gradient-to-br from-orange-500 via-red-500 to-pink-600 p-6 text-white flex flex-col justify-between">
+                  <div>
+                    <p className="text-xs font-medium opacity-80 mb-2">FEATURED COLLECTION</p>
+                    <h3 className="text-lg font-bold leading-tight">
+                      Essential podcasts for new agents starting their journey
+                    </h3>
+                  </div>
+                  <div className="flex items-center gap-2 mt-4">
+                    <Badge className="bg-orange-400 text-orange-900 text-xs px-2 py-1">
+                      Featured Collection
+                    </Badge>
+                  </div>
+                </div>
+              </Card>
+            </div>
+          </div>
 
-          {/* Categories */}
-          <div className="mt-12">
-            <h2 className="text-2xl font-bold text-foreground mb-6">Browse by Category</h2>
+          {/* Top Shows */}
+          <div className="mb-12">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-foreground">Top Shows</h2>
+              <Button variant="ghost" className="text-primary hover:text-primary/80 gap-1">
+                See All <ChevronRight className="w-4 h-4" />
+              </Button>
+            </div>
+            
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+              {featuredPodcasts.slice(0, 6).map((podcast, index) => (
+                <div key={podcast.id} className="text-center">
+                  <Card 
+                    className="overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer group mb-3"
+                    onClick={() => handlePlayPodcast(podcast.id)}
+                  >
+                    <AspectRatio ratio={1}>
+                      <img 
+                        src={podcast.thumbnail} 
+                        alt={podcast.title}
+                        className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
+                      />
+                    </AspectRatio>
+                  </Card>
+                  
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium text-foreground text-center">{index + 1}</p>
+                    <h3 className="text-sm font-semibold text-foreground line-clamp-2">{podcast.title}</h3>
+                    <p className="text-xs text-muted-foreground">{podcast.creator}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* New Shows */}
+          <div className="mb-12">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-foreground">New Shows</h2>
+              <Button variant="ghost" className="text-primary hover:text-primary/80 gap-1">
+                See All <ChevronRight className="w-4 h-4" />
+              </Button>
+            </div>
+            
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+              {newPodcasts.map((podcast) => (
+                <div key={podcast.id}>
+                  <Card 
+                    className="overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer group mb-3"
+                    onClick={() => handlePlayPodcast(podcast.id)}
+                  >
+                    <AspectRatio ratio={1}>
+                      <img 
+                        src={podcast.thumbnail} 
+                        alt={podcast.title}
+                        className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
+                      />
+                    </AspectRatio>
+                  </Card>
+                  
+                  <div className="space-y-1">
+                    <h3 className="text-sm font-semibold text-foreground line-clamp-2">{podcast.title}</h3>
+                    <p className="text-xs text-muted-foreground">{podcast.category}</p>
+                    <p className="text-xs text-muted-foreground">Updated Weekly</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Categories Grid */}
+          <div className="mb-12">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-foreground">Browse by Category</h2>
+            </div>
+            
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
               {[
-                "Lead Generation", "Marketing", "Sales", "Mindset", 
-                "Technology", "Market Trends", "Success Stories", "Industry News",
-                "Coaching", "Team Building", "Personal Branding", "Client Relations"
+                { name: "Lead Generation", color: "from-blue-500 to-blue-600" },
+                { name: "Marketing", color: "from-green-500 to-green-600" },
+                { name: "Sales Training", color: "from-purple-500 to-purple-600" },
+                { name: "Mindset", color: "from-orange-500 to-orange-600" },
+                { name: "Technology", color: "from-teal-500 to-teal-600" },
+                { name: "Success Stories", color: "from-pink-500 to-pink-600" },
+                { name: "Market Trends", color: "from-indigo-500 to-indigo-600" },
+                { name: "Team Building", color: "from-red-500 to-red-600" },
+                { name: "Personal Branding", color: "from-yellow-500 to-yellow-600" },
+                { name: "Client Relations", color: "from-cyan-500 to-cyan-600" },
+                { name: "Investment", color: "from-emerald-500 to-emerald-600" },
+                { name: "Coaching", color: "from-violet-500 to-violet-600" }
               ].map((category) => (
                 <Card 
-                  key={category}
-                  className="p-4 text-center cursor-pointer hover:bg-muted/50 transition-colors"
+                  key={category.name}
+                  className="overflow-hidden cursor-pointer hover:shadow-lg transition-all duration-200 group"
                 >
-                  <Headphones className="w-6 h-6 mx-auto mb-2 text-muted-foreground" />
-                  <h3 className="font-medium text-sm">{category}</h3>
+                  <div className={`aspect-square bg-gradient-to-br ${category.color} p-4 text-white flex items-end`}>
+                    <h3 className="font-semibold text-sm leading-tight">{category.name}</h3>
+                  </div>
                 </Card>
               ))}
             </div>
           </div>
 
-          {/* Quick Actions */}
-          <div className="mt-12 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-xl p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-xl font-bold text-foreground mb-2">Never Miss an Episode</h3>
-                <p className="text-muted-foreground">Subscribe to get notified when new podcasts are added</p>
-              </div>
-              <div className="flex gap-3">
-                <Button variant="outline" className="gap-2">
-                  <Heart className="w-4 h-4" />
-                  Follow Shows
-                </Button>
-                <Button className="gap-2">
-                  <Headphones className="w-4 h-4" />
-                  Start Listening
-                </Button>
-              </div>
+          {/* Top Episodes */}
+          <div className="mb-12">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-foreground">Top Episodes</h2>
+              <Button variant="ghost" className="text-primary hover:text-primary/80 gap-1">
+                See All <ChevronRight className="w-4 h-4" />
+              </Button>
+            </div>
+            
+            <div className="space-y-4">
+              {allPodcasts.slice(0, 8).map((podcast, index) => (
+                <Card 
+                  key={podcast.id}
+                  className="p-4 hover:shadow-md transition-all duration-200 cursor-pointer"
+                  onClick={() => handlePlayPodcast(podcast.id)}
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="text-lg font-bold text-muted-foreground min-w-[24px]">
+                      {index + 1}
+                    </div>
+                    
+                    <div className="w-16 h-16 rounded-lg overflow-hidden shrink-0">
+                      <img 
+                        src={podcast.thumbnail} 
+                        alt={podcast.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-foreground line-clamp-2 mb-1">
+                        {podcast.title}
+                      </h3>
+                      <p className="text-sm text-muted-foreground mb-1">
+                        By {podcast.creator}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {podcast.duration} • {new Date(podcast.releaseDate).toLocaleDateString()}
+                      </p>
+                    </div>
+                    
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="w-10 h-10 rounded-full shrink-0"
+                    >
+                      <Play className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </Card>
+              ))}
             </div>
           </div>
         </>
