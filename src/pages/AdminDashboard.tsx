@@ -134,6 +134,46 @@ export default function AdminDashboard() {
     }
   };
 
+  const toggleAdminStatus = async (userId: string, currentStatus: boolean) => {
+    try {
+      let specialties = users.find(u => u.user_id === userId)?.specialties || [];
+      
+      if (!currentStatus) {
+        // Add admin to specialties
+        specialties = [...(specialties || []), 'admin'];
+      } else {
+        // Remove admin from specialties
+        specialties = (specialties || []).filter(s => s !== 'admin');
+      }
+
+      const { error } = await supabase
+        .from('profiles')
+        .update({ specialties })
+        .eq('user_id', userId);
+
+      if (error) throw error;
+
+      // Update local state
+      setUsers(users.map(user => 
+        user.user_id === userId 
+          ? { ...user, specialties }
+          : user
+      ));
+
+      toast({
+        title: 'Success',
+        description: `Admin status ${!currentStatus ? 'granted' : 'revoked'} successfully`,
+      });
+    } catch (error) {
+      console.error('Error updating admin status:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update admin status',
+        variant: 'destructive',
+      });
+    }
+  };
+
   if (loading) {
     return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
   }
@@ -205,6 +245,14 @@ export default function AdminDashboard() {
                   </div>
 
                   <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2">
+                      <label className="text-sm font-medium">Admin</label>
+                      <Switch
+                        checked={user.specialties?.includes('admin') || false}
+                        onCheckedChange={() => toggleAdminStatus(user.user_id, user.specialties?.includes('admin') || false)}
+                      />
+                    </div>
+
                     <div className="flex items-center gap-2">
                       <label className="text-sm font-medium">Creator</label>
                       <Switch
