@@ -201,9 +201,9 @@ export const ServiceFunnelEditor = ({ funnelContent, onChange }: ServiceFunnelEd
         <p className="text-muted-foreground">Design what agents see when they click your service</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Editor Panel */}
-        <div className="space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
+        {/* Editor Panel - Scrollable */}
+        <div className="space-y-6 overflow-y-auto pr-4 max-h-[calc(100vh-12rem)]">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="hero">Hero</TabsTrigger>
@@ -862,8 +862,8 @@ export const ServiceFunnelEditor = ({ funnelContent, onChange }: ServiceFunnelEd
           </Tabs>
         </div>
 
-        {/* Live Preview Panel - Full ServiceFunnelModal View */}
-        <div className="space-y-6">
+        {/* Live Preview Panel - Also Scrollable */}
+        <div className="space-y-6 overflow-y-auto pl-4 max-h-[calc(100vh-12rem)] border-l">
           <div className="max-w-4xl max-h-[80vh] overflow-y-auto border rounded-lg bg-background">
             <h3 className="font-semibold p-4 border-b flex items-center gap-2">
               <Eye className="w-4 h-4" />
