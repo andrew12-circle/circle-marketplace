@@ -4,7 +4,7 @@ import { EnhancedVendorCard } from "./EnhancedVendorCard";
 import { MarketplaceFilters } from "./MarketplaceFilters";
 import { CampaignServicesHeader } from "./CampaignServicesHeader";
 import { CircleProBanner } from "./CircleProBanner";
-import { ServiceDetailsModal } from "./ServiceDetailsModal";
+
 import { LocationFilterBanner } from "./LocationFilterBanner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -516,12 +516,6 @@ export const MarketplaceGrid = () => {
         </div>
       </div>
 
-      {/* Service Details Modal */}
-      <ServiceDetailsModal
-        service={selectedService}
-        isOpen={isServiceModalOpen}
-        onClose={handleCloseServiceModal}
-      />
     </>
   );
 };
