@@ -15,6 +15,7 @@ import { UserMenu } from "@/components/UserMenu";
 import { useAuth } from "@/contexts/AuthContext";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { LegalFooter } from "@/components/LegalFooter";
+import { Building, Store } from "lucide-react";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<"marketplace" | "academy">("marketplace");
@@ -74,6 +75,14 @@ const Index = () => {
               <div className="flex items-center gap-2 sm:gap-4">
                 {/* Language Switcher */}
                 <LanguageSwitcher />
+                
+                {/* Vendor Registration Button - hidden on mobile for space */}
+                <Button asChild variant="outline" className="hidden lg:flex text-xs">
+                  <Link to="/vendor-registration">
+                    <Building className="w-3 h-3 mr-1" />
+                    List Services
+                  </Link>
+                </Button>
                 
                 {/* Cart Button - only show on marketplace */}
                 {activeTab === "marketplace" && (
