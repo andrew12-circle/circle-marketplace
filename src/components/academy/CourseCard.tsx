@@ -36,6 +36,8 @@ interface Course {
   isEnrolled?: boolean;
   totalStudents?: number;
   level?: 'Beginner' | 'Intermediate' | 'Advanced';
+  rank?: number; // For numbering the courses
+  members?: number; // Member count for community-style display
 }
 
 interface CourseCardProps {
@@ -193,56 +195,32 @@ export const CourseCard = ({
 
   return (
     <Card 
-      className={`group hover:shadow-lg transition-all duration-200 cursor-pointer ${sizeClasses[size]}`}
+      className="group hover:shadow-lg transition-all duration-200 cursor-pointer overflow-hidden"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       <CardContent className="p-0">
-        {/* Course Image */}
-        <div className="relative aspect-video bg-muted overflow-hidden">
+        {/* Course Banner Image */}
+        <div className="relative h-32 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 overflow-hidden">
           <img
-            src={course.cover_image_url || "/placeholder.svg"}
+            src={course.cover_image_url || `https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=400&h=200&fit=crop`}
             alt={course.title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
           />
           
-          {/* Overlay for locked courses */}
+          {/* Rank Badge */}
+          {course.rank && (
+            <div className="absolute top-3 left-3 w-8 h-8 bg-black/60 rounded-full flex items-center justify-center">
+              <span className="text-white font-bold text-sm">#{course.rank}</span>
+            </div>
+          )}
+          
+          {/* Lock overlay for premium courses */}
           {!canAccess && (
             <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
               <div className="text-center text-white">
                 <Lock className="w-8 h-8 mx-auto mb-2" />
-                <p className="text-sm font-medium">Pro Member Only</p>
-              </div>
-            </div>
-          )}
-          
-          {/* Badges */}
-          <div className="absolute top-2 left-2 flex gap-1">
-            {course.is_featured && (
-              <Badge className="bg-primary text-primary-foreground text-xs">
-                Featured
-              </Badge>
-            )}
-            {isFree && (
-              <Badge className="bg-green-600 text-white text-xs">
-                Free
-              </Badge>
-            )}
-            {course.is_pro && !isFree && (
-              <Badge className="bg-primary text-primary-foreground text-xs">
-                <Crown className="w-3 h-3 mr-1" />
-                Pro
-              </Badge>
-            )}
-          </div>
-          
-          {/* Play button overlay */}
-          {canAccess && (
-            <div className={`absolute inset-0 bg-black/20 flex items-center justify-center transition-opacity duration-200 ${
-              isHovered ? 'opacity-100' : 'opacity-0'
-            }`}>
-              <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center">
-                <Play className="w-6 h-6 text-primary ml-1" />
+                <p className="text-sm font-medium">Pro Only</p>
               </div>
             </div>
           )}
@@ -250,109 +228,48 @@ export const CourseCard = ({
         
         {/* Course Info */}
         <div className="p-4">
-          <div className="flex items-start justify-between gap-2 mb-2">
-            <h3 className="font-semibold text-sm line-clamp-2 leading-tight">{course.title}</h3>
-          </div>
+          {/* Course Title */}
+          <h3 className="font-bold text-lg mb-2 line-clamp-2 leading-tight">{course.title}</h3>
           
-          <p className="text-xs text-muted-foreground mb-2">By {course.creator}</p>
+          {/* Course Description */}
+          <p className="text-sm text-muted-foreground mb-4 line-clamp-3 leading-relaxed">
+            {course.description}
+          </p>
           
-          {size === 'large' && (
-            <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-              {course.description}
-            </p>
-          )}
-          
-          <div className="flex items-center gap-3 text-xs text-muted-foreground mb-3">
-            {course.lesson_count && (
-              <span className="flex items-center gap-1">
-                <BookOpen className="w-3 h-3" />
-                {course.lesson_count}
-              </span>
-            )}
-            {course.duration && (
-              <span className="flex items-center gap-1">
-                <Clock className="w-3 h-3" />
-                {course.duration}
-              </span>
-            )}
-            {course.level && (
-              <Badge variant="outline" className="text-xs">
-                {course.level}
-              </Badge>
-            )}
-          </div>
-          
-          <div className="flex items-center justify-between mb-3">
+          {/* Members and Pricing */}
+          <div className="flex items-center justify-between text-sm">
             <div className="flex items-center gap-2">
-              {course.rating && (
-                <div className="flex items-center gap-1">
-                  <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                  <span className="text-xs">{course.rating}</span>
-                </div>
-              )}
-              {course.totalStudents && (
-                <div className="flex items-center gap-1">
-                  <Users className="w-3 h-3" />
-                  <span className="text-xs">{course.totalStudents}</span>
-                </div>
+              <span className="text-muted-foreground">
+                {course.members ? `${course.members.toLocaleString()} Members` : `${course.totalStudents || 0} Students`}
+              </span>
+              <span className="text-muted-foreground">•</span>
+              {isFree ? (
+                <span className="font-bold text-green-600">Free</span>
+              ) : course.price && course.price < 50 ? (
+                <span className="font-bold text-blue-600">${course.price}/month</span>
+              ) : (
+                <span className="font-bold text-purple-600">${course.price}</span>
               )}
             </div>
             
-            <div className="text-right">
-              {isFree ? (
-                <span className="text-sm font-bold text-green-600">Free</span>
-              ) : (
-                <span className="text-sm font-bold text-primary">${course.price}</span>
+            {/* Status badges */}
+            <div className="flex items-center gap-1">
+              {course.is_featured && (
+                <Badge variant="secondary" className="text-xs">Featured</Badge>
+              )}
+              {course.is_pro && !isFree && (
+                <Crown className="w-4 h-4 text-primary" />
               )}
             </div>
           </div>
           
+          {/* Progress bar for enrolled courses */}
           {course.progress !== undefined && course.isEnrolled && (
-            <div className="mb-3">
+            <div className="mt-3">
               <Progress value={course.progress} className="h-2" />
               <p className="text-xs text-muted-foreground mt-1">{course.progress}% complete</p>
             </div>
           )}
-          
-          {size === 'large' && course.tags && course.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1 mb-3">
-              {course.tags.slice(0, 3).map((tag) => (
-                <Badge key={tag} variant="outline" className="text-xs">
-                  {tag}
-                </Badge>
-              ))}
-            </div>
-          )}
-          
-          {/* Action Button */}
-          <Button 
-            className="w-full" 
-            size="sm"
-            onClick={handleEnroll}
-            disabled={!canAccess && !isFree}
-          >
-            {course.isEnrolled ? (
-              <>
-                <Play className="w-3 h-3 mr-2" />
-                Continue Learning
-              </>
-            ) : isFree ? (
-              <>
-                <Play className="w-3 h-3 mr-2" />
-                Start Course
-              </>
-            ) : canAccess ? (
-              <>
-                <CheckCircle className="w-3 h-3 mr-2" />
-                Enroll Now
-              </>
-            ) : (
-              <>
-                <ShoppingCart className="w-3 h-3 mr-2" />
-                Add to Cart - ${course.price}
-              </>
-            )}
-          </Button>
         </div>
       </CardContent>
     </Card>

@@ -1362,9 +1362,9 @@ export const Academy = () => {
           {/* Featured Courses */}
           <div className="mb-12">
             <h2 className="text-2xl font-bold text-foreground mb-6">🔥 Featured Courses</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {featuredCourses.map((course) => (
-                <CourseCard key={course.id} course={course} onEnroll={enrollInCourse} size="medium" />
+                <CourseCard key={course.id} course={course} onEnroll={enrollInCourse} />
               ))}
             </div>
           </div>
@@ -1372,9 +1372,9 @@ export const Academy = () => {
           {/* Free Courses */}
           <div className="mb-12">
             <h2 className="text-2xl font-bold text-foreground mb-6">🎁 Free Courses</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {freeCourses.map((course) => (
-                <CourseCard key={course.id} course={course} onEnroll={enrollInCourse} size="medium" />
+                <CourseCard key={course.id} course={course} onEnroll={enrollInCourse} />
               ))}
             </div>
           </div>
@@ -1382,9 +1382,9 @@ export const Academy = () => {
           {/* Premium Courses */}
           <div className="mb-12">
             <h2 className="text-2xl font-bold text-foreground mb-6">💎 Premium Courses</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {paidCourses.map((course) => (
-                <CourseCard key={course.id} course={course} onEnroll={enrollInCourse} size="medium" />
+                <CourseCard key={course.id} course={course} onEnroll={enrollInCourse} />
               ))}
             </div>
           </div>

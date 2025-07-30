@@ -25,6 +25,8 @@ export interface Course {
   progress?: number;
   isEnrolled?: boolean;
   totalStudents?: number;
+  rank?: number; // For course ranking
+  members?: number; // Member count for community-style display
 }
 
 interface UseCoursesOptions {
@@ -116,7 +118,7 @@ export const useCourses = (options: UseCoursesOptions = {}) => {
 
       const creatorMap = new Map(creators?.map(creator => [creator.user_id, creator.display_name]) || []);
 
-      const coursesData: Course[] = (data || []).map(course => ({
+      const coursesData: Course[] = (data || []).map((course, index) => ({
         id: course.id,
         title: course.title,
         description: course.description || '',
@@ -138,6 +140,8 @@ export const useCourses = (options: UseCoursesOptions = {}) => {
         total_plays: course.total_plays,
         level: (course.metadata as any)?.level || 'Beginner',
         totalStudents: Math.floor(Math.random() * 1000) + 50, // Mock data for demo
+        members: Math.floor(Math.random() * 50000) + 1000, // Mock member count
+        rank: index + 1, // Assign ranking based on order
         progress: undefined, // Will be populated if user is enrolled
         isEnrolled: false // Will be populated based on user enrollment
       }));
