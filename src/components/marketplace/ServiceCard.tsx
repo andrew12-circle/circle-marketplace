@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -47,6 +48,7 @@ interface ServiceCardProps {
 }
 
 export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }: ServiceCardProps) => {
+  const { t } = useTranslation();
   const [isHovered, setIsHovered] = useState(false);
   const [isConsultationFlowOpen, setIsConsultationFlowOpen] = useState(false);
   const [isFunnelModalOpen, setIsFunnelModalOpen] = useState(false);
@@ -104,12 +106,12 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
       <div className="absolute top-3 left-3 z-10 flex gap-2">
         {service.is_featured && (
           <Badge className="bg-circle-primary text-primary-foreground text-xs font-medium">
-            Featured
+            {t('featured')}
           </Badge>
         )}
         {service.is_top_pick && (
           <Badge className="bg-circle-accent text-foreground text-xs font-medium">
-            Top Pick
+            {t('topPick')}
           </Badge>
         )}
       </div>
@@ -145,7 +147,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
           </h3>
           {service.vendor.is_verified && (
             <Badge variant="secondary" className="text-xs">
-              Verified
+              {t('verified')}
             </Badge>
           )}
         </div>
@@ -349,7 +351,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
           >
             <>
               <ShoppingCart className="w-4 h-4 mr-2" />
-              Add to Cart
+              {t('addToCart')}
             </>
           </Button>
           
