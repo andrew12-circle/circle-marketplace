@@ -1148,162 +1148,196 @@ export const Academy = () => {
     </div>
   );
 
-  const renderBooksView = () => (
-    <div className="flex-1 p-8 max-w-7xl">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold text-foreground mb-2">Books</h1>
-        <p className="text-muted-foreground">
-          Your digital real estate library
-        </p>
-      </div>
+  const renderBooksView = () => {
+    const [activeCategory, setActiveCategory] = useState("All");
+    
+    const categories = [
+      "Biographies & Memoirs",
+      "Business & Personal Finance", 
+      "Comics & Graphic Novels",
+      "Computers & Internet",
+      "Genre Charts"
+    ];
 
-      {/* Search and Filter Bar */}
-      <div className="flex gap-4 mb-8">
-        <div className="flex-1 relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-          <input 
-            type="text"
-            placeholder="Search books..."
-            className="w-full pl-10 pr-4 py-2 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-          />
-        </div>
-        <Button variant="outline" className="gap-2">
-          <Filter className="w-4 h-4" />
-          Filters
-        </Button>
-      </div>
+    // Mock data for demonstration - in a real app, these would come from your API
+    const topPaidBooks = [
+      { id: "1", title: "Dead Line", author: "Marc Cameron", cover: "/placeholder.svg", ranking: 1 },
+      { id: "2", title: "Robert Ludlum's The Bourne Escape", author: "Brian Freeman", cover: "/placeholder.svg", ranking: 2 },
+      { id: "3", title: "She Didn't See It Coming", author: "Shari Lapena", cover: "/placeholder.svg", ranking: 3 },
+      { id: "4", title: "Shattered Truth (Thrilling FBI...)", author: "Barbara Freethy", cover: "/placeholder.svg", ranking: 4 },
+      { id: "5", title: "An Inside Job", author: "Daniel Silva", cover: "/placeholder.svg", ranking: 5 },
+      { id: "6", title: "Immortal by Morning", author: "Lynsay Sands", cover: "/placeholder.svg", ranking: 6 },
+    ];
 
-      {booksLoading ? (
-        <div className="flex justify-center items-center py-12">
-          <div className="text-muted-foreground">Loading books...</div>
-        </div>
-      ) : (
-        <>
-          {/* Currently Reading */}
-          {allBooks.filter(book => book.progress && book.progress > 0 && !book.isFinished).length > 0 && (
-            <BookSection
-              title="📖 Continue Reading"
-              subtitle="Pick up where you left off"
-              books={allBooks.filter(book => book.progress && book.progress > 0 && !book.isFinished).slice(0, 6)}
-              onRead={handleReadBook}
-              onAddToLibrary={handleAddBookToLibrary}
-              onDownload={handleDownloadBook}
-              showSeeAll={true}
-              onSeeAll={() => toast({ title: "See All", description: "Show all books in progress" })}
-              size="medium"
-              layout="horizontal"
-              cardLayout="horizontal"
-            />
-          )}
+    const topFreeBooks = [
+      { id: "7", title: "The Bossy Billionaire", author: "Samantha Skye", cover: "/placeholder.svg", ranking: 1 },
+      { id: "8", title: "Concrete Angels", author: "Tom Fowler", cover: "/placeholder.svg", ranking: 2 },
+      { id: "9", title: "Falling", author: "Noelle Adams", cover: "/placeholder.svg", ranking: 3 },
+      { id: "10", title: "Beach Club", author: "Elana Johnson", cover: "/placeholder.svg", ranking: 4 },
+      { id: "11", title: "Hiring Mr. Darcy", author: "Valerie Bowman", cover: "/placeholder.svg", ranking: 5 },
+      { id: "12", title: "Little Girl Vanished", author: "Denise Grover Swank", cover: "/placeholder.svg", ranking: 6 },
+    ];
 
-          {/* Featured Books */}
-          <BookSection
-            title="⭐ Featured Books"
-            subtitle="Editor's picks and bestsellers"
-            books={featuredBooks}
-            onRead={handleReadBook}
-            onAddToLibrary={handleAddBookToLibrary}
-            onDownload={handleDownloadBook}
-            showSeeAll={true}
-            onSeeAll={() => toast({ title: "See All", description: "Show all featured books" })}
-            size="large"
-          />
-
-          {/* New Releases */}
-          <BookSection
-            title="🆕 New Releases"
-            subtitle="Latest additions to our library"
-            books={newBooks}
-            onRead={handleReadBook}
-            onAddToLibrary={handleAddBookToLibrary}
-            onDownload={handleDownloadBook}
-            showSeeAll={true}
-            onSeeAll={() => toast({ title: "See All", description: "Show all new books" })}
-            size="medium"
-          />
-
-          {/* All Books Grid */}
-          <BookSection
-            title="📚 Book Library"
-            subtitle="Browse our complete collection"
-            books={allBooks.slice(0, 18)}
-            onRead={handleReadBook}
-            onAddToLibrary={handleAddBookToLibrary}
-            onDownload={handleDownloadBook}
-            showSeeAll={true}
-            onSeeAll={() => toast({ title: "See All", description: "Show all books" })}
-            size="medium"
-            layout="grid"
-          />
-
-          {/* Categories */}
-          <div className="mt-12">
-            <h2 className="text-2xl font-bold text-foreground mb-6">Browse by Category</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {[
-                "Lead Generation", "Marketing", "Sales", "Mindset", 
-                "Real Estate Law", "Investment", "Market Analysis", "Communication",
-                "Business Building", "Technology", "Personal Development", "Finance"
-              ].map((category) => (
-                <Card 
-                  key={category}
-                  className="p-4 text-center cursor-pointer hover:bg-muted/50 transition-colors"
-                >
-                  <Book className="w-6 h-6 mx-auto mb-2 text-muted-foreground" />
-                  <h3 className="font-medium text-sm">{category}</h3>
-                </Card>
-              ))}
-            </div>
+    return (
+      <div className="flex-1 p-8 max-w-7xl">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-5xl font-bold text-foreground mb-6">Top Books</h1>
+          
+          {/* Category Tabs */}
+          <div className="flex gap-1 bg-muted/30 p-1 rounded-lg w-fit">
+            {categories.map((category) => (
+              <button
+                key={category}
+                onClick={() => setActiveCategory(category)}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                  activeCategory === category
+                    ? 'bg-background text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                {category}
+              </button>
+            ))}
           </div>
+        </div>
 
-          {/* Reading Stats */}
-          <div className="mt-12 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-xl p-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-foreground mb-2">
-                  {allBooks.filter(book => book.isFinished).length}
-                </div>
-                <p className="text-muted-foreground">Books Completed</p>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-foreground mb-2">
-                  {allBooks.filter(book => book.progress && book.progress > 0).length}
-                </div>
-                <p className="text-muted-foreground">Books Started</p>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-foreground mb-2">
-                  {Math.round(allBooks.reduce((acc, book) => acc + (book.progress || 0), 0) / allBooks.length) || 0}%
-                </div>
-                <p className="text-muted-foreground">Average Progress</p>
-              </div>
-            </div>
+        {booksLoading ? (
+          <div className="flex justify-center items-center py-12">
+            <div className="text-muted-foreground">Loading books...</div>
           </div>
-
-          {/* Quick Actions */}
-          <div className="mt-8 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-xl font-bold text-foreground mb-2">Build Your Knowledge</h3>
-                <p className="text-muted-foreground">Discover new books and expand your real estate expertise</p>
-              </div>
-              <div className="flex gap-3">
-                <Button variant="outline" className="gap-2">
-                  <Heart className="w-4 h-4" />
-                  My Library
-                </Button>
-                <Button className="gap-2">
-                  <BookOpen className="w-4 h-4" />
-                  Start Reading
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            {/* Top Paid Section */}
+            <div>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-foreground">Top Paid</h2>
+                <Button variant="ghost" className="text-primary hover:text-primary/80 gap-1">
+                  <ChevronRight className="w-4 h-4" />
                 </Button>
               </div>
+              
+              <div className="space-y-4">
+                {topPaidBooks.map((book) => (
+                  <Card 
+                    key={book.id}
+                    className="p-4 hover:shadow-md transition-all duration-200 cursor-pointer group"
+                    onClick={() => handleReadBook(book.id)}
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="text-xl font-bold text-muted-foreground min-w-[24px]">
+                        {book.ranking}
+                      </div>
+                      
+                      <div className="w-16 h-20 rounded-lg overflow-hidden shrink-0 shadow-sm">
+                        <img 
+                          src={book.cover} 
+                          alt={book.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                        />
+                      </div>
+                      
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-foreground line-clamp-2 mb-1 group-hover:text-primary transition-colors">
+                          {book.title}
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          {book.author}
+                        </p>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </div>
+
+            {/* Top Free Section */}
+            <div>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-foreground">Top Free</h2>
+                <Button variant="ghost" className="text-primary hover:text-primary/80 gap-1">
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </div>
+              
+              <div className="space-y-4">
+                {topFreeBooks.map((book) => (
+                  <Card 
+                    key={book.id}
+                    className="p-4 hover:shadow-md transition-all duration-200 cursor-pointer group"
+                    onClick={() => handleReadBook(book.id)}
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="text-xl font-bold text-muted-foreground min-w-[24px]">
+                        {book.ranking}
+                      </div>
+                      
+                      <div className="w-16 h-20 rounded-lg overflow-hidden shrink-0 shadow-sm">
+                        <img 
+                          src={book.cover} 
+                          alt={book.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                        />
+                      </div>
+                      
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-foreground line-clamp-2 mb-1 group-hover:text-primary transition-colors">
+                          {book.title}
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          {book.author}
+                        </p>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
             </div>
           </div>
-        </>
-      )}
-    </div>
-  );
+        )}
+
+        {/* Featured Collections Section */}
+        <div className="mt-16">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-foreground">Featured Collections</h2>
+            <Button variant="ghost" className="text-primary hover:text-primary/80 gap-1">
+              See All
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[
+              { title: "Real Estate Classics", subtitle: "Timeless wisdom for agents", bookCount: 25 },
+              { title: "Lead Generation Mastery", subtitle: "Convert more prospects", bookCount: 18 },
+              { title: "Market Analysis Expert", subtitle: "Data-driven insights", bookCount: 12 },
+              { title: "Negotiation Powerhouse", subtitle: "Close deals like a pro", bookCount: 15 },
+              { title: "Digital Marketing Edge", subtitle: "Modern marketing strategies", bookCount: 22 },
+              { title: "Investment Strategies", subtitle: "Building wealth through real estate", bookCount: 16 }
+            ].map((collection, index) => (
+              <Card 
+                key={index}
+                className="p-6 cursor-pointer hover:shadow-lg transition-all duration-200 group border-2 border-transparent hover:border-primary/20"
+              >
+                <div className="h-32 bg-gradient-to-br from-primary/10 to-primary/5 rounded-lg mb-4 flex items-center justify-center">
+                  <Book className="w-12 h-12 text-primary/60" />
+                </div>
+                <h3 className="font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
+                  {collection.title}
+                </h3>
+                <p className="text-sm text-muted-foreground mb-2">
+                  {collection.subtitle}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {collection.bookCount} books
+                </p>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   const renderContent = () => {
     console.log("Current activeView:", activeView); // Debug log
