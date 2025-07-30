@@ -875,6 +875,7 @@ export const VendorRegistration = () => {
                       type="submit" 
                       size="lg" 
                       disabled={isSubmitting}
+                      onClick={() => console.log("Button clicked!", { isSubmitting, formData })}
                       className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 disabled:transform-none disabled:scale-100 h-12 text-lg font-semibold"
                     >
                       {isSubmitting ? (
