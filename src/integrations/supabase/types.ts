@@ -1035,6 +1035,7 @@ export type Database = {
           is_top_pick: boolean | null
           original_price: string | null
           price: string | null
+          price_duration: string | null
           pro_price: string | null
           rating: number | null
           requires_quote: boolean | null
@@ -1060,6 +1061,7 @@ export type Database = {
           is_top_pick?: boolean | null
           original_price?: string | null
           price?: string | null
+          price_duration?: string | null
           pro_price?: string | null
           rating?: number | null
           requires_quote?: boolean | null
@@ -1085,6 +1087,7 @@ export type Database = {
           is_top_pick?: boolean | null
           original_price?: string | null
           price?: string | null
+          price_duration?: string | null
           pro_price?: string | null
           rating?: number | null
           requires_quote?: boolean | null

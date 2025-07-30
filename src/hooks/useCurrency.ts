@@ -25,10 +25,10 @@ export const useCurrency = () => {
 
   const currency = getCurrency();
 
-  // Format price with appropriate currency
-  const formatPrice = (amount: number | string) => {
+  // Format price with appropriate currency and duration
+  const formatPrice = (amount: number | string, duration?: string) => {
     if (typeof amount === 'string') {
-      // Extract number from text like "447/mo"
+      // Handle legacy text-based pricing like "447/mo"
       const match = amount.match(/(\d+(?:\.\d+)?)/);
       if (match) {
         const numAmount = parseFloat(match[1]);
@@ -55,12 +55,28 @@ export const useCurrency = () => {
       }).format(0);
     }
 
-    return new Intl.NumberFormat(i18n.language === 'fr' ? 'fr-CA' : 'en-US', {
+    const formattedAmount = new Intl.NumberFormat(i18n.language === 'fr' ? 'fr-CA' : 'en-US', {
       style: 'currency',
       currency: currency,
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     }).format(numAmount);
+
+    // Add duration suffix if provided
+    if (duration) {
+      const durationMap: { [key: string]: string } = {
+        'mo': '/mo',
+        'yr': '/yr',
+        'year': '/yr',
+        'month': '/mo',
+        'one-time': '',
+        'onetime': ''
+      };
+      const suffix = durationMap[duration.toLowerCase()] || `/${duration}`;
+      return `${formattedAmount}${suffix}`;
+    }
+
+    return formattedAmount;
   };
 
   // Get currency symbol
