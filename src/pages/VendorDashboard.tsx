@@ -707,7 +707,7 @@ export const VendorDashboard = () => {
           </div>
           <Button 
             onClick={() => openServiceBuilder()}
-            className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-white shadow-lg"
+            className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg"
           >
             <Plus className="w-4 h-4 mr-2" />
             Create New Service
