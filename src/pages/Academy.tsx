@@ -726,14 +726,17 @@ export const Academy = () => {
   );
 
   const renderContent = () => {
+    console.log("Current activeView:", activeView); // Debug log
     switch (activeView) {
       case "home":
         return renderHomeView();
       case "videos":
         return renderVideosView();
       case "channels":
+        console.log("Rendering channels view"); // Debug log
         return renderChannelsView();
       default:
+        console.log("Rendering default view for:", activeView); // Debug log
         return (
           <div className="flex-1 p-8">
             <h2 className="text-2xl font-bold mb-4">{activeView.charAt(0).toUpperCase() + activeView.slice(1)}</h2>
