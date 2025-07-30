@@ -247,11 +247,11 @@ export const VendorRegistration = () => {
       await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate API call
       
       toast({
-        title: "Registration Submitted!",
-        description: "Thank you for your interest. We'll review your application and get back to you within 24-48 hours.",
+        title: "Registration Successful!",
+        description: "Welcome! Let's set up your vendor profile and create your first service.",
       });
       
-      navigate("/");
+      navigate("/vendor-dashboard");
     } catch (error) {
       toast({
         title: "Submission Failed",
