@@ -16,6 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "@/hooks/useLocation";
 import { supabase } from "@/integrations/supabase/client";
 import { User, Settings, ShoppingBag, Crown, LogOut, Loader2, MapPin, Heart, BarChart3, Shield, Building2, DollarSign, Store, Briefcase } from "lucide-react";
+import { LocationModal } from "./LocationModal";
 
 interface VendorInfo {
   enabled: boolean;
@@ -29,6 +30,7 @@ export const UserMenu = () => {
   const { location } = useLocation();
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [vendorInfo, setVendorInfo] = useState<VendorInfo | null>(null);
+  const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
 
   // Check vendor info from profile
   useEffect(() => {
@@ -190,6 +192,14 @@ export const UserMenu = () => {
         
         <DropdownMenuSeparator />
         
+        <DropdownMenuItem 
+          onClick={() => setIsLocationModalOpen(true)}
+          className="flex items-center"
+        >
+          <MapPin className="mr-2 h-4 w-4" />
+          <span>{location ? `Change Location (${location.city}, ${location.state})` : "Set Location"}</span>
+        </DropdownMenuItem>
+        
         <DropdownMenuItem asChild>
           <Link to="/profile-settings" className="flex items-center">
             <User className="mr-2 h-4 w-4" />
@@ -233,6 +243,11 @@ export const UserMenu = () => {
           <span>Sign out</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
+      
+      <LocationModal 
+        open={isLocationModalOpen} 
+        onClose={() => setIsLocationModalOpen(false)} 
+      />
     </DropdownMenu>
   );
 };
