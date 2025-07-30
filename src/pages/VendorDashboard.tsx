@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { VendorPricingModal } from '@/components/marketplace/VendorPricingModal';
 import { 
   Calendar, 
   Clock, 
@@ -82,6 +83,8 @@ export const VendorDashboard = () => {
   const [showServiceBuilder, setShowServiceBuilder] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
   const [currentStep, setCurrentStep] = useState<'basic' | 'funnel' | 'preview'>('basic');
+  const [showPricingModal, setShowPricingModal] = useState(false);
+  const [vendorPlan, setVendorPlan] = useState<string | null>(null);
   const { toast } = useToast();
 
   // Service Builder Form State
@@ -104,7 +107,29 @@ export const VendorDashboard = () => {
 
   useEffect(() => {
     loadDashboardData();
+    // Check if vendor needs to select a pricing plan
+    checkVendorPlan();
   }, []);
+
+  const checkVendorPlan = async () => {
+    // In a real app, you'd check if the vendor has selected a plan
+    // For now, we'll show the pricing modal if no plan is stored
+    const savedPlan = localStorage.getItem('vendorPlan');
+    if (!savedPlan) {
+      setShowPricingModal(true);
+    } else {
+      setVendorPlan(savedPlan);
+    }
+  };
+
+  const handlePlanSelected = (plan: string) => {
+    setVendorPlan(plan);
+    localStorage.setItem('vendorPlan', plan);
+    toast({
+      title: "Welcome to your new plan!",
+      description: `You can now create unlimited services with your ${plan} plan.`,
+    });
+  };
 
   const loadDashboardData = async () => {
     try {
@@ -991,6 +1016,13 @@ export const VendorDashboard = () => {
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* Pricing Selection Modal */}
+        <VendorPricingModal
+          isOpen={showPricingModal}
+          onClose={() => setShowPricingModal(false)}
+          onPlanSelected={handlePlanSelected}
+        />
       </div>
     </div>
   );
