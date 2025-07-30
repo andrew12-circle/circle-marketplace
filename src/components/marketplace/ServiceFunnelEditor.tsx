@@ -815,7 +815,7 @@ export const ServiceFunnelEditor = ({ funnelContent, onChange }: ServiceFunnelEd
                             />
                           </div>
                           <div>
-                            <Label>Price ($)</Label>
+                            <Label>Circle Pro Price ($)</Label>
                             <Input
                               type="number"
                               value={pkg.price}
