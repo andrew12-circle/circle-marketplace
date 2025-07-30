@@ -375,7 +375,7 @@ export const VendorDashboard = () => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              Vendor Dashboard
+              Services Dashboard
             </h1>
             <p className="text-lg text-muted-foreground mt-2">
               Manage your services, track performance, and grow your business
