@@ -532,10 +532,9 @@ export const VendorRegistration = () => {
                             {state}
                           </Button>
                         ))}
-                      </div>
-                      </div>
-                    </div>
-                  </div>
+                       </div>
+                     </div>
+                   </div>
                   
                   <div className="space-y-2">
                     <Label htmlFor="serviceZipCodes" className="text-sm font-medium text-foreground">
