@@ -19,13 +19,13 @@ export const LegalFooter = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Button asChild variant="default" className="min-w-[200px]">
-                <Link to="/vendor-registration">
+                <Link to="/vendor-registration?type=service_provider">
                   <Store className="w-4 h-4 mr-2" />
                   List Your Services
                 </Link>
               </Button>
               <Button asChild variant="outline" className="min-w-[200px]">
-                <Link to="/vendor-registration">
+                <Link to="/vendor-registration?type=co_marketing">
                   <Building className="w-4 h-4 mr-2" />
                   Join as Co-Marketing Partner
                 </Link>

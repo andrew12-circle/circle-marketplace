@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -11,12 +11,22 @@ import { Building2, Crown, ArrowLeft, ShoppingBag, Briefcase } from "lucide-reac
 import { Link } from "react-router-dom";
 
 const VendorRegistration = () => {
+  const [searchParams] = useSearchParams();
   const [step, setStep] = useState<'type' | 'form'>('type');
   const [vendorType, setVendorType] = useState<'service_provider' | 'co_marketing'>('service_provider');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
+
+  // Check URL parameters and auto-select vendor type
+  useEffect(() => {
+    const typeParam = searchParams.get('type');
+    if (typeParam === 'service_provider' || typeParam === 'co_marketing') {
+      setVendorType(typeParam);
+      setStep('form'); // Skip type selection and go directly to form
+    }
+  }, [searchParams]);
 
   const handleTypeSelection = (type: 'service_provider' | 'co_marketing') => {
     setVendorType(type);
