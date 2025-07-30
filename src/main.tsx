@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
 import "./index.css";
+import "./i18n";
 
 import Index from "./pages/Index";
 import { Marketplace } from "./pages/Marketplace";

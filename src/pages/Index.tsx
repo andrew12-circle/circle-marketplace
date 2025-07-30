@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { NavigationTabs } from "@/components/NavigationTabs";
 import { Marketplace } from "./Marketplace";
@@ -11,11 +12,13 @@ import { CartProvider } from "@/contexts/CartContext";
 import { CartDrawer } from "@/components/marketplace/CartDrawer";
 import { UserMenu } from "@/components/UserMenu";
 import { useAuth } from "@/contexts/AuthContext";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { LegalFooter } from "@/components/LegalFooter";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<"marketplace" | "academy">("marketplace");
   const { user, profile } = useAuth();
+  const { t } = useTranslation();
 
   return (
     <CartProvider>
@@ -49,7 +52,7 @@ const Index = () => {
                         : "text-muted-foreground"
                     }`}
                   >
-                    Market
+                    {t('marketplace').substring(0, 6)}
                   </button>
                   <button
                     onClick={() => setActiveTab("academy")}
@@ -59,12 +62,15 @@ const Index = () => {
                         : "text-muted-foreground"
                     }`}
                   >
-                    Academy
+                    {t('academy')}
                   </button>
                 </div>
               </div>
               
               <div className="flex items-center gap-2 sm:gap-4">
+                {/* Language Switcher */}
+                <LanguageSwitcher />
+                
                 {/* Cart Button - only show on marketplace */}
                 {activeTab === "marketplace" && (
                   <CartDrawer />

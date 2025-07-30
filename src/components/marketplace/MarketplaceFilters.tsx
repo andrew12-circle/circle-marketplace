@@ -1,4 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
+import { useTranslation } from "react-i18next";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
@@ -24,6 +25,7 @@ export interface MarketplaceFiltersProps {
 }
 
 export const MarketplaceFilters = ({ filters, onFiltersChange, categories, viewMode = 'services' }: MarketplaceFiltersProps) => {
+  const { t } = useTranslation();
   // Provide default values to prevent undefined errors
   const safeFilters = filters || {
     category: "all",
@@ -61,7 +63,7 @@ export const MarketplaceFilters = ({ filters, onFiltersChange, categories, viewM
           </div>
           {hasActiveFilters && (
             <Button variant="ghost" size="sm" onClick={clearFilters}>
-              Clear all
+              {t('clearAll')}
             </Button>
           )}
         </div>
@@ -79,7 +81,7 @@ export const MarketplaceFilters = ({ filters, onFiltersChange, categories, viewM
           {/* Price Range Filter */}
           <div className="space-y-3">
             <Label className="text-sm font-medium">
-              Price Range: ${safeFilters.priceRange[0]} - ${safeFilters.priceRange[1]}
+              {t('priceRange')}: ${safeFilters.priceRange[0]} - ${safeFilters.priceRange[1]}
             </Label>
             <Slider
               value={safeFilters.priceRange}
@@ -99,7 +101,7 @@ export const MarketplaceFilters = ({ filters, onFiltersChange, categories, viewM
               onCheckedChange={(checked) => updateFilter("verified", checked)}
             />
             <Label htmlFor="verified" className="text-sm">
-              Circle Verified Only
+              {t('circleVerifiedOnly')}
             </Label>
           </div>
 
@@ -111,7 +113,7 @@ export const MarketplaceFilters = ({ filters, onFiltersChange, categories, viewM
               onCheckedChange={(checked) => updateFilter("featured", checked)}
             />
             <Label htmlFor="featured" className="text-sm">
-              Featured Only
+              {t('featuredOnly')}
             </Label>
           </div>
 
@@ -124,7 +126,7 @@ export const MarketplaceFilters = ({ filters, onFiltersChange, categories, viewM
                 onCheckedChange={(checked) => updateFilter("coPayEligible", checked)}
               />
               <Label htmlFor="coPayEligible" className="text-sm">
-                Co-Pay Eligible
+                {t('coPayEligible')}
               </Label>
             </div>
           )}

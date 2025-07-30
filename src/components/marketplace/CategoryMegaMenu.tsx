@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -124,6 +125,7 @@ const getIconForCategory = (categoryId: string, viewMode: 'services' | 'vendors'
 
 export const CategoryMegaMenu = ({ selectedCategory, onCategorySelect, viewMode = 'services' }: CategoryMegaMenuProps) => {
   const [open, setOpen] = useState(false);
+  const { t } = useTranslation();
 
   const handleCategorySelect = (category: string) => {
     onCategorySelect(category);
@@ -131,7 +133,7 @@ export const CategoryMegaMenu = ({ selectedCategory, onCategorySelect, viewMode 
   };
 
   const getDisplayText = () => {
-    if (selectedCategory === "all") return "All Categories";
+    if (selectedCategory === "all") return t('allCategories');
     return selectedCategory;
   };
 
@@ -152,14 +154,14 @@ export const CategoryMegaMenu = ({ selectedCategory, onCategorySelect, viewMode 
         <div className="bg-background border rounded-lg shadow-lg relative z-10">
           <div className="p-4 border-b">
             <div className="flex items-center justify-between">
-              <h3 className="font-semibold text-sm">Select Category</h3>
+              <h3 className="font-semibold text-sm">{t('selectCategory')}</h3>
               <Button 
                 variant="ghost" 
                 size="sm"
                 onClick={() => handleCategorySelect("all")}
                 className={selectedCategory === "all" ? "bg-accent" : ""}
               >
-                All Categories
+                {t('allCategories')}
               </Button>
             </div>
           </div>

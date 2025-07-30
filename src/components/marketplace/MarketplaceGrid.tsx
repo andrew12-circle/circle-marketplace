@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { ServiceCard } from "./ServiceCard";
 import { EnhancedVendorCard } from "./EnhancedVendorCard";
 import { MarketplaceFilters } from "./MarketplaceFilters";
@@ -88,6 +89,7 @@ interface LocalRepresentative {
 type ViewMode = "services" | "vendors";
 
 export const MarketplaceGrid = () => {
+  const { t } = useTranslation();
   const [services, setServices] = useState<Service[]>([]);
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [loading, setLoading] = useState(true);
@@ -378,7 +380,7 @@ export const MarketplaceGrid = () => {
           <div className="flex items-center justify-center h-64">
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-circle-primary mx-auto mb-4"></div>
-              <p className="text-muted-foreground">Loading marketplace...</p>
+              <p className="text-muted-foreground">{t('loading')} marketplace...</p>
             </div>
           </div>
         </div>
@@ -392,9 +394,9 @@ export const MarketplaceGrid = () => {
         <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
           {/* Hero Section */}
           <div className="mb-12">
-            <h1 className="text-6xl font-bold text-black mb-4">Marketplace.</h1>
+            <h1 className="text-6xl font-bold text-black mb-4">{t('marketplaceTitle')}</h1>
             <p className="text-lg text-gray-600 max-w-2xl">
-              Finally, we silenced the noise. Welcome to the Marketplace. Discover premium marketing services and connect with top-performing vendors who will actually move your business forward.
+              {t('marketplaceDescription')}
             </p>
           </div>
 
@@ -411,7 +413,7 @@ export const MarketplaceGrid = () => {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4 sm:w-5 sm:h-5" />
               <Input
-                placeholder="Search services, vendors, or categories..."
+                placeholder={t('searchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 sm:pl-12 h-10 sm:h-11 text-sm sm:text-base"
@@ -424,7 +426,7 @@ export const MarketplaceGrid = () => {
                 className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-9 sm:h-10 text-sm sm:text-base"
               >
                 <Sparkles className="w-3 h-3 sm:w-4 sm:h-4" />
-                Services
+                {t('services')}
               </Button>
               <Button
                 variant={viewMode === "vendors" ? "default" : "outline"}
@@ -432,7 +434,7 @@ export const MarketplaceGrid = () => {
                 className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-9 sm:h-10 text-sm sm:text-base"
               >
                 <Zap className="w-3 h-3 sm:w-4 sm:h-4" />
-                Vendors
+                {t('vendors')}
               </Button>
             </div>
           </div>
@@ -491,10 +493,10 @@ export const MarketplaceGrid = () => {
                 <Search className="w-8 h-8 text-muted-foreground" />
               </div>
               <h3 className="text-lg font-semibold text-foreground mb-2">
-                No {viewMode} found
+                {t('noResultsFound', { type: viewMode })}
               </h3>
               <p className="text-muted-foreground mb-4">
-                Try adjusting your search terms or filters
+                {t('tryAdjustingFilters')}
               </p>
               <Button 
                 variant="outline" 
@@ -509,7 +511,7 @@ export const MarketplaceGrid = () => {
                   });
                 }}
               >
-                Clear all filters
+                {t('clearAll')} filters
               </Button>
             </div>
           )}

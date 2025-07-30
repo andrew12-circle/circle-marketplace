@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "react-i18next";
 
 interface NavigationTabsProps {
   activeTab: "marketplace" | "academy";
@@ -6,6 +7,7 @@ interface NavigationTabsProps {
 }
 
 export const NavigationTabs = ({ activeTab, onTabChange }: NavigationTabsProps) => {
+  const { t } = useTranslation();
   return (
     <div className="flex bg-muted/50 rounded-xl p-1 w-fit mx-auto backdrop-blur-sm border border-border/50">
       <Button
@@ -17,7 +19,7 @@ export const NavigationTabs = ({ activeTab, onTabChange }: NavigationTabsProps) 
             : "text-muted-foreground hover:text-foreground hover:bg-background/50"
         }`}
       >
-        Marketplace
+        {t('marketplace')}
       </Button>
       <Button
         variant="ghost"
@@ -28,7 +30,7 @@ export const NavigationTabs = ({ activeTab, onTabChange }: NavigationTabsProps) 
             : "text-muted-foreground hover:text-foreground hover:bg-background/50"
         }`}
       >
-        Academy
+        {t('academy')}
       </Button>
     </div>
   );
