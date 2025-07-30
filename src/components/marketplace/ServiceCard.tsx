@@ -140,16 +140,29 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
 
         {/* Rating - moved above pricing */}
         <div className="flex items-center gap-1 mb-3">
-          {[...Array(5)].map((_, i) => (
-            <Star 
-              key={i} 
-              className={`h-4 w-4 ${
-                i < Math.floor(service.vendor.rating) 
-                  ? "fill-yellow-400 text-yellow-400" 
-                  : "text-gray-300"
-              }`} 
-            />
-          ))}
+          {[...Array(5)].map((_, i) => {
+            const rating = service.vendor.rating;
+            const isFullStar = i < Math.floor(rating);
+            const isPartialStar = i === Math.floor(rating) && rating % 1 !== 0;
+            const fillPercentage = isPartialStar ? (rating % 1) * 100 : 0;
+            
+            return (
+              <div key={i} className="relative h-4 w-4">
+                <Star className="h-4 w-4 text-gray-300 absolute" />
+                {isFullStar && (
+                  <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 absolute" />
+                )}
+                {isPartialStar && (
+                  <div 
+                    className="overflow-hidden absolute"
+                    style={{ width: `${fillPercentage}%` }}
+                  >
+                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                  </div>
+                )}
+              </div>
+            );
+          })}
           <span className="text-sm text-muted-foreground ml-1">
             {service.vendor.rating} ({service.vendor.review_count})
           </span>
