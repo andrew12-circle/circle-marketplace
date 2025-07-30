@@ -3,7 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles, X, MapPin, TrendingUp, Clock } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Sparkles, X, MapPin, TrendingUp, Clock, BarChart, Target } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -22,16 +26,64 @@ interface AIRecommendation {
   };
 }
 
+interface CurrentPerformance {
+  dealVolume12m: string;
+  dealVolume24m: string;
+  buyerDeals: string;
+  sellerDeals: string;
+  avgBuyerPrice: string;
+  avgSellerPrice: string;
+  preferredLenders: string;
+  preferredTitle: string;
+  cashRatio: string;
+  location: string;
+}
+
+interface FutureGoals {
+  targetVolume: string;
+  targetPricePoint: string;
+  marketExpansion: string;
+  partnershipGoals: string;
+  timeframe: string;
+  specificChallenges: string;
+}
+
 interface AskCircleAIModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
 export const AskCircleAIModal = ({ open, onOpenChange }: AskCircleAIModalProps) => {
-  const [prompt, setPrompt] = useState("");
+  const [activeTab, setActiveTab] = useState("quick");
   const [loading, setLoading] = useState(false);
   const [recommendation, setRecommendation] = useState<AIRecommendation | null>(null);
   const { toast } = useToast();
+  
+  // Quick assessment state
+  const [prompt, setPrompt] = useState("");
+  
+  // Detailed assessment state
+  const [currentPerformance, setCurrentPerformance] = useState<CurrentPerformance>({
+    dealVolume12m: "",
+    dealVolume24m: "",
+    buyerDeals: "",
+    sellerDeals: "",
+    avgBuyerPrice: "",
+    avgSellerPrice: "",
+    preferredLenders: "",
+    preferredTitle: "",
+    cashRatio: "",
+    location: ""
+  });
+  
+  const [futureGoals, setFutureGoals] = useState<FutureGoals>({
+    targetVolume: "",
+    targetPricePoint: "",
+    marketExpansion: "",
+    partnershipGoals: "",
+    timeframe: "",
+    specificChallenges: ""
+  });
 
   const suggestionChips = [
     "Analyze my location for ROI",
@@ -39,7 +91,7 @@ export const AskCircleAIModal = ({ open, onOpenChange }: AskCircleAIModalProps) 
     "Top 3 marketing items"
   ];
 
-  const handleGetRecommendation = async () => {
+  const handleQuickRecommendation = async () => {
     if (!prompt.trim()) {
       toast({
         title: "Please enter a question",
@@ -53,7 +105,46 @@ export const AskCircleAIModal = ({ open, onOpenChange }: AskCircleAIModalProps) 
       setLoading(true);
       
       const { data, error } = await supabase.functions.invoke('ask-circle-ai', {
-        body: { prompt: prompt.trim() },
+        body: { 
+          type: 'quick',
+          prompt: prompt.trim() 
+        },
+      });
+
+      if (error) throw error;
+
+      setRecommendation(data.recommendation);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to get AI recommendation. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDetailedAssessment = async () => {
+    // Validate required fields
+    if (!currentPerformance.location || !futureGoals.targetVolume) {
+      toast({
+        title: "Please complete required fields",
+        description: "Location and target volume are required for assessment",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setLoading(true);
+      
+      const { data, error } = await supabase.functions.invoke('ask-circle-ai', {
+        body: { 
+          type: 'detailed',
+          currentPerformance,
+          futureGoals
+        },
       });
 
       if (error) throw error;
@@ -77,6 +168,26 @@ export const AskCircleAIModal = ({ open, onOpenChange }: AskCircleAIModalProps) 
   const handleReset = () => {
     setRecommendation(null);
     setPrompt("");
+    setCurrentPerformance({
+      dealVolume12m: "",
+      dealVolume24m: "",
+      buyerDeals: "",
+      sellerDeals: "",
+      avgBuyerPrice: "",
+      avgSellerPrice: "",
+      preferredLenders: "",
+      preferredTitle: "",
+      cashRatio: "",
+      location: ""
+    });
+    setFutureGoals({
+      targetVolume: "",
+      targetPricePoint: "",
+      marketExpansion: "",
+      partnershipGoals: "",
+      timeframe: "",
+      specificChallenges: ""
+    });
   };
 
   return (
@@ -95,43 +206,230 @@ export const AskCircleAIModal = ({ open, onOpenChange }: AskCircleAIModalProps) 
         </DialogHeader>
 
         {!recommendation ? (
-          <div className="space-y-6">
-            <div className="space-y-4">
-              <Input
-                placeholder="Best bundle for Franklin, TN"
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                className="h-12 text-base"
-                onKeyPress={(e) => e.key === 'Enter' && handleGetRecommendation()}
-              />
-              
-              <div className="flex flex-wrap gap-2">
-                {suggestionChips.map((chip) => (
-                  <Button
-                    key={chip}
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleChipClick(chip)}
-                    className="text-xs"
-                  >
-                    {chip}
-                  </Button>
-                ))}
-              </div>
-            </div>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="quick" className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4" />
+                Quick Assessment
+              </TabsTrigger>
+              <TabsTrigger value="detailed" className="flex items-center gap-2">
+                <BarChart className="w-4 h-4" />
+                Detailed Assessment
+              </TabsTrigger>
+            </TabsList>
 
-            <Button 
-              onClick={handleGetRecommendation}
-              disabled={loading || !prompt.trim()}
-              className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-medium"
-            >
-              {loading ? "Getting Recommendation..." : "Get Recommendation"}
-            </Button>
-          </div>
+            <TabsContent value="quick" className="space-y-6 mt-6">
+              <div className="space-y-4">
+                <Input
+                  placeholder="Best bundle for Franklin, TN"
+                  value={prompt}
+                  onChange={(e) => setPrompt(e.target.value)}
+                  className="h-12 text-base"
+                  onKeyPress={(e) => e.key === 'Enter' && handleQuickRecommendation()}
+                />
+                
+                <div className="flex flex-wrap gap-2">
+                  {suggestionChips.map((chip) => (
+                    <Button
+                      key={chip}
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleChipClick(chip)}
+                      className="text-xs"
+                    >
+                      {chip}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+
+              <Button 
+                onClick={handleQuickRecommendation}
+                disabled={loading || !prompt.trim()}
+                className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-medium"
+              >
+                {loading ? "Getting Recommendation..." : "Get Quick Recommendation"}
+              </Button>
+            </TabsContent>
+
+            <TabsContent value="detailed" className="space-y-6 mt-6">
+              <div className="space-y-6">
+                {/* Current Performance Section */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <BarChart className="w-5 h-5 text-blue-600" />
+                    <h3 className="text-lg font-semibold">Where You Are At</h3>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="location">Location *</Label>
+                      <Input
+                        id="location"
+                        placeholder="Franklin, TN"
+                        value={currentPerformance.location}
+                        onChange={(e) => setCurrentPerformance({...currentPerformance, location: e.target.value})}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="dealVolume12m">Deals (Last 12 months)</Label>
+                      <Input
+                        id="dealVolume12m"
+                        placeholder="25"
+                        value={currentPerformance.dealVolume12m}
+                        onChange={(e) => setCurrentPerformance({...currentPerformance, dealVolume12m: e.target.value})}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="buyerDeals">Buyer Deals (%)</Label>
+                      <Input
+                        id="buyerDeals"
+                        placeholder="60%"
+                        value={currentPerformance.buyerDeals}
+                        onChange={(e) => setCurrentPerformance({...currentPerformance, buyerDeals: e.target.value})}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="sellerDeals">Seller Deals (%)</Label>
+                      <Input
+                        id="sellerDeals"
+                        placeholder="40%"
+                        value={currentPerformance.sellerDeals}
+                        onChange={(e) => setCurrentPerformance({...currentPerformance, sellerDeals: e.target.value})}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="avgBuyerPrice">Avg Buyer Price</Label>
+                      <Input
+                        id="avgBuyerPrice"
+                        placeholder="$450,000"
+                        value={currentPerformance.avgBuyerPrice}
+                        onChange={(e) => setCurrentPerformance({...currentPerformance, avgBuyerPrice: e.target.value})}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="avgSellerPrice">Avg Seller Price</Label>
+                      <Input
+                        id="avgSellerPrice"
+                        placeholder="$480,000"
+                        value={currentPerformance.avgSellerPrice}
+                        onChange={(e) => setCurrentPerformance({...currentPerformance, avgSellerPrice: e.target.value})}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="preferredLenders">Preferred Lenders</Label>
+                      <Input
+                        id="preferredLenders"
+                        placeholder="First Horizon, Fairway Independent"
+                        value={currentPerformance.preferredLenders}
+                        onChange={(e) => setCurrentPerformance({...currentPerformance, preferredLenders: e.target.value})}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="cashRatio">Cash vs Financing Ratio</Label>
+                      <Input
+                        id="cashRatio"
+                        placeholder="20% cash, 80% financed"
+                        value={currentPerformance.cashRatio}
+                        onChange={(e) => setCurrentPerformance({...currentPerformance, cashRatio: e.target.value})}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Future Goals Section */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <Target className="w-5 h-5 text-green-600" />
+                    <h3 className="text-lg font-semibold">Where You're Going</h3>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="targetVolume">Target Deal Volume *</Label>
+                      <Input
+                        id="targetVolume"
+                        placeholder="50 deals/year"
+                        value={futureGoals.targetVolume}
+                        onChange={(e) => setFutureGoals({...futureGoals, targetVolume: e.target.value})}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="timeframe">Timeframe</Label>
+                      <Select value={futureGoals.timeframe} onValueChange={(value) => setFutureGoals({...futureGoals, timeframe: value})}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select timeframe" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="6months">6 months</SelectItem>
+                          <SelectItem value="12months">12 months</SelectItem>
+                          <SelectItem value="18months">18 months</SelectItem>
+                          <SelectItem value="24months">24 months</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="targetPricePoint">Target Price Points</Label>
+                      <Input
+                        id="targetPricePoint"
+                        placeholder="$500K - $750K"
+                        value={futureGoals.targetPricePoint}
+                        onChange={(e) => setFutureGoals({...futureGoals, targetPricePoint: e.target.value})}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="marketExpansion">Market Expansion</Label>
+                      <Input
+                        id="marketExpansion"
+                        placeholder="Brentwood, Cool Springs"
+                        value={futureGoals.marketExpansion}
+                        onChange={(e) => setFutureGoals({...futureGoals, marketExpansion: e.target.value})}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="partnershipGoals">Partnership Goals</Label>
+                      <Input
+                        id="partnershipGoals"
+                        placeholder="Exclusive lender relationships, builder partnerships"
+                        value={futureGoals.partnershipGoals}
+                        onChange={(e) => setFutureGoals({...futureGoals, partnershipGoals: e.target.value})}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="specificChallenges">Specific Challenges</Label>
+                      <Textarea
+                        id="specificChallenges"
+                        placeholder="Lead generation, competing with teams, time management..."
+                        value={futureGoals.specificChallenges}
+                        onChange={(e) => setFutureGoals({...futureGoals, specificChallenges: e.target.value})}
+                        rows={3}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <Button 
+                  onClick={handleDetailedAssessment}
+                  disabled={loading || !currentPerformance.location || !futureGoals.targetVolume}
+                  className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-medium"
+                >
+                  {loading ? "Analyzing Your Profile..." : "Get Detailed Recommendation"}
+                </Button>
+              </div>
+            </TabsContent>
+          </Tabs>
         ) : (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold">AI Recommendation for {prompt}</h3>
+              <h3 className="text-lg font-semibold">
+                AI Recommendation{activeTab === 'quick' && prompt ? ` for ${prompt}` : ''}
+              </h3>
               <Button variant="ghost" size="sm" onClick={handleReset}>
                 <X className="w-4 h-4" />
               </Button>
