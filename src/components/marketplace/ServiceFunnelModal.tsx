@@ -214,7 +214,11 @@ export const ServiceFunnelModal = ({
             variant="ghost"
             size="icon"
             className="absolute top-4 right-4 z-50 h-10 w-10 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white"
-            onClick={onClose}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onClose();
+            }}
           >
             <X className="h-6 w-6" />
           </Button>
