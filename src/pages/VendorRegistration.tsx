@@ -236,19 +236,18 @@ export const VendorRegistration = () => {
             Back to Home
           </Button>
 
-          <Card className="shadow-2xl border-0 bg-card/95 backdrop-blur-sm animate-scale-in">
-            <CardHeader className="text-center relative pb-8">
-              <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-accent/5 to-secondary/5 rounded-t-lg"></div>
+          <Card className="shadow-2xl border-0 bg-card/95 backdrop-blur-sm animate-scale-in overflow-hidden">
+            <CardHeader className="text-center relative pb-8 bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 text-white">
               <div className="relative z-10">
                 <div className="flex justify-center mb-4">
-                  <div className="p-4 rounded-full bg-gradient-to-br from-primary to-accent shadow-lg">
-                    <Building className="w-8 h-8 text-primary-foreground" />
+                  <div className="p-4 rounded-full bg-white/20 backdrop-blur-sm shadow-lg border border-white/30">
+                    <Building className="w-8 h-8 text-white" />
                   </div>
                 </div>
-                <CardTitle className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent mb-4">
+                <CardTitle className="text-3xl md:text-4xl font-bold text-white mb-4 drop-shadow-sm">
                   {registrationType === "co_marketing" ? "Co-Marketing Partner" : "Service Provider"} Registration
                 </CardTitle>
-                <CardDescription className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+                <CardDescription className="text-lg text-blue-100 max-w-2xl mx-auto leading-relaxed drop-shadow-sm">
                   {registrationType === "co_marketing" 
                     ? "Join our network of marketing partners and grow your business with strategic collaborations and shared opportunities"
                     : "Join our marketplace and connect with homebuyers, real estate agents, and grow your customer base"
@@ -256,12 +255,15 @@ export const VendorRegistration = () => {
                 </CardDescription>
                 {registrationType === "co_marketing" && (
                   <div className="flex justify-center mt-4">
-                    <Badge variant="secondary" className="bg-gradient-to-r from-accent/20 to-primary/20 text-primary border-primary/20 px-4 py-1">
+                    <Badge variant="secondary" className="bg-white/20 text-white border-white/30 px-4 py-1 backdrop-blur-sm">
                       ✨ Co-Marketing Partner Application
                     </Badge>
                   </div>
                 )}
               </div>
+              {/* Decorative elements */}
+              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+              <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full blur-xl"></div>
             </CardHeader>
 
             <CardContent className="p-8">
