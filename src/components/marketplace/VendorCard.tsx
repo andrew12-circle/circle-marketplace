@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCurrency } from "@/hooks/useCurrency";
 import { Star, TrendingUp, MapPin, Award, Info } from "lucide-react";
 
 interface VendorCardProps {
@@ -27,6 +28,7 @@ interface VendorCardProps {
 
 export const VendorCard = ({ vendor, onAddToWallet, onRequestCoMarketing, onNavigateToVendors }: VendorCardProps) => {
   const { profile } = useAuth();
+  const { formatPrice } = useCurrency();
   const isProMember = profile?.is_pro_member || false;
   
   const percentSaved = Math.round(((vendor.retailPrice - vendor.proPrice) / vendor.retailPrice) * 100);
@@ -107,7 +109,7 @@ export const VendorCard = ({ vendor, onAddToWallet, onRequestCoMarketing, onNavi
           {!isProMember && (
             <div className="flex justify-between items-center">
               <span className="text-sm text-muted-foreground">Retail Price:</span>
-              <span className="text-sm line-through">${vendor.retailPrice}</span>
+              <span className="text-sm line-through">{formatPrice(vendor.retailPrice, 'mo')}</span>
             </div>
           )}
           
@@ -115,7 +117,7 @@ export const VendorCard = ({ vendor, onAddToWallet, onRequestCoMarketing, onNavi
           {isProMember && (
             <div className="flex justify-between items-center">
               <span className="text-sm font-medium">Circle Pro:</span>
-              <span className="text-lg font-bold text-circle-primary">${vendor.proPrice}</span>
+              <span className="text-lg font-bold text-circle-primary">{formatPrice(vendor.proPrice, 'mo')}</span>
             </div>
           )}
           
@@ -149,12 +151,12 @@ export const VendorCard = ({ vendor, onAddToWallet, onRequestCoMarketing, onNavi
                 </PopoverContent>
               </Popover>
             </div>
-            <span className="text-lg font-bold text-circle-success">${vendor.coPayPrice}</span>
+            <span className="text-lg font-bold text-circle-success">{formatPrice(vendor.coPayPrice, 'mo')}</span>
           </div>
           
           <div className="flex justify-between items-center">
             <span className="text-sm text-muted-foreground">Avg Agent Cost:</span>
-            <span className="text-sm font-medium">${vendor.avgAgentCost}</span>
+            <span className="text-sm font-medium">{formatPrice(vendor.avgAgentCost, 'mo')}</span>
           </div>
           
           <div className="flex justify-between items-center">
