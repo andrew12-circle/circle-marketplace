@@ -44,6 +44,50 @@ export type Database = {
         }
         Relationships: []
       }
+      channels: {
+        Row: {
+          cover_image_url: string | null
+          created_at: string | null
+          creator_id: string
+          description: string | null
+          id: string
+          is_verified: boolean | null
+          name: string
+          subscriber_count: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          cover_image_url?: string | null
+          created_at?: string | null
+          creator_id: string
+          description?: string | null
+          id?: string
+          is_verified?: boolean | null
+          name: string
+          subscriber_count?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          cover_image_url?: string | null
+          created_at?: string | null
+          creator_id?: string
+          description?: string | null
+          id?: string
+          is_verified?: boolean | null
+          name?: string
+          subscriber_count?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "channels_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       consultation_bookings: {
         Row: {
           budget_range: string | null
@@ -100,6 +144,185 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "services"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      content: {
+        Row: {
+          category: string
+          content_type: Database["public"]["Enums"]["content_type"]
+          content_url: string | null
+          cover_image_url: string | null
+          created_at: string | null
+          creator_id: string
+          description: string | null
+          duration: string | null
+          id: string
+          is_featured: boolean | null
+          is_pro: boolean | null
+          is_published: boolean | null
+          lesson_count: number | null
+          metadata: Json | null
+          page_count: number | null
+          preview_url: string | null
+          price: number | null
+          published_at: string | null
+          rating: number | null
+          tags: string[] | null
+          title: string
+          total_plays: number | null
+          total_revenue: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          category: string
+          content_type: Database["public"]["Enums"]["content_type"]
+          content_url?: string | null
+          cover_image_url?: string | null
+          created_at?: string | null
+          creator_id: string
+          description?: string | null
+          duration?: string | null
+          id?: string
+          is_featured?: boolean | null
+          is_pro?: boolean | null
+          is_published?: boolean | null
+          lesson_count?: number | null
+          metadata?: Json | null
+          page_count?: number | null
+          preview_url?: string | null
+          price?: number | null
+          published_at?: string | null
+          rating?: number | null
+          tags?: string[] | null
+          title: string
+          total_plays?: number | null
+          total_revenue?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string
+          content_type?: Database["public"]["Enums"]["content_type"]
+          content_url?: string | null
+          cover_image_url?: string | null
+          created_at?: string | null
+          creator_id?: string
+          description?: string | null
+          duration?: string | null
+          id?: string
+          is_featured?: boolean | null
+          is_pro?: boolean | null
+          is_published?: boolean | null
+          lesson_count?: number | null
+          metadata?: Json | null
+          page_count?: number | null
+          preview_url?: string | null
+          price?: number | null
+          published_at?: string | null
+          rating?: number | null
+          tags?: string[] | null
+          title?: string
+          total_plays?: number | null
+          total_revenue?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      content_plays: {
+        Row: {
+          completion_percentage: number | null
+          content_id: string
+          device_type: string | null
+          id: string
+          location: string | null
+          play_duration: number | null
+          played_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          completion_percentage?: number | null
+          content_id: string
+          device_type?: string | null
+          id?: string
+          location?: string | null
+          play_duration?: number | null
+          played_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          completion_percentage?: number | null
+          content_id?: string
+          device_type?: string | null
+          id?: string
+          location?: string | null
+          play_duration?: number | null
+          played_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_plays_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "content"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_plays_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      content_ratings: {
+        Row: {
+          content_id: string
+          created_at: string | null
+          id: string
+          rating: number
+          review: string | null
+          user_id: string
+        }
+        Insert: {
+          content_id: string
+          created_at?: string | null
+          id?: string
+          rating: number
+          review?: string | null
+          user_id: string
+        }
+        Update: {
+          content_id?: string
+          created_at?: string | null
+          id?: string
+          rating?: number
+          review?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_ratings_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "content"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_ratings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
           },
         ]
       }
@@ -177,18 +400,27 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          bank_details: Json | null
           bio: string | null
           business_name: string | null
           circle_points: number | null
           city: string | null
           created_at: string
+          creator_bio: string | null
+          creator_joined_at: string | null
+          creator_social_links: Json | null
+          creator_verified: boolean | null
+          creator_website: string | null
           display_name: string | null
           id: string
+          is_creator: boolean | null
           is_pro_member: boolean | null
           location: string | null
           phone: string | null
+          revenue_share_percentage: number | null
           specialties: string[] | null
           state: string | null
+          total_earnings: number | null
           updated_at: string
           user_id: string
           website_url: string | null
@@ -197,18 +429,27 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
+          bank_details?: Json | null
           bio?: string | null
           business_name?: string | null
           circle_points?: number | null
           city?: string | null
           created_at?: string
+          creator_bio?: string | null
+          creator_joined_at?: string | null
+          creator_social_links?: Json | null
+          creator_verified?: boolean | null
+          creator_website?: string | null
           display_name?: string | null
           id?: string
+          is_creator?: boolean | null
           is_pro_member?: boolean | null
           location?: string | null
           phone?: string | null
+          revenue_share_percentage?: number | null
           specialties?: string[] | null
           state?: string | null
+          total_earnings?: number | null
           updated_at?: string
           user_id: string
           website_url?: string | null
@@ -217,18 +458,27 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
+          bank_details?: Json | null
           bio?: string | null
           business_name?: string | null
           circle_points?: number | null
           city?: string | null
           created_at?: string
+          creator_bio?: string | null
+          creator_joined_at?: string | null
+          creator_social_links?: Json | null
+          creator_verified?: boolean | null
+          creator_website?: string | null
           display_name?: string | null
           id?: string
+          is_creator?: boolean | null
           is_pro_member?: boolean | null
           location?: string | null
           phone?: string | null
+          revenue_share_percentage?: number | null
           specialties?: string[] | null
           state?: string | null
+          total_earnings?: number | null
           updated_at?: string
           user_id?: string
           website_url?: string | null
@@ -236,6 +486,60 @@ export type Database = {
           zip_code?: string | null
         }
         Relationships: []
+      }
+      revenue_tracking: {
+        Row: {
+          content_id: string | null
+          created_at: string | null
+          creator_id: string
+          id: string
+          month_year: string
+          paid_out: boolean | null
+          payout_date: string | null
+          revenue_earned: number | null
+          revenue_share_percentage: number | null
+          total_plays: number | null
+        }
+        Insert: {
+          content_id?: string | null
+          created_at?: string | null
+          creator_id: string
+          id?: string
+          month_year: string
+          paid_out?: boolean | null
+          payout_date?: string | null
+          revenue_earned?: number | null
+          revenue_share_percentage?: number | null
+          total_plays?: number | null
+        }
+        Update: {
+          content_id?: string | null
+          created_at?: string | null
+          creator_id?: string
+          id?: string
+          month_year?: string
+          paid_out?: boolean | null
+          payout_date?: string | null
+          revenue_earned?: number | null
+          revenue_share_percentage?: number | null
+          total_plays?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "revenue_tracking_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "content"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "revenue_tracking_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       saved_services: {
         Row: {
@@ -727,6 +1031,10 @@ export type Database = {
         Args: { lat1: number; lon1: number; lat2: number; lon2: number }
         Returns: number
       }
+      calculate_monthly_revenue: {
+        Args: { target_month: string }
+        Returns: undefined
+      }
       get_public_profile: {
         Args: { profile_id: string }
         Returns: {
@@ -740,13 +1048,23 @@ export type Database = {
           avatar_url: string
         }[]
       }
+      increment_content_plays: {
+        Args: { content_uuid: string }
+        Returns: undefined
+      }
       increment_video_views: {
         Args: { video_uuid: string }
         Returns: undefined
       }
     }
     Enums: {
-      [_ in never]: never
+      content_type:
+        | "video"
+        | "podcast"
+        | "book"
+        | "course"
+        | "playbook"
+        | "channel"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -873,6 +1191,15 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      content_type: [
+        "video",
+        "podcast",
+        "book",
+        "course",
+        "playbook",
+        "channel",
+      ],
+    },
   },
 } as const
