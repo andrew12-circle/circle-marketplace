@@ -1094,6 +1094,7 @@ export const VendorDashboard = () => {
                         placeholder="e.g., $299/month or $45 each"
                       />
                      </div>
+                   </div>
 
                    <div className="space-y-2">
                      <Label htmlFor="service-description">Service Description *</Label>
