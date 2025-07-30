@@ -433,6 +433,36 @@ export type Database = {
           },
         ]
       }
+      failed_login_attempts: {
+        Row: {
+          attempt_type: string
+          attempts_count: number | null
+          created_at: string | null
+          id: string
+          identifier: string
+          last_attempt_at: string | null
+          locked_until: string | null
+        }
+        Insert: {
+          attempt_type?: string
+          attempts_count?: number | null
+          created_at?: string | null
+          id?: string
+          identifier: string
+          last_attempt_at?: string | null
+          locked_until?: string | null
+        }
+        Update: {
+          attempt_type?: string
+          attempts_count?: number | null
+          created_at?: string | null
+          id?: string
+          identifier?: string
+          last_attempt_at?: string | null
+          locked_until?: string | null
+        }
+        Relationships: []
+      }
       login_attempts: {
         Row: {
           attempt_time: string
@@ -1257,6 +1287,74 @@ export type Database = {
           vendor_type: string | null
           website_url: string | null
         }
+        Insert: {
+          campaigns_funded?: number | null
+          co_marketing_agents?: number | null
+          contact_email?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          individual_email?: string | null
+          individual_license_number?: string | null
+          individual_name?: string | null
+          individual_phone?: string | null
+          individual_title?: string | null
+          is_active?: boolean | null
+          is_verified?: boolean | null
+          latitude?: number | null
+          license_states?: string[] | null
+          local_representatives?: never
+          location?: string | null
+          logo_url?: string | null
+          longitude?: number | null
+          mls_areas?: string[] | null
+          name?: string | null
+          nmls_id?: string | null
+          parent_vendor_id?: string | null
+          phone?: string | null
+          rating?: number | null
+          review_count?: number | null
+          service_radius_miles?: number | null
+          service_states?: string[] | null
+          service_zip_codes?: string[] | null
+          updated_at?: string | null
+          vendor_type?: string | null
+          website_url?: string | null
+        }
+        Update: {
+          campaigns_funded?: number | null
+          co_marketing_agents?: number | null
+          contact_email?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          individual_email?: string | null
+          individual_license_number?: string | null
+          individual_name?: string | null
+          individual_phone?: string | null
+          individual_title?: string | null
+          is_active?: boolean | null
+          is_verified?: boolean | null
+          latitude?: number | null
+          license_states?: string[] | null
+          local_representatives?: never
+          location?: string | null
+          logo_url?: string | null
+          longitude?: number | null
+          mls_areas?: string[] | null
+          name?: string | null
+          nmls_id?: string | null
+          parent_vendor_id?: string | null
+          phone?: string | null
+          rating?: number | null
+          review_count?: number | null
+          service_radius_miles?: number | null
+          service_states?: string[] | null
+          service_zip_codes?: string[] | null
+          updated_at?: string | null
+          vendor_type?: string | null
+          website_url?: string | null
+        }
         Relationships: [
           {
             foreignKeyName: "vendors_parent_vendor_id_fkey"
@@ -1287,6 +1385,14 @@ export type Database = {
       check_account_lockout: {
         Args: { user_email: string; client_ip?: unknown }
         Returns: Json
+      }
+      check_and_update_lockout: {
+        Args: { identifier: string; attempt_type?: string }
+        Returns: Json
+      }
+      clear_failed_attempts: {
+        Args: { identifier: string; attempt_type?: string }
+        Returns: undefined
       }
       get_public_profile: {
         Args: { profile_id: string }
@@ -1336,7 +1442,7 @@ export type Database = {
       }
       validate_password_strength: {
         Args: { password: string }
-        Returns: boolean
+        Returns: Json
       }
     }
     Enums: {

@@ -135,12 +135,119 @@ export const useSecureInput = (rules: ValidationRules = {}) => {
   };
 };
 
+// Password strength validation using database function
+export const validatePasswordStrength = async (password: string): Promise<{
+  isStrong: boolean;
+  score: number;
+  maxScore: number;
+  feedback: string[];
+}> => {
+  try {
+    const { supabase } = await import('@/integrations/supabase/client');
+    const { data, error } = await supabase.rpc('validate_password_strength', { password });
+    
+    if (error) {
+      console.error('Password validation error:', error);
+      return {
+        isStrong: false,
+        score: 0,
+        maxScore: 6,
+        feedback: ['Unable to validate password strength']
+      };
+    }
+    
+    // Type assertion for the database response
+    const result = data as {
+      is_strong: boolean;
+      score: number;
+      max_score: number;
+      feedback: string[];
+    };
+    
+    return {
+      isStrong: result.is_strong,
+      score: result.score,
+      maxScore: result.max_score,
+      feedback: result.feedback
+    };
+  } catch (error) {
+    console.error('Password validation error:', error);
+    return {
+      isStrong: false,
+      score: 0,
+      maxScore: 6,
+      feedback: ['Unable to validate password strength']
+    };
+  }
+};
+
+// Account lockout check
+export const checkAccountLockout = async (email: string): Promise<{
+  isLocked: boolean;
+  attemptsRemaining: number;
+  timeRemainingSeconds: number;
+}> => {
+  try {
+    const { supabase } = await import('@/integrations/supabase/client');
+    const { data, error } = await supabase.rpc('check_and_update_lockout', { 
+      identifier: email,
+      attempt_type: 'email'
+    });
+    
+    if (error) {
+      console.error('Lockout check error:', error);
+      return { isLocked: false, attemptsRemaining: 5, timeRemainingSeconds: 0 };
+    }
+    
+    // Type assertion for the database response
+    const result = data as {
+      is_locked: boolean;
+      attempts_remaining: number;
+      time_remaining_seconds: number;
+    };
+    
+    return {
+      isLocked: result.is_locked,
+      attemptsRemaining: result.attempts_remaining,
+      timeRemainingSeconds: result.time_remaining_seconds
+    };
+  } catch (error) {
+    console.error('Lockout check error:', error);
+    return { isLocked: false, attemptsRemaining: 5, timeRemainingSeconds: 0 };
+  }
+};
+
+// Clear failed attempts on successful login
+export const clearFailedAttempts = async (email: string): Promise<void> => {
+  try {
+    const { supabase } = await import('@/integrations/supabase/client');
+    await supabase.rpc('clear_failed_attempts', { 
+      identifier: email,
+      attempt_type: 'email'
+    });
+  } catch (error) {
+    console.error('Clear failed attempts error:', error);
+  }
+};
+
 // Common validation rule presets
 export const commonRules = {
   email: {
     required: true,
     maxLength: 255,
     custom: (value: string) => validateEmail(value) ? null : 'Invalid email format'
+  },
+  password: {
+    required: true,
+    minLength: 8,
+    maxLength: 128,
+    custom: (value: string) => {
+      if (value.length < 8) return 'Password must be at least 8 characters long';
+      if (!/[A-Z]/.test(value)) return 'Password must contain at least one uppercase letter';
+      if (!/[a-z]/.test(value)) return 'Password must contain at least one lowercase letter';
+      if (!/[0-9]/.test(value)) return 'Password must contain at least one number';
+      return null;
+    }
   },
   phone: {
     maxLength: 20,

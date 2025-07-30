@@ -10,7 +10,9 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Eye, EyeOff, Mail, Lock, User, Briefcase } from "lucide-react";
 import { SecureForm } from "@/components/common/SecureForm";
-import { commonRules } from "@/hooks/useSecureInput";
+import { commonRules, checkAccountLockout, clearFailedAttempts } from "@/hooks/useSecureInput";
+import { PasswordStrengthIndicator } from "@/components/auth/PasswordStrengthIndicator";
+import { AccountLockoutAlert } from "@/components/auth/AccountLockoutAlert";
 
 export const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -22,6 +24,12 @@ export const Auth = () => {
     displayName: '',
     isCreator: false
   });
+  const [lockoutStatus, setLockoutStatus] = useState({
+    isLocked: false,
+    attemptsRemaining: 5,
+    timeRemainingSeconds: 0
+  });
+  const [passwordStrong, setPasswordStrong] = useState(false);
   
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -66,12 +74,55 @@ export const Auth = () => {
     return data;
   };
 
+  // Check account lockout status when email changes
+  useEffect(() => {
+    const checkLockout = async () => {
+      if (formData.email && isLogin) {
+        try {
+          const status = await checkAccountLockout(formData.email);
+          setLockoutStatus(status);
+        } catch (error) {
+          console.error('Error checking account lockout:', error);
+        }
+      }
+    };
+
+    const timer = setTimeout(checkLockout, 500);
+    return () => clearTimeout(timer);
+  }, [formData.email, isLogin]);
+
   const handleSecureSubmit = async (data: Record<string, string>) => {
     setLoading(true);
 
     try {
+      // Check lockout status before attempting login
+      if (isLogin) {
+        const lockoutCheck = await checkAccountLockout(data.email);
+        if (lockoutCheck.isLocked) {
+          toast({
+            title: "Account Locked",
+            description: `Account is temporarily locked. Try again in ${Math.ceil(lockoutCheck.timeRemainingSeconds / 60)} minutes.`,
+            variant: "destructive",
+          });
+          setLockoutStatus(lockoutCheck);
+          return;
+        }
+      }
+
+      // Validate password strength for signup
+      if (!isLogin && !passwordStrong) {
+        toast({
+          title: "Weak Password",
+          description: "Please choose a stronger password that meets all requirements.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       if (isLogin) {
         await handleLogin(data.email, data.password);
+        // Clear failed attempts on successful login
+        await clearFailedAttempts(data.email);
         toast({
           title: "Welcome back!",
           description: "You've been successfully logged in.",
@@ -99,10 +150,21 @@ export const Auth = () => {
       
       if (error.message?.includes('Invalid login credentials')) {
         errorMessage = "Invalid email or password. Please check your credentials.";
+        // Update lockout status after failed login
+        if (isLogin && data.email) {
+          setTimeout(async () => {
+            try {
+              const status = await checkAccountLockout(data.email);
+              setLockoutStatus(status);
+            } catch (err) {
+              console.error('Error updating lockout status:', err);
+            }
+          }, 100);
+        }
       } else if (error.message?.includes('User already registered')) {
         errorMessage = "An account with this email already exists. Try logging in instead.";
       } else if (error.message?.includes('Password should be at least')) {
-        errorMessage = "Password should be at least 6 characters long.";
+        errorMessage = "Password should be at least 8 characters long.";
       } else if (error.message?.includes('Invalid email')) {
         errorMessage = "Please enter a valid email address.";
       } else if (error.message) {
@@ -123,11 +185,11 @@ export const Auth = () => {
   const validationRules = isLogin 
     ? {
         email: commonRules.email,
-        password: { required: true, minLength: 6 }
+        password: { required: true, minLength: 8 }
       }
     : {
         email: commonRules.email,
-        password: { required: true, minLength: 6 },
+        password: commonRules.password,
         displayName: commonRules.name,
       };
 
@@ -151,6 +213,15 @@ export const Auth = () => {
           </p>
         </CardHeader>
         <CardContent>
+          {/* Account Lockout Alert */}
+          {isLogin && (
+            <AccountLockoutAlert
+              isLocked={lockoutStatus.isLocked}
+              timeRemainingSeconds={lockoutStatus.timeRemainingSeconds}
+              attemptsRemaining={lockoutStatus.attemptsRemaining}
+            />
+          )}
+          
           <SecureForm 
             validationRules={validationRules}
             onSubmit={handleSecureSubmit}
@@ -168,6 +239,8 @@ export const Auth = () => {
                   placeholder="Enter your email"
                   className="pl-10"
                   required
+                  value={formData.email}
+                  onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                 />
               </div>
             </div>
@@ -202,7 +275,9 @@ export const Auth = () => {
                   placeholder="Enter your password"
                   className="pl-10 pr-10"
                   required
-                  minLength={6}
+                  minLength={8}
+                  value={formData.password}
+                  onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
                 />
                 <Button
                   type="button"
@@ -218,6 +293,14 @@ export const Auth = () => {
                   )}
                 </Button>
               </div>
+              
+              {/* Password Strength Indicator (Signup only) */}
+              {!isLogin && (
+                <PasswordStrengthIndicator
+                  password={formData.password}
+                  onStrengthChange={setPasswordStrong}
+                />
+              )}
             </div>
 
             {/* Creator Toggle (Signup only) */}
