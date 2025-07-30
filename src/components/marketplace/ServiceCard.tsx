@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { useServiceAnalytics } from "@/hooks/useServiceAnalytics";
 import { ConsultationFlow } from "./ConsultationFlow";
 import { ServiceFunnelModal } from "./ServiceFunnelModal";
 
@@ -55,6 +56,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
   const { toast } = useToast();
   const { addToCart } = useCart();
   const { profile } = useAuth();
+  const { trackServiceView } = useServiceAnalytics();
   const navigate = useNavigate();
   const isProMember = profile?.is_pro_member || false;
 
@@ -67,7 +69,9 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
     });
   };
 
-  const handleViewDetails = () => {
+  const handleViewDetails = async () => {
+    // Track the service view
+    await trackServiceView(service.id);
     setIsFunnelModalOpen(true);
     onViewDetails?.(service.id);
   };

@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { useServiceAnalytics } from '@/hooks/useServiceAnalytics';
 import { supabase } from '@/integrations/supabase/client';
 import { VendorPricingModal } from '@/components/marketplace/VendorPricingModal';
 import { ServiceImageUpload } from '@/components/marketplace/ServiceImageUpload';
@@ -155,6 +156,7 @@ interface VendorStats {
 
 export const VendorDashboard = () => {
   const { user, loading: authLoading } = useAuth();
+  const { analytics, loading: analyticsLoading, trackServiceView, refreshAnalytics } = useServiceAnalytics();
   const navigate = useNavigate();
   const [services, setServices] = useState<Service[]>([]);
   const [stats, setStats] = useState<VendorStats>({
@@ -280,6 +282,19 @@ export const VendorDashboard = () => {
     }
   }, [user, authLoading, navigate]);
 
+  // Update stats when analytics data changes
+  useEffect(() => {
+    if (analytics) {
+      setStats({
+        total_services: analytics.total_services,
+        total_views: analytics.total_views,
+        total_bookings: analytics.total_bookings,
+        conversion_rate: analytics.conversion_rate,
+        monthly_revenue: analytics.monthly_revenue
+      });
+    }
+  }, [analytics]);
+
   const loadDashboardData = async () => {
     if (!user) return;
     
@@ -388,13 +403,6 @@ export const VendorDashboard = () => {
       }));
 
       setServices(transformedServices);
-      setStats({
-        total_services: transformedServices.length,
-        total_views: transformedServices.reduce((sum, s) => sum + s.views, 0),
-        total_bookings: transformedServices.reduce((sum, s) => sum + s.conversions, 0),
-        conversion_rate: 4.2,
-        monthly_revenue: 15847
-      });
 
     } catch (error) {
       console.error('Error loading dashboard data:', error);

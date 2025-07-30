@@ -789,6 +789,44 @@ export type Database = {
         }
         Relationships: []
       }
+      service_views: {
+        Row: {
+          id: string
+          ip_address: unknown | null
+          referrer_url: string | null
+          service_id: string
+          user_agent: string | null
+          user_id: string | null
+          viewed_at: string
+        }
+        Insert: {
+          id?: string
+          ip_address?: unknown | null
+          referrer_url?: string | null
+          service_id: string
+          user_agent?: string | null
+          user_id?: string | null
+          viewed_at?: string
+        }
+        Update: {
+          id?: string
+          ip_address?: unknown | null
+          referrer_url?: string | null
+          service_id?: string
+          user_agent?: string | null
+          user_id?: string | null
+          viewed_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_service_views_service_id"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       services: {
         Row: {
           category: string | null
