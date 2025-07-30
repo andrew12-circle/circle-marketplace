@@ -413,6 +413,7 @@ export type Database = {
           creator_website: string | null
           display_name: string | null
           id: string
+          is_admin: boolean | null
           is_creator: boolean | null
           is_pro_member: boolean | null
           location: string | null
@@ -442,6 +443,7 @@ export type Database = {
           creator_website?: string | null
           display_name?: string | null
           id?: string
+          is_admin?: boolean | null
           is_creator?: boolean | null
           is_pro_member?: boolean | null
           location?: string | null
@@ -471,6 +473,7 @@ export type Database = {
           creator_website?: string | null
           display_name?: string | null
           id?: string
+          is_admin?: boolean | null
           is_creator?: boolean | null
           is_pro_member?: boolean | null
           location?: string | null

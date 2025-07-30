@@ -20,6 +20,7 @@ interface UserProfile {
   creator_verified: boolean | null;
   creator_joined_at: string | null;
   specialties: string[] | null;
+  is_admin: boolean | null;
   created_at: string;
 }
 
@@ -30,7 +31,7 @@ export default function AdminDashboard() {
   const [loadingUsers, setLoadingUsers] = useState(true);
 
   // Check if user is admin
-  const isAdmin = profile?.specialties?.includes('admin') || false;
+  const isAdmin = profile?.is_admin || false;
 
   useEffect(() => {
     if (!loading && (!user || !isAdmin)) {
@@ -136,19 +137,9 @@ export default function AdminDashboard() {
 
   const toggleAdminStatus = async (userId: string, currentStatus: boolean) => {
     try {
-      let specialties = users.find(u => u.user_id === userId)?.specialties || [];
-      
-      if (!currentStatus) {
-        // Add admin to specialties
-        specialties = [...(specialties || []), 'admin'];
-      } else {
-        // Remove admin from specialties
-        specialties = (specialties || []).filter(s => s !== 'admin');
-      }
-
       const { error } = await supabase
         .from('profiles')
-        .update({ specialties })
+        .update({ is_admin: !currentStatus })
         .eq('user_id', userId);
 
       if (error) throw error;
@@ -156,7 +147,7 @@ export default function AdminDashboard() {
       // Update local state
       setUsers(users.map(user => 
         user.user_id === userId 
-          ? { ...user, specialties }
+          ? { ...user, is_admin: !currentStatus }
           : user
       ));
 
@@ -221,7 +212,7 @@ export default function AdminDashboard() {
                       <h3 className="font-semibold">
                         {user.display_name || user.business_name || 'Unnamed User'}
                       </h3>
-                      {user.specialties?.includes('admin') && (
+                      {user.is_admin && (
                         <Badge variant="destructive">Admin</Badge>
                       )}
                       {user.is_creator && (
@@ -248,8 +239,8 @@ export default function AdminDashboard() {
                     <div className="flex items-center gap-2">
                       <label className="text-sm font-medium">Admin</label>
                       <Switch
-                        checked={user.specialties?.includes('admin') || false}
-                        onCheckedChange={() => toggleAdminStatus(user.user_id, user.specialties?.includes('admin') || false)}
+                        checked={user.is_admin || false}
+                        onCheckedChange={() => toggleAdminStatus(user.user_id, user.is_admin || false)}
                       />
                     </div>
 

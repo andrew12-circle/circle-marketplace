@@ -21,6 +21,7 @@ interface Profile {
   is_pro_member: boolean | null;
   is_creator: boolean | null;
   creator_verified: boolean | null;
+  is_admin: boolean | null;
   revenue_share_percentage: number | null;
   total_earnings: number | null;
   created_at: string;
