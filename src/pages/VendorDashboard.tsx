@@ -103,8 +103,11 @@ interface Service {
       certification: string;
     };
     callToAction: {
-      primaryButton: string;
-      secondaryButton: string;
+      primaryHeadline: string;
+      primaryDescription: string;
+      primaryButtonText: string;
+      secondaryHeadline: string;
+      secondaryDescription: string;
       contactInfo: {
         phone: string;
         email: string;
@@ -201,8 +204,11 @@ export const VendorDashboard = () => {
         certification: 'Industry certified'
       },
       callToAction: {
-        primaryButton: 'Get Started Today',
-        secondaryButton: 'Learn More',
+        primaryHeadline: 'Need More Information?',
+        primaryDescription: 'Visit our website for detailed documentation and resources.',
+        primaryButtonText: 'Visit Official Website',
+        secondaryHeadline: 'Questions? We\'re Here to Help!',
+        secondaryDescription: 'Speak with our experts to find the perfect package for your business.',
         contactInfo: {
           phone: '',
           email: '',
@@ -306,8 +312,11 @@ export const VendorDashboard = () => {
               certification: 'Industry Leader'
             },
             callToAction: {
-              primaryButton: 'Start Free Trial',
-              secondaryButton: 'Book Demo',
+              primaryHeadline: 'Need More Information?',
+              primaryDescription: 'Visit our website for detailed documentation and resources.',
+              primaryButtonText: 'Visit Official Website',
+              secondaryHeadline: 'Questions? We\'re Here to Help!',
+              secondaryDescription: 'Speak with our experts to find the perfect package for your business.',
               contactInfo: {
                 phone: '(555) 123-4567',
                 email: 'support@crmtool.com',
@@ -398,8 +407,11 @@ export const VendorDashboard = () => {
           certification: 'Industry certified'
         },
         callToAction: {
-          primaryButton: 'Get Started Today',
-          secondaryButton: 'Learn More',
+          primaryHeadline: 'Need More Information?',
+          primaryDescription: 'Visit our website for detailed documentation and resources.',
+          primaryButtonText: 'Visit Official Website',
+          secondaryHeadline: 'Questions? We\'re Here to Help!',
+          secondaryDescription: 'Speak with our experts to find the perfect package for your business.',
           contactInfo: {
             phone: '',
             email: '',
@@ -473,8 +485,11 @@ export const VendorDashboard = () => {
             certification: 'Industry certified'
           },
           callToAction: {
-            primaryButton: 'Get Started Today',
-            secondaryButton: 'Learn More',
+            primaryHeadline: 'Need More Information?',
+            primaryDescription: 'Visit our website for detailed documentation and resources.',
+            primaryButtonText: 'Visit Official Website',
+            secondaryHeadline: 'Questions? We\'re Here to Help!',
+            secondaryDescription: 'Speak with our experts to find the perfect package for your business.',
             contactInfo: {
               phone: '',
               email: '',
@@ -1066,7 +1081,7 @@ export const VendorDashboard = () => {
                       <div className="space-y-4 pt-6 border-t">
                         <h2 className="text-2xl font-semibold">Ready to Get Started?</h2>
                         <Button size="lg" className="bg-gradient-to-r from-primary to-accent text-white">
-                          {serviceForm.funnel_content.callToAction.primaryButton || 'Book a Demo'}
+                          {serviceForm.funnel_content.callToAction.primaryButtonText || 'Book a Demo'}
                         </Button>
                         <p className="text-sm text-muted-foreground">
                           {serviceForm.description || 'Your service description will appear here'}

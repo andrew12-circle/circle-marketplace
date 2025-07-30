@@ -36,7 +36,9 @@ import {
   Mail,
   Globe,
   Clock,
-  Crown
+  Crown,
+  ExternalLink,
+  ShoppingCart
 } from 'lucide-react';
 
 interface MediaItem {
@@ -100,8 +102,11 @@ interface FunnelContent {
   };
 
   callToAction: {
-    primaryButton: string;
-    secondaryButton: string;
+    primaryHeadline: string;
+    primaryDescription: string;
+    primaryButtonText: string;
+    secondaryHeadline: string;
+    secondaryDescription: string;
     contactInfo: {
       phone: string;
       email: string;
@@ -195,7 +200,10 @@ export const ServiceFunnelEditor = ({ funnelContent, onChange }: ServiceFunnelEd
         <p className="text-muted-foreground">Design what agents see when they click your service</p>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Editor Panel */}
+        <div className="lg:col-span-1">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="hero">Hero</TabsTrigger>
           <TabsTrigger value="benefits">Benefits</TabsTrigger>
@@ -741,6 +749,70 @@ export const ServiceFunnelEditor = ({ funnelContent, onChange }: ServiceFunnelEd
 
               <Separator />
 
+              {/* Call to Action Cards */}
+              <div>
+                <h4 className="font-semibold mb-4">Call to Action Cards</h4>
+                <div className="space-y-6">
+                  {/* Primary CTA */}
+                  <div>
+                    <h5 className="font-medium mb-3">Primary CTA Card</h5>
+                    <div className="space-y-3">
+                      <div>
+                        <Label>Headline</Label>
+                        <Input
+                          value={funnelContent.callToAction.primaryHeadline}
+                          onChange={(e) => updateContent('callToAction.primaryHeadline', e.target.value)}
+                          placeholder="Need More Information?"
+                        />
+                      </div>
+                      <div>
+                        <Label>Description</Label>
+                        <Textarea
+                          value={funnelContent.callToAction.primaryDescription}
+                          onChange={(e) => updateContent('callToAction.primaryDescription', e.target.value)}
+                          placeholder="Visit our website for detailed documentation and resources."
+                          rows={2}
+                        />
+                      </div>
+                      <div>
+                        <Label>Button Text</Label>
+                        <Input
+                          value={funnelContent.callToAction.primaryButtonText}
+                          onChange={(e) => updateContent('callToAction.primaryButtonText', e.target.value)}
+                          placeholder="Visit Official Website"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Secondary CTA */}
+                  <div>
+                    <h5 className="font-medium mb-3">Secondary CTA Card</h5>
+                    <div className="space-y-3">
+                      <div>
+                        <Label>Headline</Label>
+                        <Input
+                          value={funnelContent.callToAction.secondaryHeadline}
+                          onChange={(e) => updateContent('callToAction.secondaryHeadline', e.target.value)}
+                          placeholder="Questions? We're Here to Help!"
+                        />
+                      </div>
+                      <div>
+                        <Label>Description</Label>
+                        <Textarea
+                          value={funnelContent.callToAction.secondaryDescription}
+                          onChange={(e) => updateContent('callToAction.secondaryDescription', e.target.value)}
+                          placeholder="Speak with our experts to find the perfect package for your business."
+                          rows={2}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <Separator />
+
               {/* Contact Information */}
               <div>
                 <h4 className="font-semibold mb-4">Contact Information</h4>
@@ -799,6 +871,224 @@ export const ServiceFunnelEditor = ({ funnelContent, onChange }: ServiceFunnelEd
           </Card>
         </TabsContent>
       </Tabs>
+        </div>
+
+        {/* Live Preview Panel */}
+        <div className="lg:col-span-2">
+          <Card className="sticky top-4">
+            <CardHeader>
+              <CardTitle>Live Preview - What Agents See</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="max-h-[600px] overflow-y-auto border rounded-lg bg-background">
+                {/* Exact replica of ServiceDetailsModal layout */}
+                
+                {/* Hero Section */}
+                <div className="relative bg-gradient-to-br from-circle-primary to-circle-primary/80 text-white p-8">
+                  <div className="flex items-start gap-6">
+                    <div className="w-24 h-24 bg-white rounded-xl p-4 flex-shrink-0">
+                      {funnelContent.media[0] ? (
+                        <img
+                          src={funnelContent.media[0].url}
+                          alt={funnelContent.headline}
+                          className="w-full h-full object-contain"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gray-200 rounded flex items-center justify-center text-xs text-gray-500">
+                          No Image
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <h2 className="text-3xl font-bold">{funnelContent.headline || 'Your Headline'}</h2>
+                        <Badge className="bg-white/20 text-white border-white/30">
+                          <Shield className="w-3 h-3 mr-1" />
+                          Verified
+                        </Badge>
+                      </div>
+                      
+                      <p className="text-lg text-white/90 mb-4">{funnelContent.heroDescription || 'Your description'}</p>
+                      
+                      <div className="flex items-center gap-6 text-sm">
+                        <div className="flex items-center gap-1">
+                          <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                          <span>5.0 (100+ reviews)</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <TrendingUp className="w-4 h-4" />
+                          <span>{funnelContent.estimatedRoi}x ROI</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Clock className="w-4 h-4" />
+                          <span>{funnelContent.duration}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="absolute top-4 right-4">
+                    <Badge className="bg-white text-circle-primary font-medium">
+                      <Award className="w-3 h-3 mr-1" />
+                      Featured Service
+                    </Badge>
+                  </div>
+                </div>
+
+                <div className="p-8">
+                  {/* Key Benefits */}
+                  <div className="mb-8">
+                    <h3 className="text-2xl font-bold mb-4">{funnelContent.whyChooseUs.title || `Why ${funnelContent.headline}?`}</h3>
+                    <div className="grid md:grid-cols-3 gap-4">
+                      {funnelContent.whyChooseUs.benefits.slice(0, 3).map((benefit, index) => {
+                        const icons = [Zap, Users, TrendingUp];
+                        const IconComponent = icons[index % icons.length];
+                        
+                        return (
+                          <Card key={index}>
+                            <CardContent className="p-4 text-center">
+                              <IconComponent className="w-8 h-8 text-circle-primary mx-auto mb-2" />
+                              <h4 className="font-semibold mb-1">{benefit.title}</h4>
+                              <p className="text-sm text-muted-foreground">{benefit.description}</p>
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <Separator className="my-8" />
+
+                  {/* Pricing Packages */}
+                  <div className="mb-8">
+                    <h3 className="text-2xl font-bold mb-6 text-center">Choose Your Package</h3>
+                    <div className="grid md:grid-cols-3 gap-4">
+                      {funnelContent.packages.map((pkg) => (
+                        <Card 
+                          key={pkg.id} 
+                          className={`relative transition-all duration-200 ${
+                            pkg.popular ? 'ring-2 ring-circle-primary scale-105' : ''
+                          }`}
+                        >
+                          {pkg.popular && (
+                            <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                              <Badge className="bg-circle-primary text-white px-4 py-1">
+                                Most Popular
+                              </Badge>
+                            </div>
+                          )}
+                          
+                          <CardContent className="p-6">
+                            <div className="text-center mb-4">
+                              <div className="flex items-center justify-center gap-2 mb-2">
+                                <h4 className="text-xl font-bold">{pkg.name}</h4>
+                                {pkg.proOnly && <Crown className="w-5 h-5 text-circle-primary" />}
+                              </div>
+                              <p className="text-sm text-muted-foreground">{pkg.description}</p>
+                            </div>
+
+                            <div className="text-center mb-4">
+                              {pkg.originalPrice && (
+                                <div className="text-sm text-muted-foreground line-through">
+                                  ${pkg.originalPrice}
+                                </div>
+                              )}
+                              <div className="text-3xl font-bold text-circle-primary">
+                                ${pkg.price}
+                              </div>
+                              {pkg.savings && (
+                                <Badge className="bg-destructive text-destructive-foreground text-xs mt-1">
+                                  {pkg.savings} OFF
+                                </Badge>
+                              )}
+                            </div>
+
+                            <div className="space-y-2 mb-6">
+                              {pkg.features.map((feature, featureIndex) => (
+                                <div key={featureIndex} className="flex items-center gap-2 text-sm">
+                                  <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
+                                  <span>{feature}</span>
+                                </div>
+                              ))}
+                            </div>
+
+                            <Button 
+                              className="w-full"
+                              variant={pkg.popular ? "default" : "outline"}
+                            >
+                              <ShoppingCart className="w-4 h-4 mr-2" />
+                              Add to Cart
+                            </Button>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+
+                  <Separator className="my-8" />
+
+                  {/* Call to Actions */}
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <Card className="bg-gradient-to-r from-circle-primary/5 to-circle-primary/10 border-circle-primary/20">
+                      <CardContent className="p-6 text-center">
+                        <h4 className="text-xl font-bold mb-2">{funnelContent.callToAction.primaryHeadline || "Need More Information?"}</h4>
+                        <p className="text-muted-foreground mb-4">
+                          {funnelContent.callToAction.primaryDescription || "Visit our website for detailed documentation and resources."}
+                        </p>
+                        <Button 
+                          variant="outline" 
+                          className="w-full"
+                        >
+                          <ExternalLink className="w-4 h-4 mr-2" />
+                          {funnelContent.callToAction.primaryButtonText || "Visit Official Website"}
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-gradient-to-r from-green-50 to-green-100 border-green-200">
+                      <CardContent className="p-6 text-center">
+                        <h4 className="text-xl font-bold mb-2">{funnelContent.callToAction.secondaryHeadline || "Questions? We're Here to Help!"}</h4>
+                        <p className="text-muted-foreground mb-4">
+                          {funnelContent.callToAction.secondaryDescription || "Speak with our experts to find the perfect package for your business."}
+                        </p>
+                        <div className="flex gap-2">
+                          <Button variant="outline" className="flex-1" size="sm">
+                            <Phone className="w-4 h-4 mr-2" />
+                            Call Us
+                          </Button>
+                          <Button variant="outline" className="flex-1" size="sm">
+                            <Mail className="w-4 h-4 mr-2" />
+                            Email
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Trust Indicators */}
+                  <div className="mt-8 text-center">
+                    <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-1">
+                        <Shield className="w-4 h-4 text-green-500" />
+                        <span>{funnelContent.trustIndicators.guarantee || "30-Day Money Back Guarantee"}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <CheckCircle className="w-4 h-4 text-green-500" />
+                        <span>{funnelContent.trustIndicators.cancellation || "Cancel Anytime"}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Award className="w-4 h-4 text-yellow-500" />
+                        <span>{funnelContent.trustIndicators.certification || "Industry Leader"}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 };
