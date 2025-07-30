@@ -4,12 +4,15 @@ import { VideoSection } from "@/components/academy/VideoSection";
 import { VideoPlayerModal } from "@/components/academy/VideoPlayerModal";
 import { PodcastSection } from "@/components/academy/PodcastSection";
 import { PodcastPlayerModal } from "@/components/academy/PodcastPlayerModal";
+import { BookSection } from "@/components/academy/BookSection";
+import { BookReaderModal } from "@/components/academy/BookReaderModal";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useVideos } from "@/hooks/useVideos";
 import { useChannels } from "@/hooks/useChannels";
 import { usePodcasts } from "@/hooks/usePodcasts";
+import { useBooks } from "@/hooks/useBooks";
 import { supabase } from "@/integrations/supabase/client";
 import { 
   GraduationCap, 
@@ -201,6 +204,9 @@ export const Academy = () => {
   const [selectedPodcast, setSelectedPodcast] = useState<any>(null);
   const [isPodcastModalOpen, setIsPodcastModalOpen] = useState(false);
   const [currentPodcastUrl, setCurrentPodcastUrl] = useState<string>("");
+  const [selectedBook, setSelectedBook] = useState<any>(null);
+  const [isBookModalOpen, setIsBookModalOpen] = useState(false);
+  const [currentBookUrl, setCurrentBookUrl] = useState<string>("");
   const { toast } = useToast();
   
   // Fetch videos using the custom hook
@@ -218,6 +224,11 @@ export const Academy = () => {
   const { podcasts: featuredPodcasts } = usePodcasts({ featured: true, limit: 10 });
   const { podcasts: newPodcasts } = usePodcasts({ orderBy: 'created_at', orderDirection: 'desc', limit: 8 });
   const { podcasts: allPodcasts, loading: podcastsLoading, incrementPlay } = usePodcasts();
+  
+  // Fetch books using the custom hook
+  const { books: featuredBooks } = useBooks({ featured: true, limit: 10 });
+  const { books: newBooks } = useBooks({ orderBy: 'created_at', orderDirection: 'desc', limit: 8 });
+  const { books: allBooks, loading: booksLoading, incrementRead, updateProgress } = useBooks();
 
   const categories = [
     { id: "courses", label: "Courses", icon: GraduationCap },
@@ -426,6 +437,70 @@ export const Academy = () => {
     toast({
       title: "Download Started",
       description: "Podcast download has begun",
+    });
+  };
+
+  const handleReadBook = (bookId: string) => {
+    console.log("handleReadBook called with bookId:", bookId);
+    
+    // Find the book in our data
+    const book = allBooks.find(b => b.id === bookId) || 
+                 featuredBooks.find(b => b.id === bookId) || 
+                 newBooks.find(b => b.id === bookId);
+    
+    console.log("Found book:", book);
+    
+    if (book) {
+      // Increment read count
+      incrementRead(bookId);
+      
+      // Get the content URL from Supabase and open in reader modal
+      supabase
+        .from('content')
+        .select('content_url')
+        .eq('id', bookId)
+        .single()
+        .then(({ data, error }) => {
+          console.log("Supabase response:", { data, error });
+          
+          if (data?.content_url && !error) {
+            console.log("Setting book modal state");
+            setSelectedBook(book);
+            setCurrentBookUrl(data.content_url);
+            setIsBookModalOpen(true);
+            
+            toast({
+              title: "Opening Book",
+              description: `Now reading: ${book.title}`,
+            });
+          } else {
+            toast({
+              title: "Error",
+              description: "Could not load book",
+              variant: "destructive",
+            });
+          }
+        });
+    } else {
+      toast({
+        title: "Error", 
+        description: "Book not found",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleAddBookToLibrary = (bookId: string) => {
+    toast({
+      title: "Added to Library",
+      description: "Book saved to your library",
+    });
+  };
+
+  const handleDownloadBook = (bookId: string) => {
+    toast({
+      title: "Download Started",
+      description: "Book download has begun",
     });
   };
 
@@ -816,6 +891,163 @@ export const Academy = () => {
     </div>
   );
 
+  const renderBooksView = () => (
+    <div className="flex-1 p-8 max-w-7xl">
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-4xl font-bold text-foreground mb-2">Books</h1>
+        <p className="text-muted-foreground">
+          Your digital real estate library
+        </p>
+      </div>
+
+      {/* Search and Filter Bar */}
+      <div className="flex gap-4 mb-8">
+        <div className="flex-1 relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+          <input 
+            type="text"
+            placeholder="Search books..."
+            className="w-full pl-10 pr-4 py-2 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+          />
+        </div>
+        <Button variant="outline" className="gap-2">
+          <Filter className="w-4 h-4" />
+          Filters
+        </Button>
+      </div>
+
+      {booksLoading ? (
+        <div className="flex justify-center items-center py-12">
+          <div className="text-muted-foreground">Loading books...</div>
+        </div>
+      ) : (
+        <>
+          {/* Currently Reading */}
+          {allBooks.filter(book => book.progress && book.progress > 0 && !book.isFinished).length > 0 && (
+            <BookSection
+              title="📖 Continue Reading"
+              subtitle="Pick up where you left off"
+              books={allBooks.filter(book => book.progress && book.progress > 0 && !book.isFinished).slice(0, 6)}
+              onRead={handleReadBook}
+              onAddToLibrary={handleAddBookToLibrary}
+              onDownload={handleDownloadBook}
+              showSeeAll={true}
+              onSeeAll={() => toast({ title: "See All", description: "Show all books in progress" })}
+              size="medium"
+              layout="horizontal"
+              cardLayout="horizontal"
+            />
+          )}
+
+          {/* Featured Books */}
+          <BookSection
+            title="⭐ Featured Books"
+            subtitle="Editor's picks and bestsellers"
+            books={featuredBooks}
+            onRead={handleReadBook}
+            onAddToLibrary={handleAddBookToLibrary}
+            onDownload={handleDownloadBook}
+            showSeeAll={true}
+            onSeeAll={() => toast({ title: "See All", description: "Show all featured books" })}
+            size="large"
+          />
+
+          {/* New Releases */}
+          <BookSection
+            title="🆕 New Releases"
+            subtitle="Latest additions to our library"
+            books={newBooks}
+            onRead={handleReadBook}
+            onAddToLibrary={handleAddBookToLibrary}
+            onDownload={handleDownloadBook}
+            showSeeAll={true}
+            onSeeAll={() => toast({ title: "See All", description: "Show all new books" })}
+            size="medium"
+          />
+
+          {/* All Books Grid */}
+          <BookSection
+            title="📚 Book Library"
+            subtitle="Browse our complete collection"
+            books={allBooks.slice(0, 18)}
+            onRead={handleReadBook}
+            onAddToLibrary={handleAddBookToLibrary}
+            onDownload={handleDownloadBook}
+            showSeeAll={true}
+            onSeeAll={() => toast({ title: "See All", description: "Show all books" })}
+            size="medium"
+            layout="grid"
+          />
+
+          {/* Categories */}
+          <div className="mt-12">
+            <h2 className="text-2xl font-bold text-foreground mb-6">Browse by Category</h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              {[
+                "Lead Generation", "Marketing", "Sales", "Mindset", 
+                "Real Estate Law", "Investment", "Market Analysis", "Communication",
+                "Business Building", "Technology", "Personal Development", "Finance"
+              ].map((category) => (
+                <Card 
+                  key={category}
+                  className="p-4 text-center cursor-pointer hover:bg-muted/50 transition-colors"
+                >
+                  <Book className="w-6 h-6 mx-auto mb-2 text-muted-foreground" />
+                  <h3 className="font-medium text-sm">{category}</h3>
+                </Card>
+              ))}
+            </div>
+          </div>
+
+          {/* Reading Stats */}
+          <div className="mt-12 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-xl p-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="text-center">
+                <div className="text-3xl font-bold text-foreground mb-2">
+                  {allBooks.filter(book => book.isFinished).length}
+                </div>
+                <p className="text-muted-foreground">Books Completed</p>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-foreground mb-2">
+                  {allBooks.filter(book => book.progress && book.progress > 0).length}
+                </div>
+                <p className="text-muted-foreground">Books Started</p>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-foreground mb-2">
+                  {Math.round(allBooks.reduce((acc, book) => acc + (book.progress || 0), 0) / allBooks.length) || 0}%
+                </div>
+                <p className="text-muted-foreground">Average Progress</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Quick Actions */}
+          <div className="mt-8 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-xl font-bold text-foreground mb-2">Build Your Knowledge</h3>
+                <p className="text-muted-foreground">Discover new books and expand your real estate expertise</p>
+              </div>
+              <div className="flex gap-3">
+                <Button variant="outline" className="gap-2">
+                  <Heart className="w-4 h-4" />
+                  My Library
+                </Button>
+                <Button className="gap-2">
+                  <BookOpen className="w-4 h-4" />
+                  Start Reading
+                </Button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+
   const renderContent = () => {
     console.log("Current activeView:", activeView); // Debug log
     switch (activeView) {
@@ -829,6 +1061,9 @@ export const Academy = () => {
       case "podcasts":
         console.log("Rendering podcasts view"); // Debug log
         return renderPodcastsView();
+      case "books":
+        console.log("Rendering books view"); // Debug log
+        return renderBooksView();
       default:
         console.log("Rendering default view for:", activeView); // Debug log
         return (
@@ -863,6 +1098,13 @@ export const Academy = () => {
         isOpen={isPodcastModalOpen}
         onClose={() => setIsPodcastModalOpen(false)}
         audioUrl={currentPodcastUrl}
+      />
+
+      <BookReaderModal
+        book={selectedBook}
+        isOpen={isBookModalOpen}
+        onClose={() => setIsBookModalOpen(false)}
+        contentUrl={currentBookUrl}
       />
     </div>
   );
