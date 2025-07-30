@@ -32,35 +32,66 @@ export const useVideos = (options: UseVideosOptions = {}) => {
       setLoading(true);
       setError(null);
 
-      let query = supabase
-        .from('content')
-        .select('*')
-        .eq('content_type', 'video')
-        .eq('is_published', true)
-        .order('created_at', { ascending: false });
+      // Build query conditions
+      const baseConditions = {
+        content_type: 'video',
+        is_published: true
+      };
 
+      let additionalConditions = {};
+      
       if (options.category === 'shorts') {
-        // Filter for shorts by checking metadata
-        query = query.eq('metadata->is_short', true);
+        // For shorts, we'll filter in JavaScript since metadata queries are complex
+        additionalConditions = {};
       } else if (options.category) {
-        query = query.eq('category', options.category);
+        additionalConditions = { category: options.category };
       }
 
       if (options.featured !== undefined) {
-        query = query.eq('is_featured', options.featured);
+        additionalConditions = { ...additionalConditions, is_featured: options.featured };
       }
+
+      const allConditions = { ...baseConditions, ...additionalConditions };
+
+      // Execute query
+      let queryBuilder = supabase
+        .from('content')
+        .select('*')
+        .match(allConditions)
+        .order('created_at', { ascending: false });
 
       if (options.limit) {
-        query = query.limit(options.limit);
+        queryBuilder = queryBuilder.limit(options.limit * 2); // Get extra for shorts filtering
       }
 
-      const { data, error: fetchError } = await query;
+      const { data, error: fetchError } = await queryBuilder;
 
       if (fetchError) {
         throw fetchError;
       }
 
-      const formattedVideos: Video[] = (data || []).map((video) => ({
+      // Filter for shorts in JavaScript if needed
+      let filteredData = data || [];
+      if (options.category === 'shorts') {
+        filteredData = filteredData.filter(video => {
+          // Check if metadata exists and has is_short property
+          if (video.metadata && typeof video.metadata === 'object' && !Array.isArray(video.metadata)) {
+            return (video.metadata as any).is_short === true;
+          }
+          return false;
+        });
+      }
+
+      // Apply limit after filtering
+      if (options.limit) {
+        filteredData = filteredData.slice(0, options.limit);
+      }
+
+      if (fetchError) {
+        throw fetchError;
+      }
+
+      const formattedVideos: Video[] = filteredData.map((video) => ({
         id: video.id,
         title: video.title,
         creator: "Content Creator", // Will need to join with profiles table later
