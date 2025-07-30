@@ -18,11 +18,15 @@ export const ServiceImageUpload = ({ value, onChange }: ServiceImageUploadProps)
   const { toast } = useToast();
 
   const handleUpload = async (file: File) => {
-    const allowedTypes = ['image/svg+xml', 'image/png', 'image/jpeg', 'image/jpg'];
-    if (!allowedTypes.includes(file.type)) {
+    const allowedTypes = ['image/svg+xml', 'image/png', 'image/jpeg'];
+    const fileName = file.name.toLowerCase();
+    const isValidExtension = fileName.endsWith('.svg') || fileName.endsWith('.png') || 
+                           fileName.endsWith('.jpg') || fileName.endsWith('.jpeg');
+    
+    if (!allowedTypes.includes(file.type) && !isValidExtension) {
       toast({
         title: "Invalid file type",
-        description: "Please upload an SVG, PNG, or JPG file only.",
+        description: "Please upload an SVG, PNG, or JPEG/JPG file only.",
         variant: "destructive"
       });
       return;
@@ -40,13 +44,18 @@ export const ServiceImageUpload = ({ value, onChange }: ServiceImageUploadProps)
     try {
       setIsUploading(true);
       
-      // Get file extension from the actual file type
-      let fileExt = 'svg';
-      if (file.type === 'image/png') fileExt = 'png';
-      if (file.type === 'image/jpeg' || file.type === 'image/jpg') fileExt = 'jpg';
+      // Get file extension from the actual file type or file name
+      let fileExt = 'jpg'; // default fallback
+      if (file.type === 'image/svg+xml' || fileName.endsWith('.svg')) {
+        fileExt = 'svg';
+      } else if (file.type === 'image/png' || fileName.endsWith('.png')) {
+        fileExt = 'png';
+      } else if (file.type === 'image/jpeg' || fileName.endsWith('.jpg') || fileName.endsWith('.jpeg')) {
+        fileExt = 'jpg';
+      }
       
-      const fileName = `${Math.random()}.${fileExt}`;
-      const filePath = `${fileName}`;
+      const generatedFileName = `${Math.random()}.${fileExt}`;
+      const filePath = `${generatedFileName}`;
 
       const { error: uploadError } = await supabase.storage
         .from('service-images')
