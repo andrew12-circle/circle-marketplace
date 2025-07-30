@@ -9,6 +9,7 @@ import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { ConsultationFlow } from "./ConsultationFlow";
+import { ServiceFunnelModal } from "./ServiceFunnelModal";
 
 interface Service {
   id: string;
@@ -47,6 +48,7 @@ interface ServiceCardProps {
 export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }: ServiceCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isConsultationFlowOpen, setIsConsultationFlowOpen] = useState(false);
+  const [isFunnelModalOpen, setIsFunnelModalOpen] = useState(false);
   const { toast } = useToast();
   const { addToCart } = useCart();
   const { profile } = useAuth();
@@ -62,6 +64,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
   };
 
   const handleViewDetails = () => {
+    setIsFunnelModalOpen(true);
     onViewDetails?.(service.id);
   };
 
@@ -355,6 +358,12 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
             name: service.vendor.name
           }
         }}
+      />
+      
+      <ServiceFunnelModal
+        isOpen={isFunnelModalOpen}
+        onClose={() => setIsFunnelModalOpen(false)}
+        service={service}
       />
     </Card>
     </TooltipProvider>
