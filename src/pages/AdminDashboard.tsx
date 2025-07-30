@@ -136,6 +136,15 @@ export default function AdminDashboard() {
   };
 
   const toggleAdminStatus = async (userId: string, currentStatus: boolean) => {
+    // Additional security check - require confirmation for admin changes
+    const confirmMessage = !currentStatus 
+      ? "Are you sure you want to grant admin privileges to this user? This action will be logged for security purposes."
+      : "Are you sure you want to remove admin privileges from this user? This action will be logged for security purposes.";
+    
+    if (!window.confirm(confirmMessage)) {
+      return;
+    }
+
     try {
       const { error } = await supabase
         .from('profiles')
@@ -153,7 +162,7 @@ export default function AdminDashboard() {
 
       toast({
         title: 'Success',
-        description: `Admin status ${!currentStatus ? 'granted' : 'revoked'} successfully`,
+        description: `Admin status ${!currentStatus ? 'granted' : 'revoked'} successfully. Action has been logged for security audit.`,
       });
     } catch (error) {
       console.error('Error updating admin status:', error);

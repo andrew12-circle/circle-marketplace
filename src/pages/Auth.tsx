@@ -9,6 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Eye, EyeOff, Mail, Lock, User, Briefcase } from "lucide-react";
+import { SecureForm } from "@/components/common/SecureForm";
+import { commonRules } from "@/hooks/useSecureInput";
 
 export const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -64,13 +66,12 @@ export const Auth = () => {
     return data;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSecureSubmit = async (data: Record<string, string>) => {
     setLoading(true);
 
     try {
       if (isLogin) {
-        await handleLogin(formData.email, formData.password);
+        await handleLogin(data.email, data.password);
         toast({
           title: "Welcome back!",
           description: "You've been successfully logged in.",
@@ -78,16 +79,16 @@ export const Auth = () => {
         navigate('/');
       } else {
         const { user } = await handleSignUp(
-          formData.email, 
-          formData.password, 
-          formData.displayName,
-          formData.isCreator
+          data.email, 
+          data.password, 
+          data.displayName || '',
+          data.isCreator === 'true'
         );
         
         if (user) {
           toast({
             title: "Account created!",
-            description: formData.isCreator 
+            description: data.isCreator === 'true'
               ? "Welcome to the creator platform! Check your email to verify your account."
               : "Welcome! Check your email to verify your account.",
           });
@@ -113,10 +114,22 @@ export const Auth = () => {
         description: errorMessage,
         variant: "destructive",
       });
+      throw error; // Re-throw to let SecureForm handle it
     } finally {
       setLoading(false);
     }
   };
+
+  const validationRules = isLogin 
+    ? {
+        email: commonRules.email,
+        password: { required: true, minLength: 6 }
+      }
+    : {
+        email: commonRules.email,
+        password: { required: true, minLength: 6 },
+        displayName: commonRules.name,
+      };
 
   const toggleMode = () => {
     setIsLogin(!isLogin);
@@ -138,7 +151,11 @@ export const Auth = () => {
           </p>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <SecureForm 
+            validationRules={validationRules}
+            onSubmit={handleSecureSubmit}
+            className="space-y-4"
+          >
             {/* Email Field */}
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
@@ -146,10 +163,9 @@ export const Auth = () => {
                 <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
                   id="email"
+                  name="email"
                   type="email"
                   placeholder="Enter your email"
-                  value={formData.email}
-                  onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                   className="pl-10"
                   required
                 />
@@ -164,10 +180,9 @@ export const Auth = () => {
                   <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
                     id="displayName"
+                    name="displayName"
                     type="text"
                     placeholder="Enter your full name"
-                    value={formData.displayName}
-                    onChange={(e) => setFormData(prev => ({ ...prev, displayName: e.target.value }))}
                     className="pl-10"
                     required
                   />
@@ -182,10 +197,9 @@ export const Auth = () => {
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
                   id="password"
+                  name="password"
                   type={showPassword ? "text" : "password"}
                   placeholder="Enter your password"
-                  value={formData.password}
-                  onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
                   className="pl-10 pr-10"
                   required
                   minLength={6}
@@ -218,6 +232,11 @@ export const Auth = () => {
                     Upload and monetize your content
                   </p>
                 </div>
+                <input
+                  type="hidden"
+                  name="isCreator"
+                  value={formData.isCreator.toString()}
+                />
                 <Switch
                   id="isCreator"
                   checked={formData.isCreator}
@@ -234,7 +253,7 @@ export const Auth = () => {
             >
               {loading ? 'Loading...' : (isLogin ? 'Sign In' : 'Create Account')}
             </Button>
-          </form>
+          </SecureForm>
 
           <Separator className="my-6" />
 

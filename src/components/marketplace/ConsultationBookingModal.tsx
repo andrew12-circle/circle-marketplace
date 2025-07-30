@@ -10,6 +10,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Calendar as CalendarIcon, Clock, User, MessageSquare } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { SecureForm } from '@/components/common/SecureForm';
+import { commonRules } from '@/hooks/useSecureInput';
 
 interface ConsultationBookingModalProps {
   isOpen: boolean;
@@ -47,49 +49,43 @@ export const ConsultationBookingModal = ({
     '3:00 PM', '3:30 PM', '4:00 PM', '4:30 PM', '5:00 PM'
   ];
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedDate || !selectedTime || !name || !email) {
+  const handleSecureSubmit = async (data: Record<string, string>) => {
+    if (!selectedDate || !selectedTime) {
       toast({
         title: "Missing Information",
-        description: "Please fill in all required fields",
+        description: "Please select a date and time",
         variant: "destructive"
       });
-      return;
+      throw new Error("Date and time are required");
     }
 
     setIsSubmitting(true);
     try {
-      // For now, create a consultation booking ID and store locally
-      // TODO: Replace with actual Supabase call once types are updated
-      const consultationId = `consultation_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      
-      const bookingData = {
-        id: consultationId,
-        user_id: user?.id,
-        service_id: service.id,
-        scheduled_date: selectedDate.toISOString().split('T')[0],
-        scheduled_time: selectedTime,
-        client_name: name,
-        client_email: email,
-        client_phone: phone,
-        project_details: projectDetails,
-        budget_range: budget,
-        status: 'pending',
-        created_at: new Date().toISOString()
-      };
+      const { data: bookingData, error } = await supabase
+        .from('consultation_bookings')
+        .insert({
+          user_id: user?.id,
+          service_id: service.id,
+          scheduled_date: selectedDate.toISOString().split('T')[0],
+          scheduled_time: selectedTime,
+          client_name: data.client_name,
+          client_email: data.client_email,
+          client_phone: data.client_phone || null,
+          project_details: data.project_details || null,
+          budget_range: data.budget_range || null,
+          status: 'pending'
+        })
+        .select()
+        .single();
 
-      // Store in localStorage for now
-      const existingBookings = JSON.parse(localStorage.getItem('consultation_bookings') || '[]');
-      existingBookings.push(bookingData);
-      localStorage.setItem('consultation_bookings', JSON.stringify(existingBookings));
+      if (error) throw error;
 
       toast({
         title: "Consultation Booked!",
         description: "We'll send you a confirmation email shortly. Next, complete the preparation course to make the most of your consultation.",
       });
 
-      onBookingConfirmed(consultationId);
+      onBookingConfirmed(bookingData.id);
       onClose();
     } catch (error) {
       console.error('Error booking consultation:', error);
@@ -98,9 +94,17 @@ export const ConsultationBookingModal = ({
         description: "There was an error booking your consultation. Please try again.",
         variant: "destructive"
       });
+      throw error; // Re-throw to let SecureForm handle it
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const validationRules = {
+    client_name: commonRules.name,
+    client_email: commonRules.email,
+    client_phone: commonRules.phone,
+    project_details: commonRules.description,
   };
 
   return (
@@ -113,7 +117,11 @@ export const ConsultationBookingModal = ({
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <SecureForm 
+          validationRules={validationRules}
+          onSubmit={handleSecureSubmit}
+          className="space-y-6"
+        >
           {/* Service Info */}
           <div className="bg-muted/50 p-4 rounded-lg">
             <h3 className="font-semibold text-sm text-muted-foreground">SERVICE PROVIDER</h3>
@@ -163,34 +171,31 @@ export const ConsultationBookingModal = ({
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="name">Full Name *</Label>
+                <Label htmlFor="client_name">Full Name *</Label>
                 <Input
-                  id="name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  id="client_name"
+                  name="client_name"
                   placeholder="Your full name"
                   required
                 />
               </div>
               <div>
-                <Label htmlFor="email">Email *</Label>
+                <Label htmlFor="client_email">Email *</Label>
                 <Input
-                  id="email"
+                  id="client_email"
+                  name="client_email"
                   type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
                   placeholder="your@email.com"
                   required
                 />
               </div>
             </div>
             <div>
-              <Label htmlFor="phone">Phone Number</Label>
+              <Label htmlFor="client_phone">Phone Number</Label>
               <Input
-                id="phone"
+                id="client_phone"
+                name="client_phone"
                 type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
                 placeholder="(555) 123-4567"
               />
             </div>
@@ -203,17 +208,21 @@ export const ConsultationBookingModal = ({
               Project Information
             </h3>
             <div>
-              <Label htmlFor="project">Project Details</Label>
+              <Label htmlFor="project_details">Project Details</Label>
               <Textarea
-                id="project"
-                value={projectDetails}
-                onChange={(e) => setProjectDetails(e.target.value)}
+                id="project_details"
+                name="project_details"
                 placeholder="Tell us about your project, goals, and any specific requirements..."
                 rows={4}
               />
             </div>
             <div>
-              <Label htmlFor="budget">Budget Range</Label>
+              <Label htmlFor="budget_range">Budget Range</Label>
+              <input
+                type="hidden"
+                name="budget_range"
+                value={budget}
+              />
               <Select value={budget} onValueChange={setBudget}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select your budget range" />
@@ -240,7 +249,7 @@ export const ConsultationBookingModal = ({
               {isSubmitting ? 'Booking...' : 'Book Consultation'}
             </Button>
           </div>
-        </form>
+        </SecureForm>
       </DialogContent>
     </Dialog>
   );

@@ -11,6 +11,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { MapPin, Loader2 } from 'lucide-react';
 import { useLocation } from '@/hooks/useLocation';
+import { SecureForm } from '@/components/common/SecureForm';
+import { commonRules } from '@/hooks/useSecureInput';
 
 interface LocationModalProps {
   open: boolean;
@@ -37,11 +39,15 @@ export const LocationModal = ({ open, onClose }: LocationModalProps) => {
     onClose();
   };
 
-  const handleManualSubmit = async () => {
-    if (city && state) {
-      await updateLocationManually(city, state, zipCode);
-      onClose();
-    }
+  const handleManualSubmit = async (data: Record<string, string>) => {
+    await updateLocationManually(data.city, data.state, data.zipCode || '');
+    onClose();
+  };
+
+  const validationRules = {
+    city: { required: true, minLength: 2 },
+    state: { required: true },
+    zipCode: commonRules.zipCode,
   };
 
   return (
@@ -92,24 +98,34 @@ export const LocationModal = ({ open, onClose }: LocationModalProps) => {
               </Button>
             </div>
           ) : (
-            <div className="space-y-4">
+            <SecureForm 
+              validationRules={validationRules}
+              onSubmit={handleManualSubmit}
+              className="space-y-4"
+            >
               <div className="space-y-2">
                 <Label htmlFor="city">City</Label>
                 <Input
                   id="city"
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
+                  name="city"
                   placeholder="Enter your city"
+                  required
                 />
               </div>
               
               <div className="space-y-2">
                 <Label htmlFor="state">State</Label>
+                <input
+                  type="hidden"
+                  name="state"
+                  value={state}
+                />
                 <select
                   id="state"
                   value={state}
                   onChange={(e) => setState(e.target.value)}
                   className="w-full px-3 py-2 border border-input bg-background rounded-md text-sm"
+                  required
                 >
                   <option value="">Select State</option>
                   {US_STATES.map(stateCode => (
@@ -124,14 +140,14 @@ export const LocationModal = ({ open, onClose }: LocationModalProps) => {
                 <Label htmlFor="zipCode">Zip Code (Optional)</Label>
                 <Input
                   id="zipCode"
-                  value={zipCode}
-                  onChange={(e) => setZipCode(e.target.value)}
+                  name="zipCode"
                   placeholder="Enter your zip code"
                 />
               </div>
               
               <div className="flex gap-2">
                 <Button 
+                  type="button"
                   variant="outline" 
                   onClick={() => setManualEntry(false)}
                   className="flex-1"
@@ -139,14 +155,13 @@ export const LocationModal = ({ open, onClose }: LocationModalProps) => {
                   Back
                 </Button>
                 <Button 
-                  onClick={handleManualSubmit}
-                  disabled={!city || !state}
+                  type="submit"
                   className="flex-1"
                 >
                   Save Location
                 </Button>
               </div>
-            </div>
+            </SecureForm>
           )}
         </div>
       </DialogContent>
