@@ -579,6 +579,36 @@ export type Database = {
           },
         ]
       }
+      security_events: {
+        Row: {
+          created_at: string | null
+          event_data: Json | null
+          event_type: string
+          id: string
+          ip_address: unknown | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          event_data?: Json | null
+          event_type: string
+          id?: string
+          ip_address?: unknown | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          event_data?: Json | null
+          event_type?: string
+          id?: string
+          ip_address?: unknown | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       services: {
         Row: {
           category: string | null
@@ -1051,6 +1081,10 @@ export type Database = {
           avatar_url: string
         }[]
       }
+      get_user_admin_status: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       increment_content_plays: {
         Args: { content_uuid: string }
         Returns: undefined
@@ -1062,6 +1096,10 @@ export type Database = {
       trigger_trending_import: {
         Args: Record<PropertyKey, never>
         Returns: undefined
+      }
+      user_has_specialty: {
+        Args: { specialty_name: string }
+        Returns: boolean
       }
     }
     Enums: {
