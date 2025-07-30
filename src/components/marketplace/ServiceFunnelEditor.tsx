@@ -376,10 +376,31 @@ export const ServiceFunnelEditor = ({ funnelContent, onChange }: ServiceFunnelEd
                   <p className="text-sm text-muted-foreground">
                     Add images, videos, or documents to showcase your work
                   </p>
-                  <Button variant="outline" className="w-full">
-                    <Upload className="w-4 h-4 mr-2" />
-                    Upload Media
-                  </Button>
+                  <div className="relative">
+                    <input
+                      type="file"
+                      accept="image/*,video/*,.pdf,.doc,.docx"
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          // For now, just add a placeholder - you'll need to implement actual upload
+                          const newMedia = {
+                            id: Date.now().toString(),
+                            type: file.type.startsWith('image/') ? 'image' as const : 
+                                  file.type.startsWith('video/') ? 'video' as const : 'document' as const,
+                            url: URL.createObjectURL(file),
+                            caption: file.name
+                          };
+                          updateContent('media', [...funnelContent.media, newMedia]);
+                        }
+                      }}
+                    />
+                    <Button variant="outline" className="w-full">
+                      <Upload className="w-4 h-4 mr-2" />
+                      Upload Media
+                    </Button>
+                  </div>
                   <div className="grid grid-cols-3 gap-2">
                     {funnelContent.media.map((item, index) => (
                       <div key={item.id} className="relative group">
@@ -390,6 +411,10 @@ export const ServiceFunnelEditor = ({ funnelContent, onChange }: ServiceFunnelEd
                           variant="destructive"
                           size="sm"
                           className="absolute -top-2 -right-2 w-6 h-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={() => {
+                            const updatedMedia = funnelContent.media.filter((_, i) => i !== index);
+                            updateContent('media', updatedMedia);
+                          }}
                         >
                           <X className="w-3 h-3" />
                         </Button>
