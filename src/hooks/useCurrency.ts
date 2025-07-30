@@ -29,7 +29,14 @@ export const useCurrency = () => {
   const formatPrice = (amount: number | string) => {
     const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
     
-    if (isNaN(numAmount)) return `${currency} 0`;
+    if (isNaN(numAmount)) {
+      return new Intl.NumberFormat(i18n.language === 'fr' ? 'fr-CA' : 'en-US', {
+        style: 'currency',
+        currency: currency,
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }).format(0);
+    }
 
     return new Intl.NumberFormat(i18n.language === 'fr' ? 'fr-CA' : 'en-US', {
       style: 'currency',
