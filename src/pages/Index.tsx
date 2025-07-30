@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { NavigationTabs } from "@/components/NavigationTabs";
 import { Marketplace } from "./Marketplace";
-import Academy from "./Academy";
+import { Academy } from "./Academy";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Crown } from "lucide-react";

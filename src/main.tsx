@@ -9,7 +9,7 @@ import "./index.css";
 
 import Index from "./pages/Index";
 import { Marketplace } from "./pages/Marketplace";
-import Academy from "./pages/Academy";
+import { Academy } from "./pages/Academy";
 import Auth from "./pages/Auth";
 import { CreatorDashboard } from "./pages/CreatorDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
