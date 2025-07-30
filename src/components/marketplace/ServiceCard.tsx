@@ -134,18 +134,29 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
               Verified
             </Badge>
           )}
-          <div className="flex items-center gap-1 ml-auto">
-            <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-            <span className="text-xs">
-              {service.vendor.rating} ({service.vendor.review_count})
-            </span>
-          </div>
         </div>
 
         {/* Title - Fixed height */}
         <h3 className="font-semibold text-foreground leading-tight line-clamp-2 h-12 mb-3">
           {service.title}
         </h3>
+
+        {/* Rating - moved above pricing */}
+        <div className="flex items-center gap-1 mb-3">
+          {[...Array(5)].map((_, i) => (
+            <Star 
+              key={i} 
+              className={`h-4 w-4 ${
+                i < Math.floor(service.vendor.rating) 
+                  ? "fill-yellow-400 text-yellow-400" 
+                  : "text-gray-300"
+              }`} 
+            />
+          ))}
+          <span className="text-sm text-muted-foreground ml-1">
+            {service.vendor.rating} ({service.vendor.review_count})
+          </span>
+        </div>
 
         {/* Description - Fixed height */}
         <p className="text-sm text-muted-foreground line-clamp-2 h-10 mb-3">
@@ -224,7 +235,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
               {/* Non-Pro Member View: Show retail as main price, others as incentives */}
               {service.retail_price && (
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Price:</span>
+                  <span className="text-sm text-muted-foreground">List Price:</span>
                   <span className="text-xl font-bold text-foreground">
                     ${service.retail_price}
                   </span>
