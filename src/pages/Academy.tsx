@@ -801,13 +801,9 @@ export const Academy = () => {
         </div>
       </div>
 
-      {podcastsLoading ? (
-        <div className="flex justify-center items-center py-12">
-          <div className="text-muted-foreground">Loading podcasts...</div>
-        </div>
-      ) : (
-        <>
-          {/* Featured Hero Cards */}
+      {/* Always show the layout, handle loading within sections */}
+      <>
+        {/* Featured Hero Cards */}
           <div className="mb-12">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Featured Show 1 */}
@@ -873,9 +869,25 @@ export const Academy = () => {
                 See All <ChevronRight className="w-4 h-4" />
               </Button>
             </div>
-            
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-              {featuredPodcasts.slice(0, 6).map((podcast, index) => (
+          
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            {podcastsLoading ? (
+              // Loading skeleton
+              Array.from({ length: 6 }).map((_, index) => (
+                <div key={index} className="text-center">
+                  <Card className="overflow-hidden mb-3">
+                    <AspectRatio ratio={1}>
+                      <div className="w-full h-full bg-muted animate-pulse" />
+                    </AspectRatio>
+                  </Card>
+                  <div className="space-y-1">
+                    <div className="h-4 bg-muted rounded animate-pulse" />
+                    <div className="h-3 bg-muted rounded animate-pulse" />
+                  </div>
+                </div>
+              ))
+            ) : featuredPodcasts.length > 0 ? (
+              featuredPodcasts.slice(0, 6).map((podcast, index) => (
                 <div key={podcast.id} className="text-center">
                   <Card 
                     className="overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer group mb-3"
@@ -896,7 +908,26 @@ export const Academy = () => {
                     <p className="text-xs text-muted-foreground">{podcast.creator}</p>
                   </div>
                 </div>
-              ))}
+              ))
+            ) : (
+              // Empty state
+              Array.from({ length: 6 }).map((_, index) => (
+                <div key={index} className="text-center">
+                  <Card className="overflow-hidden mb-3 border-dashed border-2">
+                    <AspectRatio ratio={1}>
+                      <div className="w-full h-full bg-muted/30 flex items-center justify-center">
+                        <Headphones className="w-8 h-8 text-muted-foreground" />
+                      </div>
+                    </AspectRatio>
+                  </Card>
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium text-muted-foreground text-center">{index + 1}</p>
+                    <h3 className="text-sm text-muted-foreground">Coming Soon</h3>
+                    <p className="text-xs text-muted-foreground">Real Estate Show</p>
+                  </div>
+                </div>
+              ))
+            )}
             </div>
           </div>
 
@@ -908,9 +939,26 @@ export const Academy = () => {
                 See All <ChevronRight className="w-4 h-4" />
               </Button>
             </div>
-            
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-              {newPodcasts.map((podcast) => (
+          
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            {podcastsLoading ? (
+              // Loading skeleton
+              Array.from({ length: 6 }).map((_, index) => (
+                <div key={index}>
+                  <Card className="overflow-hidden mb-3">
+                    <AspectRatio ratio={1}>
+                      <div className="w-full h-full bg-muted animate-pulse" />
+                    </AspectRatio>
+                  </Card>
+                  <div className="space-y-1">
+                    <div className="h-4 bg-muted rounded animate-pulse" />
+                    <div className="h-3 bg-muted rounded animate-pulse" />
+                    <div className="h-3 bg-muted rounded animate-pulse" />
+                  </div>
+                </div>
+              ))
+            ) : newPodcasts.length > 0 ? (
+              newPodcasts.map((podcast) => (
                 <div key={podcast.id}>
                   <Card 
                     className="overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer group mb-3"
@@ -931,7 +979,26 @@ export const Academy = () => {
                     <p className="text-xs text-muted-foreground">Updated Weekly</p>
                   </div>
                 </div>
-              ))}
+              ))
+            ) : (
+              // Empty state
+              Array.from({ length: 6 }).map((_, index) => (
+                <div key={index}>
+                  <Card className="overflow-hidden mb-3 border-dashed border-2">
+                    <AspectRatio ratio={1}>
+                      <div className="w-full h-full bg-muted/30 flex items-center justify-center">
+                        <Headphones className="w-8 h-8 text-muted-foreground" />
+                      </div>
+                    </AspectRatio>
+                  </Card>
+                  <div className="space-y-1">
+                    <h3 className="text-sm text-muted-foreground">New Show</h3>
+                    <p className="text-xs text-muted-foreground">Real Estate</p>
+                    <p className="text-xs text-muted-foreground">Coming Soon</p>
+                  </div>
+                </div>
+              ))
+            )}
             </div>
           </div>
 
@@ -976,9 +1043,28 @@ export const Academy = () => {
                 See All <ChevronRight className="w-4 h-4" />
               </Button>
             </div>
-            
-            <div className="space-y-4">
-              {allPodcasts.slice(0, 8).map((podcast, index) => (
+          
+          <div className="space-y-4">
+            {podcastsLoading ? (
+              // Loading skeleton
+              Array.from({ length: 8 }).map((_, index) => (
+                <Card key={index} className="p-4">
+                  <div className="flex items-center gap-4">
+                    <div className="text-lg font-bold text-muted-foreground min-w-[24px]">
+                      {index + 1}
+                    </div>
+                    <div className="w-16 h-16 rounded-lg bg-muted animate-pulse shrink-0" />
+                    <div className="flex-1 space-y-2">
+                      <div className="h-4 bg-muted rounded animate-pulse" />
+                      <div className="h-3 bg-muted rounded animate-pulse w-2/3" />
+                      <div className="h-3 bg-muted rounded animate-pulse w-1/3" />
+                    </div>
+                    <div className="w-10 h-10 rounded-full bg-muted animate-pulse shrink-0" />
+                  </div>
+                </Card>
+              ))
+            ) : allPodcasts.length > 0 ? (
+              allPodcasts.slice(0, 8).map((podcast, index) => (
                 <Card 
                   key={podcast.id}
                   className="p-4 hover:shadow-md transition-all duration-200 cursor-pointer"
@@ -1018,11 +1104,47 @@ export const Academy = () => {
                     </Button>
                   </div>
                 </Card>
-              ))}
-            </div>
+              ))
+            ) : (
+              // Empty state
+              Array.from({ length: 8 }).map((_, index) => (
+                <Card key={index} className="p-4 border-dashed border-2">
+                  <div className="flex items-center gap-4">
+                    <div className="text-lg font-bold text-muted-foreground min-w-[24px]">
+                      {index + 1}
+                    </div>
+                    
+                    <div className="w-16 h-16 rounded-lg bg-muted/30 flex items-center justify-center shrink-0">
+                      <Headphones className="w-6 h-6 text-muted-foreground" />
+                    </div>
+                    
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-muted-foreground mb-1">
+                        Sample Episode {index + 1}
+                      </h3>
+                      <p className="text-sm text-muted-foreground mb-1">
+                        By Real Estate Expert
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Coming Soon • Real Estate Tips
+                      </p>
+                    </div>
+                    
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="w-10 h-10 rounded-full shrink-0"
+                      disabled
+                    >
+                      <Play className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </Card>
+              ))
+            )}
           </div>
-        </>
-      )}
+        </div>
+      </>
     </div>
   );
 
