@@ -1,12 +1,15 @@
 import { useState } from "react";
 import { AcademySidebar } from "@/components/academy/AcademySidebar";
-import { CourseSection } from "@/components/academy/CourseSection";
-import { PlaylistCard } from "@/components/academy/PlaylistCard";
-import { CourseAlbumCard } from "@/components/academy/CourseAlbumCard";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Search, Play, Shuffle } from "lucide-react";
+import { 
+  GraduationCap, 
+  BookOpen, 
+  Video, 
+  Headphones, 
+  Book
+} from "lucide-react";
 
 // Mock data - replace with actual data
 const mockCourses = [
@@ -78,219 +81,124 @@ const mockPlaylists = [
 ];
 
 export const Academy = () => {
-  const [activeView, setActiveView] = useState("browse");
-  const [searchTerm, setSearchTerm] = useState("");
+  const [activeView, setActiveView] = useState("home");
   const { toast } = useToast();
 
-  const handlePlayCourse = (courseId: string) => {
-    const course = mockCourses.find(c => c.id === courseId);
-    toast({
-      title: "Playing Course",
-      description: `Now playing: "${course?.title}"`,
-    });
-  };
+  const categories = [
+    { id: "courses", label: "Courses", icon: GraduationCap },
+    { id: "playbooks", label: "Playbooks", icon: BookOpen },
+    { id: "videos", label: "Videos", icon: Video },
+    { id: "podcasts", label: "Podcasts", icon: Headphones },
+    { id: "books", label: "Books", icon: Book },
+  ];
 
-  const handlePlayAll = () => {
-    toast({
-      title: "Playing All",
-      description: "Starting playlist from the beginning",
-    });
-  };
+  const featuredContent = [
+    {
+      id: "1",
+      type: "NEW COURSE",
+      title: "The Agent Operating System",
+      isNew: true,
+      isDark: true,
+    },
+    {
+      id: "2", 
+      type: "NEW PLAYBOOK",
+      title: "The 30-Day Content Machine",
+      isNew: true,
+      isDark: false,
+    },
+  ];
 
-  const handleCreatePlaylist = () => {
-    toast({
-      title: "Create Playlist",
-      description: "Playlist creation feature coming soon!",
-    });
-  };
-
-  const handleAddCourse = () => {
-    toast({
-      title: "Add Course",
-      description: "Course selection feature coming soon!",
-    });
-  };
-
-  // Filter data based on view
-  const recentlyPlayed = mockCourses.filter(course => course.progress !== undefined);
-  const trending = mockCourses.slice().sort((a, b) => (b.rating || 0) - (a.rating || 0));
-  const newReleases = mockCourses.slice(0, 4);
-  const forYou = mockCourses.filter(course => !course.isPro || Math.random() > 0.5);
-  const topCharts = mockCourses.slice().sort((a, b) => (b.rating || 0) - (a.rating || 0));
-
-  const renderBrowseView = () => (
-    <div className="p-6">
-
-      {/* Quick Access Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-        {recentlyPlayed.slice(0, 6).map((course) => (
-          <div
-            key={course.id}
-            className="bg-card rounded-lg p-4 hover:bg-accent/50 cursor-pointer transition-colors group flex items-center gap-4"
-            onClick={() => handlePlayCourse(course.id)}
-          >
-            <div className="w-16 h-16 bg-gradient-to-br from-circle-primary to-circle-primary-light rounded-lg flex items-center justify-center">
-              <Play className="w-6 h-6 text-primary-foreground" />
-            </div>
-            <div className="flex-1">
-              <h3 className="font-semibold truncate">{course.title}</h3>
-              <p className="text-sm text-muted-foreground">{course.creator}</p>
-              {course.progress !== undefined && (
-                <div className="w-full bg-background rounded-full h-1 mt-2">
-                  <div 
-                    className="bg-circle-primary h-1 rounded-full" 
-                    style={{ width: `${course.progress}%` }}
-                  ></div>
-                </div>
-              )}
-            </div>
-          </div>
-        ))}
+  const renderHomeView = () => (
+    <div className="flex-1 p-8 max-w-6xl">
+      {/* Hero Section */}
+      <div className="mb-12">
+        <h1 className="text-6xl font-bold text-black mb-4">Academy.</h1>
+        <p className="text-lg text-gray-600 max-w-2xl">
+          Finally, we silenced the noise. Welcome to the Academy. A place you can take a 
+          breath, learn, and actually move your career forward.
+        </p>
       </div>
 
-      {/* Course Sections */}
-      <CourseSection
-        title="Made for You"
-        subtitle="Courses picked just for you"
-        courses={forYou}
-        onPlayCourse={handlePlayCourse}
-      />
+      {/* Category Icons */}
+      <div className="flex gap-8 mb-16">
+        {categories.map((category) => {
+          const Icon = category.icon;
+          return (
+            <button
+              key={category.id}
+              onClick={() => setActiveView(category.id)}
+              className="flex flex-col items-center gap-2 p-4 rounded-lg hover:bg-gray-50 transition-colors group"
+            >
+              <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center group-hover:bg-gray-200 transition-colors">
+                <Icon className="w-6 h-6 text-gray-700" />
+              </div>
+              <span className="text-sm text-gray-700 font-medium">{category.label}</span>
+            </button>
+          );
+        })}
+      </div>
 
-      <CourseSection
-        title="Top Charts"
-        subtitle="Most popular courses this week"
-        courses={topCharts}
-        onPlayCourse={handlePlayCourse}
-      />
-
-      <CourseSection
-        title="New Releases"
-        subtitle="Latest courses from top creators"
-        courses={newReleases}
-        onPlayCourse={handlePlayCourse}
-      />
-
-      <CourseSection
-        title="Trending Now"
-        subtitle="What everyone's watching"
-        courses={trending}
-        onPlayCourse={handlePlayCourse}
-      />
-    </div>
-  );
-
-  const renderSearchView = () => (
-    <div className="p-6">
-      <div className="mb-6">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
-          <Input
-            placeholder="Search courses, creators, or topics..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-12 text-lg py-6"
-          />
+      {/* The Latest Section */}
+      <div className="mb-12">
+        <h2 className="text-2xl font-bold text-black mb-2">The latest. </h2>
+        <p className="text-gray-600 mb-8">Take a look at what's new.</p>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          {featuredContent.map((item) => (
+            <Card
+              key={item.id}
+              className={`p-8 cursor-pointer transition-transform hover:scale-105 ${
+                item.isDark 
+                  ? "bg-gray-900 text-white" 
+                  : "bg-blue-50 text-gray-900"
+              }`}
+            >
+              <div className="mb-4">
+                <span className={`text-sm font-medium ${
+                  item.isDark ? "text-red-400" : "text-blue-600"
+                }`}>
+                  {item.type}
+                </span>
+              </div>
+              <h3 className="text-2xl font-bold">{item.title}</h3>
+            </Card>
+          ))}
         </div>
       </div>
 
-      {searchTerm ? (
+      {/* Bottom Banner */}
+      <div className="bg-gray-900 text-white p-6 rounded-lg flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold mb-4">Search Results for "{searchTerm}"</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {mockCourses
-              .filter(course => 
-                course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                course.creator.toLowerCase().includes(searchTerm.toLowerCase())
-              )
-              .map((course) => (
-                <CourseAlbumCard
-                  key={course.id}
-                  course={course}
-                  onPlay={handlePlayCourse}
-                />
-              ))}
-          </div>
+          <h3 className="text-lg font-bold mb-1">Everything Agents Wish They Knew Sooner.</h3>
+          <p className="text-sm text-gray-300">$47/month, Full access. Courses & coaching and reporting.</p>
         </div>
-      ) : (
-        <div>
-          <CourseSection
-            title="Browse by Topic"
-            subtitle="Explore courses by category"
-            courses={mockCourses.slice(0, 6)}
-            onPlayCourse={handlePlayCourse}
-          />
-        </div>
-      )}
-    </div>
-  );
-
-  const renderLibraryView = () => (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold mb-6">Your Library</h1>
-      
-      <PlaylistCard
-        title="Recently Played"
-        subtitle="Pick up where you left off"
-        courses={recentlyPlayed}
-        onPlayAll={handlePlayAll}
-        onAddCourse={handleAddCourse}
-        onPlayCourse={handlePlayCourse}
-        showProgress={true}
-      />
-    </div>
-  );
-
-  const renderRecentlyPlayed = () => (
-    <div className="p-6">
-      <PlaylistCard
-        title="Recently Played"
-        subtitle="Continue your learning journey"
-        courses={recentlyPlayed}
-        onPlayAll={handlePlayAll}
-        onAddCourse={handleAddCourse}
-        onPlayCourse={handlePlayCourse}
-        showProgress={true}
-      />
+        <Button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium">
+          Try It Free
+        </Button>
+      </div>
     </div>
   );
 
   const renderContent = () => {
     switch (activeView) {
-      case "search":
-        return renderSearchView();
-      case "library":
-        return renderLibraryView();
-      case "recently-played":
-        return renderRecentlyPlayed();
-      case "favorites":
-        return renderLibraryView();
-      case "trending":
+      case "home":
+        return renderHomeView();
+      default:
         return (
-          <div className="p-6">
-            <CourseSection
-              title="Trending Now"
-              subtitle="Most popular courses this week"
-              courses={trending}
-              onPlayCourse={handlePlayCourse}
-              showSeeAll={false}
-              size="large"
-            />
+          <div className="flex-1 p-8">
+            <h2 className="text-2xl font-bold mb-4">{activeView.charAt(0).toUpperCase() + activeView.slice(1)}</h2>
+            <p className="text-gray-600">Content for {activeView} coming soon...</p>
           </div>
         );
-      case "my-courses":
-        return renderLibraryView();
-      default:
-        return renderBrowseView();
     }
   };
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-screen bg-white">
       <AcademySidebar
         activeView={activeView}
         onViewChange={setActiveView}
-        playlists={mockPlaylists}
-        onCreatePlaylist={handleCreatePlaylist}
       />
       
       <div className="flex-1 overflow-auto">
