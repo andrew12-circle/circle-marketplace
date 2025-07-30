@@ -40,8 +40,6 @@ export const ContentUploadModal = ({
     description: '',
     category: '',
     tags: [] as string[],
-    is_pro: false,
-    is_featured: false,
     price: '0.00',
     duration: '',
     page_count: 0,
@@ -171,8 +169,8 @@ export const ContentUploadModal = ({
         duration: formData.duration || null,
         page_count: contentType === 'book' || contentType === 'playbook' ? formData.page_count : null,
         lesson_count: contentType === 'course' ? formData.lesson_count : null,
-        is_pro: formData.is_pro,
-        is_featured: formData.is_featured,
+        is_pro: false, // Only admins can set this
+        is_featured: false, // Only admins can set this
         price: parseFloat(formData.price),
         is_published: true,
         published_at: new Date().toISOString(),
@@ -200,8 +198,6 @@ export const ContentUploadModal = ({
         description: '',
         category: '',
         tags: [],
-        is_pro: false,
-        is_featured: false,
         price: '0.00',
         duration: '',
         page_count: 0,
@@ -407,27 +403,6 @@ export const ContentUploadModal = ({
                 />
               </div>
             )}
-          </div>
-
-          {/* Settings */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="is_pro">Pro Content</Label>
-              <Switch
-                id="is_pro"
-                checked={formData.is_pro}
-                onCheckedChange={(checked) => handleInputChange('is_pro', checked)}
-              />
-            </div>
-
-            <div className="flex items-center justify-between">
-              <Label htmlFor="is_featured">Featured Content</Label>
-              <Switch
-                id="is_featured"
-                checked={formData.is_featured}
-                onCheckedChange={(checked) => handleInputChange('is_featured', checked)}
-              />
-            </div>
           </div>
 
           {/* Upload Progress */}
