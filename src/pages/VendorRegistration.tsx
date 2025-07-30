@@ -70,8 +70,8 @@ export const VendorRegistration = () => {
     marketingBudget: "",
     targetAudience: "",
     
-    // Loan Officer Upload
-    loSpreadsheetFile: null as File | null,
+    // Team Members Upload
+    teamMembersFile: null as File | null,
     
     // Terms
     agreeToTerms: false,
@@ -88,16 +88,17 @@ export const VendorRegistration = () => {
     }
   };
 
-  const downloadLOTemplate = () => {
-    // Create Excel template data
+  const downloadTeamTemplate = () => {
+    // Create universal template data that works for all vendor types
     const templateData = [
-      ["First Name", "Last Name", "Email", "Phone", "NMLS ID", "License States", "Specialties", "Years Experience"],
-      ["John", "Smith", "john.smith@company.com", "(555) 123-4567", "12345", "CA,TX,FL", "First-time buyers, Refinancing", "5"],
-      ["Jane", "Doe", "jane.doe@company.com", "(555) 987-6543", "67890", "CA,NY", "Jumbo loans, Investment properties", "8"],
-      ["", "", "", "", "", "", "", ""]
+      ["First Name", "Last Name", "Title/Role", "Email", "Phone", "License/Cert Number", "License States", "Specialties/Services", "Years Experience"],
+      ["John", "Smith", "Senior Loan Officer", "john.smith@company.com", "(555) 123-4567", "NMLS123456", "CA,TX,FL", "First-time buyers, Refinancing", "5"],
+      ["Jane", "Doe", "Home Inspector", "jane.doe@company.com", "(555) 987-6543", "HI67890", "CA,NY", "Residential, Commercial", "8"],
+      ["Mike", "Johnson", "Insurance Agent", "mike@company.com", "(555) 555-1234", "INS789", "CA", "Home, Auto, Umbrella", "3"],
+      ["", "", "", "", "", "", "", "", ""]
     ];
 
-    // Convert to CSV format (Excel can open CSV files)
+    // Convert to CSV format
     const csvContent = templateData.map(row => 
       row.map(cell => `"${cell}"`).join(",")
     ).join("\n");
@@ -107,7 +108,7 @@ export const VendorRegistration = () => {
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = "loan_officers_template.csv";
+    link.download = "team_members_template.csv";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -115,7 +116,7 @@ export const VendorRegistration = () => {
 
     toast({
       title: "Template Downloaded",
-      description: "Please fill out the template and upload it back.",
+      description: "Please fill out the template with your team member details and upload it back.",
     });
   };
 
@@ -148,7 +149,7 @@ export const VendorRegistration = () => {
         return;
       }
 
-      updateFormData("loSpreadsheetFile", file);
+      updateFormData("teamMembersFile", file);
       toast({
         title: "File uploaded",
         description: `${file.name} has been selected for upload.`,
@@ -477,35 +478,34 @@ export const VendorRegistration = () => {
                 </div>
               )}
 
-              {/* Loan Officer Upload Section - Only for Lenders */}
-              {formData.vendorType === "lender" && (
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold flex items-center">
-                    <FileSpreadsheet className="w-5 h-5 mr-2" />
-                    Loan Officers Registration
-                  </h3>
-                  <div className="bg-secondary/50 rounded-lg p-4 space-y-4">
-                    <p className="text-sm text-muted-foreground">
-                      Upload details for all loan officers who will be working under your company. 
-                      Download our template, fill it out, and upload it back.
-                    </p>
+              {/* Team Members Upload Section - For All Vendor Types */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold flex items-center">
+                  <FileSpreadsheet className="w-5 h-5 mr-2" />
+                  Team Members Registration
+                </h3>
+                <div className="bg-secondary/50 rounded-lg p-4 space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    Upload details for all team members, agents, representatives, or staff who will be working under your company. 
+                    This could include loan officers, inspectors, agents, sales reps, or any other team members who provide services.
+                  </p>
                     
                     <div className="flex flex-col sm:flex-row gap-3">
                       <Button
                         type="button"
                         variant="outline"
-                        onClick={downloadLOTemplate}
+                        onClick={downloadTeamTemplate}
                         className="flex items-center"
                       >
                         <Download className="w-4 h-4 mr-2" />
-                        Download LO Template
+                        Download Team Template
                       </Button>
                       
                       <div className="flex-1">
-                        <Label htmlFor="loFile" className="sr-only">Upload LO Spreadsheet</Label>
+                        <Label htmlFor="teamFile" className="sr-only">Upload Team Spreadsheet</Label>
                         <div className="relative">
                           <Input
-                            id="loFile"
+                            id="teamFile"
                             type="file"
                             accept=".csv,.xls,.xlsx"
                             onChange={handleFileUpload}
@@ -514,12 +514,12 @@ export const VendorRegistration = () => {
                           <Button
                             type="button"
                             variant="outline"
-                            onClick={() => document.getElementById("loFile")?.click()}
+                            onClick={() => document.getElementById("teamFile")?.click()}
                             className="w-full justify-start"
                           >
                             <Upload className="w-4 h-4 mr-2" />
-                            {formData.loSpreadsheetFile 
-                              ? `Uploaded: ${formData.loSpreadsheetFile.name}`
+                            {formData.teamMembersFile 
+                              ? `Uploaded: ${formData.teamMembersFile.name}`
                               : "Upload Completed Template"
                             }
                           </Button>
@@ -527,21 +527,21 @@ export const VendorRegistration = () => {
                       </div>
                     </div>
 
-                    {formData.loSpreadsheetFile && (
+                    {formData.teamMembersFile && (
                       <div className="bg-background rounded border p-3">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-2">
                             <FileSpreadsheet className="w-4 h-4 text-green-600" />
-                            <span className="text-sm font-medium">{formData.loSpreadsheetFile.name}</span>
+                            <span className="text-sm font-medium">{formData.teamMembersFile.name}</span>
                             <Badge variant="secondary" className="text-xs">
-                              {(formData.loSpreadsheetFile.size / 1024).toFixed(1)} KB
+                              {(formData.teamMembersFile.size / 1024).toFixed(1)} KB
                             </Badge>
                           </div>
                           <Button
                             type="button"
                             variant="ghost"
                             size="sm"
-                            onClick={() => updateFormData("loSpreadsheetFile", null)}
+                            onClick={() => updateFormData("teamMembersFile", null)}
                           >
                             Remove
                           </Button>
@@ -550,14 +550,14 @@ export const VendorRegistration = () => {
                     )}
 
                     <div className="text-xs text-muted-foreground space-y-1">
-                      <p>• Template includes: Name, Email, Phone, NMLS ID, License States, Specialties, Experience</p>
+                      <p>• Template includes: Name, Title/Role, Email, Phone, License/Cert Number, License States, Specialties, Experience</p>
                       <p>• Accepted formats: CSV, Excel (.xls, .xlsx)</p>
                       <p>• Maximum file size: 5MB</p>
-                      <p>• All loan officers will be verified individually</p>
+                      <p>• All team members will be verified individually based on their roles</p>
+                      <p>• Examples: Loan Officers, Home Inspectors, Insurance Agents, Title Reps, Sales Staff, etc.</p>
                     </div>
                   </div>
                 </div>
-              )}
 
               {/* Co-Marketing Specific Fields */}
               {formData.isCoMarketing && (
