@@ -55,7 +55,8 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
   const navigate = useNavigate();
   const isProMember = profile?.is_pro_member || false;
 
-  const handleSave = () => {
+  const handleSave = (e: React.MouseEvent) => {
+    e.stopPropagation();
     onSave?.(service.id);
     toast({
       title: isSaved ? "Removed from saved" : "Saved to favorites",
@@ -68,7 +69,8 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
     onViewDetails?.(service.id);
   };
 
-  const handleAddToCart = () => {
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.stopPropagation();
     addToCart({
       id: service.id,
       title: service.title,
@@ -80,6 +82,11 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
     });
   };
 
+  const handleViewDetailsButton = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    handleViewDetails();
+  };
+
   const handleUpgradeClick = () => {
     navigate('/pricing');
   };
@@ -87,9 +94,10 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
   return (
     <TooltipProvider>
     <Card 
-      className="group relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 bg-card border border-border/50 h-full flex flex-col"
+      className="group relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 bg-card border border-border/50 h-full flex flex-col cursor-pointer"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      onClick={handleViewDetails}
     >
       {/* Top Badges */}
       <div className="absolute top-3 left-3 z-10 flex gap-2">
@@ -339,7 +347,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
           
           <Button 
             variant="outline"
-            onClick={handleViewDetails}
+            onClick={handleViewDetailsButton}
           >
             <ArrowRight className={`h-4 w-4 transition-transform ${
               isHovered ? "translate-x-1" : ""
