@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
+import { Navigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -35,6 +37,7 @@ interface RecentContent {
 }
 
 export const CreatorDashboard = () => {
+  const { user, loading: authLoading } = useAuth();
   const [stats, setStats] = useState<ContentStats>({
     totalPlays: 0,
     totalRevenue: 0,
@@ -45,14 +48,21 @@ export const CreatorDashboard = () => {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
+  // Redirect if not authenticated
+  if (!authLoading && !user) {
+    return <Navigate to="/auth" replace />;
+  }
+
   useEffect(() => {
-    fetchCreatorData();
-  }, []);
+    if (user) {
+      fetchCreatorData();
+    }
+  }, [user]);
 
   const fetchCreatorData = async () => {
+    if (!user) return;
+    
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
 
       // Fetch content stats
       const { data: contentData, error: contentError } = await supabase

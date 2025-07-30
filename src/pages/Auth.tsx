@@ -1,388 +1,261 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useAuth } from "@/contexts/AuthContext";
-import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Eye, EyeOff, Loader2 } from "lucide-react";
-import circleLogoUrl from "@/assets/circle-logo.png";
-import { useEffect } from "react";
+import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
+import { Eye, EyeOff, Mail, Lock, User, Briefcase } from "lucide-react";
 
 export const Auth = () => {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-    confirmPassword: "",
-    fullName: "",
-    businessName: "",
+    email: '',
+    password: '',
+    displayName: '',
+    isCreator: false
   });
   
-  const { signIn, signUp, user } = useAuth();
-  const { toast } = useToast();
   const navigate = useNavigate();
+  const { toast } = useToast();
 
-  // Redirect if already logged in
   useEffect(() => {
-    if (user) {
-      navigate("/");
-    }
-  }, [user, navigate]);
+    // Check if user is already logged in
+    const checkUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        navigate('/');
+      }
+    };
+    checkUser();
+  }, [navigate]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({
-      ...prev,
-      [e.target.name]: e.target.value
-    }));
+  const handleLogin = async (email: string, password: string) => {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (error) throw error;
+    return data;
   };
 
-  const handleSignIn = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.email || !formData.password) {
-      toast({
-        title: "Missing information",
-        description: "Please fill in all required fields.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsLoading(true);
+  const handleSignUp = async (email: string, password: string, displayName: string, isCreator: boolean) => {
+    const redirectUrl = `${window.location.origin}/`;
     
-    try {
-      const { error } = await signIn(formData.email, formData.password);
-      
-      if (error) {
-        if (error.message.includes("Invalid login credentials")) {
-          toast({
-            title: "Invalid credentials",
-            description: "Please check your email and password and try again.",
-            variant: "destructive",
-          });
-        } else if (error.message.includes("Email not confirmed")) {
-          toast({
-            title: "Email not confirmed",
-            description: "Please check your email and click the confirmation link before signing in.",
-            variant: "destructive",
-          });
-        } else {
-          toast({
-            title: "Sign in failed",
-            description: error.message,
-            variant: "destructive",
-          });
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: redirectUrl,
+        data: {
+          full_name: displayName,
+          is_creator: isCreator
         }
-      } else {
+      }
+    });
+
+    if (error) throw error;
+    return data;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      if (isLogin) {
+        await handleLogin(formData.email, formData.password);
         toast({
           title: "Welcome back!",
-          description: "You've been signed in successfully.",
+          description: "You've been successfully logged in.",
         });
-        navigate("/");
+        navigate('/');
+      } else {
+        const { user } = await handleSignUp(
+          formData.email, 
+          formData.password, 
+          formData.displayName,
+          formData.isCreator
+        );
+        
+        if (user) {
+          toast({
+            title: "Account created!",
+            description: formData.isCreator 
+              ? "Welcome to the creator platform! Check your email to verify your account."
+              : "Welcome! Check your email to verify your account.",
+          });
+        }
       }
-    } catch (error) {
+    } catch (error: any) {
+      let errorMessage = "An error occurred. Please try again.";
+      
+      if (error.message?.includes('Invalid login credentials')) {
+        errorMessage = "Invalid email or password. Please check your credentials.";
+      } else if (error.message?.includes('User already registered')) {
+        errorMessage = "An account with this email already exists. Try logging in instead.";
+      } else if (error.message?.includes('Password should be at least')) {
+        errorMessage = "Password should be at least 6 characters long.";
+      } else if (error.message?.includes('Invalid email')) {
+        errorMessage = "Please enter a valid email address.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
       toast({
-        title: "Sign in failed",
-        description: "An unexpected error occurred. Please try again.",
+        title: isLogin ? "Login Failed" : "Signup Failed",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!formData.email || !formData.password || !formData.confirmPassword) {
-      toast({
-        title: "Missing information",
-        description: "Please fill in all required fields.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      toast({
-        title: "Passwords don't match",
-        description: "Please make sure your passwords match.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (formData.password.length < 6) {
-      toast({
-        title: "Password too short",
-        description: "Password must be at least 6 characters long.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsLoading(true);
-    
-    try {
-      const { error } = await signUp(formData.email, formData.password, {
-        full_name: formData.fullName,
-        business_name: formData.businessName,
-      });
-      
-      if (error) {
-        if (error.message.includes("User already registered")) {
-          toast({
-            title: "Account exists",
-            description: "An account with this email already exists. Please sign in instead.",
-            variant: "destructive",
-          });
-        } else {
-          toast({
-            title: "Sign up failed",
-            description: error.message,
-            variant: "destructive",
-          });
-        }
-      } else {
-        toast({
-          title: "Check your email!",
-          description: "We've sent you a confirmation link. Please check your email and click the link to activate your account.",
-        });
-        // Don't navigate - user needs to confirm email first
-      }
-    } catch (error) {
-      toast({
-        title: "Sign up failed",
-        description: "An unexpected error occurred. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
+  const toggleMode = () => {
+    setIsLogin(!isLogin);
+    setFormData({ email: '', password: '', displayName: '', isCreator: false });
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-circle-primary/5 via-background to-circle-accent/5 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4">
-            <ArrowLeft className="w-4 h-4" />
-            Back to marketplace
-          </Link>
-          
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <img 
-              src={circleLogoUrl} 
-              alt="Circle Logo" 
-              className="w-12 h-12 object-contain"
-            />
-          </div>
-        </div>
-
-        {/* Auth Tabs */}
-        <Tabs defaultValue="signin" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-6">
-            <TabsTrigger value="signin">Sign In</TabsTrigger>
-            <TabsTrigger value="signup">Sign Up</TabsTrigger>
-          </TabsList>
-
-          {/* Sign In Tab */}
-          <TabsContent value="signin">
-            <Card>
-              <CardHeader>
-                <CardTitle>Welcome back</CardTitle>
-                <CardDescription>
-                  Sign in to your Circle account to continue
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleSignIn} className="space-y-4">
-                  <div>
-                    <Label htmlFor="signin-email">Email</Label>
-                    <Input
-                      id="signin-email"
-                      name="email"
-                      type="email"
-                      placeholder="Enter your email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      required
-                    />
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="signin-password">Password</Label>
-                    <div className="relative">
-                      <Input
-                        id="signin-password"
-                        name="password"
-                        type={showPassword ? "text" : "password"}
-                        placeholder="Enter your password"
-                        value={formData.password}
-                        onChange={handleInputChange}
-                        required
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="absolute right-0 top-0 h-full px-3"
-                        onClick={() => setShowPassword(!showPassword)}
-                      >
-                        {showPassword ? (
-                          <EyeOff className="h-4 w-4" />
-                        ) : (
-                          <Eye className="h-4 w-4" />
-                        )}
-                      </Button>
-                    </div>
-                  </div>
-
-                  <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Signing in...
-                      </>
-                    ) : (
-                      "Sign In"
-                    )}
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Sign Up Tab */}
-          <TabsContent value="signup">
-            <Card>
-              <CardHeader>
-                <CardTitle>Create account</CardTitle>
-                <CardDescription>
-                  Join Circle and start growing your business
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleSignUp} className="space-y-4">
-                  <div>
-                    <Label htmlFor="signup-fullname">Full Name</Label>
-                    <Input
-                      id="signup-fullname"
-                      name="fullName"
-                      type="text"
-                      placeholder="Enter your full name"
-                      value={formData.fullName}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="signup-business">Business Name (Optional)</Label>
-                    <Input
-                      id="signup-business"
-                      name="businessName"
-                      type="text"
-                      placeholder="Enter your business name"
-                      value={formData.businessName}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="signup-email">Email</Label>
-                    <Input
-                      id="signup-email"
-                      name="email"
-                      type="email"
-                      placeholder="Enter your email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      required
-                    />
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="signup-password">Password</Label>
-                    <div className="relative">
-                      <Input
-                        id="signup-password"
-                        name="password"
-                        type={showPassword ? "text" : "password"}
-                        placeholder="Create a password"
-                        value={formData.password}
-                        onChange={handleInputChange}
-                        required
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="absolute right-0 top-0 h-full px-3"
-                        onClick={() => setShowPassword(!showPassword)}
-                      >
-                        {showPassword ? (
-                          <EyeOff className="h-4 w-4" />
-                        ) : (
-                          <Eye className="h-4 w-4" />
-                        )}
-                      </Button>
-                    </div>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="signup-confirm">Confirm Password</Label>
-                    <Input
-                      id="signup-confirm"
-                      name="confirmPassword"
-                      type="password"
-                      placeholder="Confirm your password"
-                      value={formData.confirmPassword}
-                      onChange={handleInputChange}
-                      required
-                    />
-                  </div>
-
-                  <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Creating account...
-                      </>
-                    ) : (
-                      "Create Account"
-                    )}
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-
-        {/* Benefits */}
-        <div className="mt-8 text-center">
-          <p className="text-sm text-muted-foreground mb-4">
-            Join thousands of real estate professionals growing their business with Circle
+    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl font-bold text-center">
+            {isLogin ? 'Welcome Back' : 'Create Account'}
+          </CardTitle>
+          <p className="text-sm text-muted-foreground text-center">
+            {isLogin 
+              ? 'Sign in to your account to continue' 
+              : 'Sign up to start your journey with Circle Academy'
+            }
           </p>
-          <div className="grid grid-cols-1 gap-2 text-xs text-muted-foreground">
-            <div className="flex items-center justify-center gap-2">
-              <img src={circleLogoUrl} alt="Circle" className="w-3 h-3" />
-              <span>100 Circle Points™ welcome bonus</span>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Email Field */}
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="Enter your email"
+                  value={formData.email}
+                  onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                  className="pl-10"
+                  required
+                />
+              </div>
             </div>
-            <div className="flex items-center justify-center gap-2">
-              <img src={circleLogoUrl} alt="Circle" className="w-3 h-3" />
-              <span>Exclusive member pricing</span>
+
+            {/* Display Name Field (Signup only) */}
+            {!isLogin && (
+              <div className="space-y-2">
+                <Label htmlFor="displayName">Full Name</Label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    id="displayName"
+                    type="text"
+                    placeholder="Enter your full name"
+                    value={formData.displayName}
+                    onChange={(e) => setFormData(prev => ({ ...prev, displayName: e.target.value }))}
+                    className="pl-10"
+                    required
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Password Field */}
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Enter your password"
+                  value={formData.password}
+                  onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
+                  className="pl-10 pr-10"
+                  required
+                  minLength={6}
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <EyeOff className="w-4 h-4 text-muted-foreground" />
+                  ) : (
+                    <Eye className="w-4 h-4 text-muted-foreground" />
+                  )}
+                </Button>
+              </div>
             </div>
-            <div className="flex items-center justify-center gap-2">
-              <img src={circleLogoUrl} alt="Circle" className="w-3 h-3" />
-              <span>Order tracking & history</span>
-            </div>
+
+            {/* Creator Toggle (Signup only) */}
+            {!isLogin && (
+              <div className="flex items-center space-x-2 p-3 bg-muted/30 rounded-lg">
+                <Briefcase className="w-4 h-4 text-muted-foreground" />
+                <div className="flex-1">
+                  <Label htmlFor="isCreator" className="text-sm font-medium">
+                    I'm a creator
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Upload and monetize your content
+                  </p>
+                </div>
+                <Switch
+                  id="isCreator"
+                  checked={formData.isCreator}
+                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isCreator: checked }))}
+                />
+              </div>
+            )}
+
+            {/* Submit Button */}
+            <Button 
+              type="submit" 
+              className="w-full" 
+              disabled={loading}
+            >
+              {loading ? 'Loading...' : (isLogin ? 'Sign In' : 'Create Account')}
+            </Button>
+          </form>
+
+          <Separator className="my-6" />
+
+          {/* Toggle between login/signup */}
+          <div className="text-center">
+            <p className="text-sm text-muted-foreground">
+              {isLogin ? "Don't have an account?" : "Already have an account?"}
+            </p>
+            <Button
+              type="button"
+              variant="link"
+              onClick={toggleMode}
+              className="p-0 h-auto font-semibold"
+            >
+              {isLogin ? 'Sign up' : 'Sign in'}
+            </Button>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
+
+export default Auth;
