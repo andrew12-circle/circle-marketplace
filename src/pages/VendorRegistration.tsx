@@ -227,8 +227,14 @@ export const VendorRegistration = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!validateForm()) return;
+    console.log("Form submitted, validating...", formData);
     
+    if (!validateForm()) {
+      console.log("Validation failed, errors:", errors);
+      return;
+    }
+    
+    console.log("Validation passed, submitting...");
     setIsSubmitting(true);
     
     try {
