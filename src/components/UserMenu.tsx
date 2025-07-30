@@ -15,13 +15,12 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "@/hooks/useLocation";
 import { supabase } from "@/integrations/supabase/client";
-import { User, Settings, ShoppingBag, Crown, LogOut, Loader2, MapPin, Heart, BarChart3, Shield, Building2, DollarSign } from "lucide-react";
+import { User, Settings, ShoppingBag, Crown, LogOut, Loader2, MapPin, Heart, BarChart3, Shield, Building2, DollarSign, Store, Briefcase } from "lucide-react";
 
 interface VendorInfo {
-  id: string;
-  name: string;
-  vendor_type: string;
-  nmls_id?: string;
+  enabled: boolean;
+  type: string;
+  company_name: string;
 }
 
 export const UserMenu = () => {
@@ -31,29 +30,21 @@ export const UserMenu = () => {
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [vendorInfo, setVendorInfo] = useState<VendorInfo | null>(null);
 
-  // Check if user is associated with a vendor
+  // Check vendor info from profile
   useEffect(() => {
-    const checkVendorStatus = async () => {
-      if (!user?.email) return;
-
-      try {
-        // Check if user is a vendor by email
-        const { data: vendorData, error } = await supabase
-          .from('vendors')
-          .select('id, name, vendor_type, nmls_id')
-          .or(`contact_email.eq.${user.email},individual_email.eq.${user.email}`)
-          .single();
-
-        if (vendorData && !error) {
-          setVendorInfo(vendorData);
-        }
-      } catch (error) {
-        console.log('No vendor association found for user');
+    if (profile) {
+      const profileData = profile as any;
+      if (profileData.vendor_enabled) {
+        setVendorInfo({
+          enabled: true,
+          type: profileData.vendor_type || 'service_provider',
+          company_name: profileData.vendor_company_name || profileData.business_name || ''
+        });
+      } else {
+        setVendorInfo(null);
       }
-    };
-
-    checkVendorStatus();
-  }, [user?.email]);
+    }
+  }, [profile]);
 
   const handleSignOut = async () => {
     setIsSigningOut(true);
@@ -178,24 +169,24 @@ export const UserMenu = () => {
           </>
         )}
 
-        {/* Vendor Dashboard Link */}
-        {vendorInfo && (
-          <>
-            <DropdownMenuItem asChild>
-              <Link to="/vendor-dashboard" className="flex items-center">
-                {vendorInfo.vendor_type === 'lender' ? (
-                  <DollarSign className="mr-2 h-4 w-4 text-green-600" />
-                ) : (
-                  <Building2 className="mr-2 h-4 w-4 text-blue-600" />
-                )}
-                <span>
-                  {vendorInfo.vendor_type === 'lender' ? 'Lender' : 'Service Provider'} Dashboard
-                </span>
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-          </>
-        )}
+         {/* Vendor Dashboard Link */}
+         {vendorInfo && (
+           <>
+             <DropdownMenuItem asChild>
+               <Link to="/vendor-dashboard" className="flex items-center">
+                 {vendorInfo.type === 'co_marketing' ? (
+                   <Briefcase className="mr-2 h-4 w-4 text-green-600" />
+                 ) : (
+                   <Store className="mr-2 h-4 w-4 text-blue-600" />
+                 )}
+                 <span>
+                   {vendorInfo.type === 'co_marketing' ? 'Co-Marketing' : 'Service Provider'} Dashboard
+                 </span>
+               </Link>
+             </DropdownMenuItem>
+             <DropdownMenuSeparator />
+           </>
+         )}
         
         <DropdownMenuSeparator />
         

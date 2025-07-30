@@ -460,6 +460,10 @@ export type Database = {
           total_earnings: number | null
           updated_at: string
           user_id: string
+          vendor_company_name: string | null
+          vendor_description: string | null
+          vendor_enabled: boolean | null
+          vendor_type: string | null
           website_url: string | null
           years_experience: number | null
           zip_code: string | null
@@ -490,6 +494,10 @@ export type Database = {
           total_earnings?: number | null
           updated_at?: string
           user_id: string
+          vendor_company_name?: string | null
+          vendor_description?: string | null
+          vendor_enabled?: boolean | null
+          vendor_type?: string | null
           website_url?: string | null
           years_experience?: number | null
           zip_code?: string | null
@@ -520,6 +528,10 @@ export type Database = {
           total_earnings?: number | null
           updated_at?: string
           user_id?: string
+          vendor_company_name?: string | null
+          vendor_description?: string | null
+          vendor_enabled?: boolean | null
+          vendor_type?: string | null
           website_url?: string | null
           years_experience?: number | null
           zip_code?: string | null

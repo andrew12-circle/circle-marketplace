@@ -59,7 +59,27 @@ const VendorRegistration = () => {
         throw new Error("Failed to create user account");
       }
 
-      // Create vendor profile via edge function
+      // Update profile with vendor information
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({
+          vendor_enabled: true,
+          vendor_type: vendorType,
+          vendor_company_name: data.companyName,
+          vendor_description: data.description,
+          business_name: data.companyName,
+          phone: data.phone || null,
+          website_url: data.website || null,
+          location: data.location || null,
+        })
+        .eq('user_id', userId);
+
+      if (profileError) {
+        console.error('Profile update error:', profileError);
+        // Continue anyway - the main account creation succeeded
+      }
+
+      // Create vendor profile via edge function (optional - for legacy compatibility)
       const { error: inviteError } = await supabase.functions.invoke('invite-vendor', {
         body: {
           name: data.companyName,

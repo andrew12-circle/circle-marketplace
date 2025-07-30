@@ -8,10 +8,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { User, Upload, ArrowLeft, Crown } from "lucide-react";
+import { User, Upload, ArrowLeft, Crown, Building, Store } from "lucide-react";
 
 export const ProfileSettings = () => {
   const { user, profile, updateProfile } = useAuth();
@@ -20,6 +22,7 @@ export const ProfileSettings = () => {
   
   const [loading, setLoading] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [vendorLoading, setVendorLoading] = useState(false);
   const [formData, setFormData] = useState({
     display_name: "",
     bio: "",
@@ -28,6 +31,13 @@ export const ProfileSettings = () => {
     location: "",
     website_url: "",
     years_experience: "",
+  });
+  
+  const [vendorData, setVendorData] = useState({
+    vendor_enabled: false,
+    vendor_type: "",
+    vendor_company_name: "",
+    vendor_description: "",
   });
 
   useEffect(() => {
@@ -46,11 +56,93 @@ export const ProfileSettings = () => {
         website_url: profile.website_url || "",
         years_experience: profile.years_experience?.toString() || "",
       });
+      
+      setVendorData({
+        vendor_enabled: (profile as any).vendor_enabled || false,
+        vendor_type: (profile as any).vendor_type || "",
+        vendor_company_name: (profile as any).vendor_company_name || "",
+        vendor_description: (profile as any).vendor_description || "",
+      });
     }
   }, [user, profile, navigate]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleVendorChange = (field: string, value: string | boolean) => {
+    setVendorData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleVendorToggle = async (enabled: boolean) => {
+    if (!user) return;
+    
+    setVendorLoading(true);
+    
+    try {
+      const updateData: any = { vendor_enabled: enabled };
+      
+      // If disabling vendor, clear vendor-specific fields
+      if (!enabled) {
+        updateData.vendor_type = null;
+        updateData.vendor_company_name = null;
+        updateData.vendor_description = null;
+      }
+      
+      const { error } = await updateProfile(updateData);
+
+      if (error) throw error;
+      
+      setVendorData(prev => ({
+        ...prev,
+        vendor_enabled: enabled,
+        ...(enabled ? {} : { vendor_type: "", vendor_company_name: "", vendor_description: "" })
+      }));
+      
+      toast({
+        title: enabled ? "Vendor access enabled" : "Vendor access disabled",
+        description: enabled 
+          ? "You now have access to the vendor dashboard."
+          : "Vendor dashboard access has been removed.",
+      });
+    } catch (error) {
+      toast({
+        title: "Update failed",
+        description: "Failed to update vendor settings. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setVendorLoading(false);
+    }
+  };
+
+  const handleVendorDetailsSubmit = async () => {
+    if (!user || !vendorData.vendor_enabled) return;
+    
+    setVendorLoading(true);
+    
+    try {
+      const { error } = await updateProfile({
+        vendor_type: vendorData.vendor_type || null,
+        vendor_company_name: vendorData.vendor_company_name || null,
+        vendor_description: vendorData.vendor_description || null,
+      } as any);
+
+      if (error) throw error;
+      
+      toast({
+        title: "Vendor details updated",
+        description: "Your vendor information has been saved.",
+      });
+    } catch (error) {
+      toast({
+        title: "Update failed",
+        description: "Failed to update vendor details. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setVendorLoading(false);
+    }
   };
 
   const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -356,6 +448,103 @@ export const ProfileSettings = () => {
                   )}
                 </div>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Vendor Access Control */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Building className="w-5 h-5" />
+                Vendor Dashboard Access
+              </CardTitle>
+              <CardDescription>
+                Enable vendor features to list services or access co-marketing opportunities
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <p className="font-medium">Enable Vendor Access</p>
+                  <p className="text-sm text-muted-foreground">
+                    Access vendor dashboard to manage services and partnerships
+                  </p>
+                </div>
+                <Switch
+                  checked={vendorData.vendor_enabled}
+                  onCheckedChange={handleVendorToggle}
+                  disabled={vendorLoading}
+                />
+              </div>
+
+              {vendorData.vendor_enabled && (
+                <>
+                  <Separator />
+                  <div className="space-y-4">
+                    <h4 className="font-medium">Vendor Configuration</h4>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="vendor_type">Vendor Type</Label>
+                      <Select
+                        value={vendorData.vendor_type}
+                        onValueChange={(value) => handleVendorChange("vendor_type", value)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select vendor type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="service_provider">
+                            <div className="flex items-center gap-2">
+                              <Store className="w-4 h-4" />
+                              Service Provider
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="co_marketing">
+                            <div className="flex items-center gap-2">
+                              <Building className="w-4 h-4" />
+                              Co-Marketing Partner
+                            </div>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-muted-foreground">
+                        {vendorData.vendor_type === "service_provider" 
+                          ? "List and sell services to real estate professionals" 
+                          : "Partner with agents for lead generation and co-marketing"}
+                      </p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="vendor_company_name">Company Name</Label>
+                      <Input
+                        id="vendor_company_name"
+                        value={vendorData.vendor_company_name}
+                        onChange={(e) => handleVendorChange("vendor_company_name", e.target.value)}
+                        placeholder="Your company or business name"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="vendor_description">Company Description</Label>
+                      <Textarea
+                        id="vendor_description"
+                        value={vendorData.vendor_description}
+                        onChange={(e) => handleVendorChange("vendor_description", e.target.value)}
+                        placeholder="Describe your business and what you offer..."
+                        rows={3}
+                      />
+                    </div>
+
+                    <Button 
+                      onClick={handleVendorDetailsSubmit}
+                      disabled={vendorLoading || !vendorData.vendor_type}
+                      className="w-full"
+                    >
+                      {vendorLoading ? "Saving..." : "Save Vendor Details"}
+                    </Button>
+                  </div>
+                </>
+              )}
             </CardContent>
           </Card>
         </div>
