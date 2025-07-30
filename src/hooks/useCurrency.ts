@@ -39,6 +39,21 @@ export const useCurrency = () => {
           minimumFractionDigits: 0,
           maximumFractionDigits: 0
         }).format(numAmount);
+        
+        // If we have a duration parameter and no existing suffix, use the duration
+        if (duration && !suffix) {
+          const durationMap: { [key: string]: string } = {
+            'mo': '/mo',
+            'yr': '/yr',
+            'year': '/yr',
+            'month': '/mo',
+            'one-time': '',
+            'onetime': ''
+          };
+          const durationSuffix = durationMap[duration.toLowerCase()] || `/${duration}`;
+          return `${formattedAmount}${durationSuffix}`;
+        }
+        
         return suffix ? `${formattedAmount}${suffix}` : formattedAmount;
       }
       // If no number found, return as is
