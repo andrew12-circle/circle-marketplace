@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,6 +12,7 @@ import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { VendorPricingModal } from '@/components/marketplace/VendorPricingModal';
 import { ServiceImageUpload } from '@/components/marketplace/ServiceImageUpload';
@@ -152,6 +154,8 @@ interface VendorStats {
 }
 
 export const VendorDashboard = () => {
+  const { user, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
   const [services, setServices] = useState<Service[]>([]);
   const [stats, setStats] = useState<VendorStats>({
     total_services: 0,
@@ -261,40 +265,25 @@ export const VendorDashboard = () => {
   });
 
   useEffect(() => {
-    loadDashboardData();
-    // Check if vendor needs to select a pricing plan
-    checkVendorPlan();
-  }, []);
-
-  const checkVendorPlan = async () => {
-    // In a real app, you'd check if the vendor has selected a plan
-    // For now, we'll show the pricing modal if no plan is stored
-    const savedPlan = localStorage.getItem('vendorPlan');
-    if (!savedPlan) {
-      setShowPricingModal(true);
-    } else {
-      setVendorPlan(savedPlan);
+    // Check authentication first
+    if (!authLoading) {
+      if (!user) {
+        // Redirect to auth page if not authenticated
+        navigate('/auth');
+        return;
+      }
+      
+      // User is authenticated, load dashboard data
+      loadDashboardData();
+      checkVendorPlan();
     }
-  };
-
-  const handlePlanSelected = (plan: string) => {
-    setVendorPlan(plan);
-    localStorage.setItem('vendorPlan', plan);
-    toast({
-      title: "Welcome to your new plan!",
-      description: `You can now create unlimited services with your ${plan} plan.`,
-    });
-  };
+  }, [user, authLoading, navigate]);
 
   const loadDashboardData = async () => {
+    if (!user) return;
+    
     try {
       setIsLoading(true);
-      
-      // Get current user profile
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        throw new Error('User not authenticated');
-      }
 
       // Fetch vendor's services
       const { data: services, error } = await supabase
@@ -587,12 +576,30 @@ export const VendorDashboard = () => {
     resetServiceForm();
   };
 
+  const checkVendorPlan = async () => {
+    // In a real app, you'd check if the vendor has selected a plan
+    // For now, we'll show the pricing modal if no plan is stored
+    const savedPlan = localStorage.getItem('vendorPlan');
+    if (!savedPlan) {
+      setShowPricingModal(true);
+    } else {
+      setVendorPlan(savedPlan);
+    }
+  };
+
+  const handlePlanSelected = (plan: string) => {
+    setVendorPlan(plan);
+    localStorage.setItem('vendorPlan', plan);
+    toast({
+      title: "Welcome to your new plan!",
+      description: `You can now create unlimited services with your ${plan} plan.`,
+    });
+  };
+
   const saveService = async () => {
+    if (!user) return;
+    
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        throw new Error('User not authenticated');
-      }
 
       const serviceData = {
         title: serviceForm.title,
@@ -657,6 +664,16 @@ export const VendorDashboard = () => {
     }
   };
 
+  // Show loading while authentication is being checked
+  if (authLoading) {
+    return (
+      <div className="container mx-auto py-8">
+        <div className="text-center">Checking authentication...</div>
+      </div>
+    );
+  }
+
+  // Show loading while dashboard data is being loaded
   if (isLoading) {
     return (
       <div className="container mx-auto py-8">
