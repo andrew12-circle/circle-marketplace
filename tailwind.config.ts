@@ -21,7 +21,7 @@ export default {
 			fontFamily: {
 				'sans': ['Inter', 'sans-serif'],
 				'inter': ['Inter', 'sans-serif'],
-				'handelson': ['Handjet', 'monospace'],
+				'handlee': ['Handlee', 'cursive'],
 			},
 			colors: {
 				border: 'hsl(var(--border))',
