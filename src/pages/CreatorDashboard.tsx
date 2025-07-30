@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { ContentUploadModal } from "@/components/creator/ContentUploadModal";
 import { 
   Upload, 
   Video, 
@@ -46,6 +47,8 @@ export const CreatorDashboard = () => {
   });
   const [recentContent, setRecentContent] = useState<RecentContent[]>([]);
   const [loading, setLoading] = useState(true);
+  const [uploadModalOpen, setUploadModalOpen] = useState(false);
+  const [selectedContentType, setSelectedContentType] = useState<string>('video');
   const { toast } = useToast();
 
   // Redirect if not authenticated
@@ -125,6 +128,15 @@ export const CreatorDashboard = () => {
     return <Icon className="w-4 h-4" />;
   };
 
+  const handleUploadClick = (contentType: string) => {
+    setSelectedContentType(contentType);
+    setUploadModalOpen(true);
+  };
+
+  const handleUploadComplete = () => {
+    fetchCreatorData();
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -141,7 +153,7 @@ export const CreatorDashboard = () => {
           <h1 className="text-3xl font-bold text-foreground">Creator Dashboard</h1>
           <p className="text-muted-foreground">Manage your content and track your earnings</p>
         </div>
-        <Button className="gap-2">
+        <Button className="gap-2" onClick={() => setUploadModalOpen(true)}>
           <Plus className="w-4 h-4" />
           Create Content
         </Button>
@@ -208,7 +220,7 @@ export const CreatorDashboard = () => {
                   key={contentType.type}
                   variant="outline"
                   className="flex flex-col items-center gap-2 h-24"
-                  onClick={() => toast({ title: "Upload", description: `Upload new ${contentType.label}` })}
+                  onClick={() => handleUploadClick(contentType.type)}
                 >
                   <div className={`w-8 h-8 rounded-lg ${contentType.color} flex items-center justify-center`}>
                     <Icon className="w-4 h-4 text-white" />
@@ -263,6 +275,14 @@ export const CreatorDashboard = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Upload Modal */}
+      <ContentUploadModal
+        isOpen={uploadModalOpen}
+        onClose={() => setUploadModalOpen(false)}
+        contentType={selectedContentType}
+        onUploadComplete={handleUploadComplete}
+      />
     </div>
   );
 };
