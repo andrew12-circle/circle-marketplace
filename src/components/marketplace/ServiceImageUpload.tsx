@@ -182,13 +182,15 @@ export const ServiceImageUpload = ({ value, onChange }: ServiceImageUploadProps)
       ) : (
         /* Image Preview */
         <div className="relative">
-          <div className="border rounded-lg p-4 bg-card">
-            <div className="flex items-center justify-between">
+          <div className="border-2 border-green-200 bg-green-50 rounded-lg p-4">
+            <div className="flex items-center justify-between mb-4">
               <div className="flex items-center space-x-3">
-                <CheckCircle className="h-5 w-5 text-green-500" />
+                <div className="bg-green-500 rounded-full p-1">
+                  <CheckCircle className="h-4 w-4 text-white" />
+                </div>
                 <div>
-                  <p className="font-medium">Image uploaded successfully</p>
-                  <p className="text-sm text-muted-foreground truncate max-w-xs">
+                  <p className="font-semibold text-green-800">✅ Image uploaded successfully!</p>
+                  <p className="text-sm text-green-600 truncate max-w-xs">
                     {value.split('/').pop()}
                   </p>
                 </div>
@@ -198,22 +200,40 @@ export const ServiceImageUpload = ({ value, onChange }: ServiceImageUploadProps)
                 variant="ghost"
                 size="sm"
                 onClick={removeImage}
+                className="text-gray-500 hover:text-red-500"
               >
                 <X className="h-4 w-4" />
               </Button>
             </div>
             
             {/* Image Preview */}
-            <div className="mt-4 p-4 bg-muted/30 rounded border-2 border-dashed border-muted-foreground/20">
-              <img 
-                src={value} 
-                alt="Service preview" 
-                className="max-w-full h-32 object-contain mx-auto"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.style.display = 'none';
-                }}
-              />
+            <div className="bg-white rounded-lg border-2 border-dashed border-green-300 p-4">
+              <div className="text-center">
+                <p className="text-sm font-medium text-green-700 mb-2">Preview:</p>
+                <img 
+                  src={value} 
+                  alt="Service preview" 
+                  className="max-w-full h-40 object-contain mx-auto rounded border"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+                  }}
+                />
+              </div>
+            </div>
+            
+            {/* Upload Another Button */}
+            <div className="mt-4 text-center">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+                className="text-green-700 border-green-300 hover:bg-green-100"
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                Upload Different Image
+              </Button>
             </div>
           </div>
         </div>
