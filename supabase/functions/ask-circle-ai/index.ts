@@ -12,6 +12,55 @@ const logStep = (step: string, details?: any) => {
   console.log(`[ASK-CIRCLE-AI] ${step}${detailsStr}`);
 };
 
+// Input validation helper
+const validateInput = (input: any) => {
+  if (!input || typeof input !== 'object') {
+    throw new Error('Invalid request body');
+  }
+  
+  const { message, prompt } = input;
+  const userPrompt = message || prompt;
+  
+  if (!userPrompt || typeof userPrompt !== 'string') {
+    throw new Error('Prompt is required and must be a string');
+  }
+  
+  if (userPrompt.length > 2000) {
+    throw new Error('Prompt too long. Maximum 2000 characters allowed');
+  }
+  
+  // Sanitize input - remove potentially harmful content
+  const sanitizedPrompt = userPrompt
+    .replace(/<script[^>]*>.*?<\/script>/gi, '')
+    .replace(/<[^>]*>/g, '')
+    .trim();
+    
+  if (!sanitizedPrompt) {
+    throw new Error('Prompt cannot be empty after sanitization');
+  }
+  
+  return sanitizedPrompt;
+};
+
+// Rate limiting store
+const rateLimitStore = new Map();
+
+const checkRateLimit = (key: string) => {
+  const now = Date.now();
+  const windowMs = 60000; // 1 minute
+  const maxRequests = 10;
+  
+  const requests = rateLimitStore.get(key) || [];
+  const validRequests = requests.filter((timestamp: number) => now - timestamp < windowMs);
+  
+  if (validRequests.length >= maxRequests) {
+    throw new Error('Rate limit exceeded. Please try again later.');
+  }
+  
+  validRequests.push(now);
+  rateLimitStore.set(key, validRequests);
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -19,20 +68,25 @@ serve(async (req) => {
 
   try {
     logStep("Function started");
+    
+    // Rate limiting
+    const rateLimitKey = req.headers.get('x-forwarded-for') || 'unknown';
+    checkRateLimit(rateLimitKey);
 
     const geminiKey = Deno.env.get("GEMINI_API_KEY");
     if (!geminiKey) throw new Error("GEMINI_API_KEY is not set");
     logStep("Gemini key verified");
+
+    // Validate and sanitize input
+    const requestBody = await req.json();
+    const userPrompt = validateInput(requestBody);
+    logStep("Input validated", { promptLength: userPrompt.length });
 
     // Create Supabase client to fetch services data
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_ANON_KEY") ?? ""
     );
-
-    const { message, prompt } = await req.json();
-    const userPrompt = message || prompt;
-    logStep("Received prompt", { prompt: userPrompt });
 
     // Check if this is a service comparison request
     const isComparison = userPrompt.includes('analyze and compare these services');

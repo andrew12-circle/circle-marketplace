@@ -6,9 +6,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { UserPlus, Building2, Briefcase, X } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { UserPlus, Building2, Briefcase, X, AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useSecureInput, commonRules, ValidationRules } from "@/hooks/useSecureInput";
+import SecureForm from "@/components/common/SecureForm";
 
 interface InviteVendorModalProps {
   open: boolean;
@@ -109,64 +112,91 @@ export const InviteVendorModal = ({ open, onOpenChange }: InviteVendorModalProps
     });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!formData.name || !formData.contact_email || !formData.category) {
-      toast({
-        title: "Missing Information",
-        description: "Please fill in all required fields (Name, Email, Category)",
-        variant: "destructive",
-      });
-      return;
+  // Define validation rules for the form
+  const validationRules: ValidationRules = {
+    name: commonRules.name,
+    contact_email: commonRules.email,
+    description: commonRules.description,
+    website_url: commonRules.url,
+    phone: commonRules.phone,
+    location: {
+      required: true,
+      minLength: 2,
+      maxLength: 100,
+      sanitize: true
+    },
+    category: {
+      required: true,
+      minLength: 2,
+      maxLength: 50,
+      sanitize: true
+    }
+  };
+
+  const { sanitizeString, validateEmail, validatePhone, validateUrl } = useSecureInput(validationRules);
+
+  const handleSecureSubmit = async (sanitizedData: Record<string, string>) => {
+    // Additional validation for vendor-specific fields
+    if (!sanitizedData.name || !sanitizedData.contact_email || !sanitizedData.category) {
+      throw new Error("Please fill in all required fields");
     }
 
+    if (!validateEmail(sanitizedData.contact_email)) {
+      throw new Error("Please enter a valid email address");
+    }
+
+    if (sanitizedData.phone && !validatePhone(sanitizedData.phone)) {
+      throw new Error("Please enter a valid phone number");
+    }
+
+    if (sanitizedData.website_url && !validateUrl(sanitizedData.website_url)) {
+      throw new Error("Please enter a valid website URL");
+    }
+
+    setLoading(true);
     try {
-      setLoading(true);
+      // Convert form data to expected format
+      const vendorData = {
+        ...formData,
+        name: sanitizedData.name,
+        description: sanitizedData.description,
+        contact_email: sanitizedData.contact_email,
+        phone: sanitizedData.phone,
+        website_url: sanitizedData.website_url,
+        location: sanitizedData.location,
+        category: sanitizedData.category,
+      };
 
       const { data, error } = await supabase.functions.invoke('invite-vendor', {
-        body: { 
-          vendorData: formData,
-          inviterMessage: `New ${formData.vendorType} vendor invitation`
-        },
+        body: {
+          vendorData,
+          inviterMessage: `New vendor invited: ${vendorData.name} for ${vendorData.category} services`
+        }
       });
 
       if (error) throw error;
 
       toast({
-        title: "Vendor Invited Successfully!",
-        description: "The vendor has been added to the marketplace and will be notified.",
+        title: "Success!",
+        description: "Vendor has been successfully invited to the marketplace",
       });
 
-      // Reset form
-      setFormData({
-        name: "",
-        description: "",
-        vendorType: "",
-        category: "",
-        website_url: "",
-        contact_email: "",
-        phone: "",
-        location: "",
-        logo_url: "",
-        specialties: [],
-        years_experience: null,
-        service_states: [],
-        mls_areas: [],
-        service_radius_miles: null,
-      });
-      setStep('type');
+      handleReset();
       onOpenChange(false);
-
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to invite vendor. Please try again.",
-        variant: "destructive",
-      });
+      console.error('Error inviting vendor:', error);
+      throw error; // Re-throw to be handled by SecureForm
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleValidationError = (errors: Record<string, string>) => {
+    toast({
+      title: "Validation Error",
+      description: "Please fix the highlighted errors before submitting",
+      variant: "destructive",
+    });
   };
 
   const handleReset = () => {
@@ -248,7 +278,12 @@ export const InviteVendorModal = ({ open, onOpenChange }: InviteVendorModalProps
             </div>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <SecureForm 
+            validationRules={validationRules}
+            onSubmit={handleSecureSubmit}
+            onValidationError={handleValidationError}
+            className="space-y-6"
+          >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Badge variant="outline">{selectedVendorType?.label}</Badge>
@@ -263,6 +298,7 @@ export const InviteVendorModal = ({ open, onOpenChange }: InviteVendorModalProps
                 <Label htmlFor="name">Vendor Name *</Label>
                 <Input
                   id="name"
+                  name="name"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="ABC Marketing Agency"
@@ -272,6 +308,7 @@ export const InviteVendorModal = ({ open, onOpenChange }: InviteVendorModalProps
 
               <div className="space-y-2">
                 <Label htmlFor="category">Service Category *</Label>
+                <input type="hidden" name="category" value={formData.category} />
                 <Select 
                   value={formData.category} 
                   onValueChange={(value) => setFormData({ ...formData, category: value })}
@@ -292,13 +329,14 @@ export const InviteVendorModal = ({ open, onOpenChange }: InviteVendorModalProps
 
             <div className="space-y-2">
               <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Brief description of their services and expertise..."
-                rows={3}
-              />
+                <Textarea
+                  id="description"
+                  name="description"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  placeholder="Brief description of their services and expertise..."
+                  rows={3}
+                />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -306,6 +344,7 @@ export const InviteVendorModal = ({ open, onOpenChange }: InviteVendorModalProps
                 <Label htmlFor="contact_email">Contact Email *</Label>
                 <Input
                   id="contact_email"
+                  name="contact_email"
                   type="email"
                   value={formData.contact_email}
                   onChange={(e) => setFormData({ ...formData, contact_email: e.target.value })}
@@ -318,6 +357,7 @@ export const InviteVendorModal = ({ open, onOpenChange }: InviteVendorModalProps
                 <Label htmlFor="phone">Phone Number</Label>
                 <Input
                   id="phone"
+                  name="phone"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                   placeholder="(555) 123-4567"
@@ -330,6 +370,7 @@ export const InviteVendorModal = ({ open, onOpenChange }: InviteVendorModalProps
                 <Label htmlFor="website_url">Website URL</Label>
                 <Input
                   id="website_url"
+                  name="website_url"
                   value={formData.website_url}
                   onChange={(e) => setFormData({ ...formData, website_url: e.target.value })}
                   placeholder="https://vendor-website.com"
@@ -340,6 +381,7 @@ export const InviteVendorModal = ({ open, onOpenChange }: InviteVendorModalProps
                 <Label htmlFor="location">Location</Label>
                 <Input
                   id="location"
+                  name="location"
                   value={formData.location}
                   onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                   placeholder="Nashville, TN"
@@ -464,7 +506,7 @@ export const InviteVendorModal = ({ open, onOpenChange }: InviteVendorModalProps
                 {loading ? "Inviting..." : "Invite Vendor"}
               </Button>
             </div>
-          </form>
+          </SecureForm>
         )}
       </DialogContent>
     </Dialog>

@@ -29,6 +29,72 @@ interface VendorData {
   service_radius_miles: number | null;
 }
 
+// Input validation and sanitization helpers
+const validateEmail = (email: string): boolean => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
+const sanitizeString = (input: string): string => {
+  return input
+    .replace(/<script[^>]*>.*?<\/script>/gi, '')
+    .replace(/<[^>]*>/g, '')
+    .trim()
+    .slice(0, 500); // Limit length
+};
+
+const validateVendorData = (data: any): VendorData => {
+  if (!data || typeof data !== 'object') {
+    throw new Error('Invalid vendor data');
+  }
+
+  const { name, contact_email, category, description, website_url, phone, location } = data;
+
+  // Required field validation
+  if (!name || typeof name !== 'string' || name.trim().length === 0) {
+    throw new Error('Vendor name is required');
+  }
+  
+  if (!contact_email || !validateEmail(contact_email)) {
+    throw new Error('Valid contact email is required');
+  }
+  
+  if (!category || typeof category !== 'string' || category.trim().length === 0) {
+    throw new Error('Category is required');
+  }
+
+  // Optional field validation and sanitization
+  if (website_url && website_url.length > 0) {
+    if (!website_url.startsWith('http://') && !website_url.startsWith('https://')) {
+      throw new Error('Website URL must start with http:// or https://');
+    }
+  }
+
+  if (phone && phone.length > 0) {
+    const phoneRegex = /^[+]?[0-9\s\-\(\)\.]+$/;
+    if (!phoneRegex.test(phone)) {
+      throw new Error('Invalid phone number format');
+    }
+  }
+
+  return {
+    name: sanitizeString(name),
+    description: description ? sanitizeString(description) : '',
+    vendorType: 'company',
+    category: sanitizeString(category),
+    website_url: website_url ? sanitizeString(website_url) : '',
+    contact_email: contact_email.toLowerCase().trim(),
+    phone: phone ? sanitizeString(phone) : '',
+    location: location ? sanitizeString(location) : '',
+    logo_url: data.logo_url ? sanitizeString(data.logo_url) : '',
+    specialties: Array.isArray(data.specialties) ? data.specialties.map(s => sanitizeString(s)).slice(0, 10) : [],
+    years_experience: typeof data.years_experience === 'number' ? Math.max(0, Math.min(100, data.years_experience)) : null,
+    service_states: Array.isArray(data.service_states) ? data.service_states.slice(0, 50) : [],
+    mls_areas: Array.isArray(data.mls_areas) ? data.mls_areas.slice(0, 100) : [],
+    service_radius_miles: typeof data.service_radius_miles === 'number' ? Math.max(0, Math.min(1000, data.service_radius_miles)) : null,
+  };
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -44,24 +110,40 @@ serve(async (req) => {
       { auth: { persistSession: false } }
     );
 
-    // Get user authentication for audit trail
+    // Require authentication for this endpoint
     const authHeader = req.headers.get("Authorization");
-    let inviterUserId = null;
+    if (!authHeader) {
+      throw new Error("Authentication required");
+    }
+
+    const token = authHeader.replace("Bearer ", "");
+    const { data: userData, error: authError } = await supabaseClient.auth.getUser(token);
     
-    if (authHeader) {
-      const token = authHeader.replace("Bearer ", "");
-      const { data: userData } = await supabaseClient.auth.getUser(token);
-      inviterUserId = userData.user?.id;
-      logStep("Inviter authenticated", { userId: inviterUserId });
+    if (authError || !userData.user) {
+      throw new Error("Invalid authentication token");
     }
 
-    const { vendorData, inviterMessage }: { vendorData: VendorData; inviterMessage: string } = await req.json();
-    logStep("Received vendor data", { name: vendorData.name, category: vendorData.category });
+    const inviterUserId = userData.user.id;
+    logStep("User authenticated", { userId: inviterUserId });
 
-    // Validate required fields
-    if (!vendorData.name || !vendorData.contact_email || !vendorData.category) {
-      throw new Error("Missing required fields: name, contact_email, and category are required");
+    // Check if user has admin privileges (based on our updated RLS policies)
+    const { data: profile } = await supabaseClient
+      .from('profiles')
+      .select('specialties')
+      .eq('user_id', inviterUserId)
+      .single();
+
+    const isAdmin = profile?.specialties?.includes('admin') || false;
+    if (!isAdmin) {
+      throw new Error("Insufficient privileges. Admin access required.");
     }
+
+    const requestBody = await req.json();
+    const { vendorData: rawVendorData, inviterMessage } = requestBody;
+    
+    // Validate and sanitize vendor data
+    const vendorData = validateVendorData(rawVendorData);
+    logStep("Vendor data validated", { name: vendorData.name, category: vendorData.category });
 
     // Check if vendor already exists
     const { data: existingVendor } = await supabaseClient
