@@ -80,9 +80,35 @@ export const ConsultationBookingModal = ({
 
       if (error) throw error;
 
+      // Send notification to vendor
+      try {
+        const notificationResponse = await supabase.functions.invoke('send-consultation-notification', {
+          body: {
+            bookingId: bookingData.id,
+            serviceTitle: service.title,
+            vendorName: service.vendor.name,
+            clientName: data.client_name,
+            clientEmail: data.client_email,
+            clientPhone: data.client_phone,
+            scheduledDate: selectedDate.toISOString().split('T')[0],
+            scheduledTime: selectedTime,
+            projectDetails: data.project_details,
+            budgetRange: data.budget_range
+          }
+        });
+
+        if (notificationResponse.error) {
+          console.error('Failed to send vendor notification:', notificationResponse.error);
+          // Don't fail the booking if notification fails
+        }
+      } catch (notificationError) {
+        console.error('Error sending vendor notification:', notificationError);
+        // Don't fail the booking if notification fails
+      }
+
       toast({
         title: "Consultation Booked!",
-        description: "We'll send you a confirmation email shortly. Next, complete the preparation course to make the most of your consultation.",
+        description: "We'll send you a confirmation email shortly. The service provider has been notified and will contact you soon.",
       });
 
       onBookingConfirmed(bookingData.id);

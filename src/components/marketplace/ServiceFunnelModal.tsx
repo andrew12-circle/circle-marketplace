@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -35,6 +35,8 @@ import {
 import { getRiskBadge, getComplianceAlert, determineServiceRisk } from "./RESPAComplianceSystem";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { ConsultationFlow } from "./ConsultationFlow";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Service {
   id: string;
@@ -76,6 +78,12 @@ export const ServiceFunnelModal = ({
 }: ServiceFunnelModalProps) => {
   const [selectedPackage, setSelectedPackage] = useState("standard");
   const [quantity, setQuantity] = useState(1);
+  const [isConsultationFlowOpen, setIsConsultationFlowOpen] = useState(false);
+  const [vendorAvailability, setVendorAvailability] = useState<{
+    is_available_now: boolean;
+    availability_message?: string;
+    next_available_slot?: string;
+  } | null>(null);
   const { addToCart } = useCart();
   const { profile } = useAuth();
   const isProMember = profile?.is_pro_member || false;
@@ -111,6 +119,36 @@ export const ServiceFunnelModal = ({
   ];
 
   const selectedPkg = packages.find(pkg => pkg.id === selectedPackage) || packages[1];
+
+  // Fetch vendor availability on component mount
+  useEffect(() => {
+    const fetchVendorAvailability = async () => {
+      try {
+        const { data: vendor } = await supabase
+          .from('vendors')
+          .select('id')
+          .eq('name', service.vendor.name)
+          .single();
+
+        if (vendor) {
+          const { data: availability } = await supabase
+            .from('vendor_availability')
+            .select('is_available_now, availability_message, next_available_slot')
+            .eq('vendor_id', vendor.id)
+            .single();
+
+          setVendorAvailability(availability || { is_available_now: false });
+        }
+      } catch (error) {
+        console.error('Error fetching vendor availability:', error);
+        setVendorAvailability({ is_available_now: false });
+      }
+    };
+
+    if (isOpen) {
+      fetchVendorAvailability();
+    }
+  }, [isOpen, service.vendor.name]);
 
   // Mock reviews data
   const reviews = [
@@ -467,12 +505,21 @@ export const ServiceFunnelModal = ({
                 </div>
 
                 <div className="space-y-3">
-                  <Button className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold" size="lg">
+                  <Button 
+                    className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold" 
+                    size="lg"
+                    onClick={() => setIsConsultationFlowOpen(true)}
+                  >
                     <Phone className="w-4 h-4 mr-2" />
                     Schedule Free Consultation
                   </Button>
                   
-                  <Button variant="outline" className="w-full" size="lg">
+                  <Button 
+                    variant="outline" 
+                    className="w-full" 
+                    size="lg"
+                    onClick={() => setIsConsultationFlowOpen(true)}
+                  >
                     <Mail className="w-4 h-4 mr-2" />
                     Get Custom Quote
                   </Button>
@@ -514,10 +561,26 @@ export const ServiceFunnelModal = ({
 
                 <div className="text-center space-y-2">
                   <div className="flex items-center justify-center gap-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    <span className="text-sm font-medium text-green-600">Available Now</span>
+                    <div className={`w-2 h-2 rounded-full ${
+                      vendorAvailability?.is_available_now ? 'bg-green-500' : 'bg-yellow-500'
+                    }`}></div>
+                    <span className={`text-sm font-medium ${
+                      vendorAvailability?.is_available_now ? 'text-green-600' : 'text-yellow-600'
+                    }`}>
+                      {vendorAvailability?.is_available_now ? 'Available Now' : 'Available Soon'}
+                    </span>
                   </div>
-                  <p className="text-xs text-muted-foreground">Typically responds within 1 hour</p>
+                  <p className="text-xs text-muted-foreground">
+                    {vendorAvailability?.availability_message || 
+                     (vendorAvailability?.is_available_now ? 
+                      'Typically responds within 1 hour' : 
+                      'Will respond within 24 hours')}
+                  </p>
+                  {vendorAvailability?.next_available_slot && (
+                    <p className="text-xs text-muted-foreground">
+                      Next available: {new Date(vendorAvailability.next_available_slot).toLocaleDateString()}
+                    </p>
+                  )}
                 </div>
               </Card>
 
@@ -831,6 +894,13 @@ export const ServiceFunnelModal = ({
           </div>
         </div>
       </DialogContent>
+      
+      {/* Consultation Flow Modal */}
+      <ConsultationFlow
+        isOpen={isConsultationFlowOpen}
+        onClose={() => setIsConsultationFlowOpen(false)}
+        service={service}
+      />
     </Dialog>
   );
 };

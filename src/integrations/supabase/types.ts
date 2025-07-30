@@ -147,6 +147,42 @@ export type Database = {
           },
         ]
       }
+      consultation_notifications: {
+        Row: {
+          consultation_booking_id: string
+          created_at: string
+          error_message: string | null
+          id: string
+          notification_data: Json | null
+          notification_type: string
+          sent_at: string | null
+          status: string
+          vendor_id: string
+        }
+        Insert: {
+          consultation_booking_id: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          notification_data?: Json | null
+          notification_type: string
+          sent_at?: string | null
+          status?: string
+          vendor_id: string
+        }
+        Update: {
+          consultation_booking_id?: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          notification_data?: Json | null
+          notification_type?: string
+          sent_at?: string | null
+          status?: string
+          vendor_id?: string
+        }
+        Relationships: []
+      }
       content: {
         Row: {
           category: string
@@ -609,6 +645,48 @@ export type Database = {
         }
         Relationships: []
       }
+      service_customizations: {
+        Row: {
+          created_at: string
+          custom_description: string | null
+          custom_features: Json | null
+          custom_images: Json | null
+          custom_pricing: Json | null
+          custom_title: string | null
+          id: string
+          is_active: boolean
+          service_id: string
+          updated_at: string
+          vendor_id: string
+        }
+        Insert: {
+          created_at?: string
+          custom_description?: string | null
+          custom_features?: Json | null
+          custom_images?: Json | null
+          custom_pricing?: Json | null
+          custom_title?: string | null
+          id?: string
+          is_active?: boolean
+          service_id: string
+          updated_at?: string
+          vendor_id: string
+        }
+        Update: {
+          created_at?: string
+          custom_description?: string | null
+          custom_features?: Json | null
+          custom_images?: Json | null
+          custom_pricing?: Json | null
+          custom_title?: string | null
+          id?: string
+          is_active?: boolean
+          service_id?: string
+          updated_at?: string
+          vendor_id?: string
+        }
+        Relationships: []
+      }
       services: {
         Row: {
           category: string | null
@@ -732,6 +810,72 @@ export type Database = {
           subscription_tier?: string | null
           updated_at?: string
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      vendor_availability: {
+        Row: {
+          availability_message: string | null
+          calendar_link: string | null
+          created_at: string
+          id: string
+          is_available_now: boolean
+          next_available_slot: string | null
+          updated_at: string
+          vendor_id: string
+        }
+        Insert: {
+          availability_message?: string | null
+          calendar_link?: string | null
+          created_at?: string
+          id?: string
+          is_available_now?: boolean
+          next_available_slot?: string | null
+          updated_at?: string
+          vendor_id: string
+        }
+        Update: {
+          availability_message?: string | null
+          calendar_link?: string | null
+          created_at?: string
+          id?: string
+          is_available_now?: boolean
+          next_available_slot?: string | null
+          updated_at?: string
+          vendor_id?: string
+        }
+        Relationships: []
+      }
+      vendor_credentials: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          is_active: boolean
+          last_login: string | null
+          password_hash: string
+          updated_at: string
+          vendor_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          is_active?: boolean
+          last_login?: string | null
+          password_hash: string
+          updated_at?: string
+          vendor_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          is_active?: boolean
+          last_login?: string | null
+          password_hash?: string
+          updated_at?: string
+          vendor_id?: string
         }
         Relationships: []
       }
