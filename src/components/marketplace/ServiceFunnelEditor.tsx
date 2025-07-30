@@ -483,125 +483,223 @@ export const ServiceFunnelEditor = ({ funnelContent, onChange }: ServiceFunnelEd
           </Tabs>
         </div>
 
-        {/* Live Preview Panel - ServiceFunnelModal Layout */}
+        {/* Live Preview Panel - Full ServiceFunnelModal View */}
         <div className="space-y-6">
-          <div className="bg-card border rounded-lg p-4">
-            <h3 className="font-semibold mb-4 flex items-center gap-2">
+          <div className="max-w-4xl max-h-[80vh] overflow-y-auto border rounded-lg bg-background">
+            <h3 className="font-semibold p-4 border-b flex items-center gap-2">
               <Eye className="w-4 h-4" />
-              Live Preview
+              What Realtors See (Live Preview)
             </h3>
             
-            {/* Hero Section Preview */}
-            <div className="relative bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 rounded-lg mb-6">
-              <div className="absolute inset-0 bg-black/20 rounded-lg"></div>
-              <div className="relative space-y-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Badge className="bg-green-500 text-white">
-                    <CheckCircle className="w-3 h-3 mr-1" />
-                    Top Rated Pro
-                  </Badge>
-                  <Badge className="bg-orange-500 text-white">
-                    <Trophy className="w-3 h-3 mr-1" />
-                    Premium Provider
-                  </Badge>
-                </div>
-                <h1 className="text-2xl font-bold leading-tight">
-                  {funnelContent.headline || 'Your Amazing Service Title'}
-                </h1>
-                <p className="text-lg text-blue-100">
-                  {funnelContent.subheadline || 'Transform your real estate business with our proven system'}
-                </p>
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-1">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                    ))}
-                  </div>
-                  <span className="text-sm">5.0 (150+ reviews)</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Benefits Preview */}
-            <div className="space-y-4 mb-6">
-              <h2 className="text-xl font-bold">{funnelContent.whyChooseUs.title}</h2>
-              <div className="space-y-3">
-                {funnelContent.whyChooseUs.benefits.map((benefit, index) => (
-                  <div key={index} className="flex items-start gap-3">
-                    <div className="bg-green-100 rounded-full p-2 mt-1">
-                      <CheckCircle className="w-4 h-4 text-green-600" />
+            {/* Full Funnel Modal Preview */}
+            <div className="p-0">
+              {/* Hero Section */}
+              <div className="relative bg-gradient-to-r from-blue-600 to-purple-600 text-white p-8">
+                <div className="absolute inset-0 bg-black/20"></div>
+                <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Badge className="bg-green-500 text-white">
+                        <CheckCircle className="w-3 h-3 mr-1" />
+                        Top Rated Pro
+                      </Badge>
+                      <Badge className="bg-orange-500 text-white">
+                        <Trophy className="w-3 h-3 mr-1" />
+                        Premium Provider
+                      </Badge>
                     </div>
-                    <div>
-                      <h3 className="font-medium">{benefit.title}</h3>
-                      <p className="text-sm text-muted-foreground">{benefit.description}</p>
+                    <h1 className="text-4xl font-bold leading-tight">
+                      {funnelContent.headline || 'Transform Your Real Estate Business'}
+                    </h1>
+                    <p className="text-xl text-blue-100">
+                      {funnelContent.subheadline || 'Proven system used by top performers'}
+                    </p>
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-1">
+                        {[...Array(5)].map((_, i) => (
+                          <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                        ))}
+                      </div>
+                      <span className="text-lg">5.0 (150+ reviews)</span>
                     </div>
                   </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Packages Preview */}
-            {funnelContent.packages.length > 0 && (
-              <div className="space-y-4 mb-6">
-                <h2 className="text-xl font-bold">Choose Your Package</h2>
-                <div className="grid gap-4">
-                  {funnelContent.packages.map((pkg, index) => (
-                    <Card key={pkg.id} className={`relative ${pkg.popular ? 'border-primary shadow-lg' : ''}`}>
-                      {pkg.popular && (
-                        <Badge className="absolute -top-2 left-4 bg-primary">
-                          Most Popular
-                        </Badge>
-                      )}
-                      <CardContent className="p-4">
-                        <div className="flex justify-between items-start mb-2">
-                          <h3 className="font-semibold">{pkg.name}</h3>
-                          <div className="text-right">
-                            <span className="text-2xl font-bold">${pkg.price}</span>
-                          </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20">
+                    <h3 className="text-2xl font-bold mb-4">Why Choose This Service?</h3>
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-3">
+                        <div className="bg-green-500 rounded-full p-1">
+                          <TrendingUp className="w-4 h-4" />
                         </div>
-                        <p className="text-sm text-muted-foreground mb-3">{pkg.description}</p>
-                        <div className="space-y-1">
-                          {pkg.features?.map((feature, i) => (
-                            <div key={i} className="flex items-center gap-2 text-sm">
-                              <CheckCircle className="w-3 h-3 text-green-500" />
-                              <span>{feature}</span>
-                            </div>
-                          ))}
+                        <span className="text-lg">Average {funnelContent.estimatedRoi}x ROI increase</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="bg-green-500 rounded-full p-1">
+                          <Users className="w-4 h-4" />
                         </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                        <span className="text-lg">500+ successful implementations</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="bg-green-500 rounded-full p-1">
+                          <Zap className="w-4 h-4" />
+                        </div>
+                        <span className="text-lg">Setup in {funnelContent.duration}</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-            )}
 
-            {/* Testimonials Preview */}
-            {funnelContent.socialProof.testimonials.length > 0 && (
-              <div className="space-y-4">
-                <h2 className="text-xl font-bold">What Our Customers Say</h2>
-                <div className="space-y-3">
-                  {funnelContent.socialProof.testimonials.map((testimonial, index) => (
-                    <Card key={testimonial.id} className="p-4 border-l-4 border-l-green-500">
-                      <div className="flex items-start gap-3">
-                        <div className="bg-green-100 rounded-full p-2">
-                          <Star className="w-4 h-4 text-green-600" />
-                        </div>
-                        <div>
-                          <p className="font-medium">{testimonial.name}</p>
-                          <p className="text-sm text-muted-foreground">{testimonial.role}</p>
-                          <p className="text-sm mt-1">"{testimonial.content}"</p>
-                          <div className="flex items-center gap-1 mt-1">
-                            {[...Array(5)].map((_, i) => (
-                              <Star key={i} className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                            ))}
-                          </div>
+              {/* Main Content Grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-6">
+                {/* Left Column - Media and Social Proof */}
+                <div className="lg:col-span-5 space-y-6">
+                  {/* Main Image/Video */}
+                  <div className="aspect-video bg-muted rounded-lg overflow-hidden relative">
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
+                      <Building className="w-24 h-24 text-blue-400" />
+                    </div>
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                      <Button className="bg-red-600 hover:bg-red-700 text-white rounded-full p-4">
+                        <div className="w-0 h-0 border-t-[12px] border-t-transparent border-l-[20px] border-l-white border-b-[12px] border-b-transparent ml-1"></div>
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Thumbnail Gallery */}
+                  <div className="grid grid-cols-4 gap-2">
+                    {[
+                      { label: "Demo Video", icon: "video" },
+                      { label: "Case Study", icon: "chart" },
+                      { label: "Training", icon: "book" },
+                      { label: "Results", icon: "trophy" }
+                    ].map((item, i) => (
+                      <div key={i} className="aspect-square bg-muted rounded border-2 border-transparent hover:border-primary cursor-pointer relative overflow-hidden">
+                        <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
+                          {item.icon === "video" && <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center"><div className="w-0 h-0 border-t-[6px] border-t-transparent border-l-[10px] border-l-white border-b-[6px] border-b-transparent ml-0.5"></div></div>}
+                          {item.icon === "chart" && <TrendingUp className="w-8 h-8 text-green-500" />}
+                          {item.icon === "book" && <Building className="w-8 h-8 text-blue-500" />}
+                          {item.icon === "trophy" && <Trophy className="w-8 h-8 text-yellow-500" />}
+                          <span className="text-xs text-center mt-1 px-1">{item.label}</span>
                         </div>
                       </div>
-                    </Card>
-                  ))}
+                    ))}
+                  </div>
+
+                  {/* Recent Success Stories */}
+                  <div className="space-y-4">
+                    <h3 className="font-bold text-lg">Recent Success Stories</h3>
+                    {funnelContent.socialProof.testimonials.slice(0, 2).map((testimonial, index) => (
+                      <Card key={testimonial.id} className="p-4 border-l-4 border-l-green-500">
+                        <div className="flex items-start gap-3">
+                          <div className="bg-green-100 rounded-full p-2">
+                            <Star className="w-4 h-4 text-green-600" />
+                          </div>
+                          <div>
+                            <p className="font-medium">{testimonial.name}</p>
+                            <p className="text-sm text-muted-foreground">"{testimonial.content}"</p>
+                            <div className="flex items-center gap-1 mt-1">
+                              {[...Array(5)].map((_, i) => (
+                                <Star key={i} className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                              ))}
+                              <span className="text-xs text-muted-foreground ml-2">2 days ago</span>
+                            </div>
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Middle Column - Value Proposition */}
+                <div className="lg:col-span-4 space-y-6">
+                  <div>
+                    <h2 className="text-2xl font-bold mb-4">{funnelContent.whyChooseUs.title}</h2>
+                    <div className="space-y-4">
+                      {funnelContent.whyChooseUs.benefits.map((benefit, index) => (
+                        <div key={index} className="flex items-start gap-3">
+                          <div className="bg-green-100 rounded-full p-2 mt-1">
+                            <CheckCircle className="w-4 h-4 text-green-600" />
+                          </div>
+                          <div>
+                            <h3 className="font-semibold">{benefit.title}</h3>
+                            <p className="text-sm text-muted-foreground">{benefit.description}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Packages Preview */}
+                  {funnelContent.packages.length > 0 && (
+                    <div className="space-y-4">
+                      <h2 className="text-xl font-bold">Choose Your Package</h2>
+                      <div className="space-y-3">
+                        {funnelContent.packages.map((pkg, index) => (
+                          <Card key={pkg.id} className={`relative cursor-pointer transition-all hover:shadow-lg ${pkg.popular ? 'border-primary shadow-md' : ''}`}>
+                            {pkg.popular && (
+                              <Badge className="absolute -top-2 left-4 bg-primary">
+                                Most Popular
+                              </Badge>
+                            )}
+                            <CardContent className="p-4">
+                              <div className="flex justify-between items-start mb-2">
+                                <h3 className="font-semibold">{pkg.name}</h3>
+                                <div className="text-right">
+                                  <span className="text-2xl font-bold text-primary">${pkg.price}</span>
+                                </div>
+                              </div>
+                              <p className="text-sm text-muted-foreground mb-3">{pkg.description}</p>
+                              <div className="space-y-1 mb-4">
+                                {pkg.features?.slice(0, 3).map((feature, i) => (
+                                  <div key={i} className="flex items-center gap-2 text-sm">
+                                    <CheckCircle className="w-3 h-3 text-green-500" />
+                                    <span>{feature}</span>
+                                  </div>
+                                ))}
+                              </div>
+                              <Button className="w-full" variant={pkg.popular ? "default" : "outline"}>
+                                Select {pkg.name}
+                              </Button>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Right Column - Order Summary & CTA */}
+                <div className="lg:col-span-3 space-y-6">
+                  <Card className="sticky top-4">
+                    <CardHeader>
+                      <CardTitle>Get Started Today</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="text-center">
+                        <div className="text-3xl font-bold text-primary">$299</div>
+                        <div className="text-sm text-muted-foreground">Starting price</div>
+                      </div>
+                      
+                      <Button className="w-full bg-gradient-to-r from-primary to-accent text-white">
+                        <ShoppingCart className="w-4 h-4 mr-2" />
+                        {funnelContent.callToAction.primaryButtonText || 'Book Demo'}
+                      </Button>
+                      
+                      <Button variant="outline" className="w-full">
+                        <Phone className="w-4 h-4 mr-2" />
+                        Schedule Call
+                      </Button>
+
+                      <div className="text-center text-sm text-muted-foreground">
+                        <p>✓ 30-day money back guarantee</p>
+                        <p>✓ Cancel anytime</p>
+                        <p>✓ Industry certified</p>
+                      </div>
+                    </CardContent>
+                  </Card>
                 </div>
               </div>
-            )}
+            </div>
           </div>
         </div>
       </div>
