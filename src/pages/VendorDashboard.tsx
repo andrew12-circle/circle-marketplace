@@ -472,69 +472,141 @@ export const VendorDashboard = () => {
           <TabsContent value="services" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {services.map((service) => (
-                <Card key={service.id} className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 group">
-                  <div className="relative">
-                    {service.image_url && (
-                      <div className="h-48 bg-gradient-to-br from-secondary/20 to-accent/20 rounded-t-lg flex items-center justify-center">
-                        <Image className="w-16 h-16 text-muted-foreground" />
-                      </div>
-                    )}
-                    {service.is_featured && (
-                      <Badge className="absolute top-2 right-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white">
-                        Featured
-                      </Badge>
-                    )}
-                  </div>
-                  <CardHeader>
-                    <CardTitle className="text-xl font-semibold line-clamp-2">{service.title}</CardTitle>
-                    <p className="text-sm text-muted-foreground line-clamp-3">{service.description}</p>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <Badge variant="outline">{service.category.replace('_', ' ')}</Badge>
-                      <span className="text-lg font-bold text-primary">{service.price}</span>
-                    </div>
-                    
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div className="text-center">
-                        <div className="font-semibold text-blue-600">{service.views}</div>
-                        <div className="text-muted-foreground">Views</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="font-semibold text-green-600">{service.conversions}</div>
-                        <div className="text-muted-foreground">Conversions</div>
+                <div key={service.id} className="group relative">
+                  {/* Service Card - matches marketplace design */}
+                  <Card className="group relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 bg-card border border-border/50 h-full flex flex-col">
+                    {/* Edit Overlay */}
+                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity z-20 flex items-center justify-center">
+                      <div className="flex gap-2">
+                        <Button size="sm" onClick={() => openServiceBuilder(service)}>
+                          <Edit className="w-4 h-4 mr-2" />
+                          Edit
+                        </Button>
+                        <Button size="sm" variant="outline">
+                          <Eye className="w-4 h-4 mr-2" />
+                          Preview
+                        </Button>
+                        <Button size="sm" variant="destructive" onClick={() => deleteService(service.id)}>
+                          <X className="w-4 h-4 mr-2" />
+                          Delete
+                        </Button>
                       </div>
                     </div>
 
-                    <div className="flex space-x-2">
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={() => openServiceBuilder(service)}
-                        className="flex-1"
-                      >
-                        <Edit className="w-4 h-4 mr-2" />
-                        Edit
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        className="flex-1"
-                      >
-                        <Eye className="w-4 h-4 mr-2" />
-                        Preview
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => deleteService(service.id)}
-                        className="text-destructive hover:text-destructive"
-                      >
-                        <X className="w-4 h-4" />
-                      </Button>
+                    {/* Top Badges */}
+                    <div className="absolute top-3 left-3 z-10 flex gap-2">
+                      {service.is_featured && (
+                        <Badge className="bg-circle-primary text-primary-foreground text-xs font-medium">
+                          Featured
+                        </Badge>
+                      )}
                     </div>
-                  </CardContent>
-                </Card>
+
+                    {/* Performance Stats */}
+                    <div className="absolute top-3 right-3 z-10 flex gap-1">
+                      <Badge variant="secondary" className="text-xs">
+                        {service.views || 0} views
+                      </Badge>
+                      <Badge variant="secondary" className="text-xs">
+                        {service.conversions || 0} leads
+                      </Badge>
+                    </div>
+
+                    {/* Image */}
+                    <div className="relative h-48 overflow-hidden bg-muted flex-shrink-0">
+                      {service.image_url ? (
+                        <img
+                          src={service.image_url}
+                          alt={service.title}
+                          className="w-full h-full object-contain object-center transition-transform duration-300 group-hover:scale-105"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-secondary/20 to-accent/20 flex items-center justify-center">
+                          <Image className="w-16 h-16 text-muted-foreground" />
+                        </div>
+                      )}
+                    </div>
+
+                    <CardContent className="p-4 flex flex-col flex-grow">
+                      {/* Title */}
+                      <div className="h-6 mb-3">
+                        <h3 className="font-semibold text-foreground leading-tight line-clamp-1">
+                          {service.title}
+                        </h3>
+                      </div>
+
+                      {/* Rating placeholder */}
+                      <div className="flex items-center gap-1 mb-3">
+                        {[...Array(5)].map((_, i) => (
+                          <Star key={i} className="h-4 w-4 text-gray-300" />
+                        ))}
+                        <span className="text-sm text-muted-foreground ml-1">
+                          0.0 (0 reviews)
+                        </span>
+                      </div>
+
+                      {/* Description */}
+                      <p className="text-sm text-muted-foreground line-clamp-2 h-10 mb-3">
+                        {service.description}
+                      </p>
+
+                      {/* Category & Tags */}
+                      <div className="h-8 mb-3">
+                        <div className="flex flex-wrap gap-1">
+                          <Badge variant="outline" className="text-xs">
+                            {service.category.replace('_', ' ')}
+                          </Badge>
+                          {service.funnel_content?.features && service.funnel_content.features.slice(0, 2).map((feature) => (
+                            <Badge key={feature} variant="outline" className="text-xs">
+                              {feature}
+                            </Badge>
+                          ))}
+                          {service.funnel_content?.features && service.funnel_content.features.length > 2 && (
+                            <span className="text-xs text-muted-foreground">
+                              +{service.funnel_content.features.length - 2} more
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Pricing */}
+                      <div className="space-y-2 mb-3 flex-grow">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-muted-foreground">Price:</span>
+                          <span className="text-xl font-bold text-foreground">
+                            ${service.price}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Performance metrics */}
+                      <div className="h-4 mb-4">
+                        <div className="flex items-center justify-between text-xs text-muted-foreground">
+                          <span>Conv. Rate: {((service.conversions || 0) / Math.max(service.views || 1, 1) * 100).toFixed(1)}%</span>
+                          <span>Revenue: $0</span>
+                        </div>
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="flex gap-2 mt-auto">
+                        <Button 
+                          className="flex-1"
+                          variant="outline"
+                          onClick={() => openServiceBuilder(service)}
+                        >
+                          <Edit className="w-4 h-4 mr-2" />
+                          Edit Service
+                        </Button>
+                        
+                        <Button 
+                          variant="outline"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
               ))}
             </div>
           </TabsContent>
