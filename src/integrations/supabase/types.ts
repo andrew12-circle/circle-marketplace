@@ -1059,6 +1059,10 @@ export type Database = {
         Args: { video_uuid: string }
         Returns: undefined
       }
+      trigger_trending_import: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
     }
     Enums: {
       content_type:
