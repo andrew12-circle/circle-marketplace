@@ -293,10 +293,14 @@ export const Academy = () => {
   );
 
   const handlePlayVideo = (videoId: string) => {
+    console.log("handlePlayVideo called with videoId:", videoId);
+    
     // Find the video in our data
     const video = allVideos.find(v => v.id === videoId) || 
                   trendingVideos.find(v => v.id === videoId) || 
                   featuredVideos.find(v => v.id === videoId);
+    
+    console.log("Found video:", video);
     
     if (video) {
       // Increment view count
@@ -309,7 +313,10 @@ export const Academy = () => {
         .eq('id', videoId)
         .single()
         .then(({ data, error }) => {
+          console.log("Supabase response:", { data, error });
+          
           if (data?.content_url && !error) {
+            console.log("Setting video modal state");
             setSelectedVideo(video);
             setCurrentVideoUrl(data.content_url);
             setIsVideoModalOpen(true);
