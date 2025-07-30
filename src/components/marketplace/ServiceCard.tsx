@@ -144,7 +144,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
             const rating = service.vendor.rating;
             const isFullStar = i < Math.floor(rating);
             const isPartialStar = i === Math.floor(rating) && rating % 1 !== 0;
-            const fillPercentage = isPartialStar ? (rating % 1) * 100 : 0;
+            const fillPercentage = isPartialStar ? (rating <= 4.9 ? 50 : (rating % 1) * 100) : 0;
             
             return (
               <div key={i} className="relative h-4 w-4">
