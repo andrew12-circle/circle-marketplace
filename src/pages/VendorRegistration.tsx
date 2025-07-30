@@ -8,8 +8,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Building, User, MapPin, Phone, Mail, Globe, CreditCard, Download, Upload, FileSpreadsheet, Calendar } from "lucide-react";
+import { ArrowLeft, Building, User, MapPin, Phone, Mail, Globe, CreditCard, Download, Upload, FileSpreadsheet, Calendar, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const SERVICE_PROVIDER_TYPES = [
   { value: "marketing_tools", label: "Marketing Tools & Platforms" },
@@ -55,6 +56,12 @@ export const VendorRegistration = () => {
   const registrationType = searchParams.get("type") || "service_provider";
   
   const [formData, setFormData] = useState({
+    // Authentication Info
+    email: "",
+    password: "",
+    confirmPassword: "",
+    fullName: "",
+    
     // Business Type
     businessType: "",
     
@@ -65,7 +72,6 @@ export const VendorRegistration = () => {
     description: "",
     
     // Contact Info
-    email: "",
     phone: "",
     individualEmail: "",
     individualPhone: "",
@@ -196,11 +202,19 @@ export const VendorRegistration = () => {
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
+    // Authentication validation
+    if (!formData.email) newErrors.email = "Email is required";
+    if (!formData.password) newErrors.password = "Password is required";
+    if (formData.password && formData.password.length < 6) newErrors.password = "Password must be at least 6 characters";
+    if (!formData.confirmPassword) newErrors.confirmPassword = "Please confirm your password";
+    if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = "Passwords do not match";
+    if (!formData.fullName) newErrors.fullName = "Full name is required";
+
+    // Business validation
     if (!formData.businessType) newErrors.businessType = "Please select a business type";
     if (!formData.companyName && !formData.individualName) {
       newErrors.companyName = "Company name or individual name is required";
     }
-    if (!formData.email) newErrors.email = "Email is required";
     if (!formData.phone) newErrors.phone = "Phone number is required";
     if (!formData.description) newErrors.description = "Description is required";
     if (!formData.calendarLink) newErrors.calendarLink = "Calendar booking link is required";
@@ -243,19 +257,50 @@ export const VendorRegistration = () => {
     setIsSubmitting(true);
     
     try {
-      // Here you would typically submit to your API
-      await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate API call
+      // Step 1: Create user account
+      const redirectUrl = `${window.location.origin}/vendor-dashboard`;
       
-      toast({
-        title: "Registration Successful!",
-        description: "Welcome! Let's set up your vendor profile and create your first service.",
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          emailRedirectTo: redirectUrl,
+          data: {
+            full_name: formData.fullName,
+            is_vendor: true,
+            vendor_type: registrationType,
+          }
+        }
       });
+
+      if (authError) throw authError;
+
+      // Step 2: If user creation successful, show success message
+      if (authData.user) {
+        toast({
+          title: "Account Created Successfully!",
+          description: "Welcome! You can now start creating your services and funnel pages.",
+        });
+        
+        // Navigate to vendor dashboard
+        navigate("/vendor-dashboard");
+      }
+    } catch (error: any) {
+      let errorMessage = "Registration failed. Please try again.";
       
-      navigate("/vendor-dashboard");
-    } catch (error) {
+      if (error.message?.includes('User already registered')) {
+        errorMessage = "An account with this email already exists. Please use a different email or sign in.";
+      } else if (error.message?.includes('Password should be at least')) {
+        errorMessage = "Password should be at least 6 characters long.";
+      } else if (error.message?.includes('Invalid email')) {
+        errorMessage = "Please enter a valid email address.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
       toast({
-        title: "Submission Failed",
-        description: "Please try again or contact support if the problem persists.",
+        title: "Registration Failed",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -325,6 +370,92 @@ export const VendorRegistration = () => {
 
             <CardContent className="p-8">
               <form onSubmit={handleSubmit} className="space-y-12">
+                {/* Account Creation Section */}
+                <div className="space-y-6 animate-fade-in">
+                  <div className="flex items-center space-x-3 mb-6">
+                    <div className="p-2 rounded-lg bg-gradient-to-br from-green-500/10 to-blue-500/10">
+                      <User className="w-6 h-6 text-green-600" />
+                    </div>
+                    <h3 className="text-xl font-semibold text-foreground">Create Your Account</h3>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="fullName" className="text-sm font-medium text-foreground">
+                        Full Name *
+                      </Label>
+                      <Input
+                        id="fullName"
+                        value={formData.fullName}
+                        onChange={(e) => updateFormData("fullName", e.target.value)}
+                        placeholder="John Smith"
+                        className="transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary hover:border-primary/50"
+                      />
+                      {errors.fullName && (
+                        <p className="text-sm text-destructive animate-fade-in bg-destructive/10 p-2 rounded-md border border-destructive/20">
+                          {errors.fullName}
+                        </p>
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="email" className="text-sm font-medium text-foreground flex items-center">
+                        <Mail className="w-4 h-4 mr-1" />
+                        Email Address *
+                      </Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) => updateFormData("email", e.target.value)}
+                        placeholder="john@company.com"
+                        className="transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary hover:border-primary/50"
+                      />
+                      {errors.email && (
+                        <p className="text-sm text-destructive animate-fade-in bg-destructive/10 p-2 rounded-md border border-destructive/20">
+                          {errors.email}
+                        </p>
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="password" className="text-sm font-medium text-foreground">
+                        Password * (min. 6 characters)
+                      </Label>
+                      <div className="relative">
+                        <Input
+                          id="password"
+                          type="password"
+                          value={formData.password}
+                          onChange={(e) => updateFormData("password", e.target.value)}
+                          placeholder="Enter password"
+                          className="transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary hover:border-primary/50"
+                        />
+                      </div>
+                      {errors.password && (
+                        <p className="text-sm text-destructive animate-fade-in bg-destructive/10 p-2 rounded-md border border-destructive/20">
+                          {errors.password}
+                        </p>
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="confirmPassword" className="text-sm font-medium text-foreground">
+                        Confirm Password *
+                      </Label>
+                      <Input
+                        id="confirmPassword"
+                        type="password"
+                        value={formData.confirmPassword}
+                        onChange={(e) => updateFormData("confirmPassword", e.target.value)}
+                        placeholder="Confirm password"
+                        className="transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary hover:border-primary/50"
+                      />
+                      {errors.confirmPassword && (
+                        <p className="text-sm text-destructive animate-fade-in bg-destructive/10 p-2 rounded-md border border-destructive/20">
+                          {errors.confirmPassword}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
                 {/* Business Type Selection */}
                 <div className="space-y-6 animate-fade-in">
                   <div className="flex items-center space-x-3 mb-6">
@@ -439,44 +570,25 @@ export const VendorRegistration = () => {
                     </div>
                     <h3 className="text-xl font-semibold text-foreground">Contact Information</h3>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="email" className="text-sm font-medium text-foreground flex items-center">
-                        <Mail className="w-4 h-4 mr-1" />
-                        Business Email *
-                      </Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        value={formData.email}
-                        onChange={(e) => updateFormData("email", e.target.value)}
-                        placeholder="contact@company.com"
-                        className="transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary hover:border-primary/50"
-                      />
-                      {errors.email && (
-                        <p className="text-sm text-destructive animate-fade-in bg-destructive/10 p-2 rounded-md border border-destructive/20">
-                          {errors.email}
-                        </p>
-                      )}
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="phone" className="text-sm font-medium text-foreground flex items-center">
-                        <Phone className="w-4 h-4 mr-1" />
-                        Business Phone *
-                      </Label>
-                      <Input
-                        id="phone"
-                        value={formData.phone}
-                        onChange={(e) => updateFormData("phone", e.target.value)}
-                        placeholder="(555) 123-4567"
-                        className="transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary hover:border-primary/50"
-                      />
-                      {errors.phone && (
-                        <p className="text-sm text-destructive animate-fade-in bg-destructive/10 p-2 rounded-md border border-destructive/20">
-                          {errors.phone}
-                        </p>
-                      )}
-                    </div>
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                     <div className="space-y-2">
+                       <Label htmlFor="phone" className="text-sm font-medium text-foreground flex items-center">
+                         <Phone className="w-4 h-4 mr-1" />
+                         Business Phone *
+                       </Label>
+                       <Input
+                         id="phone"
+                         value={formData.phone}
+                         onChange={(e) => updateFormData("phone", e.target.value)}
+                         placeholder="(555) 123-4567"
+                         className="transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary hover:border-primary/50"
+                       />
+                       {errors.phone && (
+                         <p className="text-sm text-destructive animate-fade-in bg-destructive/10 p-2 rounded-md border border-destructive/20">
+                           {errors.phone}
+                         </p>
+                       )}
+                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="individualEmail" className="text-sm font-medium text-foreground">
                         Contact Person Email
