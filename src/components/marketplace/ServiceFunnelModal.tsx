@@ -29,7 +29,8 @@ import {
   ThumbsUp,
   ThumbsDown,
   Verified,
-  Crown
+  Crown,
+  X
 } from "lucide-react";
 import { getRiskBadge, getComplianceAlert, determineServiceRisk } from "./RESPAComplianceSystem";
 import { useCart } from "@/contexts/CartContext";
@@ -208,6 +209,16 @@ export const ServiceFunnelModal = ({
         
         {/* Hero Section */}
         <div className="relative bg-gradient-to-r from-blue-600 to-purple-600 text-white p-8">
+          {/* Close Button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute top-4 right-4 z-50 h-10 w-10 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white"
+            onClick={onClose}
+          >
+            <X className="h-6 w-6" />
+          </Button>
+          
           <div className="absolute inset-0 bg-black/20"></div>
           <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
             <div className="space-y-4">
