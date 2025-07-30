@@ -26,7 +26,7 @@ const Index = () => {
             <div className="flex items-center justify-between">
               {/* Logo */}
               <div className="flex items-center gap-2 sm:gap-3">
-                <h1 className="font-handlee text-2xl sm:text-3xl font-normal text-black">
+                <h1 className="font-handelson text-2xl sm:text-3xl font-normal text-black">
                   Circle
                 </h1>
               </div>
