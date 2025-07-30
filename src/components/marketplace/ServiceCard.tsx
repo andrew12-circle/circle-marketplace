@@ -126,20 +126,17 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
       </div>
 
       <CardContent className="p-4 flex flex-col flex-grow">
-        {/* Vendor Info - Fixed height */}
+        {/* Title and Vendor Info - Fixed height */}
         <div className="flex items-center gap-2 text-sm text-muted-foreground h-6 mb-3">
-          <span className="font-medium text-foreground">{service.vendor.name}</span>
+          <h3 className="font-semibold text-foreground leading-tight">
+            {service.title.split(' - ').pop() || service.title.split(': ').pop() || service.title}
+          </h3>
           {service.vendor.is_verified && (
             <Badge variant="secondary" className="text-xs">
               Verified
             </Badge>
           )}
         </div>
-
-        {/* Title - Fixed height */}
-        <h3 className="font-semibold text-foreground leading-tight line-clamp-2 h-12 mb-3">
-          {service.title.split(' - ').pop() || service.title.split(': ').pop() || service.title}
-        </h3>
 
         {/* Rating - moved above pricing */}
         <div className="flex items-center gap-1 mb-3">
