@@ -33,6 +33,9 @@ const Index = () => {
                   src={circleLogoUrl} 
                   alt="Circle Logo" 
                   className="w-10 h-10 sm:w-12 sm:h-12 object-contain"
+                  style={{
+                    imageRendering: 'crisp-edges'
+                  }}
                 />
               </div>
               
