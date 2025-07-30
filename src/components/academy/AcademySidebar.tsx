@@ -64,7 +64,10 @@ export const AcademySidebar = ({
   const isCollapsed = state === "collapsed";
 
   return (
-    <Sidebar className="transition-all duration-300" collapsible="icon">
+    <Sidebar 
+      className="transition-all duration-300" 
+      collapsible="icon"
+    >
       <SidebarContent>
         {/* Main Navigation */}
         <SidebarGroup>

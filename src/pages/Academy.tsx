@@ -32,8 +32,7 @@ import {
   Heart,
   Award,
   ChevronRight,
-  Play,
-  Menu
+  Play
 } from "lucide-react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 
@@ -1427,18 +1426,17 @@ export const Academy = () => {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-white">
-        {/* Mobile Header with Sidebar Trigger */}
-        <header className="fixed top-0 left-0 right-0 z-50 h-14 bg-white border-b flex items-center px-4 md:hidden">
-          <SidebarTrigger className="mr-2" />
-          <h1 className="text-lg font-semibold">Academy</h1>
-        </header>
+        {/* Mobile Sidebar Trigger - Only visible on mobile when sidebar is collapsed */}
+        <div className="md:hidden fixed top-20 left-4 z-40">
+          <SidebarTrigger className="bg-white shadow-md border rounded-md p-2" />
+        </div>
 
         <AcademySidebar
           activeView={activeView}
           onViewChange={setActiveView}
         />
         
-        <div className="flex-1 overflow-auto pt-14 md:pt-0">
+        <div className="flex-1 overflow-auto">
           {renderContent()}
         </div>
 
