@@ -138,7 +138,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
 
         {/* Title - Fixed height */}
         <h3 className="font-semibold text-foreground leading-tight line-clamp-2 h-12 mb-3">
-          {service.title}
+          {service.title.split(' - ').pop() || service.title.split(': ').pop() || service.title}
         </h3>
 
         {/* Rating - moved above pricing */}
