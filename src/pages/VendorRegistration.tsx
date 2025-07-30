@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Building, User, MapPin, Phone, Mail, Globe, CreditCard } from "lucide-react";
+import { ArrowLeft, Building, User, MapPin, Phone, Mail, Globe, CreditCard, Download, Upload, FileSpreadsheet } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const VENDOR_TYPES = [
@@ -70,6 +70,9 @@ export const VendorRegistration = () => {
     marketingBudget: "",
     targetAudience: "",
     
+    // Loan Officer Upload
+    loSpreadsheetFile: null as File | null,
+    
     // Terms
     agreeToTerms: false,
     agreeToBackground: false
@@ -82,6 +85,74 @@ export const VendorRegistration = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: "" }));
+    }
+  };
+
+  const downloadLOTemplate = () => {
+    // Create Excel template data
+    const templateData = [
+      ["First Name", "Last Name", "Email", "Phone", "NMLS ID", "License States", "Specialties", "Years Experience"],
+      ["John", "Smith", "john.smith@company.com", "(555) 123-4567", "12345", "CA,TX,FL", "First-time buyers, Refinancing", "5"],
+      ["Jane", "Doe", "jane.doe@company.com", "(555) 987-6543", "67890", "CA,NY", "Jumbo loans, Investment properties", "8"],
+      ["", "", "", "", "", "", "", ""]
+    ];
+
+    // Convert to CSV format (Excel can open CSV files)
+    const csvContent = templateData.map(row => 
+      row.map(cell => `"${cell}"`).join(",")
+    ).join("\n");
+
+    // Create download link
+    const blob = new Blob([csvContent], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "loan_officers_template.csv";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+
+    toast({
+      title: "Template Downloaded",
+      description: "Please fill out the template and upload it back.",
+    });
+  };
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Validate file type
+      const allowedTypes = [
+        "text/csv",
+        "application/vnd.ms-excel",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      ];
+      
+      if (!allowedTypes.includes(file.type)) {
+        toast({
+          title: "Invalid file type",
+          description: "Please upload a CSV or Excel file (.csv, .xls, .xlsx)",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Validate file size (5MB max)
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "File too large",
+          description: "Please upload a file smaller than 5MB",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      updateFormData("loSpreadsheetFile", file);
+      toast({
+        title: "File uploaded",
+        description: `${file.name} has been selected for upload.`,
+      });
     }
   };
 
@@ -401,6 +472,88 @@ export const VendorRegistration = () => {
                           {state}
                         </Button>
                       ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Loan Officer Upload Section - Only for Lenders */}
+              {formData.vendorType === "lender" && (
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold flex items-center">
+                    <FileSpreadsheet className="w-5 h-5 mr-2" />
+                    Loan Officers Registration
+                  </h3>
+                  <div className="bg-secondary/50 rounded-lg p-4 space-y-4">
+                    <p className="text-sm text-muted-foreground">
+                      Upload details for all loan officers who will be working under your company. 
+                      Download our template, fill it out, and upload it back.
+                    </p>
+                    
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={downloadLOTemplate}
+                        className="flex items-center"
+                      >
+                        <Download className="w-4 h-4 mr-2" />
+                        Download LO Template
+                      </Button>
+                      
+                      <div className="flex-1">
+                        <Label htmlFor="loFile" className="sr-only">Upload LO Spreadsheet</Label>
+                        <div className="relative">
+                          <Input
+                            id="loFile"
+                            type="file"
+                            accept=".csv,.xls,.xlsx"
+                            onChange={handleFileUpload}
+                            className="hidden"
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => document.getElementById("loFile")?.click()}
+                            className="w-full justify-start"
+                          >
+                            <Upload className="w-4 h-4 mr-2" />
+                            {formData.loSpreadsheetFile 
+                              ? `Uploaded: ${formData.loSpreadsheetFile.name}`
+                              : "Upload Completed Template"
+                            }
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {formData.loSpreadsheetFile && (
+                      <div className="bg-background rounded border p-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-2">
+                            <FileSpreadsheet className="w-4 h-4 text-green-600" />
+                            <span className="text-sm font-medium">{formData.loSpreadsheetFile.name}</span>
+                            <Badge variant="secondary" className="text-xs">
+                              {(formData.loSpreadsheetFile.size / 1024).toFixed(1)} KB
+                            </Badge>
+                          </div>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => updateFormData("loSpreadsheetFile", null)}
+                          >
+                            Remove
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="text-xs text-muted-foreground space-y-1">
+                      <p>• Template includes: Name, Email, Phone, NMLS ID, License States, Specialties, Experience</p>
+                      <p>• Accepted formats: CSV, Excel (.xls, .xlsx)</p>
+                      <p>• Maximum file size: 5MB</p>
+                      <p>• All loan officers will be verified individually</p>
                     </div>
                   </div>
                 </div>
