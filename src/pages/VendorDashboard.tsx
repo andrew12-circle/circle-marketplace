@@ -56,21 +56,23 @@ interface Service {
     headline: string;
     subheadline: string;
     heroDescription: string;
+    estimatedRoi: number;
+    duration: string;
     whyChooseUs: {
       title: string;
       benefits: Array<{
-        icon: string;
-        text: string;
-      }>;
-    };
-    valueProposition: {
-      title: string;
-      items: Array<{
         icon: string;
         title: string;
         description: string;
       }>;
     };
+    media: Array<{
+      id: string;
+      type: 'image' | 'video' | 'document';
+      url: string;
+      title: string;
+      description?: string;
+    }>;
     packages: Array<{
       id: string;
       name: string;
@@ -79,24 +81,36 @@ interface Service {
       originalPrice?: number;
       features: string[];
       popular: boolean;
+      proOnly?: boolean;
+      savings?: string;
     }>;
-    socialProof: Array<{
-      id: string;
-      authorName: string;
-      authorTitle: string;
-      text: string;
-      rating: number;
-      date: string;
-    }>;
-    mediaGallery: Array<{
-      id: string;
-      type: 'image' | 'video' | 'document';
-      url: string;
-      title: string;
-      description?: string;
-    }>;
-    callToAction: string;
-    guarantees: string[];
+    socialProof: {
+      testimonials: Array<{
+        id: string;
+        name: string;
+        role: string;
+        content: string;
+        rating: number;
+      }>;
+      stats: Array<{
+        label: string;
+        value: string;
+      }>;
+    };
+    trustIndicators: {
+      guarantee: string;
+      cancellation: string;
+      certification: string;
+    };
+    callToAction: {
+      primaryButton: string;
+      secondaryButton: string;
+      contactInfo: {
+        phone: string;
+        email: string;
+        website: string;
+      };
+    };
     urgency: {
       enabled: boolean;
       message: string;
@@ -145,24 +159,17 @@ export const VendorDashboard = () => {
       headline: '',
       subheadline: '',
       heroDescription: '',
+      estimatedRoi: 3,
+      duration: '30 days',
       whyChooseUs: {
         title: 'Why Choose Our Service?',
         benefits: [
-          { icon: 'check', text: 'Proven results' },
-          { icon: 'check', text: 'Expert support' },
-          { icon: 'check', text: 'Fast implementation' }
+          { icon: 'check', title: 'Proven Results', description: 'Get measurable results fast' },
+          { icon: 'check', title: 'Expert Support', description: '24/7 professional assistance' },
+          { icon: 'check', title: 'Fast Implementation', description: 'Up and running in minutes' }
         ]
       },
-      valueProposition: {
-        title: 'What You\'ll Get',
-        items: [
-          {
-            icon: 'target',
-            title: 'Complete Solution',
-            description: 'Everything you need to succeed'
-          }
-        ]
-      },
+      media: [],
       packages: [
         {
           id: 'standard',
@@ -173,19 +180,35 @@ export const VendorDashboard = () => {
           popular: true
         }
       ],
-      socialProof: [
-        {
-          id: '1',
-          authorName: 'John Smith',
-          authorTitle: 'Real Estate Agent',
-          text: 'This service transformed my business...',
-          rating: 5,
-          date: new Date().toLocaleDateString()
+      socialProof: {
+        testimonials: [
+          {
+            id: '1',
+            name: 'John Smith',
+            role: 'Real Estate Agent',
+            content: 'This service transformed my business...',
+            rating: 5
+          }
+        ],
+        stats: [
+          { label: 'Happy Customers', value: '1000+' },
+          { label: 'Success Rate', value: '98%' }
+        ]
+      },
+      trustIndicators: {
+        guarantee: '30-day money back guarantee',
+        cancellation: 'Cancel anytime',
+        certification: 'Industry certified'
+      },
+      callToAction: {
+        primaryButton: 'Get Started Today',
+        secondaryButton: 'Learn More',
+        contactInfo: {
+          phone: '',
+          email: '',
+          website: ''
         }
-      ],
-      mediaGallery: [],
-      callToAction: 'Get Started Today',
-      guarantees: ['30-day money back guarantee', '24/7 support'],
+      },
       urgency: {
         enabled: false,
         message: 'Limited time offer!'
@@ -241,24 +264,17 @@ export const VendorDashboard = () => {
             headline: 'Close More Deals with Smart CRM Automation',
             subheadline: 'Automate your lead nurturing and never miss a follow-up again',
             heroDescription: 'Complete CRM solution with automated email campaigns, lead scoring, and real estate specific workflows.',
+            estimatedRoi: 4.2,
+            duration: '30 days',
             whyChooseUs: {
               title: 'Why Choose Our CRM?',
               benefits: [
-                { icon: 'check', text: 'Proven results' },
-                { icon: 'check', text: 'Expert support' },
-                { icon: 'check', text: 'Fast implementation' }
+                { icon: 'check', title: 'Proven Results', description: 'Increase conversions by 40%' },
+                { icon: 'check', title: 'Expert Support', description: '24/7 professional assistance' },
+                { icon: 'check', title: 'Fast Implementation', description: 'Up and running in 24 hours' }
               ]
             },
-            valueProposition: {
-              title: 'What You\'ll Get',
-              items: [
-                {
-                  icon: 'target',
-                  title: 'Complete Solution',
-                  description: 'Everything you need to succeed'
-                }
-              ]
-            },
+            media: [],
             packages: [
               {
                 id: 'standard',
@@ -269,19 +285,35 @@ export const VendorDashboard = () => {
                 popular: true
               }
             ],
-            socialProof: [
-              {
-                id: '1',
-                authorName: 'Sarah Johnson',
-                authorTitle: 'Top Producer, Keller Williams',
-                text: 'Increased my conversions by 40% in the first month!',
-                rating: 5,
-                date: new Date().toLocaleDateString()
+            socialProof: {
+              testimonials: [
+                {
+                  id: '1',
+                  name: 'Sarah Johnson',
+                  role: 'Top Producer, Keller Williams',
+                  content: 'Increased my conversions by 40% in the first month!',
+                  rating: 5
+                }
+              ],
+              stats: [
+                { label: 'Happy Customers', value: '5000+' },
+                { label: 'Success Rate', value: '95%' }
+              ]
+            },
+            trustIndicators: {
+              guarantee: '30-day money back guarantee',
+              cancellation: 'Cancel anytime',
+              certification: 'Industry Leader'
+            },
+            callToAction: {
+              primaryButton: 'Start Free Trial',
+              secondaryButton: 'Book Demo',
+              contactInfo: {
+                phone: '(555) 123-4567',
+                email: 'support@crmtool.com',
+                website: 'https://crmtool.com'
               }
-            ],
-            mediaGallery: [],
-            callToAction: 'Start Free Trial',
-            guarantees: ['30-day money back guarantee', '24/7 support'],
+            },
             urgency: {
               enabled: false,
               message: 'Limited time offer!'
@@ -324,24 +356,17 @@ export const VendorDashboard = () => {
         headline: '',
         subheadline: '',
         heroDescription: '',
+        estimatedRoi: 3,
+        duration: '30 days',
         whyChooseUs: {
           title: 'Why Choose Our Service?',
           benefits: [
-            { icon: 'check', text: 'Proven results' },
-            { icon: 'check', text: 'Expert support' },
-            { icon: 'check', text: 'Fast implementation' }
+            { icon: 'check', title: 'Proven Results', description: 'Get measurable results fast' },
+            { icon: 'check', title: 'Expert Support', description: '24/7 professional assistance' },
+            { icon: 'check', title: 'Fast Implementation', description: 'Up and running in minutes' }
           ]
         },
-        valueProposition: {
-          title: 'What You\'ll Get',
-          items: [
-            {
-              icon: 'target',
-              title: 'Complete Solution',
-              description: 'Everything you need to succeed'
-            }
-          ]
-        },
+        media: [],
         packages: [
           {
             id: 'standard',
@@ -352,19 +377,35 @@ export const VendorDashboard = () => {
             popular: true
           }
         ],
-        socialProof: [
-          {
-            id: '1',
-            authorName: 'John Smith',
-            authorTitle: 'Real Estate Agent',
-            text: 'This service transformed my business...',
-            rating: 5,
-            date: new Date().toLocaleDateString()
+        socialProof: {
+          testimonials: [
+            {
+              id: '1',
+              name: 'John Smith',
+              role: 'Real Estate Agent',
+              content: 'This service transformed my business...',
+              rating: 5
+            }
+          ],
+          stats: [
+            { label: 'Happy Customers', value: '1000+' },
+            { label: 'Success Rate', value: '98%' }
+          ]
+        },
+        trustIndicators: {
+          guarantee: '30-day money back guarantee',
+          cancellation: 'Cancel anytime',
+          certification: 'Industry certified'
+        },
+        callToAction: {
+          primaryButton: 'Get Started Today',
+          secondaryButton: 'Learn More',
+          contactInfo: {
+            phone: '',
+            email: '',
+            website: ''
           }
-        ],
-        mediaGallery: [],
-        callToAction: 'Get Started Today',
-        guarantees: ['30-day money back guarantee', '24/7 support'],
+        },
         urgency: {
           enabled: false,
           message: 'Limited time offer!'
@@ -390,24 +431,17 @@ export const VendorDashboard = () => {
           headline: '',
           subheadline: '',
           heroDescription: '',
+          estimatedRoi: 3,
+          duration: '30 days',
           whyChooseUs: {
             title: 'Why Choose Our Service?',
             benefits: [
-              { icon: 'check', text: 'Proven results' },
-              { icon: 'check', text: 'Expert support' },
-              { icon: 'check', text: 'Fast implementation' }
+              { icon: 'check', title: 'Proven Results', description: 'Get measurable results fast' },
+              { icon: 'check', title: 'Expert Support', description: '24/7 professional assistance' },
+              { icon: 'check', title: 'Fast Implementation', description: 'Up and running in minutes' }
             ]
           },
-          valueProposition: {
-            title: 'What You\'ll Get',
-            items: [
-              {
-                icon: 'target',
-                title: 'Complete Solution',
-                description: 'Everything you need to succeed'
-              }
-            ]
-          },
+          media: [],
           packages: [
             {
               id: 'standard',
@@ -418,19 +452,35 @@ export const VendorDashboard = () => {
               popular: true
             }
           ],
-          socialProof: [
-            {
-              id: '1',
-              authorName: 'John Smith',
-              authorTitle: 'Real Estate Agent',
-              text: 'This service transformed my business...',
-              rating: 5,
-              date: new Date().toLocaleDateString()
+          socialProof: {
+            testimonials: [
+              {
+                id: '1',
+                name: 'John Smith',
+                role: 'Real Estate Agent',
+                content: 'This service transformed my business...',
+                rating: 5
+              }
+            ],
+            stats: [
+              { label: 'Happy Customers', value: '1000+' },
+              { label: 'Success Rate', value: '98%' }
+            ]
+          },
+          trustIndicators: {
+            guarantee: '30-day money back guarantee',
+            cancellation: 'Cancel anytime',
+            certification: 'Industry certified'
+          },
+          callToAction: {
+            primaryButton: 'Get Started Today',
+            secondaryButton: 'Learn More',
+            contactInfo: {
+              phone: '',
+              email: '',
+              website: ''
             }
-          ],
-          mediaGallery: [],
-          callToAction: 'Get Started Today',
-          guarantees: ['30-day money back guarantee', '24/7 support'],
+          },
           urgency: {
             enabled: false,
             message: 'Limited time offer!'
@@ -974,17 +1024,17 @@ export const VendorDashboard = () => {
                         </div>
                       </div>
 
-                      {/* Value Proposition Section */}
-                      {serviceForm.funnel_content.valueProposition.items.length > 0 && (
+                      {/* Benefits Section */}
+                      {serviceForm.funnel_content.whyChooseUs.benefits.length > 0 && (
                         <div className="space-y-4">
-                          <h2 className="text-2xl font-semibold">{serviceForm.funnel_content.valueProposition.title}</h2>
+                          <h2 className="text-2xl font-semibold">{serviceForm.funnel_content.whyChooseUs.title}</h2>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-left">
-                            {serviceForm.funnel_content.valueProposition.items.map((item, index) => (
+                            {serviceForm.funnel_content.whyChooseUs.benefits.map((benefit, index) => (
                               <div key={index} className="flex items-start space-x-2">
                                 <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
                                 <div>
-                                  <h3 className="font-semibold">{item.title}</h3>
-                                  <p className="text-sm text-muted-foreground">{item.description}</p>
+                                  <h3 className="font-semibold">{benefit.title}</h3>
+                                  <p className="text-sm text-muted-foreground">{benefit.description}</p>
                                 </div>
                               </div>
                             ))}
@@ -993,18 +1043,18 @@ export const VendorDashboard = () => {
                       )}
 
                       {/* Social Proof */}
-                      {serviceForm.funnel_content.socialProof.length > 0 && (
+                      {serviceForm.funnel_content.socialProof.testimonials.length > 0 && (
                         <div className="space-y-4">
                           <h2 className="text-2xl font-semibold">What Our Customers Say</h2>
                           <div className="space-y-4">
-                            {serviceForm.funnel_content.socialProof.map((proof, index) => (
+                            {serviceForm.funnel_content.socialProof.testimonials.map((testimonial, index) => (
                               <Card key={index} className="p-4 text-left">
-                                <p className="italic mb-2">"{proof.text}"</p>
+                                <p className="italic mb-2">"{testimonial.content}"</p>
                                 <div className="flex items-center space-x-2">
                                   <Star className="w-4 h-4 text-yellow-500" />
-                                  <span className="font-medium">{proof.authorName}</span>
+                                  <span className="font-medium">{testimonial.name}</span>
                                   <span className="text-muted-foreground">•</span>
-                                  <span className="text-muted-foreground text-sm">{proof.authorTitle}</span>
+                                  <span className="text-muted-foreground text-sm">{testimonial.role}</span>
                                 </div>
                               </Card>
                             ))}
@@ -1016,7 +1066,7 @@ export const VendorDashboard = () => {
                       <div className="space-y-4 pt-6 border-t">
                         <h2 className="text-2xl font-semibold">Ready to Get Started?</h2>
                         <Button size="lg" className="bg-gradient-to-r from-primary to-accent text-white">
-                          {serviceForm.funnel_content.callToAction || 'Book a Demo'}
+                          {serviceForm.funnel_content.callToAction.primaryButton || 'Book a Demo'}
                         </Button>
                         <p className="text-sm text-muted-foreground">
                           {serviceForm.description || 'Your service description will appear here'}

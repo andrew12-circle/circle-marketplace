@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Switch } from '@/components/ui/switch';
 import { ServiceImageUpload } from './ServiceImageUpload';
 import { 
   Star, 
@@ -28,7 +29,14 @@ import {
   CheckCircle,
   ArrowUp,
   ArrowDown,
-  Grip
+  Grip,
+  Shield,
+  Award,
+  Phone,
+  Mail,
+  Globe,
+  Clock,
+  Crown
 } from 'lucide-react';
 
 interface MediaItem {
@@ -47,41 +55,60 @@ interface Package {
   originalPrice?: number;
   features: string[];
   popular: boolean;
-}
-
-interface SocialProofItem {
-  id: string;
-  authorName: string;
-  authorTitle: string;
-  text: string;
-  rating: number;
-  date: string;
+  proOnly?: boolean;
+  savings?: string;
 }
 
 interface FunnelContent {
   headline: string;
   subheadline: string;
   heroDescription: string;
+  estimatedRoi: number;
+  duration: string;
+  
   whyChooseUs: {
     title: string;
-    benefits: Array<{
-      icon: string;
-      text: string;
-    }>;
-  };
-  valueProposition: {
-    title: string;
-    items: Array<{
+    benefits: {
       icon: string;
       title: string;
       description: string;
-    }>;
+    }[];
   };
+  
+  media: MediaItem[];
+  
   packages: Package[];
-  socialProof: SocialProofItem[];
-  mediaGallery: MediaItem[];
-  callToAction: string;
-  guarantees: string[];
+  
+  socialProof: {
+    testimonials: {
+      id: string;
+      name: string;
+      role: string;
+      content: string;
+      rating: number;
+    }[];
+    stats: {
+      label: string;
+      value: string;
+    }[];
+  };
+
+  trustIndicators: {
+    guarantee: string;
+    cancellation: string;
+    certification: string;
+  };
+
+  callToAction: {
+    primaryButton: string;
+    secondaryButton: string;
+    contactInfo: {
+      phone: string;
+      email: string;
+      website: string;
+    };
+  };
+
   urgency: {
     enabled: boolean;
     message: string;
@@ -95,21 +122,17 @@ interface ServiceFunnelEditorProps {
 
 export const ServiceFunnelEditor = ({ funnelContent, onChange }: ServiceFunnelEditorProps) => {
   const [activeTab, setActiveTab] = useState('hero');
-  const [previewMode, setPreviewMode] = useState<'desktop' | 'mobile'>('desktop');
 
   const updateContent = (path: string, value: any) => {
-    const pathArray = path.split('.');
+    const keys = path.split('.');
     const newContent = { ...funnelContent };
     let current: any = newContent;
     
-    for (let i = 0; i < pathArray.length - 1; i++) {
-      if (typeof current[pathArray[i]] === 'undefined') {
-        current[pathArray[i]] = {};
-      }
-      current = current[pathArray[i]];
+    for (let i = 0; i < keys.length - 1; i++) {
+      current = current[keys[i]];
     }
+    current[keys[keys.length - 1]] = value;
     
-    current[pathArray[pathArray.length - 1]] = value;
     onChange(newContent);
   };
 
@@ -126,676 +149,656 @@ export const ServiceFunnelEditor = ({ funnelContent, onChange }: ServiceFunnelEd
     updateContent('packages', [...funnelContent.packages, newPackage]);
   };
 
-  const updatePackage = (index: number, field: string, value: any) => {
-    const packages = [...funnelContent.packages];
-    packages[index] = { ...packages[index], [field]: value };
-    updateContent('packages', packages);
+  const updatePackage = (index: number, field: keyof Package, value: any) => {
+    const newPackages = [...funnelContent.packages];
+    newPackages[index] = { ...newPackages[index], [field]: value };
+    updateContent('packages', newPackages);
   };
 
   const removePackage = (index: number) => {
-    const packages = funnelContent.packages.filter((_, i) => i !== index);
-    updateContent('packages', packages);
+    const newPackages = funnelContent.packages.filter((_, i) => i !== index);
+    updateContent('packages', newPackages);
   };
 
-  const addSocialProof = () => {
-    const newProof: SocialProofItem = {
-      id: Date.now().toString(),
-      authorName: 'Customer Name',
-      authorTitle: 'Company/Role',
-      text: 'This service transformed my business...',
-      rating: 5,
-      date: new Date().toLocaleDateString()
+  const addBenefit = () => {
+    const newBenefit = {
+      icon: 'Zap',
+      title: 'New Benefit',
+      description: 'Benefit description'
     };
-    
-    updateContent('socialProof', [...funnelContent.socialProof, newProof]);
+    updateContent('whyChooseUs.benefits', [...funnelContent.whyChooseUs.benefits, newBenefit]);
   };
 
-  const updateSocialProof = (index: number, field: string, value: any) => {
-    const socialProof = [...funnelContent.socialProof];
-    socialProof[index] = { ...socialProof[index], [field]: value };
-    updateContent('socialProof', socialProof);
-  };
-
-  const removeSocialProof = (index: number) => {
-    const socialProof = funnelContent.socialProof.filter((_, i) => i !== index);
-    updateContent('socialProof', socialProof);
-  };
-
-  const addMediaItem = (type: 'image' | 'video' | 'document') => {
-    const newMedia: MediaItem = {
+  const addTestimonial = () => {
+    const newTestimonial = {
       id: Date.now().toString(),
-      type,
-      url: '',
-      title: `New ${type}`,
-      description: ''
+      name: 'Happy Customer',
+      role: 'Real Estate Agent',
+      content: 'This service transformed my business!',
+      rating: 5
     };
-    
-    updateContent('mediaGallery', [...funnelContent.mediaGallery, newMedia]);
+    updateContent('socialProof.testimonials', [...funnelContent.socialProof.testimonials, newTestimonial]);
   };
 
-  const renderStarRating = (rating: number) => {
-    return (
-      <div className="flex items-center gap-1">
-        {[...Array(5)].map((_, i) => (
-          <Star
-            key={i}
-            className={`h-4 w-4 ${
-              i < rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'
-            }`}
-          />
-        ))}
-      </div>
-    );
+  const addStat = () => {
+    const newStat = {
+      label: 'New Metric',
+      value: '100+'
+    };
+    updateContent('socialProof.stats', [...funnelContent.socialProof.stats, newStat]);
   };
-
-  const PreviewContent = () => (
-    <div className={`${previewMode === 'mobile' ? 'max-w-sm mx-auto' : 'w-full'} bg-background border rounded-lg overflow-hidden`}>
-      {/* Hero Section Preview */}
-      <div className="relative bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6">
-        <div className="space-y-4">
-          <div className="flex items-center gap-2 mb-2">
-            <Badge className="bg-green-500 text-white">
-              <Trophy className="w-3 h-3 mr-1" />
-              Premium Provider
-            </Badge>
-          </div>
-          <h1 className="text-2xl font-bold">{funnelContent.headline || 'Your Service Title'}</h1>
-          <p className="text-lg text-blue-100">{funnelContent.subheadline || 'Your compelling subheadline'}</p>
-          <div className="flex items-center gap-2">
-            {renderStarRating(5)}
-            <span>5.0 (50+ reviews)</span>
-          </div>
-        </div>
-        
-        {funnelContent.whyChooseUs.benefits.length > 0 && (
-          <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 mt-4 border border-white/20">
-            <h3 className="font-bold mb-3">{funnelContent.whyChooseUs.title}</h3>
-            <div className="space-y-2">
-              {funnelContent.whyChooseUs.benefits.slice(0, 3).map((benefit, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  <div className="bg-green-500 rounded-full p-1">
-                    <CheckCircle className="w-3 h-3" />
-                  </div>
-                  <span className="text-sm">{benefit.text}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Media Gallery Preview */}
-      {funnelContent.mediaGallery.length > 0 && (
-        <div className="p-4">
-          <div className="aspect-video bg-muted rounded-lg mb-4 flex items-center justify-center">
-            <Video className="w-12 h-12 text-muted-foreground" />
-          </div>
-          <div className="grid grid-cols-4 gap-2">
-            {funnelContent.mediaGallery.slice(0, 4).map((media, i) => (
-              <div key={i} className="aspect-square bg-muted rounded border flex items-center justify-center">
-                {media.type === 'video' && <Video className="w-4 h-4" />}
-                {media.type === 'image' && <ImageIcon className="w-4 h-4" />}
-                {media.type === 'document' && <FileText className="w-4 h-4" />}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Value Proposition Preview */}
-      {funnelContent.valueProposition.items.length > 0 && (
-        <div className="p-4">
-          <h2 className="text-xl font-bold mb-4">{funnelContent.valueProposition.title}</h2>
-          <div className="space-y-3">
-            {funnelContent.valueProposition.items.slice(0, 3).map((item, i) => (
-              <div key={i} className="flex items-start gap-3">
-                <div className="bg-primary/10 rounded-full p-2 mt-1">
-                  <Target className="w-4 h-4 text-primary" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-sm">{item.title}</h3>
-                  <p className="text-xs text-muted-foreground">{item.description}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Packages Preview */}
-      {funnelContent.packages.length > 0 && (
-        <div className="p-4">
-          <h2 className="text-xl font-bold mb-4">Choose Your Package</h2>
-          <div className="space-y-3">
-            {funnelContent.packages.map((pkg, i) => (
-              <Card key={i} className={`${pkg.popular ? 'border-primary' : ''}`}>
-                <CardContent className="p-4">
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="font-semibold">{pkg.name}</h3>
-                    {pkg.popular && <Badge>Popular</Badge>}
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-2">{pkg.description}</p>
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-lg font-bold">${pkg.price}</span>
-                    {pkg.originalPrice && (
-                      <span className="text-sm text-muted-foreground line-through">${pkg.originalPrice}</span>
-                    )}
-                  </div>
-                  <div className="space-y-1">
-                    {pkg.features.slice(0, 3).map((feature, fi) => (
-                      <div key={fi} className="flex items-center gap-2">
-                        <CheckCircle className="w-3 h-3 text-green-500" />
-                        <span className="text-xs">{feature}</span>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Social Proof Preview */}
-      {funnelContent.socialProof.length > 0 && (
-        <div className="p-4">
-          <h2 className="text-xl font-bold mb-4">What Customers Say</h2>
-          <div className="space-y-3">
-            {funnelContent.socialProof.slice(0, 2).map((proof, i) => (
-              <Card key={i} className="p-3">
-                <div className="flex items-start gap-3">
-                  <div className="bg-muted rounded-full w-8 h-8 flex items-center justify-center">
-                    <Users className="w-4 h-4" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm mb-2">"{proof.text}"</p>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium text-sm">{proof.authorName}</p>
-                        <p className="text-xs text-muted-foreground">{proof.authorTitle}</p>
-                      </div>
-                      {renderStarRating(proof.rating)}
-                    </div>
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* CTA Section */}
-      <div className="p-4 bg-secondary/20">
-        <Button className="w-full bg-gradient-to-r from-primary to-accent text-white">
-          {funnelContent.callToAction || 'Get Started Today'}
-        </Button>
-      </div>
-    </div>
-  );
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[70vh]">
-      {/* Editor Panel */}
-      <div className="space-y-4 overflow-y-auto">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="hero">Hero</TabsTrigger>
-            <TabsTrigger value="media">Media</TabsTrigger>
-            <TabsTrigger value="value">Value</TabsTrigger>
-            <TabsTrigger value="packages">Packages</TabsTrigger>
-            <TabsTrigger value="social">Social Proof</TabsTrigger>
-          </TabsList>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold">Edit Service Funnel</h2>
+        <p className="text-muted-foreground">Design what agents see when they click your service</p>
+      </div>
 
-          <TabsContent value="hero" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Hero Section</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Main Headline</Label>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-6">
+          <TabsTrigger value="hero">Hero</TabsTrigger>
+          <TabsTrigger value="benefits">Benefits</TabsTrigger>
+          <TabsTrigger value="media">Media</TabsTrigger>
+          <TabsTrigger value="packages">Packages</TabsTrigger>
+          <TabsTrigger value="social">Social Proof</TabsTrigger>
+          <TabsTrigger value="cta">Call to Action</TabsTrigger>
+        </TabsList>
+
+        {/* Hero Section Editor */}
+        <TabsContent value="hero" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Target className="w-5 h-5" />
+                Hero Section
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="headline">Main Headline</Label>
+                <Input
+                  id="headline"
+                  value={funnelContent.headline}
+                  onChange={(e) => updateContent('headline', e.target.value)}
+                  placeholder="Your compelling main headline"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="subheadline">Subheadline</Label>
+                <Input
+                  id="subheadline"
+                  value={funnelContent.subheadline}
+                  onChange={(e) => updateContent('subheadline', e.target.value)}
+                  placeholder="Supporting subheadline"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="heroDescription">Description</Label>
+                <Textarea
+                  id="heroDescription"
+                  value={funnelContent.heroDescription}
+                  onChange={(e) => updateContent('heroDescription', e.target.value)}
+                  placeholder="Detailed description of your service"
+                  rows={3}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="roi">Estimated ROI (multiplier)</Label>
                   <Input
-                    value={funnelContent.headline}
-                    onChange={(e) => updateContent('headline', e.target.value)}
-                    placeholder="Your compelling headline"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Subheadline</Label>
-                  <Input
-                    value={funnelContent.subheadline}
-                    onChange={(e) => updateContent('subheadline', e.target.value)}
-                    placeholder="Supporting text that explains the value"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Description</Label>
-                  <Textarea
-                    value={funnelContent.heroDescription}
-                    onChange={(e) => updateContent('heroDescription', e.target.value)}
-                    placeholder="Detailed description of your service"
-                    rows={3}
+                    id="roi"
+                    type="number"
+                    min="1"
+                    step="0.1"
+                    value={funnelContent.estimatedRoi}
+                    onChange={(e) => updateContent('estimatedRoi', parseFloat(e.target.value))}
                   />
                 </div>
                 
-                <Separator />
-                
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label>Why Choose Us - Section Title</Label>
-                    <Input
-                      value={funnelContent.whyChooseUs.title}
-                      onChange={(e) => updateContent('whyChooseUs.title', e.target.value)}
-                      placeholder="Why Choose [Your Company]?"
-                    />
-                  </div>
-                  
-                  <div className="space-y-3">
-                    <Label>Benefits</Label>
-                    {funnelContent.whyChooseUs.benefits.map((benefit, index) => (
-                      <div key={index} className="flex items-center space-x-2">
-                        <Input
-                          value={benefit.text}
-                          onChange={(e) => {
-                            const benefits = [...funnelContent.whyChooseUs.benefits];
-                            benefits[index] = { ...benefit, text: e.target.value };
-                            updateContent('whyChooseUs.benefits', benefits);
-                          }}
-                          placeholder="Benefit description"
-                          className="flex-1"
-                        />
+                <div>
+                  <Label htmlFor="duration">Duration/Timeline</Label>
+                  <Input
+                    id="duration"
+                    value={funnelContent.duration}
+                    onChange={(e) => updateContent('duration', e.target.value)}
+                    placeholder="e.g., 30 days, 3 months"
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Preview */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Hero Preview</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="bg-gradient-to-br from-primary to-primary/80 text-white p-6 rounded-lg">
+                <h3 className="text-2xl font-bold mb-2">{funnelContent.headline || 'Your Headline'}</h3>
+                <p className="text-lg mb-4">{funnelContent.subheadline || 'Your subheadline'}</p>
+                <p className="mb-4">{funnelContent.heroDescription || 'Your description'}</p>
+                <div className="flex gap-4 text-sm">
+                  <span className="flex items-center gap-1">
+                    <TrendingUp className="w-4 h-4" />
+                    {funnelContent.estimatedRoi}x ROI
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Clock className="w-4 h-4" />
+                    {funnelContent.duration}
+                  </span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Benefits Section Editor */}
+        <TabsContent value="benefits" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Zap className="w-5 h-5" />
+                Why Choose Your Service
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="benefitsTitle">Section Title</Label>
+                <Input
+                  id="benefitsTitle"
+                  value={funnelContent.whyChooseUs.title}
+                  onChange={(e) => updateContent('whyChooseUs.title', e.target.value)}
+                  placeholder="Why choose your service?"
+                />
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-semibold">Benefits</h4>
+                  <Button onClick={addBenefit} size="sm">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Benefit
+                  </Button>
+                </div>
+
+                {funnelContent.whyChooseUs.benefits.map((benefit, index) => (
+                  <Card key={index}>
+                    <CardContent className="p-4">
+                      <div className="grid grid-cols-3 gap-4">
+                        <div>
+                          <Label>Icon</Label>
+                          <Input
+                            value={benefit.icon}
+                            onChange={(e) => {
+                              const newBenefits = [...funnelContent.whyChooseUs.benefits];
+                              newBenefits[index].icon = e.target.value;
+                              updateContent('whyChooseUs.benefits', newBenefits);
+                            }}
+                            placeholder="Icon name"
+                          />
+                        </div>
+                        <div>
+                          <Label>Title</Label>
+                          <Input
+                            value={benefit.title}
+                            onChange={(e) => {
+                              const newBenefits = [...funnelContent.whyChooseUs.benefits];
+                              newBenefits[index].title = e.target.value;
+                              updateContent('whyChooseUs.benefits', newBenefits);
+                            }}
+                          />
+                        </div>
+                        <div>
+                          <Label>Description</Label>
+                          <Input
+                            value={benefit.description}
+                            onChange={(e) => {
+                              const newBenefits = [...funnelContent.whyChooseUs.benefits];
+                              newBenefits[index].description = e.target.value;
+                              updateContent('whyChooseUs.benefits', newBenefits);
+                            }}
+                          />
+                        </div>
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="mt-2"
+                        onClick={() => {
+                          const newBenefits = funnelContent.whyChooseUs.benefits.filter((_, i) => i !== index);
+                          updateContent('whyChooseUs.benefits', newBenefits);
+                        }}
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Media Section Editor */}
+        <TabsContent value="media" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Video className="w-5 h-5" />
+                Media Gallery
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ServiceImageUpload
+                value=""
+                onChange={(url) => {
+                  const newMedia: MediaItem = {
+                    id: Date.now().toString(),
+                    type: 'image',
+                    url,
+                    title: 'Uploaded Image'
+                  };
+                  updateContent('media', [...funnelContent.media, newMedia]);
+                }}
+              />
+              
+              <div className="mt-4 grid grid-cols-2 gap-4">
+                {funnelContent.media.map((item, index) => (
+                  <Card key={item.id}>
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <Badge>{item.type}</Badge>
                         <Button
-                          type="button"
                           variant="outline"
                           size="sm"
                           onClick={() => {
-                            const benefits = funnelContent.whyChooseUs.benefits.filter((_, i) => i !== index);
-                            updateContent('whyChooseUs.benefits', benefits);
+                            const newMedia = funnelContent.media.filter((_, i) => i !== index);
+                            updateContent('media', newMedia);
                           }}
                         >
                           <X className="w-4 h-4" />
                         </Button>
                       </div>
-                    ))}
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        const benefits = [...funnelContent.whyChooseUs.benefits, { icon: 'check', text: '' }];
-                        updateContent('whyChooseUs.benefits', benefits);
-                      }}
-                    >
-                      <Plus className="w-4 h-4 mr-2" />
-                      Add Benefit
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+                      <Input
+                        value={item.title}
+                        onChange={(e) => {
+                          const newMedia = [...funnelContent.media];
+                          newMedia[index].title = e.target.value;
+                          updateContent('media', newMedia);
+                        }}
+                        placeholder="Media title"
+                      />
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-          <TabsContent value="media" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Media Gallery</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex gap-2">
-                  <Button onClick={() => addMediaItem('video')} variant="outline" size="sm">
-                    <Video className="w-4 h-4 mr-2" />
-                    Add Video
-                  </Button>
-                  <Button onClick={() => addMediaItem('image')} variant="outline" size="sm">
-                    <ImageIcon className="w-4 h-4 mr-2" />
-                    Add Image
-                  </Button>
-                  <Button onClick={() => addMediaItem('document')} variant="outline" size="sm">
-                    <FileText className="w-4 h-4 mr-2" />
-                    Add Document
-                  </Button>
-                </div>
-                
-                <div className="space-y-3">
-                  {funnelContent.mediaGallery.map((media, index) => (
-                    <Card key={media.id}>
-                      <CardContent className="p-4">
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="flex items-center gap-2">
-                            {media.type === 'video' && <Video className="w-4 h-4" />}
-                            {media.type === 'image' && <ImageIcon className="w-4 h-4" />}
-                            {media.type === 'document' && <FileText className="w-4 h-4" />}
-                            <span className="font-medium">{media.type.charAt(0).toUpperCase() + media.type.slice(1)}</span>
-                          </div>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              const gallery = funnelContent.mediaGallery.filter((_, i) => i !== index);
-                              updateContent('mediaGallery', gallery);
-                            }}
-                          >
-                            <X className="w-4 h-4" />
-                          </Button>
-                        </div>
-                        <div className="space-y-2">
-                          <Input
-                            value={media.title}
-                            onChange={(e) => {
-                              const gallery = [...funnelContent.mediaGallery];
-                              gallery[index] = { ...media, title: e.target.value };
-                              updateContent('mediaGallery', gallery);
-                            }}
-                            placeholder="Media title"
-                          />
-                          {media.type === 'image' ? (
-                            <ServiceImageUpload
-                              value={media.url}
-                              onChange={(url) => {
-                                const gallery = [...funnelContent.mediaGallery];
-                                gallery[index] = { ...media, url };
-                                updateContent('mediaGallery', gallery);
-                              }}
-                            />
-                          ) : (
-                            <Input
-                              value={media.url}
-                              onChange={(e) => {
-                                const gallery = [...funnelContent.mediaGallery];
-                                gallery[index] = { ...media, url: e.target.value };
-                                updateContent('mediaGallery', gallery);
-                              }}
-                              placeholder={`${media.type.charAt(0).toUpperCase() + media.type.slice(1)} URL`}
-                            />
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+        {/* Packages Section Editor */}
+        <TabsContent value="packages" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <DollarSign className="w-5 h-5" />
+                Pricing Packages
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Button onClick={addPackage} className="w-full">
+                <Plus className="w-4 h-4 mr-2" />
+                Add Package
+              </Button>
 
-          <TabsContent value="value" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Value Proposition</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Section Title</Label>
-                  <Input
-                    value={funnelContent.valueProposition.title}
-                    onChange={(e) => updateContent('valueProposition.title', e.target.value)}
-                    placeholder="What You'll Get"
-                  />
-                </div>
-                
-                <div className="space-y-3">
-                  <Label>Value Items</Label>
-                  {funnelContent.valueProposition.items.map((item, index) => (
-                    <Card key={index}>
-                      <CardContent className="p-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="font-medium">Item {index + 1}</span>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              const items = funnelContent.valueProposition.items.filter((_, i) => i !== index);
-                              updateContent('valueProposition.items', items);
-                            }}
-                          >
-                            <X className="w-4 h-4" />
-                          </Button>
-                        </div>
-                        <div className="space-y-2">
-                          <Input
-                            value={item.title}
-                            onChange={(e) => {
-                              const items = [...funnelContent.valueProposition.items];
-                              items[index] = { ...item, title: e.target.value };
-                              updateContent('valueProposition.items', items);
-                            }}
-                            placeholder="Value item title"
-                          />
-                          <Textarea
-                            value={item.description}
-                            onChange={(e) => {
-                              const items = [...funnelContent.valueProposition.items];
-                              items[index] = { ...item, description: e.target.value };
-                              updateContent('valueProposition.items', items);
-                            }}
-                            placeholder="Description of this value item"
-                            rows={2}
-                          />
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      const items = [...funnelContent.valueProposition.items, {
-                        icon: 'target',
-                        title: '',
-                        description: ''
-                      }];
-                      updateContent('valueProposition.items', items);
-                    }}
-                  >
+              {funnelContent.packages.map((pkg, index) => (
+                <Card key={pkg.id}>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-lg">{pkg.name}</CardTitle>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => removePackage(index)}
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label>Package Name</Label>
+                        <Input
+                          value={pkg.name}
+                          onChange={(e) => updatePackage(index, 'name', e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <Label>Price ($)</Label>
+                        <Input
+                          type="number"
+                          value={pkg.price}
+                          onChange={(e) => updatePackage(index, 'price', parseFloat(e.target.value))}
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label>Description</Label>
+                      <Input
+                        value={pkg.description}
+                        onChange={(e) => updatePackage(index, 'description', e.target.value)}
+                      />
+                    </div>
+
+                    <div>
+                      <Label>Original Price (optional)</Label>
+                      <Input
+                        type="number"
+                        value={pkg.originalPrice || ''}
+                        onChange={(e) => updatePackage(index, 'originalPrice', e.target.value ? parseFloat(e.target.value) : undefined)}
+                      />
+                    </div>
+
+                    <div>
+                      <Label>Savings Text (optional)</Label>
+                      <Input
+                        value={pkg.savings || ''}
+                        onChange={(e) => updatePackage(index, 'savings', e.target.value)}
+                        placeholder="e.g., 50% OFF"
+                      />
+                    </div>
+
+                    <div className="flex items-center space-x-4">
+                      <div className="flex items-center space-x-2">
+                        <Switch
+                          checked={pkg.popular}
+                          onCheckedChange={(checked) => updatePackage(index, 'popular', checked)}
+                        />
+                        <Label>Most Popular</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Switch
+                          checked={pkg.proOnly || false}
+                          onCheckedChange={(checked) => updatePackage(index, 'proOnly', checked)}
+                        />
+                        <Label>Pro Members Only</Label>
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label>Features (one per line)</Label>
+                      <Textarea
+                        value={pkg.features.join('\n')}
+                        onChange={(e) => updatePackage(index, 'features', e.target.value.split('\n').filter(f => f.trim()))}
+                        rows={4}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Social Proof Section Editor */}
+        <TabsContent value="social" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="w-5 h-5" />
+                Social Proof
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Testimonials */}
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="font-semibold">Customer Testimonials</h4>
+                  <Button onClick={addTestimonial} size="sm">
                     <Plus className="w-4 h-4 mr-2" />
-                    Add Value Item
+                    Add Testimonial
                   </Button>
                 </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
 
-          <TabsContent value="packages" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Service Packages</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-4">
-                  {funnelContent.packages.map((pkg, index) => (
-                    <Card key={pkg.id}>
-                      <CardContent className="p-4">
-                        <div className="flex items-center justify-between mb-3">
-                          <span className="font-medium">Package {index + 1}</span>
-                          <div className="flex items-center gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => updatePackage(index, 'popular', !pkg.popular)}
-                            >
-                              {pkg.popular ? 'Remove Popular' : 'Mark Popular'}
-                            </Button>
-                            {funnelContent.packages.length > 1 && (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => removePackage(index)}
-                              >
-                                <X className="w-4 h-4" />
-                              </Button>
-                            )}
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-3 mb-3">
+                {funnelContent.socialProof.testimonials.map((testimonial, index) => (
+                  <Card key={testimonial.id}>
+                    <CardContent className="p-4 space-y-3">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label>Customer Name</Label>
                           <Input
-                            value={pkg.name}
-                            onChange={(e) => updatePackage(index, 'name', e.target.value)}
-                            placeholder="Package name"
+                            value={testimonial.name}
+                            onChange={(e) => {
+                              const newTestimonials = [...funnelContent.socialProof.testimonials];
+                              newTestimonials[index].name = e.target.value;
+                              updateContent('socialProof.testimonials', newTestimonials);
+                            }}
                           />
+                        </div>
+                        <div>
+                          <Label>Role/Title</Label>
+                          <Input
+                            value={testimonial.role}
+                            onChange={(e) => {
+                              const newTestimonials = [...funnelContent.socialProof.testimonials];
+                              newTestimonials[index].role = e.target.value;
+                              updateContent('socialProof.testimonials', newTestimonials);
+                            }}
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <Label>Testimonial Content</Label>
+                        <Textarea
+                          value={testimonial.content}
+                          onChange={(e) => {
+                            const newTestimonials = [...funnelContent.socialProof.testimonials];
+                            newTestimonials[index].content = e.target.value;
+                            updateContent('socialProof.testimonials', newTestimonials);
+                          }}
+                          rows={3}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label>Rating (1-5)</Label>
                           <Input
                             type="number"
-                            value={pkg.price}
-                            onChange={(e) => updatePackage(index, 'price', parseFloat(e.target.value) || 0)}
-                            placeholder="Price"
+                            min="1"
+                            max="5"
+                            value={testimonial.rating}
+                            onChange={(e) => {
+                              const newTestimonials = [...funnelContent.socialProof.testimonials];
+                              newTestimonials[index].rating = parseInt(e.target.value);
+                              updateContent('socialProof.testimonials', newTestimonials);
+                            }}
                           />
                         </div>
-                        <Textarea
-                          value={pkg.description}
-                          onChange={(e) => updatePackage(index, 'description', e.target.value)}
-                          placeholder="Package description"
-                          rows={2}
-                          className="mb-3"
-                        />
-                        <div className="space-y-2">
-                          <Label>Features</Label>
-                          {pkg.features.map((feature, featureIndex) => (
-                            <div key={featureIndex} className="flex items-center space-x-2">
-                              <Input
-                                value={feature}
-                                onChange={(e) => {
-                                  const features = [...pkg.features];
-                                  features[featureIndex] = e.target.value;
-                                  updatePackage(index, 'features', features);
-                                }}
-                                placeholder="Feature description"
-                                className="flex-1"
-                              />
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                onClick={() => {
-                                  const features = pkg.features.filter((_, i) => i !== featureIndex);
-                                  updatePackage(index, 'features', features);
-                                }}
-                              >
-                                <X className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          ))}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            const newTestimonials = funnelContent.socialProof.testimonials.filter((_, i) => i !== index);
+                            updateContent('socialProof.testimonials', newTestimonials);
+                          }}
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+
+              <Separator />
+
+              {/* Stats */}
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="font-semibold">Success Statistics</h4>
+                  <Button onClick={addStat} size="sm">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Stat
+                  </Button>
+                </div>
+
+                {funnelContent.socialProof.stats.map((stat, index) => (
+                  <Card key={index}>
+                    <CardContent className="p-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label>Label</Label>
+                          <Input
+                            value={stat.label}
+                            onChange={(e) => {
+                              const newStats = [...funnelContent.socialProof.stats];
+                              newStats[index].label = e.target.value;
+                              updateContent('socialProof.stats', newStats);
+                            }}
+                            placeholder="e.g., Satisfied Customers"
+                          />
+                        </div>
+                        <div className="flex items-end gap-2">
+                          <div className="flex-1">
+                            <Label>Value</Label>
+                            <Input
+                              value={stat.value}
+                              onChange={(e) => {
+                                const newStats = [...funnelContent.socialProof.stats];
+                                newStats[index].value = e.target.value;
+                                updateContent('socialProof.stats', newStats);
+                              }}
+                              placeholder="e.g., 10,000+"
+                            />
+                          </div>
                           <Button
-                            type="button"
                             variant="outline"
                             size="sm"
                             onClick={() => {
-                              const features = [...pkg.features, ''];
-                              updatePackage(index, 'features', features);
+                              const newStats = funnelContent.socialProof.stats.filter((_, i) => i !== index);
+                              updateContent('socialProof.stats', newStats);
                             }}
-                          >
-                            <Plus className="w-4 h-4 mr-2" />
-                            Add Feature
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-                <Button onClick={addPackage} variant="outline">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Package
-                </Button>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="social" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Social Proof & Testimonials</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-4">
-                  {funnelContent.socialProof.map((proof, index) => (
-                    <Card key={proof.id}>
-                      <CardContent className="p-4">
-                        <div className="flex items-center justify-between mb-3">
-                          <span className="font-medium">Testimonial {index + 1}</span>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => removeSocialProof(index)}
                           >
                             <X className="w-4 h-4" />
                           </Button>
                         </div>
-                        <div className="grid grid-cols-2 gap-3 mb-3">
-                          <Input
-                            value={proof.authorName}
-                            onChange={(e) => updateSocialProof(index, 'authorName', e.target.value)}
-                            placeholder="Customer name"
-                          />
-                          <Input
-                            value={proof.authorTitle}
-                            onChange={(e) => updateSocialProof(index, 'authorTitle', e.target.value)}
-                            placeholder="Title/Company"
-                          />
-                        </div>
-                        <Textarea
-                          value={proof.text}
-                          onChange={(e) => updateSocialProof(index, 'text', e.target.value)}
-                          placeholder="Testimonial text"
-                          rows={3}
-                          className="mb-3"
-                        />
-                        <div className="flex items-center gap-3">
-                          <Label>Rating:</Label>
-                          <div className="flex items-center gap-1">
-                            {[1, 2, 3, 4, 5].map((star) => (
-                              <Button
-                                key={star}
-                                variant="ghost"
-                                size="sm"
-                                className="p-1"
-                                onClick={() => updateSocialProof(index, 'rating', star)}
-                              >
-                                <Star
-                                  className={`w-4 h-4 ${
-                                    star <= proof.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'
-                                  }`}
-                                />
-                              </Button>
-                            ))}
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-                <Button onClick={addSocialProof} variant="outline">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Testimonial
-                </Button>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-      {/* Preview Panel */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold">Live Preview</h3>
-          <div className="flex items-center gap-2">
-            <Button
-              variant={previewMode === 'desktop' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setPreviewMode('desktop')}
-            >
-              <Monitor className="w-4 h-4" />
-            </Button>
-            <Button
-              variant={previewMode === 'mobile' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setPreviewMode('mobile')}
-            >
-              <Smartphone className="w-4 h-4" />
-            </Button>
-          </div>
-        </div>
-        <div className="border rounded-lg p-4 bg-muted/30 overflow-y-auto max-h-[60vh]">
-          <PreviewContent />
-        </div>
-      </div>
+        {/* Call to Action Section Editor */}
+        <TabsContent value="cta" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Target className="w-5 h-5" />
+                Call to Action & Trust
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Trust Indicators */}
+              <div>
+                <h4 className="font-semibold mb-4">Trust Indicators</h4>
+                <div className="space-y-3">
+                  <div>
+                    <Label>Money Back Guarantee</Label>
+                    <Input
+                      value={funnelContent.trustIndicators.guarantee}
+                      onChange={(e) => updateContent('trustIndicators.guarantee', e.target.value)}
+                      placeholder="e.g., 30-Day Money Back Guarantee"
+                    />
+                  </div>
+                  <div>
+                    <Label>Cancellation Policy</Label>
+                    <Input
+                      value={funnelContent.trustIndicators.cancellation}
+                      onChange={(e) => updateContent('trustIndicators.cancellation', e.target.value)}
+                      placeholder="e.g., Cancel Anytime"
+                    />
+                  </div>
+                  <div>
+                    <Label>Certification/Award</Label>
+                    <Input
+                      value={funnelContent.trustIndicators.certification}
+                      onChange={(e) => updateContent('trustIndicators.certification', e.target.value)}
+                      placeholder="e.g., Industry Leader"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* Contact Information */}
+              <div>
+                <h4 className="font-semibold mb-4">Contact Information</h4>
+                <div className="space-y-3">
+                  <div>
+                    <Label>Phone Number</Label>
+                    <Input
+                      value={funnelContent.callToAction.contactInfo.phone}
+                      onChange={(e) => updateContent('callToAction.contactInfo.phone', e.target.value)}
+                      placeholder="(555) 123-4567"
+                    />
+                  </div>
+                  <div>
+                    <Label>Email Address</Label>
+                    <Input
+                      value={funnelContent.callToAction.contactInfo.email}
+                      onChange={(e) => updateContent('callToAction.contactInfo.email', e.target.value)}
+                      placeholder="support@yourcompany.com"
+                    />
+                  </div>
+                  <div>
+                    <Label>Website URL</Label>
+                    <Input
+                      value={funnelContent.callToAction.contactInfo.website}
+                      onChange={(e) => updateContent('callToAction.contactInfo.website', e.target.value)}
+                      placeholder="https://yourcompany.com"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* Urgency Settings */}
+              <div>
+                <div className="flex items-center space-x-2 mb-4">
+                  <Switch
+                    checked={funnelContent.urgency.enabled}
+                    onCheckedChange={(checked) => updateContent('urgency.enabled', checked)}
+                  />
+                  <Label>Enable Urgency Message</Label>
+                </div>
+                
+                {funnelContent.urgency.enabled && (
+                  <div>
+                    <Label>Urgency Message</Label>
+                    <Input
+                      value={funnelContent.urgency.message}
+                      onChange={(e) => updateContent('urgency.message', e.target.value)}
+                      placeholder="Limited time offer - Act now!"
+                    />
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
