@@ -65,7 +65,7 @@ export const AcademySidebar = ({
 
   return (
     <Sidebar 
-      className="transition-all duration-300" 
+      className="transition-all duration-300 z-10" 
       collapsible="icon"
     >
       <SidebarContent>
