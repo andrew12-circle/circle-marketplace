@@ -18,10 +18,11 @@ export const ServiceImageUpload = ({ value, onChange }: ServiceImageUploadProps)
   const { toast } = useToast();
 
   const handleUpload = async (file: File) => {
-    if (!file.type.includes('svg')) {
+    const allowedTypes = ['image/svg+xml', 'image/png', 'image/jpeg', 'image/jpg'];
+    if (!allowedTypes.includes(file.type)) {
       toast({
         title: "Invalid file type",
-        description: "Please upload an SVG file only.",
+        description: "Please upload an SVG, PNG, or JPG file only.",
         variant: "destructive"
       });
       return;
@@ -39,7 +40,11 @@ export const ServiceImageUpload = ({ value, onChange }: ServiceImageUploadProps)
     try {
       setIsUploading(true);
       
-      const fileExt = 'svg';
+      // Get file extension from the actual file type
+      let fileExt = 'svg';
+      if (file.type === 'image/png') fileExt = 'png';
+      if (file.type === 'image/jpeg' || file.type === 'image/jpg') fileExt = 'jpg';
+      
       const fileName = `${Math.random()}.${fileExt}`;
       const filePath = `${fileName}`;
 
@@ -113,7 +118,8 @@ export const ServiceImageUpload = ({ value, onChange }: ServiceImageUploadProps)
         <AlertDescription>
           <strong>Perfect Service Card Image Guidelines:</strong>
           <ul className="list-disc list-inside mt-2 space-y-1 text-sm">
-            <li>Use SVG format for crisp, scalable graphics</li>
+            <li>Use SVG, PNG, or JPG format for best results</li>
+            <li>SVG recommended for crisp, scalable graphics</li>
             <li>Recommended size: 400x300 pixels (4:3 aspect ratio)</li>
             <li>Keep file size under 500KB for fast loading</li>
             <li>Use clear, professional icons or illustrations</li>
@@ -142,7 +148,7 @@ export const ServiceImageUpload = ({ value, onChange }: ServiceImageUploadProps)
             <div>
               <p className="text-lg font-medium">Upload Service Image</p>
               <p className="text-sm text-muted-foreground">
-                Drag and drop your SVG file here, or click to browse
+                Drag and drop your SVG, PNG, or JPG file here, or click to browse
               </p>
             </div>
             <Button
@@ -158,7 +164,7 @@ export const ServiceImageUpload = ({ value, onChange }: ServiceImageUploadProps)
           <input
             ref={fileInputRef}
             type="file"
-            accept=".svg"
+            accept=".svg,.png,.jpg,.jpeg"
             onChange={handleFileSelect}
             className="hidden"
           />
