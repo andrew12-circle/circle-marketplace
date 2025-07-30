@@ -39,7 +39,10 @@ export const useVideos = (options: UseVideosOptions = {}) => {
         .eq('is_published', true)
         .order('created_at', { ascending: false });
 
-      if (options.category) {
+      if (options.category === 'shorts') {
+        // Filter for shorts by checking metadata
+        query = query.eq('metadata->is_short', true);
+      } else if (options.category) {
         query = query.eq('category', options.category);
       }
 

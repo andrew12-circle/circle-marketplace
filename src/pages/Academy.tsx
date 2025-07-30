@@ -195,6 +195,7 @@ export const Academy = () => {
   const { videos: allVideos, loading, incrementView } = useVideos();
   const { videos: featuredVideos } = useVideos({ featured: true, limit: 10 });
   const { videos: trendingVideos } = useVideos({ limit: 10 });
+  const { videos: shortsVideos } = useVideos({ category: 'shorts', limit: 15 });
 
   const categories = [
     { id: "courses", label: "Courses", icon: GraduationCap },
@@ -376,8 +377,18 @@ export const Academy = () => {
       ) : (
         <>
           <VideoSection
+            title="🚀 Quick Wins (Shorts)"
+            subtitle="Bite-sized tips you can implement today"
+            videos={shortsVideos}
+            onPlayVideo={handlePlayVideo}
+            showSeeAll={true}
+            onSeeAll={() => toast({ title: "See All", description: "Show all real estate shorts" })}
+            size="small"
+          />
+
+          <VideoSection
             title="Trending Now"
-            subtitle="Most watched videos this week"
+            subtitle="Most watched real estate training this week"
             videos={trendingVideos}
             onPlayVideo={handlePlayVideo}
             showSeeAll={true}
@@ -386,8 +397,8 @@ export const Academy = () => {
           />
 
           <VideoSection
-            title="Featured Content"
-            subtitle="Hand-picked by our team"
+            title="Featured Training"
+            subtitle="Hand-picked by real estate experts"
             videos={featuredVideos}
             onPlayVideo={handlePlayVideo}
             showSeeAll={true}
@@ -396,8 +407,8 @@ export const Academy = () => {
           />
 
           <VideoSection
-            title="All Videos"
-            subtitle="Browse our complete library"
+            title="All Training Videos"
+            subtitle="Browse our complete library of real estate education"
             videos={allVideos.slice(0, 8)}
             onPlayVideo={handlePlayVideo}
             showSeeAll={true}
