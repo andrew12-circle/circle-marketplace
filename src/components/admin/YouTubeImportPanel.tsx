@@ -49,9 +49,28 @@ export const YouTubeImportPanel = () => {
 
   const fetchVideoMetadata = async (videoId: string): Promise<YouTubeVideoData | null> => {
     try {
-      // For demonstration, we'll create mock data
-      // In production, you'd use YouTube Data API v3
-      const mockData: YouTubeVideoData = {
+      // Use oEmbed API to get basic video info (free, no API key required)
+      const oEmbedUrl = `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`;
+      
+      const response = await fetch(oEmbedUrl);
+      if (!response.ok) {
+        throw new Error('Failed to fetch video metadata');
+      }
+      
+      const data = await response.json();
+      
+      return {
+        title: data.title || `YouTube Video ${videoId}`,
+        description: 'Imported from YouTube - please update description',
+        duration: '10:30', // oEmbed doesn't provide duration, would need YouTube API for this
+        thumbnailUrl: data.thumbnail_url || `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`,
+        videoId,
+        channelTitle: data.author_name || 'YouTube Channel'
+      };
+    } catch (error) {
+      console.error('Error fetching video metadata:', error);
+      // Fallback to basic data if oEmbed fails
+      return {
         title: `YouTube Video ${videoId}`,
         description: 'Imported from YouTube - please update description',
         duration: '10:30',
@@ -59,11 +78,6 @@ export const YouTubeImportPanel = () => {
         videoId,
         channelTitle: 'YouTube Channel'
       };
-      
-      return mockData;
-    } catch (error) {
-      console.error('Error fetching video metadata:', error);
-      return null;
     }
   };
 

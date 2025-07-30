@@ -86,8 +86,8 @@ export const useVideos = (options: UseVideosOptions = {}) => {
 
   const incrementView = async (videoId: string) => {
     try {
-      const { error } = await supabase.rpc('increment_video_views', {
-        video_uuid: videoId
+      const { error } = await supabase.rpc('increment_content_plays', {
+        content_uuid: videoId
       });
 
       if (error) {
@@ -112,9 +112,9 @@ export const useVideos = (options: UseVideosOptions = {}) => {
       }
 
       const { error } = await supabase
-        .from('video_ratings')
+        .from('content_ratings')
         .upsert({
-          video_id: videoId,
+          content_id: videoId,
           user_id: user.id,
           rating: rating
         });
