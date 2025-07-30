@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "@/hooks/useLocation";
-import { User, Settings, ShoppingBag, Crown, LogOut, Loader2, MapPin, Heart, BarChart3 } from "lucide-react";
+import { User, Settings, ShoppingBag, Crown, LogOut, Loader2, MapPin, Heart, BarChart3, Shield } from "lucide-react";
 
 export const UserMenu = () => {
   const { user, profile, signOut } = useAuth();
@@ -126,6 +126,19 @@ export const UserMenu = () => {
               <Link to="/creator-dashboard" className="flex items-center">
                 <BarChart3 className="mr-2 h-4 w-4" />
                 <span>Creator Dashboard</span>
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+          </>
+        )}
+        
+        {/* Admin Dashboard Link */}
+        {profile?.is_admin && (
+          <>
+            <DropdownMenuItem asChild>
+              <Link to="/admin" className="flex items-center">
+                <Shield className="mr-2 h-4 w-4" />
+                <span>Admin Dashboard</span>
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
