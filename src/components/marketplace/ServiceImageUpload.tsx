@@ -118,11 +118,12 @@ export const ServiceImageUpload = ({ value, onChange }: ServiceImageUploadProps)
         <AlertDescription>
           <strong>Perfect Service Card Image Guidelines:</strong>
           <ul className="list-disc list-inside mt-2 space-y-1 text-sm">
-            <li>Use SVG, PNG, or JPG format for best results</li>
+            <li>Supported formats: SVG, PNG, or JPEG/JPG</li>
             <li>SVG recommended for crisp, scalable graphics</li>
+            <li>PNG/JPEG work great for photos and complex images</li>
             <li>Recommended size: 400x300 pixels (4:3 aspect ratio)</li>
-            <li>Keep file size under 500KB for fast loading</li>
-            <li>Use clear, professional icons or illustrations</li>
+            <li>Keep file size under 2MB for fast loading</li>
+            <li>Use clear, professional images or illustrations</li>
             <li>Avoid text in images - use the title and description instead</li>
             <li>Use brand colors that match your service</li>
             <li>Ensure good contrast for both light and dark themes</li>
@@ -164,7 +165,7 @@ export const ServiceImageUpload = ({ value, onChange }: ServiceImageUploadProps)
           <input
             ref={fileInputRef}
             type="file"
-            accept=".svg,.png,.jpg,.jpeg"
+            accept="image/svg+xml,image/png,image/jpeg,image/jpg,.svg,.png,.jpg,.jpeg"
             onChange={handleFileSelect}
             className="hidden"
           />
@@ -209,10 +210,10 @@ export const ServiceImageUpload = ({ value, onChange }: ServiceImageUploadProps)
         </div>
       )}
 
-      {/* Best Practices Tips */}
       <div className="text-xs text-muted-foreground space-y-1">
         <p><strong>💡 Pro Tips:</strong></p>
-        <p>• Use tools like Figma, Adobe Illustrator, or free options like Canva to create SVG graphics</p>
+        <p>• Use Figma, Adobe Illustrator, or Canva to create SVG graphics</p>
+        <p>• For photos/complex images, use PNG for transparency or JPEG for smaller file sizes</p>
         <p>• Test your image on both light and dark backgrounds</p>
         <p>• Simple, clean designs perform better than cluttered ones</p>
       </div>
