@@ -1093,45 +1093,25 @@ export const VendorDashboard = () => {
                         onChange={(e) => setServiceForm(prev => ({ ...prev, price: e.target.value }))}
                         placeholder="e.g., $299/month or $45 each"
                       />
-                    </div>
-
-                     <div className="space-y-2">
-                       <Label htmlFor="copay-support">Supports Co-pay</Label>
-                       <Switch
-                         checked={serviceForm.supports_copay}
-                         onCheckedChange={(checked) => setServiceForm(prev => ({ ...prev, supports_copay: checked }))}
-                       />
-                       <p className="text-xs text-muted-foreground">
-                         Enable if this service offers co-pay pricing options
-                       </p>
                      </div>
-                  </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="service-description">Service Description *</Label>
-                    <Textarea
-                      id="service-description"
-                      value={serviceForm.description}
-                      onChange={(e) => setServiceForm(prev => ({ ...prev, description: e.target.value }))}
-                      placeholder="Describe your service, what it does, and how it helps real estate professionals..."
-                      rows={4}
-                    />
-                  </div>
+                   <div className="space-y-2">
+                     <Label htmlFor="service-description">Service Description *</Label>
+                     <Textarea
+                       id="service-description"
+                       value={serviceForm.description}
+                       onChange={(e) => setServiceForm(prev => ({ ...prev, description: e.target.value }))}
+                       placeholder="Describe your service, what it does, and how it helps real estate professionals..."
+                       rows={4}
+                     />
+                   </div>
 
-                  <ServiceImageUpload
-                    value={serviceForm.image_url}
-                    onChange={(url) => setServiceForm(prev => ({ ...prev, image_url: url }))}
-                  />
-
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      checked={serviceForm.is_featured}
-                      onCheckedChange={(checked) => setServiceForm(prev => ({ ...prev, is_featured: checked }))}
-                    />
-                    <Label>Mark as Featured Service</Label>
-                  </div>
-                </div>
-              )}
+                   <ServiceImageUpload
+                     value={serviceForm.image_url}
+                     onChange={(url) => setServiceForm(prev => ({ ...prev, image_url: url }))}
+                   />
+                 </div>
+               )}
 
               {/* Basic info only - funnel editing is in separate modal */}
               {/* Note: Funnel editing moved to full-screen modal */}
