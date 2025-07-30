@@ -228,7 +228,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">Retail Price:</span>
                   <span className="text-sm text-muted-foreground line-through">
-                    {formatPrice(service.retail_price, service.price_duration)}
+                    {formatPrice(service.retail_price, service.price_duration || 'mo')}
                   </span>
                 </div>
               )}
@@ -240,7 +240,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                     <Crown className="w-4 h-4 text-circle-primary" />
                   </div>
                   <span className="text-xl font-bold text-circle-primary">
-                    {formatPrice(service.pro_price, service.price_duration)}
+                    {formatPrice(service.pro_price, service.price_duration || 'mo')}
                   </span>
                 </div>
               )}
@@ -255,7 +255,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                       </div>
                     </div>
                     <span className="text-lg font-bold text-green-600">
-                      {formatPrice(service.co_pay_price, service.price_duration)}
+                      {formatPrice(service.co_pay_price, service.price_duration || 'mo')}
                     </span>
                   </div>
                   {service.discount_percentage && (
@@ -275,7 +275,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">List Price:</span>
                   <span className="text-xl font-bold text-foreground">
-                    {formatPrice(service.retail_price, service.price_duration)}
+                    {formatPrice(service.retail_price, service.price_duration || 'mo')}
                   </span>
                 </div>
               )}
@@ -290,7 +290,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                         <Crown className="w-4 h-4 text-circle-primary" />
                       </div>
                       <span className="text-lg font-bold text-circle-primary">
-                        {formatPrice(service.pro_price, service.price_duration)}
+                        {formatPrice(service.pro_price, service.price_duration || 'mo')}
                       </span>
                     </div>
                   </TooltipTrigger>
@@ -314,7 +314,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                           </div>
                         </div>
                         <span className="text-lg font-bold text-green-600">
-                          {formatPrice(service.co_pay_price, service.price_duration)}
+                          {formatPrice(service.co_pay_price, service.price_duration || 'mo')}
                         </span>
                       </div>
                     </TooltipTrigger>
