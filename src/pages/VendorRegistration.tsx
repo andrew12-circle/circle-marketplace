@@ -68,7 +68,6 @@ export const VendorRegistration = () => {
     // Co-Marketing Specific
     isCoMarketing: registrationType === "co_marketing",
     marketingBudget: "",
-    targetAudience: "",
     
     // Team Members Upload
     teamMembersFile: null as File | null,
@@ -181,7 +180,6 @@ export const VendorRegistration = () => {
     // Co-marketing specific validation
     if (formData.isCoMarketing) {
       if (!formData.marketingBudget) newErrors.marketingBudget = "Marketing budget is required";
-      if (!formData.targetAudience) newErrors.targetAudience = "Target audience is required";
     }
 
     setErrors(newErrors);
@@ -662,34 +660,41 @@ export const VendorRegistration = () => {
 
               {/* Co-Marketing Specific Fields */}
               {formData.isCoMarketing && (
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Co-Marketing Information</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="marketingBudget">Monthly Marketing Budget *</Label>
-                      <Select value={formData.marketingBudget} onValueChange={(value) => updateFormData("marketingBudget", value)}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select budget range" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="under_1000">Under $1,000</SelectItem>
-                          <SelectItem value="1000_2500">$1,000 - $2,500</SelectItem>
-                          <SelectItem value="2500_5000">$2,500 - $5,000</SelectItem>
-                          <SelectItem value="5000_10000">$5,000 - $10,000</SelectItem>
-                          <SelectItem value="over_10000">Over $10,000</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      {errors.marketingBudget && <p className="text-sm text-destructive">{errors.marketingBudget}</p>}
+                <div className="space-y-6 animate-fade-in">
+                  <div className="flex items-center space-x-3 mb-6">
+                    <div className="p-2 rounded-lg bg-gradient-to-br from-accent/10 to-primary/10">
+                      <CreditCard className="w-6 h-6 text-accent" />
                     </div>
-                    <div>
-                      <Label htmlFor="targetAudience">Target Audience *</Label>
-                      <Input
-                        id="targetAudience"
-                        value={formData.targetAudience}
-                        onChange={(e) => updateFormData("targetAudience", e.target.value)}
-                        placeholder="First-time homebuyers, luxury market, etc."
-                      />
-                      {errors.targetAudience && <p className="text-sm text-destructive">{errors.targetAudience}</p>}
+                    <h3 className="text-xl font-semibold text-foreground">Co-Marketing Information</h3>
+                  </div>
+                  <div className="bg-accent/5 rounded-lg p-6 border border-accent/20">
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="marketingBudget" className="text-sm font-medium text-foreground">
+                          Monthly Marketing Budget *
+                        </Label>
+                        <Select value={formData.marketingBudget} onValueChange={(value) => updateFormData("marketingBudget", value)}>
+                          <SelectTrigger className="transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary hover:border-primary/50">
+                            <SelectValue placeholder="Select your monthly marketing investment" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="under_1000">Under $1,000</SelectItem>
+                            <SelectItem value="1000_2500">$1,000 - $2,500</SelectItem>
+                            <SelectItem value="2500_5000">$2,500 - $5,000</SelectItem>
+                            <SelectItem value="5000_10000">$5,000 - $10,000</SelectItem>
+                            <SelectItem value="over_10000">Over $10,000</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        {errors.marketingBudget && (
+                          <p className="text-sm text-destructive animate-fade-in bg-destructive/10 p-2 rounded-md border border-destructive/20">
+                            {errors.marketingBudget}
+                          </p>
+                        )}
+                      </div>
+                      <div className="text-sm text-muted-foreground bg-blue-50 p-3 rounded-md border border-blue-200">
+                        <p className="font-medium text-blue-900 mb-1">🎯 Target Audience: Real Estate Professionals</p>
+                        <p className="text-blue-700">Your co-marketing efforts will focus on real estate agents, brokers, and homebuyers in your service area.</p>
+                      </div>
                     </div>
                   </div>
                 </div>
