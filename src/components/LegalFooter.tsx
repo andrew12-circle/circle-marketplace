@@ -3,11 +3,38 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Info } from "lucide-react";
+import { Info, Building, Store } from "lucide-react";
 
 export const LegalFooter = () => {
   return (
     <footer className="bg-muted/30 border-t mt-16">
+      {/* Business Partners Section */}
+      <div className="bg-gradient-to-r from-primary/5 to-accent/5 border-b">
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center space-y-4">
+            <h3 className="text-lg font-semibold">Are You a Business Partner?</h3>
+            <p className="text-sm text-muted-foreground max-w-2xl mx-auto">
+              Join our marketplace as a service provider or co-marketing partner. 
+              List your services and connect with real estate professionals.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Button asChild variant="default" className="min-w-[200px]">
+                <Link to="/vendor-registration">
+                  <Store className="w-4 h-4 mr-2" />
+                  List Your Services
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="min-w-[200px]">
+                <Link to="/vendor-registration">
+                  <Building className="w-4 h-4 mr-2" />
+                  Join as Co-Marketing Partner
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Legal Links Section */}
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6">

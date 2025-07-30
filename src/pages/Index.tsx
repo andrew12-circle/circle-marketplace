@@ -76,14 +76,6 @@ const Index = () => {
                 {/* Language Switcher */}
                 <LanguageSwitcher />
                 
-                {/* Vendor Registration Button - hidden on mobile for space */}
-                <Button asChild variant="outline" className="hidden lg:flex text-xs">
-                  <Link to="/vendor-registration">
-                    <Building className="w-3 h-3 mr-1" />
-                    List Services
-                  </Link>
-                </Button>
-                
                 {/* Cart Button - only show on marketplace */}
                 {activeTab === "marketplace" && (
                   <CartDrawer />
