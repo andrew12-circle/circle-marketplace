@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useVideos } from "@/hooks/useVideos";
+import { supabase } from "@/integrations/supabase/client";
 import { 
   GraduationCap, 
   BookOpen, 
@@ -288,13 +289,45 @@ export const Academy = () => {
   );
 
   const handlePlayVideo = (videoId: string) => {
-    // Increment view count
-    incrementView(videoId);
+    // Find the video in our data to get the content URL
+    const video = allVideos.find(v => v.id === videoId) || 
+                  trendingVideos.find(v => v.id === videoId) || 
+                  featuredVideos.find(v => v.id === videoId);
     
-    toast({
-      title: "Playing Video",
-      description: `Starting video: ${videoId}`,
-    });
+    if (video) {
+      // Increment view count
+      incrementView(videoId);
+      
+      // Get the content URL from Supabase and open it
+      supabase
+        .from('content')
+        .select('content_url')
+        .eq('id', videoId)
+        .single()
+        .then(({ data, error }) => {
+          if (data?.content_url && !error) {
+            // Open the YouTube video in a new tab
+            window.open(data.content_url, '_blank');
+            
+            toast({
+              title: "Opening Video",
+              description: `Playing: ${video.title}`,
+            });
+          } else {
+            toast({
+              title: "Error",
+              description: "Could not load video",
+              variant: "destructive",
+            });
+          }
+        });
+    } else {
+      toast({
+        title: "Error", 
+        description: "Video not found",
+        variant: "destructive",
+      });
+    }
   };
 
   const renderVideosView = () => (
