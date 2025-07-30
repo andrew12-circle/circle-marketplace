@@ -2,20 +2,25 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 
 interface CartItem {
-  serviceId: string;
+  id: string; // Can be serviceId or courseId
   title: string;
   price: number;
-  vendor: string;
+  vendor?: string; // For marketplace services
+  creator?: string; // For academy courses
   image_url?: string;
   quantity: number;
   requiresQuote?: boolean;
+  type: 'service' | 'course'; // Distinguish between marketplace and academy items
+  description?: string;
+  duration?: string; // For courses
+  lessonCount?: number; // For courses
 }
 
 interface CartContextType {
   cartItems: CartItem[];
   addToCart: (item: Omit<CartItem, 'quantity'>) => void;
-  removeFromCart: (serviceId: string) => void;
-  updateQuantity: (serviceId: string, quantity: number) => void;
+  removeFromCart: (id: string) => void;
+  updateQuantity: (id: string, quantity: number) => void;
   clearCart: () => void;
   getCartTotal: () => number;
   getCartCount: () => number;
@@ -58,7 +63,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const addToCart = (item: Omit<CartItem, 'quantity'>) => {
     setCartItems(prev => {
-      const existingItem = prev.find(cartItem => cartItem.serviceId === item.serviceId);
+      const existingItem = prev.find(cartItem => cartItem.id === item.id);
       
       if (existingItem) {
         toast({
@@ -66,7 +71,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
           description: `Increased quantity for "${item.title}"`,
         });
         return prev.map(cartItem =>
-          cartItem.serviceId === item.serviceId
+          cartItem.id === item.id
             ? { ...cartItem, quantity: cartItem.quantity + 1 }
             : cartItem
         );
@@ -80,28 +85,28 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   };
 
-  const removeFromCart = (serviceId: string) => {
+  const removeFromCart = (id: string) => {
     setCartItems(prev => {
-      const item = prev.find(cartItem => cartItem.serviceId === serviceId);
+      const item = prev.find(cartItem => cartItem.id === id);
       if (item) {
         toast({
           title: "Removed from cart",
           description: `"${item.title}" has been removed from your cart`,
         });
       }
-      return prev.filter(cartItem => cartItem.serviceId !== serviceId);
+      return prev.filter(cartItem => cartItem.id !== id);
     });
   };
 
-  const updateQuantity = (serviceId: string, quantity: number) => {
+  const updateQuantity = (id: string, quantity: number) => {
     if (quantity <= 0) {
-      removeFromCart(serviceId);
+      removeFromCart(id);
       return;
     }
     
     setCartItems(prev =>
       prev.map(cartItem =>
-        cartItem.serviceId === serviceId
+        cartItem.id === id
           ? { ...cartItem, quantity }
           : cartItem
       )

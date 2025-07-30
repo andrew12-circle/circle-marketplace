@@ -77,12 +77,13 @@ export const ServiceDetailsModal = ({ service, isOpen, onClose }: ServiceDetails
     }
 
     addToCart({
-      serviceId: service.id,
+      id: service.id,
       title: `${service.title} - ${packageType.charAt(0).toUpperCase() + packageType.slice(1)} Package`,
       price,
       vendor: service.vendor.name,
       image_url: service.image_url,
       requiresQuote: service.requires_quote,
+      type: 'service'
     });
 
     toast({

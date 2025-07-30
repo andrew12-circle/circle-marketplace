@@ -67,12 +67,13 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
 
   const handleAddToCart = () => {
     addToCart({
-      serviceId: service.id,
+      id: service.id,
       title: service.title,
       price: parseFloat(service.price) || 0,
       vendor: service.vendor.name,
       image_url: service.image_url,
       requiresQuote: service.requires_quote,
+      type: 'service'
     });
   };
 

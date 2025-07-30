@@ -13,6 +13,8 @@ import { useVideos } from "@/hooks/useVideos";
 import { useChannels } from "@/hooks/useChannels";
 import { usePodcasts } from "@/hooks/usePodcasts";
 import { useBooks } from "@/hooks/useBooks";
+import { useCourses } from "@/hooks/useCourses";
+import { CourseCard } from "@/components/academy/CourseCard";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
@@ -234,6 +236,12 @@ export const Academy = () => {
   const { books: featuredBooks } = useBooks({ featured: true, limit: 10 });
   const { books: newBooks } = useBooks({ orderBy: 'created_at', orderDirection: 'desc', limit: 8 });
   const { books: allBooks, loading: booksLoading, incrementRead, updateProgress } = useBooks();
+
+  // Fetch courses using the custom hook
+  const { courses: featuredCourses } = useCourses({ featured: true, limit: 8 });
+  const { courses: freeCourses } = useCourses({ free: true, limit: 12 });
+  const { courses: paidCourses } = useCourses({ paid: true, limit: 12 });
+  const { courses: allCourses, loading: coursesLoading, enrollInCourse } = useCourses();
 
   const categories = [
     { id: "courses", label: "Courses", icon: GraduationCap },
@@ -1338,6 +1346,53 @@ export const Academy = () => {
     );
   };
 
+  const renderCoursesView = () => (
+    <div className="flex-1 p-8 max-w-7xl">
+      <div className="mb-8">
+        <h1 className="text-4xl font-bold text-foreground mb-2">Courses</h1>
+        <p className="text-muted-foreground">Master real estate with our comprehensive courses</p>
+      </div>
+
+      {coursesLoading ? (
+        <div className="flex justify-center items-center py-12">
+          <div className="text-muted-foreground">Loading courses...</div>
+        </div>
+      ) : (
+        <>
+          {/* Featured Courses */}
+          <div className="mb-12">
+            <h2 className="text-2xl font-bold text-foreground mb-6">🔥 Featured Courses</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {featuredCourses.map((course) => (
+                <CourseCard key={course.id} course={course} onEnroll={enrollInCourse} size="medium" />
+              ))}
+            </div>
+          </div>
+
+          {/* Free Courses */}
+          <div className="mb-12">
+            <h2 className="text-2xl font-bold text-foreground mb-6">🎁 Free Courses</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {freeCourses.map((course) => (
+                <CourseCard key={course.id} course={course} onEnroll={enrollInCourse} size="medium" />
+              ))}
+            </div>
+          </div>
+
+          {/* Premium Courses */}
+          <div className="mb-12">
+            <h2 className="text-2xl font-bold text-foreground mb-6">💎 Premium Courses</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {paidCourses.map((course) => (
+                <CourseCard key={course.id} course={course} onEnroll={enrollInCourse} size="medium" />
+              ))}
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  };
+
   const renderContent = () => {
     console.log("Current activeView:", activeView); // Debug log
     switch (activeView) {
@@ -1351,6 +1406,8 @@ export const Academy = () => {
       case "podcasts":
         console.log("Rendering podcasts view"); // Debug log
         return renderPodcastsView();
+      case "courses":
+        return renderCoursesView();
       case "books":
         console.log("Rendering books view"); // Debug log
         return renderBooksView();

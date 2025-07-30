@@ -60,7 +60,7 @@ export const CartDrawer = () => {
           window.open(data.url, '_blank');
           
           // Clear purchasable items from cart after successful checkout initiation
-          purchasableItems.forEach(item => removeFromCart(item.serviceId));
+          purchasableItems.forEach(item => removeFromCart(item.id));
           
           toast({
             title: "Redirecting to checkout",
@@ -90,7 +90,7 @@ export const CartDrawer = () => {
       });
       
       // Remove quote items from cart after requesting
-      quoteItems.forEach(item => removeFromCart(item.serviceId));
+      quoteItems.forEach(item => removeFromCart(item.id));
     }
   };
 
@@ -104,7 +104,7 @@ export const CartDrawer = () => {
 
   const handleConsultationComplete = () => {
     const quoteItems = cartItems.filter(item => item.requiresQuote);
-    quoteItems.forEach(item => removeFromCart(item.serviceId));
+    quoteItems.forEach(item => removeFromCart(item.id));
     toast({
       title: "Consultations Scheduled",
       description: "All consultations have been booked and preparation courses completed!",
@@ -151,7 +151,7 @@ export const CartDrawer = () => {
             <>
               <div className="flex-1 overflow-auto py-4 space-y-4">
                 {cartItems.map((item) => (
-                  <div key={item.serviceId} className="flex gap-3 p-3 border rounded-lg">
+                  <div key={item.id} className="flex gap-3 p-3 border rounded-lg">
                      <div className="w-20 h-16 bg-muted rounded-lg overflow-hidden">
                        <img
                          src={item.image_url || "/placeholder.svg"}
@@ -190,7 +190,7 @@ export const CartDrawer = () => {
                                 variant="outline"
                                 size="icon"
                                 className="h-6 w-6"
-                                onClick={() => updateQuantity(item.serviceId, item.quantity - 1)}
+                                onClick={() => updateQuantity(item.id, item.quantity - 1)}
                               >
                                 <Minus className="w-3 h-3" />
                               </Button>
@@ -199,7 +199,7 @@ export const CartDrawer = () => {
                                 variant="outline"
                                 size="icon"
                                 className="h-6 w-6"
-                                onClick={() => updateQuantity(item.serviceId, item.quantity + 1)}
+                                onClick={() => updateQuantity(item.id, item.quantity + 1)}
                               >
                                 <Plus className="w-3 h-3" />
                               </Button>
@@ -209,7 +209,7 @@ export const CartDrawer = () => {
                             variant="ghost"
                             size="icon"
                             className="h-6 w-6 text-destructive"
-                            onClick={() => removeFromCart(item.serviceId)}
+                            onClick={() => removeFromCart(item.id)}
                           >
                             <Trash2 className="w-3 h-3" />
                           </Button>
@@ -284,7 +284,7 @@ export const CartDrawer = () => {
          isOpen={isConsultationFlowOpen}
          onClose={() => setIsConsultationFlowOpen(false)}
          consultationItems={quoteItems.map(item => ({
-           serviceId: item.serviceId,
+           serviceId: item.id,
            title: item.title,
            vendor: item.vendor,
            image_url: item.image_url,
