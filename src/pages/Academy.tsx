@@ -4,6 +4,7 @@ import { VideoSection } from "@/components/academy/VideoSection";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { useVideos } from "@/hooks/useVideos";
 import { 
   GraduationCap, 
   BookOpen, 
@@ -184,6 +185,11 @@ const mockVideos = {
 export const Academy = () => {
   const [activeView, setActiveView] = useState("home");
   const { toast } = useToast();
+  
+  // Fetch videos using the custom hook
+  const { videos: allVideos, loading, incrementView } = useVideos();
+  const { videos: featuredVideos } = useVideos({ featured: true, limit: 10 });
+  const { videos: trendingVideos } = useVideos({ limit: 10 });
 
   const categories = [
     { id: "courses", label: "Courses", icon: GraduationCap },
@@ -282,6 +288,9 @@ export const Academy = () => {
   );
 
   const handlePlayVideo = (videoId: string) => {
+    // Increment view count
+    incrementView(videoId);
+    
     toast({
       title: "Playing Video",
       description: `Starting video: ${videoId}`,
@@ -315,35 +324,43 @@ export const Academy = () => {
       </div>
 
       {/* Video Sections */}
-      <VideoSection
-        title="Trending Now"
-        subtitle="Most watched videos this week"
-        videos={mockVideos.trending}
-        onPlayVideo={handlePlayVideo}
-        showSeeAll={true}
-        onSeeAll={() => toast({ title: "See All", description: "Show all trending videos" })}
-        size="large"
-      />
+      {loading ? (
+        <div className="flex justify-center items-center py-12">
+          <div className="text-muted-foreground">Loading videos...</div>
+        </div>
+      ) : (
+        <>
+          <VideoSection
+            title="Trending Now"
+            subtitle="Most watched videos this week"
+            videos={trendingVideos}
+            onPlayVideo={handlePlayVideo}
+            showSeeAll={true}
+            onSeeAll={() => toast({ title: "See All", description: "Show all trending videos" })}
+            size="large"
+          />
 
-      <VideoSection
-        title="Recommended for You"
-        subtitle="Based on your profile and viewing history"
-        videos={mockVideos.forYou}
-        onPlayVideo={handlePlayVideo}
-        showSeeAll={true}
-        onSeeAll={() => toast({ title: "See All", description: "Show all recommended videos" })}
-        size="medium"
-      />
+          <VideoSection
+            title="Featured Content"
+            subtitle="Hand-picked by our team"
+            videos={featuredVideos}
+            onPlayVideo={handlePlayVideo}
+            showSeeAll={true}
+            onSeeAll={() => toast({ title: "See All", description: "Show all featured videos" })}
+            size="medium"
+          />
 
-      <VideoSection
-        title="New Releases"
-        subtitle="Fresh content from our partners"
-        videos={mockVideos.newReleases}
-        onPlayVideo={handlePlayVideo}
-        showSeeAll={true}
-        onSeeAll={() => toast({ title: "See All", description: "Show all new releases" })}
-        size="medium"
-      />
+          <VideoSection
+            title="All Videos"
+            subtitle="Browse our complete library"
+            videos={allVideos.slice(0, 8)}
+            onPlayVideo={handlePlayVideo}
+            showSeeAll={true}
+            onSeeAll={() => toast({ title: "See All", description: "Show all videos" })}
+            size="medium"
+          />
+        </>
+      )}
 
       {/* Categories Grid */}
       <div className="mt-12">
