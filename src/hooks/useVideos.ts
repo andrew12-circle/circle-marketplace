@@ -33,10 +33,11 @@ export const useVideos = (options: UseVideosOptions = {}) => {
       setError(null);
 
       let query = supabase
-        .from('videos')
+        .from('content')
         .select('*')
-        .eq('status', 'published')
-        .order('upload_date', { ascending: false });
+        .eq('content_type', 'video')
+        .eq('is_published', true)
+        .order('created_at', { ascending: false });
 
       if (options.category) {
         query = query.eq('category', options.category);
@@ -59,13 +60,13 @@ export const useVideos = (options: UseVideosOptions = {}) => {
       const formattedVideos: Video[] = (data || []).map((video) => ({
         id: video.id,
         title: video.title,
-        creator: video.creator_name,
-        thumbnail: video.thumbnail_url || "/placeholder.svg",
-        duration: video.duration,
+        creator: "Content Creator", // Will need to join with profiles table later
+        thumbnail: video.cover_image_url || "/placeholder.svg",
+        duration: video.duration || "0:00",
         category: video.category,
         rating: video.rating || undefined,
         isPro: video.is_pro,
-        views: video.view_count > 0 ? `${Math.floor(video.view_count / 1000)}K` : "0",
+        views: video.total_plays > 0 ? `${Math.floor(video.total_plays / 1000)}K` : "0",
         description: video.description || undefined,
       }));
 
