@@ -231,6 +231,11 @@ export const VendorRegistration = () => {
     
     if (!validateForm()) {
       console.log("Validation failed, errors:", errors);
+      toast({
+        title: "Please fix the errors below",
+        description: "Some required fields are missing or invalid.",
+        variant: "destructive",
+      });
       return;
     }
     
@@ -524,6 +529,77 @@ export const VendorRegistration = () => {
                     </div>
                   </div>
                 </div>
+
+                {/* Service Provider Specific Fields */}
+                {registrationType === "service_provider" && (
+                  <div className="space-y-6 animate-fade-in">
+                    <div className="flex items-center space-x-3 mb-6">
+                      <div className="p-2 rounded-lg bg-gradient-to-br from-accent/10 to-primary/10">
+                        <CreditCard className="w-6 h-6 text-accent" />
+                      </div>
+                      <h3 className="text-xl font-semibold text-foreground">Service Details</h3>
+                    </div>
+                    
+                    {/* Product Categories */}
+                    <div className="space-y-4">
+                      <Label className="text-sm font-medium text-foreground">
+                        Product/Service Categories * (Select all that apply)
+                      </Label>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                        {SERVICE_PROVIDER_TYPES.map((type, index) => (
+                          <Button
+                            key={type.value}
+                            type="button"
+                            variant={formData.productCategories.includes(type.value) ? "default" : "outline"}
+                            onClick={() => {
+                              const newCategories = formData.productCategories.includes(type.value)
+                                ? formData.productCategories.filter(c => c !== type.value)
+                                : [...formData.productCategories, type.value];
+                              updateFormData("productCategories", newCategories);
+                            }}
+                            className={`justify-start h-auto p-4 transition-all duration-300 hover-scale group ${
+                              formData.productCategories.includes(type.value)
+                                ? "bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-lg" 
+                                : "hover:bg-secondary/50 hover:border-primary/30"
+                            }`}
+                            style={{ animationDelay: `${index * 50}ms` }}
+                          >
+                            <span className="text-sm font-medium">{type.label}</span>
+                          </Button>
+                        ))}
+                      </div>
+                      {errors.productCategories && (
+                        <p className="text-sm text-destructive animate-fade-in bg-destructive/10 p-2 rounded-md border border-destructive/20">
+                          {errors.productCategories}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Pricing Model */}
+                    <div className="space-y-4">
+                      <Label className="text-sm font-medium text-foreground">
+                        Pricing Model *
+                      </Label>
+                      <Select value={formData.pricingModel} onValueChange={(value) => updateFormData("pricingModel", value)}>
+                        <SelectTrigger className="transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary hover:border-primary/50">
+                          <SelectValue placeholder="Select your pricing model" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="subscription">Monthly/Annual Subscription</SelectItem>
+                          <SelectItem value="one_time">One-time Purchase</SelectItem>
+                          <SelectItem value="per_use">Pay-per-Use/Transaction</SelectItem>
+                          <SelectItem value="freemium">Freemium (Free + Premium Tiers)</SelectItem>
+                          <SelectItem value="custom">Custom Pricing</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      {errors.pricingModel && (
+                        <p className="text-sm text-destructive animate-fade-in bg-destructive/10 p-2 rounded-md border border-destructive/20">
+                          {errors.pricingModel}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
 
                 {/* Service Area */}
                 <div className="space-y-6 animate-fade-in">
