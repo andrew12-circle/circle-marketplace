@@ -1044,14 +1044,6 @@ export const VendorDashboard = () => {
                     <Layout className="w-4 h-4 mr-2" />
                     Edit Funnel Page
                   </Button>
-                <Button
-                  variant={currentStep === 'preview' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setCurrentStep('preview')}
-                >
-                  <Eye className="w-4 h-4 mr-2" />
-                  Preview
-                </Button>
               </div>
 
               {/* Basic Info Step */}
