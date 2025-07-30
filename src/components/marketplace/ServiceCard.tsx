@@ -11,6 +11,7 @@ import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useServiceAnalytics } from "@/hooks/useServiceAnalytics";
+import { useCurrency } from "@/hooks/useCurrency";
 import { ConsultationFlow } from "./ConsultationFlow";
 import { ServiceFunnelModal } from "./ServiceFunnelModal";
 
@@ -58,6 +59,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
   const { profile } = useAuth();
   const { trackServiceView } = useServiceAnalytics();
   const navigate = useNavigate();
+  const { formatPrice } = useCurrency();
   const isProMember = profile?.is_pro_member || false;
 
   const handleSave = (e: React.MouseEvent) => {
@@ -225,7 +227,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">Retail Price:</span>
                   <span className="text-sm text-muted-foreground line-through">
-                    ${service.retail_price}
+                    {formatPrice(service.retail_price)}
                   </span>
                 </div>
               )}
@@ -237,7 +239,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                     <Crown className="w-4 h-4 text-circle-primary" />
                   </div>
                   <span className="text-xl font-bold text-circle-primary">
-                    ${service.pro_price}
+                    {formatPrice(service.pro_price)}
                   </span>
                 </div>
               )}
@@ -252,7 +254,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                       </div>
                     </div>
                     <span className="text-lg font-bold text-green-600">
-                      ${service.co_pay_price}
+                      {formatPrice(service.co_pay_price)}
                     </span>
                   </div>
                   {service.discount_percentage && (
@@ -272,7 +274,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">List Price:</span>
                   <span className="text-xl font-bold text-foreground">
-                    ${service.retail_price}
+                    {formatPrice(service.retail_price)}
                   </span>
                 </div>
               )}
@@ -287,7 +289,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                         <Crown className="w-4 h-4 text-circle-primary" />
                       </div>
                       <span className="text-lg font-bold text-circle-primary">
-                        ${service.pro_price}
+                        {formatPrice(service.pro_price)}
                       </span>
                     </div>
                   </TooltipTrigger>
@@ -311,7 +313,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                           </div>
                         </div>
                         <span className="text-lg font-bold text-green-600">
-                          ${service.co_pay_price}
+                          {formatPrice(service.co_pay_price)}
                         </span>
                       </div>
                     </TooltipTrigger>
