@@ -789,6 +789,198 @@ export type Database = {
         }
         Relationships: []
       }
+      service_provider_availability: {
+        Row: {
+          availability_message: string | null
+          calendar_link: string | null
+          created_at: string
+          id: string
+          is_available_now: boolean
+          next_available_slot: string | null
+          service_provider_id: string
+          updated_at: string
+        }
+        Insert: {
+          availability_message?: string | null
+          calendar_link?: string | null
+          created_at?: string
+          id?: string
+          is_available_now?: boolean
+          next_available_slot?: string | null
+          service_provider_id: string
+          updated_at?: string
+        }
+        Update: {
+          availability_message?: string | null
+          calendar_link?: string | null
+          created_at?: string
+          id?: string
+          is_available_now?: boolean
+          next_available_slot?: string | null
+          service_provider_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_provider_availability_service_provider_id_fkey"
+            columns: ["service_provider_id"]
+            isOneToOne: false
+            referencedRelation: "service_providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_provider_credentials: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          is_active: boolean
+          last_login: string | null
+          password_hash: string
+          service_provider_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          is_active?: boolean
+          last_login?: string | null
+          password_hash: string
+          service_provider_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          is_active?: boolean
+          last_login?: string | null
+          password_hash?: string
+          service_provider_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_provider_credentials_service_provider_id_fkey"
+            columns: ["service_provider_id"]
+            isOneToOne: false
+            referencedRelation: "service_providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_providers: {
+        Row: {
+          campaigns_funded: number | null
+          co_marketing_agents: number | null
+          contact_email: string | null
+          created_at: string
+          description: string | null
+          id: string
+          individual_email: string | null
+          individual_license_number: string | null
+          individual_name: string | null
+          individual_phone: string | null
+          individual_title: string | null
+          is_active: boolean | null
+          is_verified: boolean | null
+          latitude: number | null
+          license_states: string[] | null
+          location: string | null
+          logo_url: string | null
+          longitude: number | null
+          mls_areas: string[] | null
+          name: string
+          nmls_id: string | null
+          parent_provider_id: string | null
+          phone: string | null
+          provider_type: string | null
+          rating: number | null
+          review_count: number | null
+          service_radius_miles: number | null
+          service_states: string[] | null
+          service_zip_codes: string[] | null
+          updated_at: string
+          website_url: string | null
+        }
+        Insert: {
+          campaigns_funded?: number | null
+          co_marketing_agents?: number | null
+          contact_email?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          individual_email?: string | null
+          individual_license_number?: string | null
+          individual_name?: string | null
+          individual_phone?: string | null
+          individual_title?: string | null
+          is_active?: boolean | null
+          is_verified?: boolean | null
+          latitude?: number | null
+          license_states?: string[] | null
+          location?: string | null
+          logo_url?: string | null
+          longitude?: number | null
+          mls_areas?: string[] | null
+          name: string
+          nmls_id?: string | null
+          parent_provider_id?: string | null
+          phone?: string | null
+          provider_type?: string | null
+          rating?: number | null
+          review_count?: number | null
+          service_radius_miles?: number | null
+          service_states?: string[] | null
+          service_zip_codes?: string[] | null
+          updated_at?: string
+          website_url?: string | null
+        }
+        Update: {
+          campaigns_funded?: number | null
+          co_marketing_agents?: number | null
+          contact_email?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          individual_email?: string | null
+          individual_license_number?: string | null
+          individual_name?: string | null
+          individual_phone?: string | null
+          individual_title?: string | null
+          is_active?: boolean | null
+          is_verified?: boolean | null
+          latitude?: number | null
+          license_states?: string[] | null
+          location?: string | null
+          logo_url?: string | null
+          longitude?: number | null
+          mls_areas?: string[] | null
+          name?: string
+          nmls_id?: string | null
+          parent_provider_id?: string | null
+          phone?: string | null
+          provider_type?: string | null
+          rating?: number | null
+          review_count?: number | null
+          service_radius_miles?: number | null
+          service_states?: string[] | null
+          service_zip_codes?: string[] | null
+          updated_at?: string
+          website_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_providers_parent_provider_id_fkey"
+            columns: ["parent_provider_id"]
+            isOneToOne: false
+            referencedRelation: "service_providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       service_views: {
         Row: {
           id: string
@@ -847,6 +1039,7 @@ export type Database = {
           rating: number | null
           requires_quote: boolean | null
           retail_price: string | null
+          service_provider_id: string | null
           tags: string[] | null
           title: string
           updated_at: string | null
@@ -871,6 +1064,7 @@ export type Database = {
           rating?: number | null
           requires_quote?: boolean | null
           retail_price?: string | null
+          service_provider_id?: string | null
           tags?: string[] | null
           title: string
           updated_at?: string | null
@@ -895,12 +1089,20 @@ export type Database = {
           rating?: number | null
           requires_quote?: boolean | null
           retail_price?: string | null
+          service_provider_id?: string | null
           tags?: string[] | null
           title?: string
           updated_at?: string | null
           vendor_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "services_service_provider_id_fkey"
+            columns: ["service_provider_id"]
+            isOneToOne: false
+            referencedRelation: "service_providers"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "services_vendor_id_fkey"
             columns: ["vendor_id"]
