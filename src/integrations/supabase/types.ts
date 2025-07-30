@@ -515,6 +515,158 @@ export type Database = {
           },
         ]
       }
+      video_ratings: {
+        Row: {
+          created_at: string | null
+          id: string
+          rating: number
+          user_id: string
+          video_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          rating: number
+          user_id: string
+          video_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          rating?: number
+          user_id?: string
+          video_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_ratings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "video_ratings_video_id_fkey"
+            columns: ["video_id"]
+            isOneToOne: false
+            referencedRelation: "videos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      video_views: {
+        Row: {
+          completed: boolean | null
+          id: string
+          user_id: string | null
+          video_id: string
+          viewed_at: string | null
+          watch_duration: number | null
+        }
+        Insert: {
+          completed?: boolean | null
+          id?: string
+          user_id?: string | null
+          video_id: string
+          viewed_at?: string | null
+          watch_duration?: number | null
+        }
+        Update: {
+          completed?: boolean | null
+          id?: string
+          user_id?: string | null
+          video_id?: string
+          viewed_at?: string | null
+          watch_duration?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_views_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "video_views_video_id_fkey"
+            columns: ["video_id"]
+            isOneToOne: false
+            referencedRelation: "videos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      videos: {
+        Row: {
+          category: string
+          created_at: string | null
+          creator_id: string | null
+          creator_name: string
+          description: string | null
+          duration: string
+          id: string
+          is_featured: boolean | null
+          is_pro: boolean | null
+          rating: number | null
+          status: string | null
+          tags: string[] | null
+          thumbnail_url: string | null
+          title: string
+          updated_at: string | null
+          upload_date: string | null
+          video_url: string | null
+          view_count: number | null
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          creator_id?: string | null
+          creator_name: string
+          description?: string | null
+          duration: string
+          id?: string
+          is_featured?: boolean | null
+          is_pro?: boolean | null
+          rating?: number | null
+          status?: string | null
+          tags?: string[] | null
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string | null
+          upload_date?: string | null
+          video_url?: string | null
+          view_count?: number | null
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          creator_id?: string | null
+          creator_name?: string
+          description?: string | null
+          duration?: string
+          id?: string
+          is_featured?: boolean | null
+          is_pro?: boolean | null
+          rating?: number | null
+          status?: string | null
+          tags?: string[] | null
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string | null
+          upload_date?: string | null
+          video_url?: string | null
+          view_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "videos_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
     }
     Views: {
       vendors_with_local_reps: {
@@ -587,6 +739,10 @@ export type Database = {
           website_url: string
           avatar_url: string
         }[]
+      }
+      increment_video_views: {
+        Args: { video_uuid: string }
+        Returns: undefined
       }
     }
     Enums: {
