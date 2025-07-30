@@ -26,11 +26,9 @@ const Index = () => {
             <div className="flex items-center justify-between">
               {/* Logo */}
               <div className="flex items-center gap-2 sm:gap-3">
-                <img 
-                  src={circleLogoUrl} 
-                  alt="Circle Logo" 
-                  className="w-10 h-10 sm:w-12 sm:h-12 object-contain"
-                />
+                <h1 className="font-handlee text-2xl sm:text-3xl font-normal text-black">
+                  Circle
+                </h1>
               </div>
               
               {/* Navigation Tabs - Responsive */}
