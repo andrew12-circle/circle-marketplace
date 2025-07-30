@@ -49,9 +49,28 @@ interface Service {
   description: string;
   category: string;
   price: string;
-  pricing_model: string;
-  is_featured: boolean;
   image_url?: string;
+  is_featured: boolean;
+  vendor_id: string;
+  base_pricing_tiers?: Array<{
+    tier_name: string;
+    price: number;
+    description?: string;
+    features?: string[];
+  }>;
+  pro_pricing_tiers?: Array<{
+    tier_name: string;
+    price: number;
+    description?: string;
+    features?: string[];
+  }>;
+  copay_pricing_tiers?: Array<{
+    tier_name: string;
+    price: number;
+    description?: string;
+    features?: string[];
+  }>;
+  supports_copay?: boolean;
   funnel_content?: {
     headline: string;
     subheadline: string;
@@ -155,9 +174,28 @@ export const VendorDashboard = () => {
     description: '',
     category: '',
     price: '',
-    pricing_model: 'one_time',
     is_featured: false,
     image_url: '',
+    vendor_id: '',
+    base_pricing_tiers: [] as Array<{
+      tier_name: string;
+      price: number;
+      description?: string;
+      features?: string[];
+    }>,
+    pro_pricing_tiers: [] as Array<{
+      tier_name: string;
+      price: number;
+      description?: string;
+      features?: string[];
+    }>,
+    copay_pricing_tiers: [] as Array<{
+      tier_name: string;
+      price: number;
+      description?: string;
+      features?: string[];
+    }>,
+    supports_copay: false,
     funnel_content: {
       headline: '',
       subheadline: '',
@@ -252,90 +290,118 @@ export const VendorDashboard = () => {
     try {
       setIsLoading(true);
       
-      // Simulate API calls - replace with actual Supabase calls
-      const mockServices: Service[] = [
-        {
-          id: '1',
-          title: 'CRM Marketing Automation',
-          description: 'Complete CRM solution with automated email campaigns, lead scoring, and real estate specific workflows.',
-          category: 'crm_software',
-          price: '$299/month',
-          pricing_model: 'subscription',
-          is_featured: true,
-          image_url: '/api/placeholder/400/300',
-          views: 1250,
-          conversions: 45,
-          created_at: '2024-01-15T00:00:00Z',
-          funnel_content: {
-            headline: 'Close More Deals with Smart CRM Automation',
-            subheadline: 'Automate your lead nurturing and never miss a follow-up again',
-            heroDescription: 'Complete CRM solution with automated email campaigns, lead scoring, and real estate specific workflows.',
-            estimatedRoi: 4.2,
-            duration: '30 days',
-            whyChooseUs: {
-              title: 'Why Choose Our CRM?',
-              benefits: [
-                { icon: 'check', title: 'Proven Results', description: 'Increase conversions by 40%' },
-                { icon: 'check', title: 'Expert Support', description: '24/7 professional assistance' },
-                { icon: 'check', title: 'Fast Implementation', description: 'Up and running in 24 hours' }
-              ]
-            },
-            media: [],
-            packages: [
+      // Get current user profile
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
+      // Fetch vendor's services
+      const { data: services, error } = await supabase
+        .from('services')
+        .select(`
+          id,
+          title,
+          description,
+          category,
+          price,
+          image_url,
+          is_featured,
+          vendor_id,
+          created_at
+        `)
+        .eq('vendor_id', user.id);
+
+      if (error) {
+        throw error;
+      }
+
+      // Transform services data
+      const transformedServices: Service[] = (services || []).map(service => ({
+        id: service.id,
+        title: service.title,
+        description: service.description || '',
+        category: service.category,
+        price: service.price,
+        image_url: service.image_url,
+        is_featured: service.is_featured,
+        vendor_id: service.vendor_id,
+        base_pricing_tiers: [],
+        pro_pricing_tiers: [],
+        copay_pricing_tiers: [],
+        supports_copay: false,
+        created_at: service.created_at,
+        views: 0, // These would come from analytics tables
+        conversions: 0,
+        funnel_content: {
+          headline: service.title,
+          subheadline: 'Transform your real estate business',
+          heroDescription: service.description || '',
+          estimatedRoi: 3,
+          duration: '30 days',
+          whyChooseUs: {
+            title: 'Why Choose Our Service?',
+            benefits: [
+              { icon: 'check', title: 'Proven Results', description: 'Get measurable results fast' },
+              { icon: 'check', title: 'Expert Support', description: '24/7 professional assistance' },
+              { icon: 'check', title: 'Fast Implementation', description: 'Up and running in minutes' }
+            ]
+          },
+          media: [],
+          packages: [
+            {
+              id: 'standard',
+              name: 'Standard Package',
+              description: 'Perfect for most businesses',
+              price: 299,
+              features: ['Core features', 'Email support', 'Monthly updates'],
+              popular: true
+            }
+          ],
+          socialProof: {
+            testimonials: [
               {
-                id: 'standard',
-                name: 'Standard Package',
-                description: 'Perfect for most businesses',
-                price: 299,
-                features: ['Core features', 'Email support', 'Monthly updates'],
-                popular: true
+                id: '1',
+                name: 'John Smith',
+                role: 'Real Estate Agent',
+                content: 'This service transformed my business...',
+                rating: 5
               }
             ],
-            socialProof: {
-              testimonials: [
-                {
-                  id: '1',
-                  name: 'Sarah Johnson',
-                  role: 'Top Producer, Keller Williams',
-                  content: 'Increased my conversions by 40% in the first month!',
-                  rating: 5
-                }
-              ],
-              stats: [
-                { label: 'Happy Customers', value: '5000+' },
-                { label: 'Success Rate', value: '95%' }
-              ]
-            },
-            trustIndicators: {
-              guarantee: '30-day money back guarantee',
-              cancellation: 'Cancel anytime',
-              certification: 'Industry Leader'
-            },
-            callToAction: {
-              primaryHeadline: 'Need More Information?',
-              primaryDescription: 'Visit our website for detailed documentation and resources.',
-              primaryButtonText: 'Visit Official Website',
-              secondaryHeadline: 'Questions? We\'re Here to Help!',
-              secondaryDescription: 'Speak with our experts to find the perfect package for your business.',
-              contactInfo: {
-                phone: '(555) 123-4567',
-                email: 'support@crmtool.com',
-                website: 'https://crmtool.com'
-              }
-            },
-            urgency: {
-              enabled: false,
-              message: 'Limited time offer!'
+            stats: [
+              { label: 'Happy Customers', value: '1000+' },
+              { label: 'Success Rate', value: '98%' }
+            ]
+          },
+          trustIndicators: {
+            guarantee: '30-day money back guarantee',
+            cancellation: 'Cancel anytime',
+            certification: 'Industry certified'
+          },
+          callToAction: {
+            primaryHeadline: 'Need More Information?',
+            primaryDescription: 'Visit our website for detailed documentation and resources.',
+            primaryButtonText: 'Visit Official Website',
+            secondaryHeadline: 'Questions? We\'re Here to Help!',
+            secondaryDescription: 'Speak with our experts to find the perfect package for your business.',
+            contactInfo: {
+              phone: '',
+              email: '',
+              website: ''
             }
+          },
+          urgency: {
+            enabled: false,
+            message: 'Limited time offer!'
           }
         }
-      ];
+      }));
 
-      setServices(mockServices);
+      setServices(transformedServices);
       setStats({
-        total_services: mockServices.length,
-        total_views: mockServices.reduce((sum, s) => sum + s.views, 0),
-        total_bookings: mockServices.reduce((sum, s) => sum + s.conversions, 0),
+        total_services: transformedServices.length,
+        total_views: transformedServices.reduce((sum, s) => sum + s.views, 0),
+        total_bookings: transformedServices.reduce((sum, s) => sum + s.conversions, 0),
         conversion_rate: 4.2,
         monthly_revenue: 15847
       });
@@ -358,9 +424,13 @@ export const VendorDashboard = () => {
       description: '',
       category: '',
       price: '',
-      pricing_model: 'one_time',
       is_featured: false,
       image_url: '',
+      vendor_id: '',
+      base_pricing_tiers: [],
+      pro_pricing_tiers: [],
+      copay_pricing_tiers: [],
+      supports_copay: false,
       funnel_content: {
         headline: '',
         subheadline: '',
@@ -436,9 +506,13 @@ export const VendorDashboard = () => {
         description: service.description,
         category: service.category,
         price: service.price,
-        pricing_model: service.pricing_model,
         is_featured: service.is_featured,
         image_url: service.image_url || '',
+        vendor_id: service.vendor_id,
+        base_pricing_tiers: service.base_pricing_tiers || [],
+        pro_pricing_tiers: service.pro_pricing_tiers || [],
+        copay_pricing_tiers: service.copay_pricing_tiers || [],
+        supports_copay: service.supports_copay || false,
         funnel_content: service.funnel_content || {
           headline: '',
           subheadline: '',
@@ -513,30 +587,74 @@ export const VendorDashboard = () => {
     resetServiceForm();
   };
 
-  const saveService = () => {
-    // Here you would save to Supabase
-    const newService: Service = {
-      id: editingService?.id || Date.now().toString(),
-      ...serviceForm,
-      views: editingService?.views || 0,
-      conversions: editingService?.conversions || 0,
-      created_at: editingService?.created_at || new Date().toISOString()
-    };
+  const saveService = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
 
-    if (editingService) {
-      setServices(prev => prev.map(s => s.id === editingService.id ? newService : s));
-      toast({ title: "Success", description: "Service updated successfully!" });
-    } else {
-      setServices(prev => [...prev, newService]);
-      toast({ title: "Success", description: "Service created successfully!" });
+      const serviceData = {
+        title: serviceForm.title,
+        description: serviceForm.description,
+        category: serviceForm.category,
+        price: serviceForm.price,
+        image_url: serviceForm.image_url,
+        is_featured: serviceForm.is_featured,
+        vendor_id: user.id
+      };
+
+      if (editingService) {
+        const { error } = await supabase
+          .from('services')
+          .update(serviceData)
+          .eq('id', editingService.id);
+
+        if (error) throw error;
+        
+        toast({ title: "Success", description: "Service updated successfully!" });
+      } else {
+        const { error } = await supabase
+          .from('services')
+          .insert([serviceData]);
+
+        if (error) throw error;
+        
+        toast({ title: "Success", description: "Service created successfully!" });
+      }
+
+      // Reload services data
+      await loadDashboardData();
+      closeServiceBuilder();
+    } catch (error) {
+      console.error('Error saving service:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save service",
+        variant: "destructive"
+      });
     }
-
-    closeServiceBuilder();
   };
 
-  const deleteService = (serviceId: string) => {
-    setServices(prev => prev.filter(s => s.id !== serviceId));
-    toast({ title: "Success", description: "Service deleted successfully!" });
+  const deleteService = async (serviceId: string) => {
+    try {
+      const { error } = await supabase
+        .from('services')
+        .delete()
+        .eq('id', serviceId);
+
+      if (error) throw error;
+
+      setServices(prev => prev.filter(s => s.id !== serviceId));
+      toast({ title: "Success", description: "Service deleted successfully!" });
+    } catch (error) {
+      console.error('Error deleting service:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete service",
+        variant: "destructive"
+      });
+    }
   };
 
   if (isLoading) {
@@ -967,23 +1085,16 @@ export const VendorDashboard = () => {
                       />
                     </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="pricing-model">Pricing Model *</Label>
-                      <Select 
-                        value={serviceForm.pricing_model} 
-                        onValueChange={(value) => setServiceForm(prev => ({ ...prev, pricing_model: value }))}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="one_time">One-time Payment</SelectItem>
-                          <SelectItem value="subscription">Monthly Subscription</SelectItem>
-                          <SelectItem value="per_transaction">Per Transaction</SelectItem>
-                          <SelectItem value="custom">Custom Quote</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+                     <div className="space-y-2">
+                       <Label htmlFor="copay-support">Supports Co-pay</Label>
+                       <Switch
+                         checked={serviceForm.supports_copay}
+                         onCheckedChange={(checked) => setServiceForm(prev => ({ ...prev, supports_copay: checked }))}
+                       />
+                       <p className="text-xs text-muted-foreground">
+                         Enable if this service offers co-pay pricing options
+                       </p>
+                     </div>
                   </div>
 
                   <div className="space-y-2">
