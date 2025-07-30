@@ -18,6 +18,7 @@ import {
   Building,
   MapPin,
   Calendar,
+  Clock,
   Phone,
   Mail,
   ShoppingCart,
@@ -200,240 +201,345 @@ export const ServiceFunnelModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl max-h-[95vh] overflow-y-auto p-0">
+      <DialogContent className="max-w-7xl max-h-[95vh] overflow-y-auto p-0">
         <DialogHeader className="sr-only">
           <span>Service Details</span>
         </DialogHeader>
         
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-6">
-          {/* Left Column - Images */}
-          <div className="lg:col-span-5">
-            <div className="sticky top-6">
-              {/* Main Image */}
-              <div className="aspect-square bg-muted rounded-lg mb-4 overflow-hidden">
-                {service.image_url ? (
-                  <img 
-                    src={service.image_url} 
-                    alt={service.title}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <Building className="w-24 h-24 text-muted-foreground" />
-                  </div>
+        {/* Hero Section */}
+        <div className="relative bg-gradient-to-r from-blue-600 to-purple-600 text-white p-8">
+          <div className="absolute inset-0 bg-black/20"></div>
+          <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 mb-2">
+                {service.vendor.is_verified && (
+                  <Badge className="bg-green-500 text-white">
+                    <Verified className="w-3 h-3 mr-1" />
+                    Top Rated Pro
+                  </Badge>
                 )}
+                <Badge className="bg-orange-500 text-white">
+                  <Trophy className="w-3 h-3 mr-1" />
+                  Premium Provider
+                </Badge>
               </div>
-              
-              {/* Thumbnail Gallery */}
-              <div className="grid grid-cols-4 gap-2">
-                {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="aspect-square bg-muted rounded border-2 border-transparent hover:border-primary cursor-pointer">
-                    <div className="w-full h-full flex items-center justify-center">
-                      <Building className="w-8 h-8 text-muted-foreground" />
-                    </div>
+              <h1 className="text-4xl font-bold leading-tight">{service.title}</h1>
+              <p className="text-xl text-blue-100">
+                Transform your real estate business with our proven system
+              </p>
+              <div className="flex items-center gap-4">
+                {renderStarRating(service.vendor.rating, "lg")}
+                <span className="text-lg">
+                  {service.vendor.rating} ({service.vendor.review_count}+ reviews)
+                </span>
+              </div>
+            </div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20">
+              <h3 className="text-2xl font-bold mb-4">Why Choose {service.vendor.name}?</h3>
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="bg-green-500 rounded-full p-1">
+                    <TrendingUp className="w-4 h-4" />
                   </div>
-                ))}
+                  <span className="text-lg">Average 250% ROI increase</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="bg-green-500 rounded-full p-1">
+                    <Users className="w-4 h-4" />
+                  </div>
+                  <span className="text-lg">500+ successful implementations</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="bg-green-500 rounded-full p-1">
+                    <Zap className="w-4 h-4" />
+                  </div>
+                  <span className="text-lg">Setup in 7 days or less</span>
+                </div>
               </div>
             </div>
           </div>
+        </div>
 
-          {/* Middle Column - Product Details */}
-          <div className="lg:col-span-4 space-y-4">
-            {/* Title and Rating */}
-            <div>
-              <h1 className="text-2xl font-bold mb-2">{service.title}</h1>
-              <div className="flex items-center gap-2 mb-2">
-                {renderStarRating(service.vendor.rating)}
-                <span className="text-sm text-blue-600 hover:text-blue-800 cursor-pointer">
-                  {service.vendor.rating} ({service.vendor.review_count} ratings)
-                </span>
-                {service.vendor.is_verified && (
-                  <Badge className="bg-orange-100 text-orange-800 text-xs">
-                    <Verified className="w-3 h-3 mr-1" />
-                    Verified Provider
-                  </Badge>
-                )}
-              </div>
-              <p className="text-sm text-muted-foreground mb-2">by {service.vendor.name}</p>
-              {getRiskBadge(riskLevel)}
-            </div>
-
-            <Separator />
-
-            {/* Price Section */}
-            <div className="space-y-2">
-              <div className="flex items-baseline gap-2">
-                <span className="text-xs text-muted-foreground">List Price:</span>
-                <span className="text-sm text-muted-foreground line-through">
-                  ${selectedPkg.originalPrice.toFixed(2)}
-                </span>
-              </div>
-              <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-bold text-red-600">
-                  ${selectedPkg.price.toFixed(2)}
-                </span>
-                <Badge className="bg-red-500 text-white">
-                  Save ${(selectedPkg.originalPrice - selectedPkg.price).toFixed(2)}
-                </Badge>
-              </div>
-              {isProMember && service.pro_price && (
-                <div className="flex items-baseline gap-2">
-                  <Crown className="w-4 h-4 text-circle-primary" />
-                  <span className="text-lg font-bold text-circle-primary">
-                    Circle Pro: ${service.pro_price}
-                  </span>
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-6">
+          {/* Left Column - Media and Social Proof */}
+          <div className="lg:col-span-5 space-y-6">
+            {/* Main Image/Video */}
+            <div className="aspect-video bg-muted rounded-lg overflow-hidden relative">
+              {service.image_url ? (
+                <img 
+                  src={service.image_url} 
+                  alt={service.title}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
+                  <Building className="w-24 h-24 text-blue-400" />
                 </div>
               )}
-              <p className="text-sm text-muted-foreground">
-                FREE setup and onboarding included
-              </p>
+              <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                <Button className="bg-red-600 hover:bg-red-700 text-white rounded-full p-4">
+                  <div className="w-0 h-0 border-t-[12px] border-t-transparent border-l-[20px] border-l-white border-b-[12px] border-b-transparent ml-1"></div>
+                </Button>
+              </div>
             </div>
 
-            <Separator />
-
-            {/* Package Selection */}
-            <div className="space-y-3">
-              <h3 className="font-semibold">Choose your package:</h3>
-              {packages.map((pkg) => (
-                <div 
-                  key={pkg.id}
-                  className={`border rounded-lg p-3 cursor-pointer transition-colors ${
-                    selectedPackage === pkg.id ? 'border-primary bg-primary/5' : 'border-border hover:border-muted-foreground'
-                  } ${pkg.popular ? 'relative' : ''}`}
-                  onClick={() => setSelectedPackage(pkg.id)}
-                >
-                  {pkg.popular && (
-                    <Badge className="absolute -top-2 left-3 bg-orange-500">
-                      Most Popular
-                    </Badge>
-                  )}
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-medium">{pkg.name}</span>
-                    <span className="font-bold">${pkg.price.toFixed(2)}</span>
+            {/* Thumbnail Gallery */}
+            <div className="grid grid-cols-4 gap-2">
+              {[
+                { label: "Demo Video", icon: "video" },
+                { label: "Case Study", icon: "chart" },
+                { label: "Training", icon: "book" },
+                { label: "Results", icon: "trophy" }
+              ].map((item, i) => (
+                <div key={i} className="aspect-square bg-muted rounded border-2 border-transparent hover:border-primary cursor-pointer relative overflow-hidden">
+                  <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
+                    {item.icon === "video" && <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center"><div className="w-0 h-0 border-t-[6px] border-t-transparent border-l-[10px] border-l-white border-b-[6px] border-b-transparent ml-0.5"></div></div>}
+                    {item.icon === "chart" && <TrendingUp className="w-8 h-8 text-green-500" />}
+                    {item.icon === "book" && <Building className="w-8 h-8 text-blue-500" />}
+                    {item.icon === "trophy" && <Trophy className="w-8 h-8 text-yellow-500" />}
+                    <span className="text-xs text-center mt-1 px-1">{item.label}</span>
                   </div>
-                  <p className="text-sm text-muted-foreground mb-2">{pkg.description}</p>
-                  <ul className="text-xs text-muted-foreground space-y-1">
-                    {pkg.features.slice(0, 2).map((feature, i) => (
-                      <li key={i} className="flex items-center gap-1">
-                        <CheckCircle className="w-3 h-3 text-green-500" />
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
                 </div>
               ))}
             </div>
 
-            <Separator />
-
-            {/* Key Features */}
-            <div className="space-y-3">
-              <h3 className="font-semibold">About this service:</h3>
-              <ul className="space-y-2 text-sm">
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-500 mt-0.5" />
-                  <span>Professional implementation and setup</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-500 mt-0.5" />
-                  <span>Dedicated support throughout the process</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-500 mt-0.5" />
-                  <span>{service.duration || "Flexible timeline"} delivery</span>
-                </li>
-                {service.estimated_roi && (
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 text-green-500 mt-0.5" />
-                    <span>Estimated {service.estimated_roi}x return on investment</span>
-                  </li>
-                )}
-              </ul>
+            {/* Social Proof Cards */}
+            <div className="space-y-4">
+              <h3 className="font-bold text-lg">Recent Success Stories</h3>
+              <div className="space-y-3">
+                <Card className="p-4 border-l-4 border-l-green-500">
+                  <div className="flex items-start gap-3">
+                    <div className="bg-green-100 rounded-full p-2">
+                      <TrendingUp className="w-4 h-4 text-green-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium">Sarah M. - Keller Williams</p>
+                      <p className="text-sm text-muted-foreground">"Increased my closing rate by 180% in just 3 months!"</p>
+                      <div className="flex items-center gap-1 mt-1">
+                        {renderStarRating(5)}
+                        <span className="text-xs text-muted-foreground ml-2">2 days ago</span>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+                
+                <Card className="p-4 border-l-4 border-l-blue-500">
+                  <div className="flex items-start gap-3">
+                    <div className="bg-blue-100 rounded-full p-2">
+                      <DollarSign className="w-4 h-4 text-blue-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium">Mike R. - RE/MAX</p>
+                      <p className="text-sm text-muted-foreground">"ROI was 320% in the first quarter alone."</p>
+                      <div className="flex items-center gap-1 mt-1">
+                        {renderStarRating(5)}
+                        <span className="text-xs text-muted-foreground ml-2">1 week ago</span>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              </div>
             </div>
           </div>
 
-          {/* Right Column - Purchase Options */}
+          {/* Middle Column - Value Proposition */}
+          <div className="lg:col-span-4 space-y-6">
+            <div>
+              <h2 className="text-2xl font-bold mb-4">What You'll Get</h2>
+              <div className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <div className="bg-green-100 rounded-full p-2 mt-1">
+                    <Target className="w-5 h-5 text-green-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold">Proven Lead Generation System</h3>
+                    <p className="text-sm text-muted-foreground">Our proprietary system that's generated over $50M in commissions for our clients</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start gap-3">
+                  <div className="bg-blue-100 rounded-full p-2 mt-1">
+                    <Zap className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold">Complete Setup & Training</h3>
+                    <p className="text-sm text-muted-foreground">White-glove implementation with 1-on-1 training sessions</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start gap-3">
+                  <div className="bg-purple-100 rounded-full p-2 mt-1">
+                    <Users className="w-5 h-5 text-purple-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold">Ongoing Support & Optimization</h3>
+                    <p className="text-sm text-muted-foreground">Dedicated account manager and monthly strategy calls</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* ROI Calculator */}
+            <div className="bg-gradient-to-r from-green-50 to-blue-50 p-4 rounded-lg border">
+              <h3 className="font-bold text-lg mb-3">ROI Calculator</h3>
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-sm">Current monthly closings:</span>
+                  <span className="font-medium">3 deals</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm">Average commission:</span>
+                  <span className="font-medium">$8,500</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm">With our system (150% increase):</span>
+                  <span className="font-medium text-green-600">7.5 deals</span>
+                </div>
+                <Separator />
+                <div className="flex justify-between text-lg font-bold">
+                  <span>Additional monthly income:</span>
+                  <span className="text-green-600">+$38,250</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span>Annual increase:</span>
+                  <span className="text-green-600 font-semibold">+$459,000</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Time Investment */}
+            <div className="bg-blue-50 p-4 rounded-lg border">
+              <h3 className="font-bold mb-3">Time Investment</h3>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-blue-600" />
+                  <span className="text-sm">Setup: 2-3 hours over 1 week</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-blue-600" />
+                  <span className="text-sm">Daily maintenance: 15 minutes</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Trophy className="w-4 h-4 text-blue-600" />
+                  <span className="text-sm">Results visible: Within 30 days</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Urgency */}
+            <div className="bg-red-50 border border-red-200 p-4 rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                <span className="font-semibold text-red-700">Limited Availability</span>
+              </div>
+              <p className="text-sm text-red-600">
+                We only take on 5 new clients per month to ensure quality service. 
+                <span className="font-semibold"> 2 spots remaining this month.</span>
+              </p>
+            </div>
+          </div>
+
+          {/* Right Column - CTA and Contact */}
           <div className="lg:col-span-3">
-            <div className="sticky top-6">
-              <Card className="p-4 space-y-4">
-                <div className="space-y-2">
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-xl font-bold">${(selectedPkg.price * quantity).toFixed(2)}</span>
-                    <span className="text-sm text-muted-foreground line-through">
-                      ${(selectedPkg.originalPrice * quantity).toFixed(2)}
-                    </span>
+            <div className="sticky top-6 space-y-4">
+              <Card className="p-6 space-y-4 border-2 border-primary">
+                <div className="text-center space-y-2">
+                  <h3 className="text-xl font-bold">Ready to Transform Your Business?</h3>
+                  <p className="text-sm text-muted-foreground">Custom pricing based on your specific needs</p>
+                </div>
+
+                <div className="space-y-3">
+                  <Button className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold" size="lg">
+                    <Phone className="w-4 h-4 mr-2" />
+                    Schedule Free Consultation
+                  </Button>
+                  
+                  <Button variant="outline" className="w-full" size="lg">
+                    <Mail className="w-4 h-4 mr-2" />
+                    Get Custom Quote
+                  </Button>
+
+                  <div className="text-center">
+                    <p className="text-xs text-muted-foreground">
+                      <span className="font-medium">Free consultation</span> • No obligation • Response within 2 hours
+                    </p>
                   </div>
-                  <p className="text-sm text-green-600 font-medium">Available Now</p>
-                  <p className="text-xs text-muted-foreground">
-                    Setup begins within 2 business days
-                  </p>
                 </div>
 
                 <Separator />
 
-                {/* Quantity */}
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Quantity:</label>
-                  <div className="flex items-center gap-2">
-                    <Button 
-                      variant="outline" 
-                      size="icon"
-                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                      className="h-8 w-8"
-                    >
-                      <Minus className="w-4 h-4" />
-                    </Button>
-                    <span className="w-12 text-center border rounded px-2 py-1 text-sm">
-                      {quantity}
-                    </span>
-                    <Button 
-                      variant="outline" 
-                      size="icon"
-                      onClick={() => setQuantity(quantity + 1)}
-                      className="h-8 w-8"
-                    >
-                      <Plus className="w-4 h-4" />
-                    </Button>
+                  <h4 className="font-semibold text-sm">What happens next?</h4>
+                  <div className="space-y-2 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-green-100 rounded-full flex items-center justify-center">
+                        <span className="text-green-600 font-bold text-xs">1</span>
+                      </div>
+                      <span>15-min discovery call to understand your goals</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-green-100 rounded-full flex items-center justify-center">
+                        <span className="text-green-600 font-bold text-xs">2</span>
+                      </div>
+                      <span>Custom proposal with ROI projections</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-green-100 rounded-full flex items-center justify-center">
+                        <span className="text-green-600 font-bold text-xs">3</span>
+                      </div>
+                      <span>Implementation starts within 48 hours</span>
+                    </div>
                   </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Button 
-                    onClick={handleAddToCart}
-                    className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-medium"
-                    size="lg"
-                  >
-                    Add to Cart
-                  </Button>
-                  <Button 
-                    onClick={handleAddToCart}
-                    variant="outline"
-                    className="w-full"
-                    size="lg"
-                  >
-                    Buy Now
-                  </Button>
-                </div>
-
-                <div className="flex gap-2">
-                  <Button variant="ghost" size="sm" className="flex-1">
-                    <Heart className="w-4 h-4 mr-1" />
-                    Save
-                  </Button>
-                  <Button variant="ghost" size="sm" className="flex-1">
-                    <Share2 className="w-4 h-4 mr-1" />
-                    Share
-                  </Button>
                 </div>
 
                 <Separator />
 
-                <div className="text-xs text-muted-foreground space-y-1">
-                  <p>✓ 30-day satisfaction guarantee</p>
-                  <p>✓ Secure payment processing</p>
-                  <p>✓ RESPA compliant service</p>
+                <div className="text-center space-y-2">
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span className="text-sm font-medium text-green-600">Available Now</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">Typically responds within 1 hour</p>
                 </div>
               </Card>
+
+              {/* Trust Signals */}
+              <Card className="p-4">
+                <h4 className="font-semibold mb-3 text-sm">Why Agents Trust Us</h4>
+                <div className="space-y-2 text-xs text-muted-foreground">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="w-3 h-3 text-green-500" />
+                    <span>500+ successful implementations</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="w-3 h-3 text-green-500" />
+                    <span>99% client satisfaction rate</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="w-3 h-3 text-green-500" />
+                    <span>RESPA compliant & fully insured</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="w-3 h-3 text-green-500" />
+                    <span>Money-back guarantee</span>
+                  </div>
+                </div>
+              </Card>
+
+              {/* Save/Share */}
+              <div className="flex gap-2">
+                <Button variant="ghost" size="sm" className="flex-1">
+                  <Heart className="w-4 h-4 mr-1" />
+                  Save
+                </Button>
+                <Button variant="ghost" size="sm" className="flex-1">
+                  <Share2 className="w-4 h-4 mr-1" />
+                  Share
+                </Button>
+              </div>
             </div>
           </div>
         </div>
