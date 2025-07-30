@@ -217,216 +217,315 @@ export const VendorRegistration = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 py-8">
-      <div className="container max-w-4xl mx-auto px-4">
-        <Button
-          variant="ghost"
-          onClick={() => navigate("/")}
-          className="mb-6"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Home
-        </Button>
+    <div className="min-h-screen bg-gradient-to-br from-background via-secondary/10 to-accent/20 relative overflow-hidden">
+      {/* Background Decorative Elements */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent/10 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/2 left-1/3 w-64 h-64 bg-secondary/20 rounded-full blur-2xl"></div>
+      </div>
 
-        <Card className="shadow-lg">
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl md:text-3xl font-bold">
-              {registrationType === "co_marketing" ? "Co-Marketing Partner" : "Service Provider"} Registration
-            </CardTitle>
-            <CardDescription className="text-lg">
-              {registrationType === "co_marketing" 
-                ? "Join our network of marketing partners and grow your business"
-                : "Join our marketplace and connect with homebuyers and agents"
-              }
-            </CardDescription>
-            {registrationType === "co_marketing" && (
-              <Badge variant="secondary" className="mx-auto mt-2">
-                Co-Marketing Partner Application
-              </Badge>
-            )}
-          </CardHeader>
+      <div className="container max-w-5xl mx-auto px-4 py-8 relative z-10">
+        <div className="animate-fade-in">
+          <Button
+            variant="ghost"
+            onClick={() => navigate("/")}
+            className="mb-8 hover-scale group"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2 transition-transform group-hover:-translate-x-1" />
+            Back to Home
+          </Button>
 
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-8">
-              {/* Vendor Type Selection */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold flex items-center">
-                  <Building className="w-5 h-5 mr-2" />
-                  Business Type
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                  {VENDOR_TYPES.map((type) => (
-                    <Button
-                      key={type.value}
-                      type="button"
-                      variant={formData.vendorType === type.value ? "default" : "outline"}
-                      onClick={() => updateFormData("vendorType", type.value)}
-                      className="justify-start h-auto p-3"
-                    >
-                      {type.label}
-                    </Button>
-                  ))}
+          <Card className="shadow-2xl border-0 bg-card/95 backdrop-blur-sm animate-scale-in">
+            <CardHeader className="text-center relative pb-8">
+              <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-accent/5 to-secondary/5 rounded-t-lg"></div>
+              <div className="relative z-10">
+                <div className="flex justify-center mb-4">
+                  <div className="p-4 rounded-full bg-gradient-to-br from-primary to-accent shadow-lg">
+                    <Building className="w-8 h-8 text-primary-foreground" />
+                  </div>
                 </div>
-                {errors.vendorType && <p className="text-sm text-destructive">{errors.vendorType}</p>}
+                <CardTitle className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent mb-4">
+                  {registrationType === "co_marketing" ? "Co-Marketing Partner" : "Service Provider"} Registration
+                </CardTitle>
+                <CardDescription className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+                  {registrationType === "co_marketing" 
+                    ? "Join our network of marketing partners and grow your business with strategic collaborations and shared opportunities"
+                    : "Join our marketplace and connect with homebuyers, real estate agents, and grow your customer base"
+                  }
+                </CardDescription>
+                {registrationType === "co_marketing" && (
+                  <div className="flex justify-center mt-4">
+                    <Badge variant="secondary" className="bg-gradient-to-r from-accent/20 to-primary/20 text-primary border-primary/20 px-4 py-1">
+                      ✨ Co-Marketing Partner Application
+                    </Badge>
+                  </div>
+                )}
               </div>
+            </CardHeader>
 
-              {/* Company/Individual Information */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold flex items-center">
-                  <User className="w-5 h-5 mr-2" />
-                  Business Information
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="companyName">Company/Business Name</Label>
-                    <Input
-                      id="companyName"
-                      value={formData.companyName}
-                      onChange={(e) => updateFormData("companyName", e.target.value)}
-                      placeholder="ABC Title Company"
-                    />
-                    {errors.companyName && <p className="text-sm text-destructive">{errors.companyName}</p>}
+            <CardContent className="p-8">
+              <form onSubmit={handleSubmit} className="space-y-12">
+                {/* Vendor Type Selection */}
+                <div className="space-y-6 animate-fade-in">
+                  <div className="flex items-center space-x-3 mb-6">
+                    <div className="p-2 rounded-lg bg-gradient-to-br from-primary/10 to-accent/10">
+                      <Building className="w-6 h-6 text-primary" />
+                    </div>
+                    <h3 className="text-xl font-semibold text-foreground">Business Type</h3>
                   </div>
-                  <div>
-                    <Label htmlFor="individualName">Contact Person Name</Label>
-                    <Input
-                      id="individualName"
-                      value={formData.individualName}
-                      onChange={(e) => updateFormData("individualName", e.target.value)}
-                      placeholder="John Smith"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="individualTitle">Contact Person Title</Label>
-                    <Input
-                      id="individualTitle"
-                      value={formData.individualTitle}
-                      onChange={(e) => updateFormData("individualTitle", e.target.value)}
-                      placeholder="Owner, Manager, Agent, etc."
-                    />
-                  </div>
-                </div>
-                <div>
-                  <Label htmlFor="description">Business Description</Label>
-                  <Textarea
-                    id="description"
-                    value={formData.description}
-                    onChange={(e) => updateFormData("description", e.target.value)}
-                    placeholder="Describe your services, experience, and what makes you unique..."
-                    rows={4}
-                  />
-                  {errors.description && <p className="text-sm text-destructive">{errors.description}</p>}
-                </div>
-              </div>
-
-              {/* Contact Information */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold flex items-center">
-                  <Phone className="w-5 h-5 mr-2" />
-                  Contact Information
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="email">Business Email *</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => updateFormData("email", e.target.value)}
-                      placeholder="contact@company.com"
-                    />
-                    {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
-                  </div>
-                  <div>
-                    <Label htmlFor="phone">Business Phone *</Label>
-                    <Input
-                      id="phone"
-                      value={formData.phone}
-                      onChange={(e) => updateFormData("phone", e.target.value)}
-                      placeholder="(555) 123-4567"
-                    />
-                    {errors.phone && <p className="text-sm text-destructive">{errors.phone}</p>}
-                  </div>
-                  <div>
-                    <Label htmlFor="individualEmail">Contact Person Email</Label>
-                    <Input
-                      id="individualEmail"
-                      type="email"
-                      value={formData.individualEmail}
-                      onChange={(e) => updateFormData("individualEmail", e.target.value)}
-                      placeholder="john@company.com"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="websiteUrl">Website URL</Label>
-                    <Input
-                      id="websiteUrl"
-                      value={formData.websiteUrl}
-                      onChange={(e) => updateFormData("websiteUrl", e.target.value)}
-                      placeholder="https://www.yourcompany.com"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Service Area */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold flex items-center">
-                  <MapPin className="w-5 h-5 mr-2" />
-                  Service Area
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="location">Primary Business Location *</Label>
-                    <Input
-                      id="location"
-                      value={formData.location}
-                      onChange={(e) => updateFormData("location", e.target.value)}
-                      placeholder="City, State"
-                    />
-                    {errors.location && <p className="text-sm text-destructive">{errors.location}</p>}
-                  </div>
-                  <div>
-                    <Label htmlFor="serviceRadiusMiles">Service Radius (Miles)</Label>
-                    <Input
-                      id="serviceRadiusMiles"
-                      type="number"
-                      value={formData.serviceRadiusMiles}
-                      onChange={(e) => updateFormData("serviceRadiusMiles", e.target.value)}
-                      placeholder="50"
-                    />
-                  </div>
-                </div>
-                
-                <div>
-                  <Label>States You Service</Label>
-                  <div className="grid grid-cols-6 md:grid-cols-10 gap-2 mt-2">
-                    {US_STATES.map((state) => (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {VENDOR_TYPES.map((type, index) => (
                       <Button
-                        key={state}
+                        key={type.value}
                         type="button"
-                        variant={formData.serviceStates.includes(state) ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => handleStateToggle("serviceStates", state)}
-                        className="h-8"
+                        variant={formData.vendorType === type.value ? "default" : "outline"}
+                        onClick={() => updateFormData("vendorType", type.value)}
+                        className={`justify-start h-auto p-4 transition-all duration-300 hover-scale group ${
+                          formData.vendorType === type.value 
+                            ? "bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-lg" 
+                            : "hover:bg-secondary/50 hover:border-primary/30"
+                        }`}
+                        style={{ animationDelay: `${index * 50}ms` }}
                       >
-                        {state}
+                        <span className="text-sm font-medium">{type.label}</span>
                       </Button>
                     ))}
                   </div>
+                  {errors.vendorType && (
+                    <p className="text-sm text-destructive animate-fade-in bg-destructive/10 p-2 rounded-md border border-destructive/20">
+                      {errors.vendorType}
+                    </p>
+                  )}
                 </div>
-                
-                <div>
-                  <Label htmlFor="serviceZipCodes">Specific Zip Codes (Optional)</Label>
-                  <Textarea
-                    id="serviceZipCodes"
-                    value={formData.serviceZipCodes}
-                    onChange={(e) => updateFormData("serviceZipCodes", e.target.value)}
-                    placeholder="12345, 12346, 12347..."
-                    rows={2}
-                  />
+
+                {/* Company/Individual Information */}
+                <div className="space-y-6 animate-fade-in">
+                  <div className="flex items-center space-x-3 mb-6">
+                    <div className="p-2 rounded-lg bg-gradient-to-br from-accent/10 to-secondary/10">
+                      <User className="w-6 h-6 text-accent" />
+                    </div>
+                    <h3 className="text-xl font-semibold text-foreground">Business Information</h3>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="companyName" className="text-sm font-medium text-foreground">
+                        Company/Business Name *
+                      </Label>
+                      <Input
+                        id="companyName"
+                        value={formData.companyName}
+                        onChange={(e) => updateFormData("companyName", e.target.value)}
+                        placeholder="ABC Title Company"
+                        className="transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary hover:border-primary/50"
+                      />
+                      {errors.companyName && (
+                        <p className="text-sm text-destructive animate-fade-in bg-destructive/10 p-2 rounded-md border border-destructive/20">
+                          {errors.companyName}
+                        </p>
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="individualName" className="text-sm font-medium text-foreground">
+                        Contact Person Name
+                      </Label>
+                      <Input
+                        id="individualName"
+                        value={formData.individualName}
+                        onChange={(e) => updateFormData("individualName", e.target.value)}
+                        placeholder="John Smith"
+                        className="transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary hover:border-primary/50"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="individualTitle" className="text-sm font-medium text-foreground">
+                        Contact Person Title
+                      </Label>
+                      <Input
+                        id="individualTitle"
+                        value={formData.individualTitle}
+                        onChange={(e) => updateFormData("individualTitle", e.target.value)}
+                        placeholder="Owner, Manager, Agent, etc."
+                        className="transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary hover:border-primary/50"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="description" className="text-sm font-medium text-foreground">
+                      Business Description *
+                    </Label>
+                    <Textarea
+                      id="description"
+                      value={formData.description}
+                      onChange={(e) => updateFormData("description", e.target.value)}
+                      placeholder="Describe your services, experience, and what makes you unique..."
+                      rows={4}
+                      className="transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary hover:border-primary/50 resize-none"
+                    />
+                    {errors.description && (
+                      <p className="text-sm text-destructive animate-fade-in bg-destructive/10 p-2 rounded-md border border-destructive/20">
+                        {errors.description}
+                      </p>
+                    )}
+                  </div>
                 </div>
-              </div>
+
+                {/* Contact Information */}
+                <div className="space-y-6 animate-fade-in">
+                  <div className="flex items-center space-x-3 mb-6">
+                    <div className="p-2 rounded-lg bg-gradient-to-br from-secondary/10 to-primary/10">
+                      <Phone className="w-6 h-6 text-secondary" />
+                    </div>
+                    <h3 className="text-xl font-semibold text-foreground">Contact Information</h3>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="email" className="text-sm font-medium text-foreground flex items-center">
+                        <Mail className="w-4 h-4 mr-1" />
+                        Business Email *
+                      </Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) => updateFormData("email", e.target.value)}
+                        placeholder="contact@company.com"
+                        className="transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary hover:border-primary/50"
+                      />
+                      {errors.email && (
+                        <p className="text-sm text-destructive animate-fade-in bg-destructive/10 p-2 rounded-md border border-destructive/20">
+                          {errors.email}
+                        </p>
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="phone" className="text-sm font-medium text-foreground flex items-center">
+                        <Phone className="w-4 h-4 mr-1" />
+                        Business Phone *
+                      </Label>
+                      <Input
+                        id="phone"
+                        value={formData.phone}
+                        onChange={(e) => updateFormData("phone", e.target.value)}
+                        placeholder="(555) 123-4567"
+                        className="transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary hover:border-primary/50"
+                      />
+                      {errors.phone && (
+                        <p className="text-sm text-destructive animate-fade-in bg-destructive/10 p-2 rounded-md border border-destructive/20">
+                          {errors.phone}
+                        </p>
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="individualEmail" className="text-sm font-medium text-foreground">
+                        Contact Person Email
+                      </Label>
+                      <Input
+                        id="individualEmail"
+                        type="email"
+                        value={formData.individualEmail}
+                        onChange={(e) => updateFormData("individualEmail", e.target.value)}
+                        placeholder="john@company.com"
+                        className="transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary hover:border-primary/50"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="websiteUrl" className="text-sm font-medium text-foreground flex items-center">
+                        <Globe className="w-4 h-4 mr-1" />
+                        Website URL
+                      </Label>
+                      <Input
+                        id="websiteUrl"
+                        value={formData.websiteUrl}
+                        onChange={(e) => updateFormData("websiteUrl", e.target.value)}
+                        placeholder="https://www.yourcompany.com"
+                        className="transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary hover:border-primary/50"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Service Area */}
+                <div className="space-y-6 animate-fade-in">
+                  <div className="flex items-center space-x-3 mb-6">
+                    <div className="p-2 rounded-lg bg-gradient-to-br from-primary/10 to-secondary/10">
+                      <MapPin className="w-6 h-6 text-primary" />
+                    </div>
+                    <h3 className="text-xl font-semibold text-foreground">Service Area</h3>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="location" className="text-sm font-medium text-foreground flex items-center">
+                        <MapPin className="w-4 h-4 mr-1" />
+                        Primary Business Location *
+                      </Label>
+                      <Input
+                        id="location"
+                        value={formData.location}
+                        onChange={(e) => updateFormData("location", e.target.value)}
+                        placeholder="City, State"
+                        className="transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary hover:border-primary/50"
+                      />
+                      {errors.location && (
+                        <p className="text-sm text-destructive animate-fade-in bg-destructive/10 p-2 rounded-md border border-destructive/20">
+                          {errors.location}
+                        </p>
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="serviceRadiusMiles" className="text-sm font-medium text-foreground">
+                        Service Radius (Miles)
+                      </Label>
+                      <Input
+                        id="serviceRadiusMiles"
+                        type="number"
+                        value={formData.serviceRadiusMiles}
+                        onChange={(e) => updateFormData("serviceRadiusMiles", e.target.value)}
+                        placeholder="50"
+                        className="transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary hover:border-primary/50"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <Label className="text-sm font-medium text-foreground">States You Service</Label>
+                    <div className="bg-secondary/30 rounded-lg p-4 border border-secondary/50">
+                      <div className="grid grid-cols-6 md:grid-cols-10 gap-2">
+                        {US_STATES.map((state, index) => (
+                          <Button
+                            key={state}
+                            type="button"
+                            variant={formData.serviceStates.includes(state) ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => handleStateToggle("serviceStates", state)}
+                            className={`h-10 text-xs font-medium transition-all duration-300 ${
+                              formData.serviceStates.includes(state)
+                                ? "bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-lg"
+                                : "hover:bg-primary/10 hover:border-primary/30"
+                            }`}
+                            style={{ animationDelay: `${index * 20}ms` }}
+                          >
+                            {state}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="serviceZipCodes" className="text-sm font-medium text-foreground">
+                      Specific Zip Codes (Optional)
+                    </Label>
+                    <Textarea
+                      id="serviceZipCodes"
+                      value={formData.serviceZipCodes}
+                      onChange={(e) => updateFormData("serviceZipCodes", e.target.value)}
+                      placeholder="12345, 12346, 12347..."
+                      rows={2}
+                      className="transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary hover:border-primary/50 resize-none"
+                    />
+                  </div>
+                </div>
 
               {/* Professional Credentials */}
               {(formData.vendorType === "lender" || formData.vendorType === "real_estate" || formData.vendorType === "attorney") && (
@@ -624,22 +723,40 @@ export const VendorRegistration = () => {
               </div>
 
               {/* Submit Button */}
-              <div className="pt-6">
-                <Button 
-                  type="submit" 
-                  size="lg" 
-                  disabled={isSubmitting}
-                  className="w-full"
-                >
-                  {isSubmitting ? "Submitting Application..." : "Submit Application"}
-                </Button>
-                <p className="text-sm text-muted-foreground text-center mt-2">
-                  We'll review your application and respond within 24-48 hours
-                </p>
+              <div className="pt-8 animate-fade-in">
+                <div className="bg-gradient-to-r from-primary/5 via-accent/5 to-secondary/5 rounded-xl p-6 border border-primary/10">
+                  <Button 
+                    type="submit" 
+                    size="lg" 
+                    disabled={isSubmitting}
+                    className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 disabled:transform-none disabled:scale-100 h-12 text-lg font-semibold"
+                  >
+                    {isSubmitting ? (
+                      <div className="flex items-center space-x-2">
+                        <div className="w-5 h-5 border-2 border-primary-foreground/20 border-t-primary-foreground rounded-full animate-spin"></div>
+                        <span>Submitting Application...</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center space-x-2">
+                        <span>Submit Application</span>
+                        <ArrowLeft className="w-5 h-5 rotate-180" />
+                      </div>
+                    )}
+                  </Button>
+                  <div className="text-center mt-4 space-y-2">
+                    <p className="text-sm text-muted-foreground">
+                      🚀 We'll review your application and respond within 24-48 hours
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Our team carefully reviews each application to ensure quality partnerships
+                    </p>
+                  </div>
+                </div>
               </div>
             </form>
           </CardContent>
         </Card>
+        </div>
       </div>
     </div>
   );
