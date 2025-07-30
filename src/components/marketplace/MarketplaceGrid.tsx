@@ -390,10 +390,10 @@ export const MarketplaceGrid = () => {
     <>
       <div className="min-h-screen bg-background">
         <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
-          {/* Hero Section - Mobile Optimized */}
-          <div className="mb-6 sm:mb-12">
-            <h1 className="font-inter font-black text-4xl sm:text-6xl lg:text-[72px] leading-tight sm:leading-[72px] text-gray-900 mb-3 sm:mb-6">Marketplace.</h1>
-            <p className="text-sm sm:text-lg text-muted-foreground max-w-4xl">
+          {/* Hero Section */}
+          <div className="mb-12">
+            <h1 className="text-6xl font-bold text-black mb-4">Marketplace.</h1>
+            <p className="text-lg text-gray-600 max-w-2xl">
               Finally, we silenced the noise. Welcome to the Marketplace. Discover premium marketing services and connect with top-performing vendors who will actually move your business forward.
             </p>
           </div>
