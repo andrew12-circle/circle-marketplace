@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { Users, Shield, Star } from 'lucide-react';
 import { Navigate } from 'react-router-dom';
+import { ContentPromotionPanel } from '@/components/admin/ContentPromotionPanel';
 
 interface UserProfile {
   id: string;
@@ -151,6 +152,8 @@ export default function AdminDashboard() {
           Manage users and creator permissions
         </p>
       </div>
+
+      <ContentPromotionPanel />
 
       <Card>
         <CardHeader>
