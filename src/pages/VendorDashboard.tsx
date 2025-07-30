@@ -698,7 +698,7 @@ export const VendorDashboard = () => {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            <h1 className="text-4xl font-bold text-blue-600">
               Services Dashboard
             </h1>
             <p className="text-lg text-muted-foreground mt-2">
