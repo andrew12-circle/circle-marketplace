@@ -180,9 +180,16 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
         </div>
 
         {/* Description - Fixed height */}
-        <p className="text-sm text-muted-foreground line-clamp-2 h-10 mb-3">
-          {service.description}
-        </p>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <p className="text-sm text-muted-foreground line-clamp-2 h-10 mb-3 cursor-help">
+              {service.description}
+            </p>
+          </TooltipTrigger>
+          <TooltipContent className="max-w-xs p-3 text-sm z-50">
+            <p>{service.description}</p>
+          </TooltipContent>
+        </Tooltip>
 
         {/* Tags - Fixed height */}
         <div className="h-8 mb-3">
