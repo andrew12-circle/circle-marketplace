@@ -32,6 +32,9 @@ interface VendorData {
   name: string;
   contact_email: string;
   individual_email?: string;
+  vendor_type?: string;
+  nmls_id?: string;
+  is_verified?: boolean;
 }
 
 interface AvailabilityData {
@@ -215,8 +218,22 @@ export const VendorDashboard = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Vendor Dashboard</h1>
-          <p className="text-muted-foreground">Welcome back, {vendorData.name}</p>
+          <h1 className="text-3xl font-bold">
+            {vendorData.vendor_type === 'lender' ? 'Lender' : 'Service Provider'} Dashboard
+          </h1>
+          <p className="text-muted-foreground">
+            Welcome back, {vendorData.name}
+            {vendorData.vendor_type === 'lender' && vendorData.nmls_id && (
+              <span className="ml-2 text-sm">(NMLS ID: {vendorData.nmls_id})</span>
+            )}
+          </p>
+          {vendorData.is_verified && (
+            <div className="mt-1">
+              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                Verified {vendorData.vendor_type === 'lender' ? 'Lender' : 'Vendor'}
+              </Badge>
+            </div>
+          )}
         </div>
         <div className="flex items-center gap-2">
           <div className={`w-3 h-3 rounded-full ${availability.is_available_now ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
@@ -230,7 +247,9 @@ export const VendorDashboard = () => {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Consultations</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              {vendorData.vendor_type === 'lender' ? 'Loan Applications' : 'Total Consultations'}
+            </CardTitle>
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -241,7 +260,9 @@ export const VendorDashboard = () => {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Requests</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              {vendorData.vendor_type === 'lender' ? 'Pending Reviews' : 'Pending Requests'}
+            </CardTitle>
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -280,18 +301,24 @@ export const VendorDashboard = () => {
       </div>
 
       {/* Main Content */}
-      <Tabs defaultValue="consultations" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="consultations">Consultations</TabsTrigger>
-          <TabsTrigger value="availability">Availability</TabsTrigger>
-          <TabsTrigger value="services">Services</TabsTrigger>
-          <TabsTrigger value="settings">Settings</TabsTrigger>
-        </TabsList>
+        <Tabs defaultValue="consultations" className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="consultations">
+              {vendorData.vendor_type === 'lender' ? 'Applications' : 'Consultations'}
+            </TabsTrigger>
+            <TabsTrigger value="availability">Availability</TabsTrigger>
+            <TabsTrigger value="services">
+              {vendorData.vendor_type === 'lender' ? 'Loan Products' : 'Services'}
+            </TabsTrigger>
+            <TabsTrigger value="settings">Settings</TabsTrigger>
+          </TabsList>
 
         <TabsContent value="consultations" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Recent Consultation Requests</CardTitle>
+              <CardTitle>
+                {vendorData.vendor_type === 'lender' ? 'Recent Loan Applications' : 'Recent Consultation Requests'}
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -348,21 +375,21 @@ export const VendorDashboard = () => {
                       <div className="flex gap-2">
                         {consultation.status === 'pending' && (
                           <>
-                            <Button 
-                              size="sm" 
-                              onClick={() => updateConsultationStatus(consultation.id, 'confirmed')}
-                            >
-                              <CheckCircle className="w-4 h-4 mr-1" />
-                              Confirm
-                            </Button>
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={() => updateConsultationStatus(consultation.id, 'cancelled')}
-                            >
-                              <X className="w-4 h-4 mr-1" />
-                              Decline
-                            </Button>
+                             <Button 
+                               size="sm" 
+                               onClick={() => updateConsultationStatus(consultation.id, 'confirmed')}
+                             >
+                               <CheckCircle className="w-4 h-4 mr-1" />
+                               {vendorData.vendor_type === 'lender' ? 'Approve' : 'Confirm'}
+                             </Button>
+                             <Button 
+                               size="sm" 
+                               variant="outline"
+                               onClick={() => updateConsultationStatus(consultation.id, 'cancelled')}
+                             >
+                               <X className="w-4 h-4 mr-1" />
+                               {vendorData.vendor_type === 'lender' ? 'Reject' : 'Decline'}
+                             </Button>
                           </>
                         )}
                         <Button size="sm" variant="outline">

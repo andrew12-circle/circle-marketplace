@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -14,13 +14,46 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "@/hooks/useLocation";
-import { User, Settings, ShoppingBag, Crown, LogOut, Loader2, MapPin, Heart, BarChart3, Shield } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { User, Settings, ShoppingBag, Crown, LogOut, Loader2, MapPin, Heart, BarChart3, Shield, Building2, DollarSign } from "lucide-react";
+
+interface VendorInfo {
+  id: string;
+  name: string;
+  vendor_type: string;
+  nmls_id?: string;
+}
 
 export const UserMenu = () => {
   const { user, profile, signOut } = useAuth();
   const { toast } = useToast();
   const { location } = useLocation();
   const [isSigningOut, setIsSigningOut] = useState(false);
+  const [vendorInfo, setVendorInfo] = useState<VendorInfo | null>(null);
+
+  // Check if user is associated with a vendor
+  useEffect(() => {
+    const checkVendorStatus = async () => {
+      if (!user?.email) return;
+
+      try {
+        // Check if user is a vendor by email
+        const { data: vendorData, error } = await supabase
+          .from('vendors')
+          .select('id, name, vendor_type, nmls_id')
+          .or(`contact_email.eq.${user.email},individual_email.eq.${user.email}`)
+          .single();
+
+        if (vendorData && !error) {
+          setVendorInfo(vendorData);
+        }
+      } catch (error) {
+        console.log('No vendor association found for user');
+      }
+    };
+
+    checkVendorStatus();
+  }, [user?.email]);
 
   const handleSignOut = async () => {
     setIsSigningOut(true);
@@ -139,6 +172,25 @@ export const UserMenu = () => {
               <Link to="/admin" className="flex items-center">
                 <Shield className="mr-2 h-4 w-4" />
                 <span>Admin Dashboard</span>
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+          </>
+        )}
+
+        {/* Vendor Dashboard Link */}
+        {vendorInfo && (
+          <>
+            <DropdownMenuItem asChild>
+              <Link to="/vendor-dashboard" className="flex items-center">
+                {vendorInfo.vendor_type === 'lender' ? (
+                  <DollarSign className="mr-2 h-4 w-4 text-green-600" />
+                ) : (
+                  <Building2 className="mr-2 h-4 w-4 text-blue-600" />
+                )}
+                <span>
+                  {vendorInfo.vendor_type === 'lender' ? 'Lender' : 'Service Provider'} Dashboard
+                </span>
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
