@@ -27,8 +27,25 @@ export const useCurrency = () => {
 
   // Format price with appropriate currency
   const formatPrice = (amount: number | string) => {
-    const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
+    if (typeof amount === 'string') {
+      // Extract number from text like "447/mo"
+      const match = amount.match(/(\d+(?:\.\d+)?)/);
+      if (match) {
+        const numAmount = parseFloat(match[1]);
+        const suffix = amount.replace(match[1], '').trim();
+        const formattedAmount = new Intl.NumberFormat(i18n.language === 'fr' ? 'fr-CA' : 'en-US', {
+          style: 'currency',
+          currency: currency,
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 0
+        }).format(numAmount);
+        return suffix ? `${formattedAmount}${suffix}` : formattedAmount;
+      }
+      // If no number found, return as is
+      return amount;
+    }
     
+    const numAmount = amount;
     if (isNaN(numAmount)) {
       return new Intl.NumberFormat(i18n.language === 'fr' ? 'fr-CA' : 'en-US', {
         style: 'currency',
