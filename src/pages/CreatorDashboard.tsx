@@ -179,7 +179,7 @@ export const CreatorDashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">${stats.totalRevenue.toFixed(2)}</div>
-            <p className="text-xs text-muted-foreground">25% revenue share</p>
+            <p className="text-xs text-muted-foreground">Revenue share</p>
           </CardContent>
         </Card>
 
