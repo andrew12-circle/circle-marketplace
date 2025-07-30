@@ -211,6 +211,7 @@ export const Academy = () => {
   const [selectedBook, setSelectedBook] = useState<any>(null);
   const [isBookModalOpen, setIsBookModalOpen] = useState(false);
   const [currentBookUrl, setCurrentBookUrl] = useState<string>("");
+  const [activeCategory, setActiveCategory] = useState("All");
   const { toast } = useToast();
   
   // Fetch videos using the custom hook
@@ -1149,8 +1150,6 @@ export const Academy = () => {
   );
 
   const renderBooksView = () => {
-    const [activeCategory, setActiveCategory] = useState("All");
-    
     const categories = [
       "Biographies & Memoirs",
       "Business & Personal Finance", 
