@@ -43,6 +43,63 @@ interface Service {
   estimated_roi?: number;
   duration?: string;
   requires_quote?: boolean;
+  funnel_content?: {
+    headline: string;
+    subheadline: string;
+    heroDescription: string;
+    estimatedRoi: number;
+    duration: string;
+    whyChooseUs: {
+      title: string;
+      benefits: {
+        icon: string;
+        title: string;
+        description: string;
+      }[];
+    };
+    media: any[];
+    packages: {
+      id: string;
+      name: string;
+      description: string;
+      price: number;
+      originalPrice?: number;
+      features: string[];
+      popular: boolean;
+      proOnly?: boolean;
+      savings?: string;
+    }[];
+    socialProof: {
+      testimonials: {
+        id: string;
+        name: string;
+        role: string;
+        content: string;
+        rating: number;
+      }[];
+      stats: {
+        label: string;
+        value: string;
+      }[];
+    };
+    trustIndicators: {
+      guarantee: string;
+      cancellation: string;
+      certification: string;
+    };
+    callToAction: {
+      primaryHeadline: string;
+      primaryDescription: string;
+      primaryButtonText: string;
+      secondaryHeadline: string;
+      secondaryDescription: string;
+      contactInfo: {
+        phone: string;
+        email: string;
+        website: string;
+      };
+    };
+  };
   vendor: {
     name: string;
     rating: number;
