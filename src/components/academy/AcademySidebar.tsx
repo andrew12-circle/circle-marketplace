@@ -65,10 +65,10 @@ export const AcademySidebar = ({
 
   return (
     <Sidebar 
-      className="transition-all duration-300 z-10" 
+      className="transition-all duration-300 z-10 pt-20" 
       collapsible="icon"
     >
-      <SidebarContent>
+      <SidebarContent className="pt-4">
         {/* Main Navigation */}
         <SidebarGroup>
           <SidebarGroupLabel>Academy</SidebarGroupLabel>
