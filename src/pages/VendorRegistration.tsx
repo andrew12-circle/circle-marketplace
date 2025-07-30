@@ -11,7 +11,22 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Building, User, MapPin, Phone, Mail, Globe, CreditCard, Download, Upload, FileSpreadsheet } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-const VENDOR_TYPES = [
+const SERVICE_PROVIDER_TYPES = [
+  { value: "marketing_tools", label: "Marketing Tools & Platforms" },
+  { value: "signs_materials", label: "Signs & Marketing Materials" },
+  { value: "crm_software", label: "CRM & Contact Management" },
+  { value: "lead_generation", label: "Lead Generation Services" },
+  { value: "website_design", label: "Website Design & Development" },
+  { value: "social_media", label: "Social Media Management" },
+  { value: "photography", label: "Photography & Virtual Tours" },
+  { value: "staging_services", label: "Home Staging Services" },
+  { value: "printing_services", label: "Printing & Design Services" },
+  { value: "coaching_training", label: "Coaching & Training" },
+  { value: "transaction_management", label: "Transaction Management" },
+  { value: "other_services", label: "Other Real Estate Services" }
+];
+
+const COMARKETING_PARTNER_TYPES = [
   { value: "lender", label: "Mortgage Lender" },
   { value: "title", label: "Title Company" },
   { value: "insurance", label: "Insurance Agency" },
@@ -19,10 +34,10 @@ const VENDOR_TYPES = [
   { value: "inspection", label: "Home Inspection" },
   { value: "moving", label: "Moving Company" },
   { value: "handyman", label: "Handyman/Contractor" },
-  { value: "real_estate", label: "Real Estate Agent" },
+  { value: "real_estate", label: "Real Estate Agent/Broker" },
   { value: "attorney", label: "Real Estate Attorney" },
   { value: "appraiser", label: "Property Appraiser" },
-  { value: "other", label: "Other Service Provider" }
+  { value: "other", label: "Other Professional Service" }
 ];
 
 const US_STATES = [
@@ -40,8 +55,10 @@ export const VendorRegistration = () => {
   const registrationType = searchParams.get("type") || "service_provider";
   
   const [formData, setFormData] = useState({
-    // Company/Individual Info
-    vendorType: "",
+    // Business Type
+    businessType: "",
+    
+    // Company Info
     companyName: "",
     individualName: "",
     individualTitle: "",
@@ -54,22 +71,24 @@ export const VendorRegistration = () => {
     individualPhone: "",
     websiteUrl: "",
     
-    // Location & Service Area
+    // Service Provider Specific (for products/services TO realtors)
+    productCategories: [] as string[],
+    pricingModel: "",
+    productCatalog: "",
+    shippingInfo: "",
+    supportInfo: "",
+    
+    // Co-Marketing Partner Specific (for professional service providers)
     location: "",
     serviceStates: [] as string[],
     serviceZipCodes: "",
     serviceRadiusMiles: "",
-    
-    // Professional Info
     licenseNumber: "",
     nmlsId: "",
     licenseStates: [] as string[],
-    
-    // Co-Marketing Specific
-    isCoMarketing: registrationType === "co_marketing",
     marketingBudget: "",
     
-    // Team Members Upload
+    // Team Members (both types can use this)
     teamMembersFile: null as File | null,
     
     // Terms
@@ -176,18 +195,26 @@ export const VendorRegistration = () => {
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
-    if (!formData.vendorType) newErrors.vendorType = "Please select a vendor type";
+    if (!formData.businessType) newErrors.businessType = "Please select a business type";
     if (!formData.companyName && !formData.individualName) {
       newErrors.companyName = "Company name or individual name is required";
     }
     if (!formData.email) newErrors.email = "Email is required";
     if (!formData.phone) newErrors.phone = "Phone number is required";
-    if (!formData.location) newErrors.location = "Location is required";
     if (!formData.description) newErrors.description = "Description is required";
     if (!formData.agreeToTerms) newErrors.agreeToTerms = "You must agree to the terms";
     
+    // Service Provider specific validation
+    if (registrationType === "service_provider") {
+      if (formData.productCategories.length === 0) {
+        newErrors.productCategories = "Please select at least one product category";
+      }
+      if (!formData.pricingModel) newErrors.pricingModel = "Please select a pricing model";
+    }
+    
     // Co-marketing specific validation
-    if (formData.isCoMarketing) {
+    if (registrationType === "co_marketing") {
+      if (!formData.location) newErrors.location = "Location is required";
       if (!formData.marketingBudget) newErrors.marketingBudget = "Marketing budget is required";
     }
 
@@ -252,18 +279,28 @@ export const VendorRegistration = () => {
                   </div>
                 </div>
                 <CardTitle className="text-3xl md:text-4xl font-bold text-white mb-4 drop-shadow-sm">
-                  {registrationType === "co_marketing" ? "Co-Marketing Partner" : "Service Provider"} Registration
+                  {registrationType === "co_marketing" 
+                    ? "Co-Marketing Partner Registration" 
+                    : "Service Provider Registration"
+                  }
                 </CardTitle>
                 <CardDescription className="text-lg text-blue-100 max-w-2xl mx-auto leading-relaxed drop-shadow-sm">
                   {registrationType === "co_marketing" 
-                    ? "Join our network of marketing partners and grow your business with strategic collaborations and shared opportunities"
-                    : "Join our marketplace and connect with homebuyers, real estate agents, and grow your customer base"
+                    ? "Partner with real estate professionals to co-fund marketing campaigns and grow your business through strategic collaborations"
+                    : "List your products and services in our marketplace for real estate professionals. Sell marketing tools, CRMs, signs, and more to agents and brokers"
                   }
                 </CardDescription>
                 {registrationType === "co_marketing" && (
                   <div className="flex justify-center mt-4">
                     <Badge variant="secondary" className="bg-white/20 text-white border-white/30 px-4 py-1 backdrop-blur-sm">
-                      ✨ Co-Marketing Partner Application
+                      🤝 Co-Marketing Partner Application
+                    </Badge>
+                  </div>
+                )}
+                {registrationType === "service_provider" && (
+                  <div className="flex justify-center mt-4">
+                    <Badge variant="secondary" className="bg-white/20 text-white border-white/30 px-4 py-1 backdrop-blur-sm">
+                      🛒 Service Provider Application
                     </Badge>
                   </div>
                 )}
@@ -275,23 +312,25 @@ export const VendorRegistration = () => {
 
             <CardContent className="p-8">
               <form onSubmit={handleSubmit} className="space-y-12">
-                {/* Vendor Type Selection */}
+                {/* Business Type Selection */}
                 <div className="space-y-6 animate-fade-in">
                   <div className="flex items-center space-x-3 mb-6">
                     <div className="p-2 rounded-lg bg-gradient-to-br from-primary/10 to-accent/10">
                       <Building className="w-6 h-6 text-primary" />
                     </div>
-                    <h3 className="text-xl font-semibold text-foreground">Business Type</h3>
+                    <h3 className="text-xl font-semibold text-foreground">
+                      {registrationType === "co_marketing" ? "Professional Service Type" : "Product/Service Category"}
+                    </h3>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                    {VENDOR_TYPES.map((type, index) => (
+                    {(registrationType === "co_marketing" ? COMARKETING_PARTNER_TYPES : SERVICE_PROVIDER_TYPES).map((type, index) => (
                       <Button
                         key={type.value}
                         type="button"
-                        variant={formData.vendorType === type.value ? "default" : "outline"}
-                        onClick={() => updateFormData("vendorType", type.value)}
+                        variant={formData.businessType === type.value ? "default" : "outline"}
+                        onClick={() => updateFormData("businessType", type.value)}
                         className={`justify-start h-auto p-4 transition-all duration-300 hover-scale group ${
-                          formData.vendorType === type.value 
+                          formData.businessType === type.value 
                             ? "bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-lg" 
                             : "hover:bg-secondary/50 hover:border-primary/30"
                         }`}
@@ -301,9 +340,9 @@ export const VendorRegistration = () => {
                       </Button>
                     ))}
                   </div>
-                  {errors.vendorType && (
+                  {errors.businessType && (
                     <p className="text-sm text-destructive animate-fade-in bg-destructive/10 p-2 rounded-md border border-destructive/20">
-                      {errors.vendorType}
+                      {errors.businessType}
                     </p>
                   )}
                 </div>
@@ -552,7 +591,7 @@ export const VendorRegistration = () => {
                 </div>
 
                 {/* Professional Credentials */}
-                {(formData.vendorType === "lender" || formData.vendorType === "real_estate" || formData.vendorType === "attorney") && (
+                {(formData.businessType === "lender" || formData.businessType === "real_estate" || formData.businessType === "attorney") && registrationType === "co_marketing" && (
                   <div className="space-y-6 animate-fade-in">
                     <div className="flex items-center space-x-3 mb-6">
                       <div className="p-2 rounded-lg bg-gradient-to-br from-primary/10 to-accent/10">
@@ -573,7 +612,7 @@ export const VendorRegistration = () => {
                           className="transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary hover:border-primary/50"
                         />
                       </div>
-                      {formData.vendorType === "lender" && (
+                      {formData.businessType === "lender" && (
                         <div className="space-y-2">
                           <Label htmlFor="nmlsId" className="text-sm font-medium text-foreground">
                             NMLS ID
@@ -716,7 +755,7 @@ export const VendorRegistration = () => {
                   </div>
 
               {/* Co-Marketing Specific Fields */}
-              {formData.isCoMarketing && (
+              {registrationType === "co_marketing" && (
                 <div className="space-y-6 animate-fade-in">
                   <div className="flex items-center space-x-3 mb-6">
                     <div className="p-2 rounded-lg bg-gradient-to-br from-accent/10 to-primary/10">
