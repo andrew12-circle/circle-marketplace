@@ -63,6 +63,51 @@ interface Service {
     review_count: number;
     is_verified: boolean;
   };
+  funnel_content?: {
+    headline?: string;
+    subHeadline?: string;
+    media?: Array<{
+      url: string;
+      type: 'image' | 'video';
+      title?: string;
+      description?: string;
+    }>;
+    benefits?: Array<{
+      title: string;
+      description: string;
+      icon?: string;
+    }>;
+    packages?: Array<{
+      id: string;
+      name: string;
+      price: number;
+      originalPrice?: number;
+      features: string[];
+      description: string;
+      popular?: boolean;
+      proOnly?: boolean;
+    }>;
+    testimonials?: Array<{
+      name: string;
+      title?: string;
+      content: string;
+      rating: number;
+      image?: string;
+    }>;
+    stats?: Array<{
+      value: string;
+      label: string;
+      icon?: string;
+    }>;
+    estimatedRoi?: number;
+    duration?: string;
+    callToAction?: {
+      title: string;
+      description: string;
+      buttonText: string;
+      buttonVariant?: 'default' | 'secondary' | 'outline';
+    };
+  };
 }
 
 interface ServiceFunnelModalProps {
@@ -89,34 +134,35 @@ export const ServiceFunnelModal = ({
   const isProMember = profile?.is_pro_member || false;
   const riskLevel = determineServiceRisk(service.title, service.description);
   
-  // Service packages/variations (like Amazon product variations)
-  const packages = [
-    {
-      id: "basic",
-      name: "Basic Package",
-      price: parseFloat(service.retail_price || service.price) * 0.75,
-      originalPrice: parseFloat(service.retail_price || service.price),
-      description: "Essential service features for getting started",
-      features: ["Core service delivery", "Email support", "Basic reporting"]
-    },
-    {
-      id: "standard",
-      name: "Standard Package", 
-      price: parseFloat(service.retail_price || service.price),
-      originalPrice: parseFloat(service.retail_price || service.price) * 1.33,
-      description: "Complete solution for most needs",
-      features: ["Everything in Basic", "Priority support", "Advanced reporting", "Custom consultation"],
-      popular: true
-    },
-    {
-      id: "premium",
-      name: "Premium Package",
-      price: parseFloat(service.retail_price || service.price) * 1.5,
-      originalPrice: parseFloat(service.retail_price || service.price) * 2,
-      description: "Full-service solution with dedicated support",
-      features: ["Everything in Standard", "Dedicated account manager", "24/7 support", "Custom integrations"]
-    }
-  ];
+  // Use funnel content packages if available, otherwise fallback to default packages
+  const packages = service.funnel_content?.packages?.length ? 
+    service.funnel_content.packages : [
+      {
+        id: "basic",
+        name: "Basic Package",
+        price: parseFloat(service.retail_price || service.price) * 0.75,
+        originalPrice: parseFloat(service.retail_price || service.price),
+        description: "Essential service features for getting started",
+        features: ["Core service delivery", "Email support", "Basic reporting"]
+      },
+      {
+        id: "standard",
+        name: "Standard Package", 
+        price: parseFloat(service.retail_price || service.price),
+        originalPrice: parseFloat(service.retail_price || service.price) * 1.33,
+        description: "Complete solution for most needs",
+        features: ["Everything in Basic", "Priority support", "Advanced reporting", "Custom consultation"],
+        popular: true
+      },
+      {
+        id: "premium",
+        name: "Premium Package",
+        price: parseFloat(service.retail_price || service.price) * 1.5,
+        originalPrice: parseFloat(service.retail_price || service.price) * 2,
+        description: "Full-service solution with dedicated support",
+        features: ["Everything in Standard", "Dedicated account manager", "24/7 support", "Custom integrations"]
+      }
+    ];
 
   const selectedPkg = packages.find(pkg => pkg.id === selectedPackage) || packages[1];
 
@@ -276,9 +322,11 @@ export const ServiceFunnelModal = ({
                   Premium Provider
                 </Badge>
               </div>
-              <h1 className="text-4xl font-bold leading-tight">{service.title}</h1>
+              <h1 className="text-4xl font-bold leading-tight">
+                {service.funnel_content?.headline || service.title}
+              </h1>
               <p className="text-xl text-blue-100">
-                Transform your real estate business with our proven system
+                {service.funnel_content?.subHeadline || "Transform your real estate business with our proven system"}
               </p>
               <div className="flex items-center gap-4">
                 {renderStarRating(service.vendor.rating, "lg")}
@@ -319,10 +367,10 @@ export const ServiceFunnelModal = ({
           <div className="lg:col-span-5 space-y-6">
             {/* Main Image/Video */}
             <div className="aspect-video bg-muted rounded-lg overflow-hidden relative">
-              {service.image_url ? (
+              {(service.funnel_content?.media?.[0]?.url || service.image_url) ? (
                 <img 
-                  src={service.image_url} 
-                  alt={service.title}
+                  src={service.funnel_content?.media?.[0]?.url || service.image_url} 
+                  alt={service.funnel_content?.headline || service.title}
                   className="w-full h-full object-cover"
                 />
               ) : (
@@ -401,35 +449,50 @@ export const ServiceFunnelModal = ({
             <div>
               <h2 className="text-2xl font-bold mb-4">What You'll Get</h2>
               <div className="space-y-4">
-                <div className="flex items-start gap-3">
-                  <div className="bg-green-100 rounded-full p-2 mt-1">
-                    <Target className="w-5 h-5 text-green-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold">Proven Lead Generation System</h3>
-                    <p className="text-sm text-muted-foreground">Our proprietary system that's generated over $50M in commissions for our clients</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start gap-3">
-                  <div className="bg-blue-100 rounded-full p-2 mt-1">
-                    <Zap className="w-5 h-5 text-blue-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold">Complete Setup & Training</h3>
-                    <p className="text-sm text-muted-foreground">White-glove implementation with 1-on-1 training sessions</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start gap-3">
-                  <div className="bg-purple-100 rounded-full p-2 mt-1">
-                    <Users className="w-5 h-5 text-purple-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold">Ongoing Support & Optimization</h3>
-                    <p className="text-sm text-muted-foreground">Dedicated account manager and monthly strategy calls</p>
-                  </div>
-                </div>
+                {service.funnel_content?.benefits?.length ? 
+                  service.funnel_content.benefits.map((benefit, index) => (
+                    <div key={index} className="flex items-start gap-3">
+                      <div className="bg-green-100 rounded-full p-2 mt-1">
+                        <Target className="w-5 h-5 text-green-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold">{benefit.title}</h3>
+                        <p className="text-sm text-muted-foreground">{benefit.description}</p>
+                      </div>
+                    </div>
+                  )) : (
+                  <>
+                    <div className="flex items-start gap-3">
+                      <div className="bg-green-100 rounded-full p-2 mt-1">
+                        <Target className="w-5 h-5 text-green-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold">Proven Lead Generation System</h3>
+                        <p className="text-sm text-muted-foreground">Our proprietary system that's generated over $50M in commissions for our clients</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start gap-3">
+                      <div className="bg-blue-100 rounded-full p-2 mt-1">
+                        <Zap className="w-5 h-5 text-blue-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold">Complete Setup & Training</h3>
+                        <p className="text-sm text-muted-foreground">White-glove implementation with 1-on-1 training sessions</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start gap-3">
+                      <div className="bg-purple-100 rounded-full p-2 mt-1">
+                        <Users className="w-5 h-5 text-purple-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold">Ongoing Support & Optimization</h3>
+                        <p className="text-sm text-muted-foreground">Dedicated account manager and monthly strategy calls</p>
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
 
