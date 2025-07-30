@@ -2,32 +2,127 @@ import { useState } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ChevronDown, Building2, Home, Truck, Camera, Briefcase, AlertTriangle, Shield, CheckCircle } from "lucide-react";
+import { ChevronDown, Building2, Home, Truck, Camera, Briefcase, AlertTriangle, Shield, CheckCircle, Store, Users, MapPin } from "lucide-react";
 import { SERVICE_CATEGORIES, getRiskBadge } from "./RESPAComplianceSystem";
+
+// Vendor categories - different from service categories
+const VENDOR_CATEGORIES = [
+  {
+    id: 'mortgage-lenders',
+    name: 'Mortgage & Finance',
+    subcategories: [
+      'Mortgage Lenders',
+      'Credit Unions', 
+      'Private Lenders',
+      'Loan Officers'
+    ]
+  },
+  {
+    id: 'title-escrow',
+    name: 'Title & Escrow',
+    subcategories: [
+      'Title Companies',
+      'Escrow Services',
+      'Real Estate Attorneys'
+    ]
+  },
+  {
+    id: 'inspections-appraisals',
+    name: 'Inspections & Appraisals',
+    subcategories: [
+      'Home Inspectors',
+      'Appraisers',
+      'Specialty Inspectors'
+    ]
+  },
+  {
+    id: 'home-services-vendors',
+    name: 'Home Services',
+    subcategories: [
+      'Contractors',
+      'Handyman Services',
+      'HVAC Companies',
+      'Plumbers',
+      'Electricians',
+      'Landscapers'
+    ]
+  },
+  {
+    id: 'insurance-vendors',
+    name: 'Insurance & Protection',
+    subcategories: [
+      'Home Insurance',
+      'Home Warranty',
+      'Security Companies'
+    ]
+  },
+  {
+    id: 'moving-storage-vendors',
+    name: 'Moving & Storage',
+    subcategories: [
+      'Moving Companies',
+      'Storage Facilities',
+      'Relocation Services'
+    ]
+  },
+  {
+    id: 'marketing-vendors',
+    name: 'Marketing & Media',
+    subcategories: [
+      'Marketing Agencies',
+      'Photographers',
+      'Videographers',
+      'Print Shops',
+      'Sign Companies'
+    ]
+  }
+];
 
 interface CategoryMegaMenuProps {
   selectedCategory: string;
   onCategorySelect: (category: string) => void;
+  viewMode?: 'services' | 'vendors';
 }
 
-const getIconForCategory = (categoryId: string) => {
-  switch (categoryId) {
-    case 'settlement-services':
-      return Building2;
-    case 'home-services':
-      return Home;
-    case 'moving-relocation':
-      return Truck;
-    case 'property-services':
-      return Camera;
-    case 'professional-services':
-      return Briefcase;
-    default:
-      return Building2;
+const getIconForCategory = (categoryId: string, viewMode: 'services' | 'vendors' = 'services') => {
+  if (viewMode === 'vendors') {
+    switch (categoryId) {
+      case 'mortgage-lenders':
+        return Building2;
+      case 'title-escrow':
+        return Shield;
+      case 'inspections-appraisals':
+        return CheckCircle;
+      case 'home-services-vendors':
+        return Home;
+      case 'insurance-vendors':
+        return Shield;
+      case 'moving-storage-vendors':
+        return Truck;
+      case 'marketing-vendors':
+        return Camera;
+      default:
+        return Store;
+    }
+  } else {
+    switch (categoryId) {
+      case 'settlement-services':
+        return Building2;
+      case 'home-services':
+        return Home;
+      case 'moving-relocation':
+        return Truck;
+      case 'property-services':
+        return Camera;
+      case 'professional-services':
+        return Briefcase;
+      default:
+        return Building2;
+    }
   }
 };
 
-export const CategoryMegaMenu = ({ selectedCategory, onCategorySelect }: CategoryMegaMenuProps) => {
+export const CategoryMegaMenu = ({ selectedCategory, onCategorySelect, viewMode = 'services' }: CategoryMegaMenuProps) => {
   const [open, setOpen] = useState(false);
 
   const handleCategorySelect = (category: string) => {
@@ -70,8 +165,8 @@ export const CategoryMegaMenu = ({ selectedCategory, onCategorySelect }: Categor
           </div>
           
           <div className="grid grid-cols-1 gap-6 p-6">
-            {SERVICE_CATEGORIES.map((category) => {
-              const Icon = getIconForCategory(category.id);
+            {(viewMode === 'services' ? SERVICE_CATEGORIES : VENDOR_CATEGORIES).map((category) => {
+              const Icon = getIconForCategory(category.id, viewMode);
               return (
                 <div key={category.id} className="space-y-3">
                   <div className="flex items-center justify-between pb-2 border-b border-border/50">
@@ -79,7 +174,7 @@ export const CategoryMegaMenu = ({ selectedCategory, onCategorySelect }: Categor
                       <Icon className="h-4 w-4 text-circle-primary" />
                       <h4 className="font-medium text-sm text-foreground">{category.name}</h4>
                     </div>
-                    {getRiskBadge(category.riskLevel)}
+                    {viewMode === 'services' && 'riskLevel' in category && getRiskBadge((category as any).riskLevel)}
                   </div>
                   <div className="grid grid-cols-2 gap-1">
                     {category.subcategories.map((subcategory) => {

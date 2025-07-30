@@ -72,6 +72,7 @@ export const MarketplaceFilters = ({ filters, onFiltersChange, categories, viewM
             <CategoryMegaMenu 
               selectedCategory={safeFilters.category}
               onCategorySelect={(value) => updateFilter("category", value)}
+              viewMode={viewMode}
             />
           </div>
 
