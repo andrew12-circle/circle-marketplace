@@ -473,24 +473,6 @@ export const VendorFunnelModal = ({
                 </div>
               </div>
               
-              {/* Trust Indicators */}
-               <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200">
-                 <h3 className="font-semibold text-blue-900 mb-3">Why Partner With Us</h3>
-                 <div className="space-y-2">
-                   <div className="flex items-center text-sm text-blue-800">
-                     <TrendingUp className="w-4 h-4 mr-2 text-green-600" />
-                     {vendor.co_marketing_agents || 150}+ Active {config.partnerLabel}
-                   </div>
-                   <div className="flex items-center text-sm text-blue-800">
-                     <DollarSign className="w-4 h-4 mr-2 text-green-600" />
-                     52 Campaigns Funded
-                   </div>
-                   <div className="flex items-center text-sm text-blue-800">
-                     <Award className="w-4 h-4 mr-2 text-green-600" />
-                     {config.mainMetric}
-                   </div>
-                 </div>
-               </div>
 
               {/* Rating Display */}
               <div className="text-center space-y-2">
