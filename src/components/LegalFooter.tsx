@@ -21,7 +21,10 @@ export const LegalFooter = () => {
               <Button asChild variant="default" className="min-w-[200px]">
                 <Link 
                   to="/vendor-registration?type=service_provider"
-                  onClick={() => console.log('Clicked List Your Services button')}
+                  onClick={() => {
+                    console.log('Clicked List Your Services button');
+                    window.scrollTo(0, 0);
+                  }}
                 >
                   <Store className="w-4 h-4 mr-2" />
                   List Your Services
