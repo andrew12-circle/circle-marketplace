@@ -122,10 +122,23 @@ export const VendorRegistration = () => {
     }
   };
 
+  const formatWebsite = (value: string) => {
+    // Don't add https:// if it's empty or already has a protocol
+    if (!value || value.startsWith('http://') || value.startsWith('https://')) {
+      return value;
+    }
+    return `https://${value}`;
+  };
+
   const updateFormData = (field: string, value: any) => {
     // Apply phone formatting for phone fields
     if (field === "phone" && typeof value === "string") {
       value = formatPhoneNumber(value);
+    }
+    
+    // Apply website formatting for website fields
+    if (field === "website" && typeof value === "string") {
+      value = formatWebsite(value);
     }
     
     setFormData(prev => ({ ...prev, [field]: value }));
