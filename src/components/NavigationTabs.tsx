@@ -9,7 +9,7 @@ interface NavigationTabsProps {
 export const NavigationTabs = ({ activeTab, onTabChange }: NavigationTabsProps) => {
   const { t } = useTranslation();
   return (
-    <div className="flex bg-muted/50 rounded-xl p-1 backdrop-blur-sm border border-border/50">
+    <div className="flex bg-muted/50 rounded-xl p-1 w-fit mx-auto backdrop-blur-sm border border-border/50">
       <Button
         variant="ghost"
         onClick={() => onTabChange("marketplace")}
