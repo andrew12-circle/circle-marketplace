@@ -565,11 +565,11 @@ export const MarketplaceGrid = () => {
   return (
     <>
       <div className="min-h-screen bg-background">
-        <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
-          {/* Hero Section */}
-          <div className="mb-12">
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4">{t('marketplaceTitle')}</h1>
-            <p className="text-lg text-gray-600 max-w-2xl">
+        <div className="container mx-auto px-4 py-4">
+          {/* Hero Section - Mobile Optimized */}
+          <div className="mb-6">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-3">{t('marketplaceTitle')}</h1>
+            <p className="text-sm sm:text-base text-muted-foreground">
               {t('marketplaceDescription')}
             </p>
           </div>
@@ -582,41 +582,41 @@ export const MarketplaceGrid = () => {
           {/* Campaign Services Header */}
           <CampaignServicesHeader />
 
-          {/* Search and View Toggle - Mobile Optimized */}
-          <div className="flex flex-col gap-3 sm:gap-4 mb-4 sm:mb-6">
+          {/* Search and View Toggle - Super Mobile Optimized */}
+          <div className="space-y-4 mb-6">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4 sm:w-5 sm:h-5" />
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
               <Input
                 placeholder={t('searchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 sm:pl-12 h-10 sm:h-11 text-sm sm:text-base"
+                className="pl-12 h-12 text-base touch-target"
               />
             </div>
-            <div className="flex gap-2">
+            <div className="grid grid-cols-3 gap-2">
               <Button
                 variant={viewMode === "services" ? "default" : "outline"}
                 onClick={() => setViewMode("services")}
-                className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-9 sm:h-10 text-sm sm:text-base"
+                className="touch-target flex flex-col items-center gap-1 h-auto py-3 px-2"
               >
-                <Sparkles className="w-3 h-3 sm:w-4 sm:h-4" />
-                {t('services')}
+                <Sparkles className="w-5 h-5" />
+                <span className="text-xs font-medium">{t('services')}</span>
               </Button>
               <Button
                 variant={viewMode === "products" ? "default" : "outline"}
                 onClick={() => setViewMode("products")}
-                className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-9 sm:h-10 text-sm sm:text-base"
+                className="touch-target flex flex-col items-center gap-1 h-auto py-3 px-2"
               >
-                <Filter className="w-3 h-3 sm:w-4 sm:h-4" />
-                Products
+                <Filter className="w-5 h-5" />
+                <span className="text-xs font-medium">Products</span>
               </Button>
               <Button
                 variant={viewMode === "vendors" ? "default" : "outline"}
                 onClick={() => setViewMode("vendors")}
-                className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-9 sm:h-10 text-sm sm:text-base"
+                className="touch-target flex flex-col items-center gap-1 h-auto py-3 px-2"
               >
-                <Zap className="w-3 h-3 sm:w-4 sm:h-4" />
-                {t('vendors')}
+                <Zap className="w-5 h-5" />
+                <span className="text-xs font-medium">{t('vendors')}</span>
               </Button>
             </div>
           </div>
