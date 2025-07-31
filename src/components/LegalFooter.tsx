@@ -33,7 +33,10 @@ export const LegalFooter = () => {
               <Button asChild variant="outline" className="min-w-[200px]">
                 <Link 
                   to="/vendor-registration?type=co_marketing"
-                  onClick={() => console.log('Clicked Co-Marketing Partner button')}
+                  onClick={() => {
+                    console.log('Clicked Co-Marketing Partner button');
+                    window.scrollTo(0, 0);
+                  }}
                 >
                   <Building className="w-4 h-4 mr-2" />
                   Join as Co-Marketing Partner
