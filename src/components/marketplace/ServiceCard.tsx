@@ -62,7 +62,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
 
   // Helper function to extract numeric value from price strings like "$797" or "$1,347.00"
   const extractNumericPrice = (priceString: string): number => {
-    const match = priceString.match(/(\d{1,3}(?:,\d{3})*(?:\.\d+)?)/);
+    const match = priceString.match(/(\d+(?:,\d{3})*(?:\.\d+)?)/);
     return match ? parseFloat(match[1].replace(/,/g, '')) : 0;
   };
 
