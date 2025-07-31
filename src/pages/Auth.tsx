@@ -14,6 +14,8 @@ import { commonRules, checkAccountLockout, clearFailedAttempts } from "@/hooks/u
 import { PasswordStrengthIndicator } from "@/components/auth/PasswordStrengthIndicator";
 import { AccountLockoutAlert } from "@/components/auth/AccountLockoutAlert";
 
+const circleLogoUrl = "/lovable-uploads/97692497-6d98-46a8-b6fc-05cd68bdc160.png";
+
 export const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
@@ -241,18 +243,32 @@ export const Auth = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">
-            {showForgotPassword ? 'Reset Password' : isLogin ? 'Welcome Back' : 'Create Account'}
-          </CardTitle>
-          <p className="text-sm text-muted-foreground text-center">
-            {showForgotPassword 
-              ? 'Enter your email to receive reset instructions'
-              : isLogin 
-              ? 'Sign in to your account to continue' 
-              : 'Sign up to start your journey with Circle Academy'
-            }
-          </p>
+        <CardHeader className="space-y-4">
+          {/* Logo */}
+          <div className="flex justify-center">
+            <img 
+              src={circleLogoUrl}
+              alt="Circle Logo" 
+              className="w-16 h-16 object-contain"
+              style={{
+                imageRendering: 'crisp-edges'
+              }}
+            />
+          </div>
+          
+          <div className="space-y-1">
+            <CardTitle className="text-2xl font-bold text-center">
+              {showForgotPassword ? 'Reset Password' : isLogin ? 'Welcome Back' : 'Create Account'}
+            </CardTitle>
+            <p className="text-sm text-muted-foreground text-center">
+              {showForgotPassword 
+                ? 'Enter your email to receive reset instructions'
+                : isLogin 
+                ? 'Sign in to your account to continue' 
+                : 'Sign up to start your journey with Circle Academy'
+              }
+            </p>
+          </div>
         </CardHeader>
         <CardContent>
           {/* Account Lockout Alert */}
