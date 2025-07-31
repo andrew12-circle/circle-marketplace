@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Search, MapPin, Star, Users, TrendingUp, Building } from "lucide-react";
+import { Search, MapPin, Star, Users, TrendingUp, Building, Plus, CheckCircle } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -47,6 +47,8 @@ export const VendorSelectionModal = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null);
   const { toast } = useToast();
   const { location } = useLocation();
 
@@ -110,7 +112,20 @@ export const VendorSelectionModal = ({
   };
 
   const handleVendorSelect = (vendor: Vendor) => {
+    setSelectedVendor(vendor);
+    setShowConfirmation(true);
     onVendorSelect(vendor);
+  };
+
+  const handleSendAnotherRequest = () => {
+    setShowConfirmation(false);
+    setSelectedVendor(null);
+    // Keep modal open for another selection
+  };
+
+  const handleFinish = () => {
+    setShowConfirmation(false);
+    setSelectedVendor(null);
     onClose();
   };
 
@@ -128,31 +143,59 @@ export const VendorSelectionModal = ({
           className="max-w-6xl max-h-[95vh] overflow-hidden z-[100]"
           onClick={(e) => e.stopPropagation()}
         >
-        <DialogHeader>
-          <DialogTitle>Select Co-Pay Partner</DialogTitle>
-          <p className="text-sm text-muted-foreground">
-            Choose a vendor to help with "{service.title}" - they'll cover {service.max_vendor_split_percentage}% of the cost
-          </p>
-          {location?.state && (
-            <p className="text-xs text-muted-foreground">
-              Showing vendors available in {location.state}
+        <DialogHeader className="flex flex-row items-start justify-between space-y-0 pb-4">
+          <div className="flex-1">
+            <DialogTitle>Select Co-Pay Partner</DialogTitle>
+            <p className="text-sm text-muted-foreground">
+              Choose a vendor to help with "{service.title}" - they'll cover {service.max_vendor_split_percentage}% of the cost
             </p>
-          )}
+            {location?.state && (
+              <p className="text-xs text-muted-foreground">
+                Showing vendors available in {location.state}
+              </p>
+            )}
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowInviteModal(true)}
+            className="shrink-0 ml-4"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Request Your Vendors
+          </Button>
         </DialogHeader>
         
-        <div className="space-y-4">
-          {/* Search */}
-          <div className="flex gap-2">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-              <Input
-                placeholder="Search vendors by name, location, or service area..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
+        {showConfirmation ? (
+          <div className="text-center py-12">
+            <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold mb-2">Request Sent!</h3>
+            <p className="text-muted-foreground mb-6">
+              Your co-pay request has been sent to {selectedVendor?.name}. They'll be notified and can respond within 14 days.
+            </p>
+            <div className="flex gap-3 justify-center">
+              <Button onClick={handleSendAnotherRequest} variant="outline">
+                Send Another Request
+              </Button>
+              <Button onClick={handleFinish}>
+                Finish
+              </Button>
             </div>
           </div>
+        ) : (
+          <div className="space-y-4">
+            {/* Search */}
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                <Input
+                  placeholder="Search vendors by name, location, or service area..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
 
           {/* Vendor Grid */}
           <div className="max-h-[60vh] overflow-y-auto">
@@ -240,20 +283,13 @@ export const VendorSelectionModal = ({
             )}
           </div>
 
-          <div className="flex justify-between">
-            <Button 
-              variant="outline" 
-              onClick={() => setShowInviteModal(true)}
-              className="flex items-center gap-2"
-            >
-              <Users className="w-4 h-4" />
-              Request Your Vendors
-            </Button>
-            <Button variant="outline" onClick={onClose}>
-              Cancel
-            </Button>
+            <div className="flex justify-end pt-4">
+              <Button variant="outline" onClick={onClose}>
+                Cancel
+              </Button>
+            </div>
           </div>
-        </div>
+        )}
       </DialogContent>
     </Dialog>
 
