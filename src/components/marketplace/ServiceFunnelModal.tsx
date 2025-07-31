@@ -59,7 +59,7 @@ interface Service {
     rating: number;
     review_count: number;
     is_verified: boolean;
-  };
+  } | null;
   funnel_content?: {
     headline?: string;
     subHeadline?: string;
@@ -166,6 +166,11 @@ export const ServiceFunnelModal = ({
   // Fetch vendor availability on component mount
   useEffect(() => {
     const fetchVendorAvailability = async () => {
+      if (!service.vendor?.name) {
+        setVendorAvailability({ is_available_now: false });
+        return;
+      }
+
       try {
         const { data: vendor } = await supabase
           .from('vendors')
@@ -191,7 +196,7 @@ export const ServiceFunnelModal = ({
     if (isOpen) {
       fetchVendorAvailability();
     }
-  }, [isOpen, service.vendor.name]);
+  }, [isOpen, service.vendor?.name]);
 
   // Mock reviews data
   const reviews = [
@@ -244,7 +249,7 @@ export const ServiceFunnelModal = ({
       id: service.id,
       title: `${service.title} - ${selectedPkg.name}`,
       price: selectedPkg.price * quantity,
-      vendor: service.vendor.name,
+      vendor: service.vendor?.name || 'Direct Service',
       image_url: service.image_url,
       requiresQuote: service.requires_quote,
       type: 'service'
@@ -308,7 +313,7 @@ export const ServiceFunnelModal = ({
           <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
             <div className="space-y-4">
               <div className="flex items-center gap-2 mb-2">
-                {service.vendor.is_verified && (
+                {service.vendor?.is_verified && (
                   <Badge className="bg-green-500 text-white">
                     <Verified className="w-3 h-3 mr-1" />
                     Top Rated Pro
@@ -325,15 +330,17 @@ export const ServiceFunnelModal = ({
               <p className="text-xl text-blue-100">
                 {service.funnel_content?.subHeadline || "Transform your real estate business with our proven system"}
               </p>
-              <div className="flex items-center gap-4">
-                {renderStarRating(service.vendor.rating, "lg")}
-                <span className="text-lg">
-                  {service.vendor.rating} ({service.vendor.review_count}+ reviews)
-                </span>
-              </div>
+              {service.vendor && (
+                <div className="flex items-center gap-4">
+                  {renderStarRating(service.vendor.rating, "lg")}
+                  <span className="text-lg">
+                    {service.vendor.rating} ({service.vendor.review_count}+ reviews)
+                  </span>
+                </div>
+              )}
             </div>
             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20">
-              <h3 className="text-2xl font-bold mb-4">Why Choose {service.vendor.name}?</h3>
+              <h3 className="text-2xl font-bold mb-4">Why Choose {service.vendor?.name || 'This Service'}?</h3>
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
                   <div className="bg-green-500 rounded-full p-1">
@@ -711,7 +718,7 @@ export const ServiceFunnelModal = ({
                     <div className="space-y-2 text-sm">
                       <p><strong>Category:</strong> {service.category}</p>
                       <p><strong>Duration:</strong> {service.duration || "Flexible"}</p>
-                      <p><strong>Provider:</strong> {service.vendor.name}</p>
+                      <p><strong>Provider:</strong> {service.vendor?.name || 'Direct Service'}</p>
                       {service.estimated_roi && (
                         <p><strong>Est. ROI:</strong> {service.estimated_roi}x</p>
                       )}
@@ -723,11 +730,18 @@ export const ServiceFunnelModal = ({
               <TabsContent value="reviews" className="mt-6">
                 <div className="space-y-6">
                   <div className="flex items-center gap-4 mb-6">
+                  {service.vendor ? (
                     <div className="text-center">
                       <div className="text-3xl font-bold">{service.vendor.rating}</div>
                       {renderStarRating(service.vendor.rating, "lg")}
                       <p className="text-sm text-muted-foreground">{service.vendor.review_count} global ratings</p>
                     </div>
+                  ) : (
+                    <div className="text-center">
+                      <div className="text-lg text-muted-foreground">Direct Service</div>
+                      <p className="text-sm text-muted-foreground">No vendor ratings available</p>
+                    </div>
+                  )}
                     <div className="flex-1 space-y-1">
                       {[5, 4, 3, 2, 1].map((stars) => (
                         <div key={stars} className="flex items-center gap-2 text-sm">
@@ -906,7 +920,7 @@ export const ServiceFunnelModal = ({
                 <div className="space-y-6">
                   {/* More Services Section */}
                   <div>
-                    <h3 className="font-semibold mb-4">Related Services from {service.vendor.name}</h3>
+                    <h3 className="font-semibold mb-4">Related Services from {service.vendor?.name || 'This Provider'}</h3>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       {[1, 2, 3].map((i) => (
                         <Card key={i} className="p-4">
