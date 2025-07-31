@@ -8,6 +8,7 @@ import { Star, MapPin, Users, TrendingUp, ExternalLink, Info, Building, Globe, A
 import { getRiskBadge, getComplianceAlert, determineServiceRisk } from "./RESPAComplianceSystem";
 import { useState } from "react";
 import { VendorFunnelModal } from "./VendorFunnelModal";
+import { useCoPayRequests } from "@/hooks/useCoPayRequests";
 
 interface Vendor {
   id: string;
@@ -53,6 +54,7 @@ interface EnhancedVendorCardProps {
 export const EnhancedVendorCard = ({ vendor, onConnect, onViewProfile }: EnhancedVendorCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isFunnelModalOpen, setIsFunnelModalOpen] = useState(false);
+  const { createCoPayRequest } = useCoPayRequests();
   // Determine risk level based on vendor name/description
   const riskLevel = determineServiceRisk(vendor.name, vendor.description);
   

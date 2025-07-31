@@ -10,6 +10,8 @@ import { Search, AlertTriangle, Crown, CheckCircle, Clock, X, ArrowRight } from 
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { VendorSelectionModal } from "./VendorSelectionModal";
+import { useCoPayRequests } from "@/hooks/useCoPayRequests";
 
 interface CoPayRequestModalProps {
   isOpen: boolean;
@@ -47,7 +49,9 @@ export const CoPayRequestModal = ({ isOpen, onClose, service }: CoPayRequestModa
   });
   const [agentNotes, setAgentNotes] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showVendorSelection, setShowVendorSelection] = useState(false);
   const { toast } = useToast();
+  const { createCoPayRequest } = useCoPayRequests();
 
   const coPayPrice = service.retail_price && service.max_vendor_split_percentage 
     ? parseFloat(service.retail_price.replace(/[^\d.]/g, '')) * (1 - (service.max_vendor_split_percentage / 100))
@@ -70,46 +74,14 @@ export const CoPayRequestModal = ({ isOpen, onClose, service }: CoPayRequestModa
     }
   };
 
-  const handleVendorSearch = async () => {
-    if (!searchQuery.trim()) return;
-    
-    setIsLoading(true);
-    try {
-      // Search for vendors in profiles table
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('user_id, display_name, business_name, vendor_company_name')
-        .or(`display_name.ilike.%${searchQuery}%,business_name.ilike.%${searchQuery}%,vendor_company_name.ilike.%${searchQuery}%`)
-        .eq('vendor_enabled', true)
-        .limit(5);
-
-      if (error) throw error;
-
-      const vendors: Vendor[] = data?.map(profile => ({
-        id: profile.user_id,
-        name: profile.display_name || 'Unknown',
-        company: profile.business_name || profile.vendor_company_name,
-      })) || [];
-
-      setFoundVendors(vendors);
-      if (vendors.length === 0) {
-        setCurrentStep('invite-vendor');
-      }
-    } catch (error) {
-      console.error('Error searching vendors:', error);
-      toast({
-        title: "Search Error",
-        description: "Unable to search vendors. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsLoading(false);
-    }
+  const handleVendorSearch = () => {
+    setShowVendorSelection(true);
   };
 
   const handleVendorSelect = (vendor: Vendor) => {
     setSelectedVendor(vendor);
     setCurrentStep('vendor-found');
+    setShowVendorSelection(false);
   };
 
   const handleRequestCoPay = async () => {
@@ -117,46 +89,16 @@ export const CoPayRequestModal = ({ isOpen, onClose, service }: CoPayRequestModa
     
     setIsLoading(true);
     try {
-      const { error: requestError } = await supabase
-        .from('co_pay_requests')
-        .insert({
-          agent_id: profile?.user_id,
-          vendor_id: selectedVendor.id,
-          service_id: service.id,
-          requested_split_percentage: service.max_vendor_split_percentage,
-          agent_notes: agentNotes,
-          ip_address: '0.0.0.0', // This would be populated by an edge function in production
-        });
-
-      if (requestError) throw requestError;
-
-      // Log the audit trail
-      const { error: auditError } = await supabase
-        .from('co_pay_audit_log')
-        .insert({
-          action_type: 'requested',
-          performed_by: profile?.user_id,
-          action_details: {
-            service_id: service.id,
-            vendor_id: selectedVendor.id,
-            requested_percentage: service.max_vendor_split_percentage,
-          }
-        });
-
-      if (auditError) console.error('Audit log error:', auditError);
+      await createCoPayRequest(
+        service.id,
+        selectedVendor.id,
+        service.max_vendor_split_percentage,
+        agentNotes
+      );
 
       setCurrentStep('request-submitted');
-      toast({
-        title: "Co-Pay Request Sent",
-        description: "Your vendor will receive a notification to approve the co-pay arrangement.",
-      });
     } catch (error) {
       console.error('Error submitting co-pay request:', error);
-      toast({
-        title: "Request Failed",
-        description: "Unable to submit co-pay request. Please try again.",
-        variant: "destructive"
-      });
     } finally {
       setIsLoading(false);
     }
@@ -527,6 +469,13 @@ export const CoPayRequestModal = ({ isOpen, onClose, service }: CoPayRequestModa
           {renderCurrentStep()}
         </div>
       </DialogContent>
+
+      <VendorSelectionModal
+        isOpen={showVendorSelection}
+        onClose={() => setShowVendorSelection(false)}
+        onVendorSelect={handleVendorSelect}
+        service={service}
+      />
     </Dialog>
   );
 };

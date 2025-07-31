@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useCart } from "@/contexts/CartContext";
+import { useCoPayRequests } from "@/hooks/useCoPayRequests";
 import { ShoppingCart, Plus, Minus, Trash2, CreditCard, MessageCircle, Calendar } from "lucide-react";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,11 +17,12 @@ export const CartDrawer = () => {
     updateQuantity, 
     clearCart, 
     getCartTotal, 
-    getCartCount,
-    isOpen,
+    getCartCount, 
+    isOpen, 
     setIsOpen 
   } = useCart();
   
+  const { requests, removeRequest, getApprovedRequests, getPendingRequests } = useCoPayRequests();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [isConsultationFlowOpen, setIsConsultationFlowOpen] = useState(false);
   const { toast } = useToast();
