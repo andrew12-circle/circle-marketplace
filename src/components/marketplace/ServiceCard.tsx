@@ -14,8 +14,8 @@ import { useServiceAnalytics } from "@/hooks/useServiceAnalytics";
 import { useCurrency } from "@/hooks/useCurrency";
 import { extractAndValidatePrice, validateCartPricing, safeFormatPrice } from "@/utils/priceValidation";
 import { ConsultationFlow } from "./ConsultationFlow";
+import { ServiceFunnelModal } from "./ServiceFunnelModal";
 import { VendorSelectionModal } from "./VendorSelectionModal";
-import { VendorFunnelModal } from "./VendorFunnelModal";
 import { PricingChoiceModal } from "./PricingChoiceModal";
 
 interface Service {
@@ -60,8 +60,8 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
   const { t } = useTranslation();
   const [isHovered, setIsHovered] = useState(false);
   const [isConsultationFlowOpen, setIsConsultationFlowOpen] = useState(false);
+  const [isFunnelModalOpen, setIsFunnelModalOpen] = useState(false);
   const [isVendorSelectionModalOpen, setIsVendorSelectionModalOpen] = useState(false);
-  const [isVendorFunnelModalOpen, setIsVendorFunnelModalOpen] = useState(false);
   const [isPricingChoiceModalOpen, setIsPricingChoiceModalOpen] = useState(false);
   const { toast } = useToast();
   const { addToCart } = useCart();
@@ -91,8 +91,9 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
   };
 
   const handleViewDetails = async () => {
-    // Track the service view but don't open modal
+    // Track the service view
     await trackServiceView(service.id);
+    setIsFunnelModalOpen(true);
   };
 
   const handleAddToCart = async (e: React.MouseEvent) => {
@@ -165,9 +166,10 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
   return (
     <TooltipProvider>
     <Card 
-      className="group relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 bg-card border border-border/50 h-full flex flex-col mobile-card touch-friendly"
+      className="group relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 bg-card border border-border/50 h-full flex flex-col cursor-pointer mobile-card touch-friendly"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      onClick={handleViewDetails}
     >
       {/* Top Badges */}
       <div className="absolute top-3 left-3 z-10 flex gap-2">
@@ -469,6 +471,12 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
       </CardContent>
       
       
+      <ServiceFunnelModal
+        isOpen={isFunnelModalOpen}
+        onClose={() => setIsFunnelModalOpen(false)}
+        service={service}
+      />
+      
       <VendorSelectionModal
         isOpen={isVendorSelectionModalOpen}
         onClose={() => setIsVendorSelectionModalOpen(false)}
@@ -480,27 +488,6 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
           title: service.title,
           co_pay_price: service.co_pay_price,
           max_vendor_split_percentage: service.max_vendor_split_percentage,
-        }}
-      />
-
-      <VendorFunnelModal
-        isOpen={isVendorFunnelModalOpen}
-        onClose={() => setIsVendorFunnelModalOpen(false)}
-        vendor={{
-          id: service.vendor?.name || 'unknown',
-          name: service.vendor?.name || 'Unknown Vendor',
-          description: `Vendor for ${service.title}`,
-          location: 'Various Locations',
-          rating: service.vendor?.rating || 4.5,
-          review_count: service.vendor?.review_count || 0,
-          is_verified: service.vendor?.is_verified || false,
-          co_marketing_agents: 15,
-          campaigns_funded: 8,
-          logo_url: service.image_url || ''
-        }}
-        onRequestCoMarketing={(vendorId) => {
-          console.log('Co-marketing request for vendor:', vendorId);
-          setIsVendorFunnelModalOpen(false);
         }}
       />
 
@@ -519,7 +506,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
         }}
         onChooseCoPay={() => {
           setIsPricingChoiceModalOpen(false);
-          setIsVendorFunnelModalOpen(true);
+          setIsVendorSelectionModalOpen(true);
         }}
       />
     </Card>
