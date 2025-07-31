@@ -587,23 +587,6 @@ export const VendorFunnelModal = ({
                  </div>
                </div>
 
-              {/* Success Stories */}
-               <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-5 rounded-lg border border-green-200">
-                 <h3 className="font-bold text-green-900 mb-3 flex items-center">
-                   <TrendingUp className="w-5 h-5 mr-2" />
-                   {config.successLabel}
-                 </h3>
-                <div className="space-y-3">
-                  <blockquote className="text-sm text-green-800 italic">
-                    "My business increased 40% in the first 6 months of our partnership."
-                  </blockquote>
-                  <p className="text-xs text-green-700">- Sarah M., Top Producer, Phoenix AZ</p>
-                  <blockquote className="text-sm text-green-800 italic">
-                    "The shared marketing campaigns have been a game-changer for my referral business."
-                  </blockquote>
-                  <p className="text-xs text-green-700">- Mike D., Realtor, Dallas TX</p>
-                </div>
-              </div>
             </div>
           </div>
 
