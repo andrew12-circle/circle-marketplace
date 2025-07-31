@@ -91,6 +91,10 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
   };
 
   const handleViewDetails = async () => {
+    // Don't open if other modals are already open
+    if (isVendorSelectionModalOpen || isPricingChoiceModalOpen) {
+      return;
+    }
     // Track the service view
     await trackServiceView(service.id);
     setIsFunnelModalOpen(true);
