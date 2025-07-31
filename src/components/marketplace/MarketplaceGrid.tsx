@@ -10,7 +10,7 @@ import { AddProductModal } from "./AddProductModal";
 import { LocationFilterBanner } from "./LocationFilterBanner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Filter, Sparkles, Zap } from "lucide-react";
+import { Search, Filter, Sparkles, Zap, Facebook, Globe, Mail, Share2, Monitor, TrendingUp, Database, Camera, Video, Printer, ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -95,18 +95,88 @@ export const MarketplaceGrid = () => {
   const [viewMode, setViewMode] = useState<ViewMode>("services");
   const [selectedProductCategory, setSelectedProductCategory] = useState<string | null>(null);
   
-  // Define product categories
+  // Define product categories with enhanced styling
   const PRODUCT_CATEGORIES = [
-    { id: 'facebook-ads', name: 'Facebook Ad Campaigns', description: 'Professional Facebook advertising services for real estate' },
-    { id: 'google-ads', name: 'Google Ad Campaigns', description: 'Google Ads and search marketing services' },
-    { id: 'direct-mail', name: 'Direct Mail Campaigns', description: 'Postcards, flyers, and targeted mail services' },
-    { id: 'social-media', name: 'Social Media Management', description: 'Complete social media marketing packages' },
-    { id: 'website-design', name: 'Website Design', description: 'Professional real estate websites and landing pages' },
-    { id: 'seo-services', name: 'SEO Services', description: 'Search engine optimization for real estate' },
-    { id: 'crm-tools', name: 'CRM & Lead Management', description: 'Customer relationship management systems' },
-    { id: 'photography', name: 'Real Estate Photography', description: 'Professional listing photography services' },
-    { id: 'videography', name: 'Video Marketing', description: 'Real estate video production and marketing' },
-    { id: 'print-marketing', name: 'Print Marketing Materials', description: 'Business cards, brochures, and signage' },
+    { 
+      id: 'facebook-ads', 
+      name: 'Facebook Ad Campaigns', 
+      description: 'Professional Facebook advertising services for real estate',
+      icon: Facebook,
+      gradient: 'from-blue-500 to-blue-600',
+      color: 'text-blue-600'
+    },
+    { 
+      id: 'google-ads', 
+      name: 'Google Ad Campaigns', 
+      description: 'Google Ads and search marketing services',
+      icon: Globe,
+      gradient: 'from-green-500 to-green-600',
+      color: 'text-green-600'
+    },
+    { 
+      id: 'direct-mail', 
+      name: 'Direct Mail Campaigns', 
+      description: 'Postcards, flyers, and targeted mail services',
+      icon: Mail,
+      gradient: 'from-purple-500 to-purple-600',
+      color: 'text-purple-600'
+    },
+    { 
+      id: 'social-media', 
+      name: 'Social Media Management', 
+      description: 'Complete social media marketing packages',
+      icon: Share2,
+      gradient: 'from-pink-500 to-pink-600',
+      color: 'text-pink-600'
+    },
+    { 
+      id: 'website-design', 
+      name: 'Website Design', 
+      description: 'Professional real estate websites and landing pages',
+      icon: Monitor,
+      gradient: 'from-indigo-500 to-indigo-600',
+      color: 'text-indigo-600'
+    },
+    { 
+      id: 'seo-services', 
+      name: 'SEO Services', 
+      description: 'Search engine optimization for real estate',
+      icon: TrendingUp,
+      gradient: 'from-orange-500 to-orange-600',
+      color: 'text-orange-600'
+    },
+    { 
+      id: 'crm-tools', 
+      name: 'CRM & Lead Management', 
+      description: 'Customer relationship management systems',
+      icon: Database,
+      gradient: 'from-teal-500 to-teal-600',
+      color: 'text-teal-600'
+    },
+    { 
+      id: 'photography', 
+      name: 'Real Estate Photography', 
+      description: 'Professional listing photography services',
+      icon: Camera,
+      gradient: 'from-yellow-500 to-yellow-600',
+      color: 'text-yellow-600'
+    },
+    { 
+      id: 'videography', 
+      name: 'Video Marketing', 
+      description: 'Real estate video production and marketing',
+      icon: Video,
+      gradient: 'from-red-500 to-red-600',
+      color: 'text-red-600'
+    },
+    { 
+      id: 'print-marketing', 
+      name: 'Print Marketing Materials', 
+      description: 'Business cards, brochures, and signage',
+      icon: Printer,
+      gradient: 'from-gray-500 to-gray-600',
+      color: 'text-gray-600'
+    },
   ];
   const [savedServiceIds, setSavedServiceIds] = useState<string[]>([]);
   const [selectedService, setSelectedService] = useState<Service | null>(null);
@@ -589,24 +659,62 @@ export const MarketplaceGrid = () => {
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredProducts.map((product) => (
-                  <div
-                    key={product.id}
-                    className="bg-card p-6 rounded-lg border border-border hover:border-primary/50 cursor-pointer transition-all duration-200 hover:shadow-md"
-                    onClick={() => handleSelectProduct(product.id)}
-                  >
-                    <h3 className="text-xl font-semibold mb-2">{product.name}</h3>
-                    <p className="text-muted-foreground mb-4">{product.description}</p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">
-                        {getServicesForProduct(product.id).length} providers available
-                      </span>
-                      <Button variant="outline" size="sm">
-                        View Providers →
-                      </Button>
+                {filteredProducts.map((product) => {
+                  const IconComponent = product.icon;
+                  return (
+                    <div
+                      key={product.id}
+                      className="group relative overflow-hidden bg-white rounded-xl border border-gray-200 hover:border-gray-300 cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
+                      onClick={() => handleSelectProduct(product.id)}
+                    >
+                      {/* Background Gradient */}
+                      <div className={`absolute inset-0 bg-gradient-to-br ${product.gradient} opacity-5 group-hover:opacity-10 transition-opacity duration-300`} />
+                      
+                      {/* Content */}
+                      <div className="relative p-6">
+                        {/* Icon and Header */}
+                        <div className="flex items-start justify-between mb-4">
+                          <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${product.gradient} flex items-center justify-center shadow-lg`}>
+                            <IconComponent className="w-6 h-6 text-white" />
+                          </div>
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-gray-600 transform group-hover:translate-x-1 transition-all duration-300" />
+                          </div>
+                        </div>
+
+                        {/* Title */}
+                        <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-gray-800 transition-colors duration-300">
+                          {product.name}
+                        </h3>
+
+                        {/* Description */}
+                        <p className="text-gray-600 text-sm leading-relaxed mb-6 line-clamp-2">
+                          {product.description}
+                        </p>
+
+                        {/* Footer */}
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <div className={`w-2 h-2 rounded-full bg-gradient-to-r ${product.gradient}`} />
+                            <span className="text-sm font-medium text-gray-700">
+                              {getServicesForProduct(product.id).length} providers
+                            </span>
+                          </div>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            className={`${product.color} hover:bg-gray-50 font-medium opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0`}
+                          >
+                            Explore →
+                          </Button>
+                        </div>
+                      </div>
+
+                      {/* Hover Effect Overlay */}
+                      <div className="absolute inset-0 ring-1 ring-gray-200 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )
           ) : (
