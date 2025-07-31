@@ -13,6 +13,7 @@ import { YouTubeImportPanel } from '@/components/admin/YouTubeImportPanel';
 import { YouTubeChannelImportPanel } from '@/components/admin/YouTubeChannelImportPanel';
 import SecurityMonitoringPanel from '@/components/admin/SecurityMonitoringPanel';
 import { ServiceImportPanel } from '@/components/admin/ServiceImportPanel';
+import { VendorImportPanel } from '@/components/admin/VendorImportPanel';
 
 interface UserProfile {
   id: string;
@@ -201,6 +202,7 @@ export default function AdminDashboard() {
         <ContentPromotionPanel />
         <YouTubeImportPanel />
         <YouTubeChannelImportPanel />
+        <VendorImportPanel />
         <ServiceImportPanel />
       </div>
 
