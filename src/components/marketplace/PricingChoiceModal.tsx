@@ -31,7 +31,11 @@ export const PricingChoiceModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
+      <DialogContent 
+        className="max-w-md z-[100]"
+        onClick={(e) => e.stopPropagation()}
+        onPointerDown={(e) => e.stopPropagation()}
+      >
         <DialogHeader>
           <DialogTitle>Choose Your Payment Option</DialogTitle>
         </DialogHeader>

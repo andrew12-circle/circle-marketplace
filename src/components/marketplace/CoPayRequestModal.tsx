@@ -268,9 +268,17 @@ export const CoPayRequestModal = ({ isOpen, onClose, service }: CoPayRequestModa
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleVendorSearch()}
+            onClick={(e) => e.stopPropagation()}
+            onFocus={(e) => e.stopPropagation()}
           />
         </div>
-        <Button onClick={handleVendorSearch} disabled={isLoading}>
+        <Button 
+          onClick={(e) => {
+            e.stopPropagation();
+            handleVendorSearch();
+          }} 
+          disabled={isLoading}
+        >
           <Search className="w-4 h-4" />
         </Button>
       </div>
@@ -279,7 +287,14 @@ export const CoPayRequestModal = ({ isOpen, onClose, service }: CoPayRequestModa
         <div className="space-y-2">
           <h4 className="font-medium">Found Vendors:</h4>
           {foundVendors.map((vendor) => (
-            <Card key={vendor.id} className="cursor-pointer hover:bg-accent" onClick={() => handleVendorSelect(vendor)}>
+            <Card 
+              key={vendor.id} 
+              className="cursor-pointer hover:bg-accent" 
+              onClick={(e) => {
+                e.stopPropagation();
+                handleVendorSelect(vendor);
+              }}
+            >
               <CardContent className="p-3">
                 <div className="flex justify-between items-center">
                   <div>
@@ -499,12 +514,18 @@ export const CoPayRequestModal = ({ isOpen, onClose, service }: CoPayRequestModa
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+      <DialogContent 
+        className="max-w-md max-h-[90vh] overflow-y-auto z-[100]"
+        onClick={(e) => e.stopPropagation()}
+        onPointerDown={(e) => e.stopPropagation()}
+      >
         <DialogHeader>
           <DialogTitle>Co-Pay Request</DialogTitle>
         </DialogHeader>
         
-        {renderCurrentStep()}
+        <div onClick={(e) => e.stopPropagation()}>
+          {renderCurrentStep()}
+        </div>
       </DialogContent>
     </Dialog>
   );
