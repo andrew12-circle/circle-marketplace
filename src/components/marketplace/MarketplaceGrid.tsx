@@ -294,6 +294,14 @@ export const MarketplaceGrid = () => {
     vendor.service_states?.includes(location.state))
   ).length : 0;
 
+  // Filter product categories based on search term
+  const filteredProducts = PRODUCT_CATEGORIES.filter(product => {
+    if (!searchTerm) return true;
+    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         product.description.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesSearch;
+  });
+
   const handleSaveService = async (serviceId: string) => {
     if (!profile?.user_id) {
       toast({
@@ -581,7 +589,7 @@ export const MarketplaceGrid = () => {
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {PRODUCT_CATEGORIES.map((product) => (
+                {filteredProducts.map((product) => (
                   <div
                     key={product.id}
                     className="bg-card p-6 rounded-lg border border-border hover:border-primary/50 cursor-pointer transition-all duration-200 hover:shadow-md"
@@ -617,6 +625,7 @@ export const MarketplaceGrid = () => {
           {/* Empty State */}
           {((viewMode === "services" && filteredServices.length === 0) || 
             (viewMode === "vendors" && filteredVendors.length === 0) ||
+            (viewMode === "products" && !selectedProductCategory && filteredProducts.length === 0) ||
             (viewMode === "products" && selectedProductCategory && getServicesForProduct(selectedProductCategory).length === 0)) && (
             <div className="text-center py-12">
               <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
