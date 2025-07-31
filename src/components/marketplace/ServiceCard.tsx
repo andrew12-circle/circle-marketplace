@@ -12,6 +12,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useServiceAnalytics } from "@/hooks/useServiceAnalytics";
 import { useCurrency } from "@/hooks/useCurrency";
+import { extractAndValidatePrice, validateCartPricing, safeFormatPrice } from "@/utils/priceValidation";
 import { ConsultationFlow } from "./ConsultationFlow";
 import { ServiceFunnelModal } from "./ServiceFunnelModal";
 
@@ -60,10 +61,14 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
   const { formatPrice } = useCurrency();
   const isProMember = profile?.is_pro_member || false;
 
-  // Helper function to extract numeric value from price strings like "$797" or "$1,347.00"
+  // Safe price extraction with validation
   const extractNumericPrice = (priceString: string): number => {
-    const match = priceString.match(/(\d+(?:,\d{3})*(?:\.\d+)?)/);
-    return match ? parseFloat(match[1].replace(/,/g, '')) : 0;
+    const validation = extractAndValidatePrice(priceString, 'retail');
+    if (!validation.isValid || validation.sanitizedPrice === null) {
+      console.error('Price validation failed:', priceString, validation.errors);
+      return 0;
+    }
+    return validation.sanitizedPrice;
   };
 
   const handleSave = (e: React.MouseEvent) => {
@@ -81,7 +86,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
     setIsFunnelModalOpen(true);
   };
 
-  const handleAddToCart = (e: React.MouseEvent) => {
+  const handleAddToCart = async (e: React.MouseEvent) => {
     e.stopPropagation();
     
     // Determine price based on user's membership and available pricing
@@ -93,6 +98,27 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
       finalPrice = extractNumericPrice(service.pro_price);
     } else if (service.retail_price) {
       finalPrice = extractNumericPrice(service.retail_price);
+    }
+    
+    // Critical: Validate pricing integrity before adding to cart
+    if (finalPrice === 0) {
+      toast({
+        title: "Pricing Error",
+        description: "Unable to determine valid price. Please contact support.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Server-side price validation
+    const isPriceValid = await validateCartPricing(service.id, finalPrice);
+    if (!isPriceValid) {
+      toast({
+        title: "Price Validation Failed",
+        description: "Price mismatch detected. Please refresh and try again.",
+        variant: "destructive",
+      });
+      return;
     }
     
     addToCart({
