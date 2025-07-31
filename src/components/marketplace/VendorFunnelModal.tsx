@@ -633,6 +633,48 @@ export const VendorFunnelModal = ({
                   <p className="text-sm text-gray-600 mt-1">Why agents choose us</p>
                 </div>
 
+                {/* Action Buttons */}
+                <div className="space-y-3">
+                  <Button
+                    onClick={handleRequestCoMarketing}
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                    size="lg"
+                  >
+                    <Handshake className="w-4 h-4 mr-2" />
+                    Request Partnership
+                  </Button>
+                  
+                  <Button
+                    variant="outline"
+                    className="w-full border-blue-600 text-blue-600 hover:bg-blue-50"
+                    size="lg"
+                  >
+                    <Calendar className="w-4 h-4 mr-2" />
+                    Schedule Consultation
+                  </Button>
+                  
+                  {vendor.website_url && (
+                    <Button
+                      variant="outline"
+                      className="w-full border-gray-300 text-gray-700 hover:bg-gray-50"
+                      size="lg"
+                      onClick={() => window.open(vendor.website_url, '_blank')}
+                    >
+                      <Building className="w-4 h-4 mr-2" />
+                      Visit Website
+                    </Button>
+                  )}
+                  
+                  <Button
+                    variant="ghost"
+                    className="w-full text-gray-600 hover:text-gray-800"
+                    size="sm"
+                  >
+                    <Users className="w-4 h-4 mr-2" />
+                    View Agent Testimonials
+                  </Button>
+                </div>
+
                  {/* Key Stats */}
                  <div className="space-y-4">
                    <div className="text-center p-4 bg-green-50 rounded-lg border border-green-200">
@@ -674,48 +716,6 @@ export const VendorFunnelModal = ({
                       Transparent process updates
                     </div>
                   </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="space-y-3">
-                  <Button
-                    onClick={handleRequestCoMarketing}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                    size="lg"
-                  >
-                    <Handshake className="w-4 h-4 mr-2" />
-                    Request Partnership
-                  </Button>
-                  
-                  <Button
-                    variant="outline"
-                    className="w-full border-blue-600 text-blue-600 hover:bg-blue-50"
-                    size="lg"
-                  >
-                    <Calendar className="w-4 h-4 mr-2" />
-                    Schedule Consultation
-                  </Button>
-                  
-                  {vendor.website_url && (
-                    <Button
-                      variant="outline"
-                      className="w-full border-gray-300 text-gray-700 hover:bg-gray-50"
-                      size="lg"
-                      onClick={() => window.open(vendor.website_url, '_blank')}
-                    >
-                      <Building className="w-4 h-4 mr-2" />
-                      Visit Website
-                    </Button>
-                  )}
-                  
-                  <Button
-                    variant="ghost"
-                    className="w-full text-gray-600 hover:text-gray-800"
-                    size="sm"
-                  >
-                    <Users className="w-4 h-4 mr-2" />
-                    View Agent Testimonials
-                  </Button>
                 </div>
 
               </div>
