@@ -9,7 +9,7 @@ const corsHeaders = {
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
+const geminiApiKey = Deno.env.get('GEMINI_API_KEY');
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -202,104 +202,112 @@ async function processSingleImage(supabase: any, serviceId: string) {
 }
 
 async function generateVectorDescription(base64Image: string, title: string): Promise<string> {
-  if (!openaiApiKey) {
-    throw new Error('OpenAI API key not configured');
+  if (!geminiApiKey) {
+    throw new Error('Gemini API key not configured');
   }
 
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+  const requestBody = {
+    contents: [
+      {
+        parts: [
+          {
+            text: `You are an expert at analyzing images and creating detailed descriptions for vector graphics. 
+            Your task is to analyze the provided image for the service "${title}" and create a detailed description that can be used to generate a clean, simple SVG vector version.
+            
+            Focus on:
+            - Main shapes and geometric elements
+            - Color scheme (use web-safe colors)
+            - Key visual elements and their relationships
+            - Simple, clean design principles
+            - Icon-like representation if applicable
+            
+            Return only a detailed description suitable for SVG generation, no other text.`
+          },
+          {
+            inline_data: {
+              mime_type: "image/jpeg",
+              data: base64Image
+            }
+          }
+        ]
+      }
+    ],
+    generationConfig: {
+      temperature: 0.4,
+      topK: 32,
+      topP: 1,
+      maxOutputTokens: 500,
+    }
+  };
+
+  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`, {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${openaiApiKey}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      model: 'gpt-4o-mini',
-      messages: [
-        {
-          role: 'system',
-          content: `You are an expert at analyzing images and creating detailed descriptions for vector graphics. 
-          Your task is to analyze the provided image and create a detailed description that can be used to generate a clean, simple SVG vector version.
-          Focus on:
-          - Main shapes and geometric elements
-          - Color scheme (use web-safe colors)
-          - Key visual elements and their relationships
-          - Simple, clean design principles
-          - Icon-like representation if applicable
-          
-          Return only a detailed description suitable for SVG generation, no other text.`
-        },
-        {
-          role: 'user',
-          content: [
-            {
-              type: 'text',
-              text: `Please analyze this image for the service "${title}" and provide a detailed description for creating a vector version:`
-            },
-            {
-              type: 'image_url',
-              image_url: {
-                url: `data:image/jpeg;base64,${base64Image}`
-              }
-            }
-          ]
-        }
-      ],
-      max_tokens: 500
-    }),
+    body: JSON.stringify(requestBody),
   });
 
   const data = await response.json();
   
-  if (!data.choices?.[0]?.message?.content) {
-    throw new Error('Failed to generate vector description');
+  if (!data.candidates?.[0]?.content?.parts?.[0]?.text) {
+    console.error('Gemini API response:', data);
+    throw new Error('Failed to generate vector description with Gemini');
   }
 
-  return data.choices[0].message.content;
+  return data.candidates[0].content.parts[0].text;
 }
 
 async function generateSVG(description: string, title: string): Promise<string> {
-  if (!openaiApiKey) {
-    throw new Error('OpenAI API key not configured');
+  if (!geminiApiKey) {
+    throw new Error('Gemini API key not configured');
   }
 
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+  const requestBody = {
+    contents: [
+      {
+        parts: [
+          {
+            text: `You are an expert SVG creator. Generate clean, professional SVG code based on descriptions.
+            
+            Requirements:
+            - Create valid SVG with viewBox="0 0 200 200"
+            - Use modern, clean design principles
+            - Use web-safe colors and gradients
+            - Make it scalable and professional
+            - Include proper accessibility attributes
+            - Keep the design simple but recognizable
+            - Return only the SVG code, no other text or markdown
+            
+            Create an SVG for "${title}" based on this description: ${description}`
+          }
+        ]
+      }
+    ],
+    generationConfig: {
+      temperature: 0.3,
+      topK: 32,
+      topP: 1,
+      maxOutputTokens: 1000,
+    }
+  };
+
+  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`, {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${openaiApiKey}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      model: 'gpt-4o-mini',
-      messages: [
-        {
-          role: 'system',
-          content: `You are an expert SVG creator. Generate clean, professional SVG code based on descriptions.
-          
-          Requirements:
-          - Create valid SVG with viewBox="0 0 200 200"
-          - Use modern, clean design principles
-          - Use web-safe colors and gradients
-          - Make it scalable and professional
-          - Include proper accessibility attributes
-          - Keep the design simple but recognizable
-          - Return only the SVG code, no other text or markdown`
-        },
-        {
-          role: 'user',
-          content: `Create an SVG for "${title}" based on this description: ${description}`
-        }
-      ],
-      max_tokens: 1000
-    }),
+    body: JSON.stringify(requestBody),
   });
 
   const data = await response.json();
   
-  if (!data.choices?.[0]?.message?.content) {
-    throw new Error('Failed to generate SVG');
+  if (!data.candidates?.[0]?.content?.parts?.[0]?.text) {
+    console.error('Gemini API response:', data);
+    throw new Error('Failed to generate SVG with Gemini');
   }
 
-  let svgContent = data.choices[0].message.content.trim();
+  let svgContent = data.candidates[0].content.parts[0].text.trim();
   
   // Clean up the response - remove markdown code blocks if present
   svgContent = svgContent.replace(/```svg\n?/g, '').replace(/```\n?/g, '');
