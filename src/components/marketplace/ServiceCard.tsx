@@ -82,7 +82,6 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
     // Track the service view
     await trackServiceView(service.id);
     setIsFunnelModalOpen(true);
-    onViewDetails?.(service.id);
   };
 
   const handleAddToCart = (e: React.MouseEvent) => {
