@@ -20,8 +20,6 @@ interface Service {
   title: string;
   description: string;
   category: string;
-  price: string;
-  original_price?: string;
   discount_percentage?: string;
   retail_price?: string;
   pro_price?: string;
@@ -88,7 +86,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
     e.stopPropagation();
     
     // Determine price based on user's membership and available pricing
-    let finalPrice = extractNumericPrice(service.price);
+    let finalPrice = 0;
     
     if (isProMember && service.co_pay_price) {
       finalPrice = extractNumericPrice(service.co_pay_price);

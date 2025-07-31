@@ -51,7 +51,9 @@ interface Service {
   title: string;
   description: string;
   category: string;
-  price: string;
+  retail_price?: string;
+  pro_price?: string;
+  co_pay_price?: string;
   image_url?: string;
   is_featured: boolean;
   vendor_id: string;
@@ -320,7 +322,9 @@ export const VendorDashboard = () => {
           title,
           description,
           category,
-          price,
+          retail_price,
+          pro_price,
+          co_pay_price,
           image_url,
           is_featured,
           vendor_id,
@@ -338,7 +342,9 @@ export const VendorDashboard = () => {
         title: service.title,
         description: service.description || '',
         category: service.category,
-        price: service.price,
+        retail_price: service.retail_price,
+        pro_price: service.pro_price,
+        co_pay_price: service.co_pay_price,
         image_url: service.image_url,
         is_featured: service.is_featured,
         vendor_id: service.vendor_id,
@@ -523,7 +529,7 @@ export const VendorDashboard = () => {
         title: service.title,
         description: service.description,
         category: service.category,
-        price: service.price,
+        price: service.retail_price || service.pro_price || service.co_pay_price || '',
         is_featured: service.is_featured,
         image_url: service.image_url || '',
         vendor_id: service.vendor_id,
@@ -907,7 +913,7 @@ export const VendorDashboard = () => {
                         <div className="flex items-center justify-between">
                           <span className="text-sm text-muted-foreground">Price:</span>
                           <span className="text-xl font-bold text-foreground">
-                            ${service.price}
+                            ${service.retail_price || service.pro_price || service.co_pay_price || 'TBD'}
                           </span>
                         </div>
                       </div>

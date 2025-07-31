@@ -1033,8 +1033,6 @@ export type Database = {
           image_url: string | null
           is_featured: boolean | null
           is_top_pick: boolean | null
-          original_price: string | null
-          price: string | null
           price_duration: string | null
           pro_price: string | null
           rating: number | null
@@ -1059,8 +1057,6 @@ export type Database = {
           image_url?: string | null
           is_featured?: boolean | null
           is_top_pick?: boolean | null
-          original_price?: string | null
-          price?: string | null
           price_duration?: string | null
           pro_price?: string | null
           rating?: number | null
@@ -1085,8 +1081,6 @@ export type Database = {
           image_url?: string | null
           is_featured?: boolean | null
           is_top_pick?: boolean | null
-          original_price?: string | null
-          price?: string | null
           price_duration?: string | null
           pro_price?: string | null
           rating?: number | null

@@ -29,8 +29,6 @@ interface Service {
   title: string;
   description: string;
   category: string;
-  price: string;
-  original_price?: string;
   discount_percentage?: string;
   retail_price?: string;
   pro_price?: string;
@@ -164,7 +162,7 @@ export const ServiceDetailsModal = ({ service, isOpen, onClose }: ServiceDetails
     {
       id: "retail",
       name: "Standard",
-      price: service.retail_price || service.price,
+      price: service.retail_price || "100",
       description: "Perfect for individual agents",
       features: features.slice(0, 4),
       popular: false
@@ -172,7 +170,7 @@ export const ServiceDetailsModal = ({ service, isOpen, onClose }: ServiceDetails
     {
       id: "pro",
       name: "Circle Pro",
-      price: service.pro_price || service.price,
+      price: service.pro_price || "100",
       originalPrice: service.retail_price,
       description: "Best value for serious agents",
       features: features.slice(0, 6),

@@ -30,8 +30,6 @@ interface Service {
   title: string;
   description: string;
   category: string;
-  price: string;
-  original_price?: string;
   discount_percentage?: string;
   retail_price?: string;
   pro_price?: string;
@@ -192,8 +190,6 @@ export const MarketplaceGrid = () => {
       // Convert the database response to match our interface
       const formattedServices = (servicesData || []).map(service => ({
         ...service,
-        price: String(service.price || "0"),
-        original_price: service.original_price ? String(service.original_price) : undefined,
         discount_percentage: service.discount_percentage ? String(service.discount_percentage) : undefined,
         contribution_amount: String(service.contribution_amount || "0"),
       }));
@@ -226,7 +222,7 @@ export const MarketplaceGrid = () => {
                          service.vendor.name.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesCategory = filters.category === "all" || service.category === filters.category;
-    const priceValue = parseFloat(service.price) || 0;
+    const priceValue = parseFloat(service.retail_price || "0") || 0;
     const matchesPrice = priceValue >= filters.priceRange[0] && priceValue <= filters.priceRange[1];
     const matchesVerified = !filters.verified || service.vendor.is_verified;
     const matchesFeatured = !filters.featured || service.is_featured;
@@ -581,13 +577,13 @@ export const MarketplaceGrid = () => {
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
                   {getServicesForProduct(selectedProductCategory).map((service) => (
-                    <ServiceCard
-                      key={service.id}
-                      service={service}
-                      onSave={handleSaveService}
-                      onViewDetails={handleViewServiceDetails}
-                      isSaved={savedServiceIds.includes(service.id)}
-                    />
+        <ServiceCard
+          key={service.id}
+          service={service}
+          onSave={handleSaveService}
+          onViewDetails={handleViewServiceDetails}
+          isSaved={savedServiceIds.includes(service.id)}
+        />
                   ))}
                 </div>
               </div>

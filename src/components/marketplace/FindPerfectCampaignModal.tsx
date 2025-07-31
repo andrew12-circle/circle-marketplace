@@ -16,7 +16,9 @@ interface Service {
   title: string;
   description: string;
   category: string;
-  price: string;
+  retail_price?: string;
+  pro_price?: string;
+  co_pay_price?: string;
   is_featured: boolean;
   vendor: {
     name: string;
@@ -219,7 +221,9 @@ export const FindPerfectCampaignModal = ({ open, onOpenChange }: FindPerfectCamp
                     </div>
 
                     <div className="flex items-center justify-between">
-                      <span className="font-semibold text-sm">{service.price}</span>
+                      <span className="font-semibold text-sm">
+                        {service.retail_price || service.pro_price || service.co_pay_price || 'Contact for price'}
+                      </span>
                       <Button size="sm" variant="outline" className="text-xs h-7">
                         <ExternalLink className="w-3 h-3 mr-1" />
                         View Details

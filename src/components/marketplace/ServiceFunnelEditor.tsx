@@ -1130,7 +1130,7 @@ export const ServiceFunnelEditor = ({ funnelContent, onChange }: ServiceFunnelEd
           title: funnelContent.headline || 'Service Preview',
           description: funnelContent.heroDescription,
           category: 'Marketing',
-          price: funnelContent.packages[0]?.price?.toString() || '299',
+          retail_price: funnelContent.packages[0]?.price?.toString() || '299',
           is_featured: true,
           is_top_pick: true,
           contribution_amount: '50',

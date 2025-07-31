@@ -43,8 +43,6 @@ interface Service {
   title: string;
   description: string;
   category: string;
-  price: string;
-  original_price?: string;
   discount_percentage?: string;
   retail_price?: string;
   pro_price?: string;
@@ -140,16 +138,16 @@ export const ServiceFunnelModal = ({
       {
         id: "basic",
         name: "Basic Package",
-        price: parseFloat(service.retail_price || service.price) * 0.75,
-        originalPrice: parseFloat(service.retail_price || service.price),
+        price: parseFloat(service.retail_price || "100") * 0.75,
+        originalPrice: parseFloat(service.retail_price || "100"),
         description: "Essential service features for getting started",
         features: ["Core service delivery", "Email support", "Basic reporting"]
       },
       {
         id: "standard",
         name: "Standard Package", 
-        price: parseFloat(service.retail_price || service.price),
-        originalPrice: parseFloat(service.retail_price || service.price) * 1.33,
+        price: parseFloat(service.retail_price || "100"),
+        originalPrice: parseFloat(service.retail_price || "100") * 1.33,
         description: "Complete solution for most needs",
         features: ["Everything in Basic", "Priority support", "Advanced reporting", "Custom consultation"],
         popular: true
@@ -157,8 +155,8 @@ export const ServiceFunnelModal = ({
       {
         id: "premium",
         name: "Premium Package",
-        price: parseFloat(service.retail_price || service.price) * 1.5,
-        originalPrice: parseFloat(service.retail_price || service.price) * 2,
+        price: parseFloat(service.retail_price || "100") * 1.5,
+        originalPrice: parseFloat(service.retail_price || "100") * 2,
         description: "Full-service solution with dedicated support",
         features: ["Everything in Standard", "Dedicated account manager", "24/7 support", "Custom integrations"]
       }
@@ -921,7 +919,7 @@ export const ServiceFunnelModal = ({
                           <h4 className="font-medium mb-2">{service.category} Solution {i}</h4>
                           <p className="text-sm text-muted-foreground mb-2">Complementary service for your needs</p>
                           <div className="flex items-center justify-between">
-                            <span className="font-bold">${(parseFloat(service.price) * (0.8 + i * 0.3)).toFixed(0)}</span>
+                            <span className="font-bold">${(parseFloat(service.retail_price || "100") * (0.8 + i * 0.3)).toFixed(0)}</span>
                             <Button size="sm">View Details</Button>
                           </div>
                         </Card>
