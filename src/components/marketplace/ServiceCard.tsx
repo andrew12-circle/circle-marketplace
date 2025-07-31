@@ -212,8 +212,8 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
               {service.description}
             </p>
           </PopoverTrigger>
-          <PopoverContent className="max-w-xs p-3 text-sm text-muted-foreground rounded-lg z-50">
-            <p>{service.description}</p>
+          <PopoverContent className="max-w-xs p-3 text-sm bg-popover border border-border rounded-lg shadow-lg z-[60]">
+            <p className="text-popover-foreground">{service.description}</p>
           </PopoverContent>
         </Popover>
 
