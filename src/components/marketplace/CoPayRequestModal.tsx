@@ -501,12 +501,7 @@ export const CoPayRequestModal = ({ isOpen, onClose, service }: CoPayRequestModa
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <div className="flex items-center justify-between">
-            <DialogTitle>Co-Pay Request</DialogTitle>
-            <Button variant="ghost" size="icon" onClick={handleClose}>
-              <X className="w-4 h-4" />
-            </Button>
-          </div>
+          <DialogTitle>Co-Pay Request</DialogTitle>
         </DialogHeader>
         
         {renderCurrentStep()}

@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Heart, Star, ArrowRight, ShoppingCart, MessageCircle, Lock, Crown, Calendar } from "lucide-react";
+import { Heart, Star, ArrowRight, ShoppingCart, MessageCircle, Lock, Crown, Calendar, Users } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -96,12 +96,6 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    
-    // Check if user wants to use co-pay pricing
-    if (isProMember && service.co_pay_allowed && service.retail_price && service.max_vendor_split_percentage) {
-      setIsCoPayModalOpen(true);
-      return;
-    }
     
     // Determine price based on user's membership and available pricing
     let finalPrice = 0;
@@ -447,6 +441,21 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
               <span className="sm:hidden">Add</span>
             </>
           </Button>
+          
+          {/* Co-Pay Option for Pro Members */}
+          {isProMember && service.co_pay_allowed && service.retail_price && service.max_vendor_split_percentage && (
+            <Button 
+              variant="outline"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsCoPayModalOpen(true);
+              }}
+              className="touch-target"
+            >
+              <Users className="w-4 h-4" />
+            </Button>
+          )}
           
           <Button 
             variant="outline"
