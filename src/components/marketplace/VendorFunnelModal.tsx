@@ -675,29 +675,31 @@ export const VendorFunnelModal = ({
                   </Button>
                 </div>
 
-                 {/* Key Stats */}
-                 <div className="space-y-4">
-                   <div className="text-center p-4 bg-green-50 rounded-lg border border-green-200">
-                     <div className="text-2xl font-bold text-green-700">52</div>
-                     <div className="text-sm text-green-600">{config.statsLabels.primary}</div>
-                   </div>
-                   
-                   <div className="grid grid-cols-2 gap-3">
-                     <div className="text-center p-3 bg-blue-50 rounded-lg border border-blue-200">
-                       <div className="text-xl font-bold text-blue-700">98%</div>
-                       <div className="text-xs text-blue-600">{config.statsLabels.secondary}</div>
+                 {/* Key Stats - Only show if vendor has meaningful numbers */}
+                 {(vendor.co_marketing_agents >= 10 && vendor.campaigns_funded >= 20) && (
+                   <div className="space-y-4">
+                     <div className="text-center p-4 bg-green-50 rounded-lg border border-green-200">
+                       <div className="text-2xl font-bold text-green-700">{vendor.campaigns_funded}</div>
+                       <div className="text-sm text-green-600">{config.statsLabels.primary}</div>
                      </div>
-                     <div className="text-center p-3 bg-purple-50 rounded-lg border border-purple-200">
-                       <div className="text-xl font-bold text-purple-700">4.9★</div>
-                       <div className="text-xs text-purple-600">{config.statsLabels.rating}</div>
+                     
+                     <div className="grid grid-cols-2 gap-3">
+                       <div className="text-center p-3 bg-blue-50 rounded-lg border border-blue-200">
+                         <div className="text-xl font-bold text-blue-700">98%</div>
+                         <div className="text-xs text-blue-600">{config.statsLabels.secondary}</div>
+                       </div>
+                       <div className="text-center p-3 bg-purple-50 rounded-lg border border-purple-200">
+                         <div className="text-xl font-bold text-purple-700">4.9★</div>
+                         <div className="text-xs text-purple-600">{config.statsLabels.rating}</div>
+                       </div>
+                     </div>
+                     
+                     <div className="text-center p-3 bg-orange-50 rounded-lg border border-orange-200">
+                       <div className="text-xl font-bold text-orange-700">24hr</div>
+                       <div className="text-xs text-orange-600">{config.statsLabels.response}</div>
                      </div>
                    </div>
-                   
-                   <div className="text-center p-3 bg-orange-50 rounded-lg border border-orange-200">
-                     <div className="text-xl font-bold text-orange-700">24hr</div>
-                     <div className="text-xs text-orange-600">{config.statsLabels.response}</div>
-                   </div>
-                 </div>
+                 )}
 
                 {/* Communication Highlights */}
                 <div className="bg-gray-50 p-4 rounded-lg">
