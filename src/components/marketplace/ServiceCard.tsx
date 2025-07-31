@@ -37,7 +37,7 @@ interface Service {
     rating: number;
     review_count: number;
     is_verified: boolean;
-  };
+  } | null;
 }
 
 interface ServiceCardProps {
@@ -99,7 +99,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
       id: service.id,
       title: service.title,
       price: finalPrice,
-      vendor: service.vendor.name,
+      vendor: service.vendor?.name || 'Unknown Vendor',
       image_url: service.image_url,
       requiresQuote: service.requires_quote,
       type: 'service'
@@ -166,7 +166,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
           <h3 className="font-semibold text-foreground leading-tight">
             {service.title.split(' - ').pop() || service.title.split(': ').pop() || service.title}
           </h3>
-          {service.vendor.is_verified && (
+          {service.vendor?.is_verified && (
             <Badge variant="secondary" className="text-xs">
               {t('verified')}
             </Badge>
@@ -174,34 +174,36 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
         </div>
 
         {/* Rating - moved above pricing */}
-        <div className="flex items-center gap-1 mb-3">
-          {[...Array(5)].map((_, i) => {
-            const rating = service.vendor.rating;
-            const isFullStar = i < Math.floor(rating);
-            const isPartialStar = i === Math.floor(rating) && rating % 1 !== 0;
-            const fillPercentage = isPartialStar ? (rating <= 4.9 ? 50 : (rating % 1) * 100) : 0;
-            
-            return (
-              <div key={i} className="relative h-4 w-4">
-                <Star className="h-4 w-4 text-gray-300 absolute" />
-                {isFullStar && (
-                  <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 absolute" />
-                )}
-                {isPartialStar && (
-                  <div 
-                    className="overflow-hidden absolute"
-                    style={{ width: `${fillPercentage}%` }}
-                  >
-                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                  </div>
-                )}
-              </div>
-            );
-          })}
-          <span className="text-sm text-muted-foreground ml-1">
-            {service.vendor.rating} ({service.vendor.review_count})
-          </span>
-        </div>
+        {service.vendor && (
+          <div className="flex items-center gap-1 mb-3">
+            {[...Array(5)].map((_, i) => {
+              const rating = service.vendor.rating;
+              const isFullStar = i < Math.floor(rating);
+              const isPartialStar = i === Math.floor(rating) && rating % 1 !== 0;
+              const fillPercentage = isPartialStar ? (rating <= 4.9 ? 50 : (rating % 1) * 100) : 0;
+              
+              return (
+                <div key={i} className="relative h-4 w-4">
+                  <Star className="h-4 w-4 text-gray-300 absolute" />
+                  {isFullStar && (
+                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 absolute" />
+                  )}
+                  {isPartialStar && (
+                    <div 
+                      className="overflow-hidden absolute"
+                      style={{ width: `${fillPercentage}%` }}
+                    >
+                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+            <span className="text-sm text-muted-foreground ml-1">
+              {service.vendor.rating} ({service.vendor.review_count})
+            </span>
+          </div>
+        )}
 
         {/* Description - Fixed height */}
         <Popover>
