@@ -12,12 +12,14 @@ export const LocationSwitcher = () => {
     setIsLocationModalOpen(true);
   };
 
-  const getLocationIcon = () => {
+  const getLocationText = () => {
     if (location?.city && location?.state) {
-      return '📍';
+      return `${location.city}, ${location.state}`;
     }
-    return '';
+    return 'Set Location';
   };
+
+  const hasLocation = location?.city && location?.state;
 
   return (
     <>
@@ -28,9 +30,8 @@ export const LocationSwitcher = () => {
         className="flex items-center gap-1.5 h-8 px-2 text-muted-foreground hover:text-foreground"
       >
         <MapPin className="h-4 w-4" />
-        <span className="text-sm">{getLocationIcon()}</span>
-        <span className="hidden sm:inline text-sm max-w-20 truncate">
-          {location?.city || 'Set Location'}
+        <span className="text-sm font-medium">
+          {getLocationText()}
         </span>
       </Button>
       
