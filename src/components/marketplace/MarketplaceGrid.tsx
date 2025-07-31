@@ -358,6 +358,20 @@ export const MarketplaceGrid = () => {
     vendor.service_states?.includes(location.state))
   ).length : 0;
 
+  // Get categories based on view mode
+  const getCategories = () => {
+    switch (viewMode) {
+      case 'services':
+        return Array.from(new Set(services.map(s => s.category).filter(category => category && category.trim() !== "")));
+      case 'vendors':
+        return []; // CategoryMegaMenu has its own vendor categories
+      case 'products':
+        return []; // CategoryMegaMenu has its own product categories
+      default:
+        return [];
+    }
+  };
+
   // Filter product categories based on search term
   const filteredProducts = PRODUCT_CATEGORIES.filter(product => {
     if (!searchTerm) return true;
@@ -610,7 +624,7 @@ export const MarketplaceGrid = () => {
             <MarketplaceFilters
               filters={filters}
               onFiltersChange={setFilters}
-              categories={Array.from(new Set(services.map(s => s.category).filter(category => category && category.trim() !== "")))}
+              categories={getCategories()}
               viewMode={viewMode}
             />
           </div>
