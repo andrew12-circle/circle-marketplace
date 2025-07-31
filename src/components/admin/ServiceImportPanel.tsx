@@ -45,8 +45,8 @@ export function ServiceImportPanel() {
 
   const downloadTemplate = () => {
     const csvContent = `title,description,category,retail_price,pro_price,co_pay_price,price_duration,discount_percentage,duration,estimated_roi,vendor_id,tags,is_featured,is_top_pick,requires_quote,image_url,service_provider_id
-"Real Estate Photography","Professional photography services for real estate listings","Marketing",299,249,199,"mo",15,2,150,"vendor-uuid-here","photography,marketing,real estate",false,false,false,"https://example.com/image.jpg",""
-"Social Media Management","Complete social media management for 3 months","Marketing",599,499,399,"mo",20,3,300,"vendor-uuid-here","social media,marketing,management",true,false,false,"","provider-uuid-here"`;
+"CRM Software","Complete customer relationship management solution","Software",99,79,59,"mo",20,12,200,"","crm,software,leads",true,false,false,"https://example.com/crm.jpg",""
+"Lead Generation Service","Professional lead generation for real estate","Marketing",299,249,199,"mo",15,3,500,"","leads,marketing,real estate",false,true,false,"","provider-uuid-here"`;
 
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
@@ -305,9 +305,9 @@ export function ServiceImportPanel() {
         )}
 
         <div className="text-xs text-muted-foreground space-y-1">
-          <p><strong>Required fields:</strong> title, vendor_id</p>
-          <p><strong>Note:</strong> vendor_id must be a valid UUID from the vendors table</p>
-          <p><strong>Tags format:</strong> Comma-separated values (e.g., "photography,marketing,real estate")</p>
+          <p><strong>Required fields:</strong> title</p>
+          <p><strong>Optional fields:</strong> vendor_id (leave empty for independent services)</p>
+          <p><strong>Tags format:</strong> Comma-separated values (e.g., "crm,software,leads")</p>
           <p><strong>Boolean fields:</strong> Use "true" or "false" for is_featured, is_top_pick, requires_quote</p>
         </div>
       </CardContent>

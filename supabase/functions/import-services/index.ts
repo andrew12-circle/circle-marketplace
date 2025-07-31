@@ -87,14 +87,14 @@ serve(async (req) => {
     let totalRows = 0;
 
     // Validate required columns
-    const requiredColumns = ['title', 'vendor_id'];
+    const requiredColumns = ['title'];
     const missingColumns = requiredColumns.filter(col => !headers.includes(col));
     
     if (missingColumns.length > 0) {
       throw new Error(`Missing required columns: ${missingColumns.join(', ')}`);
     }
 
-    // Get all vendor IDs for validation
+    // Get all vendor IDs for validation (optional now)
     const { data: vendors } = await supabase
       .from('vendors')
       .select('id');
@@ -146,13 +146,8 @@ serve(async (req) => {
           continue;
         }
 
-        if (!serviceData.vendor_id?.trim()) {
-          errors.push({ row: rowNumber, error: 'vendor_id is required' });
-          continue;
-        }
-
-        // Validate vendor_id exists
-        if (!validVendorIds.has(serviceData.vendor_id)) {
+        // Validate vendor_id exists if provided
+        if (serviceData.vendor_id?.trim() && !validVendorIds.has(serviceData.vendor_id)) {
           errors.push({ row: rowNumber, error: 'Invalid vendor_id - vendor not found' });
           continue;
         }
@@ -168,7 +163,7 @@ serve(async (req) => {
           price_duration: serviceData.price_duration || 'mo',
           discount_percentage: serviceData.discount_percentage || null,
           duration: serviceData.duration || null,
-          vendor_id: serviceData.vendor_id,
+          vendor_id: serviceData.vendor_id?.trim() || null,
           image_url: serviceData.image_url || null,
           service_provider_id: serviceData.service_provider_id || null,
         };
