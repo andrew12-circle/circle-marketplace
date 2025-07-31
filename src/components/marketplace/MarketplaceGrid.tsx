@@ -6,7 +6,7 @@ import { MarketplaceFilters } from "./MarketplaceFilters";
 import { CampaignServicesHeader } from "./CampaignServicesHeader";
 import { CircleProBanner } from "./CircleProBanner";
 import { ServiceDetailsModal } from "./ServiceDetailsModal";
-
+import { AddProductModal } from "./AddProductModal";
 import { LocationFilterBanner } from "./LocationFilterBanner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -115,6 +115,7 @@ export const MarketplaceGrid = () => {
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
   const [isLocationFilterActive, setIsLocationFilterActive] = useState(false);
+  const [isAddProductModalOpen, setIsAddProductModalOpen] = useState(false);
   const [filters, setFilters] = useState<FilterState>({
     category: "all",
     priceRange: [0, 2000],
@@ -522,6 +523,15 @@ export const MarketplaceGrid = () => {
                 <Zap className="w-3 h-3 sm:w-4 sm:h-4" />
                 {t('vendors')}
               </Button>
+              {user && (
+                <Button
+                  variant="outline"
+                  onClick={() => setIsAddProductModalOpen(true)}
+                  className="flex items-center gap-2 h-9 sm:h-10 text-sm sm:text-base"
+                >
+                  + Add Product
+                </Button>
+              )}
             </div>
           </div>
 
@@ -658,6 +668,13 @@ export const MarketplaceGrid = () => {
           onClose={handleCloseServiceModal}
         />
       )}
+
+      {/* Add Product Modal */}
+      <AddProductModal
+        open={isAddProductModalOpen}
+        onOpenChange={setIsAddProductModalOpen}
+        onProductAdded={loadData}
+      />
     </>
   );
 };
