@@ -1827,7 +1827,7 @@ export type Database = {
         Returns: boolean
       }
       check_and_update_lockout: {
-        Args: { identifier: string; attempt_type?: string }
+        Args: { p_identifier: string; p_attempt_type: string }
         Returns: Json
       }
       cleanup_old_security_events: {
