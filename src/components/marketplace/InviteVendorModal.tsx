@@ -223,7 +223,7 @@ export const InviteVendorModal = ({ open, onOpenChange }: InviteVendorModalProps
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto z-[110]">
         <DialogHeader className="text-center pb-4">
           <div className="flex items-center justify-center gap-2 mb-2">
             <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
