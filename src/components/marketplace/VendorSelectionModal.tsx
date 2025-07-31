@@ -357,6 +357,7 @@ export const VendorSelectionModal = ({
         onClose={() => {
           setShowFunnelModal(false);
           setFunnelVendor(null);
+          onClose(); // Close the parent modal too
         }}
         vendor={funnelVendor}
         onRequestCoMarketing={handleCoMarketingRequest}
