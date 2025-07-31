@@ -244,7 +244,7 @@ export const MarketplaceGrid = () => {
 
       // Load vendors with location filtering
       let vendorQuery = supabase
-        .from('vendors_with_local_reps')
+        .from('vendors')
         .select('*')
         .order('sort_order', { ascending: false }) // Higher sort_order = higher priority
         .order('rating', { ascending: false });
@@ -261,10 +261,10 @@ export const MarketplaceGrid = () => {
       
       setServices(formattedServices);
       
-      // Format vendors data and parse JSON representatives
+      // Format vendors data (main vendors table doesn't have local_representatives)
       const formattedVendors = (vendorsData || []).map(vendor => ({
         ...vendor,
-        local_representatives: vendor.local_representatives || []
+        local_representatives: [] // Initialize as empty array since main table doesn't have this field
       }));
       
       setVendors(formattedVendors);
