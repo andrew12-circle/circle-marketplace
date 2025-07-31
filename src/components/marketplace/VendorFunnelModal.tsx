@@ -506,11 +506,6 @@ export const VendorFunnelModal = ({
                   </Button>
                 </div>
 
-                {/* Compliance Notice */}
-                <div className="text-xs text-gray-500 text-center p-3 bg-gray-50 rounded border">
-                  <Shield className="w-4 h-4 mx-auto mb-1" />
-                  All partnerships are RESPA compliant and structured as legitimate business relationships.
-                </div>
               </div>
             </div>
           </div>
