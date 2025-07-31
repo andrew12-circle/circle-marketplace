@@ -87,14 +87,25 @@ export const UserMenu = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-          <Avatar className="h-10 w-10">
-            <AvatarImage src={profile?.avatar_url} alt={profile?.display_name || 'User'} />
-            <AvatarFallback className="bg-circle-primary text-primary-foreground">
-              {initials}
-            </AvatarFallback>
-          </Avatar>
-        </Button>
+        <div className="relative">
+          <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+            <Avatar className={`h-10 w-10 ${profile?.is_pro_member ? 'ring-2 ring-circle-accent ring-offset-2 ring-offset-background' : ''}`}>
+              <AvatarImage src={profile?.avatar_url} alt={profile?.display_name || 'User'} />
+              <AvatarFallback className="bg-circle-primary text-primary-foreground">
+                {initials}
+              </AvatarFallback>
+            </Avatar>
+          </Button>
+          {/* Pro indicator below avatar */}
+          {profile?.is_pro_member && (
+            <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2">
+              <Badge variant="secondary" className="bg-circle-accent text-foreground text-[10px] px-1 py-0 h-4 min-w-0">
+                <Crown className="w-2 h-2 mr-0.5" />
+                PRO
+              </Badge>
+            </div>
+          )}
+        </div>
       </DropdownMenuTrigger>
       
       <DropdownMenuContent className="w-56" align="end" forceMount>

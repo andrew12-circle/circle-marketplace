@@ -101,13 +101,6 @@ const Index = () => {
                   </Button>
                 )}
                 
-                {/* Pro badge */}
-                {user && profile?.is_pro_member && (
-                  <Badge variant="secondary" className="bg-circle-accent text-foreground text-xs px-2 py-1">
-                    <Crown className="w-3 h-3 mr-1" />
-                    <span className="hidden sm:inline">Circle </span>Pro
-                  </Badge>
-                )}
                 
                 {/* User menu */}
                 <UserMenu />
