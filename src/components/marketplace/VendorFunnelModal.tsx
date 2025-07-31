@@ -167,7 +167,7 @@ export const VendorFunnelModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl max-h-[95vh] overflow-y-auto p-0">
+      <DialogContent className="max-w-6xl max-h-[95vh] overflow-y-auto p-0 z-[110]">
         <DialogHeader className="sr-only">
           <span>Vendor Partnership Details</span>
         </DialogHeader>
