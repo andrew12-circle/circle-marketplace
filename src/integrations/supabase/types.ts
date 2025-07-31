@@ -1476,6 +1476,7 @@ export type Database = {
           service_radius_miles: number | null
           service_states: string[] | null
           service_zip_codes: string[] | null
+          sort_order: number | null
           updated_at: string
           vendor_type: string | null
           website_url: string | null
@@ -1509,6 +1510,7 @@ export type Database = {
           service_radius_miles?: number | null
           service_states?: string[] | null
           service_zip_codes?: string[] | null
+          sort_order?: number | null
           updated_at?: string
           vendor_type?: string | null
           website_url?: string | null
@@ -1542,6 +1544,7 @@ export type Database = {
           service_radius_miles?: number | null
           service_states?: string[] | null
           service_zip_codes?: string[] | null
+          sort_order?: number | null
           updated_at?: string
           vendor_type?: string | null
           website_url?: string | null
