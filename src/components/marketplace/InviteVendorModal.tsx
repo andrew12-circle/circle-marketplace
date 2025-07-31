@@ -71,12 +71,12 @@ const VENDOR_TYPES = {
 };
 
 export const InviteVendorModal = ({ open, onOpenChange }: InviteVendorModalProps) => {
-  const [step, setStep] = useState<'type' | 'form'>('type');
+  const [step, setStep] = useState<'type' | 'form'>('form'); // Skip type selection, go directly to form
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<VendorFormData>({
     name: "",
     description: "",
-    vendorType: "",
+    vendorType: "settlement", // Default to settlement services
     category: "",
     website_url: "",
     contact_email: "",
@@ -200,11 +200,11 @@ export const InviteVendorModal = ({ open, onOpenChange }: InviteVendorModalProps
   };
 
   const handleReset = () => {
-    setStep('type');
+    setStep('form'); // Keep on form step since we skip type selection
     setFormData({
       name: "",
       description: "",
-      vendorType: "",
+      vendorType: "settlement", // Default to settlement services
       category: "",
       website_url: "",
       contact_email: "",
