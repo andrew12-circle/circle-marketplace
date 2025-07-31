@@ -27,7 +27,10 @@ import {
   Minus,
   ThumbsUp,
   ThumbsDown,
-  Verified
+  Verified,
+  Shield,
+  Award,
+  Handshake
 } from "lucide-react";
 import { getRiskBadge, getComplianceAlert, determineServiceRisk } from "./RESPAComplianceSystem";
 
@@ -50,7 +53,7 @@ interface VendorFunnelModalProps {
     mls_areas?: string[];
     service_radius_miles?: number;
   };
-  onRequestCoMarketing: (vendorId: string) => void;
+  onRequestCoMarketing: (vendorId: string, packageType: string, duration: number) => void;
 }
 
 export const VendorFunnelModal = ({ 
@@ -132,7 +135,7 @@ export const VendorFunnelModal = ({
   ];
 
   const handleRequestCoMarketing = () => {
-    onRequestCoMarketing(vendor.id);
+    onRequestCoMarketing(vendor.id, selectedPackage, quantity);
     onClose();
   };
 
@@ -173,223 +176,272 @@ export const VendorFunnelModal = ({
         </DialogHeader>
         
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-6">
-          {/* Left Column - Images */}
-          <div className="lg:col-span-5">
-            <div className="sticky top-6">
-              {/* Main Image */}
-              <div className="aspect-square bg-muted rounded-lg mb-4 overflow-hidden">
-                {vendor.logo_url ? (
-                  <img 
-                    src={vendor.logo_url} 
-                    alt={vendor.name}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <Building className="w-24 h-24 text-muted-foreground" />
+          {/* Column 1: Vendor Logo & Credibility */}
+          <div className="lg:col-span-4">
+            <div className="space-y-4">
+              <div className="relative h-48 rounded-lg overflow-hidden bg-white border border-gray-200 p-6">
+                <img
+                  src={vendor.logo_url || "/placeholder.svg"}
+                  alt={vendor.name}
+                  className="w-full h-full object-contain"
+                />
+                {vendor.is_verified && (
+                  <div className="absolute top-4 right-4">
+                    <Badge className="bg-green-600 text-white">
+                      <Shield className="w-3 h-3 mr-1" />
+                      Verified
+                    </Badge>
                   </div>
                 )}
               </div>
               
-              {/* Thumbnail Gallery */}
-              <div className="grid grid-cols-4 gap-2">
-                {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="aspect-square bg-muted rounded border-2 border-transparent hover:border-primary cursor-pointer">
-                    <div className="w-full h-full flex items-center justify-center">
-                      <Building className="w-8 h-8 text-muted-foreground" />
+              {/* Trust Indicators */}
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200">
+                <h3 className="font-semibold text-blue-900 mb-3">Why Partner With Us</h3>
+                <div className="space-y-2">
+                  <div className="flex items-center text-sm text-blue-800">
+                    <TrendingUp className="w-4 h-4 mr-2 text-green-600" />
+                    {vendor.co_marketing_agents || 150}+ Active Agent Partners
+                  </div>
+                  <div className="flex items-center text-sm text-blue-800">
+                    <DollarSign className="w-4 h-4 mr-2 text-green-600" />
+                    {vendor.campaigns_funded || 45} Campaigns Funded
+                  </div>
+                  <div className="flex items-center text-sm text-blue-800">
+                    <Award className="w-4 h-4 mr-2 text-green-600" />
+                    RESPA Compliant
+                  </div>
+                </div>
+              </div>
+
+              {/* Rating Display */}
+              <div className="text-center space-y-2">
+                <div className="flex items-center justify-center space-x-1">
+                  {renderStarRating(vendor.rating || 4.8)}
+                </div>
+                <p className="text-sm text-gray-600">
+                  {vendor.rating || 4.8}/5 from {vendor.review_count || 127} agent reviews
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Column 2: Partnership Details */}
+          <div className="lg:col-span-5">
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-3xl font-bold text-gray-900">{vendor.name}</h2>
+                <p className="text-xl text-blue-600 font-medium mt-1">Strategic Partnership Opportunity</p>
+                <div className="flex items-center gap-2 mt-3">
+                  {getRiskBadge(riskLevel)}
+                  <Badge variant="outline" className="text-green-600 border-green-600">
+                    NMLS Licensed
+                  </Badge>
+                </div>
+              </div>
+
+              <div className="prose prose-sm">
+                <p className="text-gray-700 leading-relaxed">
+                  Join our network of successful real estate agents who have increased their business through strategic partnerships. 
+                  We provide compliant co-marketing opportunities that help you reach more clients while sharing advertising costs.
+                </p>
+              </div>
+
+              {/* Partnership Benefits */}
+              <div className="bg-white border border-gray-200 rounded-lg p-5">
+                <h3 className="font-bold text-gray-900 mb-4 flex items-center">
+                  <Handshake className="w-5 h-5 mr-2 text-blue-600" />
+                  Partnership Benefits
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="flex items-start space-x-3">
+                    <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="font-medium text-gray-900">Shared Marketing Costs</p>
+                      <p className="text-sm text-gray-600">Split advertising expenses 50/50</p>
                     </div>
                   </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Middle Column - Product Details */}
-          <div className="lg:col-span-4 space-y-4">
-            {/* Title and Rating */}
-            <div>
-              <h1 className="text-2xl font-bold mb-2">{vendor.name}</h1>
-              <div className="flex items-center gap-2 mb-2">
-                {renderStarRating(vendor.rating)}
-                <span className="text-sm text-blue-600 hover:text-blue-800 cursor-pointer">
-                  {vendor.rating} ({vendor.review_count} ratings)
-                </span>
-                {vendor.is_verified && (
-                  <Badge className="bg-orange-100 text-orange-800 text-xs">
-                    <Verified className="w-3 h-3 mr-1" />
-                    Verified Partner
-                  </Badge>
-                )}
-              </div>
-              {getRiskBadge(riskLevel)}
-            </div>
-
-            <Separator />
-
-            {/* Price Section */}
-            <div className="space-y-2">
-              <div className="flex items-baseline gap-2">
-                <span className="text-xs text-muted-foreground">List Price:</span>
-                <span className="text-sm text-muted-foreground line-through">
-                  ${selectedPkg.originalPrice}
-                </span>
-              </div>
-              <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-bold text-red-600">
-                  ${selectedPkg.price}
-                </span>
-                <Badge className="bg-red-500 text-white">
-                  Save ${selectedPkg.originalPrice - selectedPkg.price}
-                </Badge>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                FREE delivery and setup included
-              </p>
-            </div>
-
-            <Separator />
-
-            {/* Package Selection */}
-            <div className="space-y-3">
-              <h3 className="font-semibold">Choose your package:</h3>
-              {packages.map((pkg) => (
-                <div 
-                  key={pkg.id}
-                  className={`border rounded-lg p-3 cursor-pointer transition-colors ${
-                    selectedPackage === pkg.id ? 'border-primary bg-primary/5' : 'border-border hover:border-muted-foreground'
-                  } ${pkg.popular ? 'relative' : ''}`}
-                  onClick={() => setSelectedPackage(pkg.id)}
-                >
-                  {pkg.popular && (
-                    <Badge className="absolute -top-2 left-3 bg-orange-500">
-                      Most Popular
-                    </Badge>
-                  )}
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-medium">{pkg.name}</span>
-                    <span className="font-bold">${pkg.price}</span>
+                  <div className="flex items-start space-x-3">
+                    <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="font-medium text-gray-900">Co-Branded Materials</p>
+                      <p className="text-sm text-gray-600">Professional marketing assets</p>
+                    </div>
                   </div>
-                  <p className="text-sm text-muted-foreground mb-2">{pkg.description}</p>
-                  <ul className="text-xs text-muted-foreground space-y-1">
-                    {pkg.features.slice(0, 2).map((feature, i) => (
-                      <li key={i} className="flex items-center gap-1">
-                        <CheckCircle className="w-3 h-3 text-green-500" />
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
+                  <div className="flex items-start space-x-3">
+                    <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="font-medium text-gray-900">Lead Generation</p>
+                      <p className="text-sm text-gray-600">Access to our client database</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-3">
+                    <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="font-medium text-gray-900">RESPA Compliance</p>
+                      <p className="text-sm text-gray-600">Fully compliant partnerships</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-3">
+                    <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="font-medium text-gray-900">Premium Placement</p>
+                      <p className="text-sm text-gray-600">Priority in referral systems</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-3">
+                    <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="font-medium text-gray-900">Training & Support</p>
+                      <p className="text-sm text-gray-600">Ongoing partner education</p>
+                    </div>
+                  </div>
                 </div>
-              ))}
-            </div>
+              </div>
 
-            <Separator />
-
-            {/* Key Features */}
-            <div className="space-y-3">
-              <h3 className="font-semibold">About this partnership:</h3>
-              <ul className="space-y-2 text-sm">
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-500 mt-0.5" />
-                  <span>Split marketing costs 50/50 with proven ROI</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-500 mt-0.5" />
-                  <span>Access to {vendor.co_marketing_agents} agent network</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-500 mt-0.5" />
-                  <span>{vendor.service_radius_miles || 50} mile radius coverage</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-500 mt-0.5" />
-                  <span>Average 147% increase in lead generation</span>
-                </li>
-              </ul>
+              {/* Success Stories */}
+              <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-5 rounded-lg border border-green-200">
+                <h3 className="font-bold text-green-900 mb-3 flex items-center">
+                  <TrendingUp className="w-5 h-5 mr-2" />
+                  Agent Success Stories
+                </h3>
+                <div className="space-y-3">
+                  <blockquote className="text-sm text-green-800 italic">
+                    "My business increased 40% in the first 6 months of our partnership."
+                  </blockquote>
+                  <p className="text-xs text-green-700">- Sarah M., Top Producer, Phoenix AZ</p>
+                  <blockquote className="text-sm text-green-800 italic">
+                    "The shared marketing campaigns have been a game-changer for my referral business."
+                  </blockquote>
+                  <p className="text-xs text-green-700">- Mike D., Realtor, Dallas TX</p>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Right Column - Purchase Options */}
+          {/* Column 3: Partnership Options */}
           <div className="lg:col-span-3">
-            <div className="sticky top-6">
-              <Card className="p-4 space-y-4">
-                <div className="space-y-2">
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-xl font-bold">${selectedPkg.price}</span>
-                    <span className="text-sm text-muted-foreground line-through">
-                      ${selectedPkg.originalPrice}
-                    </span>
-                  </div>
-                  <p className="text-sm text-green-600 font-medium">In Stock</p>
-                  <p className="text-xs text-muted-foreground">
-                    FREE delivery by {new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toLocaleDateString()}
-                  </p>
+            <div className="bg-white border border-gray-200 rounded-lg p-6 sticky top-6 shadow-lg">
+              <div className="space-y-6">
+                <div className="text-center">
+                  <h3 className="text-lg font-bold text-gray-900">Start Your Partnership</h3>
+                  <p className="text-sm text-gray-600 mt-1">Choose your investment level</p>
                 </div>
 
-                <Separator />
-
-                {/* Quantity */}
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Campaigns:</label>
-                  <div className="flex items-center gap-2">
-                    <Button 
-                      variant="outline" 
-                      size="icon"
-                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                      className="h-8 w-8"
-                    >
-                      <Minus className="w-4 h-4" />
-                    </Button>
-                    <span className="w-12 text-center border rounded px-2 py-1 text-sm">
-                      {quantity}
-                    </span>
-                    <Button 
-                      variant="outline" 
-                      size="icon"
-                      onClick={() => setQuantity(quantity + 1)}
-                      className="h-8 w-8"
-                    >
-                      <Plus className="w-4 h-4" />
-                    </Button>
+                {/* Package Selection */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                    Partnership Level
+                  </label>
+                  <div className="space-y-3">
+                    <div className={`p-3 border rounded-lg cursor-pointer transition-all ${selectedPackage === 'bronze' ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-gray-400'}`}
+                         onClick={() => setSelectedPackage('bronze')}>
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <p className="font-medium">Bronze</p>
+                          <p className="text-xs text-gray-600">Basic co-marketing</p>
+                        </div>
+                        <p className="text-lg font-bold text-blue-600">$500/mo</p>
+                      </div>
+                    </div>
+                    <div className={`p-3 border rounded-lg cursor-pointer transition-all ${selectedPackage === 'silver' ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-gray-400'}`}
+                         onClick={() => setSelectedPackage('silver')}>
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <p className="font-medium">Silver</p>
+                          <p className="text-xs text-gray-600">Enhanced marketing + leads</p>
+                        </div>
+                        <p className="text-lg font-bold text-blue-600">$1,200/mo</p>
+                      </div>
+                    </div>
+                    <div className={`p-3 border rounded-lg cursor-pointer transition-all ${selectedPackage === 'gold' ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-gray-400'}`}
+                         onClick={() => setSelectedPackage('gold')}>
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <p className="font-medium">Gold</p>
+                          <p className="text-xs text-gray-600">Premium partnership</p>
+                        </div>
+                        <p className="text-lg font-bold text-blue-600">$2,500/mo</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Button 
+                {/* Duration */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Campaign Duration
+                  </label>
+                  <select
+                    value={quantity}
+                    onChange={(e) => setQuantity(parseInt(e.target.value))}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value={1}>1 month trial</option>
+                    <option value={3}>3 months</option>
+                    <option value={6}>6 months (recommended)</option>
+                    <option value={12}>12 months (best value)</option>
+                  </select>
+                </div>
+
+                {/* Investment Summary */}
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm text-gray-600">Monthly Investment:</span>
+                    <span className="font-bold">
+                      ${selectedPackage === 'bronze' ? '500' : selectedPackage === 'silver' ? '1,200' : '2,500'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm text-gray-600">Duration:</span>
+                    <span className="font-bold">{quantity} month{quantity > 1 ? 's' : ''}</span>
+                  </div>
+                  <div className="border-t pt-2 mt-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-lg font-semibold">Total Investment:</span>
+                      <span className="text-2xl font-bold text-blue-600">
+                        ${(selectedPackage === 'bronze' ? 500 : selectedPackage === 'silver' ? 1200 : 2500) * quantity}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="space-y-3">
+                  <Button
                     onClick={handleRequestCoMarketing}
-                    className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-medium"
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white"
                     size="lg"
                   >
-                    Add to Cart
+                    <Handshake className="w-4 h-4 mr-2" />
+                    Request Partnership
                   </Button>
-                  <Button 
-                    onClick={handleRequestCoMarketing}
+                  
+                  <Button
                     variant="outline"
-                    className="w-full"
+                    className="w-full border-blue-600 text-blue-600 hover:bg-blue-50"
                     size="lg"
                   >
-                    Buy Now
+                    <Calendar className="w-4 h-4 mr-2" />
+                    Schedule Consultation
+                  </Button>
+                  
+                  <Button
+                    variant="ghost"
+                    className="w-full text-gray-600 hover:text-gray-800"
+                    size="sm"
+                  >
+                    <Users className="w-4 h-4 mr-2" />
+                    View Agent Testimonials
                   </Button>
                 </div>
 
-                <div className="flex gap-2">
-                  <Button variant="ghost" size="sm" className="flex-1">
-                    <Heart className="w-4 h-4 mr-1" />
-                    Save
-                  </Button>
-                  <Button variant="ghost" size="sm" className="flex-1">
-                    <Share2 className="w-4 h-4 mr-1" />
-                    Share
-                  </Button>
+                {/* Compliance Notice */}
+                <div className="text-xs text-gray-500 text-center p-3 bg-gray-50 rounded border">
+                  <Shield className="w-4 h-4 mx-auto mb-1" />
+                  All partnerships are RESPA compliant and structured as legitimate business relationships.
                 </div>
-
-                <Separator />
-
-                <div className="text-xs text-muted-foreground space-y-1">
-                  <p>✓ 30-day money back guarantee</p>
-                  <p>✓ Secure payment processing</p>
-                  <p>✓ RESPA compliant partnership</p>
-                </div>
-              </Card>
+              </div>
             </div>
           </div>
         </div>
