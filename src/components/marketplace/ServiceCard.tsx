@@ -335,29 +335,26 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                       </div>
                     </TooltipTrigger>
                     <TooltipContent className="w-80 p-0 border-0 bg-transparent cursor-pointer" onClick={handleUpgradeClick}>
-                      <div className="relative rounded-lg overflow-hidden shadow-lg">
-                        {/* Background card image */}
-                        <img 
-                          src="/lovable-uploads/f2b3abc3-39f5-4434-a4d8-fafd69241183.png" 
-                          alt="Circle Coverage Card"
-                          className="w-full h-auto"
-                        />
+                      <div className="relative bg-gradient-to-br from-yellow-400 via-yellow-500 to-yellow-600 rounded-lg p-4 shadow-lg">
+                        {/* Card design elements */}
+                        <div className="absolute top-2 left-2 w-6 h-6 border border-yellow-700/30 rounded-sm"></div>
+                        <div className="absolute top-2 right-2 text-yellow-800 font-bold text-lg">PRO</div>
                         
-                        {/* Overlay content */}
-                        <div className="absolute inset-0 p-4 flex flex-col justify-end">
-                          <div className="bg-black/20 rounded p-3 backdrop-blur-sm">
-                            <p className="text-white text-sm leading-relaxed mb-2">
-                              Find lenders and title companies & more interested in sharing the cost of public advertising campaigns. Each party pays their proportional share and receives proportional benefit in all advertising materials.
-                            </p>
-                            
-                            <p className="text-white/90 text-xs leading-relaxed mb-3">
-                              This feature facilitates introductions for RESPA-compliant marketing partnerships only. Federal law prohibits cost-sharing arrangements for lead generation tools or business platforms.
-                            </p>
-                            
-                            <button className="text-white text-sm font-medium hover:text-yellow-200 underline">
-                              Learn more
-                            </button>
-                          </div>
+                        {/* Main content */}
+                        <div className="mt-6">
+                          <h3 className="text-yellow-900 font-bold text-lg mb-1">Circle COVERAGE</h3>
+                          <h4 className="text-yellow-800 font-semibold text-base mb-3">Compliant Advertising Partnerships</h4>
+                          <p className="text-yellow-900 text-sm leading-relaxed mb-3">
+                            Find lenders and title companies & more interested in sharing the cost of public advertising campaigns. Each party pays their proportional share and receives proportional benefit in all advertising materials.
+                          </p>
+                          
+                          <p className="text-yellow-900 text-xs leading-relaxed mb-3">
+                            This feature facilitates introductions for RESPA-compliant marketing partnerships only. Federal law prohibits cost-sharing arrangements for lead generation tools or business platforms.
+                          </p>
+                          
+                          <button className="text-yellow-800 text-sm font-medium hover:text-yellow-900 underline">
+                            Learn more
+                          </button>
                         </div>
                       </div>
                     </TooltipContent>
