@@ -74,28 +74,37 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
     return null
   }
 
-  return (
-    <style
-      dangerouslySetInnerHTML={{
-        __html: Object.entries(THEMES)
-          .map(
-            ([theme, prefix]) => `
-${prefix} [data-chart=${id}] {
-${colorConfig
-  .map(([key, itemConfig]) => {
-    const color =
-      itemConfig.theme?.[theme as keyof typeof itemConfig.theme] ||
-      itemConfig.color
-    return color ? `  --color-${key}: ${color};` : null
+  // Safely construct CSS variables without dangerouslySetInnerHTML
+  const sanitizeColor = (color: string): string => {
+    // Only allow hex colors, hsl(), and rgb() values - prevent CSS injection
+    if (!/^(#[0-9a-fA-F]{3,6}|hsl\([\d\s,%.]+\)|rgb\([\d\s,%.]+\))$/.test(color)) {
+      return 'transparent'
+    }
+    return color
+  }
+
+  const cssRules = Object.entries(THEMES)
+    .map(([theme, prefix]) => {
+      const rules = colorConfig
+        .map(([key, itemConfig]) => {
+          const color =
+            itemConfig.theme?.[theme as keyof typeof itemConfig.theme] ||
+            itemConfig.color
+          if (!color) return null
+          const sanitizedColor = sanitizeColor(color)
+          return `  --color-${key}: ${sanitizedColor};`
+        })
+        .filter(Boolean)
+        .join('\n')
+
+      return `${prefix} [data-chart="${id}"] {\n${rules}\n}`
+    })
+    .join('\n')
+
+  // Use React.createElement to safely inject CSS
+  return React.createElement('style', {
+    children: cssRules
   })
-  .join("\n")}
-}
-`
-          )
-          .join("\n"),
-      }}
-    />
-  )
 }
 
 const ChartTooltip = RechartsPrimitive.Tooltip
