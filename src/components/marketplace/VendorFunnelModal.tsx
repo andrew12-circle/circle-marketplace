@@ -474,15 +474,6 @@ export const VendorFunnelModal = ({
               </div>
               
 
-              {/* Rating Display */}
-              <div className="text-center space-y-2">
-                <div className="flex items-center justify-center space-x-1">
-                  {renderStarRating(vendor.rating || 4.8)}
-                </div>
-                <p className="text-sm text-gray-600">
-                  {vendor.rating || 4.8}/5 from {vendor.review_count || 127} agent reviews
-                </p>
-              </div>
             </div>
           </div>
 
