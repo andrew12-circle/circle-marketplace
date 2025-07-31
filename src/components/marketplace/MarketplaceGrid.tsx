@@ -215,14 +215,14 @@ export const MarketplaceGrid = () => {
   };
 
   const filteredServices = services.filter(service => {
-    const matchesSearch = service.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         service.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         service.vendor.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = service.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         service.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         service.vendor?.name?.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesCategory = filters.category === "all" || service.category === filters.category;
     const priceValue = parseFloat(service.retail_price || "0") || 0;
     const matchesPrice = priceValue >= filters.priceRange[0] && priceValue <= filters.priceRange[1];
-    const matchesVerified = !filters.verified || service.vendor.is_verified;
+    const matchesVerified = !filters.verified || service.vendor?.is_verified;
     const matchesFeatured = !filters.featured || service.is_featured;
 
     // Co-pay eligibility filtering
