@@ -1,10 +1,11 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, Download, FileText, CheckCircle, XCircle } from 'lucide-react';
+import { Upload, Download, FileText, CheckCircle, XCircle, Eye } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Progress } from '@/components/ui/progress';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 interface ImportResult {
   success: boolean;
@@ -24,6 +25,23 @@ export function ServiceImportPanel() {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
+  const [vendors, setVendors] = useState<any[]>([]);
+  const [showVendors, setShowVendors] = useState(false);
+
+  useEffect(() => {
+    fetchVendors();
+  }, []);
+
+  const fetchVendors = async () => {
+    const { data, error } = await supabase
+      .from('vendors')
+      .select('id, name, vendor_type, location')
+      .order('name');
+    
+    if (!error && data) {
+      setVendors(data);
+    }
+  };
 
   const downloadTemplate = () => {
     const csvContent = `title,description,category,retail_price,pro_price,co_pay_price,price_duration,discount_percentage,duration,estimated_roi,vendor_id,tags,is_featured,is_top_pick,requires_quote,image_url,service_provider_id
@@ -164,6 +182,41 @@ export function ServiceImportPanel() {
               <Download className="h-4 w-4" />
               Download Template
             </Button>
+
+            <Dialog open={showVendors} onOpenChange={setShowVendors}>
+              <DialogTrigger asChild>
+                <Button 
+                  variant="outline"
+                  className="flex items-center gap-2"
+                >
+                  <Eye className="h-4 w-4" />
+                  View Vendor IDs
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Available Vendor IDs</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground">
+                    Copy the vendor ID for the vendor you want to associate with your services:
+                  </p>
+                  <div className="grid grid-cols-1 gap-2 max-h-96 overflow-y-auto">
+                    {vendors.map((vendor) => (
+                      <div key={vendor.id} className="p-3 border rounded-lg">
+                        <div className="font-medium">{vendor.name}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {vendor.vendor_type} • {vendor.location}
+                        </div>
+                        <div className="text-xs font-mono bg-muted p-1 rounded mt-2 select-all">
+                          {vendor.id}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
             
             <Button 
               onClick={() => fileInputRef.current?.click()}
