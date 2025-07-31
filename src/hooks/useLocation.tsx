@@ -64,6 +64,7 @@ export const useLocation = () => {
 
       const { latitude, longitude } = position.coords;
       const locationData = await getLocationFromCoords(latitude, longitude);
+      console.log('Location detected:', locationData);
       
       setLocation(locationData);
       
@@ -109,6 +110,7 @@ export const useLocation = () => {
       coordinates: null
     };
 
+    console.log('Manually updating location:', locationData);
     setLocation(locationData);
 
     // Update user profile
