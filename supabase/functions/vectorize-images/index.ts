@@ -7,9 +7,96 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+const supabaseUrl = Deno.env.get('SUPABASE_URL');
+const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 const geminiApiKey = Deno.env.get('GEMINI_API_KEY');
+
+// Validate required environment variables
+if (!supabaseUrl || !supabaseServiceKey) {
+  throw new Error('Missing required Supabase environment variables');
+}
+
+// Rate limiting storage
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+
+// Enhanced security helpers
+const authenticateUser = async (authHeader: string | null, supabase: any) => {
+  if (!authHeader) {
+    throw new Error("Unauthorized: No authorization header provided");
+  }
+
+  const token = authHeader.replace('Bearer ', '');
+  if (!token || token.length < 10) {
+    throw new Error("Unauthorized: Invalid authorization token");
+  }
+
+  try {
+    const { data: { user }, error } = await supabase.auth.getUser(token);
+    
+    if (error) {
+      console.error('Authentication error:', error.message);
+      throw new Error("Unauthorized: Invalid token");
+    }
+    
+    if (!user) {
+      throw new Error("Unauthorized: User not found");
+    }
+
+    return user;
+  } catch (error) {
+    console.error('User authentication failed:', error);
+    throw new Error("Unauthorized: Authentication failed");
+  }
+};
+
+// Admin verification
+const verifyAdminAccess = async (userId: string, supabase: any) => {
+  try {
+    const { data: profile, error } = await supabase
+      .from('profiles')
+      .select('is_admin, specialties')
+      .eq('user_id', userId)
+      .single();
+
+    if (error) {
+      console.error('Admin verification error:', error);
+      throw new Error("Forbidden: Unable to verify admin status");
+    }
+
+    const isAdmin = profile?.is_admin || 
+                   profile?.specialties?.includes('admin') || 
+                   false;
+
+    if (!isAdmin) {
+      throw new Error("Forbidden: Admin access required");
+    }
+
+    return profile;
+  } catch (error) {
+    console.error('Admin verification failed:', error);
+    throw error;
+  }
+};
+
+// Rate limiting function
+const checkRateLimit = (identifier: string, maxRequests: number = 5, windowMs: number = 60000): boolean => {
+  const now = Date.now();
+  const key = identifier;
+  
+  const current = rateLimitMap.get(key);
+  
+  if (!current || now > current.resetTime) {
+    rateLimitMap.set(key, { count: 1, resetTime: now + windowMs });
+    return true;
+  }
+  
+  if (current.count >= maxRequests) {
+    return false;
+  }
+  
+  current.count++;
+  return true;
+};
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -18,6 +105,23 @@ serve(async (req) => {
 
   try {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    
+    // Authenticate user and verify admin access
+    const authHeader = req.headers.get('authorization');
+    const user = await authenticateUser(authHeader, supabase);
+    await verifyAdminAccess(user.id, supabase);
+    
+    // Check rate limiting per user
+    const userIp = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
+    const rateLimitKey = `vectorize:${user.id}:${userIp}`;
+    
+    if (!checkRateLimit(rateLimitKey, 5, 60000)) {
+      return new Response(
+        JSON.stringify({ error: 'Rate limit exceeded. Please wait before trying again.' }),
+        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
     const { action, serviceId, batchSize = 10 } = await req.json();
 
     if (action === 'process-batch') {

@@ -6,10 +6,72 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Environment variables validation
+const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+
+if (!GEMINI_API_KEY || !SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+  throw new Error('Missing required environment variables');
+}
+
+// Rate limiting storage
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+
 // Helper logging function
 const logStep = (step: string, details?: any) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
   console.log(`[ASK-CIRCLE-AI] ${step}${detailsStr}`);
+};
+
+// Enhanced security helpers
+const authenticateUser = async (authHeader: string | null, supabase: any) => {
+  if (!authHeader) {
+    throw new Error("Unauthorized: No authorization header provided");
+  }
+
+  const token = authHeader.replace('Bearer ', '');
+  if (!token || token.length < 10) {
+    throw new Error("Unauthorized: Invalid authorization token");
+  }
+
+  try {
+    const { data: { user }, error } = await supabase.auth.getUser(token);
+    
+    if (error) {
+      console.error('Authentication error:', error.message);
+      throw new Error("Unauthorized: Invalid token");
+    }
+    
+    if (!user) {
+      throw new Error("Unauthorized: User not found");
+    }
+
+    return user;
+  } catch (error) {
+    console.error('User authentication failed:', error);
+    throw new Error("Unauthorized: Authentication failed");
+  }
+};
+
+// Rate limiting function
+const checkRateLimit = (identifier: string, maxRequests: number = 20, windowMs: number = 60000): boolean => {
+  const now = Date.now();
+  const key = identifier;
+  
+  const current = rateLimitMap.get(key);
+  
+  if (!current || now > current.resetTime) {
+    rateLimitMap.set(key, { count: 1, resetTime: now + windowMs });
+    return true;
+  }
+  
+  if (current.count >= maxRequests) {
+    return false;
+  }
+  
+  current.count++;
+  return true;
 };
 
 // Input validation helper
@@ -57,24 +119,6 @@ const validateInput = (input: any) => {
   throw new Error('Type must be either "quick" or "detailed"');
 };
 
-// Rate limiting store
-const rateLimitStore = new Map();
-
-const checkRateLimit = (key: string) => {
-  const now = Date.now();
-  const windowMs = 60000; // 1 minute
-  const maxRequests = 10;
-  
-  const requests = rateLimitStore.get(key) || [];
-  const validRequests = requests.filter((timestamp: number) => now - timestamp < windowMs);
-  
-  if (validRequests.length >= maxRequests) {
-    throw new Error('Rate limit exceeded. Please try again later.');
-  }
-  
-  validRequests.push(now);
-  rateLimitStore.set(key, validRequests);
-};
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -84,9 +128,24 @@ serve(async (req) => {
   try {
     logStep("Function started");
     
-    // Rate limiting
-    const rateLimitKey = req.headers.get('x-forwarded-for') || 'unknown';
-    checkRateLimit(rateLimitKey);
+    // Create Supabase client for authentication
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+    
+    // Authenticate user
+    const authHeader = req.headers.get('authorization');
+    const user = await authenticateUser(authHeader, supabase);
+    logStep("User authenticated", { userId: user.id });
+    
+    // Rate limiting per user
+    const userIp = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
+    const rateLimitKey = `circle-ai:${user.id}:${userIp}`;
+    
+    if (!checkRateLimit(rateLimitKey, 20, 60000)) {
+      return new Response(
+        JSON.stringify({ error: 'Rate limit exceeded. Please wait before asking another question.' }),
+        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     const geminiKey = Deno.env.get("GEMINI_API_KEY");
     if (!geminiKey) throw new Error("GEMINI_API_KEY is not set");

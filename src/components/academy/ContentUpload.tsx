@@ -70,8 +70,7 @@ export const ContentUpload = ({ contentType, onSuccess, onCancel }: ContentUploa
     return data;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (data: Record<string, string>) => {
     setUploading(true);
 
     try {
@@ -106,13 +105,13 @@ export const ContentUpload = ({ contentType, onSuccess, onCancel }: ContentUploa
         contentUrl = contentUrlData.publicUrl;
       }
 
-      // Create content record
+      // Create content record using validated and sanitized data
       const contentData = {
         creator_id: user.id,
         content_type: contentType,
-        title: formData.title,
-        description: formData.description,
-        category: formData.category,
+        title: data.title || formData.title,
+        description: data.description || formData.description,
+        category: data.category || formData.category,
         duration: formData.duration || null,
         page_count: formData.pageCount ? parseInt(formData.pageCount) : null,
         lesson_count: formData.lessonCount ? parseInt(formData.lessonCount) : null,
@@ -120,7 +119,7 @@ export const ContentUpload = ({ contentType, onSuccess, onCancel }: ContentUploa
         content_url: contentUrl || null,
         tags: formData.tags ? formData.tags.split(',').map(tag => tag.trim()) : [],
         is_pro: formData.isPro,
-        price: formData.price ? parseFloat(formData.price) : 0,
+        price: data.price ? parseFloat(data.price) : (formData.price ? parseFloat(formData.price) : 0),
         is_published: true,
         published_at: new Date().toISOString()
       };
@@ -174,7 +173,16 @@ export const ContentUpload = ({ contentType, onSuccess, onCancel }: ContentUploa
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <SecureForm 
+          onSubmit={handleSubmit} 
+          validationRules={{
+            title: { required: true, minLength: 3, maxLength: 200 },
+            description: { required: true, minLength: 10, maxLength: 2000 },
+            category: { required: true },
+            price: { pattern: /^\d+(\.\d{2})?$/ }
+          }}
+          className="space-y-6"
+        >
           {/* Cover Image Upload */}
           <div>
             <Label>Cover Image</Label>
@@ -361,7 +369,7 @@ export const ContentUpload = ({ contentType, onSuccess, onCancel }: ContentUploa
               {uploading ? 'Uploading...' : 'Upload Content'}
             </Button>
           </div>
-        </form>
+        </SecureForm>
       </CardContent>
     </Card>
   );

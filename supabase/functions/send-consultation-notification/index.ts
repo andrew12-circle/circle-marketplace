@@ -6,12 +6,19 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const supabase = createClient(
-  Deno.env.get('SUPABASE_URL') ?? '',
-  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-);
+const supabaseUrl = Deno.env.get('SUPABASE_URL');
+const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
-// Security helpers for edge functions
+if (!supabaseUrl || !supabaseServiceKey) {
+  throw new Error('Missing required environment variables');
+}
+
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+// Rate limiting storage
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+
+// Enhanced security helpers for edge functions
 const authenticateUser = async (authHeader: string | null) => {
   if (!authHeader) {
     throw new Error("Unauthorized: No authorization header provided");
@@ -39,6 +46,26 @@ const authenticateUser = async (authHeader: string | null) => {
     console.error('User authentication failed:', error);
     throw new Error("Unauthorized: Authentication failed");
   }
+};
+
+// Rate limiting function
+const checkRateLimit = (identifier: string, maxRequests: number = 10, windowMs: number = 60000): boolean => {
+  const now = Date.now();
+  const key = identifier;
+  
+  const current = rateLimitMap.get(key);
+  
+  if (!current || now > current.resetTime) {
+    rateLimitMap.set(key, { count: 1, resetTime: now + windowMs });
+    return true;
+  }
+  
+  if (current.count >= maxRequests) {
+    return false;
+  }
+  
+  current.count++;
+  return true;
 };
 
 const sanitizeString = (input: string): string => {
@@ -103,27 +130,6 @@ const validateInput = (input: any, schema: Record<string, any>): Record<string, 
   return result;
 };
 
-// Rate limiting store
-const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
-
-const checkRateLimit = (identifier: string, maxRequests: number = 10, windowMs: number = 60000): boolean => {
-  const now = Date.now();
-  const key = identifier;
-  
-  const current = rateLimitMap.get(key);
-  
-  if (!current || now > current.resetTime) {
-    rateLimitMap.set(key, { count: 1, resetTime: now + windowMs });
-    return true;
-  }
-  
-  if (current.count >= maxRequests) {
-    return false;
-  }
-  
-  current.count++;
-  return true;
-};
 
 const logSecurityEvent = async (eventType: string, userId: string | null, eventData: Record<string, any> = {}, request?: Request) => {
   try {
