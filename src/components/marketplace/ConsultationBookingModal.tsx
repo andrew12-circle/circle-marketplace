@@ -21,7 +21,7 @@ interface ConsultationBookingModalProps {
     title: string;
     vendor: {
       name: string;
-    };
+    } | null;
   };
   onBookingConfirmed: (consultationId: string) => void;
 }
@@ -86,7 +86,7 @@ export const ConsultationBookingModal = ({
           body: {
             bookingId: bookingData.id,
             serviceTitle: service.title,
-            vendorName: service.vendor.name,
+            vendorName: service.vendor?.name || 'Direct Service',
             clientName: data.client_name,
             clientEmail: data.client_email,
             clientPhone: data.client_phone,
@@ -151,7 +151,7 @@ export const ConsultationBookingModal = ({
           {/* Service Info */}
           <div className="bg-muted/50 p-4 rounded-lg">
             <h3 className="font-semibold text-sm text-muted-foreground">SERVICE PROVIDER</h3>
-            <p className="font-medium">{service.vendor.name}</p>
+            <p className="font-medium">{service.vendor?.name || 'Direct Service'}</p>
             <p className="text-sm text-muted-foreground mt-1">
               This consultation will help determine your exact project needs and provide accurate pricing.
             </p>
