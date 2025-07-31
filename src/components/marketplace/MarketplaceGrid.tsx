@@ -243,14 +243,8 @@ export const MarketplaceGrid = () => {
       // Load vendors with location filtering
       let vendorQuery = supabase
         .from('vendors_with_local_reps')
-        .select('*');
-
-      // Apply location-based filtering if user has location
-      if (location?.state) {
-        vendorQuery = vendorQuery.or(`license_states.cs.{"${location.state}"},service_states.cs.{"${location.state}"}`);
-      }
-
-      vendorQuery = vendorQuery.order('rating', { ascending: false });
+        .select('*')
+        .order('rating', { ascending: false });
 
       const { data: vendorsData, error: vendorsError } = await vendorQuery;
 
