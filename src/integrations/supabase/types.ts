@@ -1448,6 +1448,9 @@ export type Database = {
       }
       vendors: {
         Row: {
+          ad_budget_max: number | null
+          ad_budget_min: number | null
+          budget_currency: string | null
           campaigns_funded: number | null
           co_marketing_agents: number | null
           contact_email: string | null
@@ -1482,6 +1485,9 @@ export type Database = {
           website_url: string | null
         }
         Insert: {
+          ad_budget_max?: number | null
+          ad_budget_min?: number | null
+          budget_currency?: string | null
           campaigns_funded?: number | null
           co_marketing_agents?: number | null
           contact_email?: string | null
@@ -1516,6 +1522,9 @@ export type Database = {
           website_url?: string | null
         }
         Update: {
+          ad_budget_max?: number | null
+          ad_budget_min?: number | null
+          budget_currency?: string | null
           campaigns_funded?: number | null
           co_marketing_agents?: number | null
           contact_email?: string | null

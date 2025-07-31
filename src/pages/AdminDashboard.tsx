@@ -14,9 +14,10 @@ import { YouTubeChannelImportPanel } from '@/components/admin/YouTubeChannelImpo
 import SecurityMonitoringPanel from '@/components/admin/SecurityMonitoringPanel';
 import { ServiceImportPanel } from '@/components/admin/ServiceImportPanel';
 import { VendorImportPanel } from '@/components/admin/VendorImportPanel';
+import { VendorBudgetManager } from '@/components/admin/VendorBudgetManager';
 import { ImageVectorizationPanel } from '@/components/admin/ImageVectorizationPanel';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Zap, Upload, Building, Youtube } from 'lucide-react';
+import { Zap, Upload, Building, Youtube, DollarSign } from 'lucide-react';
 
 interface UserProfile {
   id: string;
@@ -339,6 +340,7 @@ export default function AdminDashboard() {
         </TabsContent>
 
         <TabsContent value="vendors" className="space-y-6">
+          <VendorBudgetManager />
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <VendorImportPanel />
           </div>

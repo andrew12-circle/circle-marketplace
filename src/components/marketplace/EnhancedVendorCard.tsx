@@ -30,6 +30,9 @@ interface Vendor {
   longitude?: number;
   vendor_type?: string;
   local_representatives?: any; // JSON data from database
+  ad_budget_min?: number;
+  ad_budget_max?: number;
+  budget_currency?: string;
 }
 
 interface LocalRepresentative {
@@ -155,7 +158,9 @@ export const EnhancedVendorCard = ({ vendor, onConnect, onViewProfile }: Enhance
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-sm">
               <TrendingUp className="w-4 h-4 text-muted-foreground" />
-              <span>Ad Budget: {mockBudgetRange}</span>
+              <span>Ad Budget: {vendor.ad_budget_min && vendor.ad_budget_max 
+                ? `$${(vendor.ad_budget_min / 100).toLocaleString()} - $${(vendor.ad_budget_max / 100).toLocaleString()}/mo`
+                : 'Contact for pricing'}</span>
             </div>
             {vendor.license_states && vendor.license_states.length > 0 && (
               <div className="flex flex-wrap gap-1">
