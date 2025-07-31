@@ -176,23 +176,79 @@ export const VendorFunnelModal = ({
         </DialogHeader>
         
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-6">
-          {/* Column 1: Vendor Logo & Credibility */}
+          {/* Column 1: Media & Videos */}
           <div className="lg:col-span-4">
             <div className="space-y-4">
-              <div className="relative h-48 rounded-lg overflow-hidden bg-white border border-gray-200 p-6">
-                <img
-                  src={vendor.logo_url || "/placeholder.svg"}
-                  alt={vendor.name}
-                  className="w-full h-full object-contain"
-                />
-                {vendor.is_verified && (
-                  <div className="absolute top-4 right-4">
-                    <Badge className="bg-green-600 text-white">
-                      <Shield className="w-3 h-3 mr-1" />
-                      Verified
-                    </Badge>
+              {/* Main Video */}
+              <div className="relative h-48 rounded-lg overflow-hidden bg-gray-900 border border-gray-200">
+                <video 
+                  className="w-full h-full object-cover"
+                  poster="/placeholder.svg"
+                  controls
+                >
+                  <source src="/placeholder-video.mp4" type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
+                <div className="absolute bottom-2 left-2">
+                  <Badge className="bg-black/70 text-white text-xs">
+                    Why Partner With {vendor.name}
+                  </Badge>
+                </div>
+              </div>
+              
+              {/* 4 smaller videos/images below */}
+              <div className="grid grid-cols-2 gap-2">
+                <div className="relative h-24 rounded-lg overflow-hidden bg-gray-100 border border-gray-200 cursor-pointer hover:opacity-80 transition-opacity">
+                  <img
+                    src="/placeholder.svg"
+                    alt="Agent Success Story"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                    <div className="w-6 h-6 rounded-full bg-white/80 flex items-center justify-center">
+                      <div className="w-0 h-0 border-l-[6px] border-l-blue-600 border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent ml-1"></div>
+                    </div>
                   </div>
-                )}
+                </div>
+                <div className="relative h-24 rounded-lg overflow-hidden bg-gray-100 border border-gray-200 cursor-pointer hover:opacity-80 transition-opacity">
+                  <img
+                    src="/placeholder.svg"
+                    alt="Closing Process"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                    <div className="w-6 h-6 rounded-full bg-white/80 flex items-center justify-center">
+                      <div className="w-0 h-0 border-l-[6px] border-l-blue-600 border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent ml-1"></div>
+                    </div>
+                  </div>
+                </div>
+                <div className="relative h-24 rounded-lg overflow-hidden bg-gray-100 border border-gray-200 cursor-pointer hover:opacity-80 transition-opacity">
+                  <img
+                    src="/placeholder.svg"
+                    alt="Communication Process"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                    <div className="w-6 h-6 rounded-full bg-white/80 flex items-center justify-center">
+                      <div className="w-0 h-0 border-l-[6px] border-l-blue-600 border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent ml-1"></div>
+                    </div>
+                  </div>
+                </div>
+                <div className="relative h-24 rounded-lg overflow-hidden bg-gray-100 border border-gray-200">
+                  <img
+                    src={vendor.logo_url || "/placeholder.svg"}
+                    alt={vendor.name}
+                    className="w-full h-full object-contain p-2 bg-white"
+                  />
+                  {vendor.is_verified && (
+                    <div className="absolute top-1 right-1">
+                      <Badge className="bg-green-600 text-white text-xs">
+                        <Shield className="w-2 h-2 mr-1" />
+                        Verified
+                      </Badge>
+                    </div>
+                  )}
+                </div>
               </div>
               
               {/* Trust Indicators */}
@@ -205,11 +261,11 @@ export const VendorFunnelModal = ({
                   </div>
                   <div className="flex items-center text-sm text-blue-800">
                     <DollarSign className="w-4 h-4 mr-2 text-green-600" />
-                    {vendor.campaigns_funded || 45} Campaigns Funded
+                    52 Campaigns Funded
                   </div>
                   <div className="flex items-center text-sm text-blue-800">
                     <Award className="w-4 h-4 mr-2 text-green-600" />
-                    RESPA Compliant
+                    On-Time Closings Guaranteed
                   </div>
                 </div>
               </div>
@@ -278,8 +334,8 @@ export const VendorFunnelModal = ({
                   <div className="flex items-start space-x-3">
                     <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="font-medium text-gray-900">RESPA Compliance</p>
-                      <p className="text-sm text-gray-600">Fully compliant partnerships</p>
+                      <p className="font-medium text-gray-900">Fast Closings</p>
+                      <p className="text-sm text-gray-600">Close on time, every time</p>
                     </div>
                   </div>
                   <div className="flex items-start space-x-3">
@@ -319,89 +375,54 @@ export const VendorFunnelModal = ({
             </div>
           </div>
 
-          {/* Column 3: Partnership Options */}
+          {/* Column 3: Performance Stats & Contact */}
           <div className="lg:col-span-3">
             <div className="bg-white border border-gray-200 rounded-lg p-6 sticky top-6 shadow-lg">
               <div className="space-y-6">
                 <div className="text-center">
-                  <h3 className="text-lg font-bold text-gray-900">Start Your Partnership</h3>
-                  <p className="text-sm text-gray-600 mt-1">Choose your investment level</p>
+                  <h3 className="text-lg font-bold text-gray-900">Partnership Performance</h3>
+                  <p className="text-sm text-gray-600 mt-1">Why agents choose us</p>
                 </div>
 
-                {/* Package Selection */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-3">
-                    Partnership Level
-                  </label>
-                  <div className="space-y-3">
-                    <div className={`p-3 border rounded-lg cursor-pointer transition-all ${selectedPackage === 'bronze' ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-gray-400'}`}
-                         onClick={() => setSelectedPackage('bronze')}>
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <p className="font-medium">Bronze</p>
-                          <p className="text-xs text-gray-600">Basic co-marketing</p>
-                        </div>
-                        <p className="text-lg font-bold text-blue-600">$500/mo</p>
-                      </div>
+                {/* Key Stats */}
+                <div className="space-y-4">
+                  <div className="text-center p-4 bg-green-50 rounded-lg border border-green-200">
+                    <div className="text-2xl font-bold text-green-700">52</div>
+                    <div className="text-sm text-green-600">Campaigns Successfully Funded</div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="text-center p-3 bg-blue-50 rounded-lg border border-blue-200">
+                      <div className="text-xl font-bold text-blue-700">98%</div>
+                      <div className="text-xs text-blue-600">On-Time Closing Rate</div>
                     </div>
-                    <div className={`p-3 border rounded-lg cursor-pointer transition-all ${selectedPackage === 'silver' ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-gray-400'}`}
-                         onClick={() => setSelectedPackage('silver')}>
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <p className="font-medium">Silver</p>
-                          <p className="text-xs text-gray-600">Enhanced marketing + leads</p>
-                        </div>
-                        <p className="text-lg font-bold text-blue-600">$1,200/mo</p>
-                      </div>
+                    <div className="text-center p-3 bg-purple-50 rounded-lg border border-purple-200">
+                      <div className="text-xl font-bold text-purple-700">4.9★</div>
+                      <div className="text-xs text-purple-600">Agent Rating</div>
                     </div>
-                    <div className={`p-3 border rounded-lg cursor-pointer transition-all ${selectedPackage === 'gold' ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-gray-400'}`}
-                         onClick={() => setSelectedPackage('gold')}>
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <p className="font-medium">Gold</p>
-                          <p className="text-xs text-gray-600">Premium partnership</p>
-                        </div>
-                        <p className="text-lg font-bold text-blue-600">$2,500/mo</p>
-                      </div>
-                    </div>
+                  </div>
+                  
+                  <div className="text-center p-3 bg-orange-50 rounded-lg border border-orange-200">
+                    <div className="text-xl font-bold text-orange-700">24hr</div>
+                    <div className="text-xs text-orange-600">Average Response Time</div>
                   </div>
                 </div>
 
-                {/* Duration */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Campaign Duration
-                  </label>
-                  <select
-                    value={quantity}
-                    onChange={(e) => setQuantity(parseInt(e.target.value))}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value={1}>1 month trial</option>
-                    <option value={3}>3 months</option>
-                    <option value={6}>6 months (recommended)</option>
-                    <option value={12}>12 months (best value)</option>
-                  </select>
-                </div>
-
-                {/* Investment Summary */}
+                {/* Communication Highlights */}
                 <div className="bg-gray-50 p-4 rounded-lg">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm text-gray-600">Monthly Investment:</span>
-                    <span className="font-bold">
-                      ${selectedPackage === 'bronze' ? '500' : selectedPackage === 'silver' ? '1,200' : '2,500'}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm text-gray-600">Duration:</span>
-                    <span className="font-bold">{quantity} month{quantity > 1 ? 's' : ''}</span>
-                  </div>
-                  <div className="border-t pt-2 mt-2">
-                    <div className="flex justify-between items-center">
-                      <span className="text-lg font-semibold">Total Investment:</span>
-                      <span className="text-2xl font-bold text-blue-600">
-                        ${(selectedPackage === 'bronze' ? 500 : selectedPackage === 'silver' ? 1200 : 2500) * quantity}
-                      </span>
+                  <h4 className="font-semibold text-gray-900 mb-3">Why Agents Love Us</h4>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex items-center text-gray-700">
+                      <CheckCircle className="w-4 h-4 mr-2 text-green-600" />
+                      Fast, reliable communication
+                    </div>
+                    <div className="flex items-center text-gray-700">
+                      <CheckCircle className="w-4 h-4 mr-2 text-green-600" />
+                      Never miss a closing deadline
+                    </div>
+                    <div className="flex items-center text-gray-700">
+                      <CheckCircle className="w-4 h-4 mr-2 text-green-600" />
+                      Transparent process updates
                     </div>
                   </div>
                 </div>
