@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "@/hooks/useLocation";
 import { InviteVendorModal } from "./InviteVendorModal";
+import { VendorFunnelModal } from "./VendorFunnelModal";
 
 interface Vendor {
   id: string;
@@ -49,6 +50,8 @@ export const VendorSelectionModal = ({
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null);
+  const [showFunnelModal, setShowFunnelModal] = useState(false);
+  const [funnelVendor, setFunnelVendor] = useState<Vendor | null>(null);
   const { toast } = useToast();
   const { location } = useLocation();
 
@@ -63,6 +66,8 @@ export const VendorSelectionModal = ({
       setSearchQuery("");
       setSelectedVendor(null);
       setShowConfirmation(false);
+      setShowFunnelModal(false);
+      setFunnelVendor(null);
     }
   }, [isOpen]);
 
@@ -128,6 +133,20 @@ export const VendorSelectionModal = ({
     setSelectedVendor(vendor);
     setShowConfirmation(true);
     onVendorSelect(vendor);
+  };
+
+  const handleLearnMore = (vendor: Vendor, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent triggering vendor selection
+    setFunnelVendor(vendor);
+    setShowFunnelModal(true);
+  };
+
+  const handleCoMarketingRequest = (vendorId: string) => {
+    const vendor = funnelVendor;
+    if (vendor) {
+      setShowFunnelModal(false);
+      handleVendorSelect(vendor);
+    }
   };
 
   const handleSendAnotherRequest = () => {
@@ -282,14 +301,35 @@ export const VendorSelectionModal = ({
                             </div>
                           </div>
 
-                          {vendor.description && (
-                            <p className="text-xs text-muted-foreground mt-2 line-clamp-2">
-                              {vendor.description}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    </CardContent>
+                           {vendor.description && (
+                             <p className="text-xs text-muted-foreground mt-2 line-clamp-2">
+                               {vendor.description}
+                             </p>
+                           )}
+
+                           <div className="flex gap-2 mt-3">
+                             <Button
+                               size="sm"
+                               variant="outline"
+                               onClick={(e) => handleLearnMore(vendor, e)}
+                               className="flex-1 text-xs h-7"
+                             >
+                               Learn More
+                             </Button>
+                             <Button
+                               size="sm"
+                               onClick={(e) => {
+                                 e.stopPropagation();
+                                 handleVendorSelect(vendor);
+                               }}
+                               className="flex-1 text-xs h-7"
+                             >
+                               Select Partner
+                             </Button>
+                           </div>
+                         </div>
+                       </div>
+                     </CardContent>
                   </Card>
                 ))}
               </div>
@@ -310,6 +350,18 @@ export const VendorSelectionModal = ({
       open={showInviteModal}
       onOpenChange={(open) => setShowInviteModal(open)}
     />
+
+    {funnelVendor && (
+      <VendorFunnelModal
+        isOpen={showFunnelModal}
+        onClose={() => {
+          setShowFunnelModal(false);
+          setFunnelVendor(null);
+        }}
+        vendor={funnelVendor}
+        onRequestCoMarketing={handleCoMarketingRequest}
+      />
+    )}
     </>
   );
 };
