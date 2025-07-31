@@ -105,13 +105,24 @@ export const VendorSelectionModal = ({
 
   const filterVendors = () => {
     let filtered = vendors;
+    console.log('VendorSelectionModal: Filtering vendors...', { 
+      totalVendors: vendors.length, 
+      searchQuery, 
+      userLocation: location?.state 
+    });
 
-    // Filter by location if available
+    // Filter by location if available - but don't filter out ALL vendors
     if (location?.state) {
-      filtered = filtered.filter(vendor => 
+      const locationFiltered = filtered.filter(vendor => 
         vendor.service_states?.includes(location.state) ||
         vendor.location?.toLowerCase().includes(location.state.toLowerCase())
       );
+      // Only apply location filter if we still have vendors, otherwise show all
+      if (locationFiltered.length > 0) {
+        filtered = locationFiltered;
+      } else {
+        console.log('VendorSelectionModal: No vendors found for location, showing all vendors');
+      }
     }
 
     // Apply search filter
@@ -126,6 +137,10 @@ export const VendorSelectionModal = ({
       );
     }
 
+    console.log('VendorSelectionModal: Filtering complete', { 
+      filteredCount: filtered.length,
+      originalCount: vendors.length 
+    });
     setFilteredVendors(filtered);
   };
 
