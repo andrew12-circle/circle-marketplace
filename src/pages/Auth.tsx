@@ -226,6 +226,7 @@ export const Auth = () => {
             validationRules={validationRules}
             onSubmit={handleSecureSubmit}
             className="space-y-4"
+            requireCSRF={false}
           >
             {/* Email Field */}
             <div className="space-y-2">
