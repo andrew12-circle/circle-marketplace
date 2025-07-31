@@ -211,11 +211,13 @@ async function extractChannelId(url: string): Promise<string | null> {
         
         if (pattern.type === 'handle') {
           // For @username, use the search API to find the channel
+          apiUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&q=@${identifier}&key=${youtubeApiKey}`;
+        } else if (pattern.type === 'custom') {
+          // For custom URLs, use the search API
           apiUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&q=${identifier}&key=${youtubeApiKey}`;
-        } else if (pattern.type === 'custom' || pattern.type === 'user') {
-          // For custom URLs and usernames, use the channels API
-          const forUsername = pattern.type === 'user' ? `&forUsername=${identifier}` : `&forHandle=${identifier}`;
-          apiUrl = `https://www.googleapis.com/youtube/v3/channels?part=id${forUsername}&key=${youtubeApiKey}`;
+        } else if (pattern.type === 'user') {
+          // For usernames, use the channels API
+          apiUrl = `https://www.googleapis.com/youtube/v3/channels?part=id&forUsername=${identifier}&key=${youtubeApiKey}`;
         }
         
         console.log('Resolving channel ID for:', identifier, 'type:', pattern.type);
