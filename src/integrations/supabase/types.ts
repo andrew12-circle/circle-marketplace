@@ -121,6 +121,103 @@ export type Database = {
           },
         ]
       }
+      co_pay_audit_log: {
+        Row: {
+          action_details: Json | null
+          action_type: string
+          co_pay_request_id: string | null
+          created_at: string
+          id: string
+          ip_address: unknown | null
+          performed_by: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          action_details?: Json | null
+          action_type: string
+          co_pay_request_id?: string | null
+          created_at?: string
+          id?: string
+          ip_address?: unknown | null
+          performed_by?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          action_details?: Json | null
+          action_type?: string
+          co_pay_request_id?: string | null
+          created_at?: string
+          id?: string
+          ip_address?: unknown | null
+          performed_by?: string | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "co_pay_audit_log_co_pay_request_id_fkey"
+            columns: ["co_pay_request_id"]
+            isOneToOne: false
+            referencedRelation: "co_pay_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      co_pay_requests: {
+        Row: {
+          agent_id: string | null
+          agent_notes: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          ip_address: unknown | null
+          requested_split_percentage: number
+          service_id: string | null
+          status: string
+          updated_at: string
+          user_agent: string | null
+          vendor_id: string | null
+          vendor_notes: string | null
+        }
+        Insert: {
+          agent_id?: string | null
+          agent_notes?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          ip_address?: unknown | null
+          requested_split_percentage: number
+          service_id?: string | null
+          status?: string
+          updated_at?: string
+          user_agent?: string | null
+          vendor_id?: string | null
+          vendor_notes?: string | null
+        }
+        Update: {
+          agent_id?: string | null
+          agent_notes?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          ip_address?: unknown | null
+          requested_split_percentage?: number
+          service_id?: string | null
+          status?: string
+          updated_at?: string
+          user_agent?: string | null
+          vendor_id?: string | null
+          vendor_notes?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "co_pay_requests_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       consultation_bookings: {
         Row: {
           budget_range: string | null
@@ -1063,21 +1160,26 @@ export type Database = {
       services: {
         Row: {
           category: string | null
+          co_pay_allowed: boolean | null
           co_pay_price: string | null
           created_at: string | null
           description: string | null
           discount_percentage: string | null
           duration: string | null
+          estimated_agent_split_percentage: number | null
           estimated_roi: number | null
           id: string
           image_url: string | null
           is_featured: boolean | null
           is_top_pick: boolean | null
+          max_vendor_split_percentage: number | null
           original_image_url: string | null
           price_duration: string | null
           pro_price: string | null
           rating: number | null
           requires_quote: boolean | null
+          respa_category: string | null
+          respa_notes: string | null
           retail_price: string | null
           service_provider_id: string | null
           sort_order: number | null
@@ -1089,21 +1191,26 @@ export type Database = {
         }
         Insert: {
           category?: string | null
+          co_pay_allowed?: boolean | null
           co_pay_price?: string | null
           created_at?: string | null
           description?: string | null
           discount_percentage?: string | null
           duration?: string | null
+          estimated_agent_split_percentage?: number | null
           estimated_roi?: number | null
           id?: string
           image_url?: string | null
           is_featured?: boolean | null
           is_top_pick?: boolean | null
+          max_vendor_split_percentage?: number | null
           original_image_url?: string | null
           price_duration?: string | null
           pro_price?: string | null
           rating?: number | null
           requires_quote?: boolean | null
+          respa_category?: string | null
+          respa_notes?: string | null
           retail_price?: string | null
           service_provider_id?: string | null
           sort_order?: number | null
@@ -1115,21 +1222,26 @@ export type Database = {
         }
         Update: {
           category?: string | null
+          co_pay_allowed?: boolean | null
           co_pay_price?: string | null
           created_at?: string | null
           description?: string | null
           discount_percentage?: string | null
           duration?: string | null
+          estimated_agent_split_percentage?: number | null
           estimated_roi?: number | null
           id?: string
           image_url?: string | null
           is_featured?: boolean | null
           is_top_pick?: boolean | null
+          max_vendor_split_percentage?: number | null
           original_image_url?: string | null
           price_duration?: string | null
           pro_price?: string | null
           rating?: number | null
           requires_quote?: boolean | null
+          respa_category?: string | null
+          respa_notes?: string | null
           retail_price?: string | null
           service_provider_id?: string | null
           sort_order?: number | null
@@ -1262,6 +1374,42 @@ export type Database = {
           password_hash?: string
           updated_at?: string
           vendor_id?: string
+        }
+        Relationships: []
+      }
+      vendor_invitations: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          invitation_token: string | null
+          invited_by: string | null
+          status: string
+          vendor_company: string | null
+          vendor_email: string
+          vendor_name: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          invitation_token?: string | null
+          invited_by?: string | null
+          status?: string
+          vendor_company?: string | null
+          vendor_email: string
+          vendor_name: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          invitation_token?: string | null
+          invited_by?: string | null
+          status?: string
+          vendor_company?: string | null
+          vendor_email?: string
+          vendor_name?: string
         }
         Relationships: []
       }
@@ -1688,6 +1836,10 @@ export type Database = {
       }
       clear_failed_attempts: {
         Args: { identifier: string; attempt_type?: string }
+        Returns: undefined
+      }
+      expire_co_pay_requests: {
+        Args: Record<PropertyKey, never>
         Returns: undefined
       }
       get_public_profile: {
