@@ -63,6 +63,7 @@ export const VendorSelectionModal = ({
   }, [searchQuery, vendors]);
 
   const loadVendors = async () => {
+    console.log('VendorSelectionModal: Starting to load vendors...');
     setIsLoading(true);
     try {
       const { data, error } = await supabase
@@ -71,10 +72,13 @@ export const VendorSelectionModal = ({
         .eq('is_active', true)
         .order('rating', { ascending: false });
 
+      console.log('VendorSelectionModal: Supabase response:', { data, error, dataLength: data?.length });
+
       if (error) throw error;
       setVendors(data || []);
+      console.log('VendorSelectionModal: Vendors set successfully, count:', (data || []).length);
     } catch (error) {
-      console.error('Error loading vendors:', error);
+      console.error('VendorSelectionModal: Error loading vendors:', error);
       toast({
         title: "Error",
         description: "Failed to load vendors. Please try again.",
@@ -82,6 +86,7 @@ export const VendorSelectionModal = ({
       });
     } finally {
       setIsLoading(false);
+      console.log('VendorSelectionModal: Loading complete');
     }
   };
 
