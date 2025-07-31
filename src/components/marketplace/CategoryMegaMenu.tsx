@@ -171,6 +171,7 @@ interface CategoryMegaMenuProps {
   selectedCategory: string;
   onCategorySelect: (category: string) => void;
   viewMode?: 'services' | 'products' | 'vendors';
+  serviceCategories?: string[]; // Add this for actual service categories
 }
 
 const getIconForCategory = (categoryId: string, viewMode: 'services' | 'products' | 'vendors' = 'services') => {
@@ -228,7 +229,7 @@ const getIconForCategory = (categoryId: string, viewMode: 'services' | 'products
   }
 };
 
-export const CategoryMegaMenu = ({ selectedCategory, onCategorySelect, viewMode = 'services' }: CategoryMegaMenuProps) => {
+export const CategoryMegaMenu = ({ selectedCategory, onCategorySelect, viewMode = 'services', serviceCategories = [] }: CategoryMegaMenuProps) => {
   const [open, setOpen] = useState(false);
   const { t } = useTranslation();
 
@@ -272,37 +273,63 @@ export const CategoryMegaMenu = ({ selectedCategory, onCategorySelect, viewMode 
           </div>
           
           <div className="grid grid-cols-1 gap-6 p-6">
-            {(viewMode === 'services' ? SERVICE_CATEGORIES : viewMode === 'products' ? PRODUCT_CATEGORIES : VENDOR_CATEGORIES).map((category) => {
-              const Icon = getIconForCategory(category.id, viewMode);
-              return (
-                <div key={category.id} className="space-y-3">
-                  <div className="flex items-center justify-between pb-2 border-b border-border/50">
-                    <div className="flex items-center gap-2">
-                      <Icon className="h-4 w-4 text-circle-primary" />
-                      <h4 className="font-medium text-sm text-foreground">{category.name}</h4>
-                    </div>
-                    {viewMode === 'services' && 'riskLevel' in category && getRiskBadge((category as any).riskLevel)}
-                  </div>
-                  <div className="grid grid-cols-2 gap-1">
-                    {category.subcategories.map((subcategory) => {
-                      const itemCount = Math.floor(Math.random() * 50) + 5; // Mock count
-                      return (
-                        <button
-                          key={subcategory}
-                          onClick={() => handleCategorySelect(subcategory)}
-                          className={`w-full text-left text-sm px-2 py-1.5 rounded hover:bg-accent transition-colors flex items-center justify-between ${
-                            selectedCategory === subcategory ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:text-foreground"
-                          }`}
-                        >
-                          <span>{subcategory}</span>
-                          <span className="text-xs bg-muted px-1 rounded">({itemCount})</span>
-                        </button>
-                      );
-                    })}
+            {viewMode === 'services' && serviceCategories.length > 0 ? (
+              // Show actual service categories from database
+              <div className="space-y-3">
+                <div className="flex items-center justify-between pb-2 border-b border-border/50">
+                  <div className="flex items-center gap-2">
+                    <Building2 className="h-4 w-4 text-circle-primary" />
+                    <h4 className="font-medium text-sm text-foreground">Service Categories</h4>
                   </div>
                 </div>
-              );
-            })}
+                <div className="grid grid-cols-2 gap-1">
+                  {serviceCategories.map((category) => (
+                    <button
+                      key={category}
+                      onClick={() => handleCategorySelect(category)}
+                      className={`w-full text-left text-sm px-2 py-1.5 rounded hover:bg-accent transition-colors flex items-center justify-between ${
+                        selectedCategory === category ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      <span>{category}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              // Show predefined categories for other modes or fallback
+              (viewMode === 'services' ? SERVICE_CATEGORIES : viewMode === 'products' ? PRODUCT_CATEGORIES : VENDOR_CATEGORIES).map((category) => {
+                const Icon = getIconForCategory(category.id, viewMode);
+                return (
+                  <div key={category.id} className="space-y-3">
+                    <div className="flex items-center justify-between pb-2 border-b border-border/50">
+                      <div className="flex items-center gap-2">
+                        <Icon className="h-4 w-4 text-circle-primary" />
+                        <h4 className="font-medium text-sm text-foreground">{category.name}</h4>
+                      </div>
+                      {viewMode === 'services' && 'riskLevel' in category && getRiskBadge((category as any).riskLevel)}
+                    </div>
+                    <div className="grid grid-cols-2 gap-1">
+                      {category.subcategories.map((subcategory) => {
+                        const itemCount = Math.floor(Math.random() * 50) + 5; // Mock count
+                        return (
+                          <button
+                            key={subcategory}
+                            onClick={() => handleCategorySelect(subcategory)}
+                            className={`w-full text-left text-sm px-2 py-1.5 rounded hover:bg-accent transition-colors flex items-center justify-between ${
+                              selectedCategory === subcategory ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:text-foreground"
+                            }`}
+                          >
+                            <span>{subcategory}</span>
+                            <span className="text-xs bg-muted px-1 rounded">({itemCount})</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })
+            )}
           </div>
           
           {selectedCategory && selectedCategory !== "all" && (

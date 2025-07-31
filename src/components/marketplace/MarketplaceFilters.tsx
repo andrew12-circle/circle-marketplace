@@ -75,6 +75,7 @@ export const MarketplaceFilters = ({ filters, onFiltersChange, categories, viewM
               selectedCategory={safeFilters.category}
               onCategorySelect={(value) => updateFilter("category", value)}
               viewMode={viewMode}
+              serviceCategories={categories}
             />
           </div>
 
