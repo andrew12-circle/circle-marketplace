@@ -179,75 +179,124 @@ export const VendorFunnelModal = ({
           {/* Column 1: Media & Videos */}
           <div className="lg:col-span-4">
             <div className="space-y-4">
-              {/* Main Video */}
+              {/* Main Media */}
               <div className="relative h-48 rounded-lg overflow-hidden bg-gray-900 border border-gray-200">
-                <video 
+                {/* This could be either video or image - using placeholder for now */}
+                <img 
+                  src="https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=800&h=400&fit=crop"
+                  alt="Why Partner With Circle Home Loans"
                   className="w-full h-full object-cover"
-                  poster="/placeholder.svg"
-                  controls
-                >
-                  <source src="/placeholder-video.mp4" type="video/mp4" />
-                  Your browser does not support the video tag.
-                </video>
+                />
                 <div className="absolute bottom-2 left-2">
                   <Badge className="bg-black/70 text-white text-xs">
                     Why Partner With {vendor.name}
                   </Badge>
                 </div>
+                {/* Play button overlay for videos */}
+                <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity cursor-pointer">
+                  <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center">
+                    <div className="w-0 h-0 border-l-[16px] border-l-blue-600 border-t-[12px] border-t-transparent border-b-[12px] border-b-transparent ml-1"></div>
+                  </div>
+                </div>
               </div>
               
-              {/* 4 smaller videos/images below */}
+              {/* 4 smaller media items below */}
               <div className="grid grid-cols-2 gap-2">
-                <div className="relative h-24 rounded-lg overflow-hidden bg-gray-100 border border-gray-200 cursor-pointer hover:opacity-80 transition-opacity">
-                  <img
-                    src="/placeholder.svg"
-                    alt="Agent Success Story"
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-                    <div className="w-6 h-6 rounded-full bg-white/80 flex items-center justify-center">
-                      <div className="w-0 h-0 border-l-[6px] border-l-blue-600 border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent ml-1"></div>
+                {[
+                  { 
+                    src: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=300&h=200&fit=crop", 
+                    alt: "Agent Success Story", 
+                    type: "video",
+                    title: "Agent Success Stories"
+                  },
+                  { 
+                    src: "https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?w=300&h=200&fit=crop", 
+                    alt: "Closing Process", 
+                    type: "video",
+                    title: "Our Closing Process"
+                  },
+                  { 
+                    src: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=300&h=200&fit=crop", 
+                    alt: "Communication Process", 
+                    type: "image",
+                    title: "Communication Tools"
+                  },
+                  { 
+                    src: vendor.logo_url || "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=300&h=200&fit=crop", 
+                    alt: vendor.name, 
+                    type: "image",
+                    title: "Company Overview"
+                  }
+                ].map((media, index) => (
+                  <div key={index} className="relative h-24 rounded-lg overflow-hidden bg-gray-100 border border-gray-200 cursor-pointer hover:opacity-80 transition-opacity">
+                    <img
+                      src={media.src}
+                      alt={media.alt}
+                      className="w-full h-full object-cover"
+                    />
+                    {media.type === 'video' && (
+                      <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                        <div className="w-6 h-6 rounded-full bg-white/80 flex items-center justify-center">
+                          <div className="w-0 h-0 border-l-[6px] border-l-blue-600 border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent ml-1"></div>
+                        </div>
+                      </div>
+                    )}
+                    <div className="absolute bottom-1 left-1 right-1">
+                      <div className="bg-black/70 text-white text-[10px] px-1 py-0.5 rounded truncate">
+                        {media.title}
+                      </div>
                     </div>
+                    {index === 3 && vendor.is_verified && (
+                      <div className="absolute top-1 right-1">
+                        <Badge className="bg-green-600 text-white text-xs">
+                          <Shield className="w-2 h-2 mr-1" />
+                          Verified
+                        </Badge>
+                      </div>
+                    )}
                   </div>
-                </div>
-                <div className="relative h-24 rounded-lg overflow-hidden bg-gray-100 border border-gray-200 cursor-pointer hover:opacity-80 transition-opacity">
-                  <img
-                    src="/placeholder.svg"
-                    alt="Closing Process"
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-                    <div className="w-6 h-6 rounded-full bg-white/80 flex items-center justify-center">
-                      <div className="w-0 h-0 border-l-[6px] border-l-blue-600 border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent ml-1"></div>
+                ))}
+              </div>
+              
+              {/* Representatives Section */}
+              <div className="bg-white border border-gray-200 rounded-lg p-4">
+                <h3 className="font-semibold text-gray-900 mb-3 flex items-center">
+                  <Users className="w-4 h-4 mr-2 text-blue-600" />
+                  Our Loan Officers
+                </h3>
+                <div className="max-h-48 overflow-y-auto space-y-3 pr-2">
+                  {[
+                    { name: "Sarah Johnson", title: "Senior Loan Officer", phone: "(555) 123-4567", email: "sarah@circleloans.com", experience: "8 years", closings: "200+" },
+                    { name: "Mike Rodriguez", title: "Loan Officer", phone: "(555) 234-5678", email: "mike@circleloans.com", experience: "5 years", closings: "150+" },
+                    { name: "Jennifer Chen", title: "Senior Loan Officer", phone: "(555) 345-6789", email: "jennifer@circleloans.com", experience: "10 years", closings: "300+" },
+                    { name: "David Smith", title: "Loan Officer", phone: "(555) 456-7890", email: "david@circleloans.com", experience: "6 years", closings: "180+" },
+                    { name: "Lisa Martinez", title: "Senior Loan Officer", phone: "(555) 567-8901", email: "lisa@circleloans.com", experience: "12 years", closings: "400+" },
+                    { name: "Tom Wilson", title: "Loan Officer", phone: "(555) 678-9012", email: "tom@circleloans.com", experience: "4 years", closings: "120+" },
+                    { name: "Amanda Brown", title: "Senior Loan Officer", phone: "(555) 789-0123", email: "amanda@circleloans.com", experience: "9 years", closings: "250+" },
+                    { name: "Kevin Lee", title: "Loan Officer", phone: "(555) 890-1234", email: "kevin@circleloans.com", experience: "7 years", closings: "190+" }
+                  ].map((rep, index) => (
+                    <div key={index} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                      <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                        {rep.name.split(' ').map(n => n[0]).join('')}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <p className="font-medium text-gray-900 text-sm">{rep.name}</p>
+                            <p className="text-xs text-gray-600">{rep.title}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-xs text-green-600 font-medium">{rep.closings} closings</p>
+                            <p className="text-xs text-gray-500">{rep.experience} exp</p>
+                          </div>
+                        </div>
+                        <div className="flex gap-4 mt-1">
+                          <a href={`tel:${rep.phone}`} className="text-xs text-blue-600 hover:underline">{rep.phone}</a>
+                          <a href={`mailto:${rep.email}`} className="text-xs text-blue-600 hover:underline truncate">{rep.email}</a>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-                <div className="relative h-24 rounded-lg overflow-hidden bg-gray-100 border border-gray-200 cursor-pointer hover:opacity-80 transition-opacity">
-                  <img
-                    src="/placeholder.svg"
-                    alt="Communication Process"
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-                    <div className="w-6 h-6 rounded-full bg-white/80 flex items-center justify-center">
-                      <div className="w-0 h-0 border-l-[6px] border-l-blue-600 border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent ml-1"></div>
-                    </div>
-                  </div>
-                </div>
-                <div className="relative h-24 rounded-lg overflow-hidden bg-gray-100 border border-gray-200">
-                  <img
-                    src={vendor.logo_url || "/placeholder.svg"}
-                    alt={vendor.name}
-                    className="w-full h-full object-contain p-2 bg-white"
-                  />
-                  {vendor.is_verified && (
-                    <div className="absolute top-1 right-1">
-                      <Badge className="bg-green-600 text-white text-xs">
-                        <Shield className="w-2 h-2 mr-1" />
-                        Verified
-                      </Badge>
-                    </div>
-                  )}
+                  ))}
                 </div>
               </div>
               
