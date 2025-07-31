@@ -54,7 +54,15 @@ export const VendorSelectionModal = ({
 
   useEffect(() => {
     if (isOpen) {
+      console.log('VendorSelectionModal: Modal opened, loading vendors...');
+      setVendors([]); // Reset vendors to ensure clean state
+      setFilteredVendors([]);
       loadVendors();
+    } else {
+      console.log('VendorSelectionModal: Modal closed, resetting state...');
+      setSearchQuery("");
+      setSelectedVendor(null);
+      setShowConfirmation(false);
     }
   }, [isOpen]);
 
