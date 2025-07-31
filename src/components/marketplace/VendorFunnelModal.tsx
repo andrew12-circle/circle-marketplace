@@ -670,7 +670,7 @@ export const VendorFunnelModal = ({
           <div className="p-6">
             <Tabs defaultValue="details" className="w-full">
               <TabsList className="grid w-full grid-cols-5">
-                <TabsTrigger value="details">Product Details</TabsTrigger>
+                <TabsTrigger value="details">Company Details</TabsTrigger>
                 <TabsTrigger value="reviews">Customer Reviews</TabsTrigger>
                 <TabsTrigger value="agent-reviews">Agent Reviews</TabsTrigger>
                 <TabsTrigger value="qa">Q&A</TabsTrigger>
