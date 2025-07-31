@@ -61,8 +61,8 @@ export const VendorCard = ({ vendor, onAddToWallet, onRequestCoMarketing, onNavi
   };
 
   return (
-    <Card className="h-full flex flex-col hover:shadow-lg transition-shadow">
-      <CardContent className="p-4 flex-1">
+    <Card className="h-full flex flex-col hover:shadow-lg transition-shadow mobile-card touch-friendly">
+      <CardContent className="p-4 flex-1 mobile-card-content">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             {vendor.imageUrl && (
@@ -73,8 +73,8 @@ export const VendorCard = ({ vendor, onAddToWallet, onRequestCoMarketing, onNavi
               />
             )}
             <div>
-              <h3 className="font-semibold text-sm">{vendor.company}</h3>
-              <p className="text-xs text-muted-foreground">{vendor.category}</p>
+              <h3 className="font-semibold text-sm mobile-title">{vendor.company}</h3>
+              <p className="text-xs text-muted-foreground mobile-body">{vendor.category}</p>
             </div>
           </div>
           {vendor.rating && (
@@ -173,7 +173,7 @@ export const VendorCard = ({ vendor, onAddToWallet, onRequestCoMarketing, onNavi
       <CardFooter className="p-4 pt-0 flex flex-col gap-2">
         <Button 
           onClick={() => onAddToWallet(vendor.id)}
-          className="w-full bg-circle-primary hover:bg-circle-primary-light"
+          className="w-full bg-circle-primary hover:bg-circle-primary-light mobile-btn touch-target"
         >
           Add to Wallet
         </Button>
@@ -181,7 +181,7 @@ export const VendorCard = ({ vendor, onAddToWallet, onRequestCoMarketing, onNavi
           <Button 
             variant="outline" 
             onClick={() => onRequestCoMarketing(vendor.id)}
-            className="w-full"
+            className="w-full mobile-btn touch-target"
           >
             Request Co-Marketing
           </Button>

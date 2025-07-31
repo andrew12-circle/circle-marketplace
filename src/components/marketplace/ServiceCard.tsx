@@ -118,7 +118,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
   return (
     <TooltipProvider>
     <Card 
-      className="group relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 bg-card border border-border/50 h-full flex flex-col cursor-pointer"
+      className="group relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 bg-card border border-border/50 h-full flex flex-col cursor-pointer mobile-card touch-friendly"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={handleViewDetails}
@@ -160,10 +160,10 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
         />
       </div>
 
-      <CardContent className="p-4 flex flex-col flex-grow">
+      <CardContent className="p-4 flex flex-col flex-grow mobile-card-content">
         {/* Title and Vendor Info - Fixed height */}
         <div className="flex items-center gap-2 text-sm text-muted-foreground h-6 mb-3">
-          <h3 className="font-semibold text-foreground leading-tight">
+          <h3 className="font-semibold text-foreground leading-tight mobile-title">
             {service.title.split(' - ').pop() || service.title.split(': ').pop() || service.title}
           </h3>
           {service.vendor?.is_verified && (
@@ -389,17 +389,19 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
         {/* Action Buttons - Fixed at bottom */}
         <div className="flex gap-2 mt-auto">
           <Button 
-            className="flex-1"
+            className="flex-1 mobile-btn touch-target"
             onClick={handleAddToCart}
           >
             <>
               <ShoppingCart className="w-4 h-4 mr-2" />
-              {t('addToCart')}
+              <span className="hidden sm:inline">{t('addToCart')}</span>
+              <span className="sm:hidden">Add</span>
             </>
           </Button>
           
           <Button 
             variant="outline"
+            className="mobile-btn touch-target"
             onClick={handleViewDetailsButton}
           >
             <ArrowRight className={`h-4 w-4 transition-transform ${

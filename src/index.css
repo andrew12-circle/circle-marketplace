@@ -192,6 +192,25 @@ All colors MUST be HSL.
     user-select: none;
   }
 
+  /* Mobile grid optimizations */
+  .mobile-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  @media screen and (min-width: 640px) {
+    .mobile-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  
+  @media screen and (min-width: 1024px) {
+    .mobile-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
   /* Mobile container adjustments */
   @media screen and (max-width: 640px) {
     .container {
@@ -217,6 +236,40 @@ All colors MUST be HSL.
     .mobile-text-xl {
       font-size: 1.125rem !important;
       line-height: 1.75rem !important;
+    }
+
+    /* Mobile card optimizations */
+    .mobile-card {
+      border-radius: 0.75rem !important;
+      padding: 0.75rem !important;
+    }
+    
+    .mobile-card-content {
+      padding: 0.5rem !important;
+    }
+    
+    /* Mobile button optimizations */
+    .mobile-btn {
+      padding: 0.75rem 1rem !important;
+      font-size: 0.875rem !important;
+      border-radius: 0.5rem !important;
+    }
+    
+    /* Mobile text optimization */
+    .mobile-title {
+      font-size: 1rem !important;
+      line-height: 1.25rem !important;
+      font-weight: 600 !important;
+    }
+    
+    .mobile-subtitle {
+      font-size: 0.875rem !important;
+      line-height: 1.25rem !important;
+    }
+    
+    .mobile-body {
+      font-size: 0.8125rem !important;
+      line-height: 1.125rem !important;
     }
   }
 

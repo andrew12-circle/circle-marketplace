@@ -643,7 +643,7 @@ export const MarketplaceGrid = () => {
 
           {/* Grid - Mobile Responsive */}
           {viewMode === "services" ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+            <div className="mobile-grid gap-4 sm:gap-6">
               {filteredServices.map((service) => (
                 <ServiceCard
                   key={service.id}
@@ -665,7 +665,7 @@ export const MarketplaceGrid = () => {
                     {PRODUCT_CATEGORIES.find(p => p.id === selectedProductCategory)?.name}
                   </h2>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+                <div className="mobile-grid gap-4 sm:gap-6">
                   {getServicesForProduct(selectedProductCategory).map((service) => (
         <ServiceCard
           key={service.id}
@@ -678,7 +678,7 @@ export const MarketplaceGrid = () => {
                 </div>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="mobile-grid gap-4 sm:gap-6">
                 {filteredProducts.map((product) => {
                   const IconComponent = product.icon;
                   return (
@@ -738,7 +738,7 @@ export const MarketplaceGrid = () => {
               </div>
             )
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+            <div className="mobile-grid gap-4 sm:gap-6">
               {filteredVendors.map((vendor) => (
                 <EnhancedVendorCard
                   key={vendor.id}
