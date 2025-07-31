@@ -432,10 +432,10 @@ export const MarketplaceGrid = () => {
 
     const keywords = productMapping[productId] || [];
     return services.filter(service => {
-      const title = service.title.toLowerCase();
-      const description = service.description.toLowerCase();
+      const title = service.title?.toLowerCase() || '';
+      const description = service.description?.toLowerCase() || '';
       const category = service.category?.toLowerCase() || '';
-      const tags = service.tags?.map(tag => tag.toLowerCase()) || [];
+      const tags = service.tags?.map(tag => tag?.toLowerCase() || '') || [];
       
       return keywords.some(keyword => 
         title.includes(keyword) || 
