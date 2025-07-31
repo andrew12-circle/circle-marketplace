@@ -345,32 +345,11 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                           <h3 className="text-yellow-900 font-bold text-lg mb-1">Circle COVERAGE</h3>
                           <h4 className="text-yellow-800 font-semibold text-base mb-3">Compliant Advertising Partnerships</h4>
                           <p className="text-yellow-900 text-sm leading-relaxed mb-3">
-                            Partner with settlement service providers on legitimate joint advertising campaigns that benefit both parties equally.
+                            Find lenders and title companies & more interested in sharing the cost of public advertising campaigns. Each party pays their proportional share and receives proportional benefit in all advertising materials.
                           </p>
                           
-                          <div className="mb-3">
-                            <p className="text-yellow-800 font-medium text-xs mb-1">Eligible for cost-sharing:</p>
-                            <div className="text-yellow-900 text-xs space-y-0.5">
-                              <div>✅ Billboard advertisements</div>
-                              <div>✅ Print media (newspapers, magazines)</div>
-                              <div>✅ Digital display advertising</div>
-                              <div>✅ Direct mail campaigns</div>
-                              <div>✅ Radio/TV commercials</div>
-                            </div>
-                          </div>
-                          
-                          <div className="mb-3">
-                            <p className="text-yellow-800 font-medium text-xs mb-1">Not eligible:</p>
-                            <div className="text-yellow-900 text-xs space-y-0.5">
-                              <div>❌ Lead generation platforms</div>
-                              <div>❌ CRM or database systems</div>
-                              <div>❌ Website or IDX services</div>
-                              <div>❌ Business tools or software</div>
-                            </div>
-                          </div>
-                          
                           <p className="text-yellow-900 text-xs leading-relaxed mb-3">
-                            All arrangements must feature both parties proportionally and comply with federal RESPA regulations. No referral relationships permitted.
+                            This feature facilitates introductions for RESPA-compliant marketing partnerships only. Federal law prohibits cost-sharing arrangements for lead generation tools or business platforms.
                           </p>
                           
                           <button className="text-yellow-800 text-sm font-medium hover:text-yellow-900 underline">
