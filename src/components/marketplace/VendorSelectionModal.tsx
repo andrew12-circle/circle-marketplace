@@ -83,6 +83,7 @@ export const VendorSelectionModal = ({
         .from('vendors')
         .select('*')
         .eq('is_active', true)
+        .order('sort_order', { ascending: false }) // Higher sort_order = higher priority
         .order('rating', { ascending: false });
 
       console.log('VendorSelectionModal: Supabase response:', { data, error, dataLength: data?.length });

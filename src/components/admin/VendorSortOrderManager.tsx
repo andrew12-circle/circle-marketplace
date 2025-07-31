@@ -3,21 +3,18 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { DollarSign, Save, Building } from 'lucide-react';
+import { ArrowUpDown, Save, Building } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 interface Vendor {
   id: string;
   name: string;
-  ad_budget_min?: number;
-  ad_budget_max?: number;
-  budget_currency?: string;
+  sort_order?: number;
   location?: string;
 }
 
-export const VendorBudgetManager = () => {
+export const VendorSortOrderManager = () => {
   const { toast } = useToast();
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [loading, setLoading] = useState(true);
@@ -31,7 +28,7 @@ export const VendorBudgetManager = () => {
     try {
       const { data, error } = await supabase
         .from('vendors')
-        .select('id, name, ad_budget_min, ad_budget_max, budget_currency, location')
+        .select('id, name, sort_order, location')
         .order('sort_order', { ascending: false })
         .order('name');
 
@@ -49,16 +46,13 @@ export const VendorBudgetManager = () => {
     }
   };
 
-  const updateVendorBudget = async (vendorId: string, minBudget: number | null, maxBudget: number | null) => {
+  const updateVendorSortOrder = async (vendorId: string, sortOrder: number) => {
     setUpdating(prev => ({ ...prev, [vendorId]: true }));
     
     try {
       const { error } = await supabase
         .from('vendors')
-        .update({
-          ad_budget_min: minBudget ? minBudget * 100 : null, // Convert to cents
-          ad_budget_max: maxBudget ? maxBudget * 100 : null, // Convert to cents
-        })
+        .update({ sort_order: sortOrder })
         .eq('id', vendorId);
 
       if (error) throw error;
@@ -66,23 +60,19 @@ export const VendorBudgetManager = () => {
       // Update local state
       setVendors(vendors.map(vendor => 
         vendor.id === vendorId 
-          ? { 
-              ...vendor, 
-              ad_budget_min: minBudget ? minBudget * 100 : undefined,
-              ad_budget_max: maxBudget ? maxBudget * 100 : undefined
-            }
+          ? { ...vendor, sort_order: sortOrder }
           : vendor
-      ));
+      ).sort((a, b) => (b.sort_order || 50) - (a.sort_order || 50)));
 
       toast({
         title: 'Success',
-        description: 'Vendor budget updated successfully',
+        description: 'Sort order updated successfully',
       });
     } catch (error) {
-      console.error('Error updating vendor budget:', error);
+      console.error('Error updating sort order:', error);
       toast({
         title: 'Error',
-        description: 'Failed to update vendor budget',
+        description: 'Failed to update sort order',
         variant: 'destructive',
       });
     } finally {
@@ -90,23 +80,20 @@ export const VendorBudgetManager = () => {
     }
   };
 
-  const handleBudgetUpdate = (vendorId: string) => {
-    const minInput = document.getElementById(`min-${vendorId}`) as HTMLInputElement;
-    const maxInput = document.getElementById(`max-${vendorId}`) as HTMLInputElement;
-    
-    const minBudget = minInput?.value ? parseInt(minInput.value) : null;
-    const maxBudget = maxInput?.value ? parseInt(maxInput.value) : null;
+  const handleSortOrderUpdate = (vendorId: string) => {
+    const input = document.getElementById(`sort-${vendorId}`) as HTMLInputElement;
+    const sortOrder = input?.value ? parseInt(input.value) : 50;
 
-    if (minBudget && maxBudget && minBudget > maxBudget) {
+    if (sortOrder < 1 || sortOrder > 100) {
       toast({
         title: 'Invalid Range',
-        description: 'Minimum budget cannot be greater than maximum budget',
+        description: 'Sort order must be between 1 and 100',
         variant: 'destructive',
       });
       return;
     }
 
-    updateVendorBudget(vendorId, minBudget, maxBudget);
+    updateVendorSortOrder(vendorId, sortOrder);
   };
 
   if (loading) {
@@ -117,19 +104,31 @@ export const VendorBudgetManager = () => {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <DollarSign className="h-5 w-5" />
-          Vendor Ad Budget Management
+          <ArrowUpDown className="h-5 w-5" />
+          Vendor Sort Order Management
         </CardTitle>
+        <p className="text-sm text-muted-foreground">
+          Control vendor display order (1-100). Higher numbers appear first. Current default is 50.
+        </p>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {vendors.map((vendor) => (
+          <div className="bg-blue-50 p-3 rounded-lg mb-4">
+            <p className="text-sm text-blue-800">
+              <strong>Quick Setup:</strong> Set Circle Home Loans to 100 for first position, other high-priority vendors to 90-99, standard vendors to 50.
+            </p>
+          </div>
+          
+          {vendors.map((vendor, index) => (
             <div
               key={vendor.id}
               className="flex items-center justify-between p-4 border rounded-lg"
             >
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
+                  <span className="text-sm font-mono bg-gray-100 px-2 py-1 rounded">
+                    #{index + 1}
+                  </span>
                   <Building className="h-4 w-4 text-muted-foreground" />
                   <h3 className="font-semibold">{vendor.name}</h3>
                   {vendor.location && (
@@ -139,39 +138,26 @@ export const VendorBudgetManager = () => {
                   )}
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Current Budget: {vendor.ad_budget_min && vendor.ad_budget_max 
-                    ? `$${(vendor.ad_budget_min / 100).toLocaleString()} - $${(vendor.ad_budget_max / 100).toLocaleString()}/mo`
-                    : 'Not set'}
+                  Current Sort Order: {vendor.sort_order || 50}
                 </p>
               </div>
 
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-2">
-                  <label className="text-sm font-medium whitespace-nowrap">Min Budget:</label>
+                  <label className="text-sm font-medium whitespace-nowrap">Sort Order:</label>
                   <Input
-                    id={`min-${vendor.id}`}
+                    id={`sort-${vendor.id}`}
                     type="number"
-                    placeholder="1000"
-                    defaultValue={vendor.ad_budget_min ? vendor.ad_budget_min / 100 : ''}
-                    className="w-24"
-                    min="0"
-                  />
-                </div>
-                
-                <div className="flex items-center gap-2">
-                  <label className="text-sm font-medium whitespace-nowrap">Max Budget:</label>
-                  <Input
-                    id={`max-${vendor.id}`}
-                    type="number"
-                    placeholder="5000"
-                    defaultValue={vendor.ad_budget_max ? vendor.ad_budget_max / 100 : ''}
-                    className="w-24"
-                    min="0"
+                    placeholder="50"
+                    defaultValue={vendor.sort_order || 50}
+                    className="w-20"
+                    min="1"
+                    max="100"
                   />
                 </div>
 
                 <Button
-                  onClick={() => handleBudgetUpdate(vendor.id)}
+                  onClick={() => handleSortOrderUpdate(vendor.id)}
                   disabled={updating[vendor.id]}
                   size="sm"
                   className="flex items-center gap-1"

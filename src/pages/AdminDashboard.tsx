@@ -16,6 +16,7 @@ import { ServiceImportPanel } from '@/components/admin/ServiceImportPanel';
 import { VendorImportPanel } from '@/components/admin/VendorImportPanel';
 import { VendorBudgetManager } from '@/components/admin/VendorBudgetManager';
 import { VendorRESPAManager } from '@/components/admin/VendorRESPAManager';
+import { VendorSortOrderManager } from '@/components/admin/VendorSortOrderManager';
 import { ImageVectorizationPanel } from '@/components/admin/ImageVectorizationPanel';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Zap, Upload, Building, Youtube, DollarSign } from 'lucide-react';
@@ -341,6 +342,7 @@ export default function AdminDashboard() {
         </TabsContent>
 
         <TabsContent value="vendors" className="space-y-6">
+          <VendorSortOrderManager />
           <VendorRESPAManager />
           <VendorBudgetManager />
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
