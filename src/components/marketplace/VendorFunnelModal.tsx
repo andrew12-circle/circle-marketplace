@@ -37,6 +37,7 @@ import { getRiskBadge, getComplianceAlert, determineServiceRisk } from "./RESPAC
 interface VendorFunnelModalProps {
   isOpen: boolean;
   onClose: () => void;
+  industry?: 'mortgage' | 'insurance' | 'legal' | 'accounting' | 'real-estate' | 'general';
   vendor: {
     id: string;
     name: string;
@@ -59,12 +60,175 @@ interface VendorFunnelModalProps {
 export const VendorFunnelModal = ({ 
   isOpen, 
   onClose, 
+  industry = 'general',
   vendor, 
   onRequestCoMarketing 
 }: VendorFunnelModalProps) => {
   const [selectedPackage, setSelectedPackage] = useState("standard");
   const [quantity, setQuantity] = useState(1);
   const riskLevel = determineServiceRisk(vendor.name, vendor.description);
+
+  // Industry-specific configurations
+  const industryConfig = {
+    mortgage: {
+      teamTitle: "Our Loan Officers",
+      partnerLabel: "Agent Partners",
+      processLabel: "Closings",
+      mainMetric: "On-Time Closings Guaranteed",
+      successLabel: "Agent Success Stories",
+      reviewLabel: "Real Estate Agent Reviews",
+      teamMembers: [
+        { title: "Senior Loan Officer", metric: "closings", description: "Years of mortgage expertise" },
+        { title: "Loan Officer", metric: "closings", description: "Dedicated loan processing" }
+      ],
+      benefits: [
+        { title: "Shared Marketing Costs", desc: "Split advertising expenses 50/50" },
+        { title: "Co-Branded Materials", desc: "Professional marketing assets" },
+        { title: "Lead Generation", desc: "Access to our client database" },
+        { title: "Fast Closings", desc: "Close on time, every time" },
+        { title: "Premium Placement", desc: "Priority in referral systems" },
+        { title: "Training & Support", desc: "Ongoing partner education" }
+      ],
+      statsLabels: {
+        primary: "Campaigns Successfully Funded",
+        secondary: "On-Time Closing Rate", 
+        rating: "Agent Rating",
+        response: "Average Response Time"
+      }
+    },
+    insurance: {
+      teamTitle: "Our Insurance Specialists",
+      partnerLabel: "Agent Partners", 
+      processLabel: "policies",
+      mainMetric: "Claims Processing Excellence",
+      successLabel: "Agent Success Stories",
+      reviewLabel: "Insurance Agent Reviews",
+      teamMembers: [
+        { title: "Senior Insurance Specialist", metric: "policies", description: "Years of insurance expertise" },
+        { title: "Insurance Agent", metric: "policies", description: "Comprehensive coverage solutions" }
+      ],
+      benefits: [
+        { title: "Shared Marketing Costs", desc: "Split advertising expenses 50/50" },
+        { title: "Co-Branded Materials", desc: "Professional marketing assets" },
+        { title: "Lead Generation", desc: "Access to our client database" },
+        { title: "Fast Claims Processing", desc: "Quick and reliable service" },
+        { title: "Premium Placement", desc: "Priority in referral systems" },
+        { title: "Training & Support", desc: "Ongoing partner education" }
+      ],
+      statsLabels: {
+        primary: "Campaigns Successfully Funded",
+        secondary: "Claims Approval Rate",
+        rating: "Agent Rating", 
+        response: "Average Response Time"
+      }
+    },
+    legal: {
+      teamTitle: "Our Legal Team",
+      partnerLabel: "Attorney Partners",
+      processLabel: "cases",
+      mainMetric: "Successful Case Resolution",
+      successLabel: "Attorney Success Stories", 
+      reviewLabel: "Attorney Reviews",
+      teamMembers: [
+        { title: "Senior Attorney", metric: "cases", description: "Years of legal experience" },
+        { title: "Associate Attorney", metric: "cases", description: "Specialized legal expertise" }
+      ],
+      benefits: [
+        { title: "Shared Marketing Costs", desc: "Split advertising expenses 50/50" },
+        { title: "Co-Branded Materials", desc: "Professional marketing assets" },
+        { title: "Lead Generation", desc: "Access to our client database" },
+        { title: "Case Management", desc: "Efficient case processing" },
+        { title: "Premium Placement", desc: "Priority in referral systems" },
+        { title: "Training & Support", desc: "Ongoing partner education" }
+      ],
+      statsLabels: {
+        primary: "Campaigns Successfully Funded",
+        secondary: "Case Success Rate",
+        rating: "Attorney Rating",
+        response: "Average Response Time"
+      }
+    },
+    accounting: {
+      teamTitle: "Our Accounting Team",
+      partnerLabel: "CPA Partners",
+      processLabel: "returns",
+      mainMetric: "Accurate Tax Processing",
+      successLabel: "CPA Success Stories",
+      reviewLabel: "CPA Reviews", 
+      teamMembers: [
+        { title: "Senior CPA", metric: "returns", description: "Years of accounting expertise" },
+        { title: "Tax Specialist", metric: "returns", description: "Tax preparation excellence" }
+      ],
+      benefits: [
+        { title: "Shared Marketing Costs", desc: "Split advertising expenses 50/50" },
+        { title: "Co-Branded Materials", desc: "Professional marketing assets" },
+        { title: "Lead Generation", desc: "Access to our client database" },
+        { title: "Tax Preparation", desc: "Accurate and timely service" },
+        { title: "Premium Placement", desc: "Priority in referral systems" },
+        { title: "Training & Support", desc: "Ongoing partner education" }
+      ],
+      statsLabels: {
+        primary: "Campaigns Successfully Funded",
+        secondary: "Filing Accuracy Rate",
+        rating: "CPA Rating",
+        response: "Average Response Time"
+      }
+    },
+    'real-estate': {
+      teamTitle: "Our Real Estate Team",
+      partnerLabel: "Agent Partners",
+      processLabel: "transactions",
+      mainMetric: "Successful Transactions",
+      successLabel: "Agent Success Stories",
+      reviewLabel: "Real Estate Agent Reviews",
+      teamMembers: [
+        { title: "Senior Real Estate Agent", metric: "transactions", description: "Years of real estate expertise" },
+        { title: "Real Estate Agent", metric: "transactions", description: "Market knowledge and expertise" }
+      ],
+      benefits: [
+        { title: "Shared Marketing Costs", desc: "Split advertising expenses 50/50" },
+        { title: "Co-Branded Materials", desc: "Professional marketing assets" },
+        { title: "Lead Generation", desc: "Access to our client database" },
+        { title: "Transaction Support", desc: "End-to-end transaction management" },
+        { title: "Premium Placement", desc: "Priority in referral systems" },
+        { title: "Training & Support", desc: "Ongoing partner education" }
+      ],
+      statsLabels: {
+        primary: "Campaigns Successfully Funded", 
+        secondary: "Transaction Success Rate",
+        rating: "Agent Rating",
+        response: "Average Response Time"
+      }
+    },
+    general: {
+      teamTitle: "Our Team",
+      partnerLabel: "Partners",
+      processLabel: "projects",
+      mainMetric: "Service Excellence",
+      successLabel: "Partner Success Stories",
+      reviewLabel: "Partner Reviews",
+      teamMembers: [
+        { title: "Senior Specialist", metric: "projects", description: "Years of industry expertise" },
+        { title: "Specialist", metric: "projects", description: "Professional service delivery" }
+      ],
+      benefits: [
+        { title: "Shared Marketing Costs", desc: "Split advertising expenses 50/50" },
+        { title: "Co-Branded Materials", desc: "Professional marketing assets" },
+        { title: "Lead Generation", desc: "Access to our client database" },
+        { title: "Service Excellence", desc: "High-quality service delivery" },
+        { title: "Premium Placement", desc: "Priority in referral systems" },
+        { title: "Training & Support", desc: "Ongoing partner education" }
+      ],
+      statsLabels: {
+        primary: "Campaigns Successfully Funded",
+        secondary: "Service Success Rate",
+        rating: "Partner Rating", 
+        response: "Average Response Time"
+      }
+    }
+  };
+
+  const config = industryConfig[industry];
   
   // Mock services/packages data (like Amazon product variations)
   const packages = [
@@ -262,62 +426,69 @@ export const VendorFunnelModal = ({
               <div className="bg-white border border-gray-200 rounded-lg p-4">
                 <h3 className="font-semibold text-gray-900 mb-3 flex items-center">
                   <Users className="w-4 h-4 mr-2 text-blue-600" />
-                  Our Team
+                  {config.teamTitle}
                 </h3>
                 <div className="max-h-48 overflow-y-auto space-y-3 pr-2">
                   {[
-                    { name: "Sarah Johnson", title: "Senior Loan Officer", phone: "(555) 123-4567", email: "sarah@circleloans.com", experience: "8 years", closings: "200+" },
-                    { name: "Mike Rodriguez", title: "Loan Officer", phone: "(555) 234-5678", email: "mike@circleloans.com", experience: "5 years", closings: "150+" },
-                    { name: "Jennifer Chen", title: "Senior Loan Officer", phone: "(555) 345-6789", email: "jennifer@circleloans.com", experience: "10 years", closings: "300+" },
-                    { name: "David Smith", title: "Loan Officer", phone: "(555) 456-7890", email: "david@circleloans.com", experience: "6 years", closings: "180+" },
-                    { name: "Lisa Martinez", title: "Senior Loan Officer", phone: "(555) 567-8901", email: "lisa@circleloans.com", experience: "12 years", closings: "400+" },
-                    { name: "Tom Wilson", title: "Loan Officer", phone: "(555) 678-9012", email: "tom@circleloans.com", experience: "4 years", closings: "120+" },
-                    { name: "Amanda Brown", title: "Senior Loan Officer", phone: "(555) 789-0123", email: "amanda@circleloans.com", experience: "9 years", closings: "250+" },
-                    { name: "Kevin Lee", title: "Loan Officer", phone: "(555) 890-1234", email: "kevin@circleloans.com", experience: "7 years", closings: "190+" }
-                  ].map((rep, index) => (
-                    <div key={index} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                      <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
-                        {rep.name.split(' ').map(n => n[0]).join('')}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <p className="font-medium text-gray-900 text-sm">{rep.name}</p>
-                            <p className="text-xs text-gray-600">{rep.title}</p>
+                    { name: "Sarah Johnson", experience: "8 years", metric: "200+" },
+                    { name: "Mike Rodriguez", experience: "5 years", metric: "150+" },
+                    { name: "Jennifer Chen", experience: "10 years", metric: "300+" },
+                    { name: "David Smith", experience: "6 years", metric: "180+" },
+                    { name: "Lisa Martinez", experience: "12 years", metric: "400+" },
+                    { name: "Tom Wilson", experience: "4 years", metric: "120+" },
+                    { name: "Amanda Brown", experience: "9 years", metric: "250+" },
+                    { name: "Kevin Lee", experience: "7 years", metric: "190+" }
+                  ].map((rep, index) => {
+                    const memberType = config.teamMembers[index % 2]; // Alternate between the two team member types
+                    const emailDomain = vendor.name.toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '') + '.com';
+                    const email = `${rep.name.toLowerCase().replace(/\s+/g, '.')}@${emailDomain}`;
+                    const phone = `(555) ${(123 + index * 111).toString().slice(0,3)}-${(4567 + index * 11).toString().slice(0,4)}`;
+                    
+                    return (
+                      <div key={index} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                        <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                          {rep.name.split(' ').map(n => n[0]).join('')}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <p className="font-medium text-gray-900 text-sm">{rep.name}</p>
+                              <p className="text-xs text-gray-600">{memberType.title}</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-xs text-green-600 font-medium">{rep.metric} {config.processLabel}</p>
+                              <p className="text-xs text-gray-500">{rep.experience} exp</p>
+                            </div>
                           </div>
-                          <div className="text-right">
-                            <p className="text-xs text-green-600 font-medium">{rep.closings} closings</p>
-                            <p className="text-xs text-gray-500">{rep.experience} exp</p>
+                          <div className="flex gap-4 mt-1">
+                            <a href={`tel:${phone}`} className="text-xs text-blue-600 hover:underline">{phone}</a>
+                            <a href={`mailto:${email}`} className="text-xs text-blue-600 hover:underline truncate">{email}</a>
                           </div>
                         </div>
-                        <div className="flex gap-4 mt-1">
-                          <a href={`tel:${rep.phone}`} className="text-xs text-blue-600 hover:underline">{rep.phone}</a>
-                          <a href={`mailto:${rep.email}`} className="text-xs text-blue-600 hover:underline truncate">{rep.email}</a>
-                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
               
               {/* Trust Indicators */}
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200">
-                <h3 className="font-semibold text-blue-900 mb-3">Why Partner With Us</h3>
-                <div className="space-y-2">
-                  <div className="flex items-center text-sm text-blue-800">
-                    <TrendingUp className="w-4 h-4 mr-2 text-green-600" />
-                    {vendor.co_marketing_agents || 150}+ Active Agent Partners
-                  </div>
-                  <div className="flex items-center text-sm text-blue-800">
-                    <DollarSign className="w-4 h-4 mr-2 text-green-600" />
-                    52 Campaigns Funded
-                  </div>
-                  <div className="flex items-center text-sm text-blue-800">
-                    <Award className="w-4 h-4 mr-2 text-green-600" />
-                    On-Time Closings Guaranteed
-                  </div>
-                </div>
-              </div>
+               <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200">
+                 <h3 className="font-semibold text-blue-900 mb-3">Why Partner With Us</h3>
+                 <div className="space-y-2">
+                   <div className="flex items-center text-sm text-blue-800">
+                     <TrendingUp className="w-4 h-4 mr-2 text-green-600" />
+                     {vendor.co_marketing_agents || 150}+ Active {config.partnerLabel}
+                   </div>
+                   <div className="flex items-center text-sm text-blue-800">
+                     <DollarSign className="w-4 h-4 mr-2 text-green-600" />
+                     52 Campaigns Funded
+                   </div>
+                   <div className="flex items-center text-sm text-blue-800">
+                     <Award className="w-4 h-4 mr-2 text-green-600" />
+                     {config.mainMetric}
+                   </div>
+                 </div>
+               </div>
 
               {/* Rating Display */}
               <div className="text-center space-y-2">
@@ -352,64 +523,31 @@ export const VendorFunnelModal = ({
                 </p>
               </div>
 
-              {/* Partnership Benefits */}
-              <div className="bg-white border border-gray-200 rounded-lg p-5">
-                <h3 className="font-bold text-gray-900 mb-4 flex items-center">
-                  <Handshake className="w-5 h-5 mr-2 text-blue-600" />
-                  Partnership Benefits
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div className="flex items-start space-x-3">
-                    <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="font-medium text-gray-900">Shared Marketing Costs</p>
-                      <p className="text-sm text-gray-600">Split advertising expenses 50/50</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start space-x-3">
-                    <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="font-medium text-gray-900">Co-Branded Materials</p>
-                      <p className="text-sm text-gray-600">Professional marketing assets</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start space-x-3">
-                    <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="font-medium text-gray-900">Lead Generation</p>
-                      <p className="text-sm text-gray-600">Access to our client database</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start space-x-3">
-                    <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="font-medium text-gray-900">Fast Closings</p>
-                      <p className="text-sm text-gray-600">Close on time, every time</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start space-x-3">
-                    <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="font-medium text-gray-900">Premium Placement</p>
-                      <p className="text-sm text-gray-600">Priority in referral systems</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start space-x-3">
-                    <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="font-medium text-gray-900">Training & Support</p>
-                      <p className="text-sm text-gray-600">Ongoing partner education</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+               {/* Partnership Benefits */}
+               <div className="bg-white border border-gray-200 rounded-lg p-5">
+                 <h3 className="font-bold text-gray-900 mb-4 flex items-center">
+                   <Handshake className="w-5 h-5 mr-2 text-blue-600" />
+                   Partnership Benefits
+                 </h3>
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                   {config.benefits.map((benefit, index) => (
+                     <div key={index} className="flex items-start space-x-3">
+                       <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                       <div>
+                         <p className="font-medium text-gray-900">{benefit.title}</p>
+                         <p className="text-sm text-gray-600">{benefit.desc}</p>
+                       </div>
+                     </div>
+                   ))}
+                 </div>
+               </div>
 
               {/* Success Stories */}
-              <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-5 rounded-lg border border-green-200">
-                <h3 className="font-bold text-green-900 mb-3 flex items-center">
-                  <TrendingUp className="w-5 h-5 mr-2" />
-                  Agent Success Stories
-                </h3>
+               <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-5 rounded-lg border border-green-200">
+                 <h3 className="font-bold text-green-900 mb-3 flex items-center">
+                   <TrendingUp className="w-5 h-5 mr-2" />
+                   {config.successLabel}
+                 </h3>
                 <div className="space-y-3">
                   <blockquote className="text-sm text-green-800 italic">
                     "My business increased 40% in the first 6 months of our partnership."
@@ -433,29 +571,29 @@ export const VendorFunnelModal = ({
                   <p className="text-sm text-gray-600 mt-1">Why agents choose us</p>
                 </div>
 
-                {/* Key Stats */}
-                <div className="space-y-4">
-                  <div className="text-center p-4 bg-green-50 rounded-lg border border-green-200">
-                    <div className="text-2xl font-bold text-green-700">52</div>
-                    <div className="text-sm text-green-600">Campaigns Successfully Funded</div>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="text-center p-3 bg-blue-50 rounded-lg border border-blue-200">
-                      <div className="text-xl font-bold text-blue-700">98%</div>
-                      <div className="text-xs text-blue-600">On-Time Closing Rate</div>
-                    </div>
-                    <div className="text-center p-3 bg-purple-50 rounded-lg border border-purple-200">
-                      <div className="text-xl font-bold text-purple-700">4.9★</div>
-                      <div className="text-xs text-purple-600">Agent Rating</div>
-                    </div>
-                  </div>
-                  
-                  <div className="text-center p-3 bg-orange-50 rounded-lg border border-orange-200">
-                    <div className="text-xl font-bold text-orange-700">24hr</div>
-                    <div className="text-xs text-orange-600">Average Response Time</div>
-                  </div>
-                </div>
+                 {/* Key Stats */}
+                 <div className="space-y-4">
+                   <div className="text-center p-4 bg-green-50 rounded-lg border border-green-200">
+                     <div className="text-2xl font-bold text-green-700">52</div>
+                     <div className="text-sm text-green-600">{config.statsLabels.primary}</div>
+                   </div>
+                   
+                   <div className="grid grid-cols-2 gap-3">
+                     <div className="text-center p-3 bg-blue-50 rounded-lg border border-blue-200">
+                       <div className="text-xl font-bold text-blue-700">98%</div>
+                       <div className="text-xs text-blue-600">{config.statsLabels.secondary}</div>
+                     </div>
+                     <div className="text-center p-3 bg-purple-50 rounded-lg border border-purple-200">
+                       <div className="text-xl font-bold text-purple-700">4.9★</div>
+                       <div className="text-xs text-purple-600">{config.statsLabels.rating}</div>
+                     </div>
+                   </div>
+                   
+                   <div className="text-center p-3 bg-orange-50 rounded-lg border border-orange-200">
+                     <div className="text-xl font-bold text-orange-700">24hr</div>
+                     <div className="text-xs text-orange-600">{config.statsLabels.response}</div>
+                   </div>
+                 </div>
 
                 {/* Communication Highlights */}
                 <div className="bg-gray-50 p-4 rounded-lg">
