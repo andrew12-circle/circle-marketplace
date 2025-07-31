@@ -269,8 +269,11 @@ export const MarketplaceGrid = () => {
   });
 
   const filteredVendors = vendors.filter(vendor => {
-    const matchesSearch = vendor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         vendor.description.toLowerCase().includes(searchTerm.toLowerCase());
+    // Skip null vendors
+    if (!vendor) return false;
+    
+    const matchesSearch = vendor.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         vendor.description?.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesVerified = !filters.verified || vendor.is_verified;
     
@@ -287,8 +290,8 @@ export const MarketplaceGrid = () => {
 
   // Count local vendors for the banner
   const localVendorCount = location?.state ? vendors.filter(vendor => 
-    vendor.license_states?.includes(location.state) ||
-    vendor.service_states?.includes(location.state)
+    vendor && (vendor.license_states?.includes(location.state) ||
+    vendor.service_states?.includes(location.state))
   ).length : 0;
 
   const handleSaveService = async (serviceId: string) => {
