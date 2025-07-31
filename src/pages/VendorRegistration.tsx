@@ -627,6 +627,16 @@ export const VendorRegistration = () => {
                         placeholder="https://calendly.com/yourname or https://cal.com/yourname"
                         className="transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary hover:border-primary/50"
                       />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => window.open('https://calendly.com/signup', '_blank')}
+                        className="w-fit text-xs"
+                      >
+                        <Calendar className="w-3 h-3 mr-1" />
+                        Create Free Calendly Account
+                      </Button>
                       <p className="text-xs text-muted-foreground">
                         {registrationType === "service_provider" 
                           ? "Realtors will use this to book demos, consultations, and onboarding calls"
