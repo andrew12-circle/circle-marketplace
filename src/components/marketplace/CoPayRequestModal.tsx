@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -49,9 +49,18 @@ export const CoPayRequestModal = ({ isOpen, onClose, service }: CoPayRequestModa
   });
   const [agentNotes, setAgentNotes] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [showVendorSelection, setShowVendorSelection] = useState(false);
+  const [showVendorSelection, setShowVendorSelection] = useState(profile?.is_pro_member ? isOpen : false);
   const { toast } = useToast();
   const { createCoPayRequest } = useCoPayRequests();
+
+  // Auto-open vendor selection for pro members
+  useEffect(() => {
+    if (isOpen && profile?.is_pro_member) {
+      setShowVendorSelection(true);
+    } else {
+      setShowVendorSelection(false);
+    }
+  }, [isOpen, profile?.is_pro_member]);
 
   const coPayPrice = service.retail_price && service.max_vendor_split_percentage 
     ? parseFloat(service.retail_price.replace(/[^\d.]/g, '')) * (1 - (service.max_vendor_split_percentage / 100))
@@ -455,27 +464,35 @@ export const CoPayRequestModal = ({ isOpen, onClose, service }: CoPayRequestModa
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent 
-        className="max-w-md max-h-[90vh] overflow-y-auto z-[100]"
-        onClick={(e) => e.stopPropagation()}
-        onPointerDown={(e) => e.stopPropagation()}
-      >
-        <DialogHeader>
-          <DialogTitle>Co-Pay Request</DialogTitle>
-        </DialogHeader>
-        
-        <div onClick={(e) => e.stopPropagation()}>
-          {renderCurrentStep()}
-        </div>
-      </DialogContent>
+    <>
+      {/* Only show the small modal for non-pro members or when not showing vendor selection */}
+      <Dialog open={isOpen && !showVendorSelection} onOpenChange={handleClose}>
+        <DialogContent 
+          className="max-w-md max-h-[90vh] overflow-y-auto z-[100]"
+          onClick={(e) => e.stopPropagation()}
+          onPointerDown={(e) => e.stopPropagation()}
+        >
+          <DialogHeader>
+            <DialogTitle>Co-Pay Request</DialogTitle>
+          </DialogHeader>
+          
+          <div onClick={(e) => e.stopPropagation()}>
+            {renderCurrentStep()}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <VendorSelectionModal
         isOpen={showVendorSelection}
-        onClose={() => setShowVendorSelection(false)}
+        onClose={() => {
+          setShowVendorSelection(false);
+          if (profile?.is_pro_member) {
+            onClose(); // Close the entire co-pay flow for pro members
+          }
+        }}
         onVendorSelect={handleVendorSelect}
         service={service}
       />
-    </Dialog>
+    </>
   );
 };
