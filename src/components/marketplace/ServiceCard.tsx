@@ -87,10 +87,22 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation();
+    
+    // Determine price based on user's membership and available pricing
+    let finalPrice = extractNumericPrice(service.price);
+    
+    if (isProMember && service.co_pay_price) {
+      finalPrice = extractNumericPrice(service.co_pay_price);
+    } else if (isProMember && service.pro_price) {
+      finalPrice = extractNumericPrice(service.pro_price);
+    } else if (service.retail_price) {
+      finalPrice = extractNumericPrice(service.retail_price);
+    }
+    
     addToCart({
       id: service.id,
       title: service.title,
-      price: parseFloat(service.price) || 0,
+      price: finalPrice,
       vendor: service.vendor.name,
       image_url: service.image_url,
       requiresQuote: service.requires_quote,
