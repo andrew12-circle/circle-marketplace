@@ -1463,6 +1463,7 @@ export type Database = {
           individual_phone: string | null
           individual_title: string | null
           is_active: boolean | null
+          is_respa_regulated: boolean | null
           is_verified: boolean | null
           latitude: number | null
           license_states: string[] | null
@@ -1475,6 +1476,7 @@ export type Database = {
           parent_vendor_id: string | null
           phone: string | null
           rating: number | null
+          respa_risk_level: string | null
           review_count: number | null
           service_radius_miles: number | null
           service_states: string[] | null
@@ -1500,6 +1502,7 @@ export type Database = {
           individual_phone?: string | null
           individual_title?: string | null
           is_active?: boolean | null
+          is_respa_regulated?: boolean | null
           is_verified?: boolean | null
           latitude?: number | null
           license_states?: string[] | null
@@ -1512,6 +1515,7 @@ export type Database = {
           parent_vendor_id?: string | null
           phone?: string | null
           rating?: number | null
+          respa_risk_level?: string | null
           review_count?: number | null
           service_radius_miles?: number | null
           service_states?: string[] | null
@@ -1537,6 +1541,7 @@ export type Database = {
           individual_phone?: string | null
           individual_title?: string | null
           is_active?: boolean | null
+          is_respa_regulated?: boolean | null
           is_verified?: boolean | null
           latitude?: number | null
           license_states?: string[] | null
@@ -1549,6 +1554,7 @@ export type Database = {
           parent_vendor_id?: string | null
           phone?: string | null
           rating?: number | null
+          respa_risk_level?: string | null
           review_count?: number | null
           service_radius_miles?: number | null
           service_states?: string[] | null

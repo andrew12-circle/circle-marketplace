@@ -120,6 +120,22 @@ export const getComplianceAlert = (riskLevel: 'high' | 'medium' | 'low') => {
   }
 };
 
+// Main function that checks manual overrides first, then falls back to keyword analysis
+export const determineVendorRisk = (vendor: { name: string; description?: string; is_respa_regulated?: boolean; respa_risk_level?: string }): 'high' | 'medium' | 'low' => {
+  // Check manual overrides first
+  if (vendor.is_respa_regulated !== null && vendor.is_respa_regulated !== undefined) {
+    if (vendor.is_respa_regulated === false) {
+      return 'low'; // Non-RESPA services are always low risk
+    } else if (vendor.is_respa_regulated === true && vendor.respa_risk_level) {
+      return vendor.respa_risk_level as 'high' | 'medium' | 'low';
+    }
+  }
+  
+  // Fall back to automatic keyword analysis
+  return determineServiceRisk(vendor.name, vendor.description);
+};
+
+// Original keyword-based analysis (kept for backward compatibility)
 export const determineServiceRisk = (category: string, subcategory?: string): 'high' | 'medium' | 'low' => {
   const categoryLower = category.toLowerCase();
   const subcategoryLower = subcategory?.toLowerCase() || '';
