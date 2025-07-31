@@ -1620,9 +1620,17 @@ export type Database = {
         Args: { user_email: string; client_ip?: unknown }
         Returns: Json
       }
+      check_admin_operation_rate_limit: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       check_and_update_lockout: {
         Args: { identifier: string; attempt_type?: string }
         Returns: Json
+      }
+      cleanup_old_security_events: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       clear_failed_attempts: {
         Args: { identifier: string; attempt_type?: string }
