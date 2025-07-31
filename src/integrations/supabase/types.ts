@@ -1674,6 +1674,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      check_admin_operation_rate_limit_enhanced: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       check_and_update_lockout: {
         Args: { identifier: string; attempt_type?: string }
         Returns: Json

@@ -11,6 +11,142 @@ const supabase = createClient(
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
 );
 
+// Security helpers for edge functions
+const authenticateUser = async (authHeader: string | null) => {
+  if (!authHeader) {
+    throw new Error("Unauthorized: No authorization header provided");
+  }
+
+  const token = authHeader.replace('Bearer ', '');
+  if (!token || token.length < 10) {
+    throw new Error("Unauthorized: Invalid authorization token");
+  }
+
+  try {
+    const { data: { user }, error } = await supabase.auth.getUser(token);
+    
+    if (error) {
+      console.error('Authentication error:', error.message);
+      throw new Error("Unauthorized: Invalid token");
+    }
+    
+    if (!user) {
+      throw new Error("Unauthorized: User not found");
+    }
+
+    return user;
+  } catch (error) {
+    console.error('User authentication failed:', error);
+    throw new Error("Unauthorized: Authentication failed");
+  }
+};
+
+const sanitizeString = (input: string): string => {
+  return input
+    .replace(/<script[^>]*>.*?<\/script>/gi, '')
+    .replace(/<[^>]*>/g, '')
+    .replace(/javascript:/gi, '')
+    .replace(/on\w+\s*=/gi, '')
+    .trim();
+};
+
+const validateInput = (input: any, schema: Record<string, any>): Record<string, any> => {
+  const result: Record<string, any> = {};
+  const errors: string[] = [];
+
+  for (const [key, rules] of Object.entries(schema)) {
+    const value = input[key];
+
+    if (rules.required && (value === undefined || value === null || value === '')) {
+      errors.push(`${key} is required`);
+      continue;
+    }
+
+    if (!rules.required && (value === undefined || value === null || value === '')) {
+      continue;
+    }
+
+    if (rules.type) {
+      const actualType = Array.isArray(value) ? 'array' : typeof value;
+      if (actualType !== rules.type) {
+        errors.push(`${key} must be of type ${rules.type}`);
+        continue;
+      }
+    }
+
+    if (typeof value === 'string') {
+      if (rules.maxLength && value.length > rules.maxLength) {
+        errors.push(`${key} must be no more than ${rules.maxLength} characters`);
+        continue;
+      }
+      
+      if (rules.minLength && value.length < rules.minLength) {
+        errors.push(`${key} must be at least ${rules.minLength} characters`);
+        continue;
+      }
+
+      if (rules.pattern && !rules.pattern.test(value)) {
+        errors.push(`${key} has invalid format`);
+        continue;
+      }
+
+      result[key] = rules.sanitize !== false ? sanitizeString(value) : value;
+    } else {
+      result[key] = value;
+    }
+  }
+
+  if (errors.length > 0) {
+    throw new Error(`Validation failed: ${errors.join(', ')}`);
+  }
+
+  return result;
+};
+
+// Rate limiting store
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+
+const checkRateLimit = (identifier: string, maxRequests: number = 10, windowMs: number = 60000): boolean => {
+  const now = Date.now();
+  const key = identifier;
+  
+  const current = rateLimitMap.get(key);
+  
+  if (!current || now > current.resetTime) {
+    rateLimitMap.set(key, { count: 1, resetTime: now + windowMs });
+    return true;
+  }
+  
+  if (current.count >= maxRequests) {
+    return false;
+  }
+  
+  current.count++;
+  return true;
+};
+
+const logSecurityEvent = async (eventType: string, userId: string | null, eventData: Record<string, any> = {}, request?: Request) => {
+  try {
+    const clientIP = request?.headers.get('x-forwarded-for') || 
+                    request?.headers.get('x-real-ip') || 
+                    'unknown';
+    
+    const userAgent = request?.headers.get('user-agent') || 'unknown';
+
+    await supabase
+      .from('security_events')
+      .insert({
+        event_type: eventType,
+        user_id: userId,
+        event_data: eventData,
+        ip_address: clientIP,
+        user_agent: userAgent
+      });
+  } catch (error) {
+    console.error('Failed to log security event:', error);
+  }
+};
+
 interface ConsultationRequest {
   bookingId: string;
   serviceTitle: string;
@@ -33,6 +169,35 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    // Rate limiting
+    const rateLimitKey = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
+    if (!checkRateLimit(rateLimitKey, 5, 60000)) { // 5 requests per minute
+      await logSecurityEvent('rate_limit_exceeded', null, { endpoint: 'send-consultation-notification' }, req);
+      return new Response(
+        JSON.stringify({ error: 'Rate limit exceeded. Please try again later.' }),
+        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Authenticate user
+    const authHeader = req.headers.get('authorization');
+    const user = await authenticateUser(authHeader);
+    
+    // Parse and validate input
+    const requestBody = await req.json();
+    const validatedData = validateInput(requestBody, {
+      bookingId: { required: true, type: 'string', maxLength: 100 },
+      serviceTitle: { required: true, type: 'string', maxLength: 200 },
+      vendorName: { required: true, type: 'string', maxLength: 100 },
+      clientName: { required: true, type: 'string', maxLength: 100 },
+      clientEmail: { required: true, type: 'string', pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, maxLength: 100 },
+      clientPhone: { required: false, type: 'string', maxLength: 20 },
+      scheduledDate: { required: true, type: 'string', pattern: /^\d{4}-\d{2}-\d{2}$/ },
+      scheduledTime: { required: true, type: 'string', maxLength: 10 },
+      projectDetails: { required: false, type: 'string', maxLength: 1000 },
+      budgetRange: { required: false, type: 'string', maxLength: 50 }
+    });
+
     const { 
       bookingId, 
       serviceTitle, 
@@ -44,7 +209,7 @@ const handler = async (req: Request): Promise<Response> => {
       scheduledTime,
       projectDetails,
       budgetRange 
-    }: ConsultationRequest = await req.json();
+    } = validatedData;
 
     console.log('Processing consultation notification for:', { bookingId, vendorName, serviceTitle });
 
