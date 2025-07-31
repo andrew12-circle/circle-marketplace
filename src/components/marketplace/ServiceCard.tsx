@@ -206,16 +206,16 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
         )}
 
         {/* Description - Fixed height */}
-        <Popover>
-          <PopoverTrigger asChild>
+        <Tooltip>
+          <TooltipTrigger asChild>
             <p className="text-sm text-muted-foreground line-clamp-2 h-10 mb-3 cursor-help">
               {service.description}
             </p>
-          </PopoverTrigger>
-          <PopoverContent className="max-w-xs p-3 text-sm bg-popover border border-border rounded-lg shadow-lg z-[60]">
+          </TooltipTrigger>
+          <TooltipContent className="max-w-xs p-3 text-sm bg-popover border border-border rounded-lg shadow-lg z-[60]">
             <p className="text-popover-foreground">{service.description}</p>
-          </PopoverContent>
-        </Popover>
+          </TooltipContent>
+        </Tooltip>
 
         {/* Tags - Fixed height */}
         <div className="h-8 mb-3">
