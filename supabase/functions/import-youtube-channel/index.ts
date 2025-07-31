@@ -29,6 +29,7 @@ serve(async (req) => {
     const { channelUrl, maxVideos = 50, userId }: ChannelImportRequest = await req.json();
     
     console.log('Importing YouTube channel:', channelUrl);
+    console.log('YouTube API Key available:', !!youtubeApiKey);
 
     // Extract channel ID from URL
     const channelId = await extractChannelId(channelUrl);
@@ -40,7 +41,16 @@ serve(async (req) => {
     const channelResponse = await fetch(
       `https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&id=${channelId}&key=${youtubeApiKey}`
     );
+    
+    if (!channelResponse.ok) {
+      console.error('Channel API error:', channelResponse.status, channelResponse.statusText);
+      const errorText = await channelResponse.text();
+      console.error('Channel API error details:', errorText);
+      throw new Error(`YouTube API error: ${channelResponse.status} ${channelResponse.statusText}`);
+    }
+    
     const channelData = await channelResponse.json();
+    console.log('Channel API response:', JSON.stringify(channelData, null, 2));
     
     if (!channelData.items || channelData.items.length === 0) {
       throw new Error('Channel not found');
@@ -222,12 +232,23 @@ async function extractChannelId(url: string): Promise<string | null> {
         
         console.log('Resolving channel ID for:', identifier, 'type:', pattern.type);
         const response = await fetch(apiUrl);
+        
+        if (!response.ok) {
+          console.error('YouTube API error:', response.status, response.statusText);
+          const errorText = await response.text();
+          console.error('YouTube API error details:', errorText);
+          continue; // Try next pattern
+        }
+        
         const data = await response.json();
+        console.log('YouTube API response:', JSON.stringify(data, null, 2));
         
         if (data.items && data.items.length > 0) {
           const channelId = data.items[0].id || data.items[0].snippet?.channelId;
           console.log('Resolved channel ID:', channelId);
           return channelId;
+        } else {
+          console.log('No items found in YouTube API response for:', identifier);
         }
       } catch (error) {
         console.error('Error resolving channel ID:', error);
