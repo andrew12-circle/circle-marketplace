@@ -516,6 +516,72 @@ export const VendorFunnelModal = ({
                 </div>
               </div>
 
+              {/* Service Coverage */}
+              <div className="bg-white border border-gray-200 rounded-lg p-5">
+                <h3 className="font-bold text-gray-900 mb-4 flex items-center">
+                  <MapPin className="w-5 h-5 mr-2 text-blue-600" />
+                  Service Coverage
+                </h3>
+                <div className="space-y-4">
+                  {vendor.location && (
+                    <div>
+                      <p className="font-medium text-gray-900 mb-2">Primary Location</p>
+                      <p className="text-sm text-gray-600">{vendor.location}</p>
+                    </div>
+                  )}
+                  
+                  {vendor.service_states && vendor.service_states.length > 0 && (
+                    <div>
+                      <p className="font-medium text-gray-900 mb-2">Licensed States</p>
+                      <div className="flex flex-wrap gap-2">
+                        {vendor.service_states.map((state, index) => (
+                          <Badge key={index} variant="outline" className="text-blue-600 border-blue-200">
+                            {state}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {vendor.mls_areas && vendor.mls_areas.length > 0 && (
+                    <div>
+                      <p className="font-medium text-gray-900 mb-2">MLS Areas</p>
+                      <div className="flex flex-wrap gap-2">
+                        {vendor.mls_areas.slice(0, 6).map((area, index) => (
+                          <Badge key={index} variant="outline" className="text-green-600 border-green-200">
+                            {area}
+                          </Badge>
+                        ))}
+                        {vendor.mls_areas.length > 6 && (
+                          <Badge variant="outline" className="text-gray-600 border-gray-200">
+                            +{vendor.mls_areas.length - 6} more
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {vendor.service_radius_miles && (
+                    <div>
+                      <p className="font-medium text-gray-900 mb-2">Service Radius</p>
+                      <p className="text-sm text-gray-600 flex items-center">
+                        <Target className="w-4 h-4 mr-2 text-orange-500" />
+                        {vendor.service_radius_miles} mile radius from primary location
+                      </p>
+                    </div>
+                  )}
+                  
+                  {(!vendor.service_states || vendor.service_states.length === 0) && 
+                   (!vendor.mls_areas || vendor.mls_areas.length === 0) && 
+                   !vendor.service_radius_miles && (
+                    <div className="text-center py-4">
+                      <p className="text-sm text-gray-500">Service coverage information not specified</p>
+                      <p className="text-xs text-gray-400 mt-1">Contact for service area details</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
               <div className="prose prose-sm">
                 <p className="text-gray-700 leading-relaxed">
                   Join our network of successful real estate agents who have increased their business through strategic partnerships. 
