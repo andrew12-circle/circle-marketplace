@@ -31,9 +31,9 @@ serve(async (req) => {
     console.log('Importing YouTube channel:', channelUrl);
 
     // Extract channel ID from URL
-    const channelId = extractChannelId(channelUrl);
+    const channelId = await extractChannelId(channelUrl);
     if (!channelId) {
-      throw new Error('Invalid YouTube channel URL');
+      throw new Error('Invalid YouTube channel URL or unable to resolve channel ID');
     }
 
     // Fetch channel details
@@ -54,7 +54,7 @@ serve(async (req) => {
       .from('channels')
       .select('id')
       .eq('name', channel.snippet.title)
-      .single();
+      .maybeSingle();
 
     let channelDbId;
 
@@ -113,7 +113,7 @@ serve(async (req) => {
         .select('id')
         .eq('title', video.snippet.title)
         .eq('content_type', 'video')
-        .single();
+        .maybeSingle();
 
       if (!existingVideo) {
         // Parse duration from ISO 8601 format (PT4M13S) to readable format (4:13)
@@ -187,22 +187,49 @@ serve(async (req) => {
   }
 });
 
-function extractChannelId(url: string): string | null {
+async function extractChannelId(url: string): Promise<string | null> {
   const patterns = [
-    /youtube\.com\/channel\/([a-zA-Z0-9_-]+)/,
-    /youtube\.com\/c\/([a-zA-Z0-9_-]+)/,
-    /youtube\.com\/user\/([a-zA-Z0-9_-]+)/,
-    /youtube\.com\/@([a-zA-Z0-9_-]+)/
+    { regex: /youtube\.com\/channel\/([a-zA-Z0-9_-]+)/, type: 'channel' },
+    { regex: /youtube\.com\/c\/([a-zA-Z0-9_-]+)/, type: 'custom' },
+    { regex: /youtube\.com\/user\/([a-zA-Z0-9_-]+)/, type: 'user' },
+    { regex: /youtube\.com\/@([a-zA-Z0-9_-]+)/, type: 'handle' }
   ];
 
   for (const pattern of patterns) {
-    const match = url.match(pattern);
+    const match = url.match(pattern.regex);
     if (match) {
-      // For @username format, we need to resolve it to channel ID
-      if (url.includes('/@')) {
-        return match[1]; // This will need additional API call to resolve
+      const identifier = match[1];
+      
+      // For channel URLs, return the ID directly
+      if (pattern.type === 'channel') {
+        return identifier;
       }
-      return match[1];
+      
+      // For other types, use the YouTube API to resolve to channel ID
+      try {
+        let apiUrl = '';
+        
+        if (pattern.type === 'handle') {
+          // For @username, use the search API to find the channel
+          apiUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&q=${identifier}&key=${youtubeApiKey}`;
+        } else if (pattern.type === 'custom' || pattern.type === 'user') {
+          // For custom URLs and usernames, use the channels API
+          const forUsername = pattern.type === 'user' ? `&forUsername=${identifier}` : `&forHandle=${identifier}`;
+          apiUrl = `https://www.googleapis.com/youtube/v3/channels?part=id${forUsername}&key=${youtubeApiKey}`;
+        }
+        
+        console.log('Resolving channel ID for:', identifier, 'type:', pattern.type);
+        const response = await fetch(apiUrl);
+        const data = await response.json();
+        
+        if (data.items && data.items.length > 0) {
+          const channelId = data.items[0].id || data.items[0].snippet?.channelId;
+          console.log('Resolved channel ID:', channelId);
+          return channelId;
+        }
+      } catch (error) {
+        console.error('Error resolving channel ID:', error);
+      }
     }
   }
   
