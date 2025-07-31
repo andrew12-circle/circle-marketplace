@@ -1865,7 +1865,7 @@ export type Database = {
         Returns: undefined
       }
       clear_failed_attempts: {
-        Args: { identifier: string; attempt_type?: string }
+        Args: { p_identifier: string; p_attempt_type?: string }
         Returns: undefined
       }
       expire_co_pay_requests: {
