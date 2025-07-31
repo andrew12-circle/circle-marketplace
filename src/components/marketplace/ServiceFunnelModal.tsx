@@ -592,6 +592,19 @@ export const ServiceFunnelModal = ({
                     Get Custom Quote
                   </Button>
 
+                  
+                  {service.vendor?.website_url && (
+                    <Button 
+                      variant="outline" 
+                      className="w-full" 
+                      size="lg"
+                      onClick={() => window.open(service.vendor.website_url, '_blank')}
+                    >
+                      <Building className="w-4 h-4 mr-2" />
+                      Visit {service.vendor.name} Website
+                    </Button>
+                  )}
+
                   <div className="text-center">
                     <p className="text-xs text-muted-foreground">
                       <span className="font-medium">Free consultation</span> • No obligation • Response within 2 hours
