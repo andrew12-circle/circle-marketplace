@@ -15,6 +15,7 @@ import { useCurrency } from "@/hooks/useCurrency";
 import { extractAndValidatePrice, validateCartPricing, safeFormatPrice } from "@/utils/priceValidation";
 import { ConsultationFlow } from "./ConsultationFlow";
 import { ServiceFunnelModal } from "./ServiceFunnelModal";
+import { CoPayRequestModal } from "./CoPayRequestModal";
 
 interface Service {
   id: string;
@@ -25,14 +26,20 @@ interface Service {
   retail_price?: string;
   pro_price?: string;
   co_pay_price?: string;
-  price_duration?: string; // New field for pricing duration
+  price_duration?: string;
   image_url?: string;
   tags?: string[];
   is_featured: boolean;
   is_top_pick: boolean;
   estimated_roi?: number;
   duration?: string;
-  requires_quote?: boolean; // New field to indicate if item needs custom quote
+  requires_quote?: boolean;
+  // Co-pay related fields
+  co_pay_allowed?: boolean;
+  max_vendor_split_percentage?: number;
+  estimated_agent_split_percentage?: number;
+  respa_category?: string;
+  respa_notes?: string;
   vendor: {
     name: string;
     rating: number;
@@ -53,6 +60,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
   const [isHovered, setIsHovered] = useState(false);
   const [isConsultationFlowOpen, setIsConsultationFlowOpen] = useState(false);
   const [isFunnelModalOpen, setIsFunnelModalOpen] = useState(false);
+  const [isCoPayModalOpen, setIsCoPayModalOpen] = useState(false);
   const { toast } = useToast();
   const { addToCart } = useCart();
   const { profile } = useAuth();
@@ -89,12 +97,16 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.stopPropagation();
     
+    // Check if user wants to use co-pay pricing
+    if (isProMember && service.co_pay_allowed && service.retail_price && service.max_vendor_split_percentage) {
+      setIsCoPayModalOpen(true);
+      return;
+    }
+    
     // Determine price based on user's membership and available pricing
     let finalPrice = 0;
     
-    if (isProMember && service.co_pay_price) {
-      finalPrice = extractNumericPrice(service.co_pay_price);
-    } else if (isProMember && service.pro_price) {
+    if (isProMember && service.pro_price) {
       finalPrice = extractNumericPrice(service.pro_price);
     } else if (service.retail_price) {
       finalPrice = extractNumericPrice(service.retail_price);
@@ -287,26 +299,37 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                 </div>
               )}
               
-              {service.co_pay_price && (
+              {service.co_pay_allowed && service.retail_price && service.max_vendor_split_percentage && (
                 <div className="space-y-1">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1">
                       <span className="text-sm font-medium text-green-600">Your Co-Pay:</span>
-                      <div className="w-3 h-3 rounded-full bg-green-600 flex items-center justify-center">
-                        <span className="text-xs text-white">i</span>
-                      </div>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="w-3 h-3 rounded-full bg-green-600 flex items-center justify-center cursor-help">
+                            <span className="text-xs text-white">i</span>
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-sm p-3">
+                          <p className="text-sm">
+                            Vendor co-marketing support available based on RESPA guidelines for {service.respa_category || 'this category'}. 
+                            Actual participation subject to vendor approval.
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
                     </div>
                     <span className="text-lg font-bold text-green-600">
-                      {formatPrice(extractNumericPrice(service.co_pay_price), service.price_duration || 'mo')}
+                      {formatPrice(
+                        extractNumericPrice(service.retail_price) * (1 - (service.max_vendor_split_percentage / 100)), 
+                        service.price_duration || 'mo'
+                      )}
                     </span>
                   </div>
-                  {service.discount_percentage && (
-                    <div className="flex justify-end">
-                       <Badge className="bg-destructive text-destructive-foreground text-xs hover:bg-green-600 hover:text-white transition-colors">
-                         {service.discount_percentage?.replace('%', '')}% OFF
-                       </Badge>
-                    </div>
-                  )}
+                  <div className="flex justify-end">
+                     <Badge className="bg-green-600 text-white text-xs">
+                       {service.max_vendor_split_percentage}% vendor support
+                     </Badge>
+                  </div>
                 </div>
               )}
             </>
@@ -442,6 +465,18 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
         isOpen={isFunnelModalOpen}
         onClose={() => setIsFunnelModalOpen(false)}
         service={service}
+      />
+      
+      <CoPayRequestModal
+        isOpen={isCoPayModalOpen}
+        onClose={() => setIsCoPayModalOpen(false)}
+        service={{
+          id: service.id,
+          title: service.title,
+          retail_price: service.retail_price,
+          max_vendor_split_percentage: service.max_vendor_split_percentage,
+          respa_category: service.respa_category,
+        }}
       />
     </Card>
     </TooltipProvider>
