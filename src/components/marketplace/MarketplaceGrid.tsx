@@ -278,13 +278,23 @@ export const MarketplaceGrid = () => {
     }
   };
 
+  // Helper function to extract numeric price from strings like "$150" or "150"
+  const extractNumericPrice = (priceString: string | null | undefined): number => {
+    if (!priceString) return 0;
+    // Remove currency symbols, commas, and other non-numeric characters except decimal points
+    const cleanedPrice = priceString.replace(/[^0-9.]/g, '');
+    return parseFloat(cleanedPrice) || 0;
+  };
+
   const filteredServices = services.filter(service => {
     const matchesSearch = service.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          service.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          service.vendor?.name?.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesCategory = filters.category === "all" || service.category === filters.category;
-    const priceValue = parseFloat(service.retail_price || "0") || 0;
+    
+    // Fix price filtering to handle currency symbols
+    const priceValue = extractNumericPrice(service.retail_price);
     const matchesPrice = priceValue >= filters.priceRange[0] && priceValue <= filters.priceRange[1];
     const matchesVerified = !filters.verified || service.vendor?.is_verified;
     const matchesFeatured = !filters.featured || service.is_featured;
