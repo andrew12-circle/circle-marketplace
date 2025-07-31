@@ -105,6 +105,8 @@ export const VendorRegistration = () => {
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const updateFormData = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -422,12 +424,25 @@ export const VendorRegistration = () => {
                       <div className="relative">
                         <Input
                           id="password"
-                          type="password"
+                          type={showPassword ? "text" : "password"}
                           value={formData.password}
                           onChange={(e) => updateFormData("password", e.target.value)}
                           placeholder="Enter password"
-                          className="transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary hover:border-primary/50"
+                          className="transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary hover:border-primary/50 pr-10"
                         />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                          onClick={() => setShowPassword(!showPassword)}
+                        >
+                          {showPassword ? (
+                            <EyeOff className="h-4 w-4 text-muted-foreground" />
+                          ) : (
+                            <Eye className="h-4 w-4 text-muted-foreground" />
+                          )}
+                        </Button>
                       </div>
                       {errors.password && (
                         <p className="text-sm text-destructive animate-fade-in bg-destructive/10 p-2 rounded-md border border-destructive/20">
@@ -439,14 +454,29 @@ export const VendorRegistration = () => {
                       <Label htmlFor="confirmPassword" className="text-sm font-medium text-foreground">
                         Confirm Password *
                       </Label>
-                      <Input
-                        id="confirmPassword"
-                        type="password"
-                        value={formData.confirmPassword}
-                        onChange={(e) => updateFormData("confirmPassword", e.target.value)}
-                        placeholder="Confirm password"
-                        className="transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary hover:border-primary/50"
-                      />
+                      <div className="relative">
+                        <Input
+                          id="confirmPassword"
+                          type={showConfirmPassword ? "text" : "password"}
+                          value={formData.confirmPassword}
+                          onChange={(e) => updateFormData("confirmPassword", e.target.value)}
+                          placeholder="Confirm password"
+                          className="transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary hover:border-primary/50 pr-10"
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        >
+                          {showConfirmPassword ? (
+                            <EyeOff className="h-4 w-4 text-muted-foreground" />
+                          ) : (
+                            <Eye className="h-4 w-4 text-muted-foreground" />
+                          )}
+                        </Button>
+                      </div>
                       {errors.confirmPassword && (
                         <p className="text-sm text-destructive animate-fade-in bg-destructive/10 p-2 rounded-md border border-destructive/20">
                           {errors.confirmPassword}
