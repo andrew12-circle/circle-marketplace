@@ -580,7 +580,7 @@ export const VendorFunnelModal = ({
                 </div>
               </div>
 
-              <div className="prose prose-sm">
+               <div className="prose prose-sm">
                 <p className="text-gray-700 leading-relaxed">
                   {vendor?.description || "A trusted partner in the real estate industry, committed to providing exceptional service and building lasting relationships with our clients and partners."}
                 </p>
