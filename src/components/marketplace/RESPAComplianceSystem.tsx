@@ -93,7 +93,7 @@ export const getComplianceAlert = (riskLevel: 'high' | 'medium' | 'low') => {
   switch (riskLevel) {
     case 'high':
       return (
-        <Alert className="border-amber-200 bg-amber-50 p-2">
+        <Alert className="border-amber-200 bg-amber-50 p-2 relative z-10">{/* Ensure alert stays within container */}
           <AlertTriangle className="h-3 w-3 text-amber-600" />
           <AlertDescription className="text-amber-800 text-xs">
             <span className="font-medium">Strict compliance required.</span>
@@ -105,7 +105,7 @@ export const getComplianceAlert = (riskLevel: 'high' | 'medium' | 'low') => {
       );
     case 'medium':
       return (
-        <Alert className="border-amber-200 bg-amber-50 p-2">
+        <Alert className="border-amber-200 bg-amber-50 p-2 relative z-10">{/* Ensure alert stays within container */}
           <Shield className="h-3 w-3 text-amber-600" />
           <AlertDescription className="text-amber-800 text-xs">
             <span className="font-medium">Exercise caution.</span>
