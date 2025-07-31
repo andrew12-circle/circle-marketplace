@@ -236,7 +236,9 @@ export const MarketplaceGrid = () => {
             review_count,
             is_verified
           )
-        `);
+        `)
+        .order('sort_order', { ascending: true })
+        .order('title', { ascending: true });
 
       if (servicesError) throw servicesError;
 
