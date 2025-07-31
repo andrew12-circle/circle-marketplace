@@ -517,25 +517,25 @@ export const VendorFunnelModal = ({
               </div>
 
               {/* Service Coverage */}
-              <div className="bg-white border border-gray-200 rounded-lg p-5">
-                <h3 className="font-bold text-gray-900 mb-4 flex items-center">
-                  <MapPin className="w-5 h-5 mr-2 text-blue-600" />
+              <div className="bg-white border border-gray-200 rounded-lg p-4">
+                <h3 className="font-semibold text-gray-900 mb-3 flex items-center">
+                  <MapPin className="w-4 h-4 mr-2 text-blue-600" />
                   Service Coverage
                 </h3>
-                <div className="space-y-4">
+                <div className="space-y-2">
                   {vendor.location && (
                     <div>
-                      <p className="font-medium text-gray-900 mb-2">Primary Location</p>
-                      <p className="text-sm text-gray-600">{vendor.location}</p>
+                      <span className="text-sm font-medium text-gray-900">Location:</span>
+                      <span className="text-sm text-gray-600 ml-2">{vendor.location}</span>
                     </div>
                   )}
                   
                   {vendor.service_states && vendor.service_states.length > 0 && (
                     <div>
-                      <p className="font-medium text-gray-900 mb-2">Licensed States</p>
-                      <div className="flex flex-wrap gap-2">
+                      <span className="text-sm font-medium text-gray-900">States:</span>
+                      <div className="flex flex-wrap gap-1 mt-1">
                         {vendor.service_states.map((state, index) => (
-                          <Badge key={index} variant="outline" className="text-blue-600 border-blue-200">
+                          <Badge key={index} variant="outline" className="text-xs text-blue-600 border-blue-200">
                             {state}
                           </Badge>
                         ))}
@@ -545,16 +545,16 @@ export const VendorFunnelModal = ({
                   
                   {vendor.mls_areas && vendor.mls_areas.length > 0 && (
                     <div>
-                      <p className="font-medium text-gray-900 mb-2">MLS Areas</p>
-                      <div className="flex flex-wrap gap-2">
-                        {vendor.mls_areas.slice(0, 6).map((area, index) => (
-                          <Badge key={index} variant="outline" className="text-green-600 border-green-200">
+                      <span className="text-sm font-medium text-gray-900">MLS Areas:</span>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {vendor.mls_areas.slice(0, 4).map((area, index) => (
+                          <Badge key={index} variant="outline" className="text-xs text-green-600 border-green-200">
                             {area}
                           </Badge>
                         ))}
-                        {vendor.mls_areas.length > 6 && (
-                          <Badge variant="outline" className="text-gray-600 border-gray-200">
-                            +{vendor.mls_areas.length - 6} more
+                        {vendor.mls_areas.length > 4 && (
+                          <Badge variant="outline" className="text-xs text-gray-600 border-gray-200">
+                            +{vendor.mls_areas.length - 4} more
                           </Badge>
                         )}
                       </div>
@@ -562,21 +562,17 @@ export const VendorFunnelModal = ({
                   )}
                   
                   {vendor.service_radius_miles && (
-                    <div>
-                      <p className="font-medium text-gray-900 mb-2">Service Radius</p>
-                      <p className="text-sm text-gray-600 flex items-center">
-                        <Target className="w-4 h-4 mr-2 text-orange-500" />
-                        {vendor.service_radius_miles} mile radius from primary location
-                      </p>
+                    <div className="flex items-center">
+                      <span className="text-sm font-medium text-gray-900">Radius:</span>
+                      <span className="text-sm text-gray-600 ml-2">{vendor.service_radius_miles} miles</span>
                     </div>
                   )}
                   
                   {(!vendor.service_states || vendor.service_states.length === 0) && 
                    (!vendor.mls_areas || vendor.mls_areas.length === 0) && 
                    !vendor.service_radius_miles && (
-                    <div className="text-center py-4">
-                      <p className="text-sm text-gray-500">Service coverage information not specified</p>
-                      <p className="text-xs text-gray-400 mt-1">Contact for service area details</p>
+                    <div className="text-center py-2">
+                      <p className="text-sm text-gray-500">Coverage details available upon contact</p>
                     </div>
                   )}
                 </div>
