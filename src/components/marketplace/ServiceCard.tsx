@@ -16,6 +16,7 @@ import { extractAndValidatePrice, validateCartPricing, safeFormatPrice } from "@
 import { ConsultationFlow } from "./ConsultationFlow";
 import { ServiceFunnelModal } from "./ServiceFunnelModal";
 import { CoPayRequestModal } from "./CoPayRequestModal";
+import { PricingChoiceModal } from "./PricingChoiceModal";
 
 interface Service {
   id: string;
@@ -61,6 +62,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
   const [isConsultationFlowOpen, setIsConsultationFlowOpen] = useState(false);
   const [isFunnelModalOpen, setIsFunnelModalOpen] = useState(false);
   const [isCoPayModalOpen, setIsCoPayModalOpen] = useState(false);
+  const [isPricingChoiceModalOpen, setIsPricingChoiceModalOpen] = useState(false);
   const { toast } = useToast();
   const { addToCart } = useCart();
   const { profile } = useAuth();
@@ -97,6 +99,17 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.stopPropagation();
     
+    // If pro member and co-pay is available, show choice modal
+    if (isProMember && service.co_pay_allowed && service.retail_price && service.max_vendor_split_percentage && service.pro_price) {
+      setIsPricingChoiceModalOpen(true);
+      return;
+    }
+    
+    // Otherwise proceed with direct add to cart
+    addDirectlyToCart();
+  };
+
+  const addDirectlyToCart = async () => {
     // Determine price based on user's membership and available pricing
     let finalPrice = 0;
     
@@ -115,6 +128,9 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
       });
       return;
     }
+
+    // Track the service view
+    await trackServiceView(service.id);
 
     // Server-side price validation
     const isPriceValid = await validateCartPricing(service.id, finalPrice);
@@ -442,21 +458,6 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
             </>
           </Button>
           
-          {/* Co-Pay Option for Pro Members */}
-          {isProMember && service.co_pay_allowed && service.retail_price && service.max_vendor_split_percentage && (
-            <Button 
-              variant="outline"
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsCoPayModalOpen(true);
-              }}
-              className="touch-target"
-            >
-              <Users className="w-4 h-4" />
-            </Button>
-          )}
-          
           <Button 
             variant="outline"
             className="mobile-btn touch-target"
@@ -485,6 +486,25 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
           retail_price: service.retail_price,
           max_vendor_split_percentage: service.max_vendor_split_percentage,
           respa_category: service.respa_category,
+        }}
+      />
+
+      <PricingChoiceModal
+        isOpen={isPricingChoiceModalOpen}
+        onClose={() => setIsPricingChoiceModalOpen(false)}
+        service={{
+          title: service.title,
+          pro_price: service.pro_price,
+          retail_price: service.retail_price,
+          max_vendor_split_percentage: service.max_vendor_split_percentage,
+        }}
+        onChooseProPrice={() => {
+          setIsPricingChoiceModalOpen(false);
+          addDirectlyToCart();
+        }}
+        onChooseCoPay={() => {
+          setIsPricingChoiceModalOpen(false);
+          setIsCoPayModalOpen(true);
         }}
       />
     </Card>
