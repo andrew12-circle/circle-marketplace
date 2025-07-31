@@ -1133,7 +1133,6 @@ export const ServiceFunnelEditor = ({ funnelContent, onChange }: ServiceFunnelEd
           retail_price: funnelContent.packages[0]?.price?.toString() || '299',
           is_featured: true,
           is_top_pick: true,
-          contribution_amount: '50',
           vendor: {
             name: 'Your Company',
             rating: 5.0,

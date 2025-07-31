@@ -1023,7 +1023,6 @@ export type Database = {
         Row: {
           category: string | null
           co_pay_price: string | null
-          contribution_amount: string | null
           created_at: string | null
           description: string | null
           discount_percentage: string | null
@@ -1047,7 +1046,6 @@ export type Database = {
         Insert: {
           category?: string | null
           co_pay_price?: string | null
-          contribution_amount?: string | null
           created_at?: string | null
           description?: string | null
           discount_percentage?: string | null
@@ -1071,7 +1069,6 @@ export type Database = {
         Update: {
           category?: string | null
           co_pay_price?: string | null
-          contribution_amount?: string | null
           created_at?: string | null
           description?: string | null
           discount_percentage?: string | null

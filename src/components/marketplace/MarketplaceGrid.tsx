@@ -38,7 +38,6 @@ interface Service {
   tags?: string[];
   is_featured: boolean;
   is_top_pick: boolean;
-  contribution_amount: string;
   estimated_roi?: number;
   duration?: string;
   requires_quote?: boolean;
@@ -191,7 +190,6 @@ export const MarketplaceGrid = () => {
       const formattedServices = (servicesData || []).map(service => ({
         ...service,
         discount_percentage: service.discount_percentage ? String(service.discount_percentage) : undefined,
-        contribution_amount: String(service.contribution_amount || "0"),
       }));
       
       setServices(formattedServices);

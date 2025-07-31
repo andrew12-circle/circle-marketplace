@@ -37,7 +37,6 @@ interface Service {
   tags?: string[];
   is_featured: boolean;
   is_top_pick: boolean;
-  contribution_amount: string;
   estimated_roi?: number;
   duration?: string;
   requires_quote?: boolean;
