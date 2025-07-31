@@ -1218,6 +1218,7 @@ export type Database = {
           updated_at: string | null
           vectorized_image_url: string | null
           vendor_id: string | null
+          website_url: string | null
         }
         Insert: {
           category?: string | null
@@ -1249,6 +1250,7 @@ export type Database = {
           updated_at?: string | null
           vectorized_image_url?: string | null
           vendor_id?: string | null
+          website_url?: string | null
         }
         Update: {
           category?: string | null
@@ -1280,6 +1282,7 @@ export type Database = {
           updated_at?: string | null
           vectorized_image_url?: string | null
           vendor_id?: string | null
+          website_url?: string | null
         }
         Relationships: [
           {
