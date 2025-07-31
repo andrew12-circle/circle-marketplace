@@ -32,7 +32,7 @@ export const VendorBudgetManager = () => {
       const { data, error } = await supabase
         .from('vendors')
         .select('id, name, ad_budget_min, ad_budget_max, budget_currency, location')
-        .order('sort_order', { ascending: false })
+        .order('sort_order', { ascending: true })
         .order('name');
 
       if (error) throw error;

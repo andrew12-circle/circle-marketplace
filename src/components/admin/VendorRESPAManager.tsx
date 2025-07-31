@@ -30,7 +30,7 @@ export const VendorRESPAManager = () => {
       const { data, error } = await supabase
         .from('vendors')
         .select('id, name, is_respa_regulated, respa_risk_level, location')
-        .order('sort_order', { ascending: false })
+        .order('sort_order', { ascending: true })
         .order('name');
 
       if (error) throw error;

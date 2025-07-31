@@ -246,7 +246,7 @@ export const MarketplaceGrid = () => {
       let vendorQuery = supabase
         .from('vendors')
         .select('*')
-        .order('sort_order', { ascending: false }) // Higher sort_order = higher priority
+        .order('sort_order', { ascending: true }) // Lower sort_order = higher priority
         .order('rating', { ascending: false });
 
       const { data: vendorsData, error: vendorsError } = await vendorQuery;

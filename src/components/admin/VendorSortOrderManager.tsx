@@ -29,7 +29,7 @@ export const VendorSortOrderManager = () => {
       const { data, error } = await supabase
         .from('vendors')
         .select('id, name, sort_order, location')
-        .order('sort_order', { ascending: false })
+        .order('sort_order', { ascending: true })
         .order('name');
 
       if (error) throw error;
@@ -62,7 +62,7 @@ export const VendorSortOrderManager = () => {
         vendor.id === vendorId 
           ? { ...vendor, sort_order: sortOrder }
           : vendor
-      ).sort((a, b) => (b.sort_order || 50) - (a.sort_order || 50)));
+      ).sort((a, b) => (a.sort_order || 50) - (b.sort_order || 50)));
 
       toast({
         title: 'Success',
@@ -108,14 +108,14 @@ export const VendorSortOrderManager = () => {
           Vendor Sort Order Management
         </CardTitle>
         <p className="text-sm text-muted-foreground">
-          Control vendor display order (1-100). Higher numbers appear first. Current default is 50.
+          Control vendor display order (1-100). Lower numbers appear first. Current default is 50.
         </p>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
           <div className="bg-blue-50 p-3 rounded-lg mb-4">
             <p className="text-sm text-blue-800">
-              <strong>Quick Setup:</strong> Set Circle Home Loans to 100 for first position, other high-priority vendors to 90-99, standard vendors to 50.
+              <strong>Quick Setup:</strong> Set Circle Home Loans to 1 for first position, other high-priority vendors to 2-10, standard vendors to 50.
             </p>
           </div>
           
