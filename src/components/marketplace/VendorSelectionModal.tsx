@@ -176,7 +176,7 @@ export const VendorSelectionModal = ({
             <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
             <h3 className="text-xl font-semibold mb-2">Request Sent!</h3>
             <p className="text-muted-foreground mb-6">
-              Your co-pay request has been sent to {selectedVendor?.name}. They'll be notified and can respond within 14 days.
+              Your co-pay request has been sent to {selectedVendor?.name}. They just got notified via push notification, text and email they have 3 days to respond. You will be notified instantly once they respond. Your cart is saved.
             </p>
             <div className="flex gap-3 justify-center">
               <Button onClick={handleSendAnotherRequest} variant="outline">
