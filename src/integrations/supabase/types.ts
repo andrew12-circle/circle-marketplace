@@ -1080,6 +1080,7 @@ export type Database = {
           requires_quote: boolean | null
           retail_price: string | null
           service_provider_id: string | null
+          sort_order: number | null
           tags: string[] | null
           title: string
           updated_at: string | null
@@ -1105,6 +1106,7 @@ export type Database = {
           requires_quote?: boolean | null
           retail_price?: string | null
           service_provider_id?: string | null
+          sort_order?: number | null
           tags?: string[] | null
           title: string
           updated_at?: string | null
@@ -1130,6 +1132,7 @@ export type Database = {
           requires_quote?: boolean | null
           retail_price?: string | null
           service_provider_id?: string | null
+          sort_order?: number | null
           tags?: string[] | null
           title?: string
           updated_at?: string | null
