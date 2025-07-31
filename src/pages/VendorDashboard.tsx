@@ -271,14 +271,25 @@ export const VendorDashboard = () => {
     // Check authentication first
     if (!authLoading) {
       if (!user) {
-        // Redirect to auth page if not authenticated
-        navigate('/auth');
-        return;
+        // Check if this is a new vendor registration by looking at URL params or session storage
+        const urlParams = new URLSearchParams(window.location.search);
+        const isNewRegistration = urlParams.get('new_registration') === 'true' || 
+                                sessionStorage.getItem('new_vendor_registration') === 'true';
+        
+        if (!isNewRegistration) {
+          // Only redirect to auth if this isn't a new registration
+          navigate('/auth');
+          return;
+        }
       }
       
-      // User is authenticated, load dashboard data
-      loadDashboardData();
-      checkVendorPlan();
+      // User is authenticated or new registration, load dashboard data
+      if (user) {
+        loadDashboardData();
+        checkVendorPlan();
+        // Clear the new registration flag
+        sessionStorage.removeItem('new_vendor_registration');
+      }
     }
   }, [user, authLoading, navigate]);
 

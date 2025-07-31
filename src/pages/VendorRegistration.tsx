@@ -316,6 +316,9 @@ export const VendorRegistration = () => {
           description: "Welcome! You can now start creating your services and funnel pages.",
         });
         
+        // Set flag for new registration to bypass auth check temporarily
+        sessionStorage.setItem('new_vendor_registration', 'true');
+        
         // Navigate to vendor dashboard
         navigate("/vendor-dashboard");
       }
