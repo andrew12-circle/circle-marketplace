@@ -35,7 +35,8 @@ interface Vendor {
 }
 
 export const CoPayRequestModal = ({ isOpen, onClose, service }: CoPayRequestModalProps) => {
-  const [currentStep, setCurrentStep] = useState<FlowStep>('membership-check');
+  const { profile } = useAuth();
+  const [currentStep, setCurrentStep] = useState<FlowStep>(profile?.is_pro_member ? 'vendor-search' : 'membership-check');
   const [searchQuery, setSearchQuery] = useState("");
   const [foundVendors, setFoundVendors] = useState<Vendor[]>([]);
   const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null);
@@ -47,7 +48,6 @@ export const CoPayRequestModal = ({ isOpen, onClose, service }: CoPayRequestModa
   const [agentNotes, setAgentNotes] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const { profile } = useAuth();
 
   const coPayPrice = service.retail_price && service.max_vendor_split_percentage 
     ? parseFloat(service.retail_price.replace(/[^\d.]/g, '')) * (1 - (service.max_vendor_split_percentage / 100))
@@ -204,7 +204,7 @@ export const CoPayRequestModal = ({ isOpen, onClose, service }: CoPayRequestModa
   };
 
   const handleClose = () => {
-    setCurrentStep('membership-check');
+    setCurrentStep(profile?.is_pro_member ? 'vendor-search' : 'membership-check');
     setSearchQuery("");
     setFoundVendors([]);
     setSelectedVendor(null);
