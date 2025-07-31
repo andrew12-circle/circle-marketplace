@@ -21,7 +21,7 @@ export interface MarketplaceFiltersProps {
   filters: FilterState;
   onFiltersChange: (filters: FilterState) => void;
   categories: string[];
-  viewMode?: 'services' | 'vendors'; // Add viewMode prop
+  viewMode?: 'services' | 'products' | 'vendors'; // Add viewMode prop
 }
 
 export const MarketplaceFilters = ({ filters, onFiltersChange, categories, viewMode = 'services' }: MarketplaceFiltersProps) => {

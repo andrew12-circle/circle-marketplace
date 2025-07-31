@@ -5,6 +5,7 @@ import { EnhancedVendorCard } from "./EnhancedVendorCard";
 import { MarketplaceFilters } from "./MarketplaceFilters";
 import { CampaignServicesHeader } from "./CampaignServicesHeader";
 import { CircleProBanner } from "./CircleProBanner";
+import { ServiceDetailsModal } from "./ServiceDetailsModal";
 
 import { LocationFilterBanner } from "./LocationFilterBanner";
 import { Button } from "@/components/ui/button";
@@ -86,7 +87,7 @@ interface LocalRepresentative {
   longitude?: number;
 }
 
-type ViewMode = "services" | "vendors";
+type ViewMode = "services" | "products" | "vendors";
 
 export const MarketplaceGrid = () => {
   const { t } = useTranslation();
@@ -95,6 +96,21 @@ export const MarketplaceGrid = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>("services");
+  const [selectedProductCategory, setSelectedProductCategory] = useState<string | null>(null);
+  
+  // Define product categories
+  const PRODUCT_CATEGORIES = [
+    { id: 'facebook-ads', name: 'Facebook Ad Campaigns', description: 'Professional Facebook advertising services for real estate' },
+    { id: 'google-ads', name: 'Google Ad Campaigns', description: 'Google Ads and search marketing services' },
+    { id: 'direct-mail', name: 'Direct Mail Campaigns', description: 'Postcards, flyers, and targeted mail services' },
+    { id: 'social-media', name: 'Social Media Management', description: 'Complete social media marketing packages' },
+    { id: 'website-design', name: 'Website Design', description: 'Professional real estate websites and landing pages' },
+    { id: 'seo-services', name: 'SEO Services', description: 'Search engine optimization for real estate' },
+    { id: 'crm-tools', name: 'CRM & Lead Management', description: 'Customer relationship management systems' },
+    { id: 'photography', name: 'Real Estate Photography', description: 'Professional listing photography services' },
+    { id: 'videography', name: 'Video Marketing', description: 'Real estate video production and marketing' },
+    { id: 'print-marketing', name: 'Print Marketing Materials', description: 'Business cards, brochures, and signage' },
+  ];
   const [savedServiceIds, setSavedServiceIds] = useState<string[]>([]);
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
@@ -373,6 +389,45 @@ export const MarketplaceGrid = () => {
     });
   };
 
+  const handleSelectProduct = (productId: string) => {
+    setSelectedProductCategory(productId);
+  };
+
+  const handleBackToProducts = () => {
+    setSelectedProductCategory(null);
+  };
+
+  // Filter services by selected product category
+  const getServicesForProduct = (productId: string) => {
+    const productMapping: { [key: string]: string[] } = {
+      'facebook-ads': ['facebook', 'social media ads', 'digital marketing'],
+      'google-ads': ['google', 'ppc', 'search ads'],
+      'direct-mail': ['direct mail', 'postcards', 'flyers'],
+      'social-media': ['social media', 'social marketing'],
+      'website-design': ['website', 'web design', 'landing page'],
+      'seo-services': ['seo', 'search optimization'],
+      'crm-tools': ['crm', 'lead management', 'customer management'],
+      'photography': ['photography', 'photos', 'listing photos'],
+      'videography': ['video', 'videography', 'virtual tour'],
+      'print-marketing': ['print', 'business cards', 'brochures', 'signage'],
+    };
+
+    const keywords = productMapping[productId] || [];
+    return services.filter(service => {
+      const title = service.title.toLowerCase();
+      const description = service.description.toLowerCase();
+      const category = service.category?.toLowerCase() || '';
+      const tags = service.tags?.map(tag => tag.toLowerCase()) || [];
+      
+      return keywords.some(keyword => 
+        title.includes(keyword) || 
+        description.includes(keyword) || 
+        category.includes(keyword) ||
+        tags.some(tag => tag.includes(keyword))
+      );
+    });
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
@@ -429,6 +484,14 @@ export const MarketplaceGrid = () => {
                 {t('services')}
               </Button>
               <Button
+                variant={viewMode === "products" ? "default" : "outline"}
+                onClick={() => setViewMode("products")}
+                className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-9 sm:h-10 text-sm sm:text-base"
+              >
+                <Filter className="w-3 h-3 sm:w-4 sm:h-4" />
+                Products
+              </Button>
+              <Button
                 variant={viewMode === "vendors" ? "default" : "outline"}
                 onClick={() => setViewMode("vendors")}
                 className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-9 sm:h-10 text-sm sm:text-base"
@@ -472,6 +535,51 @@ export const MarketplaceGrid = () => {
                 />
               ))}
             </div>
+          ) : viewMode === "products" ? (
+            selectedProductCategory ? (
+              <div>
+                <div className="mb-6 flex items-center gap-4">
+                  <Button variant="outline" onClick={handleBackToProducts}>
+                    ← Back to Products
+                  </Button>
+                  <h2 className="text-2xl font-bold">
+                    {PRODUCT_CATEGORIES.find(p => p.id === selectedProductCategory)?.name}
+                  </h2>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+                  {getServicesForProduct(selectedProductCategory).map((service) => (
+                    <ServiceCard
+                      key={service.id}
+                      service={service}
+                      onSave={handleSaveService}
+                      onViewDetails={handleViewServiceDetails}
+                      isSaved={savedServiceIds.includes(service.id)}
+                    />
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {PRODUCT_CATEGORIES.map((product) => (
+                  <div
+                    key={product.id}
+                    className="bg-card p-6 rounded-lg border border-border hover:border-primary/50 cursor-pointer transition-all duration-200 hover:shadow-md"
+                    onClick={() => handleSelectProduct(product.id)}
+                  >
+                    <h3 className="text-xl font-semibold mb-2">{product.name}</h3>
+                    <p className="text-muted-foreground mb-4">{product.description}</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-muted-foreground">
+                        {getServicesForProduct(product.id).length} providers available
+                      </span>
+                      <Button variant="outline" size="sm">
+                        View Providers →
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
               {filteredVendors.map((vendor) => (
@@ -487,7 +595,8 @@ export const MarketplaceGrid = () => {
 
           {/* Empty State */}
           {((viewMode === "services" && filteredServices.length === 0) || 
-            (viewMode === "vendors" && filteredVendors.length === 0)) && (
+            (viewMode === "vendors" && filteredVendors.length === 0) ||
+            (viewMode === "products" && selectedProductCategory && getServicesForProduct(selectedProductCategory).length === 0)) && (
             <div className="text-center py-12">
               <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
                 <Search className="w-8 h-8 text-muted-foreground" />
@@ -518,6 +627,14 @@ export const MarketplaceGrid = () => {
         </div>
       </div>
 
+      {/* Service Details Modal */}
+      {selectedService && (
+        <ServiceDetailsModal
+          service={selectedService}
+          isOpen={isServiceModalOpen}
+          onClose={handleCloseServiceModal}
+        />
+      )}
     </>
   );
 };

@@ -82,10 +82,10 @@ const VENDOR_CATEGORIES = [
 interface CategoryMegaMenuProps {
   selectedCategory: string;
   onCategorySelect: (category: string) => void;
-  viewMode?: 'services' | 'vendors';
+  viewMode?: 'services' | 'products' | 'vendors';
 }
 
-const getIconForCategory = (categoryId: string, viewMode: 'services' | 'vendors' = 'services') => {
+const getIconForCategory = (categoryId: string, viewMode: 'services' | 'products' | 'vendors' = 'services') => {
   if (viewMode === 'vendors') {
     switch (categoryId) {
       case 'mortgage-lenders':
