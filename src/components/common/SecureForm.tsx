@@ -2,6 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { useSecureInput, ValidationRules } from '@/hooks/useSecureInput';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertTriangle } from 'lucide-react';
+import { CSRFToken, validateCSRFToken } from './CSRFProtection';
 
 interface SecureFormProps {
   children: React.ReactNode;
@@ -9,6 +10,7 @@ interface SecureFormProps {
   onSubmit: (data: Record<string, string>) => Promise<void> | void;
   onValidationError?: (errors: Record<string, string>) => void;
   className?: string;
+  requireCSRF?: boolean;
 }
 
 export const SecureForm: React.FC<SecureFormProps> = ({
@@ -16,7 +18,8 @@ export const SecureForm: React.FC<SecureFormProps> = ({
   validationRules,
   onSubmit,
   onValidationError,
-  className = ''
+  className = '',
+  requireCSRF = true
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -34,18 +37,29 @@ export const SecureForm: React.FC<SecureFormProps> = ({
       data[key] = value.toString();
     });
 
-    // Validate form
-    const isValid = validateForm(data);
-    if (!isValid) {
-      onValidationError?.(errors);
-      return;
-    }
-
-    // Sanitize data
-    const sanitizedData = sanitizeForm(data);
-
     try {
       setIsSubmitting(true);
+
+      // Validate CSRF token if required
+      if (requireCSRF) {
+        const csrfToken = data.csrf_token;
+        if (!csrfToken || !validateCSRFToken(csrfToken)) {
+          throw new Error('Invalid security token. Please refresh the page and try again.');
+        }
+        // Remove CSRF token from form data before processing
+        delete data.csrf_token;
+      }
+
+      // Validate form
+      const isValid = validateForm(data);
+      if (!isValid) {
+        onValidationError?.(errors);
+        return;
+      }
+
+      // Sanitize data
+      const sanitizedData = sanitizeForm(data);
+
       await onSubmit(sanitizedData);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
@@ -53,7 +67,7 @@ export const SecureForm: React.FC<SecureFormProps> = ({
     } finally {
       setIsSubmitting(false);
     }
-  }, [validateForm, sanitizeForm, onSubmit, onValidationError, errors, clearErrors]);
+  }, [validateForm, sanitizeForm, onSubmit, onValidationError, errors, clearErrors, requireCSRF]);
 
   return (
     <form onSubmit={handleSubmit} className={className}>
@@ -80,12 +94,8 @@ export const SecureForm: React.FC<SecureFormProps> = ({
 
       {children}
 
-      <input
-        type="hidden"
-        name="_csrf_token"
-        value={crypto.randomUUID()}
-        readOnly
-      />
+      {/* CSRF Protection */}
+      {requireCSRF && <CSRFToken />}
     </form>
   );
 };

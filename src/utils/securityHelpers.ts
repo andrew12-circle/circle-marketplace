@@ -93,7 +93,7 @@ export const logSecurityEvent = async (
   }
 };
 
-// Enhanced input validation and sanitization
+// Enhanced input validation and sanitization with security features
 export const validateAndSanitizeInput = (
   input: any,
   schema: Record<string, {
@@ -103,10 +103,21 @@ export const validateAndSanitizeInput = (
     minLength?: number;
     pattern?: RegExp;
     sanitize?: boolean;
+    allowedValues?: string[];
   }>
 ): Record<string, any> => {
   const result: Record<string, any> = {};
   const errors: string[] = [];
+
+  // Check for potential injection attempts
+  const dangerousPatterns = [
+    /<script/i,
+    /javascript:/i,
+    /on\w+\s*=/i,
+    /data:/i,
+    /vbscript:/i,
+    /expression\(/i
+  ];
 
   for (const [key, rules] of Object.entries(schema)) {
     const value = input[key];
@@ -133,6 +144,13 @@ export const validateAndSanitizeInput = (
 
     // String validations
     if (typeof value === 'string') {
+      // Check for dangerous patterns
+      const hasDangerousContent = dangerousPatterns.some(pattern => pattern.test(value));
+      if (hasDangerousContent) {
+        errors.push(`${key} contains potentially dangerous content`);
+        continue;
+      }
+
       if (rules.maxLength && value.length > rules.maxLength) {
         errors.push(`${key} must be no more than ${rules.maxLength} characters`);
         continue;
@@ -148,9 +166,26 @@ export const validateAndSanitizeInput = (
         continue;
       }
 
-      // Sanitize if required
+      // Check allowed values
+      if (rules.allowedValues && !rules.allowedValues.includes(value)) {
+        errors.push(`${key} must be one of: ${rules.allowedValues.join(', ')}`);
+        continue;
+      }
+
+      // Sanitize if required (default to true for security)
       if (rules.sanitize !== false) {
         result[key] = sanitizeString(value);
+      } else {
+        result[key] = value;
+      }
+    } else if (Array.isArray(value)) {
+      // Validate array contents
+      if (rules.type === 'array') {
+        result[key] = value.map(item => 
+          typeof item === 'string' && rules.sanitize !== false 
+            ? sanitizeString(item) 
+            : item
+        );
       } else {
         result[key] = value;
       }
@@ -166,13 +201,26 @@ export const validateAndSanitizeInput = (
   return result;
 };
 
-// String sanitization
+// Enhanced string sanitization with additional security measures
 const sanitizeString = (input: string): string => {
   return input
+    // Remove script tags and their content
     .replace(/<script[^>]*>.*?<\/script>/gi, '')
+    // Remove all HTML tags
     .replace(/<[^>]*>/g, '')
+    // Remove javascript: protocols
     .replace(/javascript:/gi, '')
+    // Remove event handlers
     .replace(/on\w+\s*=/gi, '')
+    // Remove data: URLs that could contain scripts
+    .replace(/data:[^;]*;base64,/gi, '')
+    // Remove vbscript: protocols
+    .replace(/vbscript:/gi, '')
+    // Remove CSS expressions
+    .replace(/expression\s*\(/gi, '')
+    // Remove null bytes
+    .replace(/\0/g, '')
+    // Trim whitespace
     .trim();
 };
 
@@ -202,11 +250,15 @@ export const checkRateLimit = (
   return true;
 };
 
-// CORS headers for edge functions
+// CORS headers for edge functions with security headers
 export const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'POST, GET, OPTIONS, PUT, DELETE',
+  'X-Content-Type-Options': 'nosniff',
+  'X-Frame-Options': 'DENY',
+  'X-XSS-Protection': '1; mode=block',
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
 };
 
 // Standard error response
