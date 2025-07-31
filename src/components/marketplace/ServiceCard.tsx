@@ -60,10 +60,10 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
   const { formatPrice } = useCurrency();
   const isProMember = profile?.is_pro_member || false;
 
-  // Helper function to extract numeric value from price strings like "$797"
+  // Helper function to extract numeric value from price strings like "$797" or "$1,347.00"
   const extractNumericPrice = (priceString: string): number => {
-    const match = priceString.match(/(\d+(?:\.\d+)?)/);
-    return match ? parseFloat(match[1]) : 0;
+    const match = priceString.match(/(\d{1,3}(?:,\d{3})*(?:\.\d+)?)/);
+    return match ? parseFloat(match[1].replace(/,/g, '')) : 0;
   };
 
   const handleSave = (e: React.MouseEvent) => {
