@@ -558,7 +558,8 @@ export const VendorFunnelModal = ({
                     </div>
                   )}
                   
-                  {(!vendor.service_states || vendor.service_states.length === 0) && 
+                  {(!vendor.location) && 
+                   (!vendor.service_states || vendor.service_states.length === 0) && 
                    (!vendor.mls_areas || vendor.mls_areas.length === 0) && 
                    !vendor.service_radius_miles && (
                     <div className="text-center py-2">
