@@ -628,6 +628,36 @@ export type Database = {
         }
         Relationships: []
       }
+      login_lockouts: {
+        Row: {
+          attempt_count: number
+          attempt_type: string
+          created_at: string
+          id: string
+          identifier: string
+          locked_until: string | null
+          updated_at: string
+        }
+        Insert: {
+          attempt_count?: number
+          attempt_type?: string
+          created_at?: string
+          id?: string
+          identifier: string
+          locked_until?: string | null
+          updated_at?: string
+        }
+        Update: {
+          attempt_count?: number
+          attempt_type?: string
+          created_at?: string
+          id?: string
+          identifier?: string
+          locked_until?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       orders: {
         Row: {
           amount: number | null
