@@ -59,6 +59,7 @@ interface Service {
     rating: number;
     review_count: number;
     is_verified: boolean;
+    website_url?: string;
   } | null;
   funnel_content?: {
     headline?: string;
@@ -718,7 +719,19 @@ export const ServiceFunnelModal = ({
                     <div className="space-y-2 text-sm">
                       <p><strong>Category:</strong> {service.category}</p>
                       <p><strong>Duration:</strong> {service.duration || "Flexible"}</p>
-                      <p><strong>Provider:</strong> {service.vendor?.name || 'Direct Service'}</p>
+                      <div className="flex items-center justify-between">
+                        <p><strong>Provider:</strong> {service.vendor?.name || 'Direct Service'}</p>
+                        {service.vendor?.website_url && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => window.open(service.vendor.website_url, '_blank')}
+                            className="ml-2"
+                          >
+                            Visit Website
+                          </Button>
+                        )}
+                      </div>
                       {service.estimated_roi && (
                         <p><strong>Est. ROI:</strong> {service.estimated_roi}x</p>
                       )}
