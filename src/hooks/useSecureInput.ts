@@ -202,6 +202,7 @@ export const checkAccountLockout = async (email: string): Promise<{
     // Type assertion for the database response
     const result = data as {
       is_locked: boolean;
+      attempt_count: number;
       attempts_remaining: number;
       time_remaining_seconds: number;
     };
@@ -222,8 +223,8 @@ export const clearFailedAttempts = async (email: string): Promise<void> => {
   try {
     const { supabase } = await import('@/integrations/supabase/client');
     await supabase.rpc('clear_failed_attempts', { 
-      identifier: email,
-      attempt_type: 'email'
+      p_identifier: email,
+      p_attempt_type: 'email'
     });
   } catch (error) {
     console.error('Clear failed attempts error:', error);
