@@ -659,24 +659,6 @@ export const VendorFunnelModal = ({
                    </div>
                  )}
 
-                {/* Communication Highlights */}
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <h4 className="font-semibold text-gray-900 mb-3">Why Partners Choose Us</h4>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex items-center text-gray-700">
-                      <CheckCircle className="w-4 h-4 mr-2 text-green-600" />
-                      Professional service delivery
-                    </div>
-                    <div className="flex items-center text-gray-700">
-                      <CheckCircle className="w-4 h-4 mr-2 text-green-600" />
-                      Dedicated account support
-                    </div>
-                    <div className="flex items-center text-gray-700">
-                      <CheckCircle className="w-4 h-4 mr-2 text-green-600" />
-                      Proven track record
-                    </div>
-                  </div>
-                </div>
 
               </div>
             </div>
