@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ChevronDown, Building2, Home, Truck, Camera, Briefcase, AlertTriangle, Shield, CheckCircle, Store, Users, MapPin } from "lucide-react";
+import { ChevronDown, Building2, Home, Truck, Camera, Briefcase, AlertTriangle, Shield, CheckCircle, Store, Users, MapPin, ShoppingBag, Monitor, Target, Settings, GraduationCap, FileText } from "lucide-react";
 import { SERVICE_CATEGORIES, getRiskBadge } from "./RESPAComplianceSystem";
 
 // Vendor categories - different from service categories
@@ -79,6 +79,94 @@ const VENDOR_CATEGORIES = [
   }
 ];
 
+// Product categories for realtors
+const PRODUCT_CATEGORIES = [
+  {
+    id: 'marketing-materials',
+    name: 'Marketing Materials',
+    subcategories: [
+      'Business Cards',
+      'Yard Signs', 
+      'Open House Signs',
+      'Property Flyers',
+      'Listing Brochures',
+      'Door Hangers',
+      'Postcards',
+      'Branded Materials'
+    ]
+  },
+  {
+    id: 'digital-marketing',
+    name: 'Digital Marketing',
+    subcategories: [
+      'Facebook Ad Campaigns',
+      'Google Ads',
+      'Social Media Graphics',
+      'Website Templates',
+      'Email Marketing Templates',
+      'Virtual Tour Software',
+      'Professional Photography',
+      'Drone Photography'
+    ]
+  },
+  {
+    id: 'lead-generation',
+    name: 'Lead Generation',
+    subcategories: [
+      'Zillow Leads',
+      'Realtor.com Advertising',
+      'Lead Generation Software',
+      'CRM Systems',
+      'Contact Management Tools',
+      'Sphere Marketing Tools',
+      'Referral Programs',
+      'Expired Listing Data'
+    ]
+  },
+  {
+    id: 'technology-tools',
+    name: 'Technology & Tools',
+    subcategories: [
+      'Transaction Management',
+      'E-signature Platforms',
+      'Market Analysis Tools',
+      'Property Valuation Software',
+      'Mobile Apps',
+      'Client Portal Systems',
+      'Document Storage',
+      'Communication Tools'
+    ]
+  },
+  {
+    id: 'education-training',
+    name: 'Education & Training',
+    subcategories: [
+      'Sales Training Courses',
+      'Market Expertise Training',
+      'Legal Compliance Training',
+      'Technology Training',
+      'Negotiation Skills',
+      'Listing Presentation Tools',
+      'Buyer Consultation Training',
+      'Certification Programs'
+    ]
+  },
+  {
+    id: 'office-professional',
+    name: 'Office & Professional',
+    subcategories: [
+      'Professional Headshots',
+      'Office Supplies',
+      'Client Gifts',
+      'Closing Gifts',
+      'Professional Attire',
+      'Branded Merchandise',
+      'Office Equipment',
+      'File Organization Systems'
+    ]
+  }
+];
+
 interface CategoryMegaMenuProps {
   selectedCategory: string;
   onCategorySelect: (category: string) => void;
@@ -86,7 +174,24 @@ interface CategoryMegaMenuProps {
 }
 
 const getIconForCategory = (categoryId: string, viewMode: 'services' | 'products' | 'vendors' = 'services') => {
-  if (viewMode === 'vendors') {
+  if (viewMode === 'products') {
+    switch (categoryId) {
+      case 'marketing-materials':
+        return FileText;
+      case 'digital-marketing':
+        return Monitor;
+      case 'lead-generation':
+        return Target;
+      case 'technology-tools':
+        return Settings;
+      case 'education-training':
+        return GraduationCap;
+      case 'office-professional':
+        return Briefcase;
+      default:
+        return ShoppingBag;
+    }
+  } else if (viewMode === 'vendors') {
     switch (categoryId) {
       case 'mortgage-lenders':
         return Building2;
@@ -167,7 +272,7 @@ export const CategoryMegaMenu = ({ selectedCategory, onCategorySelect, viewMode 
           </div>
           
           <div className="grid grid-cols-1 gap-6 p-6">
-            {(viewMode === 'services' ? SERVICE_CATEGORIES : VENDOR_CATEGORIES).map((category) => {
+            {(viewMode === 'services' ? SERVICE_CATEGORIES : viewMode === 'products' ? PRODUCT_CATEGORIES : VENDOR_CATEGORIES).map((category) => {
               const Icon = getIconForCategory(category.id, viewMode);
               return (
                 <div key={category.id} className="space-y-3">

@@ -19,8 +19,6 @@ export const LocationSwitcher = () => {
     return 'Set Location';
   };
 
-  // Debug logging
-  console.log('LocationSwitcher - Current location:', location);
 
   return (
     <>
