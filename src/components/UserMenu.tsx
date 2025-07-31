@@ -13,10 +13,10 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { useLocation } from "@/hooks/useLocation";
+
 import { supabase } from "@/integrations/supabase/client";
-import { User, Settings, ShoppingBag, Crown, LogOut, Loader2, MapPin, Heart, BarChart3, Shield, Building2, DollarSign, Store, Briefcase } from "lucide-react";
-import { LocationModal } from "./LocationModal";
+import { User, Settings, ShoppingBag, Crown, LogOut, Loader2, Heart, BarChart3, Shield, Building2, DollarSign, Store, Briefcase } from "lucide-react";
+
 
 interface VendorInfo {
   enabled: boolean;
@@ -27,10 +27,10 @@ interface VendorInfo {
 export const UserMenu = () => {
   const { user, profile, signOut } = useAuth();
   const { toast } = useToast();
-  const { location } = useLocation();
+  
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [vendorInfo, setVendorInfo] = useState<VendorInfo | null>(null);
-  const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
+  
 
   // Check vendor info from profile
   useEffect(() => {
@@ -111,12 +111,6 @@ export const UserMenu = () => {
                 {profile.business_name}
               </p>
             )}
-            {location && (
-              <p className="text-xs leading-none text-muted-foreground flex items-center gap-1">
-                <MapPin className="w-3 h-3" />
-                {location.city}, {location.state}
-              </p>
-            )}
           </div>
         </DropdownMenuLabel>
         
@@ -192,13 +186,6 @@ export const UserMenu = () => {
         
         <DropdownMenuSeparator />
         
-        <DropdownMenuItem 
-          onClick={() => setIsLocationModalOpen(true)}
-          className="flex items-center"
-        >
-          <MapPin className="mr-2 h-4 w-4" />
-          <span>{location ? `Change Location (${location.city}, ${location.state})` : "Set Location"}</span>
-        </DropdownMenuItem>
         
         <DropdownMenuItem asChild>
           <Link to="/profile-settings" className="flex items-center">
@@ -244,10 +231,6 @@ export const UserMenu = () => {
         </DropdownMenuItem>
       </DropdownMenuContent>
       
-      <LocationModal 
-        open={isLocationModalOpen} 
-        onClose={() => setIsLocationModalOpen(false)} 
-      />
     </DropdownMenu>
   );
 };

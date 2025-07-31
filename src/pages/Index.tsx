@@ -14,6 +14,7 @@ import { CartDrawer } from "@/components/marketplace/CartDrawer";
 import { UserMenu } from "@/components/UserMenu";
 import { useAuth } from "@/contexts/AuthContext";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { LocationSwitcher } from "@/components/LocationSwitcher";
 import { LegalFooter } from "@/components/LegalFooter";
 import { Building, Store } from "lucide-react";
 
@@ -73,8 +74,9 @@ const Index = () => {
               </div>
               
               <div className="flex items-center gap-2 sm:gap-4">
-                {/* Language Switcher */}
+                {/* Language & Location Switchers */}
                 <LanguageSwitcher />
+                <LocationSwitcher />
                 
                 {/* Cart Button - only show on marketplace */}
                 {activeTab === "marketplace" && (
