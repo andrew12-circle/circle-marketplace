@@ -15,7 +15,7 @@ import { useCurrency } from "@/hooks/useCurrency";
 import { extractAndValidatePrice, validateCartPricing, safeFormatPrice } from "@/utils/priceValidation";
 import { ConsultationFlow } from "./ConsultationFlow";
 import { ServiceFunnelModal } from "./ServiceFunnelModal";
-import { CoPayRequestModal } from "./CoPayRequestModal";
+import { VendorSelectionModal } from "./VendorSelectionModal";
 import { PricingChoiceModal } from "./PricingChoiceModal";
 
 interface Service {
@@ -61,7 +61,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
   const [isHovered, setIsHovered] = useState(false);
   const [isConsultationFlowOpen, setIsConsultationFlowOpen] = useState(false);
   const [isFunnelModalOpen, setIsFunnelModalOpen] = useState(false);
-  const [isCoPayModalOpen, setIsCoPayModalOpen] = useState(false);
+  const [isVendorSelectionModalOpen, setIsVendorSelectionModalOpen] = useState(false);
   const [isPricingChoiceModalOpen, setIsPricingChoiceModalOpen] = useState(false);
   const { toast } = useToast();
   const { addToCart } = useCart();
@@ -477,15 +477,17 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
         service={service}
       />
       
-      <CoPayRequestModal
-        isOpen={isCoPayModalOpen}
-        onClose={() => setIsCoPayModalOpen(false)}
+      <VendorSelectionModal
+        isOpen={isVendorSelectionModalOpen}
+        onClose={() => setIsVendorSelectionModalOpen(false)}
+        onVendorSelect={(vendor) => {
+          // Handle vendor selection logic here
+          console.log('Selected vendor:', vendor);
+        }}
         service={{
-          id: service.id,
           title: service.title,
-          retail_price: service.retail_price,
+          co_pay_price: service.co_pay_price,
           max_vendor_split_percentage: service.max_vendor_split_percentage,
-          respa_category: service.respa_category,
         }}
       />
 
@@ -504,7 +506,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
         }}
         onChooseCoPay={() => {
           setIsPricingChoiceModalOpen(false);
-          setIsCoPayModalOpen(true);
+          setIsVendorSelectionModalOpen(true);
         }}
       />
     </Card>
