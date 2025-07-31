@@ -7,6 +7,8 @@ import { Search, MapPin, Star, Users, TrendingUp, Building } from "lucide-react"
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useLocation } from "@/hooks/useLocation";
+import { InviteVendorModal } from "./InviteVendorModal";
 
 interface Vendor {
   id: string;
@@ -44,7 +46,9 @@ export const VendorSelectionModal = ({
   const [filteredVendors, setFilteredVendors] = useState<Vendor[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showInviteModal, setShowInviteModal] = useState(false);
   const { toast } = useToast();
+  const { location } = useLocation();
 
   useEffect(() => {
     if (isOpen) {
@@ -80,19 +84,28 @@ export const VendorSelectionModal = ({
   };
 
   const filterVendors = () => {
-    if (!searchQuery.trim()) {
-      setFilteredVendors(vendors);
-      return;
+    let filtered = vendors;
+
+    // Filter by location if available
+    if (location?.state) {
+      filtered = filtered.filter(vendor => 
+        vendor.service_states?.includes(location.state) ||
+        vendor.location?.toLowerCase().includes(location.state.toLowerCase())
+      );
     }
 
-    const filtered = vendors.filter(vendor =>
-      vendor.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      vendor.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      vendor.location?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      vendor.service_states?.some(state => 
-        state.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    );
+    // Apply search filter
+    if (searchQuery.trim()) {
+      filtered = filtered.filter(vendor =>
+        vendor.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        vendor.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        vendor.location?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        vendor.service_states?.some(state => 
+          state.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+      );
+    }
+
     setFilteredVendors(filtered);
   };
 
@@ -109,16 +122,22 @@ export const VendorSelectionModal = ({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent 
-        className="max-w-4xl max-h-[90vh] overflow-hidden z-[100]"
-        onClick={(e) => e.stopPropagation()}
-      >
+    <>
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent 
+          className="max-w-6xl max-h-[95vh] overflow-hidden z-[100]"
+          onClick={(e) => e.stopPropagation()}
+        >
         <DialogHeader>
           <DialogTitle>Select Co-Pay Partner</DialogTitle>
           <p className="text-sm text-muted-foreground">
             Choose a vendor to help with "{service.title}" - they'll cover {service.max_vendor_split_percentage}% of the cost
           </p>
+          {location?.state && (
+            <p className="text-xs text-muted-foreground">
+              Showing vendors available in {location.state}
+            </p>
+          )}
         </DialogHeader>
         
         <div className="space-y-4">
@@ -221,7 +240,15 @@ export const VendorSelectionModal = ({
             )}
           </div>
 
-          <div className="flex justify-end">
+          <div className="flex justify-between">
+            <Button 
+              variant="outline" 
+              onClick={() => setShowInviteModal(true)}
+              className="flex items-center gap-2"
+            >
+              <Users className="w-4 h-4" />
+              Request Your Vendors
+            </Button>
             <Button variant="outline" onClick={onClose}>
               Cancel
             </Button>
@@ -229,5 +256,11 @@ export const VendorSelectionModal = ({
         </div>
       </DialogContent>
     </Dialog>
+
+    <InviteVendorModal 
+      open={showInviteModal}
+      onOpenChange={(open) => setShowInviteModal(open)}
+    />
+    </>
   );
 };
