@@ -262,7 +262,7 @@ export const VendorFunnelModal = ({
               <div className="bg-white border border-gray-200 rounded-lg p-4">
                 <h3 className="font-semibold text-gray-900 mb-3 flex items-center">
                   <Users className="w-4 h-4 mr-2 text-blue-600" />
-                  Our Loan Officers
+                  Our Team
                 </h3>
                 <div className="max-h-48 overflow-y-auto space-y-3 pr-2">
                   {[
