@@ -334,9 +334,24 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                         </span>
                       </div>
                     </TooltipTrigger>
-                    <TooltipContent className="w-48 p-3 cursor-pointer" onClick={handleUpgradeClick}>
-                      <p className="text-sm leading-relaxed">Join Circle Pro membership to unlock this price</p>
-                      <p className="text-xs text-muted-foreground mt-1">Click to upgrade →</p>
+                    <TooltipContent className="w-80 p-0 border-0 bg-transparent cursor-pointer" onClick={handleUpgradeClick}>
+                      <div className="relative bg-gradient-to-br from-yellow-400 via-yellow-500 to-yellow-600 rounded-lg p-4 shadow-lg">
+                        {/* Card design elements */}
+                        <div className="absolute top-2 left-2 w-6 h-6 border border-yellow-700/30 rounded-sm"></div>
+                        <div className="absolute top-2 right-2 text-yellow-800 font-bold text-lg">PRO</div>
+                        
+                        {/* Main content */}
+                        <div className="mt-6">
+                          <h3 className="text-yellow-900 font-bold text-lg mb-1">Circle COVERAGE</h3>
+                          <h4 className="text-yellow-800 font-semibold text-base mb-3">Co-Pay: Save on Marketing Costs</h4>
+                          <p className="text-yellow-900 text-sm leading-relaxed mb-4">
+                            This feature lets you collaborate with lenders & title companies to share the expense of a marketing service. Their contribution fully covers this listing service fee, which reduces your out-of-pocket cost by up to 100% for this service, cheaper growth.
+                          </p>
+                          <button className="text-yellow-800 text-sm font-medium hover:text-yellow-900 underline">
+                            Learn more
+                          </button>
+                        </div>
+                      </div>
                     </TooltipContent>
                   </Tooltip>
                   {service.discount_percentage && (
