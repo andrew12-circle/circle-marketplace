@@ -517,15 +517,6 @@ export const MarketplaceGrid = () => {
                 <Zap className="w-3 h-3 sm:w-4 sm:h-4" />
                 {t('vendors')}
               </Button>
-              {user && (
-                <Button
-                  variant="outline"
-                  onClick={() => setIsAddProductModalOpen(true)}
-                  className="flex items-center gap-2 h-9 sm:h-10 text-sm sm:text-base"
-                >
-                  + Add Product
-                </Button>
-              )}
             </div>
           </div>
 
