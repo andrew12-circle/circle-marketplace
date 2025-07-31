@@ -668,10 +668,10 @@ export const VendorFunnelModal = ({
         {/* Bottom Section - Tabs */}
         <div className="border-t bg-muted/20">
           <div className="p-6">
-            <Tabs defaultValue="details" className="w-full">
+            <Tabs defaultValue="reviews" className="w-full">
               <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="details">Company Details</TabsTrigger>
                 <TabsTrigger value="reviews">Agent Reviews</TabsTrigger>
+                <TabsTrigger value="details">Company Details</TabsTrigger>
                 <TabsTrigger value="qa">Q&A</TabsTrigger>
                 <TabsTrigger value="related">Related Services</TabsTrigger>
               </TabsList>
