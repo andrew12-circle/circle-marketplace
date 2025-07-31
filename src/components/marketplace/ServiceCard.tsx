@@ -152,7 +152,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
       </Button>
 
       {/* Image - Fixed height */}
-      <div className="relative h-48 overflow-hidden bg-white flex-shrink-0">
+      <div className="relative h-48 overflow-hidden bg-white flex-shrink-0 p-4">
         <img
           src={service.image_url || "/public/placeholder.svg"}
           alt={service.title}
