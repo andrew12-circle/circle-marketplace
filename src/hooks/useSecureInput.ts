@@ -190,8 +190,8 @@ export const checkAccountLockout = async (email: string): Promise<{
   try {
     const { supabase } = await import('@/integrations/supabase/client');
     const { data, error } = await supabase.rpc('check_and_update_lockout', { 
-      identifier: email,
-      attempt_type: 'email'
+      p_identifier: email,
+      p_attempt_type: 'email'
     });
     
     if (error) {
