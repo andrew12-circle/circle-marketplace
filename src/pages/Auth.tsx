@@ -40,8 +40,11 @@ export const Auth = () => {
   useEffect(() => {
     // Check if user is already logged in
     const checkUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      console.log('Checking user session...');
+      const { data: { session }, error } = await supabase.auth.getSession();
+      console.log('Session check result:', { session: !!session, error });
       if (session) {
+        console.log('User already logged in, redirecting to home');
         navigate('/');
       }
     };
@@ -89,8 +92,10 @@ export const Auth = () => {
 
   const handleGoogleSignIn = async () => {
     setLoading(true);
+    console.log('Starting Google sign-in...');
     
     try {
+      console.log('Redirect URL:', `${window.location.origin}/`);
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
@@ -98,8 +103,13 @@ export const Auth = () => {
         }
       });
       
-      if (error) throw error;
+      if (error) {
+        console.error('Google OAuth error:', error);
+        throw error;
+      }
+      console.log('Google OAuth initiated successfully');
     } catch (error: any) {
+      console.error('Google sign-in error:', error);
       toast({
         title: "Google Sign-In Failed",
         description: error.message || "Failed to sign in with Google",
