@@ -26,7 +26,7 @@ export const LocationSwitcher = () => {
     if (location?.city && location?.state) {
       return '📍';
     }
-    return '🌍';
+    return '';
   };
 
   return (
@@ -41,7 +41,7 @@ export const LocationSwitcher = () => {
             <MapPin className="h-4 w-4" />
             <span className="text-sm">{getLocationIcon()}</span>
             <span className="hidden sm:inline text-sm max-w-20 truncate">
-              {location?.city || 'Location'}
+              {location?.city || 'Set Location'}
             </span>
             <ChevronDown className="h-3 w-3" />
           </Button>
