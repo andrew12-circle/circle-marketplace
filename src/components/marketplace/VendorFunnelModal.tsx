@@ -345,23 +345,25 @@ export const VendorFunnelModal = ({
             <div className="space-y-4">
               {/* Main Media */}
               <div className="relative h-48 rounded-lg overflow-hidden bg-gray-900 border border-gray-200">
-                {/* This could be either video or image - using placeholder for now */}
+                {/* This could be either video or image - using vendor logo by default */}
                 <img 
-                  src="https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=800&h=400&fit=crop"
-                  alt="Why Partner With Circle Home Loans"
+                  src={vendor.logo_url || "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=800&h=400&fit=crop"}
+                  alt={vendor.name}
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute bottom-2 left-2">
                   <Badge className="bg-black/70 text-white text-xs">
-                    Why Partner With {vendor.name}
+                    {vendor.name}
                   </Badge>
                 </div>
-                {/* Play button overlay for videos */}
-                <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity cursor-pointer">
-                  <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center">
-                    <div className="w-0 h-0 border-l-[16px] border-l-blue-600 border-t-[12px] border-t-transparent border-b-[12px] border-b-transparent ml-1"></div>
+                {/* Play button overlay for videos - only show if vendor has uploaded a video */}
+                {vendor.logo_url && vendor.logo_url.includes('video') && (
+                  <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity cursor-pointer">
+                    <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center">
+                      <div className="w-0 h-0 border-l-[16px] border-l-blue-600 border-t-[12px] border-t-transparent border-b-[12px] border-b-transparent ml-1"></div>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
               
               {/* 4 smaller media items below */}
