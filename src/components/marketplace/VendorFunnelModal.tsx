@@ -696,6 +696,18 @@ export const VendorFunnelModal = ({
                     Schedule Consultation
                   </Button>
                   
+                  {vendor.website_url && (
+                    <Button
+                      variant="outline"
+                      className="w-full border-gray-300 text-gray-700 hover:bg-gray-50"
+                      size="lg"
+                      onClick={() => window.open(vendor.website_url, '_blank')}
+                    >
+                      <Building className="w-4 h-4 mr-2" />
+                      Visit Website
+                    </Button>
+                  )}
+                  
                   <Button
                     variant="ghost"
                     className="w-full text-gray-600 hover:text-gray-800"
