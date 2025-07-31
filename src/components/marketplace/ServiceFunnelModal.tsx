@@ -54,6 +54,7 @@ interface Service {
   estimated_roi?: number;
   duration?: string;
   requires_quote?: boolean;
+  website_url?: string;
   vendor: {
     name: string;
     rating: number;
@@ -591,7 +592,19 @@ export const ServiceFunnelModal = ({
                     <Mail className="w-4 h-4 mr-2" />
                     Get Custom Quote
                   </Button>
-
+                  
+                  {service.website_url && (
+                    <Button 
+                      variant="outline" 
+                      className="w-full" 
+                      size="lg"
+                      onClick={() => window.open(service.website_url, '_blank')}
+                    >
+                      <ArrowRight className="w-4 h-4 mr-2" />
+                      Visit Service Website
+                    </Button>
+                  )}
+                  
                   
                   {service.vendor?.website_url && (
                     <Button 
