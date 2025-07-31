@@ -463,6 +463,47 @@ export type Database = {
         }
         Relationships: []
       }
+      image_processing_log: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          id: string
+          original_url: string | null
+          processed_at: string
+          service_id: string | null
+          status: string
+          vectorized_url: string | null
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          original_url?: string | null
+          processed_at?: string
+          service_id?: string | null
+          status: string
+          vectorized_url?: string | null
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          original_url?: string | null
+          processed_at?: string
+          service_id?: string | null
+          status?: string
+          vectorized_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "image_processing_log_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       login_attempts: {
         Row: {
           attempt_time: string
@@ -1032,6 +1073,7 @@ export type Database = {
           image_url: string | null
           is_featured: boolean | null
           is_top_pick: boolean | null
+          original_image_url: string | null
           price_duration: string | null
           pro_price: string | null
           rating: number | null
@@ -1041,6 +1083,7 @@ export type Database = {
           tags: string[] | null
           title: string
           updated_at: string | null
+          vectorized_image_url: string | null
           vendor_id: string | null
         }
         Insert: {
@@ -1055,6 +1098,7 @@ export type Database = {
           image_url?: string | null
           is_featured?: boolean | null
           is_top_pick?: boolean | null
+          original_image_url?: string | null
           price_duration?: string | null
           pro_price?: string | null
           rating?: number | null
@@ -1064,6 +1108,7 @@ export type Database = {
           tags?: string[] | null
           title: string
           updated_at?: string | null
+          vectorized_image_url?: string | null
           vendor_id?: string | null
         }
         Update: {
@@ -1078,6 +1123,7 @@ export type Database = {
           image_url?: string | null
           is_featured?: boolean | null
           is_top_pick?: boolean | null
+          original_image_url?: string | null
           price_duration?: string | null
           pro_price?: string | null
           rating?: number | null
@@ -1087,6 +1133,7 @@ export type Database = {
           tags?: string[] | null
           title?: string
           updated_at?: string | null
+          vectorized_image_url?: string | null
           vendor_id?: string | null
         }
         Relationships: [

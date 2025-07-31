@@ -14,6 +14,9 @@ import { YouTubeChannelImportPanel } from '@/components/admin/YouTubeChannelImpo
 import SecurityMonitoringPanel from '@/components/admin/SecurityMonitoringPanel';
 import { ServiceImportPanel } from '@/components/admin/ServiceImportPanel';
 import { VendorImportPanel } from '@/components/admin/VendorImportPanel';
+import { ImageVectorizationPanel } from '@/components/admin/ImageVectorizationPanel';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Zap, Upload, Building, Youtube } from 'lucide-react';
 
 interface UserProfile {
   id: string;
@@ -194,100 +197,160 @@ export default function AdminDashboard() {
           Admin Dashboard
         </h1>
         <p className="text-muted-foreground mt-2">
-          Manage users and creator permissions
+          Manage users, content, and system operations
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 mb-6">
-        <ContentPromotionPanel />
-        <YouTubeImportPanel />
-        <YouTubeChannelImportPanel />
-        <VendorImportPanel />
-        <ServiceImportPanel />
-      </div>
+      <Tabs defaultValue="users" className="w-full space-y-6">
+        <TabsList className="grid w-full grid-cols-6">
+          <TabsTrigger value="users" className="flex items-center gap-2">
+            <Users className="h-4 w-4" />
+            Users
+          </TabsTrigger>
+          <TabsTrigger value="vectorization" className="flex items-center gap-2">
+            <Zap className="h-4 w-4" />
+            Images
+          </TabsTrigger>
+          <TabsTrigger value="content" className="flex items-center gap-2">
+            <Star className="h-4 w-4" />
+            Content
+          </TabsTrigger>
+          <TabsTrigger value="services" className="flex items-center gap-2">
+            <Upload className="h-4 w-4" />
+            Services
+          </TabsTrigger>
+          <TabsTrigger value="vendors" className="flex items-center gap-2">
+            <Building className="h-4 w-4" />
+            Vendors
+          </TabsTrigger>
+          <TabsTrigger value="youtube" className="flex items-center gap-2">
+            <Youtube className="h-4 w-4" />
+            YouTube
+          </TabsTrigger>
+        </TabsList>
 
-      <div className="mb-6">
-        <SecurityMonitoringPanel />
-      </div>
+        <TabsContent value="users" className="space-y-6">
+          <SecurityMonitoringPanel />
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Users className="h-5 w-5" />
-            User Management ({users.length} users)
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {loadingUsers ? (
-            <p>Loading users...</p>
-          ) : (
-            <div className="space-y-4">
-              {users.map((user) => (
-                <div
-                  key={user.id}
-                  className="flex items-center justify-between p-4 border rounded-lg"
-                >
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <h3 className="font-semibold">
-                        {user.display_name || user.business_name || 'Unnamed User'}
-                      </h3>
-                      {user.is_admin && (
-                        <Badge variant="destructive">Admin</Badge>
-                      )}
-                      {user.is_creator && (
-                        <Badge variant="secondary">Creator</Badge>
-                      )}
-                      {user.creator_verified && (
-                        <Badge variant="default" className="flex items-center gap-1">
-                          <Star className="h-3 w-3" />
-                          Verified
-                        </Badge>
-                      )}
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      Joined: {new Date(user.created_at).toLocaleDateString()}
-                      {user.creator_joined_at && (
-                        <span className="ml-4">
-                          Creator since: {new Date(user.creator_joined_at).toLocaleDateString()}
-                        </span>
-                      )}
-                    </p>
-                  </div>
-
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2">
-                      <label className="text-sm font-medium">Admin</label>
-                      <Switch
-                        checked={user.is_admin || false}
-                        onCheckedChange={() => toggleAdminStatus(user.user_id, user.is_admin || false)}
-                      />
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <label className="text-sm font-medium">Creator</label>
-                      <Switch
-                        checked={user.is_creator || false}
-                        onCheckedChange={() => toggleCreatorStatus(user.user_id, user.is_creator || false)}
-                      />
-                    </div>
-
-                    {user.is_creator && (
-                      <div className="flex items-center gap-2">
-                        <label className="text-sm font-medium">Verified</label>
-                        <Switch
-                          checked={user.creator_verified || false}
-                          onCheckedChange={() => toggleVerificationStatus(user.user_id, user.creator_verified || false)}
-                        />
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5" />
+                User Management ({users.length} users)
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {loadingUsers ? (
+                <p>Loading users...</p>
+              ) : (
+                <div className="space-y-4">
+                  {users.map((user) => (
+                    <div
+                      key={user.id}
+                      className="flex items-center justify-between p-4 border rounded-lg"
+                    >
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <h3 className="font-semibold">
+                            {user.display_name || user.business_name || 'Unnamed User'}
+                          </h3>
+                          {user.is_admin && (
+                            <Badge variant="destructive">Admin</Badge>
+                          )}
+                          {user.is_creator && (
+                            <Badge variant="secondary">Creator</Badge>
+                          )}
+                          {user.creator_verified && (
+                            <Badge variant="default" className="flex items-center gap-1">
+                              <Star className="h-3 w-3" />
+                              Verified
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          Joined: {new Date(user.created_at).toLocaleDateString()}
+                          {user.creator_joined_at && (
+                            <span className="ml-4">
+                              Creator since: {new Date(user.creator_joined_at).toLocaleDateString()}
+                            </span>
+                          )}
+                        </p>
                       </div>
-                    )}
-                  </div>
+
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2">
+                          <label className="text-sm font-medium">Admin</label>
+                          <Switch
+                            checked={user.is_admin || false}
+                            onCheckedChange={() => toggleAdminStatus(user.user_id, user.is_admin || false)}
+                          />
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <label className="text-sm font-medium">Creator</label>
+                          <Switch
+                            checked={user.is_creator || false}
+                            onCheckedChange={() => toggleCreatorStatus(user.user_id, user.is_creator || false)}
+                          />
+                        </div>
+
+                        {user.is_creator && (
+                          <div className="flex items-center gap-2">
+                            <label className="text-sm font-medium">Verified</label>
+                            <Switch
+                              checked={user.creator_verified || false}
+                              onCheckedChange={() => toggleVerificationStatus(user.user_id, user.creator_verified || false)}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="vectorization" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Zap className="h-5 w-5" />
+                Image Vectorization
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ImageVectorizationPanel />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="content" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <ContentPromotionPanel />
+          </div>
+        </TabsContent>
+
+        <TabsContent value="services" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <ServiceImportPanel />
+          </div>
+        </TabsContent>
+
+        <TabsContent value="vendors" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <VendorImportPanel />
+          </div>
+        </TabsContent>
+
+        <TabsContent value="youtube" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <YouTubeImportPanel />
+            <YouTubeChannelImportPanel />
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
