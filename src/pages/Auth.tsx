@@ -18,6 +18,7 @@ export const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -72,6 +73,16 @@ export const Auth = () => {
 
     if (error) throw error;
     return data;
+  };
+
+  const handleForgotPassword = async (email: string) => {
+    const redirectUrl = `${window.location.origin}/auth`;
+    
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: redirectUrl
+    });
+
+    if (error) throw error;
   };
 
   // Check account lockout status when email changes
@@ -182,7 +193,35 @@ export const Auth = () => {
     }
   };
 
-  const validationRules = isLogin 
+  const handleForgotPasswordSubmit = async (data: Record<string, string>) => {
+    setLoading(true);
+    
+    try {
+      await handleForgotPassword(data.email);
+      toast({
+        title: "Reset Email Sent",
+        description: "Check your email for password reset instructions.",
+      });
+      setShowForgotPassword(false);
+    } catch (error: any) {
+      let errorMessage = "Failed to send reset email. Please try again.";
+      if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      toast({
+        title: "Reset Failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const validationRules = showForgotPassword
+    ? { email: commonRules.email }
+    : isLogin 
     ? {
         email: commonRules.email,
         password: { required: true, minLength: 8 }
@@ -195,6 +234,7 @@ export const Auth = () => {
 
   const toggleMode = () => {
     setIsLogin(!isLogin);
+    setShowForgotPassword(false);
     setFormData({ email: '', password: '', displayName: '', isCreator: false });
   };
 
@@ -203,10 +243,12 @@ export const Auth = () => {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">
-            {isLogin ? 'Welcome Back' : 'Create Account'}
+            {showForgotPassword ? 'Reset Password' : isLogin ? 'Welcome Back' : 'Create Account'}
           </CardTitle>
           <p className="text-sm text-muted-foreground text-center">
-            {isLogin 
+            {showForgotPassword 
+              ? 'Enter your email to receive reset instructions'
+              : isLogin 
               ? 'Sign in to your account to continue' 
               : 'Sign up to start your journey with Circle Academy'
             }
@@ -224,7 +266,7 @@ export const Auth = () => {
           
           <SecureForm 
             validationRules={validationRules}
-            onSubmit={handleSecureSubmit}
+            onSubmit={showForgotPassword ? handleForgotPasswordSubmit : handleSecureSubmit}
             className="space-y-4"
             requireCSRF={false}
           >
@@ -247,7 +289,7 @@ export const Auth = () => {
             </div>
 
             {/* Display Name Field (Signup only) */}
-            {!isLogin && (
+            {!isLogin && !showForgotPassword && (
               <div className="space-y-2">
                 <Label htmlFor="displayName">Full Name</Label>
                 <div className="relative">
@@ -264,45 +306,47 @@ export const Auth = () => {
               </div>
             )}
 
-            {/* Password Field */}
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  id="password"
-                  name="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Enter your password"
-                  className="pl-10 pr-10"
-                  required
-                  minLength={8}
-                  value={formData.password}
-                  onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? (
-                    <EyeOff className="w-4 h-4 text-muted-foreground" />
-                  ) : (
-                    <Eye className="w-4 h-4 text-muted-foreground" />
-                  )}
-                </Button>
+            {/* Password Field (Not shown for forgot password) */}
+            {!showForgotPassword && (
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    id="password"
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Enter your password"
+                    className="pl-10 pr-10"
+                    required
+                    minLength={8}
+                    value={formData.password}
+                    onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="w-4 h-4 text-muted-foreground" />
+                    ) : (
+                      <Eye className="w-4 h-4 text-muted-foreground" />
+                    )}
+                  </Button>
+                </div>
+                
+                {/* Password Strength Indicator (Signup only) */}
+                {!isLogin && (
+                  <PasswordStrengthIndicator
+                    password={formData.password}
+                    onStrengthChange={setPasswordStrong}
+                  />
+                )}
               </div>
-              
-              {/* Password Strength Indicator (Signup only) */}
-              {!isLogin && (
-                <PasswordStrengthIndicator
-                  password={formData.password}
-                  onStrengthChange={setPasswordStrong}
-                />
-              )}
-            </div>
+            )}
 
             {/* Creator Toggle (Signup only) */}
             {!isLogin && (
@@ -335,8 +379,39 @@ export const Auth = () => {
               className="w-full" 
               disabled={loading}
             >
-              {loading ? 'Loading...' : (isLogin ? 'Sign In' : 'Create Account')}
+              {loading ? 'Loading...' : (
+                showForgotPassword ? 'Send Reset Email' : 
+                isLogin ? 'Sign In' : 'Create Account'
+              )}
             </Button>
+            
+            {/* Forgot Password Link (Login only) */}
+            {isLogin && !showForgotPassword && (
+              <div className="text-center">
+                <Button
+                  type="button"
+                  variant="link"
+                  onClick={() => setShowForgotPassword(true)}
+                  className="p-0 h-auto text-sm text-muted-foreground hover:text-foreground"
+                >
+                  Forgot your password?
+                </Button>
+              </div>
+            )}
+            
+            {/* Back to Login Link (Forgot Password) */}
+            {showForgotPassword && (
+              <div className="text-center">
+                <Button
+                  type="button"
+                  variant="link"
+                  onClick={() => setShowForgotPassword(false)}
+                  className="p-0 h-auto text-sm text-muted-foreground hover:text-foreground"
+                >
+                  Back to login
+                </Button>
+              </div>
+            )}
           </SecureForm>
 
           <Separator className="my-6" />
