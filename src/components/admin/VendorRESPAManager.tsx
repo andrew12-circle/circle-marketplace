@@ -93,7 +93,7 @@ export const VendorRESPAManager = () => {
     const riskSelect = document.getElementById(`risk-${vendorId}`) as HTMLSelectElement;
     
     const isRegulated = regulatedSelect?.value === 'true' ? true : regulatedSelect?.value === 'false' ? false : null;
-    const riskLevel = riskSelect?.value || null;
+    const riskLevel = riskSelect?.value === 'none' ? null : riskSelect?.value || null;
 
     updateVendorRESPA(vendorId, isRegulated, riskLevel);
   };
@@ -174,12 +174,12 @@ export const VendorRESPAManager = () => {
                 
                 <div className="flex items-center gap-2">
                   <label className="text-sm font-medium whitespace-nowrap">Risk Level:</label>
-                  <Select defaultValue={vendor.respa_risk_level || ''}>
+                  <Select defaultValue={vendor.respa_risk_level || 'none'}>
                     <SelectTrigger className="w-24" id={`risk-${vendor.id}`}>
                       <SelectValue placeholder="None" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">None</SelectItem>
+                      <SelectItem value="none">None</SelectItem>
                       <SelectItem value="low">Low</SelectItem>
                       <SelectItem value="medium">Medium</SelectItem>
                       <SelectItem value="high">High</SelectItem>
