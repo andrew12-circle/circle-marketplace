@@ -166,17 +166,18 @@ export const CartDrawer = () => {
                       <div className="w-20 h-16 bg-muted rounded-lg overflow-hidden relative">
                          {item.type === 'co-pay-request' ? (
                            <>
+                             {/* Main service image */}
                              <img
-                               src={item.image_url || "/placeholder.svg"}
+                               src={item.image_url || item.image || "/placeholder.svg"}
                                alt={item.title}
                                className="w-full h-full object-cover"
                              />
-                             {/* Show vendor logo overlay */}
+                             {/* Vendor logo overlay in bottom right */}
                              {typeof item.vendor === 'object' && item.vendor?.logo_url && (
                                <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-white rounded-full border-2 border-white overflow-hidden shadow-sm">
                                  <img
                                    src={item.vendor.logo_url}
-                                   alt={item.vendorName}
+                                   alt={item.vendorName || item.vendor.name}
                                    className="w-full h-full object-cover"
                                  />
                                </div>
