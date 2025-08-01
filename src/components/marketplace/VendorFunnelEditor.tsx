@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { FunnelMediaUpload } from './FunnelMediaUpload';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -128,6 +129,7 @@ const BENEFIT_ICONS = [
 ];
 
 export const VendorFunnelEditor = ({ vendorId, initialContent, onSave, onCancel }: VendorFunnelEditorProps) => {
+  const [uploadedMediaUrls, setUploadedMediaUrls] = useState<string[]>([]);
   const [content, setContent] = useState<FunnelContent>(initialContent || {
     headline: '',
     subheadline: '',
@@ -306,9 +308,12 @@ export const VendorFunnelEditor = ({ vendorId, initialContent, onSave, onCancel 
   const handleSave = async () => {
     try {
       setIsSaving(true);
-      // Here you would save to your database or service
-      // For now, we'll just call the onSave callback
-      onSave(content);
+      // Include uploaded media URLs in the content
+      const finalContent = {
+        ...content,
+        mediaUrls: uploadedMediaUrls
+      };
+      onSave(finalContent);
       toast.success('Funnel page saved successfully');
     } catch (error) {
       console.error('Error saving funnel:', error);
@@ -316,6 +321,11 @@ export const VendorFunnelEditor = ({ vendorId, initialContent, onSave, onCancel 
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const handleMediaUploaded = (mediaUrls: string[]) => {
+    setUploadedMediaUrls(prev => [...prev, ...mediaUrls]);
+    toast.success(`${mediaUrls.length} media file(s) uploaded successfully`);
   };
 
   const getIconComponent = (iconName: string) => {
@@ -987,14 +997,72 @@ export const VendorFunnelEditor = ({ vendorId, initialContent, onSave, onCancel 
           <Card>
             <CardHeader>
               <CardTitle>Media Gallery</CardTitle>
-              <p className="text-sm text-gray-600">Add images, videos, and documents to showcase your work</p>
+              <p className="text-sm text-gray-600">Upload images, videos, and documents to showcase your work</p>
             </CardHeader>
             <CardContent>
-              <div className="text-center p-8 border-2 border-dashed border-gray-300 rounded-lg">
-                <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-500 mb-4">Media management coming soon...</p>
-                <p className="text-sm text-gray-400">You'll be able to upload images, videos, and documents here</p>
-              </div>
+              <FunnelMediaUpload
+                onMediaUploaded={handleMediaUploaded}
+                maxFiles={20}
+                acceptedTypes={['image/*', 'video/*', '.pdf', '.doc', '.docx', '.ppt', '.pptx']}
+              />
+              
+              {uploadedMediaUrls.length > 0 && (
+                <div className="mt-6">
+                  <h4 className="font-medium mb-4">Uploaded Media ({uploadedMediaUrls.length})</h4>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {uploadedMediaUrls.map((url, index) => (
+                      <div key={index} className="relative group">
+                        <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden border">
+                          <img 
+                            src={url} 
+                            alt={`Media ${index + 1}`}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              const target = e.currentTarget;
+                              target.style.display = 'none';
+                              const parent = target.parentElement;
+                              if (parent) {
+                                parent.innerHTML = `
+                                  <div class="w-full h-full flex items-center justify-center bg-gray-100">
+                                    <div class="text-center">
+                                      <svg class="w-8 h-8 mx-auto mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                      </svg>
+                                      <p class="text-xs text-gray-500">File ${index + 1}</p>
+                                    </div>
+                                  </div>
+                                `;
+                              }
+                            }}
+                          />
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          className="absolute top-2 right-2 w-6 h-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={() => {
+                            setUploadedMediaUrls(prev => prev.filter((_, i) => i !== index));
+                            toast.success('Media file removed');
+                          }}
+                        >
+                          <X className="w-3 h-3" />
+                        </Button>
+                        <div className="absolute bottom-2 left-2 right-2">
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            className="w-full text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={() => window.open(url, '_blank')}
+                          >
+                            <Eye className="w-3 h-3 mr-1" />
+                            View
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
