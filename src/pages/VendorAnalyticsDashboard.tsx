@@ -106,7 +106,23 @@ export const VendorAnalyticsDashboard = () => {
         return;
       }
 
-      // Try to find vendor by email
+      // Try to find vendor through vendor_user_associations first
+      const { data: vendorAssociation } = await supabase
+        .from('vendor_user_associations')
+        .select(`
+          vendor_id,
+          vendors (*)
+        `)
+        .eq('user_id', user?.id)
+        .single();
+
+      if (vendorAssociation?.vendors) {
+        setVendorData(vendorAssociation.vendors);
+        setLoading(false);
+        return;
+      }
+
+      // Fallback: Try to find vendor by email
       const { data: vendor, error } = await supabase
         .from('vendors')
         .select('*')
