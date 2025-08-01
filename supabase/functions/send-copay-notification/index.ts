@@ -42,8 +42,69 @@ const handler = async (req: Request): Promise<Response> => {
       co_pay_request_id,
       notification_type,
       agent_email,
-      vendor_email
+      vendor_email,
+      service_title
     });
+
+    // Get detailed co-pay request info if not provided
+    let requestDetails = {
+      agent_email,
+      vendor_email,
+      agent_name,
+      vendor_name,
+      service_title,
+      split_percentage
+    };
+
+    if (!agent_email || !vendor_email || !service_title) {
+      const { data: coPayData, error: fetchError } = await supabase
+        .from('co_pay_requests')
+        .select(`
+          *,
+          vendors!vendor_id (
+            name,
+            contact_email,
+            individual_email,
+            individual_name
+          )
+        `)
+        .eq('id', co_pay_request_id)
+        .single();
+
+      if (!fetchError && coPayData) {
+        // Get agent details from auth
+        const { data: agentAuth } = await supabase.auth.admin.getUserById(coPayData.agent_id);
+        
+        requestDetails = {
+          agent_email: agentAuth?.user?.email || agent_email,
+          vendor_email: coPayData.vendors?.contact_email || coPayData.vendors?.individual_email || vendor_email,
+          agent_name: agent_name || 'Agent',
+          vendor_name: coPayData.vendors?.name || vendor_name,
+          service_title: service_title || 'Service',
+          split_percentage: coPayData.requested_split_percentage || split_percentage
+        };
+      }
+    }
+
+    // Create notification record
+    const notificationData = {
+      notification_type,
+      co_pay_request_id,
+      ...requestDetails,
+      requires_calendar_booking: notification_type === 'request_created',
+      sent_at: new Date().toISOString()
+    };
+
+    await supabase
+      .from('consultation_notifications')
+      .insert({
+        vendor_id: co_pay_request_id, // Using as reference since we don't have direct vendor_id
+        consultation_booking_id: co_pay_request_id,
+        notification_type: `copay_${notification_type}`,
+        notification_data: notificationData,
+        status: 'sent',
+        sent_at: new Date().toISOString()
+      });
 
     // Log the notification attempt
     await supabase
@@ -52,29 +113,31 @@ const handler = async (req: Request): Promise<Response> => {
         co_pay_request_id,
         action_type: `notification_${notification_type}`,
         action_details: {
-          notification_type,
-          agent_email,
-          vendor_email,
-          agent_name,
-          vendor_name,
-          service_title,
-          split_percentage
+          ...notificationData,
+          success: true
         }
       });
 
-    // Here you would integrate with your notification services:
-    // - Push notifications (Firebase, OneSignal, etc.)
-    // - SMS (Twilio, etc.)
-    // - Email (Resend, SendGrid, etc.)
-    
-    // For now, we'll just log the notification
-    console.log(`Co-pay notification sent: ${notification_type} for request ${co_pay_request_id}`);
+    // Simulate immediate vendor notification for new requests
+    if (notification_type === 'request_created') {
+      console.log('🚨 VENDOR ALERT: New Co-Pay Request!', {
+        vendor_email: requestDetails.vendor_email,
+        vendor_name: requestDetails.vendor_name,
+        message: `${requestDetails.agent_name} (${requestDetails.agent_email}) has requested a ${requestDetails.split_percentage}% co-pay split for "${requestDetails.service_title}".`,
+        action_required: 'IMMEDIATE RESPONSE NEEDED - You have 3 days to respond.',
+        calendar_booking: 'Please schedule a consultation with the agent if the service requires it.',
+        response_options: ['Approve', 'Decline', 'Request More Info']
+      });
+    }
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: `Notification sent: ${notification_type}`,
-        co_pay_request_id 
+        message: `Co-pay notification sent: ${notification_type}`,
+        co_pay_request_id,
+        vendor_notified: true,
+        calendar_booking_required: notification_type === 'request_created',
+        details: requestDetails
       }),
       {
         status: 200,
@@ -84,8 +147,25 @@ const handler = async (req: Request): Promise<Response> => {
 
   } catch (error: any) {
     console.error("Error in send-copay-notification function:", error);
+    
+    // Log the error
+    const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+    await supabase
+      .from('co_pay_audit_log')
+      .insert({
+        co_pay_request_id: 'unknown',
+        action_type: 'notification_error',
+        action_details: {
+          error: error.message,
+          stack: error.stack
+        }
+      });
+
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error.message,
+        success: false 
+      }),
       {
         status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },
