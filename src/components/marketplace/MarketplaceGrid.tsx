@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { ServiceCard } from "./ServiceCard";
 import { EnhancedVendorCard } from "./EnhancedVendorCard";
@@ -91,9 +91,57 @@ export const MarketplaceGrid = () => {
   const [services, setServices] = useState<Service[]>([]);
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>("services");
   const [selectedProductCategory, setSelectedProductCategory] = useState<string | null>(null);
+  
+  // Circuit breaker state for marketplace
+  const [circuitBreakerState, setCircuitBreakerState] = useState({
+    isOpen: false,
+    failureCount: 0,
+    lastFailureTime: 0,
+    nextAttempt: 0,
+  });
+
+  const CIRCUIT_BREAKER_CONFIG = {
+    failureThreshold: 3,
+    timeout: 30000, // 30 seconds
+  };
+
+  const checkCircuitBreaker = () => {
+    const now = Date.now();
+    if (circuitBreakerState.isOpen && now >= circuitBreakerState.nextAttempt) {
+      setCircuitBreakerState(prev => ({ ...prev, isOpen: false }));
+      return false;
+    }
+    return circuitBreakerState.isOpen;
+  };
+
+  const recordFailure = () => {
+    setCircuitBreakerState(prev => {
+      const newFailureCount = prev.failureCount + 1;
+      if (newFailureCount >= CIRCUIT_BREAKER_CONFIG.failureThreshold) {
+        return {
+          ...prev,
+          isOpen: true,
+          failureCount: newFailureCount,
+          lastFailureTime: Date.now(),
+          nextAttempt: Date.now() + CIRCUIT_BREAKER_CONFIG.timeout,
+        };
+      }
+      return { ...prev, failureCount: newFailureCount };
+    });
+  };
+
+  const recordSuccess = () => {
+    setCircuitBreakerState({
+      isOpen: false,
+      failureCount: 0,
+      lastFailureTime: 0,
+      nextAttempt: 0,
+    });
+  };
   
   // Define product categories with enhanced styling
   const PRODUCT_CATEGORIES = [
@@ -221,56 +269,79 @@ export const MarketplaceGrid = () => {
     }
   };
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
+    // Check circuit breaker before making request
+    if (checkCircuitBreaker()) {
+      console.log('Circuit breaker is open, skipping request');
+      setError('Service temporarily unavailable. Please try again in a moment.');
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
+      setError(null);
       
-      // Load services with vendor information
-      const { data: servicesData, error: servicesError } = await supabase
-        .from('services')
-        .select(`
-          *,
-          vendor:vendors (
-            name,
-            rating,
-            review_count,
-            is_verified
-          )
-        `)
-        .order('sort_order', { ascending: true })
-        .order('title', { ascending: true });
+      // Create abort controller for request timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+      
+      // Load services and vendors in parallel for better performance
+      const [servicesResponse, vendorsResponse] = await Promise.all([
+        supabase
+          .from('services')
+          .select(`
+            *,
+            vendor:vendors (
+              name,
+              rating,
+              review_count,
+              is_verified
+            )
+          `)
+          .order('sort_order', { ascending: true })
+          .order('title', { ascending: true })
+          .abortSignal(controller.signal),
+          
+        supabase
+          .from('vendors')
+          .select('*')
+          .order('sort_order', { ascending: true })
+          .order('rating', { ascending: false })
+          .abortSignal(controller.signal)
+      ]);
 
-      if (servicesError) throw servicesError;
+      clearTimeout(timeoutId);
 
-      // Load vendors with location filtering
-      let vendorQuery = supabase
-        .from('vendors')
-        .select('*')
-        .order('sort_order', { ascending: true }) // Lower sort_order = higher priority
-        .order('rating', { ascending: false });
-
-      const { data: vendorsData, error: vendorsError } = await vendorQuery;
-
-      if (vendorsError) throw vendorsError;
+      if (servicesResponse.error) throw servicesResponse.error;
+      if (vendorsResponse.error) throw vendorsResponse.error;
 
       // Convert the database response to match our interface
-      const formattedServices = (servicesData || []).map(service => ({
+      const formattedServices = (servicesResponse.data || []).map(service => ({
         ...service,
         discount_percentage: service.discount_percentage ? String(service.discount_percentage) : undefined,
       }));
       
-      setServices(formattedServices);
-      
-      // Format vendors data (main vendors table doesn't have local_representatives)
-      const formattedVendors = (vendorsData || []).map(vendor => ({
+      // Format vendors data
+      const formattedVendors = (vendorsResponse.data || []).map(vendor => ({
         ...vendor,
-        local_representatives: [] // Initialize as empty array since main table doesn't have this field
+        local_representatives: []
       }));
       
+      setServices(formattedServices);
       setVendors(formattedVendors);
+      recordSuccess();
+      
     } catch (error) {
-      // Log error for internal tracking without exposing details
-      const errorId = Date.now();
+      recordFailure();
+      
+      if (error.name === 'AbortError') {
+        setError('Request timed out. Please check your connection and try again.');
+      } else {
+        setError('Failed to load marketplace data. Please try again.');
+      }
+      
+      console.error('Marketplace data loading error:', error);
       toast({
         title: "Error loading data",
         description: "Failed to load marketplace data. Please try again.",
@@ -279,7 +350,7 @@ export const MarketplaceGrid = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [checkCircuitBreaker, recordFailure, recordSuccess, toast]);
 
   // Helper function to extract numeric price from strings like "$150" or "150"
   const extractNumericPrice = (priceString: string | null | undefined): number => {
