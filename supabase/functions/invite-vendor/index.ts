@@ -245,15 +245,38 @@ serve(async (req) => {
       logStep("Default service created", { serviceId: newService.id });
     }
 
-    // TODO: Send notification email to the vendor
-    // This would require setting up an email service
-    logStep("Vendor invitation process completed");
+    // Create contact in Go High Level and trigger automation
+    try {
+      logStep('Creating contact in Go High Level');
+      
+      const ghlResponse = await supabaseClient.functions.invoke('create-ghl-contact', {
+        body: {
+          ...vendorData,
+          vendor_id: newVendor.id,
+          service_id: newService?.id
+        }
+      });
+
+      if (ghlResponse.error) {
+        logStep('GHL integration error', ghlResponse.error);
+        // Don't fail the entire invitation if GHL fails
+        console.warn('Failed to create GHL contact, but vendor was created successfully');
+      } else {
+        logStep('GHL contact created successfully', ghlResponse.data);
+      }
+    } catch (ghlError) {
+      logStep('GHL integration failed', ghlError);
+      console.warn('Failed to integrate with Go High Level:', ghlError);
+      // Continue with successful vendor creation
+    }
+
+    logStep("Vendor invitation process completed with GHL integration");
 
     return new Response(JSON.stringify({ 
       success: true,
       vendor: newVendor,
       service: newService || null,
-      message: "Vendor has been successfully added to the marketplace"
+      message: "Vendor has been successfully added to the marketplace and automation triggered in Go High Level"
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,

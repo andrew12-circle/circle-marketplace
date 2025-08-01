@@ -1,1 +1,43 @@
 project_id = "ihzyuyfawapweamqzzlj"
+
+[functions.ask-circle-ai]
+verify_jwt = false
+
+[functions.auto-import-channels]
+verify_jwt = false
+
+[functions.auto-import-trending]
+verify_jwt = false
+
+[functions.check-subscription]
+verify_jwt = false
+
+[functions.create-checkout]
+verify_jwt = false
+
+[functions.create-ghl-contact]
+verify_jwt = false
+
+[functions.create-subscription-checkout]
+verify_jwt = false
+
+[functions.import-services]
+verify_jwt = false
+
+[functions.import-vendors]
+verify_jwt = false
+
+[functions.import-youtube-channel]
+verify_jwt = false
+
+[functions.invite-vendor]
+verify_jwt = false
+
+[functions.promote-top-content]
+verify_jwt = false
+
+[functions.send-consultation-notification]
+verify_jwt = false
+
+[functions.vectorize-images]
+verify_jwt = false
