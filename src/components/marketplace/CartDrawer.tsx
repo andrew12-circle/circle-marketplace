@@ -240,17 +240,13 @@ export const CartDrawer = () => {
                     </div>
                     {getPendingRequests().map((request) => (
                       <div key={request.id} className="flex gap-3 p-3 border rounded-lg bg-muted/30">
-                        <div className="w-20 h-16 bg-muted rounded-lg overflow-hidden">
-                          <img
-                            src={request.services?.image_url || "/placeholder.svg"}
-                            alt={request.services?.title || "Service"}
-                            className="w-full h-full object-cover"
-                          />
+                        <div className="w-20 h-16 bg-muted rounded-lg overflow-hidden flex items-center justify-center">
+                          <MessageCircle className="w-8 h-8 text-muted-foreground" />
                         </div>
                         
                         <div className="flex-1 min-w-0">
-                          <h4 className="font-medium text-sm line-clamp-2">{request.services?.title || "Service"}</h4>
-                          <p className="text-xs text-muted-foreground">{request.vendors?.name || "Vendor"}</p>
+                          <h4 className="font-medium text-sm line-clamp-2">Co-Pay Request</h4>
+                          <p className="text-xs text-muted-foreground">Vendor ID: {request.vendor_id}</p>
                           
                           <div className="flex items-center justify-between mt-2">
                             <div className="flex items-center gap-2">
@@ -259,7 +255,7 @@ export const CartDrawer = () => {
                                 Pending Approval
                               </Badge>
                               <span className="font-semibold text-muted-foreground">
-                                ${request.services?.pro_price || request.services?.retail_price || "0"}
+                                {request.requested_split_percentage}% split
                               </span>
                             </div>
                             

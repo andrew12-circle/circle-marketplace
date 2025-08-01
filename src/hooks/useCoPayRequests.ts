@@ -54,26 +54,15 @@ export const useCoPayRequests = () => {
     try {
       const { data, error } = await supabase
         .from('co_pay_requests')
-        .select(`
-          *,
-          services (
-            id,
-            title,
-            image_url,
-            pro_price,
-            retail_price,
-            max_vendor_split_percentage
-          ),
-          vendors (
-            id,
-            name,
-            logo_url
-          )
-        `)
+        .select('*')
         .eq('agent_id', user.id)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error loading co-pay requests:', error);
+        throw error;
+      }
+      
       setRequests((data as unknown as CoPayRequest[]) || []);
     } catch (error) {
       console.error('Error loading co-pay requests:', error);
