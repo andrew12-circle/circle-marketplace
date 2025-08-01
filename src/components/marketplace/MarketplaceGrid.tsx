@@ -242,16 +242,6 @@ export const MarketplaceGrid = () => {
   const { user, profile } = useAuth();
   const { location } = useLocation();
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  useEffect(() => {
-    if (profile?.user_id) {
-      loadSavedServices();
-    }
-  }, [profile?.user_id]);
-
   const loadSavedServices = async () => {
     if (!profile?.user_id) return;
 
@@ -271,7 +261,8 @@ export const MarketplaceGrid = () => {
 
   const loadData = useCallback(async () => {
     // Check circuit breaker before making request
-    if (checkCircuitBreaker()) {
+    const now = Date.now();
+    if (circuitBreakerState.isOpen && now < circuitBreakerState.nextAttempt) {
       console.log('Circuit breaker is open, skipping request');
       setError('Service temporarily unavailable. Please try again in a moment.');
       setLoading(false);
@@ -300,15 +291,13 @@ export const MarketplaceGrid = () => {
             )
           `)
           .order('sort_order', { ascending: true })
-          .order('title', { ascending: true })
-          .abortSignal(controller.signal),
+          .order('title', { ascending: true }),
           
         supabase
           .from('vendors')
           .select('*')
           .order('sort_order', { ascending: true })
           .order('rating', { ascending: false })
-          .abortSignal(controller.signal)
       ]);
 
       clearTimeout(timeoutId);
@@ -330,10 +319,30 @@ export const MarketplaceGrid = () => {
       
       setServices(formattedServices);
       setVendors(formattedVendors);
-      recordSuccess();
+      
+      // Record success
+      setCircuitBreakerState({
+        isOpen: false,
+        failureCount: 0,
+        lastFailureTime: 0,
+        nextAttempt: 0,
+      });
       
     } catch (error) {
-      recordFailure();
+      // Record failure
+      setCircuitBreakerState(prev => {
+        const newFailureCount = prev.failureCount + 1;
+        if (newFailureCount >= CIRCUIT_BREAKER_CONFIG.failureThreshold) {
+          return {
+            ...prev,
+            isOpen: true,
+            failureCount: newFailureCount,
+            lastFailureTime: Date.now(),
+            nextAttempt: Date.now() + CIRCUIT_BREAKER_CONFIG.timeout,
+          };
+        }
+        return { ...prev, failureCount: newFailureCount };
+      });
       
       if (error.name === 'AbortError') {
         setError('Request timed out. Please check your connection and try again.');
@@ -350,7 +359,17 @@ export const MarketplaceGrid = () => {
     } finally {
       setLoading(false);
     }
-  }, [checkCircuitBreaker, recordFailure, recordSuccess, toast]);
+  }, [CIRCUIT_BREAKER_CONFIG.failureThreshold, CIRCUIT_BREAKER_CONFIG.timeout, circuitBreakerState.isOpen, circuitBreakerState.nextAttempt, toast]);
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  useEffect(() => {
+    if (profile?.user_id) {
+      loadSavedServices();
+    }
+  }, [profile?.user_id]);
 
   // Helper function to extract numeric price from strings like "$150" or "150"
   const extractNumericPrice = (priceString: string | null | undefined): number => {
