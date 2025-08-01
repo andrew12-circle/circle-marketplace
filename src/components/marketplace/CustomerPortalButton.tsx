@@ -49,16 +49,13 @@ export const CustomerPortalButton = () => {
   };
 
   return (
-    <Button
-      variant="outline"
-      size="sm"
+    <div 
+      className="w-full flex items-center cursor-pointer"
       onClick={handleManageSubscription}
-      disabled={loading}
-      className="gap-2"
     >
-      <Settings className="w-4 h-4" />
+      <Settings className="mr-2 h-4 w-4" />
       {loading ? "Loading..." : "Manage Subscription"}
-      <ExternalLink className="w-3 h-3" />
-    </Button>
+      <ExternalLink className="ml-auto h-3 w-3" />
+    </div>
   );
 };

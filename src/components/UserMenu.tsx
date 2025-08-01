@@ -234,9 +234,9 @@ export const UserMenu = () => {
         </DropdownMenuItem>
         
         {/* Customer Portal Button */}
-        <div className="px-2 py-1">
+        <DropdownMenuItem asChild>
           <CustomerPortalButton />
-        </div>
+        </DropdownMenuItem>
         
         <DropdownMenuSeparator />
         
