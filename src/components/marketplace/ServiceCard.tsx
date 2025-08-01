@@ -92,8 +92,9 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
 
   const handleViewDetails = async () => {
     console.log('handleViewDetails called - modal states:', { isVendorSelectionModalOpen, isPricingChoiceModalOpen, isFunnelModalOpen });
-    // Don't open if other modals are already open
-    if (isVendorSelectionModalOpen || isPricingChoiceModalOpen) {
+    // Don't open if other modals are already open OR if the funnel modal is currently open
+    if (isVendorSelectionModalOpen || isPricingChoiceModalOpen || isFunnelModalOpen) {
+      console.log('Blocked - modal already open');
       return;
     }
     // Track the service view
