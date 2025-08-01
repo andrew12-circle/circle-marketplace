@@ -50,11 +50,11 @@ export const CustomerPortalButton = () => {
 
   return (
     <div 
-      className="w-full flex items-center cursor-pointer"
+      className="w-full flex items-center cursor-pointer text-sm"
       onClick={handleManageSubscription}
     >
       <CreditCard className="mr-2 h-4 w-4" />
-      <span>{loading ? "Loading..." : "Manage Subscription"}</span>
+      <span className="text-sm font-normal">{loading ? "Loading..." : "Manage Subscription"}</span>
       <ExternalLink className="ml-auto h-3 w-3" />
     </div>
   );
