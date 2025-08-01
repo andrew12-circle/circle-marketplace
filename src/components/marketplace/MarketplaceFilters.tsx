@@ -57,11 +57,9 @@ export const MarketplaceFilters = ({ filters, onFiltersChange, categories, viewM
 
   return (
     <Card className="bg-gradient-to-br from-background to-muted/30 border border-border/50 shadow-lg">
-      <CardContent className="p-6">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center">
-            <h3 className="text-lg font-semibold text-foreground">Filters</h3>
-          </div>
+      <CardContent className="p-4">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-medium text-foreground">Filters</h3>
           {hasActiveFilters && (
             <Button variant="outline" size="sm" onClick={clearFilters} className="hover:bg-destructive hover:text-destructive-foreground transition-colors">
               {t('clearAll')}
@@ -69,10 +67,9 @@ export const MarketplaceFilters = ({ filters, onFiltersChange, categories, viewM
           )}
         </div>
 
-        <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6`}>
+        <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4`}>
           {/* Category Filter */}
-          <div className="space-y-2">
-            <Label className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Category</Label>
+          <div>
             <CategoryMegaMenu 
               selectedCategory={safeFilters.category}
               onCategorySelect={(value) => updateFilter("category", value)}
@@ -82,77 +79,57 @@ export const MarketplaceFilters = ({ filters, onFiltersChange, categories, viewM
           </div>
 
           {/* Price Range Filter */}
-          <div className="space-y-3">
-            <Label className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
-              Price Range
-            </Label>
-            <div className="bg-muted/50 rounded-lg p-3 border border-border/30">
-              <div className="text-center mb-2">
-                <span className="text-sm font-semibold text-circle-primary">
-                  ${safeFilters.priceRange[0]} - ${safeFilters.priceRange[1]}
-                </span>
-              </div>
-              <Slider
-                value={safeFilters.priceRange}
-                onValueChange={(value) => updateFilter("priceRange", value)}
-                max={2000}
-                min={0}
-                step={50}
-                className="w-full"
-              />
+          <div className="space-y-2">
+            <div className="text-center">
+              <span className="text-xs font-medium text-circle-primary">
+                ${safeFilters.priceRange[0]} - ${safeFilters.priceRange[1]}
+              </span>
             </div>
+            <Slider
+              value={safeFilters.priceRange}
+              onValueChange={(value) => updateFilter("priceRange", value)}
+              max={2000}
+              min={0}
+              step={50}
+              className="w-full"
+            />
           </div>
 
           {/* Verification Filter */}
-          <div className="space-y-2">
-            <Label className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Verification</Label>
-            <div className="bg-muted/50 rounded-lg p-3 border border-border/30">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="verified"
-                  checked={safeFilters.verified}
-                  onCheckedChange={(checked) => updateFilter("verified", checked)}
-                />
-                <Label htmlFor="verified" className="text-sm font-medium">
-                  {t('circleVerifiedOnly')}
-                </Label>
-              </div>
-            </div>
+          <div className="flex items-center space-x-2 bg-muted/30 rounded-lg p-2">
+            <Checkbox
+              id="verified"
+              checked={safeFilters.verified}
+              onCheckedChange={(checked) => updateFilter("verified", checked)}
+            />
+            <Label htmlFor="verified" className="text-sm">
+              {t('circleVerifiedOnly')}
+            </Label>
           </div>
 
           {/* Featured Filter */}
-          <div className="space-y-2">
-            <Label className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Featured</Label>
-            <div className="bg-muted/50 rounded-lg p-3 border border-border/30">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="featured"
-                  checked={safeFilters.featured}
-                  onCheckedChange={(checked) => updateFilter("featured", checked)}
-                />
-                <Label htmlFor="featured" className="text-sm font-medium">
-                  {t('featuredOnly')}
-                </Label>
-              </div>
-            </div>
+          <div className="flex items-center space-x-2 bg-muted/30 rounded-lg p-2">
+            <Checkbox
+              id="featured"
+              checked={safeFilters.featured}
+              onCheckedChange={(checked) => updateFilter("featured", checked)}
+            />
+            <Label htmlFor="featured" className="text-sm">
+              {t('featuredOnly')}
+            </Label>
           </div>
 
           {/* Co-Pay Eligible Filter - Only for services */}
           {viewMode === 'services' && (
-            <div className="space-y-2">
-              <Label className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Co-Pay</Label>
-              <div className="bg-muted/50 rounded-lg p-3 border border-border/30">
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="coPayEligible"
-                    checked={safeFilters.coPayEligible}
-                    onCheckedChange={(checked) => updateFilter("coPayEligible", checked)}
-                  />
-                  <Label htmlFor="coPayEligible" className="text-sm font-medium">
-                    {t('coPayEligible')}
-                  </Label>
-                </div>
-              </div>
+            <div className="flex items-center space-x-2 bg-muted/30 rounded-lg p-2">
+              <Checkbox
+                id="coPayEligible"
+                checked={safeFilters.coPayEligible}
+                onCheckedChange={(checked) => updateFilter("coPayEligible", checked)}
+              />
+              <Label htmlFor="coPayEligible" className="text-sm">
+                {t('coPayEligible')}
+              </Label>
             </div>
           )}
 
