@@ -156,6 +156,9 @@ export const VendorSelectionModal = ({
   };
 
   const handleVendorSelect = async (vendor: Vendor) => {
+    // Prevent multiple clicks while processing
+    if (isLoading) return;
+    
     try {
       setIsLoading(true);
       
@@ -223,6 +226,12 @@ export const VendorSelectionModal = ({
       setSelectedVendor(vendor);
       setShowConfirmation(true);
       onVendorSelect(vendor);
+      
+      // Show success feedback
+      toast({
+        title: "Request Sent!",
+        description: `Co-pay request sent to ${vendor.name}`,
+      });
     } catch (error) {
       console.error('Error in vendor selection:', error);
       toast({
@@ -445,26 +454,28 @@ export const VendorSelectionModal = ({
                              </p>
                            )}
 
-                           <div className="flex gap-2 mt-3">
-                             <Button
-                               size="sm"
-                               variant="outline"
-                               onClick={(e) => handleLearnMore(vendor, e)}
-                               className="flex-1 text-xs h-7"
-                             >
-                               Learn More
-                             </Button>
-                             <Button
-                               size="sm"
-                               onClick={(e) => {
-                                 e.stopPropagation();
-                                 handleVendorSelect(vendor);
-                               }}
-                               className="flex-1 text-xs h-7"
-                             >
-                               Select Partner
-                             </Button>
-                           </div>
+                            <div className="flex gap-2 mt-3">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={(e) => handleLearnMore(vendor, e)}
+                                className="flex-1 text-xs h-7"
+                                disabled={isLoading}
+                              >
+                                Learn More
+                              </Button>
+                              <Button
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleVendorSelect(vendor);
+                                }}
+                                className="flex-1 text-xs h-7"
+                                disabled={isLoading}
+                              >
+                                {isLoading ? "Sending..." : "Select Partner"}
+                              </Button>
+                            </div>
                          </div>
                        </div>
                      </CardContent>
