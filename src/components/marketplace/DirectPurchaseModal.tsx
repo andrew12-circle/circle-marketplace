@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -46,9 +46,11 @@ export const DirectPurchaseModal = ({
 }: DirectPurchaseModalProps) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [selectedOption, setSelectedOption] = useState<'retail' | 'pro' | 'copay'>('retail');
+  const [agentPoints, setAgentPoints] = useState<any>(null);
+  const [loadingPoints, setLoadingPoints] = useState(false);
   const { toast } = useToast();
   const { addToCart } = useCart();
-  const { profile } = useAuth();
+  const { profile, user } = useAuth();
   const { formatPrice } = useCurrency();
   const isProMember = profile?.is_pro_member || false;
 
@@ -65,6 +67,60 @@ export const DirectPurchaseModal = ({
   const coPayPrice = service.co_pay_allowed && service.max_vendor_split_percentage 
     ? retailPrice * (1 - (service.max_vendor_split_percentage / 100))
     : 0;
+
+  // Load agent points when modal opens
+  useEffect(() => {
+    if (isOpen && user?.id) {
+      loadAgentPoints();
+    }
+  }, [isOpen, user?.id]);
+
+  const loadAgentPoints = async () => {
+    if (!user?.id) return;
+    
+    setLoadingPoints(true);
+    try {
+      const { data, error } = await supabase.rpc('get_agent_points_summary', {
+        p_agent_id: user.id
+      });
+
+      if (error) throw error;
+      setAgentPoints(data);
+    } catch (error) {
+      console.error('Error loading agent points:', error);
+    } finally {
+      setLoadingPoints(false);
+    }
+  };
+
+  const getCoPayCoverage = () => {
+    const vendorSplitAmount = retailPrice * ((service.max_vendor_split_percentage || 0) / 100);
+    const availablePoints = agentPoints?.total_available_points || 0;
+    
+    if (availablePoints >= vendorSplitAmount) {
+      return {
+        type: 'full_coverage',
+        userPointsUsed: vendorSplitAmount,
+        vendorRequest: 0,
+        message: `Use ${vendorSplitAmount} of your points ($${vendorSplitAmount})`
+      };
+    } else if (availablePoints > 0) {
+      const vendorRequest = vendorSplitAmount - availablePoints;
+      return {
+        type: 'partial_coverage',
+        userPointsUsed: availablePoints,
+        vendorRequest: vendorRequest,
+        message: `Use ${availablePoints} points + request $${vendorRequest.toFixed(2)} from vendor`
+      };
+    } else {
+      return {
+        type: 'vendor_only',
+        userPointsUsed: 0,
+        vendorRequest: vendorSplitAmount,
+        message: `Request $${vendorSplitAmount.toFixed(2)} from vendor`
+      };
+    }
+  };
 
   const getSelectedPrice = () => {
     switch (selectedOption) {
@@ -87,63 +143,114 @@ export const DirectPurchaseModal = ({
       // For co-pay purchases, try automatic point deduction with real-time charging
       if (selectedOption === 'copay' && service.vendor_id && service.max_vendor_split_percentage) {
         try {
-          const { data: pointsResult, error: pointsError } = await supabase.rpc('process_automatic_copay', {
-            p_agent_id: profile?.user_id,
-            p_service_id: service.id,
-            p_vendor_id: service.vendor_id,
-            p_total_amount: retailPrice, // Use full retail price for calculation
-            p_coverage_percentage: service.max_vendor_split_percentage
-          });
+          const coverage = getCoPayCoverage();
+          
+          // If agent has points to use
+          if (coverage.userPointsUsed > 0) {
+            const { data: pointsResult, error: pointsError } = await supabase.rpc('process_automatic_copay', {
+              p_agent_id: user?.id,
+              p_service_id: service.id,
+              p_vendor_id: service.vendor_id,
+              p_total_amount: coverage.userPointsUsed,
+              p_coverage_percentage: 100 // Use exact amount in points
+            });
 
-          const result = pointsResult as any;
-          if (!pointsError && result?.success) {
-            // Process real-time charge
-            const { data: chargeResult, error: chargeError } = await supabase.rpc(
-              'process_real_time_charge',
-              {
-                p_allocation_id: result.allocation_id,
-                p_transaction_id: result.transaction_id,
-                p_vendor_id: service.vendor_id,
-                p_agent_id: profile?.user_id,
-                p_points_used: result.points_used,
-                p_amount_to_charge: result.points_used // $1 per point
-              }
-            );
-
-            const chargeResponse = chargeResult as any;
-            if (chargeResponse?.success) {
-              // Process the actual Stripe charge
-              const { error: stripeError } = await supabase.functions.invoke('process-point-charge', {
-                body: {
-                  charge_id: chargeResponse.charge_id,
-                  stripe_customer_id: chargeResponse.stripe_customer_id,
-                  stripe_payment_method_id: chargeResponse.stripe_payment_method_id,
-                  amount_to_charge: chargeResponse.amount_to_charge,
-                  points_charged: chargeResponse.points_charged,
-                  vendor_id: service.vendor_id
+            const result = pointsResult as any;
+            if (!pointsError && result?.success) {
+              // Process real-time charge for the points used
+              const { data: chargeResult, error: chargeError } = await supabase.rpc(
+                'process_real_time_charge',
+                {
+                  p_allocation_id: result.allocation_id,
+                  p_transaction_id: result.transaction_id,
+                  p_vendor_id: service.vendor_id,
+                  p_agent_id: user?.id,
+                  p_points_used: result.points_used,
+                  p_amount_to_charge: result.points_used
                 }
-              });
+              );
 
-              if (!stripeError) {
-                toast({
-                  title: "Purchase Complete!",
-                  description: `Successfully used ${result.points_used} points ($${result.amount_covered}) for co-pay. Vendor charged immediately.`,
+              const chargeResponse = chargeResult as any;
+              if (chargeResponse?.success) {
+                // Process the actual Stripe charge
+                const { error: stripeError } = await supabase.functions.invoke('process-point-charge', {
+                  body: {
+                    charge_id: chargeResponse.charge_id,
+                    stripe_customer_id: chargeResponse.stripe_customer_id,
+                    stripe_payment_method_id: chargeResponse.stripe_payment_method_id,
+                    amount_to_charge: chargeResponse.amount_to_charge,
+                    points_charged: chargeResponse.points_charged,
+                    vendor_id: service.vendor_id
+                  }
                 });
 
-                onPurchaseComplete?.();
-                onClose();
-                return;
+                if (!stripeError) {
+                  // If full coverage, we're done
+                  if (coverage.type === 'full_coverage') {
+                    toast({
+                      title: "Purchase Complete!",
+                      description: `Successfully used ${result.points_used} points for full co-pay coverage.`,
+                    });
+
+                    onPurchaseComplete?.();
+                    onClose();
+                    return;
+                  }
+                  
+                  // If partial coverage, still need to create vendor request for remaining amount
+                  if (coverage.type === 'partial_coverage' && coverage.vendorRequest > 0) {
+                    // Create co-pay request for remaining amount
+                    const { error: requestError } = await supabase
+                      .from('co_pay_requests')
+                      .insert({
+                        agent_id: user?.id,
+                        vendor_id: service.vendor_id,
+                        service_id: service.id,
+                        requested_split_percentage: Math.round((coverage.vendorRequest / retailPrice) * 100),
+                        agent_notes: `Partial coverage: Used ${result.points_used} points, requesting $${coverage.vendorRequest.toFixed(2)} additional support`
+                      });
+
+                    if (!requestError) {
+                      toast({
+                        title: "Co-Pay Processed!",
+                        description: `Used ${result.points_used} points and requested $${coverage.vendorRequest.toFixed(2)} from vendor.`,
+                      });
+
+                      onPurchaseComplete?.();
+                      onClose();
+                      return;
+                    }
+                  }
+                }
               }
             }
-          } else if (result?.error === 'insufficient_points') {
-            toast({
-              title: "Insufficient Points",
-              description: `Need ${result.points_needed} points but only have enough for partial coverage. Proceeding to regular checkout.`,
-              variant: "destructive"
-            });
+          }
+          
+          // Fallback to vendor-only request if no points or points processing failed
+          if (coverage.type === 'vendor_only') {
+            const { error: requestError } = await supabase
+              .from('co_pay_requests')
+              .insert({
+                agent_id: user?.id,
+                vendor_id: service.vendor_id,
+                service_id: service.id,
+                requested_split_percentage: service.max_vendor_split_percentage,
+                agent_notes: 'Requesting full co-pay support from vendor'
+              });
+
+            if (!requestError) {
+              toast({
+                title: "Co-Pay Request Sent!",
+                description: `Requested $${coverage.vendorRequest.toFixed(2)} co-pay support from vendor.`,
+              });
+
+              onPurchaseComplete?.();
+              onClose();
+              return;
+            }
           }
         } catch (pointsErr) {
-          console.error('Points processing failed:', pointsErr);
+          console.error('Co-pay processing failed:', pointsErr);
         }
       }
 
@@ -349,7 +456,15 @@ export const DirectPurchaseModal = ({
                             {service.max_vendor_split_percentage}% vendor support
                           </Badge>
                         </div>
-                        <p className="text-sm text-muted-foreground">Vendor shares advertising cost</p>
+                        {loadingPoints ? (
+                          <p className="text-sm text-muted-foreground">Loading your points...</p>
+                        ) : agentPoints ? (
+                          <p className="text-sm text-muted-foreground">
+                            {getCoPayCoverage().message}
+                          </p>
+                        ) : (
+                          <p className="text-sm text-muted-foreground">Vendor shares advertising cost</p>
+                        )}
                       </div>
                     </div>
                     <div className="text-right">
@@ -359,6 +474,11 @@ export const DirectPurchaseModal = ({
                       <div className="text-sm text-muted-foreground line-through">
                         {formatPrice(retailPrice, service.price_duration || 'mo')}
                       </div>
+                      {agentPoints && (
+                        <div className="text-xs text-green-600 mt-1">
+                          Available: {agentPoints.total_available_points} points (${agentPoints.total_dollar_value})
+                        </div>
+                      )}
                     </div>
                   </div>
                 </CardContent>
