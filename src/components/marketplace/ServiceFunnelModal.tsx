@@ -289,7 +289,7 @@ export const ServiceFunnelModal = ({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()} modal={true}>
       <DialogContent className="max-w-7xl max-h-[95vh] overflow-y-auto p-0">
         <DialogHeader className="sr-only">
           <span>Service Details</span>
@@ -311,14 +311,7 @@ export const ServiceFunnelModal = ({
             <X className="h-6 w-6" />
           </Button>
           
-          <div 
-            className="absolute inset-0 bg-black/20"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              onClose();
-            }}
-          ></div>
+          <div className="absolute inset-0 bg-black/20"></div>
           <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
             <div className="space-y-4">
               <div className="flex items-center gap-2 mb-2">
