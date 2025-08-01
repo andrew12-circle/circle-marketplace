@@ -163,53 +163,78 @@ export const CartDrawer = () => {
               <div className="flex-1 overflow-auto py-4 space-y-4">
                 {cartItems.map((item) => (
                    <div key={item.id} className="flex gap-3 p-3 border rounded-lg">
-                     <div className="w-20 h-16 bg-muted rounded-lg overflow-hidden">
-                        {item.type === 'co-pay-request' ? (
-                          <img
-                            src={item.image_url || "/placeholder.svg"}
-                            alt={item.title}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <img
-                            src={item.image_url || "/placeholder.svg"}
-                            alt={item.title}
-                            className="w-full h-full object-cover"
-                          />
-                        )}
-                      </div>
+                      <div className="w-20 h-16 bg-muted rounded-lg overflow-hidden relative">
+                         {item.type === 'co-pay-request' ? (
+                           <>
+                             <img
+                               src={item.image_url || "/placeholder.svg"}
+                               alt={item.title}
+                               className="w-full h-full object-cover"
+                             />
+                             {/* Show vendor logo overlay */}
+                             {typeof item.vendor === 'object' && item.vendor?.logo_url && (
+                               <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-white rounded-full border-2 border-white overflow-hidden shadow-sm">
+                                 <img
+                                   src={item.vendor.logo_url}
+                                   alt={item.vendorName}
+                                   className="w-full h-full object-cover"
+                                 />
+                               </div>
+                             )}
+                           </>
+                         ) : (
+                           <img
+                             src={item.image_url || "/placeholder.svg"}
+                             alt={item.title}
+                             className="w-full h-full object-cover"
+                           />
+                         )}
+                       </div>
                      
                       <div className="flex-1 min-w-0">
                         <h4 className="font-medium text-sm line-clamp-2">
                           {item.title}
                         </h4>
-                       <p className="text-xs text-muted-foreground">
-                         {item.type === 'co-pay-request' 
-                           ? `Co-Pay with ${item.vendorName || item.vendor}` 
-                           : item.vendor}
-                       </p>
+                        <p className="text-xs text-muted-foreground">
+                          {item.type === 'co-pay-request' 
+                            ? `Co-Pay with ${item.vendorName || (typeof item.vendor === 'string' ? item.vendor : item.vendor?.name)}` 
+                            : item.vendor}
+                        </p>
                        
-                       {/* Show pricing structure for co-pay requests */}
-                       {item.type === 'co-pay-request' && (
-                         <div className="text-xs text-muted-foreground mt-1 space-y-0.5">
-                           <div className="flex justify-between">
-                             <span>Retail Price:</span>
-                             <span className="line-through">$99/mo</span>
-                           </div>
-                           <div className="flex justify-between">
-                             <span>Co-Pay Price:</span>
-                             <span className="text-green-600 font-medium">$49/mo</span>
-                           </div>
-                           <div className="flex justify-between">
-                             <span>Your Split:</span>
-                             <span className="text-blue-600">{100 - (item.requestedSplit || 50)}%</span>
-                           </div>
-                           <div className="flex justify-between">
-                             <span>Vendor Split:</span>
-                             <span className="text-orange-600">{item.requestedSplit || 50}%</span>
-                           </div>
-                         </div>
-                       )}
+                        {/* Show pricing structure for co-pay requests */}
+                        {item.type === 'co-pay-request' && (
+                          (() => {
+                            let pricing = { retail_price: '$99/mo', co_pay_price: '$49/mo', pro_price: '$39/mo' };
+                            try {
+                              if (item.description) {
+                                pricing = JSON.parse(item.description);
+                              }
+                            } catch (e) {
+                              // Use default pricing if parsing fails
+                            }
+                            
+                            return (
+                              <div className="text-xs text-muted-foreground mt-1 space-y-0.5">
+                                <div className="flex justify-between">
+                                  <span>Retail Price:</span>
+                                  <span className="line-through">{pricing.retail_price || '$99/mo'}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span>Co-Pay Price:</span>
+                                  <span className="text-green-600 font-medium">{pricing.co_pay_price || '$49/mo'}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span>Your Split:</span>
+                                  <span className="text-blue-600">{100 - (item.requestedSplit || 50)}%</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span>Vendor Split:</span>
+                                  <span className="text-orange-600">{item.requestedSplit || 50}%</span>
+                                </div>
+                              </div>
+                            );
+                          })()
+                        )}
                        
                        <div className="flex items-center justify-between mt-2">
                           <div className="flex items-center gap-2">
