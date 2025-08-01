@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Search, MapPin, Star, Users, TrendingUp, Building, Plus, CheckCircle } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -81,10 +82,11 @@ export const VendorSelectionModal = ({
     try {
       const { data, error } = await supabase
         .from('vendors')
-        .select('*')
+        .select('id, name, description, logo_url, location, rating, review_count, is_verified, co_marketing_agents, campaigns_funded, service_states, vendor_type')
         .eq('is_active', true)
         .order('sort_order', { ascending: true }) // Higher sort_order = higher priority
-        .order('rating', { ascending: false });
+        .order('rating', { ascending: false })
+        .limit(20); // Limit initial results for faster loading
 
       console.log('VendorSelectionModal: Supabase response:', { data, error, dataLength: data?.length });
 
@@ -254,8 +256,25 @@ export const VendorSelectionModal = ({
           {/* Vendor Grid */}
           <div className="max-h-[60vh] overflow-y-auto">
             {isLoading ? (
-              <div className="flex justify-center items-center h-32">
-                <div className="text-sm text-muted-foreground">Loading vendors...</div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <Card key={i} className="cursor-pointer">
+                    <CardContent className="p-4">
+                      <div className="flex gap-3">
+                        <Skeleton className="w-16 h-16 rounded-lg" />
+                        <div className="flex-1 space-y-2">
+                          <Skeleton className="h-4 w-3/4" />
+                          <Skeleton className="h-3 w-1/2" />
+                          <Skeleton className="h-3 w-2/3" />
+                          <div className="flex gap-2 mt-3">
+                            <Skeleton className="h-7 flex-1" />
+                            <Skeleton className="h-7 flex-1" />
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
               </div>
             ) : filteredVendors.length === 0 ? (
               <div className="text-center py-8">
