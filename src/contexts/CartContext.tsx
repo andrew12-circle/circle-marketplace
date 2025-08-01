@@ -8,6 +8,7 @@ interface CartItem {
   vendor?: string | any; // For marketplace services - can be string or vendor object for co-pay
   creator?: string; // For academy courses
   image_url?: string;
+  image?: string; // Alternative image property
   quantity: number;
   requiresQuote?: boolean;
   type: 'service' | 'course' | 'co-pay-request'; // Added co-pay-request type
@@ -176,9 +177,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const addCoPayRequest = (coPayItem: any) => {
     const cartItem: CartItem = {
       id: coPayItem.id,
-      title: `Co-Pay: ${coPayItem.service.title}`,
+      title: `${coPayItem.service.title}`,
+      image_url: coPayItem.service.image_url,
       price: 0,
-      vendor: coPayItem.vendor.name,
+      vendor: coPayItem.vendor,
       quantity: 1,
       type: 'co-pay-request',
       status: coPayItem.status,
@@ -186,7 +188,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       vendorName: coPayItem.vendor.name,
       serviceName: coPayItem.service.title,
       createdAt: coPayItem.createdAt,
-      requiresQuote: false
+      requiresQuote: false,
+      description: JSON.stringify({
+        retail_price: coPayItem.service.retail_price,
+        pro_price: coPayItem.service.pro_price,
+        co_pay_price: coPayItem.service.co_pay_price
+      })
     };
     
     addToCart(cartItem);

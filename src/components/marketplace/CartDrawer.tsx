@@ -201,40 +201,44 @@ export const CartDrawer = () => {
                             : item.vendor}
                         </p>
                        
-                        {/* Show pricing structure for co-pay requests */}
-                        {item.type === 'co-pay-request' && (
-                          (() => {
-                            let pricing = { retail_price: '$99/mo', co_pay_price: '$49/mo', pro_price: '$39/mo' };
-                            try {
-                              if (item.description) {
-                                pricing = JSON.parse(item.description);
-                              }
-                            } catch (e) {
-                              // Use default pricing if parsing fails
-                            }
-                            
-                            return (
-                              <div className="text-xs text-muted-foreground mt-1 space-y-0.5">
-                                <div className="flex justify-between">
-                                  <span>Retail Price:</span>
-                                  <span className="line-through">{pricing.retail_price || '$99/mo'}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span>Co-Pay Price:</span>
-                                  <span className="text-green-600 font-medium">{pricing.co_pay_price || '$49/mo'}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span>Your Split:</span>
-                                  <span className="text-blue-600">{100 - (item.requestedSplit || 50)}%</span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span>Vendor Split:</span>
-                                  <span className="text-orange-600">{item.requestedSplit || 50}%</span>
-                                </div>
-                              </div>
-                            );
-                          })()
-                        )}
+                         {/* Show pricing structure for co-pay requests */}
+                         {item.type === 'co-pay-request' && (
+                           (() => {
+                             let pricing = { retail_price: '$299/mo', co_pay_price: '$209/mo', pro_price: '$269/mo' };
+                             try {
+                               if (item.description) {
+                                 pricing = JSON.parse(item.description);
+                               }
+                             } catch (e) {
+                               // Use default pricing if parsing fails
+                             }
+                             
+                             return (
+                               <div className="text-xs text-muted-foreground mt-1 space-y-0.5">
+                                 <div className="flex justify-between">
+                                   <span>Retail Price:</span>
+                                   <span className="line-through text-muted-foreground">{pricing.retail_price || '$299/mo'}</span>
+                                 </div>
+                                 <div className="flex justify-between">
+                                   <span>Co-Pay Price:</span>
+                                   <span className="text-green-600 font-medium">{pricing.co_pay_price || '$209/mo'}</span>
+                                 </div>
+                                 <div className="flex justify-between">
+                                   <span>Pro Price (if denied):</span>
+                                   <span className="text-amber-600">{pricing.pro_price || '$269/mo'}</span>
+                                 </div>
+                                 <div className="flex justify-between">
+                                   <span>Your Split:</span>
+                                   <span className="text-blue-600">{100 - (item.requestedSplit || 50)}%</span>
+                                 </div>
+                                 <div className="flex justify-between">
+                                   <span>Vendor Split:</span>
+                                   <span className="text-orange-600">{item.requestedSplit || 50}%</span>
+                                 </div>
+                               </div>
+                             );
+                           })()
+                         )}
                        
                        <div className="flex items-center justify-between mt-2">
                           <div className="flex items-center gap-2">
