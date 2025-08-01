@@ -1163,6 +1163,36 @@ export type Database = {
           },
         ]
       }
+      service_reviews: {
+        Row: {
+          created_at: string
+          id: string
+          rating: number
+          review: string | null
+          service_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          rating: number
+          review?: string | null
+          service_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          rating?: number
+          review?: string | null
+          service_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       service_views: {
         Row: {
           id: string
@@ -2012,6 +2042,13 @@ export type Database = {
           years_experience: number
           website_url: string
           avatar_url: string
+        }[]
+      }
+      get_service_rating_stats: {
+        Args: { service_id: string }
+        Returns: {
+          average_rating: number
+          total_reviews: number
         }[]
       }
       get_user_admin_status: {

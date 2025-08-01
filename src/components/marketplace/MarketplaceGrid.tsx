@@ -18,6 +18,7 @@ import { useLocation } from "@/hooks/useLocation";
 import { determineServiceRisk } from "./RESPAComplianceSystem";
 import { CategoryMegaMenu } from "./CategoryMegaMenu";
 import { EnhancedSearch, SearchFilters } from "./EnhancedSearch";
+import { VendorCallToAction } from "./VendorCallToAction";
 
 interface FilterState {
   category: string;
