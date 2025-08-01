@@ -14,6 +14,7 @@ import { PaymentCanceled } from "./pages/PaymentCanceled";
 import { Pricing } from "./pages/Pricing";
 import { ProfileSettings } from "./pages/ProfileSettings";
 import { AgentWallet } from "./pages/AgentWallet";
+import { AdminAccounting } from "./pages/AdminAccounting";
 import { SavedItems } from "./pages/SavedItems";
 import { ConsultationDemo } from "./pages/ConsultationDemo";
 import { VendorDashboard } from "./pages/VendorDashboard";
@@ -58,6 +59,7 @@ const App = () => (
             <Route path="/analytics" element={<AnalyticsDashboard />} />
             <Route path="/support" element={<SupportDashboard />} />
             <Route path="/advanced-features" element={<AdvancedFeaturesDashboard />} />
+            <Route path="/admin/accounting" element={<AdminAccounting />} />
             
             {/* Legal Pages */}
             <Route path="/terms" element={<TermsOfService />} />
