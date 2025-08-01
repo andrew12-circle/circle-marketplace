@@ -346,6 +346,15 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                   </div>
                 </div>
               )}
+              
+              {/* Show discount badge for pro members */}
+              {service.discount_percentage && (
+                <div className="flex justify-end">
+                   <Badge className="bg-destructive text-destructive-foreground text-xs hover:bg-green-600 hover:text-white transition-colors">
+                     {service.discount_percentage?.replace('%', '')}% OFF
+                   </Badge>
+                </div>
+              )}
             </>
           ) : (
             <>
