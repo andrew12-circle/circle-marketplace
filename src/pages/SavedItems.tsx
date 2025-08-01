@@ -234,7 +234,8 @@ export const SavedItems = () => {
 
       const { data, error } = await supabase.functions.invoke('ask-circle-ai', {
         body: {
-          message: `Please analyze and compare these services for a real estate agent. Provide insights on pricing differences, value propositions, and which might be best for different scenarios: ${JSON.stringify(servicesData, null, 2)}`
+          type: 'quick',
+          prompt: `Please analyze and compare these services for a real estate agent. Provide insights on pricing differences, value propositions, and which might be best for different scenarios: ${JSON.stringify(servicesData, null, 2)}`
         }
       });
 
