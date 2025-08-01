@@ -86,14 +86,19 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       let serviceData = coPayItem.service;
       if (coPayItem.service_id && !serviceData?.image_url) {
         try {
+          console.log('Fetching service data for ID:', coPayItem.service_id);
           const { data: service, error } = await supabase
             .from('services')
             .select('id, title, image_url, co_pay_price, retail_price, pro_price, requires_quote')
             .eq('id', coPayItem.service_id)
             .single();
           
+          console.log('Supabase service response:', service);
+          console.log('Supabase service error:', error);
+          
           if (service && !error) {
             serviceData = service;
+            console.log('Service data set to:', serviceData);
           }
         } catch (error) {
           console.error('Error fetching service data:', error);
