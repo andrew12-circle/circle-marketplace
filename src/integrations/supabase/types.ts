@@ -1446,6 +1446,51 @@ export type Database = {
         }
         Relationships: []
       }
+      vendor_user_associations: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_primary_contact: boolean | null
+          role: string
+          updated_at: string | null
+          user_id: string
+          vendor_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_primary_contact?: boolean | null
+          role?: string
+          updated_at?: string | null
+          user_id: string
+          vendor_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_primary_contact?: boolean | null
+          role?: string
+          updated_at?: string | null
+          user_id?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_user_associations_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_user_associations_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors_with_local_reps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vendors: {
         Row: {
           ad_budget_max: number | null
