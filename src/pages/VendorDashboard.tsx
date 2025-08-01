@@ -70,16 +70,16 @@ export const VendorDashboard = () => {
     fetchVendorData();
   }, []);
 
-  // Track dashboard page view
-  useEffect(() => {
-    if (vendorId) {
-      trackFunnelView(vendorId, {
-        vendorName: 'Current Vendor',
-        section: 'vendor_dashboard',
-        timeSpent: 0,
-      });
-    }
-  }, [vendorId, trackFunnelView]);
+  // Track dashboard page view (temporarily disabled until vendor table is set up)
+  // useEffect(() => {
+  //   if (vendorId) {
+  //     trackFunnelView(vendorId, {
+  //       vendorName: 'Current Vendor',
+  //       section: 'vendor_dashboard',
+  //       timeSpent: 0,
+  //     });
+  //   }
+  // }, [vendorId, trackFunnelView]);
 
   const fetchVendorData = async () => {
     try {
@@ -104,7 +104,6 @@ export const VendorDashboard = () => {
         .from('services')
         .select(`
           *,
-          service_reviews(rating, review),
           service_views(id),
           consultation_bookings(status),
           saved_services(id)
@@ -115,7 +114,6 @@ export const VendorDashboard = () => {
 
       // Map the data to match our interface with enhanced analytics
       const mappedServices: VendorService[] = (servicesData || []).map((service: any) => {
-        const reviews = service.service_reviews || [];
         const views = service.service_views || [];
         const bookings = service.consultation_bookings || [];
         const saves = service.saved_services || [];
@@ -128,8 +126,8 @@ export const VendorDashboard = () => {
           category: service.category || 'General',
           vendor_location: service.vendor_location || 'Location not specified',
           image_url: service.image_url,
-          rating: reviews.length > 0 ? reviews.reduce((sum: number, r: any) => sum + r.rating, 0) / reviews.length : 0,
-          reviews_count: reviews.length,
+          rating: service.rating || 4.5, // Use service rating directly
+          reviews_count: 0, // Will be calculated later when reviews table is available
           views_count: views.length,
           bookings_count: bookings.length,
           is_featured: service.is_featured || false,
