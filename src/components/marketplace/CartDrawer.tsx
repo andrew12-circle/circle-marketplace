@@ -167,8 +167,8 @@ export const CartDrawer = () => {
                          {item.type === 'co-pay-request' ? (
                            <>
                              {/* Main service image */}
-                             <img
-                               src={item.image_url || item.image || "/placeholder.svg"}
+                              <img
+                                src={item.service?.image_url || item.image_url || item.image || "/placeholder.svg"}
                                alt={item.title}
                                className="w-full h-full object-cover"
                              />

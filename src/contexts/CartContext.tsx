@@ -21,6 +21,14 @@ interface CartItem {
   vendorName?: string;
   serviceName?: string;
   createdAt?: string;
+  // Service object for co-pay requests
+  service?: {
+    title: string;
+    image_url?: string;
+    co_pay_price?: number;
+    retail_price?: number;
+    pro_price?: number;
+  };
 }
 
 interface CartContextType {
