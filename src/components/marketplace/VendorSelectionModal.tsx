@@ -210,7 +210,7 @@ export const VendorSelectionModal = ({
             variant="outline"
             size="sm"
             onClick={() => setShowInviteModal(true)}
-            className="shrink-0 ml-2 mr-2 border-green-600 text-green-600 hover:bg-green-50 hover:border-green-700 hover:text-green-700"
+            className="shrink-0 mr-8 border-green-600 text-green-600 hover:bg-green-50 hover:border-green-700 hover:text-green-700"
           >
             <Plus className="w-4 h-4 mr-2" />
             Request Your Vendors
