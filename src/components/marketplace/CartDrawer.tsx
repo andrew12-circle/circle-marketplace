@@ -168,7 +168,14 @@ export const CartDrawer = () => {
                            <>
                              {/* Main service image */}
                                <img
-                                 src={item.service?.image_url || item.image_url || item.image || (typeof item.vendor === 'object' && item.vendor?.logo_url) || "/placeholder.svg"}
+                                 src={(() => {
+                                   console.log('Full cart item:', item);
+                                   // For Real Geeks service, use their logo
+                                   if (item.title?.includes('Real Geeks') || item.serviceName?.includes('Real Geeks')) {
+                                     return 'https://www.realgeeks.com/wp-content/uploads/2023/01/real-geeks-logo.png';
+                                   }
+                                   return item.service?.image_url || item.image_url || item.image || (typeof item.vendor === 'object' && item.vendor?.logo_url) || "/placeholder.svg";
+                                 })()}
                                 alt={item.title}
                                 className="w-full h-full object-cover"
                               />
