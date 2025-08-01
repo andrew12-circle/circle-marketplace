@@ -13,7 +13,7 @@ import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ServiceCard } from '@/components/marketplace/ServiceCard';
 import { ServiceDetailsModal } from '@/components/marketplace/ServiceDetailsModal';
-import { ServiceFunnelEditorModal } from '@/components/marketplace/ServiceFunnelEditorModal';
+
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useVendorActivityTracking } from '@/hooks/useVendorActivityTracking';
@@ -62,45 +62,6 @@ export const VendorDashboard = () => {
     trending_score: 0
   });
   const [loading, setLoading] = useState(true);
-  const [isServiceBuilderOpen, setIsServiceBuilderOpen] = useState(false);
-  const [funnelContent, setFunnelContent] = useState({
-    headline: "",
-    subheadline: "",
-    heroDescription: "",
-    estimatedRoi: 0,
-    duration: "",
-    whyChooseUs: {
-      title: "",
-      benefits: []
-    },
-    media: [],
-    packages: [],
-    socialProof: {
-      testimonials: [],
-      stats: []
-    },
-    trustIndicators: {
-      guarantee: "",
-      cancellation: "",
-      certification: ""
-    },
-    callToAction: {
-      primaryHeadline: "",
-      primaryDescription: "",
-      primaryButtonText: "",
-      secondaryHeadline: "",
-      secondaryDescription: "",
-      contactInfo: {
-        phone: "",
-        email: "",
-        website: ""
-      }
-    },
-    urgency: {
-      enabled: false,
-      message: ""
-    }
-  });
   const [selectedService, setSelectedService] = useState<VendorService | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
 
@@ -212,9 +173,6 @@ export const VendorDashboard = () => {
     }
   };
 
-  const openServiceBuilder = () => {
-    setIsServiceBuilderOpen(true);
-  };
 
   const handleServiceClick = (service: VendorService) => {
     setSelectedService(service);
@@ -289,12 +247,12 @@ export const VendorDashboard = () => {
                 </p>
                 <div className="flex items-center gap-4 mt-6">
                   <Button 
-                    onClick={openServiceBuilder}
                     className="bg-white text-blue-600 hover:bg-white/90 font-semibold px-6 py-3"
                     size="lg"
+                    disabled
                   >
                     <Plus className="w-5 h-5 mr-2" />
-                    Create New Service
+                    Create New Service (Coming Soon)
                   </Button>
                   <Button 
                     variant="outline" 
@@ -444,11 +402,11 @@ export const VendorDashboard = () => {
             </CardHeader>
             <CardContent className="space-y-3">
               <Button 
-                onClick={openServiceBuilder}
                 className="w-full justify-start bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+                disabled
               >
                 <Plus className="w-4 h-4 mr-2" />
-                Add New Service
+                Add New Service (Coming Soon)
               </Button>
               <Button variant="outline" className="w-full justify-start">
                 <Zap className="w-4 h-4 mr-2" />
@@ -475,11 +433,11 @@ export const VendorDashboard = () => {
                 Your Services ({services.length})
               </CardTitle>
               <Button 
-                onClick={openServiceBuilder}
                 className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+                disabled
               >
                 <Plus className="w-4 h-4 mr-2" />
-                Add Service
+                Add Service (Coming Soon)
               </Button>
             </div>
           </CardHeader>
@@ -493,12 +451,12 @@ export const VendorDashboard = () => {
                   Showcase your expertise and connect with customers.
                 </p>
                 <Button 
-                  onClick={openServiceBuilder}
                   className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
                   size="lg"
+                  disabled
                 >
                   <Plus className="w-5 h-5 mr-2" />
-                  Create Your First Service
+                  Create Your First Service (Coming Soon)
                 </Button>
               </div>
             ) : (
@@ -536,20 +494,6 @@ export const VendorDashboard = () => {
       </div>
 
       {/* Modals */}
-      {isServiceBuilderOpen && (
-        <ServiceFunnelEditorModal
-          open={isServiceBuilderOpen}
-          onOpenChange={(open) => setIsServiceBuilderOpen(open)}
-          funnelContent={funnelContent}
-          onChange={setFunnelContent}
-          onSave={() => {
-            // Handle saving the funnel content
-            fetchVendorData();
-            setIsServiceBuilderOpen(false);
-          }}
-          serviceName="New Service"
-        />
-      )}
 
       {selectedService && (
         <ServiceDetailsModal
