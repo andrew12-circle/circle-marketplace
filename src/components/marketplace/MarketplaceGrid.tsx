@@ -689,7 +689,6 @@ export const MarketplaceGrid = () => {
 
           {/* Enhanced Search Component */}
           <div className="space-y-6">
-            <CircleProBanner />
             <LocationFilterBanner 
               onToggleLocationFilter={() => setIsLocationFilterActive(!isLocationFilterActive)}
               isLocationFilterActive={isLocationFilterActive}
