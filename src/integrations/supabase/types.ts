@@ -1273,6 +1273,7 @@ export type Database = {
           co_pay_price: string | null
           created_at: string | null
           description: string | null
+          direct_purchase_enabled: boolean | null
           discount_percentage: string | null
           duration: string | null
           estimated_agent_split_percentage: number | null
@@ -1306,6 +1307,7 @@ export type Database = {
           co_pay_price?: string | null
           created_at?: string | null
           description?: string | null
+          direct_purchase_enabled?: boolean | null
           discount_percentage?: string | null
           duration?: string | null
           estimated_agent_split_percentage?: number | null
@@ -1339,6 +1341,7 @@ export type Database = {
           co_pay_price?: string | null
           created_at?: string | null
           description?: string | null
+          direct_purchase_enabled?: boolean | null
           discount_percentage?: string | null
           duration?: string | null
           estimated_agent_split_percentage?: number | null
