@@ -49,27 +49,46 @@ export const PaymentSuccess = () => {
               )}
               
               <div className="space-y-4">
-                <div className="bg-white rounded-lg p-4 border border-green-200">
-                  <h3 className="font-semibold text-green-800 mb-2">What's Next?</h3>
-                  <ul className="text-sm text-green-700 space-y-1 text-left">
-                    <li>• You'll receive a confirmation email shortly</li>
-                    <li>• Your vendor(s) will contact you within 24 hours</li>
-                    <li>• Check your Circle dashboard for order updates</li>
+                <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                  <h3 className="font-semibold text-blue-800 mb-2 flex items-center gap-2">
+                    🚀 Skip the Sales Process!
+                  </h3>
+                  <ul className="text-sm text-blue-700 space-y-1 text-left">
+                    <li>• No sales calls needed - your service is ready for setup</li>
+                    <li>• Book directly with the implementation team</li>
+                    <li>• Get started with onboarding immediately</li>
                   </ul>
                 </div>
                 
-                <div className="flex gap-4 justify-center">
-                  <Button asChild className="bg-green-600 hover:bg-green-700">
-                    <Link to="/">
-                      <ArrowLeft className="w-4 h-4 mr-2" />
-                      Back to Marketplace
+                <div className="bg-white rounded-lg p-4 border border-green-200">
+                  <h3 className="font-semibold text-green-800 mb-2">What's Next?</h3>
+                  <ul className="text-sm text-green-700 space-y-1 text-left">
+                    <li>• Schedule your onboarding session below</li>
+                    <li>• You'll receive a confirmation email shortly</li>
+                    <li>• Check your Circle dashboard for updates</li>
+                  </ul>
+                </div>
+                
+                <div className="space-y-3">
+                  <Button asChild className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                    <Link to="/marketplace">
+                      📅 Book Onboarding Session
                     </Link>
                   </Button>
                   
-                  <Button variant="outline" className="border-green-600 text-green-600 hover:bg-green-50">
-                    <Download className="w-4 h-4 mr-2" />
-                    Download Receipt
-                  </Button>
+                  <div className="flex gap-4 justify-center">
+                    <Button asChild variant="outline" className="border-green-600 text-green-600 hover:bg-green-50">
+                      <Link to="/">
+                        <ArrowLeft className="w-4 h-4 mr-2" />
+                        Back to Marketplace
+                      </Link>
+                    </Button>
+                    
+                    <Button variant="outline" className="border-green-600 text-green-600 hover:bg-green-50">
+                      <Download className="w-4 h-4 mr-2" />
+                      Download Receipt
+                    </Button>
+                  </div>
                 </div>
               </div>
             </CardContent>

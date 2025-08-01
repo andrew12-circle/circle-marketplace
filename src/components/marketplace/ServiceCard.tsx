@@ -17,6 +17,7 @@ import { ConsultationFlow } from "./ConsultationFlow";
 import { ServiceFunnelModal } from "./ServiceFunnelModal";
 import { VendorSelectionModal } from "./VendorSelectionModal";
 import { PricingChoiceModal } from "./PricingChoiceModal";
+import { DirectPurchaseModal } from "./DirectPurchaseModal";
 
 interface Service {
   id: string;
@@ -64,6 +65,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
   const [isFunnelModalOpen, setIsFunnelModalOpen] = useState(false);
   const [isVendorSelectionModalOpen, setIsVendorSelectionModalOpen] = useState(false);
   const [isPricingChoiceModalOpen, setIsPricingChoiceModalOpen] = useState(false);
+  const [isDirectPurchaseModalOpen, setIsDirectPurchaseModalOpen] = useState(false);
   const { toast } = useToast();
   const { addToCart } = useCart();
   const { profile } = useAuth();
@@ -482,25 +484,53 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
 
         {/* Action Buttons - Fixed at bottom */}
         <div className="flex gap-2 mt-auto">
-          <Button 
-            className="flex-1 mobile-btn touch-target"
-            onClick={handleAddToCart}
-          >
+          {service.requires_quote ? (
+            <Button
+              variant="outline" 
+              size="sm"
+              className="flex-1 h-9"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsConsultationFlowOpen(true);
+              }}
+            >
+              <Calendar className="w-4 h-4 mr-1" />
+              {t('bookConsultation')}
+            </Button>
+          ) : (
             <>
-              <ShoppingCart className="w-4 h-4 mr-2" />
-              <span className="hidden sm:inline">{t('addToCart')}</span>
-              <span className="sm:hidden">Add</span>
+              <Button 
+                size="sm"
+                className="flex-1 h-9 bg-green-600 hover:bg-green-700 text-white"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsDirectPurchaseModalOpen(true);
+                }}
+              >
+                <ShoppingCart className="w-4 h-4 mr-1" />
+                Buy Now
+              </Button>
+              <Button
+                variant="outline" 
+                size="sm"
+                className="h-9 px-3"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsConsultationFlowOpen(true);
+                }}
+              >
+                <Calendar className="w-4 h-4" />
+              </Button>
             </>
-          </Button>
+          )}
           
           <Button 
-            variant="outline"
-            className="mobile-btn touch-target"
+            variant="outline" 
+            size="sm"
+            className="h-9 px-3"
             onClick={handleViewDetailsButton}
           >
-            <ArrowRight className={`h-4 w-4 transition-transform ${
-              isHovered ? "translate-x-1" : ""
-            }`} />
+            <ArrowRight className="w-4 h-4" />
           </Button>
         </div>
       </CardContent>
@@ -551,6 +581,27 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
           setIsPricingChoiceModalOpen(false);
           setIsVendorSelectionModalOpen(true);
         }}
+      />
+
+      <DirectPurchaseModal
+        isOpen={isDirectPurchaseModalOpen}
+        onClose={() => setIsDirectPurchaseModalOpen(false)}
+        service={service}
+        onPurchaseComplete={() => {
+          // After successful purchase, redirect to onboarding booking
+          toast({
+            title: "Purchase successful!",
+            description: "You'll now be redirected to book your onboarding session.",
+          });
+          // Optional: Open consultation flow for onboarding booking
+          setIsConsultationFlowOpen(true);
+        }}
+      />
+
+      <ConsultationFlow
+        isOpen={isConsultationFlowOpen}
+        onClose={() => setIsConsultationFlowOpen(false)}
+        service={service}
       />
     </Card>
     </TooltipProvider>
