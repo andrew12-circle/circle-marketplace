@@ -154,13 +154,25 @@ export const VendorSelectionModal = ({
     try {
       setIsLoading(true);
       
+      // Get current user
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError || !user) {
+        console.error('Authentication error:', userError);
+        toast({
+          title: "Authentication Error",
+          description: "Please log in to send co-pay requests.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
       // Create co-pay request in database
       const { data: coPayRequest, error } = await supabase
         .from('co_pay_requests')
         .insert({
-          agent_id: (await supabase.auth.getUser()).data.user?.id,
+          agent_id: user.id,
           vendor_id: vendor.id,
-          service_id: service.title, // This should be the actual service ID if available
+          service_id: null, // Set to null since we don't have a specific service ID
           requested_split_percentage: service.max_vendor_split_percentage || 50,
           status: 'pending',
           agent_notes: `Co-pay request for "${service.title}" service`
@@ -180,7 +192,7 @@ export const VendorSelectionModal = ({
 
       console.log('Co-pay request created:', coPayRequest);
       
-      // Add to cart context or dispatch cart event with the request
+      // Add to cart context with the request data
       const cartItem = {
         id: coPayRequest.id,
         type: 'co-pay-request',
