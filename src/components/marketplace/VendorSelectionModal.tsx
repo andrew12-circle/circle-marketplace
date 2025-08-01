@@ -53,6 +53,7 @@ export const VendorSelectionModal = ({
   const [filteredVendors, setFilteredVendors] = useState<Vendor[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isSelectingVendor, setIsSelectingVendor] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null);
@@ -157,10 +158,10 @@ export const VendorSelectionModal = ({
 
   const handleVendorSelect = async (vendor: Vendor) => {
     // Prevent multiple clicks while processing
-    if (isLoading) return;
+    if (isSelectingVendor) return;
     
     try {
-      setIsLoading(true);
+      setIsSelectingVendor(true);
       
       // Get current user
       const { data: { user }, error: userError } = await supabase.auth.getUser();
@@ -240,7 +241,7 @@ export const VendorSelectionModal = ({
         variant: "destructive",
       });
     } finally {
-      setIsLoading(false);
+      setIsSelectingVendor(false);
     }
   };
 
@@ -353,8 +354,18 @@ export const VendorSelectionModal = ({
               </div>
             </div>
 
-          {/* Vendor Grid */}
-          <div className="max-h-[60vh] overflow-y-auto">
+           {/* Vendor Grid */}
+          <div className="max-h-[60vh] overflow-y-auto relative">
+            {/* Loading Overlay for Vendor Selection */}
+            {isSelectingVendor && (
+              <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-10 rounded-lg">
+                <div className="flex flex-col items-center gap-3">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                  <p className="text-sm text-muted-foreground">Sending co-pay request...</p>
+                </div>
+              </div>
+            )}
+            
             {isLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {Array.from({ length: 6 }).map((_, i) => (
@@ -455,26 +466,26 @@ export const VendorSelectionModal = ({
                            )}
 
                             <div className="flex gap-2 mt-3">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={(e) => handleLearnMore(vendor, e)}
-                                className="flex-1 text-xs h-7"
-                                disabled={isLoading}
-                              >
-                                Learn More
-                              </Button>
-                              <Button
-                                size="sm"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleVendorSelect(vendor);
-                                }}
-                                className="flex-1 text-xs h-7"
-                                disabled={isLoading}
-                              >
-                                {isLoading ? "Sending..." : "Select Partner"}
-                              </Button>
+                               <Button
+                                 size="sm"
+                                 variant="outline"
+                                 onClick={(e) => handleLearnMore(vendor, e)}
+                                 className="flex-1 text-xs h-7"
+                                 disabled={isSelectingVendor}
+                               >
+                                 Learn More
+                               </Button>
+                               <Button
+                                 size="sm"
+                                 onClick={(e) => {
+                                   e.stopPropagation();
+                                   handleVendorSelect(vendor);
+                                 }}
+                                 className="flex-1 text-xs h-7"
+                                 disabled={isSelectingVendor}
+                               >
+                                 {isSelectingVendor ? "Sending..." : "Select Partner"}
+                               </Button>
                             </div>
                          </div>
                        </div>
