@@ -167,11 +167,17 @@ export const CartDrawer = () => {
                          {item.type === 'co-pay-request' ? (
                            <>
                              {/* Main service image */}
-                               <img
-                                 src={item.service?.image_url || item.image_url || item.image || (typeof item.vendor === 'object' && item.vendor?.logo_url) || "/placeholder.svg"}
-                                alt={item.title}
-                                className="w-full h-full object-cover"
-                              />
+                                <img
+                                  src={(() => {
+                                    console.log('Cart item service data:', item.service);
+                                    console.log('Service image_url:', item.service?.image_url);
+                                    console.log('Item image_url:', item.image_url);
+                                    console.log('Full cart item:', item);
+                                    return item.service?.image_url || item.image_url || item.image || (typeof item.vendor === 'object' && item.vendor?.logo_url) || "/placeholder.svg";
+                                  })()}
+                                 alt={item.title}
+                                 className="w-full h-full object-cover"
+                               />
                              {/* Vendor logo overlay in bottom right */}
                              {typeof item.vendor === 'object' && item.vendor?.logo_url && (
                                <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-white rounded-full border-2 border-white overflow-hidden shadow-sm">
