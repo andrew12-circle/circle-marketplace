@@ -82,32 +82,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const handleAddCoPayToCart = async (event: CustomEvent) => {
       const coPayItem = event.detail;
       
-      // Fetch service data from Supabase if service_id is available
-      let serviceData = coPayItem.service;
-      if (coPayItem.service_id && (!serviceData?.image_url || typeof serviceData.image_url !== 'string' || serviceData.image_url.includes('"_type"'))) {
-        try {
-          console.log('Fetching service data for ID:', coPayItem.service_id);
-          const { data: service, error } = await supabase
-            .from('services')
-            .select('id, title, image_url, co_pay_price, retail_price, pro_price, requires_quote')
-            .eq('id', coPayItem.service_id)
-            .single();
-          
-          console.log('Supabase service response:', service);
-          console.log('Supabase service error:', error);
-          
-          if (service && !error) {
-            serviceData = service;
-            console.log('Service data set to:', serviceData);
-          }
-        } catch (error) {
-          console.error('Error fetching service data:', error);
-        }
-      }
+      // For co-pay requests, the service data should already be provided in the event
+      // No need to fetch from Supabase since VendorSelectionModal already has the service data
       
       const cartItem: CartItem = {
         id: coPayItem.id,
-        title: serviceData?.title || coPayItem.service?.title || 'Service',
+        title: coPayItem.service?.title || 'Service',
         price: 0, // Co-pay requests don't have a direct price
         vendor: coPayItem.vendor, // Store full vendor object
         quantity: 1,
@@ -115,23 +95,16 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         status: coPayItem.status,
         requestedSplit: coPayItem.requestedSplit,
         vendorName: coPayItem.vendor.name,
-        serviceName: serviceData?.title || coPayItem.service?.title,
+        serviceName: coPayItem.service?.title,
         createdAt: coPayItem.createdAt,
-        requiresQuote: serviceData?.requires_quote || coPayItem.service?.requires_quote || false,
-        image_url: serviceData?.image_url || coPayItem.service?.image_url,
-        // Store service object properly
-        service: {
-          title: serviceData?.title || coPayItem.service?.title || 'Service',
-          image_url: serviceData?.image_url || coPayItem.service?.image_url,
-          co_pay_price: serviceData?.co_pay_price || coPayItem.service?.co_pay_price,
-          retail_price: serviceData?.retail_price || coPayItem.service?.retail_price,
-          pro_price: serviceData?.pro_price || coPayItem.service?.pro_price
-        },
+        requiresQuote: coPayItem.service?.requires_quote || false,
+        image_url: coPayItem.service?.image_url,
+        service: coPayItem.service,
         // Store service pricing data
         description: JSON.stringify({
-          retail_price: serviceData?.retail_price || coPayItem.service?.retail_price,
-          co_pay_price: serviceData?.co_pay_price || coPayItem.service?.co_pay_price,
-          pro_price: serviceData?.pro_price || coPayItem.service?.pro_price
+          retail_price: coPayItem.service?.retail_price,
+          co_pay_price: coPayItem.service?.co_pay_price,
+          pro_price: coPayItem.service?.pro_price
         })
       };
       

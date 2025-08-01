@@ -175,18 +175,18 @@ export const VendorSelectionModal = ({
         return;
       }
       
-      // Create co-pay request in database
+      // Create co-pay request in database with minimal required fields
       const { data: coPayRequest, error } = await supabase
         .from('co_pay_requests')
         .insert({
           agent_id: user.id,
           vendor_id: vendor.id,
-          service_id: null, // Set to null since we don't have a specific service ID
+          service_id: null,
           requested_split_percentage: service.max_vendor_split_percentage || 50,
           status: 'pending',
           agent_notes: `Co-pay request for "${service.title}" service`
         })
-        .select()
+        .select('id')
         .single();
 
       if (error) {
@@ -198,10 +198,8 @@ export const VendorSelectionModal = ({
         });
         return;
       }
-
-      console.log('Co-pay request created:', coPayRequest);
       
-      // Add to cart context with the request data
+      // Add to cart context immediately with the request data
       const cartItem = {
         id: coPayRequest.id,
         type: 'co-pay-request',
