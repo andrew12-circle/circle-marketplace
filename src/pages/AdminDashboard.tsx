@@ -13,6 +13,7 @@ import { YouTubeImportPanel } from '@/components/admin/YouTubeImportPanel';
 import { YouTubeChannelImportPanel } from '@/components/admin/YouTubeChannelImportPanel';
 import SecurityMonitoringPanel from '@/components/admin/SecurityMonitoringPanel';
 import { ServiceImportPanel } from '@/components/admin/ServiceImportPanel';
+import { ServiceManagementPanel } from '@/components/admin/ServiceManagementPanel';
 import { VendorImportPanel } from '@/components/admin/VendorImportPanel';
 import { VendorBudgetManager } from '@/components/admin/VendorBudgetManager';
 import { VendorRESPAManager } from '@/components/admin/VendorRESPAManager';
@@ -337,6 +338,7 @@ export default function AdminDashboard() {
         </TabsContent>
 
         <TabsContent value="services" className="space-y-6">
+          <ServiceManagementPanel />
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <ServiceImportPanel />
           </div>
