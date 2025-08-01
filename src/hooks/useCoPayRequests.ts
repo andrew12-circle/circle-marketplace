@@ -54,7 +54,14 @@ export const useCoPayRequests = () => {
     try {
       const { data, error } = await supabase
         .from('co_pay_requests')
-        .select('*')
+        .select(`
+          *,
+          vendors (
+            id,
+            name,
+            logo_url
+          )
+        `)
         .eq('agent_id', user.id)
         .order('created_at', { ascending: false });
 

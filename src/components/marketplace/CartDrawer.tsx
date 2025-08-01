@@ -272,7 +272,9 @@ export const CartDrawer = () => {
                         
                         <div className="flex-1 min-w-0">
                           <h4 className="font-medium text-sm line-clamp-2">Co-Pay Request</h4>
-                          <p className="text-xs text-muted-foreground">Vendor ID: {request.vendor_id}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {request.vendors?.name || 'Unknown Vendor'}
+                          </p>
                           
                           <div className="flex items-center justify-between mt-2">
                             <div className="flex items-center gap-2">
