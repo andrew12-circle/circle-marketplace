@@ -50,7 +50,7 @@ createRoot(document.getElementById("root")!).render(
               <Route path="/academy" element={<Academy />} />
               <Route path="/creator-dashboard" element={<CreatorDashboard />} />
               <Route path="/admin" element={<AdminDashboard />} />
-              <Route path="/profile" element={<ProfileSettings />} />
+              <Route path="/profile-settings" element={<ProfileSettings />} />
               <Route path="/saved" element={<SavedItems />} />
               <Route path="/orders" element={<OrderHistory />} />
               <Route path="/wallet" element={<AgentWallet />} />
