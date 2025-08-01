@@ -22,6 +22,7 @@ import {
   Star
 } from "lucide-react";
 import { toast } from "sonner";
+import { VendorProfileEditor } from "@/components/marketplace/VendorProfileEditor";
 
 interface VendorData {
   id: string;
@@ -41,6 +42,13 @@ interface VendorData {
   nmls_id?: string;
   contact_email?: string;
   phone?: string;
+  vendor_type?: string;
+  license_states?: string[];
+  individual_name?: string;
+  individual_title?: string;
+  individual_email?: string;
+  individual_phone?: string;
+  individual_license_number?: string;
 }
 
 interface DashboardStats {
@@ -64,6 +72,7 @@ export const VendorAnalyticsDashboard = () => {
     conversionRate: 0
   });
   const [loading, setLoading] = useState(true);
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -180,6 +189,16 @@ export const VendorAnalyticsDashboard = () => {
     }
   };
 
+  const handleProfileSave = async (updatedData: any) => {
+    setVendorData(prev => prev ? { ...prev, ...updatedData } : null);
+    setIsEditingProfile(false);
+    toast.success('Profile updated successfully');
+  };
+
+  const handleProfileCancel = () => {
+    setIsEditingProfile(false);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -250,7 +269,7 @@ export const VendorAnalyticsDashboard = () => {
                 <Settings className="w-4 h-4 mr-2" />
                 Settings
               </Button>
-              <Button>
+              <Button onClick={() => setIsEditingProfile(true)}>
                 <Edit className="w-4 h-4 mr-2" />
                 Edit Profile
               </Button>
@@ -473,17 +492,31 @@ export const VendorAnalyticsDashboard = () => {
           </TabsContent>
 
           <TabsContent value="profile">
-            <Card>
-              <CardHeader>
-                <CardTitle>Edit Vendor Profile</CardTitle>
-                <p className="text-sm text-gray-600">
-                  Update your company information and how it appears to agents
-                </p>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">Profile editing interface coming soon...</p>
-              </CardContent>
-            </Card>
+            {isEditingProfile ? (
+              <VendorProfileEditor
+                vendorData={vendorData}
+                onSave={handleProfileSave}
+                onCancel={handleProfileCancel}
+              />
+            ) : (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Edit Vendor Profile</CardTitle>
+                  <p className="text-sm text-gray-600">
+                    Update your company information and how it appears to agents
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <p className="text-gray-600 mb-4">Click "Edit Profile" in the header or the button below to update your vendor information.</p>
+                    <Button onClick={() => setIsEditingProfile(true)}>
+                      <Edit className="w-4 h-4 mr-2" />
+                      Edit Profile
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           <TabsContent value="funnel">
