@@ -12,6 +12,7 @@ interface PricingChoiceModalProps {
     retail_price?: string;
     max_vendor_split_percentage?: number;
     price_duration?: string;
+    requires_quote?: boolean;
   };
   onChooseProPrice: () => void;
   onChooseCoPay: () => void;
@@ -60,7 +61,7 @@ export const PricingChoiceModal = ({
                   ${proPrice.toFixed(2)}{service.price_duration ? `/${service.price_duration}` : ''}
                 </span>
                 <span className="text-sm text-muted-foreground">
-                  Instant Purchase
+                  {service.requires_quote ? "Book Consultation" : "Instant Purchase"}
                 </span>
               </div>
               <p className="text-sm text-muted-foreground">

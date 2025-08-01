@@ -531,6 +531,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
           retail_price: service.retail_price,
           max_vendor_split_percentage: service.max_vendor_split_percentage,
           price_duration: service.price_duration,
+          requires_quote: service.requires_quote,
         }}
         onChooseProPrice={() => {
           setIsPricingChoiceModalOpen(false);
