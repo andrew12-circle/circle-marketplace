@@ -181,11 +181,13 @@ export const EnhancedVendorCard = ({ vendor, onConnect, onViewProfile }: Enhance
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="text-center p-2 bg-muted/50 rounded">
-              <div className="text-lg font-bold text-circle-primary">{vendor.co_marketing_agents}</div>
-              <div className="text-xs text-muted-foreground">Co-Marketing Agents</div>
-            </div>
+          <div className={`grid gap-4 ${vendor.co_marketing_agents > 10 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+            {vendor.co_marketing_agents > 10 && (
+              <div className="text-center p-2 bg-muted/50 rounded">
+                <div className="text-lg font-bold text-circle-primary">{vendor.co_marketing_agents}</div>
+                <div className="text-xs text-muted-foreground">Co-Marketing Agents</div>
+              </div>
+            )}
             <div className="text-center p-2 bg-muted/50 rounded">
               <div className="text-lg font-bold text-circle-primary">{vendor.campaigns_funded}</div>
               <div className="text-xs text-muted-foreground">Campaigns Funded</div>
