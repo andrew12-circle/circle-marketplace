@@ -1,9 +1,10 @@
+
 import { useState, useEffect } from "react";
-import { Search, Filter, X, MapPin, DollarSign, Star } from "lucide-react";
+import { Search, Filter, X, MapPin, DollarSign, Star, ChevronDown } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
@@ -133,93 +134,109 @@ export const EnhancedSearch = ({
 
       {/* Filter Controls */}
       <div className="flex items-center gap-2 flex-wrap">
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button variant="outline" size="sm">
-              <Filter className="w-4 h-4 mr-2" />
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm" className="gap-2">
+              <Filter className="w-4 h-4" />
               Filters
               {activeFiltersCount > 0 && (
-                <Badge variant="secondary" className="ml-2 px-1 py-0 text-xs">
+                <Badge variant="secondary" className="ml-1 px-1 py-0 text-xs">
                   {activeFiltersCount}
                 </Badge>
               )}
+              <ChevronDown className="w-4 h-4" />
             </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-80 p-4" align="start">
-            <div className="space-y-4">
-              {/* Categories */}
-              <div>
-                <Label className="text-sm font-medium">Categories</Label>
-                <div className="grid grid-cols-2 gap-2 mt-2">
-                  {availableCategories.map((category) => (
-                    <div key={category} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`category-${category}`}
-                        checked={filters.categories.includes(category)}
-                        onCheckedChange={() => toggleArrayFilter('categories', category)}
-                      />
-                      <Label htmlFor={`category-${category}`} className="text-sm">
-                        {category}
-                      </Label>
-                    </div>
-                  ))}
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-[600px] p-6 bg-popover border shadow-md" align="start">
+            <div className="grid grid-cols-2 gap-6">
+              {/* Left Column */}
+              <div className="space-y-6">
+                {/* Categories */}
+                <div>
+                  <Label className="text-sm font-medium mb-3 block">Categories</Label>
+                  <div className="grid grid-cols-1 gap-2 max-h-32 overflow-y-auto">
+                    {availableCategories.map((category) => (
+                      <div key={category} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`category-${category}`}
+                          checked={filters.categories.includes(category)}
+                          onCheckedChange={() => toggleArrayFilter('categories', category)}
+                        />
+                        <Label htmlFor={`category-${category}`} className="text-sm cursor-pointer">
+                          {category}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Features */}
+                <div>
+                  <Label className="text-sm font-medium mb-3 block">Features</Label>
+                  <div className="space-y-2">
+                    {FEATURE_OPTIONS.map((feature) => (
+                      <div key={feature} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`feature-${feature}`}
+                          checked={filters.features.includes(feature)}
+                          onCheckedChange={() => toggleArrayFilter('features', feature)}
+                        />
+                        <Label htmlFor={`feature-${feature}`} className="text-sm cursor-pointer">
+                          {feature}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
 
-              {/* Price Range */}
-              <div>
-                <Label className="text-sm font-medium">
-                  Price Range: ${filters.priceRange[0]} - ${filters.priceRange[1]}
-                </Label>
-                <Slider
-                  value={filters.priceRange}
-                  onValueChange={(value) => updateFilters('priceRange', value)}
-                  max={1000}
-                  step={10}
-                  className="mt-2"
-                />
-              </div>
+              {/* Right Column */}
+              <div className="space-y-6">
+                {/* Price Range */}
+                <div>
+                  <Label className="text-sm font-medium mb-3 block">
+                    Price Range: ${filters.priceRange[0]} - ${filters.priceRange[1]}
+                  </Label>
+                  <Slider
+                    value={filters.priceRange}
+                    onValueChange={(value) => updateFilters('priceRange', value)}
+                    max={1000}
+                    step={10}
+                    className="mt-2"
+                  />
+                </div>
 
-              {/* Rating */}
-              <div>
-                <Label className="text-sm font-medium">Minimum Rating</Label>
-                <div className="flex items-center gap-2 mt-2">
-                  {[1, 2, 3, 4, 5].map((rating) => (
-                    <Button
-                      key={rating}
-                      variant={filters.rating >= rating ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => updateFilters('rating', rating)}
-                      className="px-2 py-1"
-                    >
-                      <Star className="w-3 h-3" />
-                      {rating}+
+                {/* Rating */}
+                <div>
+                  <Label className="text-sm font-medium mb-3 block">Minimum Rating</Label>
+                  <div className="flex items-center gap-2">
+                    {[1, 2, 3, 4, 5].map((rating) => (
+                      <Button
+                        key={rating}
+                        variant={filters.rating >= rating ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => updateFilters('rating', rating)}
+                        className="px-2 py-1 text-xs"
+                      >
+                        <Star className="w-3 h-3 mr-1" />
+                        {rating}+
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Clear All Button */}
+                {activeFiltersCount > 0 && (
+                  <div className="pt-4 border-t">
+                    <Button variant="ghost" size="sm" onClick={clearAllFilters} className="w-full">
+                      Clear All Filters
                     </Button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Features */}
-              <div>
-                <Label className="text-sm font-medium">Features</Label>
-                <div className="space-y-2 mt-2">
-                  {FEATURE_OPTIONS.map((feature) => (
-                    <div key={feature} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`feature-${feature}`}
-                        checked={filters.features.includes(feature)}
-                        onCheckedChange={() => toggleArrayFilter('features', feature)}
-                      />
-                      <Label htmlFor={`feature-${feature}`} className="text-sm">
-                        {feature}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
+                  </div>
+                )}
               </div>
             </div>
-          </PopoverContent>
-        </Popover>
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         {/* Location Filter */}
         <div className="relative">
@@ -231,12 +248,6 @@ export const EnhancedSearch = ({
             className="pl-8 pr-4 w-40"
           />
         </div>
-
-        {activeFiltersCount > 0 && (
-          <Button variant="ghost" size="sm" onClick={clearAllFilters}>
-            Clear All
-          </Button>
-        )}
       </div>
 
       {/* Active Filters Display */}
