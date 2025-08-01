@@ -220,14 +220,14 @@ export const CartDrawer = () => {
                                    <span>Retail Price:</span>
                                    <span className="line-through text-muted-foreground">{pricing.retail_price || '$299/mo'}</span>
                                  </div>
-                                 <div className="flex justify-between">
-                                   <span>Co-Pay Price:</span>
-                                   <span className="text-green-600 font-medium">{pricing.co_pay_price || '$209/mo'}</span>
-                                 </div>
-                                 <div className="flex justify-between">
-                                   <span>Pro Price (if denied):</span>
-                                   <span className="text-amber-600">{pricing.pro_price || '$269/mo'}</span>
-                                 </div>
+                                  <div className="flex justify-between">
+                                    <span>Pro Price (if denied):</span>
+                                    <span className="text-amber-600">{pricing.pro_price || '$269/mo'}</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span>Co-Pay Price:</span>
+                                    <span className="text-green-600 font-medium">{pricing.co_pay_price || '$209/mo'}</span>
+                                  </div>
                                  <div className="flex justify-between">
                                    <span>Your Split:</span>
                                    <span className="text-blue-600">{100 - (item.requestedSplit || 50)}%</span>
