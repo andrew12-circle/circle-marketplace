@@ -36,6 +36,8 @@ interface Service {
   estimated_roi?: number;
   duration?: string;
   requires_quote?: boolean;
+  // Direct purchase feature - vendor controlled
+  direct_purchase_enabled?: boolean;
   // Co-pay related fields
   co_pay_allowed?: boolean;
   max_vendor_split_percentage?: number;
@@ -499,28 +501,33 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
             </Button>
           ) : (
             <>
-              <Button 
-                size="sm"
-                className="flex-1 h-9 bg-green-600 hover:bg-green-700 text-white"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsDirectPurchaseModalOpen(true);
-                }}
-              >
-                <ShoppingCart className="w-4 h-4 mr-1" />
-                Buy Now
-              </Button>
+              {/* Primary action - Consultation (traditional flow) */}
               <Button
-                variant="outline" 
                 size="sm"
-                className="h-9 px-3"
+                className="flex-1 h-9"
                 onClick={(e) => {
                   e.stopPropagation();
                   setIsConsultationFlowOpen(true);
                 }}
               >
-                <Calendar className="w-4 h-4" />
+                <Calendar className="w-4 h-4 mr-1" />
+                Book Consultation
               </Button>
+              
+              {/* Secondary option - Direct Purchase (if enabled) */}
+              {service.direct_purchase_enabled && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-9 px-3 border-green-600 text-green-600 hover:bg-green-50"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsDirectPurchaseModalOpen(true);
+                  }}
+                >
+                  <ShoppingCart className="w-4 h-4" />
+                </Button>
+              )}
             </>
           )}
           
