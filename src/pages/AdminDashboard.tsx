@@ -22,6 +22,7 @@ import { VendorSortOrderManager } from '@/components/admin/VendorSortOrderManage
 import { VendorManagementPanel } from '@/components/admin/VendorManagementPanel';
 import { ImageVectorizationPanel } from '@/components/admin/ImageVectorizationPanel';
 import { VendorActivityAnalytics } from '@/components/admin/VendorActivityAnalytics';
+import { VendorInvitationPanel } from '@/components/admin/VendorInvitationPanel';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Zap, Upload, Building, Youtube, DollarSign, BarChart3 } from 'lucide-react';
 
@@ -352,6 +353,7 @@ export default function AdminDashboard() {
         </TabsContent>
 
         <TabsContent value="vendors" className="space-y-6">
+          <VendorInvitationPanel />
           <VendorManagementPanel />
           <VendorSortOrderManager />
           <VendorRESPAManager />
