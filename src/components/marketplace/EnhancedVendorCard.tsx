@@ -219,7 +219,18 @@ export const EnhancedVendorCard = ({ vendor, onConnect, onViewProfile }: Enhance
                 <div className="text-xs text-muted-foreground">Co-Marketing Agents</div>
               </div>
             )}
-            <div className="text-center p-2 bg-muted/50 rounded">
+            <div 
+              className="text-center p-2 bg-muted/50 rounded cursor-pointer hover:bg-muted/70 transition-colors"
+              onClick={(e) => {
+                e.stopPropagation();
+                trackContactRequest(vendor.id, {
+                  type: 'campaigns_funded_click',
+                  value: vendor.campaigns_funded.toString(),
+                  message: 'User clicked on campaigns funded stat',
+                  source: 'vendor_card_stat'
+                });
+              }}
+            >
               <div className="text-lg font-bold text-circle-primary">{vendor.campaigns_funded}</div>
               <div className="text-xs text-muted-foreground">Campaigns Funded</div>
             </div>
