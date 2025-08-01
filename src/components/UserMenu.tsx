@@ -15,7 +15,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 
 import { supabase } from "@/integrations/supabase/client";
-import { User, Settings, ShoppingBag, Crown, LogOut, Loader2, Heart, BarChart3, Shield, Building2, DollarSign, Store, Briefcase } from "lucide-react";
+import { User, Settings, ShoppingBag, Crown, LogOut, Loader2, Heart, BarChart3, Shield, Building2, DollarSign, Store, Briefcase, Package } from "lucide-react";
 
 
 interface VendorInfo {
@@ -179,18 +179,24 @@ export const UserMenu = () => {
          {/* Vendor Dashboard Link */}
          {vendorInfo && (
            <>
-             <DropdownMenuItem asChild>
-               <Link to="/vendor-dashboard" className="flex items-center">
-                 {vendorInfo.type === 'co_marketing' ? (
-                   <Briefcase className="mr-2 h-4 w-4 text-green-600" />
-                 ) : (
-                   <Store className="mr-2 h-4 w-4 text-blue-600" />
-                 )}
-                 <span>
-                   {vendorInfo.type === 'co_marketing' ? 'Co-Marketing' : 'Service Provider'} Dashboard
-                 </span>
-               </Link>
-             </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/vendor-analytics" className="flex items-center">
+                  {vendorInfo.type === 'co_marketing' ? (
+                    <Briefcase className="mr-2 h-4 w-4 text-green-600" />
+                  ) : (
+                    <Store className="mr-2 h-4 w-4 text-blue-600" />
+                  )}
+                  <span>
+                    {vendorInfo.type === 'co_marketing' ? 'Co-Marketing' : 'Vendor'} Dashboard
+                  </span>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/vendor-dashboard" className="flex items-center">
+                  <Package className="mr-2 h-4 w-4 text-purple-600" />
+                  <span>Service Management</span>
+                </Link>
+              </DropdownMenuItem>
              <DropdownMenuSeparator />
            </>
          )}
