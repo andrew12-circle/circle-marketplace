@@ -98,8 +98,7 @@ export const PricingChoiceModal = ({
                 Get connected with a vendor who will help cover {service.max_vendor_split_percentage}% of the cost.
               </p>
               <Button 
-                variant="outline" 
-                className="w-full border-green-200 text-green-700 hover:bg-green-50" 
+                className="w-full bg-green-600 hover:bg-green-700 text-white" 
                 onClick={onChooseCoPay}
               >
                 <Users className="w-4 h-4 mr-2" />
