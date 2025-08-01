@@ -142,7 +142,7 @@ export const CartDrawer = () => {
         </Button>
       </SheetTrigger>
       
-      <SheetContent className="w-full sm:max-w-lg">
+      <SheetContent className="w-full sm:max-w-lg z-[110]">
         <SheetHeader>
           <SheetTitle className="flex items-center gap-2">
             <ShoppingCart className="w-5 h-5" />
