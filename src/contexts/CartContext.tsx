@@ -84,7 +84,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       // Fetch service data from Supabase if service_id is available
       let serviceData = coPayItem.service;
-      if (coPayItem.service_id && !serviceData?.image_url) {
+      if (coPayItem.service_id && (!serviceData?.image_url || typeof serviceData.image_url !== 'string' || serviceData.image_url.includes('"_type"'))) {
         try {
           console.log('Fetching service data for ID:', coPayItem.service_id);
           const { data: service, error } = await supabase
