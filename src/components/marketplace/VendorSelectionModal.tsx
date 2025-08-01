@@ -305,6 +305,15 @@ export const VendorSelectionModal = ({
               <Button onClick={handleSendAnotherRequest} variant="outline">
                 Send Another Request
               </Button>
+              <Button 
+                onClick={() => {
+                  const cartEvent = new CustomEvent('openCart');
+                  window.dispatchEvent(cartEvent);
+                }}
+                variant="outline"
+              >
+                View Cart
+              </Button>
               <Button onClick={handleFinish}>
                 Finish
               </Button>
