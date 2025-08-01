@@ -77,6 +77,13 @@ export const PricingChoiceModal = ({
             </CardContent>
           </Card>
 
+          {/* OR Divider */}
+          <div className="flex items-center justify-center">
+            <div className="flex-1 border-t border-muted-foreground/20"></div>
+            <span className="px-4 text-sm font-medium text-muted-foreground bg-background">OR</span>
+            <div className="flex-1 border-t border-muted-foreground/20"></div>
+          </div>
+
           {/* Co-Pay Option */}
           <Card className="border-2 border-green-200 animate-pulse ring-2 ring-green-300 ring-opacity-75">
             <CardHeader className="pb-2">
