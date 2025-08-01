@@ -17,6 +17,7 @@ import { AgentWallet } from "./pages/AgentWallet";
 import { SavedItems } from "./pages/SavedItems";
 import { ConsultationDemo } from "./pages/ConsultationDemo";
 import { VendorDashboard } from "./pages/VendorDashboard";
+import { VendorAnalyticsDashboard } from "./pages/VendorAnalyticsDashboard";
 import { VendorRegistration } from "./pages/VendorRegistration";
 import NotFound from "./pages/NotFound";
 import { TermsOfService } from "./pages/legal/TermsOfService";
@@ -49,6 +50,7 @@ const App = () => (
             <Route path="/payment-canceled" element={<PaymentCanceled />} />
             <Route path="/consultation-demo" element={<ConsultationDemo />} />
             <Route path="/vendor-dashboard" element={<VendorDashboard />} />
+            <Route path="/vendor-analytics" element={<VendorAnalyticsDashboard />} />
             <Route path="/vendor-registration" element={<VendorRegistration />} />
             
             {/* Legal Pages */}
