@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { VendorProfileEditor } from "@/components/marketplace/VendorProfileEditor";
+import { VendorFunnelEditor } from "@/components/marketplace/VendorFunnelEditor";
 
 interface VendorData {
   id: string;
@@ -73,6 +74,8 @@ export const VendorAnalyticsDashboard = () => {
   });
   const [loading, setLoading] = useState(true);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [isEditingFunnel, setIsEditingFunnel] = useState(false);
+  const [funnelContent, setFunnelContent] = useState(null);
 
   useEffect(() => {
     if (user) {
@@ -197,6 +200,16 @@ export const VendorAnalyticsDashboard = () => {
 
   const handleProfileCancel = () => {
     setIsEditingProfile(false);
+  };
+
+  const handleFunnelSave = async (content: any) => {
+    setFunnelContent(content);
+    setIsEditingFunnel(false);
+    toast.success('Funnel page saved successfully');
+  };
+
+  const handleFunnelCancel = () => {
+    setIsEditingFunnel(false);
   };
 
   if (loading) {
@@ -520,17 +533,58 @@ export const VendorAnalyticsDashboard = () => {
           </TabsContent>
 
           <TabsContent value="funnel">
-            <Card>
-              <CardHeader>
-                <CardTitle>Edit Funnel Page</CardTitle>
-                <p className="text-sm text-gray-600">
-                  Customize your vendor funnel page that agents see when they click on your card
-                </p>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">Funnel page editor coming soon...</p>
-              </CardContent>
-            </Card>
+            {isEditingFunnel ? (
+              <VendorFunnelEditor
+                vendorId={vendorData.id}
+                initialContent={funnelContent}
+                onSave={handleFunnelSave}
+                onCancel={handleFunnelCancel}
+              />
+            ) : (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Edit Funnel Page</CardTitle>
+                  <p className="text-sm text-gray-600">
+                    Customize your vendor funnel page that agents see when they click on your card
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <p className="text-gray-600 mb-4">
+                      Create and customize your vendor funnel page to showcase your services, testimonials, and convert more leads.
+                    </p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="p-4 border border-gray-200 rounded-lg">
+                        <h4 className="font-medium text-gray-900 mb-2">What you can customize:</h4>
+                        <ul className="text-sm text-gray-600 space-y-1">
+                          <li>• Hero section with compelling headlines</li>
+                          <li>• Service benefits and value propositions</li>
+                          <li>• Pricing packages and offerings</li>
+                          <li>• Customer testimonials and reviews</li>
+                          <li>• Contact information and CTAs</li>
+                          <li>• Trust indicators and guarantees</li>
+                        </ul>
+                      </div>
+                      <div className="p-4 border border-gray-200 rounded-lg">
+                        <h4 className="font-medium text-gray-900 mb-2">Benefits of a custom funnel:</h4>
+                        <ul className="text-sm text-gray-600 space-y-1">
+                          <li>• Higher conversion rates</li>
+                          <li>• Professional brand presentation</li>
+                          <li>• Better lead qualification</li>
+                          <li>• Showcase your expertise</li>
+                          <li>• Build trust with social proof</li>
+                          <li>• Clear pricing communication</li>
+                        </ul>
+                      </div>
+                    </div>
+                    <Button onClick={() => setIsEditingFunnel(true)} className="mt-4">
+                      <Edit className="w-4 h-4 mr-2" />
+                      Start Editing Funnel
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
         </Tabs>
       </div>
