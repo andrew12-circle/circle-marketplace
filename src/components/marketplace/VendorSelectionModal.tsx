@@ -262,12 +262,18 @@ export const VendorSelectionModal = ({
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {filteredVendors.map((vendor) => (
-                  <Card 
-                    key={vendor.id} 
-                    className="cursor-pointer hover:shadow-md transition-shadow border"
-                    onClick={() => handleVendorSelect(vendor)}
-                  >
+                {filteredVendors.map((vendor) => {
+                  const isCircleHomeLoan = vendor.name.toLowerCase().includes('circle home loan');
+                  return (
+                    <Card 
+                      key={vendor.id} 
+                      className={`cursor-pointer hover:shadow-md transition-shadow border ${
+                        isCircleHomeLoan 
+                          ? 'border-blue-500 bg-blue-50/50 shadow-lg shadow-blue-200/50 ring-2 ring-blue-200' 
+                          : ''
+                      }`}
+                      onClick={() => handleVendorSelect(vendor)}
+                    >
                     <CardContent className="p-4">
                       <div className="flex gap-3">
                         {/* Logo */}
@@ -349,8 +355,9 @@ export const VendorSelectionModal = ({
                          </div>
                        </div>
                      </CardContent>
-                  </Card>
-                ))}
+                   </Card>
+                  );
+                })}
               </div>
             )}
           </div>
