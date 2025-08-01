@@ -56,19 +56,24 @@ export const MarketplaceFilters = ({ filters, onFiltersChange, categories, viewM
     safeFilters.priceRange[0] > 0 || safeFilters.priceRange[1] < 2000;
 
   return (
-    <Card className="bg-background/80 backdrop-blur-sm border border-border/30 shadow-sm">
-      <CardContent className="p-3">
-        <div className="flex justify-end mb-2">
-          {hasActiveFilters && (
-            <Button variant="ghost" size="sm" onClick={clearFilters} className="text-xs hover:bg-destructive/10 hover:text-destructive transition-colors">
-              {t('clearAll')}
+    <div className="bg-gradient-to-r from-background via-background/95 to-background/90 backdrop-blur-md border border-border/20 rounded-2xl shadow-sm overflow-hidden">
+      <div className="p-4">
+        {hasActiveFilters && (
+          <div className="flex justify-end mb-3">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={clearFilters} 
+              className="text-xs text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-all duration-200 rounded-full px-3"
+            >
+              Clear all
             </Button>
-          )}
-        </div>
+          </div>
+        )}
 
-        <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3`}>
+        <div className="flex flex-wrap items-center gap-4">
           {/* Category Filter */}
-          <div>
+          <div className="min-w-fit">
             <CategoryMegaMenu 
               selectedCategory={safeFilters.category}
               onCategorySelect={(value) => updateFilter("category", value)}
@@ -78,56 +83,62 @@ export const MarketplaceFilters = ({ filters, onFiltersChange, categories, viewM
           </div>
 
           {/* Price Range Filter */}
-          <div className="space-y-1">
-            <div className="text-center">
-              <span className="text-xs font-medium text-circle-primary">
-                ${safeFilters.priceRange[0]} - ${safeFilters.priceRange[1]}
-              </span>
+          <div className="flex items-center gap-3 bg-muted/20 rounded-full px-4 py-2 min-w-[180px]">
+            <span className="text-xs font-medium text-muted-foreground whitespace-nowrap">Price</span>
+            <div className="flex-1 space-y-1">
+              <div className="text-center">
+                <span className="text-xs font-semibold text-circle-primary">
+                  ${safeFilters.priceRange[0]} - ${safeFilters.priceRange[1]}
+                </span>
+              </div>
+              <Slider
+                value={safeFilters.priceRange}
+                onValueChange={(value) => updateFilter("priceRange", value)}
+                max={2000}
+                min={0}
+                step={50}
+                className="w-full"
+              />
             </div>
-            <Slider
-              value={safeFilters.priceRange}
-              onValueChange={(value) => updateFilter("priceRange", value)}
-              max={2000}
-              min={0}
-              step={50}
-              className="w-full"
-            />
           </div>
 
           {/* Verification Filter */}
-          <div className="flex items-center space-x-2 hover:bg-muted/20 rounded p-1 transition-colors">
+          <div className="flex items-center gap-2 bg-muted/20 hover:bg-muted/30 rounded-full px-3 py-2 transition-all duration-200 cursor-pointer group">
             <Checkbox
               id="verified"
               checked={safeFilters.verified}
               onCheckedChange={(checked) => updateFilter("verified", checked)}
+              className="data-[state=checked]:bg-circle-primary data-[state=checked]:border-circle-primary"
             />
-            <Label htmlFor="verified" className="text-xs cursor-pointer">
-              {t('circleVerifiedOnly')}
+            <Label htmlFor="verified" className="text-xs font-medium cursor-pointer group-hover:text-foreground transition-colors">
+              Verified
             </Label>
           </div>
 
           {/* Featured Filter */}
-          <div className="flex items-center space-x-2 hover:bg-muted/20 rounded p-1 transition-colors">
+          <div className="flex items-center gap-2 bg-muted/20 hover:bg-muted/30 rounded-full px-3 py-2 transition-all duration-200 cursor-pointer group">
             <Checkbox
               id="featured"
               checked={safeFilters.featured}
               onCheckedChange={(checked) => updateFilter("featured", checked)}
+              className="data-[state=checked]:bg-circle-primary data-[state=checked]:border-circle-primary"
             />
-            <Label htmlFor="featured" className="text-xs cursor-pointer">
-              {t('featuredOnly')}
+            <Label htmlFor="featured" className="text-xs font-medium cursor-pointer group-hover:text-foreground transition-colors">
+              Featured
             </Label>
           </div>
 
           {/* Co-Pay Eligible Filter - Only for services */}
           {viewMode === 'services' && (
-            <div className="flex items-center space-x-2 hover:bg-muted/20 rounded p-1 transition-colors">
+            <div className="flex items-center gap-2 bg-muted/20 hover:bg-muted/30 rounded-full px-3 py-2 transition-all duration-200 cursor-pointer group">
               <Checkbox
                 id="coPayEligible"
                 checked={safeFilters.coPayEligible}
                 onCheckedChange={(checked) => updateFilter("coPayEligible", checked)}
+                className="data-[state=checked]:bg-circle-primary data-[state=checked]:border-circle-primary"
               />
-              <Label htmlFor="coPayEligible" className="text-xs cursor-pointer">
-                {t('coPayEligible')}
+              <Label htmlFor="coPayEligible" className="text-xs font-medium cursor-pointer group-hover:text-foreground transition-colors">
+                Co-Pay
               </Label>
             </div>
           )}
@@ -136,49 +147,49 @@ export const MarketplaceFilters = ({ filters, onFiltersChange, categories, viewM
 
         {/* Active Filters Display */}
         {hasActiveFilters && (
-          <div className="mt-4 pt-4 border-t border-border/50">
+          <div className="mt-4 pt-4 border-t border-border/20">
             <div className="flex flex-wrap gap-2">
               {safeFilters.category && safeFilters.category !== "all" && (
-                <Badge variant="secondary" className="flex items-center gap-1">
+                <Badge variant="secondary" className="flex items-center gap-1 rounded-full">
                   {safeFilters.category}
                   <X 
-                    className="w-3 h-3 cursor-pointer" 
+                    className="w-3 h-3 cursor-pointer hover:text-destructive transition-colors" 
                     onClick={() => updateFilter("category", "all")}
                   />
                 </Badge>
               )}
               {safeFilters.verified && (
-                <Badge variant="secondary" className="flex items-center gap-1">
+                <Badge variant="secondary" className="flex items-center gap-1 rounded-full">
                   Verified
                   <X 
-                    className="w-3 h-3 cursor-pointer" 
+                    className="w-3 h-3 cursor-pointer hover:text-destructive transition-colors" 
                     onClick={() => updateFilter("verified", false)}
                   />
                 </Badge>
               )}
               {safeFilters.featured && (
-                <Badge variant="secondary" className="flex items-center gap-1">
+                <Badge variant="secondary" className="flex items-center gap-1 rounded-full">
                   Featured
                   <X 
-                    className="w-3 h-3 cursor-pointer" 
+                    className="w-3 h-3 cursor-pointer hover:text-destructive transition-colors" 
                     onClick={() => updateFilter("featured", false)}
                   />
                 </Badge>
               )}
               {viewMode === 'services' && safeFilters.coPayEligible && (
-                <Badge variant="secondary" className="flex items-center gap-1">
+                <Badge variant="secondary" className="flex items-center gap-1 rounded-full">
                   Co-Pay Eligible
                   <X 
-                    className="w-3 h-3 cursor-pointer" 
+                    className="w-3 h-3 cursor-pointer hover:text-destructive transition-colors" 
                     onClick={() => updateFilter("coPayEligible", false)}
                   />
                 </Badge>
               )}
               {(safeFilters.priceRange[0] > 0 || safeFilters.priceRange[1] < 2000) && (
-                <Badge variant="secondary" className="flex items-center gap-1">
+                <Badge variant="secondary" className="flex items-center gap-1 rounded-full">
                   ${safeFilters.priceRange[0]} - ${safeFilters.priceRange[1]}
                   <X 
-                    className="w-3 h-3 cursor-pointer" 
+                    className="w-3 h-3 cursor-pointer hover:text-destructive transition-colors" 
                     onClick={() => updateFilter("priceRange", [0, 2000])}
                   />
                 </Badge>
@@ -186,7 +197,7 @@ export const MarketplaceFilters = ({ filters, onFiltersChange, categories, viewM
             </div>
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
