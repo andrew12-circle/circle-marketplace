@@ -726,6 +726,116 @@ export type Database = {
         }
         Relationships: []
       }
+      point_allocations: {
+        Row: {
+          agent_id: string
+          allocated_points: number
+          allocation_period: string
+          created_at: string
+          created_by: string | null
+          end_date: string
+          id: string
+          notes: string | null
+          remaining_points: number | null
+          start_date: string
+          status: string | null
+          updated_at: string
+          used_points: number | null
+          vendor_id: string
+        }
+        Insert: {
+          agent_id: string
+          allocated_points: number
+          allocation_period: string
+          created_at?: string
+          created_by?: string | null
+          end_date: string
+          id?: string
+          notes?: string | null
+          remaining_points?: number | null
+          start_date: string
+          status?: string | null
+          updated_at?: string
+          used_points?: number | null
+          vendor_id: string
+        }
+        Update: {
+          agent_id?: string
+          allocated_points?: number
+          allocation_period?: string
+          created_at?: string
+          created_by?: string | null
+          end_date?: string
+          id?: string
+          notes?: string | null
+          remaining_points?: number | null
+          start_date?: string
+          status?: string | null
+          updated_at?: string
+          used_points?: number | null
+          vendor_id?: string
+        }
+        Relationships: []
+      }
+      point_transactions: {
+        Row: {
+          agent_id: string
+          allocation_id: string
+          amount_covered: number
+          coverage_percentage: number
+          created_at: string
+          description: string | null
+          id: string
+          order_id: string | null
+          points_used: number
+          processed_by: string | null
+          service_id: string | null
+          total_service_amount: number | null
+          transaction_type: string
+          vendor_id: string
+        }
+        Insert: {
+          agent_id: string
+          allocation_id: string
+          amount_covered: number
+          coverage_percentage: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          order_id?: string | null
+          points_used: number
+          processed_by?: string | null
+          service_id?: string | null
+          total_service_amount?: number | null
+          transaction_type: string
+          vendor_id: string
+        }
+        Update: {
+          agent_id?: string
+          allocation_id?: string
+          amount_covered?: number
+          coverage_percentage?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          order_id?: string | null
+          points_used?: number
+          processed_by?: string | null
+          service_id?: string | null
+          total_service_amount?: number | null
+          transaction_type?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "point_transactions_allocation_id_fkey"
+            columns: ["allocation_id"]
+            isOneToOne: false
+            referencedRelation: "point_allocations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -2105,6 +2215,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      get_agent_points_summary: {
+        Args: { p_agent_id: string }
+        Returns: Json
+      }
       get_public_profile: {
         Args: { profile_id: string }
         Returns: {
@@ -2149,6 +2263,17 @@ export type Database = {
           client_user_agent?: string
         }
         Returns: undefined
+      }
+      process_automatic_copay: {
+        Args: {
+          p_agent_id: string
+          p_service_id: string
+          p_vendor_id: string
+          p_total_amount: number
+          p_coverage_percentage: number
+          p_order_id?: string
+        }
+        Returns: Json
       }
       track_vendor_activity: {
         Args: {

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -27,14 +28,37 @@ import {
 export const AgentWallet = () => {
   const { user, profile } = useAuth();
   const [activeTab, setActiveTab] = useState("overview");
+  const [pointsData, setPointsData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-  // Mock data - replace with actual API calls
+  useEffect(() => {
+    if (user?.id) {
+      loadPointsData();
+    }
+  }, [user?.id]);
+
+  const loadPointsData = async () => {
+    try {
+      const { data, error } = await supabase.rpc('get_agent_points_summary', {
+        p_agent_id: user?.id
+      });
+
+      if (error) throw error;
+      setPointsData(data);
+    } catch (error) {
+      console.error('Error loading points data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Use actual data or fallback to mock
   const walletData = {
-    availablePoints: profile?.circle_points || 0,
+    availablePoints: pointsData?.total_available_points || profile?.circle_points || 0,
     pendingPoints: 125,
     totalEarned: 2850,
     thisMonthSpent: 350,
-    pointsVault: profile?.circle_points || 0,
+    pointsVault: pointsData?.total_available_points || profile?.circle_points || 0,
     tier: "Gold",
     nextTierPoints: 500,
     goal: {
@@ -197,34 +221,63 @@ export const AgentWallet = () => {
                 </CardContent>
               </Card>
 
-              {/* Points Vault */}
+              {/* Vendor Point Allocations */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
                     <Wallet className="h-5 w-5" />
-                    <span>Points Vault</span>
+                    <span>Vendor Allocations</span>
                   </CardTitle>
                   <CardDescription>
-                    Secure storage for your accumulated points
+                    Points allocated by vendors for co-pay assistance
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="text-center py-6">
-                    <div className="text-4xl font-bold text-primary">
-                      {walletData.pointsVault.toLocaleString()}
+                  {loading ? (
+                    <div className="text-center py-6">
+                      <p className="text-muted-foreground">Loading allocations...</p>
                     </div>
-                    <p className="text-muted-foreground">Total Points Stored</p>
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <Button variant="outline" size="sm">
-                      <ArrowUpRight className="h-4 w-4 mr-2" />
-                      Deposit
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      <ArrowDownLeft className="h-4 w-4 mr-2" />
-                      Withdraw
-                    </Button>
-                  </div>
+                  ) : pointsData?.allocations?.length > 0 ? (
+                    <div className="space-y-3">
+                      <div className="text-center py-2">
+                        <div className="text-3xl font-bold text-green-600">
+                          ${walletData.availablePoints.toLocaleString()}
+                        </div>
+                        <p className="text-muted-foreground">Available for Co-Pay</p>
+                      </div>
+                      {pointsData.allocations.map((allocation: any, index: number) => (
+                        <div key={index} className="p-3 border rounded-lg bg-muted/50">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <p className="font-medium">{allocation.vendor_name}</p>
+                              <p className="text-sm text-muted-foreground">{allocation.allocation_period}</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-bold text-green-600">
+                                ${allocation.remaining_points.toLocaleString()}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {allocation.used_points}/{allocation.allocated_points} used
+                              </p>
+                            </div>
+                          </div>
+                          {allocation.notes && (
+                            <p className="text-xs text-muted-foreground mt-2">{allocation.notes}</p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-6">
+                      <div className="text-2xl font-bold text-muted-foreground">
+                        $0
+                      </div>
+                      <p className="text-muted-foreground">No vendor allocations</p>
+                      <p className="text-sm text-muted-foreground mt-2">
+                        Ask vendors to allocate co-pay points for you
+                      </p>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
