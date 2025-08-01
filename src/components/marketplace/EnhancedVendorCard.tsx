@@ -99,9 +99,9 @@ export const EnhancedVendorCard = ({ vendor, onConnect, onViewProfile }: Enhance
   };
 
   const getCardBorderClass = () => {
-    // Special blue border for Circle Home Loans
+    // Subtle blue hue for Circle Home Loans
     if (vendor.name.toLowerCase().includes('circle home loans')) {
-      return "border-blue-500 ring-2 ring-blue-200/50 shadow-blue-100";
+      return "border-blue-200/60 bg-blue-50/30 shadow-lg shadow-blue-100/50";
     }
     return "border-border";
   };
