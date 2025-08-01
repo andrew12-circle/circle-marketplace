@@ -24,6 +24,7 @@ import {
 import { toast } from "sonner";
 import { VendorProfileEditor } from "@/components/marketplace/VendorProfileEditor";
 import { VendorFunnelEditor } from "@/components/marketplace/VendorFunnelEditor";
+import { VendorAnalytics } from "@/components/marketplace/VendorAnalytics";
 
 interface VendorData {
   id: string;
@@ -457,51 +458,24 @@ export const VendorAnalyticsDashboard = () => {
           </TabsContent>
 
           <TabsContent value="analytics">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>View Analytics</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Total Views</span>
-                      <span className="font-semibold">{stats.totalViews}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Last 30 Days</span>
-                      <span className="font-semibold">{stats.recentViews}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">This Month</span>
-                      <span className="font-semibold">{stats.monthlyViews}</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Conversion Metrics</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Consultation Bookings</span>
-                      <span className="font-semibold">{stats.consultationBookings}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Conversion Rate</span>
-                      <span className="font-semibold">{stats.conversionRate}%</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Agent Partnerships</span>
-                      <span className="font-semibold">{vendorData.co_marketing_agents}</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+            <VendorAnalytics 
+              data={{
+                totalViews: stats.totalViews,
+                consultationBookings: stats.consultationBookings,
+                campaignSpend: stats.campaignSpend,
+                recentViews: stats.recentViews,
+                monthlyViews: stats.monthlyViews,
+                conversionRate: stats.conversionRate,
+                partneredAgents: vendorData.co_marketing_agents,
+                campaignsFunded: vendorData.campaigns_funded
+              }}
+              vendorData={{
+                name: vendorData.name,
+                location: vendorData.location,
+                co_marketing_agents: vendorData.co_marketing_agents,
+                campaigns_funded: vendorData.campaigns_funded
+              }}
+            />
           </TabsContent>
 
           <TabsContent value="profile">
