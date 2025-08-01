@@ -212,29 +212,31 @@ export const EnhancedVendorCard = ({ vendor, onConnect, onViewProfile }: Enhance
           </div>
 
           {/* Stats */}
-          <div className={`grid gap-4 ${vendor.co_marketing_agents > 10 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+          <div className={`grid gap-4 ${vendor.co_marketing_agents > 10 ? 'grid-cols-2' : vendor.campaigns_funded >= 10 ? 'grid-cols-1' : ''}`}>
             {vendor.co_marketing_agents > 10 && (
               <div className="text-center p-2 bg-muted/50 rounded">
                 <div className="text-lg font-bold text-circle-primary">{vendor.co_marketing_agents}</div>
                 <div className="text-xs text-muted-foreground">Co-Marketing Agents</div>
               </div>
             )}
-            <div 
-              className="text-center p-2 bg-muted/50 rounded cursor-pointer hover:bg-muted/70 transition-colors"
-              onClick={(e) => {
-                e.stopPropagation();
-                trackContactRequest(vendor.id, {
-                  type: 'campaigns_funded_click',
-                  value: vendor.campaigns_funded.toString(),
-                  message: 'User clicked on campaigns funded stat - shows how many times this vendor has covered realtor marketing costs',
-                  source: 'vendor_card_stat'
-                });
-              }}
-              title="Number of times this vendor has covered part of a realtor's marketing costs"
-            >
-              <div className="text-lg font-bold text-circle-primary">{vendor.campaigns_funded}</div>
-              <div className="text-xs text-muted-foreground">Co-Pay Campaigns Funded</div>
-            </div>
+            {vendor.campaigns_funded >= 10 && (
+              <div 
+                className="text-center p-2 bg-muted/50 rounded cursor-pointer hover:bg-muted/70 transition-colors"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  trackContactRequest(vendor.id, {
+                    type: 'campaigns_funded_click',
+                    value: vendor.campaigns_funded.toString(),
+                    message: 'User clicked on campaigns funded stat - shows how many times this vendor has covered realtor marketing costs',
+                    source: 'vendor_card_stat'
+                  });
+                }}
+                title="Number of times this vendor has covered part of a realtor's marketing costs"
+              >
+                <div className="text-lg font-bold text-circle-primary">{vendor.campaigns_funded}</div>
+                <div className="text-xs text-muted-foreground">Co-Pay Campaigns Funded</div>
+              </div>
+            )}
           </div>
 
           {/* Local Representatives */}
