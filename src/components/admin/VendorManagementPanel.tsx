@@ -58,6 +58,7 @@ export const VendorManagementPanel = () => {
   const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [isEditingFunnel, setIsEditingFunnel] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchVendors();
@@ -74,6 +75,7 @@ export const VendorManagementPanel = () => {
 
   const fetchVendors = async () => {
     try {
+      setError(null);
       const { data, error } = await supabase
         .from('vendors')
         .select('*')
@@ -83,9 +85,11 @@ export const VendorManagementPanel = () => {
       setVendors(data || []);
     } catch (error) {
       console.error('Error fetching vendors:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to fetch vendors';
+      setError(errorMessage);
       toast({
         title: 'Error',
-        description: 'Failed to fetch vendors',
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {
@@ -149,6 +153,22 @@ export const VendorManagementPanel = () => {
 
   if (loading) {
     return <p>Loading vendors...</p>;
+  }
+
+  if (error) {
+    return (
+      <div className="p-6">
+        <Card>
+          <CardContent className="p-6">
+            <h3 className="text-lg font-semibold text-destructive mb-2">Error Loading Vendors</h3>
+            <p className="text-muted-foreground">{error}</p>
+            <Button onClick={() => { setError(null); fetchVendors(); }} className="mt-4">
+              Try Again
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   return (
