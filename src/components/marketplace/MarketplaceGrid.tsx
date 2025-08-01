@@ -703,9 +703,6 @@ export const MarketplaceGrid = () => {
             />
             
             <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-              <div className="text-sm text-muted-foreground">
-                Showing {services.length} services
-              </div>
             </div>
           </div>
 
