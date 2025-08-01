@@ -16,6 +16,7 @@ import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { LocationSwitcher } from "@/components/LocationSwitcher";
 import { LegalFooter } from "@/components/LegalFooter";
 import { Building, Store } from "lucide-react";
+import { CustomerPortalButton } from "@/components/marketplace/CustomerPortalButton";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<"marketplace" | "academy">("marketplace");
@@ -89,6 +90,13 @@ const Index = () => {
                     <span className="font-medium">{profile.circle_points}</span>
                     <span className="text-muted-foreground hidden sm:inline">Points</span>
                   </Link>
+                )}
+                
+                {/* Customer Portal Button */}
+                {user && profile && (
+                  <div className="hidden sm:block">
+                    <CustomerPortalButton />
+                  </div>
                 )}
                 
                 {/* Pro upgrade button - hidden on small mobile */}

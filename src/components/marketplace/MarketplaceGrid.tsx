@@ -16,6 +16,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLocation } from "@/hooks/useLocation";
 import { determineServiceRisk } from "./RESPAComplianceSystem";
+import { CategoryMegaMenu } from "./CategoryMegaMenu";
+import { EnhancedSearch, SearchFilters } from "./EnhancedSearch";
 
 interface FilterState {
   category: string;
@@ -95,6 +97,17 @@ export const MarketplaceGrid = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>("services");
   const [selectedProductCategory, setSelectedProductCategory] = useState<string | null>(null);
+  const [searchFilters, setSearchFilters] = useState<SearchFilters>({
+    query: "",
+    categories: [],
+    tags: [],
+    priceRange: [0, 1000],
+    rating: 0,
+    location: "",
+    features: []
+  });
+  const [selectedCategory, setSelectedCategory] = useState<string>("All");
+  const [sortBy, setSortBy] = useState<'featured' | 'rating' | 'price'>('featured');
   
   // Circuit breaker state for marketplace
   const [circuitBreakerState, setCircuitBreakerState] = useState({
@@ -673,43 +686,55 @@ export const MarketplaceGrid = () => {
           {/* Campaign Services Header */}
           <CampaignServicesHeader />
 
-          {/* Search and View Toggle - Mobile Optimized */}
-          <div className="flex flex-col gap-3 sm:gap-4 mb-4 sm:mb-6">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4 sm:w-5 sm:h-5" />
-              <Input
-                placeholder={t('searchPlaceholder')}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 sm:pl-12 h-10 sm:h-11 text-sm sm:text-base"
-              />
+          {/* Enhanced Search Component */}
+          <div className="space-y-6">
+            <CircleProBanner />
+            <LocationFilterBanner 
+              onToggleLocationFilter={() => setIsLocationFilterActive(!isLocationFilterActive)}
+              isLocationFilterActive={isLocationFilterActive}
+              vendorCount={vendors.length}
+              localVendorCount={localVendorCount}
+            />
+            
+            <EnhancedSearch
+              onSearchChange={setSearchFilters}
+              availableCategories={Array.from(new Set(services.map(service => service.category).filter(Boolean)))}
+              availableTags={Array.from(new Set(services.flatMap(service => service.tags || [])))}
+            />
+            
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+              <div className="text-sm text-muted-foreground">
+                Showing {services.length} services
+              </div>
             </div>
-            <div className="flex gap-2">
-              <Button
-                variant={viewMode === "services" ? "default" : "outline"}
-                onClick={() => setViewMode("services")}
-                className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-9 sm:h-10 text-sm sm:text-base"
-              >
-                <Sparkles className="w-3 h-3 sm:w-4 sm:h-4" />
-                {t('services')}
-              </Button>
-              <Button
-                variant={viewMode === "products" ? "default" : "outline"}
-                onClick={() => setViewMode("products")}
-                className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-9 sm:h-10 text-sm sm:text-base"
-              >
-                <Filter className="w-3 h-3 sm:w-4 sm:h-4" />
-                Products
-              </Button>
-              <Button
-                variant={viewMode === "vendors" ? "default" : "outline"}
-                onClick={() => setViewMode("vendors")}
-                className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-9 sm:h-10 text-sm sm:text-base"
-              >
-                <Zap className="w-3 h-3 sm:w-4 sm:h-4" />
-                {t('vendors')}
-              </Button>
-            </div>
+          </div>
+
+          {/* View Mode Toggle */}
+          <div className="flex gap-2 mb-6">
+            <Button
+              variant={viewMode === "services" ? "default" : "outline"}
+              onClick={() => setViewMode("services")}
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-9 sm:h-10 text-sm sm:text-base"
+            >
+              <Sparkles className="w-3 h-3 sm:w-4 sm:h-4" />
+              {t('services')}
+            </Button>
+            <Button
+              variant={viewMode === "products" ? "default" : "outline"}
+              onClick={() => setViewMode("products")}
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-9 sm:h-10 text-sm sm:text-base"
+            >
+              <Filter className="w-3 h-3 sm:w-4 sm:h-4" />
+              Products
+            </Button>
+            <Button
+              variant={viewMode === "vendors" ? "default" : "outline"}
+              onClick={() => setViewMode("vendors")}
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-9 sm:h-10 text-sm sm:text-base"
+            >
+              <Zap className="w-3 h-3 sm:w-4 sm:h-4" />
+              {t('vendors')}
+            </Button>
           </div>
 
           {/* Location Filter Banner - Only for vendors */}
@@ -722,15 +747,7 @@ export const MarketplaceGrid = () => {
             />
           )}
 
-          {/* Filters - Mobile Optimized */}
-          <div className="mb-6 sm:mb-8">
-            <MarketplaceFilters
-              filters={filters}
-              onFiltersChange={setFilters}
-              categories={getCategories()}
-              viewMode={viewMode}
-            />
-          </div>
+          {/* Legacy filters section - temporarily removed for Phase 1 */}
 
           {/* Grid - Mobile Responsive */}
           {viewMode === "services" ? (
