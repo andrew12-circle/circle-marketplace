@@ -150,10 +150,66 @@ export const VendorSelectionModal = ({
     setFilteredVendors(filtered);
   };
 
-  const handleVendorSelect = (vendor: Vendor) => {
-    setSelectedVendor(vendor);
-    setShowConfirmation(true);
-    onVendorSelect(vendor);
+  const handleVendorSelect = async (vendor: Vendor) => {
+    try {
+      setIsLoading(true);
+      
+      // Create co-pay request in database
+      const { data: coPayRequest, error } = await supabase
+        .from('co_pay_requests')
+        .insert({
+          agent_id: (await supabase.auth.getUser()).data.user?.id,
+          vendor_id: vendor.id,
+          service_id: service.title, // This should be the actual service ID if available
+          requested_split_percentage: service.max_vendor_split_percentage || 50,
+          status: 'pending',
+          agent_notes: `Co-pay request for "${service.title}" service`
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error creating co-pay request:', error);
+        toast({
+          title: "Error",
+          description: "Failed to create co-pay request. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      console.log('Co-pay request created:', coPayRequest);
+      
+      // Add to cart context or dispatch cart event with the request
+      const cartItem = {
+        id: coPayRequest.id,
+        type: 'co-pay-request',
+        vendor: vendor,
+        service: service,
+        status: 'pending-approval',
+        requestedSplit: service.max_vendor_split_percentage || 50,
+        createdAt: new Date().toISOString()
+      };
+
+      // Dispatch custom event to add to cart
+      const addToCartEvent = new CustomEvent('addCoPayToCart', { 
+        detail: cartItem 
+      });
+      window.dispatchEvent(addToCartEvent);
+
+      setSelectedVendor(vendor);
+      setShowConfirmation(true);
+      onVendorSelect(vendor);
+    } catch (error) {
+      console.error('Error in vendor selection:', error);
+      toast({
+        title: "Error",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleLearnMore = (vendor: Vendor, e: React.MouseEvent) => {
@@ -227,7 +283,9 @@ export const VendorSelectionModal = ({
             <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
             <h3 className="text-xl font-semibold mb-2">Request Sent!</h3>
             <p className="text-muted-foreground mb-6">
-              Your co-pay request has been sent to {selectedVendor?.name}. They just got notified via push notification, text and email they have 3 days to respond. You will be notified instantly once they respond. Your cart is saved.
+              Your co-pay request has been sent to {selectedVendor?.name}. They've been notified via push notification, text, and email. They have 3 days to respond. You'll be notified instantly once they respond. 
+              <br /><br />
+              <strong>The request has been added to your cart as "Pending Approval".</strong>
             </p>
             <div className="flex gap-3 justify-center">
               <Button onClick={handleSendAnotherRequest} variant="outline">

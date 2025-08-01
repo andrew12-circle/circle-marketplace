@@ -165,20 +165,46 @@ export const CartDrawer = () => {
                 {cartItems.map((item) => (
                   <div key={item.id} className="flex gap-3 p-3 border rounded-lg">
                      <div className="w-20 h-16 bg-muted rounded-lg overflow-hidden">
-                       <img
-                         src={item.image_url || "/placeholder.svg"}
-                         alt={item.title}
-                         className="w-full h-full object-cover"
-                       />
+                       {item.type === 'co-pay-request' ? (
+                         <div className="w-full h-full flex items-center justify-center">
+                           <MessageCircle className="w-8 h-8 text-muted-foreground" />
+                         </div>
+                       ) : (
+                         <img
+                           src={item.image_url || "/placeholder.svg"}
+                           alt={item.title}
+                           className="w-full h-full object-cover"
+                         />
+                       )}
                      </div>
                     
                     <div className="flex-1 min-w-0">
                       <h4 className="font-medium text-sm line-clamp-2">{item.title}</h4>
-                      <p className="text-xs text-muted-foreground">{item.vendor}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {item.type === 'co-pay-request' ? item.vendorName : item.vendor}
+                      </p>
                       
                       <div className="flex items-center justify-between mt-2">
                          <div className="flex items-center gap-2">
-                            {item.requiresQuote ? (
+                           {item.type === 'co-pay-request' ? (
+                             <div className="flex items-center gap-2">
+                               <Badge 
+                                 variant="secondary" 
+                                 className={`text-xs ${
+                                   item.status === 'pending-approval' ? 'text-yellow-600 border-yellow-600' :
+                                   item.status === 'approved' ? 'text-green-600 border-green-600' :
+                                   'text-red-600 border-red-600'
+                                 }`}
+                               >
+                                 <MessageCircle className="w-3 h-3 mr-1" />
+                                 {item.status === 'pending-approval' ? 'Pending' : 
+                                  item.status === 'approved' ? 'Approved' : 'Denied'}
+                               </Badge>
+                               <span className="font-semibold text-muted-foreground text-xs">
+                                 {item.requestedSplit}% split
+                               </span>
+                             </div>
+                           ) : item.requiresQuote ? (
                              <div className="flex items-center gap-2">
                                <Badge variant="outline" className="text-blue-600 border-blue-600 text-xs">
                                  <Calendar className="w-3 h-3 mr-1" />
@@ -196,7 +222,7 @@ export const CartDrawer = () => {
                          </div>
                         
                         <div className="flex items-center gap-1">
-                          {!item.requiresQuote && (
+                          {!item.requiresQuote && item.type !== 'co-pay-request' && (
                             <>
                               <Button
                                 variant="outline"

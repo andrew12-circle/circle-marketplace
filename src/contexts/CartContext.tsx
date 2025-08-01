@@ -10,10 +10,16 @@ interface CartItem {
   image_url?: string;
   quantity: number;
   requiresQuote?: boolean;
-  type: 'service' | 'course'; // Distinguish between marketplace and academy items
+  type: 'service' | 'course' | 'co-pay-request'; // Added co-pay-request type
   description?: string;
   duration?: string; // For courses
   lessonCount?: number; // For courses
+  // Co-pay request specific fields
+  status?: 'pending-approval' | 'approved' | 'denied';
+  requestedSplit?: number;
+  vendorName?: string;
+  serviceName?: string;
+  createdAt?: string;
 }
 
 interface CartContextType {
@@ -60,6 +66,34 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     localStorage.setItem('circle-cart', JSON.stringify(cartItems));
   }, [cartItems]);
+
+  // Listen for co-pay request events
+  useEffect(() => {
+    const handleAddCoPayToCart = (event: CustomEvent) => {
+      const coPayItem = event.detail;
+      const cartItem: CartItem = {
+        id: coPayItem.id,
+        title: `Co-Pay: ${coPayItem.service.title}`,
+        price: 0, // Co-pay requests don't have a direct price
+        vendor: coPayItem.vendor.name,
+        quantity: 1,
+        type: 'co-pay-request',
+        status: coPayItem.status,
+        requestedSplit: coPayItem.requestedSplit,
+        vendorName: coPayItem.vendor.name,
+        serviceName: coPayItem.service.title,
+        createdAt: coPayItem.createdAt,
+        requiresQuote: false
+      };
+      
+      addToCart(cartItem);
+    };
+
+    window.addEventListener('addCoPayToCart', handleAddCoPayToCart as EventListener);
+    return () => window.removeEventListener('addCoPayToCart', handleAddCoPayToCart as EventListener);
+  }, []);
+
+  // Save cart to localStorage whenever it changes
 
   const addToCart = (item: Omit<CartItem, 'quantity'>) => {
     setCartItems(prev => {
@@ -130,6 +164,25 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const getCartCount = () => {
     return cartItems.reduce((count, item) => count + item.quantity, 0);
+  };
+
+  const addCoPayRequest = (coPayItem: any) => {
+    const cartItem: CartItem = {
+      id: coPayItem.id,
+      title: `Co-Pay: ${coPayItem.service.title}`,
+      price: 0,
+      vendor: coPayItem.vendor.name,
+      quantity: 1,
+      type: 'co-pay-request',
+      status: coPayItem.status,
+      requestedSplit: coPayItem.requestedSplit,
+      vendorName: coPayItem.vendor.name,
+      serviceName: coPayItem.service.title,
+      createdAt: coPayItem.createdAt,
+      requiresQuote: false
+    };
+    
+    addToCart(cartItem);
   };
 
   const value: CartContextType = {
