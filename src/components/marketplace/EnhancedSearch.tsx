@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Search, Filter, X, MapPin, DollarSign, Star, ChevronDown } from "lucide-react";
+import { Search, Filter, X, DollarSign, Star, ChevronDown } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,7 +21,6 @@ export interface SearchFilters {
   tags: string[];
   priceRange: [number, number];
   rating: number;
-  location: string;
   features: string[];
 }
 
@@ -44,7 +43,6 @@ export const EnhancedSearch = ({
     tags: [],
     priceRange: [0, 1000],
     rating: 0,
-    location: "",
     features: []
   });
 
@@ -58,7 +56,6 @@ export const EnhancedSearch = ({
     if (filters.tags.length > 0) count++;
     if (filters.priceRange[0] > 0 || filters.priceRange[1] < 1000) count++;
     if (filters.rating > 0) count++;
-    if (filters.location) count++;
     if (filters.features.length > 0) count++;
     
     setActiveFiltersCount(count);
@@ -88,7 +85,6 @@ export const EnhancedSearch = ({
       tags: [],
       priceRange: [0, 1000],
       rating: 0,
-      location: "",
       features: []
     });
   };
@@ -112,9 +108,6 @@ export const EnhancedSearch = ({
         break;
       case 'rating':
         updateFilters('rating', 0);
-        break;
-      case 'location':
-        updateFilters('location', '');
         break;
     }
   };
@@ -238,16 +231,6 @@ export const EnhancedSearch = ({
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {/* Location Filter */}
-        <div className="relative">
-          <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-3 h-3" />
-          <Input
-            placeholder="Location"
-            value={filters.location}
-            onChange={(e) => updateFilters('location', e.target.value)}
-            className="pl-8 pr-4 w-40"
-          />
-        </div>
       </div>
 
       {/* Active Filters Display */}
@@ -315,16 +298,6 @@ export const EnhancedSearch = ({
             </Badge>
           )}
           
-          {filters.location && (
-            <Badge variant="secondary" className="gap-1">
-              <MapPin className="w-3 h-3" />
-              {filters.location}
-              <X 
-                className="w-3 h-3 cursor-pointer" 
-                onClick={() => removeFilter('location')}
-              />
-            </Badge>
-          )}
         </div>
       )}
     </div>

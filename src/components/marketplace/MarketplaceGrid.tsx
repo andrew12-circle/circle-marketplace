@@ -104,7 +104,6 @@ export const MarketplaceGrid = () => {
     tags: [],
     priceRange: [0, 1000],
     rating: 0,
-    location: "",
     features: []
   });
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
