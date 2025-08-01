@@ -147,8 +147,8 @@ export const EnhancedSearch = ({
               <ChevronDown className="w-4 h-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-[600px] p-6 bg-popover border shadow-md" align="start">
-            <div className="grid grid-cols-2 gap-6">
+          <DropdownMenuContent className="w-[800px] p-6 bg-popover border shadow-md" align="start">
+            <div className="grid grid-cols-2 gap-8">
               {/* Left Column */}
               <div className="space-y-6">
                 {/* Categories */}
@@ -209,7 +209,7 @@ export const EnhancedSearch = ({
                 {/* Rating */}
                 <div>
                   <Label className="text-sm font-medium mb-3 block">Minimum Rating</Label>
-                  <div className="flex items-center gap-2">
+                  <div className="grid grid-cols-3 gap-2 max-w-xs">
                     {[1, 2, 3, 4, 5].map((rating) => (
                       <Button
                         key={rating}
