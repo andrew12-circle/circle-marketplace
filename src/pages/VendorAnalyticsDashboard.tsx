@@ -25,6 +25,7 @@ import { toast } from "sonner";
 import { VendorProfileEditor } from "@/components/marketplace/VendorProfileEditor";
 import { VendorFunnelEditor } from "@/components/marketplace/VendorFunnelEditor";
 import { VendorAnalytics } from "@/components/marketplace/VendorAnalytics";
+import { VendorCardPreview } from "@/components/marketplace/VendorCardPreview";
 
 interface VendorData {
   id: string;
@@ -76,6 +77,7 @@ export const VendorAnalyticsDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [isEditingFunnel, setIsEditingFunnel] = useState(false);
+  const [showCardPreview, setShowCardPreview] = useState(false);
   const [funnelContent, setFunnelContent] = useState(null);
 
   useEffect(() => {
@@ -286,6 +288,12 @@ export const VendorAnalyticsDashboard = () => {
               <Button onClick={() => setIsEditingProfile(true)}>
                 <Edit className="w-4 h-4 mr-2" />
                 Edit Profile
+              </Button>
+              <Button 
+                onClick={() => setShowCardPreview(!showCardPreview)}
+                variant={showCardPreview ? "default" : "outline"}
+              >
+                {showCardPreview ? "Hide Preview" : "Preview Card"}
               </Button>
             </div>
           </div>
@@ -551,7 +559,7 @@ export const VendorAnalyticsDashboard = () => {
                         </ul>
                       </div>
                     </div>
-                    <Button onClick={() => setIsEditingFunnel(true)} className="mt-4">
+                   <Button onClick={() => setIsEditingFunnel(true)} className="mt-4">
                       <Edit className="w-4 h-4 mr-2" />
                       Start Editing Funnel
                     </Button>
@@ -561,6 +569,40 @@ export const VendorAnalyticsDashboard = () => {
             )}
           </TabsContent>
         </Tabs>
+
+        {/* Card Preview Modal */}
+        {showCardPreview && (
+          <div className="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Vendor Card Preview</CardTitle>
+                <p className="text-sm text-gray-600">
+                  This is how your vendor card will appear to customers in the marketplace.
+                </p>
+              </CardHeader>
+              <CardContent>
+                <VendorCardPreview
+                  vendorData={{
+                    name: vendorData?.name || "Your Company Name",
+                    description: vendorData?.description || "Your company description will appear here...",
+                    rating: vendorData?.rating || 0,
+                    reviewCount: vendorData?.review_count || 0,
+                    location: vendorData?.location || "Your Location",
+                    phone: vendorData?.phone || "Your Phone",
+                    contactEmail: vendorData?.contact_email || "your@email.com",
+                    websiteUrl: vendorData?.website_url,
+                    logoUrl: vendorData?.logo_url,
+                    isVerified: vendorData?.is_verified || false,
+                    coMarketingAgents: vendorData?.co_marketing_agents || 0,
+                    campaignsFunded: vendorData?.campaigns_funded || 0,
+                    vendorType: vendorData?.vendor_type || "company",
+                    specialties: vendorData?.license_states || []
+                  }}
+                />
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </div>
     </div>
   );
