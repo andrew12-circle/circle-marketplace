@@ -13,7 +13,7 @@ import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ServiceCard } from '@/components/marketplace/ServiceCard';
 import { ServiceDetailsModal } from '@/components/marketplace/ServiceDetailsModal';
-import { AddProductModal } from '@/components/marketplace/AddProductModal';
+import { ServiceFunnelEditorModal } from '@/components/marketplace/ServiceFunnelEditorModal';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useVendorActivityTracking } from '@/hooks/useVendorActivityTracking';
@@ -63,6 +63,44 @@ export const VendorDashboard = () => {
   });
   const [loading, setLoading] = useState(true);
   const [isServiceBuilderOpen, setIsServiceBuilderOpen] = useState(false);
+  const [funnelContent, setFunnelContent] = useState({
+    headline: "",
+    subheadline: "",
+    heroDescription: "",
+    estimatedRoi: 0,
+    duration: "",
+    whyChooseUs: {
+      title: "",
+      benefits: []
+    },
+    media: [],
+    packages: [],
+    socialProof: {
+      testimonials: [],
+      stats: []
+    },
+    trustIndicators: {
+      guarantee: "",
+      cancellation: "",
+      certification: ""
+    },
+    callToAction: {
+      primaryHeadline: "",
+      primaryDescription: "",
+      primaryButtonText: "",
+      secondaryHeadline: "",
+      secondaryDescription: "",
+      contactInfo: {
+        phone: "",
+        email: "",
+        website: ""
+      }
+    },
+    urgency: {
+      enabled: false,
+      message: ""
+    }
+  });
   const [selectedService, setSelectedService] = useState<VendorService | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
 
@@ -499,10 +537,17 @@ export const VendorDashboard = () => {
 
       {/* Modals */}
       {isServiceBuilderOpen && (
-        <AddProductModal
+        <ServiceFunnelEditorModal
           open={isServiceBuilderOpen}
           onOpenChange={(open) => setIsServiceBuilderOpen(open)}
-          onProductAdded={fetchVendorData}
+          funnelContent={funnelContent}
+          onChange={setFunnelContent}
+          onSave={() => {
+            // Handle saving the funnel content
+            fetchVendorData();
+            setIsServiceBuilderOpen(false);
+          }}
+          serviceName="New Service"
         />
       )}
 
