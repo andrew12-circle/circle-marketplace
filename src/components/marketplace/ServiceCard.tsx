@@ -59,6 +59,7 @@ interface ServiceCardProps {
 export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }: ServiceCardProps) => {
   const { t } = useTranslation();
   const [isHovered, setIsHovered] = useState(false);
+  const [isClosingModal, setIsClosingModal] = useState(false);
   const [isConsultationFlowOpen, setIsConsultationFlowOpen] = useState(false);
   const [isFunnelModalOpen, setIsFunnelModalOpen] = useState(false);
   const [isVendorSelectionModalOpen, setIsVendorSelectionModalOpen] = useState(false);
@@ -91,10 +92,10 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
   };
 
   const handleViewDetails = async () => {
-    console.log('handleViewDetails called - modal states:', { isVendorSelectionModalOpen, isPricingChoiceModalOpen, isFunnelModalOpen });
-    // Don't open if other modals are already open OR if the funnel modal is currently open
-    if (isVendorSelectionModalOpen || isPricingChoiceModalOpen || isFunnelModalOpen) {
-      console.log('Blocked - modal already open');
+    console.log('handleViewDetails called - modal states:', { isVendorSelectionModalOpen, isPricingChoiceModalOpen, isFunnelModalOpen, isClosingModal });
+    // Don't open if other modals are already open OR if we're in the middle of closing
+    if (isVendorSelectionModalOpen || isPricingChoiceModalOpen || isFunnelModalOpen || isClosingModal) {
+      console.log('Blocked - modal already open or closing');
       return;
     }
     // Track the service view
@@ -509,7 +510,10 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
         isOpen={isFunnelModalOpen}
         onClose={() => {
           console.log('ServiceFunnelModal onClose called');
+          setIsClosingModal(true);
           setIsFunnelModalOpen(false);
+          // Clear the closing flag after a brief delay to prevent immediate reopening
+          setTimeout(() => setIsClosingModal(false), 100);
         }}
         service={service}
       />
