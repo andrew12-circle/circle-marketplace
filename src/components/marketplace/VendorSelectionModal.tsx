@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Search, MapPin, Star, Users, TrendingUp, Building, Plus, CheckCircle } from "lucide-react";
+import confirmationImage from "@/assets/confirmation-image.png";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -292,6 +293,7 @@ export const VendorSelectionModal = ({
         
         {showConfirmation ? (
           <div className="text-center py-12">
+            <img src={confirmationImage} alt="Success" className="w-24 h-24 mx-auto mb-4" />
             <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
             <h3 className="text-xl font-semibold mb-2">Request Sent!</h3>
             <p className="text-muted-foreground mb-6">
