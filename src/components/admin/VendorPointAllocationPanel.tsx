@@ -8,8 +8,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { Coins, Calendar, Users, Gift, TrendingUp, AlertCircle } from 'lucide-react';
+import { Coins, Calendar, Users, Gift, TrendingUp, AlertCircle, CreditCard, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { loadStripe } from '@stripe/stripe-js';
 
 interface Agent {
   user_id: string;
@@ -29,6 +30,7 @@ interface PointAllocation {
   end_date: string;
   status: string;
   notes: string;
+  stripe_payment_method_id?: string;
 }
 
 const VendorPointAllocationPanel = () => {
@@ -38,6 +40,8 @@ const VendorPointAllocationPanel = () => {
   const [allocations, setAllocations] = useState<PointAllocation[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedAgent, setSelectedAgent] = useState('');
+  const [paymentMethodSetup, setPaymentMethodSetup] = useState(false);
+  const [hasPaymentMethod, setHasPaymentMethod] = useState(false);
   const [allocationForm, setAllocationForm] = useState({
     points: '',
     period: '',
@@ -106,6 +110,10 @@ const VendorPointAllocationPanel = () => {
       }));
 
       setAllocations(formattedAllocations);
+      
+      // Check if vendor has payment method
+      const hasPayment = formattedAllocations.some(allocation => allocation.stripe_payment_method_id);
+      setHasPaymentMethod(hasPayment);
     } catch (error) {
       console.error('Error loading allocations:', error);
     }
@@ -133,7 +141,8 @@ const VendorPointAllocationPanel = () => {
           start_date: allocationForm.startDate,
           end_date: allocationForm.endDate,
           notes: allocationForm.notes,
-          created_by: user?.id
+          created_by: user?.id,
+          charge_on_use: true
         });
 
       if (error) throw error;
@@ -162,6 +171,47 @@ const VendorPointAllocationPanel = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const setupPaymentMethod = async () => {
+    if (!user?.id) return;
+    
+    setPaymentMethodSetup(true);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('setup-vendor-payment', {
+        body: { vendor_id: user.id }
+      });
+
+      if (error) throw error;
+
+      const stripe = await loadStripe('pk_test_51JrJNnKtnBNtpCJ2qlGPzGPOIpGm9q0e8V3j9z0RzJvFnNgJJ5aY1sW3EQg9r1P7zI8v5mA0z2c4Z6sX8y0b1FqE00M8uC8QKR');
+      if (!stripe) throw new Error('Failed to load Stripe');
+
+      const { error: confirmError } = await stripe.confirmSetup({
+        clientSecret: data.setup_intent_client_secret,
+        confirmParams: {
+          return_url: window.location.href,
+        },
+      });
+
+      if (!confirmError) {
+        toast({
+          title: "Payment Method Added",
+          description: "Your payment method has been saved successfully.",
+        });
+        loadAllocations();
+      }
+    } catch (error) {
+      console.error('Payment setup error:', error);
+      toast({
+        title: "Setup Failed",
+        description: "Failed to setup payment method. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setPaymentMethodSetup(false);
     }
   };
 
@@ -208,13 +258,35 @@ const VendorPointAllocationPanel = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <Gift className="h-8 w-8 text-blue-600" />
-        <div>
-          <h1 className="text-3xl font-bold">Point Allocations</h1>
-          <p className="text-muted-foreground">Manage agent point allocations for co-pay assistance</p>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Gift className="h-8 w-8 text-blue-600" />
+          <div>
+            <h1 className="text-3xl font-bold">Point Allocations</h1>
+            <p className="text-muted-foreground">Manage agent point allocations for co-pay assistance</p>
+          </div>
         </div>
+        {!hasPaymentMethod && (
+          <Button 
+            onClick={setupPaymentMethod}
+            disabled={paymentMethodSetup}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            {paymentMethodSetup ? <Loader2 className="animate-spin" size={16} /> : <CreditCard size={16} />}
+            Setup Payment Method
+          </Button>
+        )}
       </div>
+
+      {!hasPaymentMethod && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+          <p className="text-yellow-800">
+            <strong>Payment Method Required:</strong> You need to setup a payment method before allocating points. 
+            You'll only be charged when agents actually use the points you allocate.
+          </p>
+        </div>
+      )}
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -372,7 +444,7 @@ const VendorPointAllocationPanel = () => {
             />
           </div>
 
-          <Button onClick={handleCreateAllocation} disabled={loading} className="w-full">
+          <Button onClick={handleCreateAllocation} disabled={loading || !hasPaymentMethod} className="w-full">
             {loading ? 'Creating...' : 'Allocate Points'}
           </Button>
         </CardContent>

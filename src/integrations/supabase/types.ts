@@ -731,14 +731,18 @@ export type Database = {
           agent_id: string
           allocated_points: number
           allocation_period: string
+          charge_on_use: boolean | null
           created_at: string
           created_by: string | null
           end_date: string
           id: string
           notes: string | null
+          pre_authorized: boolean | null
           remaining_points: number | null
           start_date: string
           status: string | null
+          stripe_customer_id: string | null
+          stripe_payment_method_id: string | null
           updated_at: string
           used_points: number | null
           vendor_id: string
@@ -747,14 +751,18 @@ export type Database = {
           agent_id: string
           allocated_points: number
           allocation_period: string
+          charge_on_use?: boolean | null
           created_at?: string
           created_by?: string | null
           end_date: string
           id?: string
           notes?: string | null
+          pre_authorized?: boolean | null
           remaining_points?: number | null
           start_date: string
           status?: string | null
+          stripe_customer_id?: string | null
+          stripe_payment_method_id?: string | null
           updated_at?: string
           used_points?: number | null
           vendor_id: string
@@ -763,19 +771,86 @@ export type Database = {
           agent_id?: string
           allocated_points?: number
           allocation_period?: string
+          charge_on_use?: boolean | null
           created_at?: string
           created_by?: string | null
           end_date?: string
           id?: string
           notes?: string | null
+          pre_authorized?: boolean | null
           remaining_points?: number | null
           start_date?: string
           status?: string | null
+          stripe_customer_id?: string | null
+          stripe_payment_method_id?: string | null
           updated_at?: string
           used_points?: number | null
           vendor_id?: string
         }
         Relationships: []
+      }
+      point_charges: {
+        Row: {
+          agent_id: string
+          allocation_id: string | null
+          amount_charged: number
+          charge_status: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          points_charged: number
+          processed_at: string | null
+          stripe_charge_id: string | null
+          stripe_payment_intent_id: string | null
+          transaction_id: string | null
+          vendor_id: string
+        }
+        Insert: {
+          agent_id: string
+          allocation_id?: string | null
+          amount_charged: number
+          charge_status?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          points_charged: number
+          processed_at?: string | null
+          stripe_charge_id?: string | null
+          stripe_payment_intent_id?: string | null
+          transaction_id?: string | null
+          vendor_id: string
+        }
+        Update: {
+          agent_id?: string
+          allocation_id?: string | null
+          amount_charged?: number
+          charge_status?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          points_charged?: number
+          processed_at?: string | null
+          stripe_charge_id?: string | null
+          stripe_payment_intent_id?: string | null
+          transaction_id?: string | null
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "point_charges_allocation_id_fkey"
+            columns: ["allocation_id"]
+            isOneToOne: false
+            referencedRelation: "point_allocations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "point_charges_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "point_transactions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       point_transactions: {
         Row: {
@@ -2272,6 +2347,17 @@ export type Database = {
           p_total_amount: number
           p_coverage_percentage: number
           p_order_id?: string
+        }
+        Returns: Json
+      }
+      process_real_time_charge: {
+        Args: {
+          p_allocation_id: string
+          p_transaction_id: string
+          p_vendor_id: string
+          p_agent_id: string
+          p_points_used: number
+          p_amount_to_charge: number
         }
         Returns: Json
       }

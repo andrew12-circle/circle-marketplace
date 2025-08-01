@@ -84,7 +84,7 @@ export const DirectPurchaseModal = ({
         throw new Error("Invalid price selected");
       }
 
-      // For co-pay purchases, try automatic point deduction first
+      // For co-pay purchases, try automatic point deduction with real-time charging
       if (selectedOption === 'copay' && service.vendor_id && service.max_vendor_split_percentage) {
         try {
           const { data: pointsResult, error: pointsError } = await supabase.rpc('process_automatic_copay', {
@@ -97,15 +97,44 @@ export const DirectPurchaseModal = ({
 
           const result = pointsResult as any;
           if (!pointsError && result?.success) {
-            // Points were successfully deducted
-            toast({
-              title: "Purchase Complete!",
-              description: `Successfully used ${result.points_used} points ($${result.amount_covered}) for co-pay. You saved $${(retailPrice - selectedPrice).toFixed(2)}!`,
-            });
+            // Process real-time charge
+            const { data: chargeResult, error: chargeError } = await supabase.rpc(
+              'process_real_time_charge',
+              {
+                p_allocation_id: result.allocation_id,
+                p_transaction_id: result.transaction_id,
+                p_vendor_id: service.vendor_id,
+                p_agent_id: profile?.user_id,
+                p_points_used: result.points_used,
+                p_amount_to_charge: result.points_used // $1 per point
+              }
+            );
 
-            onPurchaseComplete?.();
-            onClose();
-            return;
+            const chargeResponse = chargeResult as any;
+            if (chargeResponse?.success) {
+              // Process the actual Stripe charge
+              const { error: stripeError } = await supabase.functions.invoke('process-point-charge', {
+                body: {
+                  charge_id: chargeResponse.charge_id,
+                  stripe_customer_id: chargeResponse.stripe_customer_id,
+                  stripe_payment_method_id: chargeResponse.stripe_payment_method_id,
+                  amount_to_charge: chargeResponse.amount_to_charge,
+                  points_charged: chargeResponse.points_charged,
+                  vendor_id: service.vendor_id
+                }
+              });
+
+              if (!stripeError) {
+                toast({
+                  title: "Purchase Complete!",
+                  description: `Successfully used ${result.points_used} points ($${result.amount_covered}) for co-pay. Vendor charged immediately.`,
+                });
+
+                onPurchaseComplete?.();
+                onClose();
+                return;
+              }
+            }
           } else if (result?.error === 'insufficient_points') {
             toast({
               title: "Insufficient Points",
