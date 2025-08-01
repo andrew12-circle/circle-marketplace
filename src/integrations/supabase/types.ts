@@ -217,6 +217,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "co_pay_requests_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "vendor_service_analytics"
+            referencedColumns: ["service_id"]
+          },
+          {
             foreignKeyName: "fk_co_pay_requests_vendor"
             columns: ["vendor_id"]
             isOneToOne: false
@@ -288,6 +295,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "services"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultation_bookings_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "vendor_service_analytics"
+            referencedColumns: ["service_id"]
           },
         ]
       }
@@ -613,6 +627,13 @@ export type Database = {
             referencedRelation: "services"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "image_processing_log_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "vendor_service_analytics"
+            referencedColumns: ["service_id"]
+          },
         ]
       }
       login_attempts: {
@@ -896,6 +917,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "services"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "saved_services_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "vendor_service_analytics"
+            referencedColumns: ["service_id"]
           },
         ]
       }
@@ -1228,6 +1256,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "services"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_service_views_service_id"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "vendor_service_analytics"
+            referencedColumns: ["service_id"]
           },
         ]
       }
@@ -1869,6 +1904,39 @@ export type Database = {
       }
     }
     Views: {
+      vendor_service_analytics: {
+        Row: {
+          avg_rating: number | null
+          category: string | null
+          completed_bookings: number | null
+          conversion_rate: number | null
+          created_at: string | null
+          pending_bookings: number | null
+          save_count: number | null
+          service_id: string | null
+          title: string | null
+          total_bookings: number | null
+          total_reviews: number | null
+          total_views: number | null
+          vendor_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "services_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "services_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors_with_local_reps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vendors_with_local_reps: {
         Row: {
           campaigns_funded: number | null
@@ -2054,6 +2122,10 @@ export type Database = {
       get_user_admin_status: {
         Args: Record<PropertyKey, never>
         Returns: boolean
+      }
+      get_vendor_dashboard_stats: {
+        Args: { p_vendor_id: string }
+        Returns: Json
       }
       increment_content_plays: {
         Args: { content_uuid: string }
