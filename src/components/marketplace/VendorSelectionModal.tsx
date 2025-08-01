@@ -35,7 +35,11 @@ interface VendorSelectionModalProps {
   service: {
     title: string;
     co_pay_price?: string;
+    retail_price?: string;
+    pro_price?: string;
+    image_url?: string;
     max_vendor_split_percentage?: number;
+    requires_quote?: boolean;
   };
 }
 
@@ -198,7 +202,13 @@ export const VendorSelectionModal = ({
         id: coPayRequest.id,
         type: 'co-pay-request',
         vendor: vendor,
-        service: service,
+        service: {
+          title: service.title,
+          image_url: service.image_url,
+          co_pay_price: service.co_pay_price,
+          retail_price: service.retail_price,
+          pro_price: service.pro_price
+        },
         status: 'pending-approval',
         requestedSplit: service.max_vendor_split_percentage || 50,
         createdAt: new Date().toISOString()

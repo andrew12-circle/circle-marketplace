@@ -189,6 +189,28 @@ export const CartDrawer = () => {
                            : item.vendor}
                        </p>
                        
+                       {/* Show pricing structure for co-pay requests */}
+                       {item.type === 'co-pay-request' && (
+                         <div className="text-xs text-muted-foreground mt-1 space-y-0.5">
+                           <div className="flex justify-between">
+                             <span>Retail Price:</span>
+                             <span className="line-through">$99/mo</span>
+                           </div>
+                           <div className="flex justify-between">
+                             <span>Co-Pay Price:</span>
+                             <span className="text-green-600 font-medium">$49/mo</span>
+                           </div>
+                           <div className="flex justify-between">
+                             <span>Your Split:</span>
+                             <span className="text-blue-600">{100 - (item.requestedSplit || 50)}%</span>
+                           </div>
+                           <div className="flex justify-between">
+                             <span>Vendor Split:</span>
+                             <span className="text-orange-600">{item.requestedSplit || 50}%</span>
+                           </div>
+                         </div>
+                       )}
+                       
                        <div className="flex items-center justify-between mt-2">
                           <div className="flex items-center gap-2">
                             {item.type === 'co-pay-request' ? (

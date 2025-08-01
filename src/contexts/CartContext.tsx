@@ -73,7 +73,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const coPayItem = event.detail;
       const cartItem: CartItem = {
         id: coPayItem.id,
-        title: `Co-Pay: ${coPayItem.service.title}`,
+        title: coPayItem.service.title,
         price: 0, // Co-pay requests don't have a direct price
         vendor: coPayItem.vendor.name,
         quantity: 1,
@@ -83,7 +83,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         vendorName: coPayItem.vendor.name,
         serviceName: coPayItem.service.title,
         createdAt: coPayItem.createdAt,
-        requiresQuote: false
+        requiresQuote: coPayItem.service.requires_quote || false,
+        image_url: coPayItem.service.image_url
       };
       
       addToCart(cartItem);
