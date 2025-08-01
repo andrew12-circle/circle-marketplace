@@ -59,7 +59,7 @@ export const SavedItems = () => {
         .from('saved_services')
         .select(`
           *,
-          services!inner(
+          services (
             id,
             title,
             description,
@@ -70,7 +70,7 @@ export const SavedItems = () => {
             image_url,
             tags,
             vendor_id,
-            vendors!inner(
+            vendors (
               name,
               rating,
               review_count,
@@ -88,7 +88,12 @@ export const SavedItems = () => {
         ...item,
         services: {
           ...item.services,
-          vendor: item.services.vendors
+          vendor: item.services?.vendors || {
+            name: 'Unknown Vendor',
+            rating: 0,
+            review_count: 0,
+            is_verified: false
+          }
         }
       })) || [];
 
