@@ -226,13 +226,14 @@ export const EnhancedVendorCard = ({ vendor, onConnect, onViewProfile }: Enhance
                 trackContactRequest(vendor.id, {
                   type: 'campaigns_funded_click',
                   value: vendor.campaigns_funded.toString(),
-                  message: 'User clicked on campaigns funded stat',
+                  message: 'User clicked on campaigns funded stat - shows how many times this vendor has covered realtor marketing costs',
                   source: 'vendor_card_stat'
                 });
               }}
+              title="Number of times this vendor has covered part of a realtor's marketing costs"
             >
               <div className="text-lg font-bold text-circle-primary">{vendor.campaigns_funded}</div>
-              <div className="text-xs text-muted-foreground">Campaigns Funded</div>
+              <div className="text-xs text-muted-foreground">Co-Pay Campaigns Funded</div>
             </div>
           </div>
 
