@@ -18,10 +18,32 @@ import {
   Tag
 } from 'lucide-react';
 import { ServiceFunnelEditorModal } from '@/components/marketplace/ServiceFunnelEditorModal';
+import { ServicePricingTiersEditor } from '@/components/marketplace/ServicePricingTiersEditor';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
+interface PricingFeature {
+  id: string;
+  text: string;
+  included: boolean;
+  isHtml?: boolean;
+}
+
+interface PricingTier {
+  id: string;
+  name: string;
+  description: string;
+  price: string;
+  originalPrice?: string;
+  duration: string;
+  features: PricingFeature[];
+  isPopular: boolean;
+  buttonText: string;
+  badge?: string;
+  position: number;
+}
 
 interface Service {
   id: string;
@@ -176,6 +198,45 @@ export const ServiceManagementPanel = () => {
       message: ''
     }
   });
+
+  // Default pricing tiers
+  const [pricingTiers, setPricingTiers] = useState<PricingTier[]>([
+    {
+      id: '1',
+      name: 'Basic',
+      description: 'Perfect for getting started',
+      price: '99',
+      duration: 'mo',
+      features: [
+        { id: '1', text: 'Basic Support', included: true },
+        { id: '2', text: 'Standard Features', included: true },
+        { id: '3', text: 'Email Support', included: true },
+        { id: '4', text: 'Priority Support', included: false }
+      ],
+      isPopular: false,
+      buttonText: 'Get Started',
+      position: 0
+    },
+    {
+      id: '2',
+      name: 'Professional',
+      description: 'Most popular choice for professionals',
+      price: '199',
+      originalPrice: '249',
+      duration: 'mo',
+      features: [
+        { id: '1', text: 'Priority Support', included: true },
+        { id: '2', text: 'Advanced Features', included: true },
+        { id: '3', text: 'Phone & Email Support', included: true },
+        { id: '4', text: 'Custom Integrations', included: true },
+        { id: '5', text: 'Dedicated Account Manager', included: false }
+      ],
+      isPopular: true,
+      buttonText: 'Choose Professional',
+      badge: 'Most Popular',
+      position: 1
+    }
+  ]);
 
   useEffect(() => {
     fetchServices();
@@ -546,12 +607,10 @@ export const ServiceManagementPanel = () => {
               </TabsContent>
 
               <TabsContent value="pricing" className="space-y-4">
-                <div className="text-center py-8">
-                  <p className="text-muted-foreground">Pricing management interface</p>
-                  <p className="text-sm text-muted-foreground mt-2">
-                    Edit retail price, pro price, co-pay options, etc.
-                  </p>
-                </div>
+                <ServicePricingTiersEditor 
+                  tiers={pricingTiers}
+                  onChange={setPricingTiers}
+                />
               </TabsContent>
 
               <TabsContent value="funnel" className="space-y-4">
