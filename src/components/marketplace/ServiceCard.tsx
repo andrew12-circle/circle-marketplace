@@ -378,7 +378,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
             <>
               {/* Non-Pro Member View: Show retail as main price, others as incentives */}
               {service.retail_price && (
-                <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mt-4">
                   <span className="text-sm text-muted-foreground">List Price:</span>
                   <span className="text-xl font-bold text-foreground">
                     {formatPrice(extractNumericPrice(service.retail_price), service.price_duration || 'mo')}
