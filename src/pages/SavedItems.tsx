@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Trash2, MessageCircle, ArrowRight, Crown, Loader2, ArrowLeft } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Link } from "react-router-dom";
+import { useVendorActivityTracking } from "@/hooks/useVendorActivityTracking";
 
 interface SavedService {
   id: string;

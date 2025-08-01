@@ -20,8 +20,9 @@ import { VendorRESPAManager } from '@/components/admin/VendorRESPAManager';
 import { VendorSortOrderManager } from '@/components/admin/VendorSortOrderManager';
 import { VendorManagementPanel } from '@/components/admin/VendorManagementPanel';
 import { ImageVectorizationPanel } from '@/components/admin/ImageVectorizationPanel';
+import { VendorActivityAnalytics } from '@/components/admin/VendorActivityAnalytics';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Zap, Upload, Building, Youtube, DollarSign } from 'lucide-react';
+import { Zap, Upload, Building, Youtube, DollarSign, BarChart3 } from 'lucide-react';
 
 interface UserProfile {
   id: string;
@@ -207,7 +208,7 @@ export default function AdminDashboard() {
       </div>
 
       <Tabs defaultValue="users" className="w-full space-y-6">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="users" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
             Users
@@ -227,6 +228,10 @@ export default function AdminDashboard() {
           <TabsTrigger value="vendors" className="flex items-center gap-2">
             <Building className="h-4 w-4" />
             Vendors
+          </TabsTrigger>
+          <TabsTrigger value="analytics" className="flex items-center gap-2">
+            <BarChart3 className="h-4 w-4" />
+            Analytics
           </TabsTrigger>
           <TabsTrigger value="youtube" className="flex items-center gap-2">
             <Youtube className="h-4 w-4" />
@@ -352,6 +357,10 @@ export default function AdminDashboard() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <VendorImportPanel />
           </div>
+        </TabsContent>
+
+        <TabsContent value="analytics" className="space-y-6">
+          <VendorActivityAnalytics />
         </TabsContent>
 
         <TabsContent value="youtube" className="space-y-6">

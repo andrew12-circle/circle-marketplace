@@ -1344,6 +1344,51 @@ export type Database = {
         }
         Relationships: []
       }
+      vendor_agent_activities: {
+        Row: {
+          activity_data: Json | null
+          activity_type: string
+          agent_id: string
+          created_at: string
+          id: string
+          updated_at: string
+          vendor_id: string
+        }
+        Insert: {
+          activity_data?: Json | null
+          activity_type: string
+          agent_id: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+          vendor_id: string
+        }
+        Update: {
+          activity_data?: Json | null
+          activity_type?: string
+          agent_id?: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_agent_activities_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_agent_activities_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors_with_local_reps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vendor_availability: {
         Row: {
           availability_message: string | null
@@ -1910,6 +1955,10 @@ export type Database = {
         Args: { target_month: string }
         Returns: undefined
       }
+      calculate_vendor_active_agents: {
+        Args: { vendor_uuid: string }
+        Returns: number
+      }
       check_account_lockout: {
         Args: { user_email: string; client_ip?: unknown }
         Returns: Json
@@ -1971,6 +2020,14 @@ export type Database = {
           client_user_agent?: string
         }
         Returns: undefined
+      }
+      track_vendor_activity: {
+        Args: {
+          p_vendor_id: string
+          p_activity_type: string
+          p_activity_data?: Json
+        }
+        Returns: string
       }
       trigger_trending_import: {
         Args: Record<PropertyKey, never>

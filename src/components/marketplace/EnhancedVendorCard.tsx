@@ -9,6 +9,7 @@ import { getRiskBadge, getComplianceAlert, determineServiceRisk } from "./RESPAC
 import { useState } from "react";
 import { VendorFunnelModal } from "./VendorFunnelModal";
 import { useCoPayRequests } from "@/hooks/useCoPayRequests";
+import { useVendorActivityTracking } from "@/hooks/useVendorActivityTracking";
 
 interface Vendor {
   id: string;
@@ -58,6 +59,7 @@ export const EnhancedVendorCard = ({ vendor, onConnect, onViewProfile }: Enhance
   const [isHovered, setIsHovered] = useState(false);
   const [isFunnelModalOpen, setIsFunnelModalOpen] = useState(false);
   const { createCoPayRequest } = useCoPayRequests();
+  const { trackFunnelView, trackContactRequest } = useVendorActivityTracking();
   // Determine risk level based on vendor name/description
   const riskLevel = determineServiceRisk(vendor.name, vendor.description);
   
@@ -65,7 +67,36 @@ export const EnhancedVendorCard = ({ vendor, onConnect, onViewProfile }: Enhance
   const serviceArea = vendor.location || "Service area not specified";
   const mockBudgetRange = riskLevel === 'high' ? "$1,000-2,500/mo" : 
                           riskLevel === 'medium' ? "$500-1,500/mo" : 
-                          "$1,000-3,000/mo";
+                           "$1,000-3,000/mo";
+
+  const handleViewFunnel = () => {
+    trackFunnelView(vendor.id, {
+      vendorName: vendor.name,
+      section: 'card_view',
+      timeSpent: 0
+    });
+    setIsFunnelModalOpen(true);
+  };
+
+  const handleConnect = () => {
+    trackContactRequest(vendor.id, {
+      type: 'connect_button',
+      value: 'marketplace_card',
+      message: 'Connect request from marketplace card',
+      source: 'vendor_card'
+    });
+    onConnect?.(vendor.id);
+  };
+
+  const handleViewProfile = () => {
+    trackContactRequest(vendor.id, {
+      type: 'profile_view',
+      value: 'marketplace_card',
+      message: 'Profile view from marketplace card',
+      source: 'vendor_card'
+    });
+    onViewProfile?.(vendor.id);
+  };
 
   const getCardBorderClass = () => {
     // Remove special border styling - all cards look normal
@@ -73,12 +104,12 @@ export const EnhancedVendorCard = ({ vendor, onConnect, onViewProfile }: Enhance
   };
 
   const handleCardClick = () => {
-    setIsFunnelModalOpen(true);
+    handleViewFunnel();
   };
 
   const handleArrowClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setIsFunnelModalOpen(true);
+    handleViewFunnel();
   };
 
   return (
@@ -255,7 +286,7 @@ export const EnhancedVendorCard = ({ vendor, onConnect, onViewProfile }: Enhance
         <Button 
           onClick={(e) => {
             e.stopPropagation();
-            onConnect?.(vendor.id);
+            handleConnect();
           }}
           className="flex-1"
         >
