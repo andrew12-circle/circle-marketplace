@@ -135,6 +135,7 @@ export const ServiceManagementPanel = () => {
   const [isEditingDetails, setIsEditingDetails] = useState(false);
   const [showFunnelEditor, setShowFunnelEditor] = useState(false);
   const [editForm, setEditForm] = useState<Partial<Service>>({});
+  const [error, setError] = useState<string | null>(null);
 
   // Default funnel content for new services
   const [funnelContent, setFunnelContent] = useState<FunnelContent>({
@@ -192,6 +193,7 @@ export const ServiceManagementPanel = () => {
 
   const fetchServices = async () => {
     try {
+      setError(null);
       const { data, error } = await supabase
         .from('services')
         .select(`
@@ -205,9 +207,11 @@ export const ServiceManagementPanel = () => {
       setServices(data || []);
     } catch (error) {
       console.error('Error fetching services:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to fetch services';
+      setError(errorMessage);
       toast({
         title: 'Error',
-        description: 'Failed to fetch services',
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {
@@ -273,6 +277,22 @@ export const ServiceManagementPanel = () => {
 
   if (loading) {
     return <p>Loading services...</p>;
+  }
+
+  if (error) {
+    return (
+      <div className="p-6">
+        <Card>
+          <CardContent className="p-6">
+            <h3 className="text-lg font-semibold text-destructive mb-2">Error Loading Services</h3>
+            <p className="text-muted-foreground">{error}</p>
+            <Button onClick={() => { setError(null); fetchServices(); }} className="mt-4">
+              Try Again
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   return (
