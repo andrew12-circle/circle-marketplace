@@ -331,7 +331,7 @@ export const SavedItems = () => {
                           <div className="space-y-2">
                             <div className="flex justify-between">
                               <span className="text-muted-foreground">Retail:</span>
-                              <span>${item.services.retail_price}</span>
+                              <span>{item.services.retail_price}</span>
                             </div>
                             {isProMember && item.services.pro_price && (
                               <div className="flex justify-between items-center">
@@ -340,7 +340,7 @@ export const SavedItems = () => {
                                   <Crown className="w-3 h-3 text-circle-primary" />
                                 </div>
                                 <span className="font-semibold text-circle-primary">
-                                  ${item.services.pro_price}
+                                  {item.services.pro_price}
                                 </span>
                               </div>
                             )}
@@ -348,7 +348,7 @@ export const SavedItems = () => {
                               <div className="flex justify-between">
                                 <span className="text-green-600">Co-Pay:</span>
                                 <span className="font-semibold text-green-600">
-                                  ${item.services.co_pay_price}
+                                  {item.services.co_pay_price}
                                 </span>
                               </div>
                             )}
@@ -467,7 +467,7 @@ export const SavedItems = () => {
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-muted-foreground">Retail Price:</span>
-                    <span className="text-sm">${item.services.retail_price}</span>
+                    <span className="text-sm">{item.services.retail_price}</span>
                   </div>
                   
                   {isProMember && item.services.pro_price && (
@@ -477,7 +477,7 @@ export const SavedItems = () => {
                         <Crown className="w-4 h-4 text-circle-primary" />
                       </div>
                       <span className="text-lg font-bold text-circle-primary">
-                        ${item.services.pro_price}
+                        {item.services.pro_price}
                       </span>
                     </div>
                   )}
@@ -486,7 +486,7 @@ export const SavedItems = () => {
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-green-600">Co-Pay Price:</span>
                       <span className="text-lg font-bold text-green-600">
-                        ${item.services.co_pay_price}
+                        {item.services.co_pay_price}
                       </span>
                     </div>
                   )}
