@@ -168,7 +168,7 @@ export const CartDrawer = () => {
                            <>
                              {/* Main service image */}
                                <img
-                                 src={typeof item.vendor === 'object' && item.vendor?.logo_url ? item.vendor.logo_url : item.service?.image_url || item.image_url || item.image || "/placeholder.svg"}
+                                 src={item.service?.image_url || item.image_url || item.image || "/placeholder.svg"}
                                 alt={item.title}
                                 className="w-full h-full object-cover"
                               />
