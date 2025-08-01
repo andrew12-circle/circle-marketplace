@@ -12,6 +12,7 @@ import { ContentPromotionPanel } from '@/components/admin/ContentPromotionPanel'
 import { YouTubeImportPanel } from '@/components/admin/YouTubeImportPanel';
 import { YouTubeChannelImportPanel } from '@/components/admin/YouTubeChannelImportPanel';
 import SecurityMonitoringPanel from '@/components/admin/SecurityMonitoringPanel';
+import { SecurityEventMonitor } from '@/components/security/SecurityEventMonitor';
 import { ServiceImportPanel } from '@/components/admin/ServiceImportPanel';
 import { ServiceManagementPanel } from '@/components/admin/ServiceManagementPanel';
 import { VendorImportPanel } from '@/components/admin/VendorImportPanel';
@@ -241,6 +242,7 @@ export default function AdminDashboard() {
 
         <TabsContent value="users" className="space-y-6">
           <SecurityMonitoringPanel />
+          <SecurityEventMonitor />
 
           <Card>
             <CardHeader>

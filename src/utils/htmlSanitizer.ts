@@ -3,20 +3,15 @@ import React from 'react';
 // HTML Sanitization utility to prevent XSS attacks
 // This utility provides safe HTML rendering for trusted content
 
+// Severely restricted allowed HTML tags
 const ALLOWED_TAGS = [
-  'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
   'p', 'br', 'strong', 'em', 'b', 'i', 'u',
   'ul', 'ol', 'li',
-  'div', 'span',
-  'label', 'input'
+  'h1', 'h2', 'h3', 'h4', 'h5', 'h6'
 ];
 
-const ALLOWED_ATTRIBUTES = {
-  'input': ['type', 'checked'],
-  'label': [],
-  'div': ['class'],
-  'span': ['class']
-};
+// No attributes allowed to prevent any XSS vectors
+const ALLOWED_ATTRIBUTES: Record<string, string[]> = {};
 
 // Simple HTML sanitizer that removes potentially dangerous content
 export const sanitizeHTML = (html: string): string => {

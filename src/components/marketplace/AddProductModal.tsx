@@ -8,6 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Plus, Upload, X } from "lucide-react";
+import { SecureForm } from "@/components/common/SecureForm";
+import { commonRules } from "@/hooks/useSecureInput";
 
 interface AddProductModalProps {
   open: boolean;
@@ -38,10 +40,7 @@ export const AddProductModal = ({ open, onOpenChange, onProductAdded }: AddProdu
     "Entertainment"
   ];
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
+  const handleSecureSubmit = async (sanitizedData: Record<string, string>) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
@@ -52,11 +51,11 @@ export const AddProductModal = ({ open, onOpenChange, onProductAdded }: AddProdu
       const { error } = await supabase
         .from('services')
         .insert({
-          title: formData.title,
-          description: formData.description,
-          price: formData.price,
-          category: formData.category,
-          image_url: formData.image_url,
+          title: sanitizedData.title,
+          description: sanitizedData.description,
+          retail_price: sanitizedData.price,
+          category: sanitizedData.category,
+          image_url: sanitizedData.image_url,
           vendor_id: user.id
         });
 
@@ -76,9 +75,21 @@ export const AddProductModal = ({ open, onOpenChange, onProductAdded }: AddProdu
     } catch (error) {
       console.error('Error adding product:', error);
       toast.error("Failed to add product");
-    } finally {
-      setIsSubmitting(false);
     }
+  };
+
+  const validationRules = {
+    title: { ...commonRules.name, required: true },
+    description: { ...commonRules.description, required: true },
+    price: { 
+      required: true, 
+      type: 'string' as const,
+      pattern: /^\d+(\.\d{1,2})?$/,
+      sanitize: true 
+    },
+    category: { required: true, type: 'string' as const, sanitize: true },
+    image_url: { ...commonRules.url },
+    vendor_location: { required: true, type: 'string' as const, sanitize: true }
   };
 
   return (
@@ -91,13 +102,17 @@ export const AddProductModal = ({ open, onOpenChange, onProductAdded }: AddProdu
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <SecureForm
+          validationRules={validationRules}
+          onSubmit={handleSecureSubmit}
+          className="space-y-4"
+        >
           <div className="space-y-2">
             <Label htmlFor="title">Product Title</Label>
             <Input
+              name="title"
               id="title"
-              value={formData.title}
-              onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+              defaultValue={formData.title}
               placeholder="Enter product title"
               required
             />
@@ -106,9 +121,9 @@ export const AddProductModal = ({ open, onOpenChange, onProductAdded }: AddProdu
           <div className="space-y-2">
             <Label htmlFor="description">Description</Label>
             <Textarea
+              name="description"
               id="description"
-              value={formData.description}
-              onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+              defaultValue={formData.description}
               placeholder="Describe your product"
               rows={3}
               required
@@ -119,11 +134,10 @@ export const AddProductModal = ({ open, onOpenChange, onProductAdded }: AddProdu
             <div className="space-y-2">
               <Label htmlFor="price">Price ($)</Label>
               <Input
+                name="price"
                 id="price"
-                type="number"
-                step="0.01"
-                value={formData.price}
-                onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
+                type="text"
+                defaultValue={formData.price}
                 placeholder="0.00"
                 required
               />
@@ -131,32 +145,30 @@ export const AddProductModal = ({ open, onOpenChange, onProductAdded }: AddProdu
 
             <div className="space-y-2">
               <Label htmlFor="category">Category</Label>
-              <Select
-                value={formData.category}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
+              <select
+                name="category"
+                id="category"
+                defaultValue={formData.category}
                 required
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map(category => (
-                    <SelectItem key={category} value={category}>
-                      {category}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                <option value="">Select category</option>
+                {categories.map(category => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="image_url">Image URL</Label>
             <Input
+              name="image_url"
               id="image_url"
               type="url"
-              value={formData.image_url}
-              onChange={(e) => setFormData(prev => ({ ...prev, image_url: e.target.value }))}
+              defaultValue={formData.image_url}
               placeholder="https://example.com/image.jpg"
             />
           </div>
@@ -164,9 +176,9 @@ export const AddProductModal = ({ open, onOpenChange, onProductAdded }: AddProdu
           <div className="space-y-2">
             <Label htmlFor="vendor_location">Location</Label>
             <Input
+              name="vendor_location"
               id="vendor_location"
-              value={formData.vendor_location}
-              onChange={(e) => setFormData(prev => ({ ...prev, vendor_location: e.target.value }))}
+              defaultValue={formData.vendor_location}
               placeholder="City, State"
               required
             />
@@ -183,13 +195,12 @@ export const AddProductModal = ({ open, onOpenChange, onProductAdded }: AddProdu
             </Button>
             <Button
               type="submit"
-              disabled={isSubmitting}
               className="flex-1"
             >
-              {isSubmitting ? "Adding..." : "Add Product"}
+              Add Product
             </Button>
           </div>
-        </form>
+        </SecureForm>
       </DialogContent>
     </Dialog>
   );

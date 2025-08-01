@@ -8,8 +8,8 @@ export const SecurityHeaders: React.FC = () => {
     cspMeta.httpEquiv = 'Content-Security-Policy';
     cspMeta.content = `
       default-src 'self';
-      script-src 'self' 'unsafe-inline' 'unsafe-eval' *.supabase.co *.googleapis.com;
-      style-src 'self' 'unsafe-inline' *.googleapis.com;
+      script-src 'self' *.supabase.co *.googleapis.com;
+      style-src 'self' *.googleapis.com;
       img-src 'self' data: blob: *.supabase.co *.google.com;
       font-src 'self' *.googleapis.com *.gstatic.com;
       connect-src 'self' *.supabase.co *.googleapis.com;
@@ -18,6 +18,7 @@ export const SecurityHeaders: React.FC = () => {
       base-uri 'self';
       form-action 'self';
       frame-ancestors 'none';
+      upgrade-insecure-requests;
     `.replace(/\s+/g, ' ').trim();
     
     // Set X-Frame-Options
