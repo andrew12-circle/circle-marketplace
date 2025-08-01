@@ -506,7 +506,15 @@ export const AskCircleAIModal = ({ open, onOpenChange }: AskCircleAIModalProps) 
               >
                 Ask Another Question
               </Button>
-              <Button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white">
+              <Button 
+                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+                onClick={() => {
+                  onOpenChange(false);
+                  // Trigger marketplace filter/scroll to recommended services
+                  const event = new CustomEvent('showRecommendedServices');
+                  window.dispatchEvent(event);
+                }}
+              >
                 View Services
               </Button>
             </div>
