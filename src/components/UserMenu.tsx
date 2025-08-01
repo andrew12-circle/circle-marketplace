@@ -226,16 +226,16 @@ export const UserMenu = () => {
           </Link>
         </DropdownMenuItem>
         
+        {/* Customer Portal Button */}
+        <DropdownMenuItem asChild>
+          <CustomerPortalButton />
+        </DropdownMenuItem>
+        
         <DropdownMenuItem asChild>
           <Link to="/profile" className="flex items-center">
             <Settings className="mr-2 h-4 w-4" />
             <span>Settings</span>
           </Link>
-        </DropdownMenuItem>
-        
-        {/* Customer Portal Button */}
-        <DropdownMenuItem asChild>
-          <CustomerPortalButton />
         </DropdownMenuItem>
         
         <DropdownMenuSeparator />
