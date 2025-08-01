@@ -55,6 +55,24 @@ interface Service {
   duration?: string;
   requires_quote?: boolean;
   website_url?: string;
+  pricing_tiers?: Array<{
+    id: string;
+    name: string;
+    description: string;
+    price: string;
+    originalPrice?: string;
+    duration: string;
+    features: Array<{
+      id: string;
+      text: string;
+      included: boolean;
+      isHtml?: boolean;
+    }>;
+    isPopular: boolean;
+    buttonText: string;
+    badge?: string;
+    position: number;
+  }>;
   vendor: {
     name: string;
     rating: number;
@@ -133,9 +151,17 @@ export const ServiceFunnelModal = ({
   const isProMember = profile?.is_pro_member || false;
   const riskLevel = determineServiceRisk(service.title, service.description);
   
-  // Use funnel content packages if available, otherwise fallback to default packages
-  const packages = service.funnel_content?.packages?.length ? 
-    service.funnel_content.packages : [
+  // Use pricing tiers if available, otherwise fallback to default packages
+  const packages = service.pricing_tiers?.length ? 
+    service.pricing_tiers.map(tier => ({
+      id: tier.id,
+      name: tier.name,
+      price: parseFloat(tier.price || "100"),
+      originalPrice: tier.originalPrice ? parseFloat(tier.originalPrice) : undefined,
+      description: tier.description,
+      features: tier.features?.map(f => f.text) || [],
+      popular: tier.isPopular
+    })) : [
       {
         id: "basic",
         name: "Basic Package",
