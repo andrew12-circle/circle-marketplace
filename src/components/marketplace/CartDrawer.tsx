@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useCart } from "@/contexts/CartContext";
-import { useCoPayRequests } from "@/hooks/useCoPayRequests";
 import { ShoppingCart, Plus, Minus, Trash2, CreditCard, MessageCircle, Calendar } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -22,7 +21,7 @@ export const CartDrawer = () => {
     setIsOpen 
   } = useCart();
   
-  const { requests, removeRequest, getApprovedRequests, getPendingRequests } = useCoPayRequests();
+  
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [isConsultationFlowOpen, setIsConsultationFlowOpen] = useState(false);
   const { toast } = useToast();
@@ -257,50 +256,6 @@ export const CartDrawer = () => {
                   </div>
                 ))}
 
-                {/* Pending Co-Pay Requests */}
-                {getPendingRequests().length > 0 && (
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                      <MessageCircle className="w-4 h-4" />
-                      Pending Vendor Approval ({getPendingRequests().length})
-                    </div>
-                    {getPendingRequests().map((request) => (
-                      <div key={request.id} className="flex gap-3 p-3 border rounded-lg bg-muted/30">
-                        <div className="w-20 h-16 bg-muted rounded-lg overflow-hidden flex items-center justify-center">
-                          <MessageCircle className="w-8 h-8 text-muted-foreground" />
-                        </div>
-                        
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-medium text-sm line-clamp-2">Co-Pay Request</h4>
-                          <p className="text-xs text-muted-foreground">
-                            {request.vendors?.name || 'Unknown Vendor'}
-                          </p>
-                          
-                          <div className="flex items-center justify-between mt-2">
-                            <div className="flex items-center gap-2">
-                              <Badge variant="secondary" className="text-yellow-600 border-yellow-600 text-xs">
-                                <MessageCircle className="w-3 h-3 mr-1" />
-                                Pending Approval
-                              </Badge>
-                              <span className="font-semibold text-muted-foreground">
-                                {request.requested_split_percentage}% split
-                              </span>
-                            </div>
-                            
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-6 w-6 text-destructive"
-                              onClick={() => removeRequest(request.id)}
-                            >
-                              <Trash2 className="w-3 h-3" />
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
               </div>
 
               <div className="border-t pt-4 space-y-4">
