@@ -53,6 +53,7 @@ interface VendorFunnelModalProps {
     service_states?: string[];
     mls_areas?: string[];
     service_radius_miles?: number;
+    nmls_id?: string;
   };
   onRequestCoMarketing: (vendorId: string, packageType: string, duration: number) => void;
 }
@@ -486,7 +487,7 @@ export const VendorFunnelModal = ({
                 <div className="flex items-center gap-2 mt-3">
                   {getRiskBadge(riskLevel)}
                   <Badge variant="outline" className="text-green-600 border-green-600">
-                    NMLS Licensed
+                    {vendor.nmls_id ? `NMLS #${vendor.nmls_id}` : 'NMLS Licensed'}
                   </Badge>
                 </div>
               </div>
