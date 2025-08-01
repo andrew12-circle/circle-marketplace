@@ -393,7 +393,7 @@ export const SavedItems = () => {
                     
                     {aiAnalysis && (
                       <div className="bg-muted/50 rounded-lg p-4">
-                        <pre className="whitespace-pre-wrap text-sm">{aiAnalysis}</pre>
+                        <pre className="whitespace-pre-wrap text-base font-medium text-slate-700 dark:text-slate-300 leading-relaxed">{aiAnalysis}</pre>
                       </div>
                     )}
                   </div>
