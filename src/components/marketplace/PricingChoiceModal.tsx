@@ -80,7 +80,7 @@ export const PricingChoiceModal = ({
           {/* OR Divider */}
           <div className="flex items-center justify-center">
             <div className="flex-1 border-t border-muted-foreground/20"></div>
-            <span className="px-4 text-sm font-medium text-muted-foreground bg-background">OR</span>
+            <span className="px-4 text-sm font-medium text-muted-foreground bg-background">OR get your billed reduced</span>
             <div className="flex-1 border-t border-muted-foreground/20"></div>
           </div>
 
