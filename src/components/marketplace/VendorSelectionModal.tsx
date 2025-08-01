@@ -293,7 +293,7 @@ export const VendorSelectionModal = ({
         
         {showConfirmation ? (
           <div className="text-center py-12">
-            <img src={confirmationImage} alt="Success" className="h-24 mx-auto mb-1" />
+            <img src={confirmationImage} alt="Success" className="h-24 mx-auto mb-4" />
             <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
             <h3 className="text-xl font-semibold mb-2">Request Sent!</h3>
             <p className="text-muted-foreground mb-6">
