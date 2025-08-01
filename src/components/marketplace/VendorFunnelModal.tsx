@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { VendorFunnelEditor } from './VendorFunnelEditor';
 import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -56,6 +57,8 @@ interface VendorFunnelModalProps {
     nmls_id?: string;
   };
   onRequestCoMarketing: (vendorId: string, packageType: string, duration: number) => void;
+  isVendorView?: boolean; // New prop to indicate if vendor is viewing their own modal
+  currentUserId?: string; // To check if current user is the vendor
 }
 
 export const VendorFunnelModal = ({ 
@@ -63,11 +66,17 @@ export const VendorFunnelModal = ({
   onClose, 
   industry = 'general',
   vendor, 
-  onRequestCoMarketing 
+  onRequestCoMarketing,
+  isVendorView = false,
+  currentUserId
 }: VendorFunnelModalProps) => {
   const [selectedPackage, setSelectedPackage] = useState("standard");
   const [quantity, setQuantity] = useState(1);
+  const [isEditingFunnel, setIsEditingFunnel] = useState(false);
   const riskLevel = determineServiceRisk(vendor.name, vendor.description);
+
+  // Check if current user is the vendor owner
+  const isVendorOwner = currentUserId === vendor.id || isVendorView;
 
   // Industry-specific configurations
   const industryConfig = {
@@ -302,6 +311,16 @@ export const VendorFunnelModal = ({
   const handleRequestCoMarketing = () => {
     onRequestCoMarketing(vendor.id, selectedPackage, quantity);
     onClose();
+  };
+
+  const handleSaveFunnel = (content: any) => {
+    console.log('Saving funnel content for vendor:', vendor.id, content);
+    // Here you would save the funnel content to your database
+    setIsEditingFunnel(false);
+  };
+
+  const handleCancelFunnelEdit = () => {
+    setIsEditingFunnel(false);
   };
 
   const renderStarRating = (rating: number, size = "sm") => {
@@ -670,11 +689,14 @@ export const VendorFunnelModal = ({
         <div className="border-t bg-muted/20">
           <div className="p-6">
             <Tabs defaultValue="reviews" className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className={`grid w-full ${isVendorOwner ? 'grid-cols-5' : 'grid-cols-4'}`}>
                 <TabsTrigger value="reviews">Agent Reviews</TabsTrigger>
                 <TabsTrigger value="details">Company Details</TabsTrigger>
                 <TabsTrigger value="qa">Q&A</TabsTrigger>
                 <TabsTrigger value="related">Related Services</TabsTrigger>
+                {isVendorOwner && (
+                  <TabsTrigger value="edit-funnel">Edit Funnel</TabsTrigger>
+                )}
               </TabsList>
               
               <TabsContent value="details" className="mt-6 space-y-4">
@@ -830,6 +852,73 @@ export const VendorFunnelModal = ({
                   </div>
                 </div>
               </TabsContent>
+
+              {/* Edit Funnel Tab - Only visible to vendor owners */}
+              {isVendorOwner && (
+                <TabsContent value="edit-funnel" className="mt-6">
+                  {isEditingFunnel ? (
+                    <VendorFunnelEditor
+                      vendorId={vendor.id}
+                      onSave={handleSaveFunnel}
+                      onCancel={handleCancelFunnelEdit}
+                    />
+                  ) : (
+                    <div className="space-y-6">
+                      <div className="text-center p-8 border-2 border-dashed border-gray-300 rounded-lg">
+                        <div className="space-y-4">
+                          <div className="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
+                            <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                            </svg>
+                          </div>
+                          <div>
+                            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                              Customize Your Funnel Page
+                            </h3>
+                            <p className="text-gray-600 mb-4 max-w-md mx-auto">
+                              Create a compelling funnel page that showcases your services, builds trust, and converts visitors into partners.
+                            </p>
+                          </div>
+                          <div className="space-y-3">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
+                              <div className="flex items-center justify-center p-3 bg-gray-50 rounded-lg">
+                                <CheckCircle className="w-4 h-4 mr-2 text-green-600" />
+                                Hero Section
+                              </div>
+                              <div className="flex items-center justify-center p-3 bg-gray-50 rounded-lg">
+                                <CheckCircle className="w-4 h-4 mr-2 text-green-600" />
+                                Benefits & Features
+                              </div>
+                              <div className="flex items-center justify-center p-3 bg-gray-50 rounded-lg">
+                                <CheckCircle className="w-4 h-4 mr-2 text-green-600" />
+                                Media Gallery
+                              </div>
+                              <div className="flex items-center justify-center p-3 bg-gray-50 rounded-lg">
+                                <CheckCircle className="w-4 h-4 mr-2 text-green-600" />
+                                Pricing Packages
+                              </div>
+                              <div className="flex items-center justify-center p-3 bg-gray-50 rounded-lg">
+                                <CheckCircle className="w-4 h-4 mr-2 text-green-600" />
+                                Social Proof
+                              </div>
+                              <div className="flex items-center justify-center p-3 bg-gray-50 rounded-lg">
+                                <CheckCircle className="w-4 h-4 mr-2 text-green-600" />
+                                Call to Action
+                              </div>
+                            </div>
+                            <Button 
+                              onClick={() => setIsEditingFunnel(true)}
+                              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-2"
+                            >
+                              Start Editing Funnel
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </TabsContent>
+              )}
             </Tabs>
           </div>
         </div>
