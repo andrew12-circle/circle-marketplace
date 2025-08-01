@@ -168,7 +168,15 @@ export const CartDrawer = () => {
                            <>
                              {/* Main service image */}
                                <img
-                                 src={item.service?.image_url || item.image_url || item.image || "/placeholder.svg"}
+                                 src={(() => {
+                                   console.log('Cart item debug:', { 
+                                     service: item.service, 
+                                     image_url: item.image_url, 
+                                     image: item.image,
+                                     vendor: item.vendor 
+                                   });
+                                   return item.service?.image_url || item.image_url || item.image || "/placeholder.svg";
+                                 })()}
                                 alt={item.title}
                                 className="w-full h-full object-cover"
                               />
