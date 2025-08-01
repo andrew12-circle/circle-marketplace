@@ -16,6 +16,7 @@ import { ServiceDetailsModal } from '@/components/marketplace/ServiceDetailsModa
 import { AddProductModal } from '@/components/marketplace/AddProductModal';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { useVendorActivityTracking } from '@/hooks/useVendorActivityTracking';
 
 interface VendorService {
   id: string;
@@ -47,6 +48,8 @@ interface VendorStats {
 export const VendorDashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { trackFunnelView } = useVendorActivityTracking();
+  const [vendorId, setVendorId] = useState<string | null>(null);
   const [services, setServices] = useState<VendorService[]>([]);
   const [stats, setStats] = useState<VendorStats>({
     total_services: 0,
@@ -67,50 +70,100 @@ export const VendorDashboard = () => {
     fetchVendorData();
   }, []);
 
+  // Track dashboard page view
+  useEffect(() => {
+    if (vendorId) {
+      trackFunnelView(vendorId, {
+        vendorName: 'Current Vendor',
+        section: 'vendor_dashboard',
+        timeSpent: 0,
+      });
+    }
+  }, [vendorId, trackFunnelView]);
+
   const fetchVendorData = async () => {
     try {
       setLoading(true);
       
-      // Fetch services
+      // Get current user profile to find vendor ID
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({
+          title: "Error",
+          description: "Please log in to view your dashboard",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Set vendor ID for activity tracking
+      setVendorId(user.id);
+
+      // Fetch services for the current user (vendor)
       const { data: servicesData, error: servicesError } = await supabase
         .from('services')
-        .select('*')
+        .select(`
+          *,
+          service_reviews(rating, review),
+          service_views(id),
+          consultation_bookings(status),
+          saved_services(id)
+        `)
         .order('created_at', { ascending: false });
 
       if (servicesError) throw servicesError;
 
-      // Map the data to match our interface with safe property access
-      const mappedServices: VendorService[] = (servicesData || []).map((service: any) => ({
-        id: service.id,
-        title: service.title || service.name || 'Untitled Service',
-        description: service.description || '',
-        retail_price: service.retail_price || service.price || '0',
-        category: service.category || 'General',
-        vendor_location: service.vendor_location || service.location || 'Location not specified',
-        image_url: service.image_url,
-        rating: service.rating || 0,
-        reviews_count: service.reviews_count || 0,
-        views_count: service.views_count || 0,
-        bookings_count: service.bookings_count || 0,
-        is_featured: service.is_featured || false,
-        status: service.status || 'active'
-      }));
+      // Map the data to match our interface with enhanced analytics
+      const mappedServices: VendorService[] = (servicesData || []).map((service: any) => {
+        const reviews = service.service_reviews || [];
+        const views = service.service_views || [];
+        const bookings = service.consultation_bookings || [];
+        const saves = service.saved_services || [];
+        
+        return {
+          id: service.id,
+          title: service.title || 'Untitled Service',
+          description: service.description || '',
+          retail_price: service.retail_price || '0',
+          category: service.category || 'General',
+          vendor_location: service.vendor_location || 'Location not specified',
+          image_url: service.image_url,
+          rating: reviews.length > 0 ? reviews.reduce((sum: number, r: any) => sum + r.rating, 0) / reviews.length : 0,
+          reviews_count: reviews.length,
+          views_count: views.length,
+          bookings_count: bookings.length,
+          is_featured: service.is_featured || false,
+          status: service.status || 'active'
+        };
+      });
 
       setServices(mappedServices);
 
-      // Calculate stats (mock data for now)
-      const mockStats: VendorStats = {
-        total_services: servicesData?.length || 0,
-        total_views: Math.floor(Math.random() * 10000) + 5000,
-        total_bookings: Math.floor(Math.random() * 200) + 50,
-        monthly_revenue: Math.floor(Math.random() * 50000) + 15000,
-        conversion_rate: Math.floor(Math.random() * 30) + 15,
-        avg_rating: 4.2 + Math.random() * 0.8,
-        total_reviews: Math.floor(Math.random() * 150) + 25,
-        trending_score: Math.floor(Math.random() * 100) + 70
+      // Calculate real stats from the data
+      const totalViews = mappedServices.reduce((sum, s) => sum + s.views_count, 0);
+      const totalBookings = mappedServices.reduce((sum, s) => sum + s.bookings_count, 0);
+      const totalReviews = mappedServices.reduce((sum, s) => sum + s.reviews_count, 0);
+      const avgRating = totalReviews > 0 
+        ? mappedServices.reduce((sum, s) => sum + (s.rating * s.reviews_count), 0) / totalReviews 
+        : 0;
+      const conversionRate = totalViews > 0 ? (totalBookings / totalViews * 100) : 0;
+      const estimatedRevenue = totalBookings * 150; // $150 average per booking
+      const trendingScore = Math.min(100, Math.max(0, 
+        (totalViews * 0.1) + (totalBookings * 5) + (totalReviews * 2)
+      ));
+
+      const realStats: VendorStats = {
+        total_services: mappedServices.length,
+        total_views: totalViews,
+        total_bookings: totalBookings,
+        monthly_revenue: estimatedRevenue,
+        conversion_rate: Math.round(conversionRate * 100) / 100,
+        avg_rating: Math.round(avgRating * 100) / 100,
+        total_reviews: totalReviews,
+        trending_score: Math.round(trendingScore)
       };
 
-      setStats(mockStats);
+      setStats(realStats);
     } catch (error) {
       console.error('Error fetching vendor data:', error);
       toast({
