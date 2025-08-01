@@ -23,8 +23,9 @@ import { VendorManagementPanel } from '@/components/admin/VendorManagementPanel'
 import { ImageVectorizationPanel } from '@/components/admin/ImageVectorizationPanel';
 import { VendorActivityAnalytics } from '@/components/admin/VendorActivityAnalytics';
 import { VendorInvitationPanel } from '@/components/admin/VendorInvitationPanel';
+import VendorPointAllocationPanel from '@/components/admin/VendorPointAllocationPanel';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Zap, Upload, Building, Youtube, DollarSign, BarChart3 } from 'lucide-react';
+import { Zap, Upload, Building, Youtube, DollarSign, BarChart3, Coins } from 'lucide-react';
 
 interface UserProfile {
   id: string;
@@ -210,7 +211,7 @@ export default function AdminDashboard() {
       </div>
 
       <Tabs defaultValue="users" className="w-full space-y-6">
-        <TabsList className="grid w-full grid-cols-7">
+        <TabsList className="grid w-full grid-cols-8">
           <TabsTrigger value="users" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
             Users
@@ -230,6 +231,10 @@ export default function AdminDashboard() {
           <TabsTrigger value="vendors" className="flex items-center gap-2">
             <Building className="h-4 w-4" />
             Vendors
+          </TabsTrigger>
+          <TabsTrigger value="points" className="flex items-center gap-2">
+            <Coins className="h-4 w-4" />
+            Points
           </TabsTrigger>
           <TabsTrigger value="analytics" className="flex items-center gap-2">
             <BarChart3 className="h-4 w-4" />
@@ -361,6 +366,10 @@ export default function AdminDashboard() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <VendorImportPanel />
           </div>
+        </TabsContent>
+
+        <TabsContent value="points" className="space-y-6">
+          <VendorPointAllocationPanel />
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-6">

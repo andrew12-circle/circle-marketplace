@@ -23,6 +23,7 @@ interface Service {
   image_url?: string;
   co_pay_allowed?: boolean;
   max_vendor_split_percentage?: number;
+  vendor_id?: string;
   vendor: {
     name: string;
     rating: number;
@@ -83,7 +84,41 @@ export const DirectPurchaseModal = ({
         throw new Error("Invalid price selected");
       }
 
-      // Add to cart and immediately checkout
+      // For co-pay purchases, try automatic point deduction first
+      if (selectedOption === 'copay' && service.vendor_id && service.max_vendor_split_percentage) {
+        try {
+          const { data: pointsResult, error: pointsError } = await supabase.rpc('process_automatic_copay', {
+            p_agent_id: profile?.user_id,
+            p_service_id: service.id,
+            p_vendor_id: service.vendor_id,
+            p_total_amount: retailPrice, // Use full retail price for calculation
+            p_coverage_percentage: service.max_vendor_split_percentage
+          });
+
+          const result = pointsResult as any;
+          if (!pointsError && result?.success) {
+            // Points were successfully deducted
+            toast({
+              title: "Purchase Complete!",
+              description: `Successfully used ${result.points_used} points ($${result.amount_covered}) for co-pay. You saved $${(retailPrice - selectedPrice).toFixed(2)}!`,
+            });
+
+            onPurchaseComplete?.();
+            onClose();
+            return;
+          } else if (result?.error === 'insufficient_points') {
+            toast({
+              title: "Insufficient Points",
+              description: `Need ${result.points_needed} points but only have enough for partial coverage. Proceeding to regular checkout.`,
+              variant: "destructive"
+            });
+          }
+        } catch (pointsErr) {
+          console.error('Points processing failed:', pointsErr);
+        }
+      }
+
+      // Fallback to regular Stripe checkout
       const cartItem = {
         id: service.id,
         title: service.title,
