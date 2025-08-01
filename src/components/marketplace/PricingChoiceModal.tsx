@@ -78,7 +78,7 @@ export const PricingChoiceModal = ({
           </Card>
 
           {/* Co-Pay Option */}
-          <Card className="border-2 border-green-200 pulse">
+          <Card className="border-2 border-green-200 animate-pulse ring-2 ring-green-300 ring-opacity-75">
             <CardHeader className="pb-2">
               <CardTitle className="text-base flex items-center gap-2">
                 <Users className="w-5 h-5 text-green-600" />
