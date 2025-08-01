@@ -16,6 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 
 import { supabase } from "@/integrations/supabase/client";
 import { User, Settings, ShoppingBag, Crown, LogOut, Loader2, Heart, BarChart3, Shield, Building2, DollarSign, Store, Briefcase, Package } from "lucide-react";
+import { CustomerPortalButton } from "@/components/marketplace/CustomerPortalButton";
 
 
 interface VendorInfo {
@@ -231,6 +232,11 @@ export const UserMenu = () => {
             <span>Settings</span>
           </Link>
         </DropdownMenuItem>
+        
+        {/* Customer Portal Button */}
+        <div className="px-2 py-1">
+          <CustomerPortalButton />
+        </div>
         
         <DropdownMenuSeparator />
         
