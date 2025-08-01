@@ -94,6 +94,14 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         createdAt: coPayItem.createdAt,
         requiresQuote: coPayItem.service.requires_quote || false,
         image_url: coPayItem.service.image_url,
+        // Store service object properly
+        service: {
+          title: coPayItem.service.title,
+          image_url: coPayItem.service.image_url,
+          co_pay_price: coPayItem.service.co_pay_price,
+          retail_price: coPayItem.service.retail_price,
+          pro_price: coPayItem.service.pro_price
+        },
         // Store service pricing data
         description: JSON.stringify({
           retail_price: coPayItem.service.retail_price,
