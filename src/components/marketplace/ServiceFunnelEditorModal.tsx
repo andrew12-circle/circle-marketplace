@@ -1,7 +1,9 @@
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { X, Save } from 'lucide-react';
 import { ServiceFunnelEditor } from './ServiceFunnelEditor';
+import { ServicePricingTiersEditor } from './ServicePricingTiersEditor';
 
 interface FunnelContent {
   headline: string;
@@ -78,6 +80,27 @@ interface FunnelContent {
   };
 }
 
+interface PricingFeature {
+  id: string;
+  text: string;
+  included: boolean;
+  isHtml?: boolean;
+}
+
+interface PricingTier {
+  id: string;
+  name: string;
+  description: string;
+  price: string;
+  originalPrice?: string;
+  duration: string; // 'mo', 'yr', 'one-time'
+  features: PricingFeature[];
+  isPopular: boolean;
+  buttonText: string;
+  badge?: string;
+  position: number;
+}
+
 interface ServiceFunnelEditorModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -85,6 +108,8 @@ interface ServiceFunnelEditorModalProps {
   onChange: (content: FunnelContent) => void;
   onSave: () => void;
   serviceName: string;
+  pricingTiers?: PricingTier[];
+  onPricingTiersChange?: (tiers: PricingTier[]) => void;
 }
 
 export const ServiceFunnelEditorModal = ({ 
@@ -93,7 +118,9 @@ export const ServiceFunnelEditorModal = ({
   funnelContent, 
   onChange, 
   onSave,
-  serviceName 
+  serviceName,
+  pricingTiers = [],
+  onPricingTiersChange
 }: ServiceFunnelEditorModalProps) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -122,10 +149,26 @@ export const ServiceFunnelEditorModal = ({
 
           {/* Content */}
           <div className="flex-1 overflow-hidden p-6">
-            <ServiceFunnelEditor
-              funnelContent={funnelContent}
-              onChange={onChange}
-            />
+            <Tabs defaultValue="funnel" className="h-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="funnel">Funnel Design</TabsTrigger>
+                <TabsTrigger value="pricing">Pricing Tiers</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="funnel" className="h-full mt-4">
+                <ServiceFunnelEditor
+                  funnelContent={funnelContent}
+                  onChange={onChange}
+                />
+              </TabsContent>
+              
+              <TabsContent value="pricing" className="h-full mt-4">
+                <ServicePricingTiersEditor
+                  tiers={pricingTiers}
+                  onChange={onPricingTiersChange || (() => {})}
+                />
+              </TabsContent>
+            </Tabs>
           </div>
         </div>
       </DialogContent>

@@ -1284,6 +1284,7 @@ export type Database = {
           max_vendor_split_percentage: number | null
           original_image_url: string | null
           price_duration: string | null
+          pricing_tiers: Json | null
           pro_price: string | null
           rating: number | null
           requires_quote: boolean | null
@@ -1316,6 +1317,7 @@ export type Database = {
           max_vendor_split_percentage?: number | null
           original_image_url?: string | null
           price_duration?: string | null
+          pricing_tiers?: Json | null
           pro_price?: string | null
           rating?: number | null
           requires_quote?: boolean | null
@@ -1348,6 +1350,7 @@ export type Database = {
           max_vendor_split_percentage?: number | null
           original_image_url?: string | null
           price_duration?: string | null
+          pricing_tiers?: Json | null
           pro_price?: string | null
           rating?: number | null
           requires_quote?: boolean | null

@@ -63,6 +63,24 @@ export const VendorDashboard = () => {
   });
   const [loading, setLoading] = useState(true);
   const [isServiceBuilderOpen, setIsServiceBuilderOpen] = useState(false);
+  const [currentServiceId, setCurrentServiceId] = useState<string | null>(null);
+  const [pricingTiers, setPricingTiers] = useState([
+    {
+      id: '1',
+      name: 'Basic',
+      description: 'Perfect for getting started',
+      price: '99',
+      duration: 'mo',
+      features: [
+        { id: '1', text: 'Basic feature 1', included: true },
+        { id: '2', text: 'Basic feature 2', included: true },
+        { id: '3', text: 'Advanced feature 1', included: false }
+      ],
+      isPopular: false,
+      buttonText: 'Get Started',
+      position: 1
+    }
+  ]);
   const [funnelContent, setFunnelContent] = useState({
     headline: "",
     subheadline: "",
@@ -219,6 +237,53 @@ export const VendorDashboard = () => {
   const handleServiceClick = (service: VendorService) => {
     setSelectedService(service);
     setIsDetailsModalOpen(true);
+  };
+
+  const handleSaveService = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({
+          title: "Error",
+          description: "You must be logged in to save services",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      const serviceData = {
+        title: funnelContent.headline || "New Service",
+        description: funnelContent.heroDescription || "",
+        vendor_id: user.id,
+        category: "professional_services",
+        retail_price: pricingTiers.length > 0 ? pricingTiers[0].price : "99",
+        pricing_tiers: pricingTiers,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+
+      const { error } = await supabase
+        .from('services')
+        .insert([serviceData]);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Service created successfully!",
+        variant: "default"
+      });
+
+      // Refresh the services list
+      await fetchVendorData();
+    } catch (error) {
+      console.error('Error saving service:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save service. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   if (loading) {
@@ -542,12 +607,13 @@ export const VendorDashboard = () => {
           onOpenChange={(open) => setIsServiceBuilderOpen(open)}
           funnelContent={funnelContent}
           onChange={setFunnelContent}
-          onSave={() => {
-            // Handle saving the funnel content
-            fetchVendorData();
+          onSave={async () => {
+            await handleSaveService();
             setIsServiceBuilderOpen(false);
           }}
           serviceName="New Service"
+          pricingTiers={pricingTiers}
+          onPricingTiersChange={setPricingTiers}
         />
       )}
 
