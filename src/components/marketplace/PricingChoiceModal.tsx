@@ -11,6 +11,7 @@ interface PricingChoiceModalProps {
     pro_price?: string;
     retail_price?: string;
     max_vendor_split_percentage?: number;
+    price_duration?: string;
   };
   onChooseProPrice: () => void;
   onChooseCoPay: () => void;
@@ -56,7 +57,7 @@ export const PricingChoiceModal = ({
             <CardContent className="space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-lg font-bold text-circle-primary">
-                  ${proPrice.toFixed(2)}
+                  ${proPrice.toFixed(2)}{service.price_duration ? `/${service.price_duration}` : ''}
                 </span>
                 <span className="text-sm text-muted-foreground">
                   Instant Purchase
@@ -65,12 +66,12 @@ export const PricingChoiceModal = ({
               <p className="text-sm text-muted-foreground">
                 Pay your discounted member price and get started immediately.
               </p>
-              <Button 
+                <Button 
                 className="w-full" 
                 onClick={onChooseProPrice}
               >
                 <ShoppingCart className="w-4 h-4 mr-2" />
-                Add to Cart - ${proPrice.toFixed(2)}
+                Add to Cart - ${proPrice.toFixed(2)}{service.price_duration ? `/${service.price_duration}` : ''}
               </Button>
             </CardContent>
           </Card>
@@ -86,7 +87,7 @@ export const PricingChoiceModal = ({
             <CardContent className="space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-lg font-bold text-green-600">
-                  ${coPayPrice.toFixed(2)}
+                  ${coPayPrice.toFixed(2)}{service.price_duration ? `/${service.price_duration}` : ''}
                 </span>
                 <span className="text-sm text-muted-foreground">
                   Vendor Assisted
