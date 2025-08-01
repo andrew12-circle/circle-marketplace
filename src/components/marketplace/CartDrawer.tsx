@@ -162,7 +162,7 @@ export const CartDrawer = () => {
           ) : (
             <>
               <div className="flex-1 overflow-auto py-4 space-y-4">
-                {cartItems.map((item) => (
+                {cartItems.filter(item => item.type !== 'co-pay-request').map((item) => (
                   <div key={item.id} className="flex gap-3 p-3 border rounded-lg">
                      <div className="w-20 h-16 bg-muted rounded-lg overflow-hidden">
                        {item.type === 'co-pay-request' ? (
