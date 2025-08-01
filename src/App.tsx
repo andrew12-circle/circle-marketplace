@@ -19,6 +19,8 @@ import { ConsultationDemo } from "./pages/ConsultationDemo";
 import { VendorDashboard } from "./pages/VendorDashboard";
 import { VendorAnalyticsDashboard } from "./pages/VendorAnalyticsDashboard";
 import { VendorRegistration } from "./pages/VendorRegistration";
+import AnalyticsDashboard from "./pages/AnalyticsDashboard";
+import SupportDashboard from "./pages/SupportDashboard";
 import NotFound from "./pages/NotFound";
 import { TermsOfService } from "./pages/legal/TermsOfService";
 import { PrivacyPolicy } from "./pages/legal/PrivacyPolicy";
@@ -52,6 +54,8 @@ const App = () => (
             <Route path="/vendor-dashboard" element={<VendorDashboard />} />
             <Route path="/vendor-analytics" element={<VendorAnalyticsDashboard />} />
             <Route path="/vendor-registration" element={<VendorRegistration />} />
+            <Route path="/analytics" element={<AnalyticsDashboard />} />
+            <Route path="/support" element={<SupportDashboard />} />
             
             {/* Legal Pages */}
             <Route path="/terms" element={<TermsOfService />} />
