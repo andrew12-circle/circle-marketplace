@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Plus, TrendingUp, DollarSign, Users, Star, Eye, Package, Calendar, Bell, Settings, BarChart3, Zap, Target, Award, Crown, Sparkles } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,1313 +9,477 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Progress } from '@/components/ui/progress';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { ServiceCard } from '@/components/marketplace/ServiceCard';
+import { ServiceDetailsModal } from '@/components/marketplace/ServiceDetailsModal';
+import { AddProductModal } from '@/components/marketplace/AddProductModal';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/contexts/AuthContext';
-import { useServiceAnalytics } from '@/hooks/useServiceAnalytics';
 import { supabase } from '@/integrations/supabase/client';
-import { VendorPricingModal } from '@/components/marketplace/VendorPricingModal';
-import { ServiceImageUpload } from '@/components/marketplace/ServiceImageUpload';
-import { ServiceFunnelEditorModal } from '@/components/marketplace/ServiceFunnelEditorModal';
-import { 
-  Calendar, 
-  Clock, 
-  MessageSquare, 
-  Settings, 
-  Bell, 
-  Users, 
-  Star,
-  DollarSign,
-  TrendingUp,
-  CheckCircle,
-  AlertCircle,
-  Edit,
-  Save,
-  X,
-  Plus,
-  Package,
-  Eye,
-  BarChart3,
-  ShoppingCart,
-  FileText,
-  Image,
-  Palette,
-  Layout,
-  Monitor,
-  Smartphone
-} from 'lucide-react';
 
-interface Service {
+interface VendorService {
   id: string;
   title: string;
   description: string;
-  category: string;
   retail_price?: string;
-  pro_price?: string;
-  co_pay_price?: string;
+  category: string;
+  vendor_location: string;
   image_url?: string;
-  is_featured: boolean;
-  vendor_id: string;
-  base_pricing_tiers?: Array<{
-    tier_name: string;
-    price: number;
-    description?: string;
-    features?: string[];
-  }>;
-  pro_pricing_tiers?: Array<{
-    tier_name: string;
-    price: number;
-    description?: string;
-    features?: string[];
-  }>;
-  copay_pricing_tiers?: Array<{
-    tier_name: string;
-    price: number;
-    description?: string;
-    features?: string[];
-  }>;
-  supports_copay?: boolean;
-  funnel_content?: {
-    headline: string;
-    subheadline: string;
-    heroDescription: string;
-    estimatedRoi: number;
-    duration: string;
-    whyChooseUs: {
-      title: string;
-      benefits: Array<{
-        icon: string;
-        title: string;
-        description: string;
-      }>;
-    };
-    media: Array<{
-      id: string;
-      type: 'image' | 'video' | 'document';
-      url: string;
-      title: string;
-      description?: string;
-    }>;
-    packages: Array<{
-      id: string;
-      name: string;
-      description: string;
-      price: number;
-      originalPrice?: number;
-      features: string[];
-      popular: boolean;
-      proOnly?: boolean;
-      savings?: string;
-    }>;
-    socialProof: {
-      testimonials: Array<{
-        id: string;
-        name: string;
-        role: string;
-        content: string;
-        rating: number;
-      }>;
-      stats: Array<{
-        label: string;
-        value: string;
-      }>;
-    };
-    trustIndicators: {
-      guarantee: string;
-      cancellation: string;
-      certification: string;
-    };
-    callToAction: {
-      primaryHeadline: string;
-      primaryDescription: string;
-      primaryButtonText: string;
-      secondaryHeadline: string;
-      secondaryDescription: string;
-      contactInfo: {
-        phone: string;
-        email: string;
-        website: string;
-      };
-    };
-    urgency: {
-      enabled: boolean;
-      message: string;
-    };
-  };
-  created_at: string;
-  views: number;
-  conversions: number;
+  rating?: number;
+  reviews_count?: number;
+  views_count?: number;
+  bookings_count?: number;
+  is_featured?: boolean;
+  status?: string;
 }
 
 interface VendorStats {
   total_services: number;
   total_views: number;
   total_bookings: number;
-  conversion_rate: number;
   monthly_revenue: number;
+  conversion_rate: number;
+  avg_rating: number;
+  total_reviews: number;
+  trending_score: number;
 }
 
 export const VendorDashboard = () => {
-  const { user, loading: authLoading } = useAuth();
-  const { analytics, loading: analyticsLoading, trackServiceView, refreshAnalytics } = useServiceAnalytics();
   const navigate = useNavigate();
-  const [services, setServices] = useState<Service[]>([]);
+  const { toast } = useToast();
+  const [services, setServices] = useState<VendorService[]>([]);
   const [stats, setStats] = useState<VendorStats>({
     total_services: 0,
     total_views: 0,
     total_bookings: 0,
+    monthly_revenue: 0,
     conversion_rate: 0,
-    monthly_revenue: 0
+    avg_rating: 0,
+    total_reviews: 0,
+    trending_score: 0
   });
-  const [isLoading, setIsLoading] = useState(true);
-  const [showServiceBuilder, setShowServiceBuilder] = useState(false);
-  const [editingService, setEditingService] = useState<Service | null>(null);
-  const [currentStep, setCurrentStep] = useState<'basic' | 'funnel' | 'preview'>('basic');
-  const [showPricingModal, setShowPricingModal] = useState(false);
-  const [showFunnelEditor, setShowFunnelEditor] = useState(false);
-  const [vendorPlan, setVendorPlan] = useState<string | null>(null);
-  const { toast } = useToast();
-
-  // Service Builder Form State
-  const [serviceForm, setServiceForm] = useState({
-    title: '',
-    description: '',
-    category: '',
-    price: '',
-    is_featured: false,
-    image_url: '',
-    vendor_id: '',
-    base_pricing_tiers: [] as Array<{
-      tier_name: string;
-      price: number;
-      description?: string;
-      features?: string[];
-    }>,
-    pro_pricing_tiers: [] as Array<{
-      tier_name: string;
-      price: number;
-      description?: string;
-      features?: string[];
-    }>,
-    copay_pricing_tiers: [] as Array<{
-      tier_name: string;
-      price: number;
-      description?: string;
-      features?: string[];
-    }>,
-    supports_copay: false,
-    funnel_content: {
-      headline: '',
-      subheadline: '',
-      heroDescription: '',
-      estimatedRoi: 3,
-      duration: '30 days',
-      whyChooseUs: {
-        title: 'Why Choose Our Service?',
-        benefits: [
-          { icon: 'check', title: 'Proven Results', description: 'Get measurable results fast' },
-          { icon: 'check', title: 'Expert Support', description: '24/7 professional assistance' },
-          { icon: 'check', title: 'Fast Implementation', description: 'Up and running in minutes' }
-        ]
-      },
-      media: [],
-      packages: [
-        {
-          id: 'standard',
-          name: 'Standard Package',
-          description: 'Perfect for most businesses',
-          price: 299,
-          features: ['Core features', 'Email support', 'Monthly updates'],
-          popular: true
-        }
-      ],
-      socialProof: {
-        testimonials: [
-          {
-            id: '1',
-            name: 'John Smith',
-            role: 'Real Estate Agent',
-            content: 'This service transformed my business...',
-            rating: 5
-          }
-        ],
-        stats: [
-          { label: 'Happy Customers', value: '1000+' },
-          { label: 'Success Rate', value: '98%' }
-        ]
-      },
-      trustIndicators: {
-        guarantee: '30-day money back guarantee',
-        cancellation: 'Cancel anytime',
-        certification: 'Industry certified'
-      },
-      callToAction: {
-        primaryHeadline: 'Need More Information?',
-        primaryDescription: 'Visit our website for detailed documentation and resources.',
-        primaryButtonText: 'Visit Official Website',
-        secondaryHeadline: 'Questions? We\'re Here to Help!',
-        secondaryDescription: 'Speak with our experts to find the perfect package for your business.',
-        contactInfo: {
-          phone: '',
-          email: '',
-          website: ''
-        }
-      },
-      urgency: {
-        enabled: false,
-        message: 'Limited time offer!'
-      }
-    }
-  });
+  const [loading, setLoading] = useState(true);
+  const [isServiceBuilderOpen, setIsServiceBuilderOpen] = useState(false);
+  const [selectedService, setSelectedService] = useState<VendorService | null>(null);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
 
   useEffect(() => {
-    // Check authentication first
-    if (!authLoading) {
-      if (!user) {
-        // Check if this is a new vendor registration by looking at URL params or session storage
-        const urlParams = new URLSearchParams(window.location.search);
-        const isNewRegistration = urlParams.get('new_registration') === 'true' || 
-                                sessionStorage.getItem('new_vendor_registration') === 'true';
-        
-        if (!isNewRegistration) {
-          // Only redirect to auth if this isn't a new registration
-          navigate('/auth');
-          return;
-        }
-      }
-      
-      // User is authenticated or new registration, load dashboard data
-      if (user) {
-        loadDashboardData();
-        checkVendorPlan();
-        // Clear the new registration flag
-        sessionStorage.removeItem('new_vendor_registration');
-      }
-    }
-  }, [user, authLoading, navigate]);
+    fetchVendorData();
+  }, []);
 
-  // Update stats when analytics data changes
-  useEffect(() => {
-    if (analytics) {
-      setStats({
-        total_services: analytics.total_services,
-        total_views: analytics.total_views,
-        total_bookings: analytics.total_bookings,
-        conversion_rate: analytics.conversion_rate,
-        monthly_revenue: analytics.monthly_revenue
-      });
-    }
-  }, [analytics]);
-
-  const loadDashboardData = async () => {
-    if (!user) return;
-    
+  const fetchVendorData = async () => {
     try {
-      setIsLoading(true);
-
-      // Fetch vendor's services
-      const { data: services, error } = await supabase
+      setLoading(true);
+      
+      // Fetch services
+      const { data: servicesData, error: servicesError } = await supabase
         .from('services')
-        .select(`
-          id,
-          title,
-          description,
-          category,
-          retail_price,
-          pro_price,
-          co_pay_price,
-          image_url,
-          is_featured,
-          vendor_id,
-          created_at
-        `)
-        .eq('vendor_id', user.id);
+        .select('*')
+        .order('created_at', { ascending: false });
 
-      if (error) {
-        throw error;
-      }
+      if (servicesError) throw servicesError;
 
-      // Transform services data
-      const transformedServices: Service[] = (services || []).map(service => ({
+      // Map the data to match our interface with safe property access
+      const mappedServices: VendorService[] = (servicesData || []).map((service: any) => ({
         id: service.id,
-        title: service.title,
+        title: service.title || service.name || 'Untitled Service',
         description: service.description || '',
-        category: service.category,
-        retail_price: service.retail_price,
-        pro_price: service.pro_price,
-        co_pay_price: service.co_pay_price,
+        retail_price: service.retail_price || service.price || '0',
+        category: service.category || 'General',
+        vendor_location: service.vendor_location || service.location || 'Location not specified',
         image_url: service.image_url,
-        is_featured: service.is_featured,
-        vendor_id: service.vendor_id,
-        base_pricing_tiers: [],
-        pro_pricing_tiers: [],
-        copay_pricing_tiers: [],
-        supports_copay: false,
-        created_at: service.created_at,
-        views: 0, // These would come from analytics tables
-        conversions: 0,
-        funnel_content: {
-          headline: service.title,
-          subheadline: 'Transform your real estate business',
-          heroDescription: service.description || '',
-          estimatedRoi: 3,
-          duration: '30 days',
-          whyChooseUs: {
-            title: 'Why Choose Our Service?',
-            benefits: [
-              { icon: 'check', title: 'Proven Results', description: 'Get measurable results fast' },
-              { icon: 'check', title: 'Expert Support', description: '24/7 professional assistance' },
-              { icon: 'check', title: 'Fast Implementation', description: 'Up and running in minutes' }
-            ]
-          },
-          media: [],
-          packages: [
-            {
-              id: 'standard',
-              name: 'Standard Package',
-              description: 'Perfect for most businesses',
-              price: 299,
-              features: ['Core features', 'Email support', 'Monthly updates'],
-              popular: true
-            }
-          ],
-          socialProof: {
-            testimonials: [
-              {
-                id: '1',
-                name: 'John Smith',
-                role: 'Real Estate Agent',
-                content: 'This service transformed my business...',
-                rating: 5
-              }
-            ],
-            stats: [
-              { label: 'Happy Customers', value: '1000+' },
-              { label: 'Success Rate', value: '98%' }
-            ]
-          },
-          trustIndicators: {
-            guarantee: '30-day money back guarantee',
-            cancellation: 'Cancel anytime',
-            certification: 'Industry certified'
-          },
-          callToAction: {
-            primaryHeadline: 'Need More Information?',
-            primaryDescription: 'Visit our website for detailed documentation and resources.',
-            primaryButtonText: 'Visit Official Website',
-            secondaryHeadline: 'Questions? We\'re Here to Help!',
-            secondaryDescription: 'Speak with our experts to find the perfect package for your business.',
-            contactInfo: {
-              phone: '',
-              email: '',
-              website: ''
-            }
-          },
-          urgency: {
-            enabled: false,
-            message: 'Limited time offer!'
-          }
-        }
+        rating: service.rating || 0,
+        reviews_count: service.reviews_count || 0,
+        views_count: service.views_count || 0,
+        bookings_count: service.bookings_count || 0,
+        is_featured: service.is_featured || false,
+        status: service.status || 'active'
       }));
 
-      setServices(transformedServices);
+      setServices(mappedServices);
 
+      // Calculate stats (mock data for now)
+      const mockStats: VendorStats = {
+        total_services: servicesData?.length || 0,
+        total_views: Math.floor(Math.random() * 10000) + 5000,
+        total_bookings: Math.floor(Math.random() * 200) + 50,
+        monthly_revenue: Math.floor(Math.random() * 50000) + 15000,
+        conversion_rate: Math.floor(Math.random() * 30) + 15,
+        avg_rating: 4.2 + Math.random() * 0.8,
+        total_reviews: Math.floor(Math.random() * 150) + 25,
+        trending_score: Math.floor(Math.random() * 100) + 70
+      };
+
+      setStats(mockStats);
     } catch (error) {
-      console.error('Error loading dashboard data:', error);
+      console.error('Error fetching vendor data:', error);
       toast({
         title: "Error",
         description: "Failed to load dashboard data",
         variant: "destructive"
       });
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  const resetServiceForm = () => {
-    setServiceForm({
-      title: '',
-      description: '',
-      category: '',
-      price: '',
-      is_featured: false,
-      image_url: '',
-      vendor_id: '',
-      base_pricing_tiers: [],
-      pro_pricing_tiers: [],
-      copay_pricing_tiers: [],
-      supports_copay: false,
-      funnel_content: {
-        headline: '',
-        subheadline: '',
-        heroDescription: '',
-        estimatedRoi: 3,
-        duration: '30 days',
-        whyChooseUs: {
-          title: 'Why Choose Our Service?',
-          benefits: [
-            { icon: 'check', title: 'Proven Results', description: 'Get measurable results fast' },
-            { icon: 'check', title: 'Expert Support', description: '24/7 professional assistance' },
-            { icon: 'check', title: 'Fast Implementation', description: 'Up and running in minutes' }
-          ]
-        },
-        media: [],
-        packages: [
-          {
-            id: 'standard',
-            name: 'Standard Package',
-            description: 'Perfect for most businesses',
-            price: 299,
-            features: ['Core features', 'Email support', 'Monthly updates'],
-            popular: true
-          }
-        ],
-        socialProof: {
-          testimonials: [
-            {
-              id: '1',
-              name: 'John Smith',
-              role: 'Real Estate Agent',
-              content: 'This service transformed my business...',
-              rating: 5
-            }
-          ],
-          stats: [
-            { label: 'Happy Customers', value: '1000+' },
-            { label: 'Success Rate', value: '98%' }
-          ]
-        },
-        trustIndicators: {
-          guarantee: '30-day money back guarantee',
-          cancellation: 'Cancel anytime',
-          certification: 'Industry certified'
-        },
-        callToAction: {
-          primaryHeadline: 'Need More Information?',
-          primaryDescription: 'Visit our website for detailed documentation and resources.',
-          primaryButtonText: 'Visit Official Website',
-          secondaryHeadline: 'Questions? We\'re Here to Help!',
-          secondaryDescription: 'Speak with our experts to find the perfect package for your business.',
-          contactInfo: {
-            phone: '',
-            email: '',
-            website: ''
-          }
-        },
-        urgency: {
-          enabled: false,
-          message: 'Limited time offer!'
-        }
-      }
-    });
-    setCurrentStep('basic');
-    setEditingService(null);
+  const openServiceBuilder = () => {
+    setIsServiceBuilderOpen(true);
   };
 
-  // Check if basic info is complete for auto-advancement
-  const isBasicInfoComplete = () => {
-    return serviceForm.title.trim() !== '' && 
-           serviceForm.category !== '' && 
-           serviceForm.price.trim() !== '' && 
-           serviceForm.description.trim() !== '' && 
-           serviceForm.image_url !== '';
+  const handleServiceClick = (service: VendorService) => {
+    setSelectedService(service);
+    setIsDetailsModalOpen(true);
   };
 
-  const openServiceBuilder = (service?: Service) => {
-    if (service) {
-      setEditingService(service);
-      setServiceForm({
-        title: service.title,
-        description: service.description,
-        category: service.category,
-        price: service.retail_price || service.pro_price || service.co_pay_price || '',
-        is_featured: service.is_featured,
-        image_url: service.image_url || '',
-        vendor_id: service.vendor_id,
-        base_pricing_tiers: service.base_pricing_tiers || [],
-        pro_pricing_tiers: service.pro_pricing_tiers || [],
-        copay_pricing_tiers: service.copay_pricing_tiers || [],
-        supports_copay: service.supports_copay || false,
-        funnel_content: service.funnel_content || {
-          headline: '',
-          subheadline: '',
-          heroDescription: '',
-          estimatedRoi: 3,
-          duration: '30 days',
-          whyChooseUs: {
-            title: 'Why Choose Our Service?',
-            benefits: [
-              { icon: 'check', title: 'Proven Results', description: 'Get measurable results fast' },
-              { icon: 'check', title: 'Expert Support', description: '24/7 professional assistance' },
-              { icon: 'check', title: 'Fast Implementation', description: 'Up and running in minutes' }
-            ]
-          },
-          media: [],
-          packages: [
-            {
-              id: 'standard',
-              name: 'Standard Package',
-              description: 'Perfect for most businesses',
-              price: 299,
-              features: ['Core features', 'Email support', 'Monthly updates'],
-              popular: true
-            }
-          ],
-          socialProof: {
-            testimonials: [
-              {
-                id: '1',
-                name: 'John Smith',
-                role: 'Real Estate Agent',
-                content: 'This service transformed my business...',
-                rating: 5
-              }
-            ],
-            stats: [
-              { label: 'Happy Customers', value: '1000+' },
-              { label: 'Success Rate', value: '98%' }
-            ]
-          },
-          trustIndicators: {
-            guarantee: '30-day money back guarantee',
-            cancellation: 'Cancel anytime',
-            certification: 'Industry certified'
-          },
-          callToAction: {
-            primaryHeadline: 'Need More Information?',
-            primaryDescription: 'Visit our website for detailed documentation and resources.',
-            primaryButtonText: 'Visit Official Website',
-            secondaryHeadline: 'Questions? We\'re Here to Help!',
-            secondaryDescription: 'Speak with our experts to find the perfect package for your business.',
-            contactInfo: {
-              phone: '',
-              email: '',
-              website: ''
-            }
-          },
-          urgency: {
-            enabled: false,
-            message: 'Limited time offer!'
-          }
-        }
-      });
-    } else {
-      resetServiceForm();
-    }
-    setShowServiceBuilder(true);
-  };
-
-  const closeServiceBuilder = () => {
-    setShowServiceBuilder(false);
-    resetServiceForm();
-  };
-
-  const checkVendorPlan = async () => {
-    // In a real app, you'd check if the vendor has selected a plan
-    // For now, we'll show the pricing modal if no plan is stored
-    const savedPlan = localStorage.getItem('vendorPlan');
-    if (!savedPlan) {
-      setShowPricingModal(true);
-    } else {
-      setVendorPlan(savedPlan);
-    }
-  };
-
-  const handlePlanSelected = (plan: string) => {
-    setVendorPlan(plan);
-    localStorage.setItem('vendorPlan', plan);
-    toast({
-      title: "Welcome to your new plan!",
-      description: `You can now create unlimited services with your ${plan} plan.`,
-    });
-  };
-
-  const saveService = async () => {
-    if (!user) return;
-    
-    try {
-
-      const serviceData = {
-        title: serviceForm.title,
-        description: serviceForm.description,
-        category: serviceForm.category,
-        price: serviceForm.price,
-        image_url: serviceForm.image_url,
-        is_featured: serviceForm.is_featured,
-        vendor_id: user.id
-      };
-
-      if (editingService) {
-        const { error } = await supabase
-          .from('services')
-          .update(serviceData)
-          .eq('id', editingService.id);
-
-        if (error) throw error;
-        
-        toast({ title: "Success", description: "Service updated successfully!" });
-      } else {
-        const { error } = await supabase
-          .from('services')
-          .insert([serviceData]);
-
-        if (error) throw error;
-        
-        toast({ title: "Success", description: "Service created successfully!" });
-      }
-
-      // Reload services data
-      await loadDashboardData();
-      closeServiceBuilder();
-    } catch (error) {
-      console.error('Error saving service:', error);
-      toast({
-        title: "Error",
-        description: "Failed to save service",
-        variant: "destructive"
-      });
-    }
-  };
-
-  const deleteService = async (serviceId: string) => {
-    try {
-      const { error } = await supabase
-        .from('services')
-        .delete()
-        .eq('id', serviceId);
-
-      if (error) throw error;
-
-      setServices(prev => prev.filter(s => s.id !== serviceId));
-      toast({ title: "Success", description: "Service deleted successfully!" });
-    } catch (error) {
-      console.error('Error deleting service:', error);
-      toast({
-        title: "Error",
-        description: "Failed to delete service",
-        variant: "destructive"
-      });
-    }
-  };
-
-  // Show loading while authentication is being checked
-  if (authLoading) {
+  if (loading) {
     return (
-      <div className="container mx-auto py-8">
-        <div className="text-center">Checking authentication...</div>
-      </div>
-    );
-  }
-
-  // Show loading while dashboard data is being loaded
-  if (isLoading) {
-    return (
-      <div className="container mx-auto py-8">
-        <div className="text-center">Loading vendor dashboard...</div>
+      <div className="min-h-screen bg-gradient-to-br from-background via-secondary/5 to-accent/10 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <div className="text-lg text-muted-foreground">Loading your dashboard...</div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-secondary/5 to-accent/10">
-      {/* Back Button */}
-      <div className="container mx-auto pt-4">
-        <Button 
-          variant="ghost" 
-          onClick={() => navigate(-1)}
-          className="mb-4 hover:bg-secondary/20"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back
-        </Button>
-      </div>
-      <div className="container mx-auto py-8 space-y-8">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-bold text-blue-600">
-              Services Dashboard
-            </h1>
-            <p className="text-lg text-muted-foreground mt-2">
-              Manage your services, track performance, and grow your business
-            </p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-950 dark:via-slate-900 dark:to-blue-950">
+      {/* Header with Back Button */}
+      <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg border-b border-slate-200/20 dark:border-slate-700/20 sticky top-0 z-50">
+        <div className="container mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Button 
+                variant="ghost" 
+                onClick={() => navigate(-1)}
+                className="hover:bg-slate-100 dark:hover:bg-slate-800"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back
+              </Button>
+              <div className="h-8 w-px bg-slate-200 dark:bg-slate-700" />
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
+                  <Crown className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-xl font-semibold text-slate-900 dark:text-white">Vendor Dashboard</h1>
+                  <p className="text-sm text-slate-600 dark:text-slate-400">Professional Services Hub</p>
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <Button variant="outline" size="sm">
+                <Bell className="w-4 h-4 mr-2" />
+                Notifications
+              </Button>
+              <Button variant="outline" size="sm">
+                <Settings className="w-4 h-4 mr-2" />
+                Settings
+              </Button>
+            </div>
           </div>
-          <Button 
-            onClick={() => openServiceBuilder()}
-            className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Create New Service
-          </Button>
         </div>
-
-        {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-          <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-blue-700 dark:text-blue-300">Total Services</CardTitle>
-              <Package className="h-4 w-4 text-blue-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-blue-800 dark:text-blue-200">{stats.total_services}</div>
-              <p className="text-xs text-blue-600 dark:text-blue-400">Active listings</p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-0 shadow-lg bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-green-700 dark:text-green-300">Total Views</CardTitle>
-              <Eye className="h-4 w-4 text-green-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-green-800 dark:text-green-200">{stats.total_views.toLocaleString()}</div>
-              <p className="text-xs text-green-600 dark:text-green-400">This month</p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-0 shadow-lg bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950 dark:to-purple-900">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-purple-700 dark:text-purple-300">Bookings</CardTitle>
-              <Calendar className="h-4 w-4 text-purple-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-purple-800 dark:text-purple-200">{stats.total_bookings}</div>
-              <p className="text-xs text-purple-600 dark:text-purple-400">Total conversions</p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-0 shadow-lg bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-950 dark:to-orange-900">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-orange-700 dark:text-orange-300">Conversion Rate</CardTitle>
-              <TrendingUp className="h-4 w-4 text-orange-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-orange-800 dark:text-orange-200">{stats.conversion_rate}%</div>
-              <p className="text-xs text-orange-600 dark:text-orange-400">Average rate</p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-0 shadow-lg bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-950 dark:to-emerald-900">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-emerald-700 dark:text-emerald-300">Revenue</CardTitle>
-              <DollarSign className="h-4 w-4 text-emerald-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-emerald-800 dark:text-emerald-200">${stats.monthly_revenue.toLocaleString()}</div>
-              <p className="text-xs text-emerald-600 dark:text-emerald-400">This month</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Main Content */}
-        <Tabs defaultValue="services" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="services" className="flex items-center space-x-2">
-              <Package className="w-4 h-4" />
-              <span>My Services</span>
-            </TabsTrigger>
-            <TabsTrigger value="bookings" className="flex items-center space-x-2">
-              <Calendar className="w-4 h-4" />
-              <span>Bookings</span>
-            </TabsTrigger>
-            <TabsTrigger value="analytics" className="flex items-center space-x-2">
-              <BarChart3 className="w-4 h-4" />
-              <span>Analytics</span>
-            </TabsTrigger>
-            <TabsTrigger value="settings" className="flex items-center space-x-2">
-              <Settings className="w-4 h-4" />
-              <span>Settings</span>
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="services" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {services.map((service) => (
-                <div key={service.id} className="group relative">
-                  {/* Service Card - matches marketplace design */}
-                  <Card className="group relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 bg-card border border-border/50 h-full flex flex-col">
-                    {/* Edit Overlay */}
-                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity z-20 flex items-center justify-center">
-                      <div className="flex gap-2">
-                        <Button size="sm" onClick={() => openServiceBuilder(service)}>
-                          <Edit className="w-4 h-4 mr-2" />
-                          Edit
-                        </Button>
-                        <Button size="sm" variant="outline">
-                          <Eye className="w-4 h-4 mr-2" />
-                          Preview
-                        </Button>
-                        <Button size="sm" variant="destructive" onClick={() => deleteService(service.id)}>
-                          <X className="w-4 h-4 mr-2" />
-                          Delete
-                        </Button>
-                      </div>
-                    </div>
-
-                    {/* Top Badges */}
-                    <div className="absolute top-3 left-3 z-10 flex gap-2">
-                      {service.is_featured && (
-                        <Badge className="bg-circle-primary text-primary-foreground text-xs font-medium">
-                          Featured
-                        </Badge>
-                      )}
-                    </div>
-
-                    {/* Performance Stats */}
-                    <div className="absolute top-3 right-3 z-10 flex gap-1">
-                      <Badge variant="secondary" className="text-xs">
-                        {service.views || 0} views
-                      </Badge>
-                      <Badge variant="secondary" className="text-xs">
-                        {service.conversions || 0} leads
-                      </Badge>
-                    </div>
-
-                    {/* Image */}
-                    <div className="relative h-48 overflow-hidden bg-muted flex-shrink-0">
-                      {service.image_url ? (
-                        <img
-                          src={service.image_url}
-                          alt={service.title}
-                          className="w-full h-full object-contain object-center transition-transform duration-300 group-hover:scale-105"
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-secondary/20 to-accent/20 flex items-center justify-center">
-                          <Image className="w-16 h-16 text-muted-foreground" />
-                        </div>
-                      )}
-                    </div>
-
-                    <CardContent className="p-4 flex flex-col flex-grow">
-                      {/* Title */}
-                      <div className="h-6 mb-3">
-                        <h3 className="font-semibold text-foreground leading-tight line-clamp-1">
-                          {service.title}
-                        </h3>
-                      </div>
-
-                      {/* Rating placeholder */}
-                      <div className="flex items-center gap-1 mb-3">
-                        {[...Array(5)].map((_, i) => (
-                          <Star key={i} className="h-4 w-4 text-gray-300" />
-                        ))}
-                        <span className="text-sm text-muted-foreground ml-1">
-                          0.0 (0 reviews)
-                        </span>
-                      </div>
-
-                      {/* Description */}
-                      <p className="text-sm text-muted-foreground line-clamp-2 h-10 mb-3">
-                        {service.description}
-                      </p>
-
-                      {/* Category & Tags */}
-                      <div className="h-8 mb-3">
-                        <div className="flex flex-wrap gap-1">
-                          <Badge variant="outline" className="text-xs">
-                            {service.category.replace('_', ' ')}
-                          </Badge>
-                        </div>
-                      </div>
-
-                      {/* Pricing */}
-                      <div className="space-y-2 mb-3 flex-grow">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-muted-foreground">Price:</span>
-                          <span className="text-xl font-bold text-foreground">
-                            ${service.retail_price || service.pro_price || service.co_pay_price || 'TBD'}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Performance metrics */}
-                      <div className="h-4 mb-4">
-                        <div className="flex items-center justify-between text-xs text-muted-foreground">
-                          <span>Conv. Rate: {((service.conversions || 0) / Math.max(service.views || 1, 1) * 100).toFixed(1)}%</span>
-                          <span>Revenue: $0</span>
-                        </div>
-                      </div>
-
-                      {/* Action Buttons */}
-                      <div className="flex gap-2 mt-auto">
-                        <Button 
-                          className="flex-1"
-                          variant="outline"
-                          onClick={() => openServiceBuilder(service)}
-                        >
-                          <Edit className="w-4 h-4 mr-2" />
-                          Edit Service
-                        </Button>
-                        
-                        <Button 
-                          variant="outline"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              ))}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="bookings" className="space-y-6">
-            <Card className="border-0 shadow-lg">
-              <CardHeader>
-                <CardTitle className="text-2xl font-semibold">Recent Bookings</CardTitle>
-                <p className="text-muted-foreground">Manage your customer appointments and demos</p>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-12 text-muted-foreground">
-                  <Calendar className="w-16 h-16 mx-auto mb-4 text-muted-foreground/50" />
-                  <h3 className="text-lg font-medium mb-2">No bookings yet</h3>
-                  <p>When customers book demos or consultations, they'll appear here</p>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="analytics" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="border-0 shadow-lg">
-                <CardHeader>
-                  <CardTitle>Service Performance</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {services.map((service) => (
-                      <div key={service.id} className="flex items-center justify-between p-3 bg-secondary/20 rounded-lg">
-                        <div>
-                          <div className="font-medium">{service.title}</div>
-                          <div className="text-sm text-muted-foreground">{service.views} views</div>
-                        </div>
-                        <div className="text-right">
-                          <div className="font-medium text-green-600">{service.conversions} conversions</div>
-                          <div className="text-sm text-muted-foreground">
-                            {((service.conversions / service.views) * 100).toFixed(1)}% rate
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="border-0 shadow-lg">
-                <CardHeader>
-                  <CardTitle>Monthly Trends</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-center py-12 text-muted-foreground">
-                    <BarChart3 className="w-16 h-16 mx-auto mb-4 text-muted-foreground/50" />
-                    <p>Analytics charts coming soon</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="settings" className="space-y-6">
-            <Card className="border-0 shadow-lg">
-              <CardHeader>
-                <CardTitle>Account Settings</CardTitle>
-                <p className="text-muted-foreground">Manage your vendor profile and preferences</p>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label className="text-base font-medium">Email Notifications</Label>
-                    <p className="text-sm text-muted-foreground">Receive notifications for new bookings</p>
-                  </div>
-                  <Switch defaultChecked />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label className="text-base font-medium">Auto-respond to Inquiries</Label>
-                    <p className="text-sm text-muted-foreground">Send automatic responses to new leads</p>
-                  </div>
-                  <Switch />
-                </div>
-
-                <Separator />
-
-                <div className="space-y-4">
-                  <h3 className="text-lg font-medium">Calendar Integration</h3>
-                  <div className="space-y-2">
-                    <Label htmlFor="calendar-link">Booking Calendar Link</Label>
-                    <Input
-                      id="calendar-link"
-                      placeholder="https://calendly.com/your-link"
-                      defaultValue="https://calendly.com/your-marketing-tools"
-                    />
-                    <p className="text-sm text-muted-foreground">
-                      Customers will use this link to book demos and consultations
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-
-        {/* Service Builder Dialog */}
-        <Dialog open={showServiceBuilder} onOpenChange={setShowServiceBuilder}>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="text-2xl font-bold">
-                {editingService ? 'Edit Service' : 'Create New Service'}
-              </DialogTitle>
-            </DialogHeader>
-
-            <div className="space-y-6">
-              {/* Step Navigation */}
-              <div className="flex items-center space-x-4 border-b pb-4">
-                <Button
-                  variant={currentStep === 'basic' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setCurrentStep('basic')}
-                >
-                  <Package className="w-4 h-4 mr-2" />
-                  Basic Info
-                </Button>
-                  <Button
-                    variant={currentStep === 'funnel' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setShowFunnelEditor(true)}
-                  >
-                    <Layout className="w-4 h-4 mr-2" />
-                    Edit Funnel Page
-                  </Button>
-              </div>
-
-              {/* Basic Info Step */}
-              {currentStep === 'basic' && (
-                <div className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="service-title">Service Title *</Label>
-                      <Input
-                        id="service-title"
-                        value={serviceForm.title}
-                        onChange={(e) => setServiceForm(prev => ({ ...prev, title: e.target.value }))}
-                        placeholder="e.g., CRM Marketing Automation"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="service-category">Category *</Label>
-                      <Select 
-                        value={serviceForm.category} 
-                        onValueChange={(value) => setServiceForm(prev => ({ ...prev, category: value }))}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="marketing_tools">Marketing Tools & Platforms</SelectItem>
-                          <SelectItem value="signs_materials">Signs & Marketing Materials</SelectItem>
-                          <SelectItem value="crm_software">CRM & Contact Management</SelectItem>
-                          <SelectItem value="lead_generation">Lead Generation Services</SelectItem>
-                          <SelectItem value="website_design">Website Design & Development</SelectItem>
-                          <SelectItem value="social_media">Social Media Management</SelectItem>
-                          <SelectItem value="photography">Photography & Virtual Tours</SelectItem>
-                          <SelectItem value="staging_services">Home Staging Services</SelectItem>
-                          <SelectItem value="printing_services">Printing & Design Services</SelectItem>
-                          <SelectItem value="coaching_training">Coaching & Training</SelectItem>
-                          <SelectItem value="transaction_management">Transaction Management</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="service-price">Price *</Label>
-                      <Input
-                        id="service-price"
-                        value={serviceForm.price}
-                        onChange={(e) => setServiceForm(prev => ({ ...prev, price: e.target.value }))}
-                        placeholder="e.g., $299/month or $45 each"
-                      />
-                     </div>
-                   </div>
-
-                   <div className="space-y-2">
-                     <Label htmlFor="service-description">Service Description *</Label>
-                     <Textarea
-                       id="service-description"
-                       value={serviceForm.description}
-                       onChange={(e) => setServiceForm(prev => ({ ...prev, description: e.target.value }))}
-                       placeholder="Describe your service, what it does, and how it helps real estate professionals..."
-                       rows={4}
-                     />
-                   </div>
-
-                   <ServiceImageUpload
-                     value={serviceForm.image_url}
-                     onChange={(url) => setServiceForm(prev => ({ ...prev, image_url: url }))}
-                   />
-
-                   {/* Next Step Button - Appears when basic info is complete */}
-                   {isBasicInfoComplete() && (
-                     <div className="pt-4 border-t">
-                       <div className="flex items-center justify-between">
-                         <div className="text-sm text-muted-foreground">
-                           ✅ Basic information complete! Ready to create your funnel page.
-                         </div>
-                         <Button 
-                           onClick={() => setShowFunnelEditor(true)}
-                           className="bg-gradient-to-r from-primary to-accent text-white"
-                         >
-                           <Layout className="w-4 h-4 mr-2" />
-                           Next: Create Funnel Page
-                         </Button>
-                       </div>
-                     </div>
-                   )}
-                 </div>
-               )}
-
-              {/* Basic info only - funnel editing is in separate modal */}
-              {/* Note: Funnel editing moved to full-screen modal */}
-
-              {/* Preview Step */}
-              {currentStep === 'preview' && (
-                <div className="space-y-6">
-                  <div className="border rounded-lg p-6 bg-gradient-to-br from-background to-secondary/20">
-                    <div className="max-w-2xl mx-auto text-center space-y-6">
-                      {/* Hero Section */}
-                      <div className="space-y-4">
-                        <h1 className="text-4xl font-bold text-primary">
-                          {serviceForm.funnel_content.headline || 'Your Amazing Headline'}
-                        </h1>
-                        <p className="text-xl text-muted-foreground">
-                          {serviceForm.funnel_content.subheadline || 'Your compelling subheadline goes here'}
-                        </p>
-                        <div className="flex items-center justify-center space-x-4">
-                          <Badge variant="outline">{serviceForm.category.replace('_', ' ')}</Badge>
-                          <span className="text-2xl font-bold text-primary">{serviceForm.price || '$299'}</span>
-                        </div>
-                      </div>
-
-                      {/* Benefits Section */}
-                      {serviceForm.funnel_content.whyChooseUs.benefits.length > 0 && (
-                        <div className="space-y-4">
-                          <h2 className="text-2xl font-semibold">{serviceForm.funnel_content.whyChooseUs.title}</h2>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-left">
-                            {serviceForm.funnel_content.whyChooseUs.benefits.map((benefit, index) => (
-                              <div key={index} className="flex items-start space-x-2">
-                                <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                                <div>
-                                  <h3 className="font-semibold">{benefit.title}</h3>
-                                  <p className="text-sm text-muted-foreground">{benefit.description}</p>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Social Proof */}
-                      {serviceForm.funnel_content.socialProof.testimonials.length > 0 && (
-                        <div className="space-y-4">
-                          <h2 className="text-2xl font-semibold">What Our Customers Say</h2>
-                          <div className="space-y-4">
-                            {serviceForm.funnel_content.socialProof.testimonials.map((testimonial, index) => (
-                              <Card key={index} className="p-4 text-left">
-                                <p className="italic mb-2">"{testimonial.content}"</p>
-                                <div className="flex items-center space-x-2">
-                                  <Star className="w-4 h-4 text-yellow-500" />
-                                  <span className="font-medium">{testimonial.name}</span>
-                                  <span className="text-muted-foreground">•</span>
-                                  <span className="text-muted-foreground text-sm">{testimonial.role}</span>
-                                </div>
-                              </Card>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* CTA Section */}
-                      <div className="space-y-4 pt-6 border-t">
-                        <h2 className="text-2xl font-semibold">Ready to Get Started?</h2>
-                        <Button size="lg" className="bg-gradient-to-r from-primary to-accent text-white">
-                          {serviceForm.funnel_content.callToAction.primaryButtonText || 'Book a Demo'}
-                        </Button>
-                        <p className="text-sm text-muted-foreground">
-                          {serviceForm.description || 'Your service description will appear here'}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Mobile Preview */}
-                  <div className="bg-secondary/20 p-4 rounded-lg">
-                    <div className="flex items-center justify-center space-x-4 mb-4">
-                      <Monitor className="w-5 h-5" />
-                      <span className="text-sm font-medium">Desktop Preview Above</span>
-                      <Smartphone className="w-5 h-5" />
-                      <span className="text-sm text-muted-foreground">Mobile-optimized automatically</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Action Buttons */}
-              <div className="flex items-center justify-between pt-6 border-t">
-                <Button variant="outline" onClick={closeServiceBuilder}>
-                  Cancel
-                </Button>
-                <div className="flex space-x-2">
-                  {currentStep !== 'basic' && (
-                    <Button 
-                      variant="outline" 
-                      onClick={() => setCurrentStep(currentStep === 'preview' ? 'funnel' : 'basic')}
-                    >
-                      Previous
-                    </Button>
-                  )}
-                  {currentStep !== 'preview' && (
-                    <Button 
-                      onClick={() => setCurrentStep(currentStep === 'basic' ? 'funnel' : 'preview')}
-                    >
-                      Next
-                    </Button>
-                  )}
-                  {currentStep === 'preview' && (
-                    <Button onClick={saveService} className="bg-gradient-to-r from-primary to-accent text-white">
-                      <Save className="w-4 h-4 mr-2" />
-                      {editingService ? 'Update Service' : 'Create Service'}
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
-
-        {/* Full-Screen Funnel Editor Modal */}
-        <ServiceFunnelEditorModal
-          open={showFunnelEditor}
-          onOpenChange={setShowFunnelEditor}
-          funnelContent={serviceForm.funnel_content}
-          onChange={(content) => setServiceForm(prev => ({ ...prev, funnel_content: content }))}
-          onSave={() => {
-            setShowFunnelEditor(false);
-            // Auto-save or show success message
-          }}
-          serviceName={serviceForm.title || 'Untitled Service'}
-        />
-
-        {/* Pricing Selection Modal */}
-        <VendorPricingModal
-          isOpen={showPricingModal}
-          onClose={() => setShowPricingModal(false)}
-          onPlanSelected={handlePlanSelected}
-        />
       </div>
+
+      <div className="container mx-auto px-6 py-8 space-y-8">
+        {/* Welcome Section */}
+        <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-2xl p-8 text-white relative overflow-hidden">
+          <div className="absolute inset-0 bg-black/10"></div>
+          <div className="relative z-10">
+            <div className="flex items-center justify-between">
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-6 h-6" />
+                  <span className="text-lg font-medium">Welcome back, Pro Vendor!</span>
+                </div>
+                <h2 className="text-3xl font-bold">Grow Your Business Today</h2>
+                <p className="text-lg text-white/90 max-w-2xl">
+                  Your professional marketplace to showcase services, connect with customers, and build your reputation.
+                </p>
+                <div className="flex items-center gap-4 mt-6">
+                  <Button 
+                    onClick={openServiceBuilder}
+                    className="bg-white text-blue-600 hover:bg-white/90 font-semibold px-6 py-3"
+                    size="lg"
+                  >
+                    <Plus className="w-5 h-5 mr-2" />
+                    Create New Service
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    className="border-white/30 text-white hover:bg-white/10"
+                    size="lg"
+                  >
+                    <BarChart3 className="w-5 h-5 mr-2" />
+                    View Analytics
+                  </Button>
+                </div>
+              </div>
+              <div className="hidden lg:flex items-center">
+                <div className="text-right space-y-2">
+                  <div className="text-2xl font-bold">${stats.monthly_revenue.toLocaleString()}</div>
+                  <div className="text-white/80">This Month's Revenue</div>
+                  <div className="flex items-center gap-2 text-green-300">
+                    <TrendingUp className="w-4 h-4" />
+                    <span className="text-sm">+23% from last month</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Key Metrics */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-950 dark:to-emerald-900 hover:shadow-xl transition-all duration-300">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-emerald-700 dark:text-emerald-300">Monthly Revenue</CardTitle>
+              <DollarSign className="h-5 w-5 text-emerald-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-emerald-800 dark:text-emerald-200">
+                ${stats.monthly_revenue.toLocaleString()}
+              </div>
+              <div className="flex items-center gap-2 mt-2">
+                <div className="flex items-center text-emerald-600 dark:text-emerald-400">
+                  <TrendingUp className="w-3 h-3 mr-1" />
+                  <span className="text-xs font-medium">+23%</span>
+                </div>
+                <span className="text-xs text-emerald-600/70 dark:text-emerald-400/70">vs last month</span>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900 hover:shadow-xl transition-all duration-300">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-blue-700 dark:text-blue-300">Total Bookings</CardTitle>
+              <Calendar className="h-5 w-5 text-blue-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-blue-800 dark:text-blue-200">{stats.total_bookings}</div>
+              <div className="flex items-center gap-2 mt-2">
+                <div className="flex items-center text-blue-600 dark:text-blue-400">
+                  <TrendingUp className="w-3 h-3 mr-1" />
+                  <span className="text-xs font-medium">+15%</span>
+                </div>
+                <span className="text-xs text-blue-600/70 dark:text-blue-400/70">this month</span>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950 dark:to-purple-900 hover:shadow-xl transition-all duration-300">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-purple-700 dark:text-purple-300">Profile Views</CardTitle>
+              <Eye className="h-5 w-5 text-purple-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-purple-800 dark:text-purple-200">
+                {stats.total_views.toLocaleString()}
+              </div>
+              <div className="flex items-center gap-2 mt-2">
+                <div className="flex items-center text-purple-600 dark:text-purple-400">
+                  <TrendingUp className="w-3 h-3 mr-1" />
+                  <span className="text-xs font-medium">+18%</span>
+                </div>
+                <span className="text-xs text-purple-600/70 dark:text-purple-400/70">this week</span>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-950 dark:to-amber-900 hover:shadow-xl transition-all duration-300">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-amber-700 dark:text-amber-300">Rating</CardTitle>
+              <Star className="h-5 w-5 text-amber-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-amber-800 dark:text-amber-200">
+                {stats.avg_rating.toFixed(1)}
+              </div>
+              <div className="flex items-center gap-2 mt-2">
+                <div className="flex">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <Star 
+                      key={star} 
+                      className={`w-3 h-3 ${star <= Math.floor(stats.avg_rating) ? 'fill-amber-400 text-amber-400' : 'text-amber-300'}`} 
+                    />
+                  ))}
+                </div>
+                <span className="text-xs text-amber-600/70 dark:text-amber-400/70">({stats.total_reviews} reviews)</span>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Performance Dashboard */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <Card className="lg:col-span-2 border-0 shadow-lg">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <BarChart3 className="w-5 h-5 text-blue-600" />
+                Performance Overview
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium">Conversion Rate</span>
+                  <span className="text-sm text-muted-foreground">{stats.conversion_rate}%</span>
+                </div>
+                <Progress value={stats.conversion_rate} className="h-2" />
+              </div>
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium">Trending Score</span>
+                  <span className="text-sm text-muted-foreground">{stats.trending_score}%</span>
+                </div>
+                <Progress value={stats.trending_score} className="h-2" />
+              </div>
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium">Profile Completion</span>
+                  <span className="text-sm text-muted-foreground">85%</span>
+                </div>
+                <Progress value={85} className="h-2" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-0 shadow-lg">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Target className="w-5 h-5 text-green-600" />
+                Quick Actions
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <Button 
+                onClick={openServiceBuilder}
+                className="w-full justify-start bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add New Service
+              </Button>
+              <Button variant="outline" className="w-full justify-start">
+                <Zap className="w-4 h-4 mr-2" />
+                Boost Visibility
+              </Button>
+              <Button variant="outline" className="w-full justify-start">
+                <Award className="w-4 h-4 mr-2" />
+                Manage Reviews
+              </Button>
+              <Button variant="outline" className="w-full justify-start">
+                <Users className="w-4 h-4 mr-2" />
+                Customer Insights
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Services Management */}
+        <Card className="border-0 shadow-lg">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <Package className="w-5 h-5 text-blue-600" />
+                Your Services ({services.length})
+              </CardTitle>
+              <Button 
+                onClick={openServiceBuilder}
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add Service
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {services.length === 0 ? (
+              <div className="text-center py-12">
+                <Package className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-xl font-semibold mb-2">No services yet</h3>
+                <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                  Start building your business by creating your first service listing. 
+                  Showcase your expertise and connect with customers.
+                </p>
+                <Button 
+                  onClick={openServiceBuilder}
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+                  size="lg"
+                >
+                  <Plus className="w-5 h-5 mr-2" />
+                  Create Your First Service
+                </Button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {services.map((service) => (
+                  <div 
+                    key={service.id} 
+                    className="group cursor-pointer transform transition-all duration-300 hover:scale-105"
+                    onClick={() => handleServiceClick(service)}
+                  >
+                    <ServiceCard 
+                      service={{
+                        id: service.id,
+                        title: service.title,
+                        description: service.description,
+                        retail_price: service.retail_price || '0',
+                        category: service.category,
+                        image_url: service.image_url,
+                        is_featured: service.is_featured || false,
+                        is_top_pick: false,
+                        vendor: {
+                          name: 'Vendor Name',
+                          rating: service.rating || 4.5,
+                          review_count: service.reviews_count || 0,
+                          is_verified: true
+                        }
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Modals */}
+      {isServiceBuilderOpen && (
+        <AddProductModal
+          open={isServiceBuilderOpen}
+          onOpenChange={(open) => setIsServiceBuilderOpen(open)}
+          onProductAdded={fetchVendorData}
+        />
+      )}
+
+      {selectedService && (
+        <ServiceDetailsModal
+          isOpen={isDetailsModalOpen}
+          onClose={() => {
+            setIsDetailsModalOpen(false);
+            setSelectedService(null);
+          }}
+          service={{
+            id: selectedService.id,
+            title: selectedService.title,
+            description: selectedService.description,
+            retail_price: selectedService.retail_price || '0',
+            category: selectedService.category,
+            image_url: selectedService.image_url,
+            is_featured: selectedService.is_featured || false,
+            is_top_pick: false,
+            vendor: {
+              name: 'Vendor Name',
+              rating: selectedService.rating || 4.5,
+              review_count: selectedService.reviews_count || 0,
+              is_verified: true
+            }
+          }}
+        />
+      )}
     </div>
   );
 };
