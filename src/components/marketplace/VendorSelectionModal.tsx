@@ -175,6 +175,9 @@ export const VendorSelectionModal = ({
     setShowConfirmation(false);
     setSelectedVendor(null);
     onClose();
+    // Open cart to show pending vendor approval items
+    const cartEvent = new CustomEvent('openCart');
+    window.dispatchEvent(cartEvent);
   };
 
   const mockBudgetRange = (vendor: Vendor) => {

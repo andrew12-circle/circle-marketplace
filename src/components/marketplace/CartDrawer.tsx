@@ -5,7 +5,7 @@ import { Separator } from "@/components/ui/separator";
 import { useCart } from "@/contexts/CartContext";
 import { useCoPayRequests } from "@/hooks/useCoPayRequests";
 import { ShoppingCart, Plus, Minus, Trash2, CreditCard, MessageCircle, Calendar } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { ConsultationSequenceFlow } from "./ConsultationSequenceFlow";
@@ -26,6 +26,16 @@ export const CartDrawer = () => {
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [isConsultationFlowOpen, setIsConsultationFlowOpen] = useState(false);
   const { toast } = useToast();
+
+  // Listen for openCart event
+  useEffect(() => {
+    const handleOpenCart = () => {
+      setIsOpen(true);
+    };
+
+    window.addEventListener('openCart', handleOpenCart);
+    return () => window.removeEventListener('openCart', handleOpenCart);
+  }, [setIsOpen]);
 
   const handleCheckout = async () => {
     const purchasableItems = cartItems.filter(item => !item.requiresQuote);
@@ -220,6 +230,53 @@ export const CartDrawer = () => {
                     </div>
                   </div>
                 ))}
+
+                {/* Pending Co-Pay Requests */}
+                {getPendingRequests().length > 0 && (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                      <MessageCircle className="w-4 h-4" />
+                      Pending Vendor Approval ({getPendingRequests().length})
+                    </div>
+                    {getPendingRequests().map((request) => (
+                      <div key={request.id} className="flex gap-3 p-3 border rounded-lg bg-muted/30">
+                        <div className="w-20 h-16 bg-muted rounded-lg overflow-hidden">
+                          <img
+                            src={request.services?.image_url || "/placeholder.svg"}
+                            alt={request.services?.title || "Service"}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-medium text-sm line-clamp-2">{request.services?.title || "Service"}</h4>
+                          <p className="text-xs text-muted-foreground">{request.vendors?.name || "Vendor"}</p>
+                          
+                          <div className="flex items-center justify-between mt-2">
+                            <div className="flex items-center gap-2">
+                              <Badge variant="secondary" className="text-yellow-600 border-yellow-600 text-xs">
+                                <MessageCircle className="w-3 h-3 mr-1" />
+                                Pending Approval
+                              </Badge>
+                              <span className="font-semibold text-muted-foreground">
+                                ${request.services?.pro_price || request.services?.retail_price || "0"}
+                              </span>
+                            </div>
+                            
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6 text-destructive"
+                              onClick={() => removeRequest(request.id)}
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="border-t pt-4 space-y-4">

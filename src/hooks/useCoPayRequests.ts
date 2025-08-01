@@ -15,8 +15,8 @@ interface CoPayRequest {
   vendor_notes?: string;
   created_at: string;
   updated_at: string;
-  services?: Service;
-  vendors?: Vendor;
+  services?: Service | null;
+  vendors?: Vendor | null;
 }
 
 interface Service {
@@ -54,12 +54,27 @@ export const useCoPayRequests = () => {
     try {
       const { data, error } = await supabase
         .from('co_pay_requests')
-        .select('*')
+        .select(`
+          *,
+          services (
+            id,
+            title,
+            image_url,
+            pro_price,
+            retail_price,
+            max_vendor_split_percentage
+          ),
+          vendors (
+            id,
+            name,
+            logo_url
+          )
+        `)
         .eq('agent_id', user.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setRequests(data || []);
+      setRequests((data as unknown as CoPayRequest[]) || []);
     } catch (error) {
       console.error('Error loading co-pay requests:', error);
       toast({
