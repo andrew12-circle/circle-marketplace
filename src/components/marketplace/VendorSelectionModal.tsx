@@ -175,8 +175,19 @@ export const VendorSelectionModal = ({
         return;
       }
       
-      // Create co-pay request in database with minimal required fields
-      const { data: coPayRequest, error } = await supabase
+      // Immediately show success state for better UX
+      setSelectedVendor(vendor);
+      setShowConfirmation(true);
+      onVendorSelect(vendor);
+      
+      // Show success feedback immediately
+      toast({
+        title: "Request Sent!",
+        description: `Co-pay request sent to ${vendor.name}`,
+      });
+
+      // Create co-pay request in database in background
+      const coPayRequestPromise = supabase
         .from('co_pay_requests')
         .insert({
           agent_id: user.id,
@@ -189,48 +200,49 @@ export const VendorSelectionModal = ({
         .select('id')
         .single();
 
-      if (error) {
-        console.error('Error creating co-pay request:', error);
-        toast({
-          title: "Error",
-          description: "Failed to create co-pay request. Please try again.",
-          variant: "destructive",
+      // Handle database operation in background
+      try {
+        const { data: coPayRequest, error } = await coPayRequestPromise;
+
+        if (error) {
+          console.error('Error creating co-pay request:', error);
+          // Revert UI state if database operation fails
+          setShowConfirmation(false);
+          setSelectedVendor(null);
+          toast({
+            title: "Error",
+            description: "Failed to create co-pay request. Please try again.",
+            variant: "destructive",
+          });
+          return;
+        }
+        
+        // Add to cart context with the actual request data
+        const cartItem = {
+          id: coPayRequest.id,
+          type: 'co-pay-request',
+          vendor: vendor,
+          service: {
+            title: service.title,
+            image_url: service.image_url,
+            co_pay_price: service.co_pay_price,
+            retail_price: service.retail_price,
+            pro_price: service.pro_price
+          },
+          status: 'pending-approval',
+          requestedSplit: service.max_vendor_split_percentage || 50,
+          createdAt: new Date().toISOString()
+        };
+
+        // Dispatch custom event to add to cart
+        const addToCartEvent = new CustomEvent('addCoPayToCart', { 
+          detail: cartItem 
         });
-        return;
+        window.dispatchEvent(addToCartEvent);
+      } catch (backgroundError) {
+        console.error('Background database error:', backgroundError);
+        // Don't disrupt user experience, just log the error
       }
-      
-      // Add to cart context immediately with the request data
-      const cartItem = {
-        id: coPayRequest.id,
-        type: 'co-pay-request',
-        vendor: vendor,
-        service: {
-          title: service.title,
-          image_url: service.image_url,
-          co_pay_price: service.co_pay_price,
-          retail_price: service.retail_price,
-          pro_price: service.pro_price
-        },
-        status: 'pending-approval',
-        requestedSplit: service.max_vendor_split_percentage || 50,
-        createdAt: new Date().toISOString()
-      };
-
-      // Dispatch custom event to add to cart
-      const addToCartEvent = new CustomEvent('addCoPayToCart', { 
-        detail: cartItem 
-      });
-      window.dispatchEvent(addToCartEvent);
-
-      setSelectedVendor(vendor);
-      setShowConfirmation(true);
-      onVendorSelect(vendor);
-      
-      // Show success feedback
-      toast({
-        title: "Request Sent!",
-        description: `Co-pay request sent to ${vendor.name}`,
-      });
     } catch (error) {
       console.error('Error in vendor selection:', error);
       toast({

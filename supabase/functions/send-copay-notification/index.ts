@@ -72,17 +72,27 @@ const handler = async (req: Request): Promise<Response> => {
         .single();
 
       if (!fetchError && coPayData) {
-        // Get agent details from auth
-        const { data: agentAuth } = await supabase.auth.admin.getUserById(coPayData.agent_id);
+        // Get agent details from auth in parallel
+        const agentPromise = supabase.auth.admin.getUserById(coPayData.agent_id);
         
         requestDetails = {
-          agent_email: agentAuth?.user?.email || agent_email,
+          agent_email: agent_email,
           vendor_email: coPayData.vendors?.contact_email || coPayData.vendors?.individual_email || vendor_email,
           agent_name: agent_name || 'Agent',
           vendor_name: coPayData.vendors?.name || vendor_name,
           service_title: service_title || 'Service',
           split_percentage: coPayData.requested_split_percentage || split_percentage
         };
+
+        // Wait for agent data and update email if needed
+        try {
+          const { data: agentAuth } = await agentPromise;
+          if (agentAuth?.user?.email) {
+            requestDetails.agent_email = agentAuth.user.email;
+          }
+        } catch (error) {
+          console.warn('Could not fetch agent details:', error);
+        }
       }
     }
 
@@ -95,28 +105,38 @@ const handler = async (req: Request): Promise<Response> => {
       sent_at: new Date().toISOString()
     };
 
-    await supabase
-      .from('consultation_notifications')
-      .insert({
-        vendor_id: co_pay_request_id, // Using as reference since we don't have direct vendor_id
-        consultation_booking_id: co_pay_request_id,
-        notification_type: `copay_${notification_type}`,
-        notification_data: notificationData,
-        status: 'sent',
-        sent_at: new Date().toISOString()
-      });
+    // Run notification and audit log insertions in parallel
+    const [notificationResult, auditResult] = await Promise.allSettled([
+      supabase
+        .from('consultation_notifications')
+        .insert({
+          vendor_id: co_pay_request_id, // Using as reference since we don't have direct vendor_id
+          consultation_booking_id: co_pay_request_id,
+          notification_type: `copay_${notification_type}`,
+          notification_data: notificationData,
+          status: 'sent',
+          sent_at: new Date().toISOString()
+        }),
+      
+      supabase
+        .from('co_pay_audit_log')
+        .insert({
+          co_pay_request_id,
+          action_type: `notification_${notification_type}`,
+          action_details: {
+            ...notificationData,
+            success: true
+          }
+        })
+    ]);
 
-    // Log the notification attempt
-    await supabase
-      .from('co_pay_audit_log')
-      .insert({
-        co_pay_request_id,
-        action_type: `notification_${notification_type}`,
-        action_details: {
-          ...notificationData,
-          success: true
-        }
-      });
+    // Log any insertion errors but don't fail the request
+    if (notificationResult.status === 'rejected') {
+      console.warn('Notification insertion failed:', notificationResult.reason);
+    }
+    if (auditResult.status === 'rejected') {
+      console.warn('Audit log insertion failed:', auditResult.reason);
+    }
 
     // Simulate immediate vendor notification for new requests
     if (notification_type === 'request_created') {
