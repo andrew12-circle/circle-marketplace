@@ -56,18 +56,17 @@ export const MarketplaceFilters = ({ filters, onFiltersChange, categories, viewM
     safeFilters.priceRange[0] > 0 || safeFilters.priceRange[1] < 2000;
 
   return (
-    <Card className="bg-gradient-to-br from-background to-muted/30 border border-border/50 shadow-lg">
-      <CardContent className="p-4">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-medium text-foreground">Filters</h3>
+    <Card className="bg-background/80 backdrop-blur-sm border border-border/30 shadow-sm">
+      <CardContent className="p-3">
+        <div className="flex justify-end mb-2">
           {hasActiveFilters && (
-            <Button variant="outline" size="sm" onClick={clearFilters} className="hover:bg-destructive hover:text-destructive-foreground transition-colors">
+            <Button variant="ghost" size="sm" onClick={clearFilters} className="text-xs hover:bg-destructive/10 hover:text-destructive transition-colors">
               {t('clearAll')}
             </Button>
           )}
         </div>
 
-        <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4`}>
+        <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3`}>
           {/* Category Filter */}
           <div>
             <CategoryMegaMenu 
@@ -79,7 +78,7 @@ export const MarketplaceFilters = ({ filters, onFiltersChange, categories, viewM
           </div>
 
           {/* Price Range Filter */}
-          <div className="space-y-2">
+          <div className="space-y-1">
             <div className="text-center">
               <span className="text-xs font-medium text-circle-primary">
                 ${safeFilters.priceRange[0]} - ${safeFilters.priceRange[1]}
@@ -96,38 +95,38 @@ export const MarketplaceFilters = ({ filters, onFiltersChange, categories, viewM
           </div>
 
           {/* Verification Filter */}
-          <div className="flex items-center space-x-2 bg-muted/30 rounded-lg p-2">
+          <div className="flex items-center space-x-2 hover:bg-muted/20 rounded p-1 transition-colors">
             <Checkbox
               id="verified"
               checked={safeFilters.verified}
               onCheckedChange={(checked) => updateFilter("verified", checked)}
             />
-            <Label htmlFor="verified" className="text-sm">
+            <Label htmlFor="verified" className="text-xs cursor-pointer">
               {t('circleVerifiedOnly')}
             </Label>
           </div>
 
           {/* Featured Filter */}
-          <div className="flex items-center space-x-2 bg-muted/30 rounded-lg p-2">
+          <div className="flex items-center space-x-2 hover:bg-muted/20 rounded p-1 transition-colors">
             <Checkbox
               id="featured"
               checked={safeFilters.featured}
               onCheckedChange={(checked) => updateFilter("featured", checked)}
             />
-            <Label htmlFor="featured" className="text-sm">
+            <Label htmlFor="featured" className="text-xs cursor-pointer">
               {t('featuredOnly')}
             </Label>
           </div>
 
           {/* Co-Pay Eligible Filter - Only for services */}
           {viewMode === 'services' && (
-            <div className="flex items-center space-x-2 bg-muted/30 rounded-lg p-2">
+            <div className="flex items-center space-x-2 hover:bg-muted/20 rounded p-1 transition-colors">
               <Checkbox
                 id="coPayEligible"
                 checked={safeFilters.coPayEligible}
                 onCheckedChange={(checked) => updateFilter("coPayEligible", checked)}
               />
-              <Label htmlFor="coPayEligible" className="text-sm">
+              <Label htmlFor="coPayEligible" className="text-xs cursor-pointer">
                 {t('coPayEligible')}
               </Label>
             </div>
