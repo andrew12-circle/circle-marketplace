@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { CreditCard, ExternalLink } from "lucide-react";
+import { CreditCard } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -50,12 +50,11 @@ export const CustomerPortalButton = () => {
 
   return (
     <div 
-      className="w-full flex items-center cursor-pointer text-sm"
+      className="flex items-center"
       onClick={handleManageSubscription}
     >
       <CreditCard className="mr-2 h-4 w-4" />
-      <span className="text-sm font-normal">{loading ? "Loading..." : "Manage Subscription"}</span>
-      <ExternalLink className="ml-auto h-3 w-3" />
+      <span>{loading ? "Loading..." : "Manage Subscription"}</span>
     </div>
   );
 };
