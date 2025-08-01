@@ -88,7 +88,10 @@ export const VendorSelectionModal = ({
 
       console.log('VendorSelectionModal: Supabase response:', { data, error, dataLength: data?.length });
 
-      if (error) throw error;
+      if (error) {
+        console.error('VendorSelectionModal: Supabase error details:', error);
+        throw error;
+      }
       setVendors(data || []);
       console.log('VendorSelectionModal: Vendors set successfully, count:', (data || []).length);
     } catch (error) {
