@@ -9,7 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { SecureForm } from "@/components/common/SecureForm";
-import { Upload, X, Image as ImageIcon } from "lucide-react";
+import { Upload, X, Image as ImageIcon, ExternalLink } from "lucide-react";
+import { CourseImportModal } from "./CourseImportModal";
 
 interface ContentUploadProps {
   contentType: 'video' | 'podcast' | 'book' | 'course' | 'playbook';
@@ -18,6 +19,7 @@ interface ContentUploadProps {
 }
 
 export const ContentUpload = ({ contentType, onSuccess, onCancel }: ContentUploadProps) => {
+  const [showImportModal, setShowImportModal] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -165,11 +167,24 @@ export const ContentUpload = ({ contentType, onSuccess, onCancel }: ContentUploa
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           Upload {contentType.charAt(0).toUpperCase() + contentType.slice(1)}
-          {onCancel && (
-            <Button variant="ghost" size="sm" onClick={onCancel}>
-              <X className="w-4 h-4" />
-            </Button>
-          )}
+          <div className="flex items-center gap-2">
+            {contentType === 'course' && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setShowImportModal(true)}
+              >
+                <ExternalLink className="w-4 h-4 mr-1" />
+                Import
+              </Button>
+            )}
+            {onCancel && (
+              <Button variant="ghost" size="sm" onClick={onCancel}>
+                <X className="w-4 h-4" />
+              </Button>
+            )}
+          </div>
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -371,6 +386,18 @@ export const ContentUpload = ({ contentType, onSuccess, onCancel }: ContentUploa
           </div>
         </SecureForm>
       </CardContent>
+      
+      {/* Course Import Modal */}
+      {contentType === 'course' && (
+        <CourseImportModal
+          isOpen={showImportModal}
+          onClose={() => setShowImportModal(false)}
+          onSuccess={() => {
+            setShowImportModal(false);
+            onSuccess?.();
+          }}
+        />
+      )}
     </Card>
   );
 };
