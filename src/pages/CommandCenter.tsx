@@ -39,7 +39,7 @@ interface KPIData {
   goal_target: number;
 }
 
-export const CommandCenter = () => {
+const CommandCenter = () => {
   console.log("CommandCenter component is rendering - DEBUG");
   const { user, profile } = useAuth();
   const { toast } = useToast();
