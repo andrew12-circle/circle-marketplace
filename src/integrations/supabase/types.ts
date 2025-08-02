@@ -2190,17 +2190,14 @@ export type Database = {
       vendor_service_analytics: {
         Row: {
           avg_rating: number | null
-          category: string | null
-          completed_bookings: number | null
           conversion_rate: number | null
           created_at: string | null
-          pending_bookings: number | null
-          save_count: number | null
           service_id: string | null
-          title: string | null
+          service_title: string | null
           total_bookings: number | null
           total_reviews: number | null
           total_views: number | null
+          updated_at: string | null
           vendor_id: string | null
         }
         Relationships: [
