@@ -2,17 +2,20 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Users, Shield, Star } from 'lucide-react';
+import { Users, Shield, Star, AlertTriangle } from 'lucide-react';
 import { Navigate } from 'react-router-dom';
+import { SecureAdminGuard } from '@/components/admin/SecureAdminGuard';
+import { useSecureAdminOperations } from '@/hooks/useSecureAdminOperations';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ContentPromotionPanel } from '@/components/admin/ContentPromotionPanel';
 import { YouTubeImportPanel } from '@/components/admin/YouTubeImportPanel';
 import { YouTubeChannelImportPanel } from '@/components/admin/YouTubeChannelImportPanel';
 import SecurityMonitoringPanel from '@/components/admin/SecurityMonitoringPanel';
 import { SecurityEventMonitor } from '@/components/security/SecurityEventMonitor';
+import { SecurityAuditLog } from '@/components/security/SecurityAuditLog';
 import { ServiceImportPanel } from '@/components/admin/ServiceImportPanel';
 import { ServiceManagementPanel } from '@/components/admin/ServiceManagementPanel';
 import { VendorImportPanel } from '@/components/admin/VendorImportPanel';
@@ -45,6 +48,14 @@ export default function AdminDashboard() {
   const { toast } = useToast();
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(true);
+  const [securityWarnings, setSecurityWarnings] = useState<string[]>([]);
+  
+  const {
+    loading: operationLoading,
+    toggleAdminStatus,
+    toggleCreatorStatus,
+    toggleVerificationStatus
+  } = useSecureAdminOperations();
 
   // Check if user is admin
   const isAdmin = profile?.is_admin || false;
@@ -65,6 +76,15 @@ export default function AdminDashboard() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
+      
+      // Security check: Verify we have admin access to this data
+      if (data && data.length > 0) {
+        const adminCount = data.filter(user => user.is_admin).length;
+        if (adminCount === 0) {
+          setSecurityWarnings(prev => [...prev, 'No admin users found in system - potential security issue']);
+        }
+      }
+      
       setUsers(data || []);
     } catch (error) {
       console.error('Error fetching users:', error);
@@ -78,115 +98,44 @@ export default function AdminDashboard() {
     }
   };
 
-  const toggleCreatorStatus = async (userId: string, currentStatus: boolean) => {
-    try {
-      const updates: any = {
-        is_creator: !currentStatus,
-      };
-
-      // If enabling creator status, set joined date
-      if (!currentStatus) {
-        updates.creator_joined_at = new Date().toISOString();
-      } else {
-        // If disabling, clear creator fields
-        updates.creator_joined_at = null;
-        updates.creator_verified = false;
-      }
-
-      const { error } = await supabase
-        .from('profiles')
-        .update(updates)
-        .eq('user_id', userId);
-
-      if (error) throw error;
-
+  const handleToggleCreatorStatus = async (userId: string, currentStatus: boolean) => {
+    const result = await toggleCreatorStatus(userId, currentStatus);
+    if (result.success) {
       // Update local state
       setUsers(users.map(user => 
         user.user_id === userId 
-          ? { ...user, ...updates }
+          ? { 
+              ...user, 
+              is_creator: !currentStatus,
+              creator_joined_at: !currentStatus ? new Date().toISOString() : null,
+              creator_verified: !currentStatus ? false : user.creator_verified
+            }
           : user
       ));
-
-      toast({
-        title: 'Success',
-        description: `Creator status ${!currentStatus ? 'enabled' : 'disabled'} successfully`,
-      });
-    } catch (error) {
-      console.error('Error updating creator status:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to update creator status',
-        variant: 'destructive',
-      });
     }
   };
 
-  const toggleVerificationStatus = async (userId: string, currentStatus: boolean) => {
-    try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ creator_verified: !currentStatus })
-        .eq('user_id', userId);
-
-      if (error) throw error;
-
+  const handleToggleVerificationStatus = async (userId: string, currentStatus: boolean) => {
+    const result = await toggleVerificationStatus(userId, currentStatus);
+    if (result.success) {
       // Update local state
       setUsers(users.map(user => 
         user.user_id === userId 
           ? { ...user, creator_verified: !currentStatus }
           : user
       ));
-
-      toast({
-        title: 'Success',
-        description: `Creator ${!currentStatus ? 'verified' : 'unverified'} successfully`,
-      });
-    } catch (error) {
-      console.error('Error updating verification status:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to update verification status',
-        variant: 'destructive',
-      });
     }
   };
 
-  const toggleAdminStatus = async (userId: string, currentStatus: boolean) => {
-    // Additional security check - require confirmation for admin changes
-    const confirmMessage = !currentStatus 
-      ? "Are you sure you want to grant admin privileges to this user? This action will be logged for security purposes."
-      : "Are you sure you want to remove admin privileges from this user? This action will be logged for security purposes.";
-    
-    if (!window.confirm(confirmMessage)) {
-      return;
-    }
-
-    try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ is_admin: !currentStatus })
-        .eq('user_id', userId);
-
-      if (error) throw error;
-
+  const handleToggleAdminStatus = async (userId: string, currentStatus: boolean) => {
+    const result = await toggleAdminStatus(userId, currentStatus);
+    if (result.success) {
       // Update local state
       setUsers(users.map(user => 
         user.user_id === userId 
           ? { ...user, is_admin: !currentStatus }
           : user
       ));
-
-      toast({
-        title: 'Success',
-        description: `Admin status ${!currentStatus ? 'granted' : 'revoked'} successfully. Action has been logged for security audit.`,
-      });
-    } catch (error) {
-      console.error('Error updating admin status:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to update admin status',
-        variant: 'destructive',
-      });
     }
   };
 
@@ -199,16 +148,31 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold flex items-center gap-2">
-          <Shield className="h-8 w-8" />
-          Admin Dashboard
-        </h1>
-        <p className="text-muted-foreground mt-2">
-          Manage users, content, and system operations
-        </p>
-      </div>
+    <SecureAdminGuard requireElevatedPrivileges={true}>
+      <div className="container mx-auto py-8 px-4">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold flex items-center gap-2">
+            <Shield className="h-8 w-8" />
+            Secure Admin Dashboard
+          </h1>
+          <p className="text-muted-foreground mt-2">
+            Manage users, content, and system operations with enhanced security
+          </p>
+          
+          {securityWarnings.length > 0 && (
+            <Alert variant="destructive" className="mt-4">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>
+                <strong>Security Warnings:</strong>
+                <ul className="list-disc list-inside mt-2">
+                  {securityWarnings.map((warning, index) => (
+                    <li key={index}>{warning}</li>
+                  ))}
+                </ul>
+              </AlertDescription>
+            </Alert>
+          )}
+        </div>
 
       <Tabs defaultValue="users" className="w-full space-y-6">
         <TabsList className="grid w-full grid-cols-8">
@@ -249,6 +213,7 @@ export default function AdminDashboard() {
         <TabsContent value="users" className="space-y-6">
           <SecurityMonitoringPanel />
           <SecurityEventMonitor />
+          <SecurityAuditLog />
 
           <Card>
             <CardHeader>
@@ -300,7 +265,8 @@ export default function AdminDashboard() {
                           <label className="text-sm font-medium">Admin</label>
                           <Switch
                             checked={user.is_admin || false}
-                            onCheckedChange={() => toggleAdminStatus(user.user_id, user.is_admin || false)}
+                            disabled={operationLoading}
+                            onCheckedChange={() => handleToggleAdminStatus(user.user_id, user.is_admin || false)}
                           />
                         </div>
 
@@ -308,7 +274,8 @@ export default function AdminDashboard() {
                           <label className="text-sm font-medium">Creator</label>
                           <Switch
                             checked={user.is_creator || false}
-                            onCheckedChange={() => toggleCreatorStatus(user.user_id, user.is_creator || false)}
+                            disabled={operationLoading}
+                            onCheckedChange={() => handleToggleCreatorStatus(user.user_id, user.is_creator || false)}
                           />
                         </div>
 
@@ -317,7 +284,8 @@ export default function AdminDashboard() {
                             <label className="text-sm font-medium">Verified</label>
                             <Switch
                               checked={user.creator_verified || false}
-                              onCheckedChange={() => toggleVerificationStatus(user.user_id, user.creator_verified || false)}
+                              disabled={operationLoading}
+                              onCheckedChange={() => handleToggleVerificationStatus(user.user_id, user.creator_verified || false)}
                             />
                           </div>
                         )}
@@ -383,6 +351,7 @@ export default function AdminDashboard() {
           </div>
         </TabsContent>
       </Tabs>
-    </div>
+      </div>
+    </SecureAdminGuard>
   );
 }

@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { CSRFProvider } from "@/components/common/CSRFProtection";
 import { SecurityHeaders } from "@/components/common/SecurityHeaders";
+import { EnhancedSecurityHeaders } from "@/components/security/EnhancedSecurityHeaders";
 import Index from "./pages/Index";
 import { Auth } from "./pages/Auth";
 import { OrderHistory } from "./pages/OrderHistory";
@@ -23,6 +24,7 @@ import { VendorRegistration } from "./pages/VendorRegistration";
 import AnalyticsDashboard from "./pages/AnalyticsDashboard";
 import SupportDashboard from "./pages/SupportDashboard";
 import AdvancedFeaturesDashboard from "./pages/AdvancedFeaturesDashboard";
+import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 import { TermsOfService } from "./pages/legal/TermsOfService";
 import { PrivacyPolicy } from "./pages/legal/PrivacyPolicy";
@@ -42,6 +44,7 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <SecurityHeaders />
+            <EnhancedSecurityHeaders />
             <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
@@ -59,6 +62,7 @@ const App = () => (
             <Route path="/analytics" element={<AnalyticsDashboard />} />
             <Route path="/support" element={<SupportDashboard />} />
             <Route path="/advanced-features" element={<AdvancedFeaturesDashboard />} />
+            <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/accounting" element={<AdminAccounting />} />
             
             {/* Legal Pages */}
