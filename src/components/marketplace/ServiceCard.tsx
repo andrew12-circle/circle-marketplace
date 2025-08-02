@@ -514,20 +514,16 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                 Book Consultation
               </Button>
               
-              {/* Secondary option - Direct Purchase (if enabled) */}
-              {service.direct_purchase_enabled && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-9 px-3 border-green-600 text-green-600 hover:bg-green-50"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setIsDirectPurchaseModalOpen(true);
-                  }}
-                >
-                  <ShoppingCart className="w-4 h-4" />
-                </Button>
-              )}
+              {/* Add to Cart Button */}
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1 h-9"
+                onClick={handleAddToCart}
+              >
+                <ShoppingCart className="w-4 h-4 mr-1" />
+                Add to Cart
+              </Button>
             </>
           )}
           
