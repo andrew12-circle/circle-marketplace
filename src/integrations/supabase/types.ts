@@ -556,9 +556,11 @@ export type Database = {
         Row: {
           completion_percentage: number | null
           content_id: string
+          content_weight_percentage: number | null
           created_at: string | null
           creator_id: string
           device_type: string | null
+          engagement_quality_score: number | null
           event_type: string
           id: string
           ip_address: unknown | null
@@ -568,13 +570,16 @@ export type Database = {
           user_agent: string | null
           user_id: string | null
           watch_time_seconds: number | null
+          weighted_score: number | null
         }
         Insert: {
           completion_percentage?: number | null
           content_id: string
+          content_weight_percentage?: number | null
           created_at?: string | null
           creator_id: string
           device_type?: string | null
+          engagement_quality_score?: number | null
           event_type: string
           id?: string
           ip_address?: unknown | null
@@ -584,13 +589,16 @@ export type Database = {
           user_agent?: string | null
           user_id?: string | null
           watch_time_seconds?: number | null
+          weighted_score?: number | null
         }
         Update: {
           completion_percentage?: number | null
           content_id?: string
+          content_weight_percentage?: number | null
           created_at?: string | null
           creator_id?: string
           device_type?: string | null
+          engagement_quality_score?: number | null
           event_type?: string
           id?: string
           ip_address?: unknown | null
@@ -600,6 +608,7 @@ export type Database = {
           user_agent?: string | null
           user_id?: string | null
           watch_time_seconds?: number | null
+          weighted_score?: number | null
         }
         Relationships: []
       }
@@ -693,6 +702,33 @@ export type Database = {
           },
         ]
       }
+      content_type_weightings: {
+        Row: {
+          base_weight_percentage: number
+          content_type: string
+          created_at: string
+          engagement_multiplier: number
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          base_weight_percentage?: number
+          content_type: string
+          created_at?: string
+          engagement_multiplier?: number
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          base_weight_percentage?: number
+          content_type?: string
+          created_at?: string
+          engagement_multiplier?: number
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       course_progress: {
         Row: {
           completed_modules: string[] | null
@@ -735,6 +771,7 @@ export type Database = {
         Row: {
           completion_rate: number | null
           content_id: string | null
+          content_type_breakdown: Json | null
           created_at: string | null
           creator_earnings: number | null
           creator_id: string
@@ -743,16 +780,19 @@ export type Database = {
           id: string
           month_year: string
           platform_total_revenue: number | null
+          quality_adjusted_earnings: number | null
           revenue_generated: number | null
           total_downloads: number | null
           total_plays: number | null
           total_watch_time_minutes: number | null
           unique_viewers: number | null
           updated_at: string | null
+          weighted_engagement_score: number | null
         }
         Insert: {
           completion_rate?: number | null
           content_id?: string | null
+          content_type_breakdown?: Json | null
           created_at?: string | null
           creator_earnings?: number | null
           creator_id: string
@@ -761,16 +801,19 @@ export type Database = {
           id?: string
           month_year: string
           platform_total_revenue?: number | null
+          quality_adjusted_earnings?: number | null
           revenue_generated?: number | null
           total_downloads?: number | null
           total_plays?: number | null
           total_watch_time_minutes?: number | null
           unique_viewers?: number | null
           updated_at?: string | null
+          weighted_engagement_score?: number | null
         }
         Update: {
           completion_rate?: number | null
           content_id?: string | null
+          content_type_breakdown?: Json | null
           created_at?: string | null
           creator_earnings?: number | null
           creator_id?: string
@@ -779,12 +822,14 @@ export type Database = {
           id?: string
           month_year?: string
           platform_total_revenue?: number | null
+          quality_adjusted_earnings?: number | null
           revenue_generated?: number | null
           total_downloads?: number | null
           total_plays?: number | null
           total_watch_time_minutes?: number | null
           unique_viewers?: number | null
           updated_at?: string | null
+          weighted_engagement_score?: number | null
         }
         Relationships: []
       }
@@ -2951,6 +2996,15 @@ export type Database = {
         Args: { lat1: number; lon1: number; lat2: number; lon2: number }
         Returns: number
       }
+      calculate_engagement_quality_score: {
+        Args: {
+          p_content_type: string
+          p_completion_percentage: number
+          p_watch_time_seconds: number
+          p_total_content_duration?: number
+        }
+        Returns: number
+      }
       calculate_monthly_payouts: {
         Args: { target_month?: string }
         Returns: undefined
@@ -2969,6 +3023,14 @@ export type Database = {
       }
       calculate_vendor_active_agents: {
         Args: { vendor_uuid: string }
+        Returns: number
+      }
+      calculate_weighted_engagement_score: {
+        Args: {
+          p_content_type: string
+          p_engagement_quality_score: number
+          p_revenue_attributed?: number
+        }
         Returns: number
       }
       check_account_lockout: {
@@ -3125,6 +3187,10 @@ export type Database = {
         Returns: undefined
       }
       update_creator_analytics: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      update_creator_analytics_weighted: {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }

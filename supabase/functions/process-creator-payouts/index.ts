@@ -33,7 +33,15 @@ serve(async (req) => {
 
       const targetMonth = payout_month || new Date().toISOString().slice(0, 7);
       
-      // First, generate the monthly calculations
+      // First update analytics with weighted engagement scores
+      const { error: analyticsError } = await supabase
+        .rpc('update_creator_analytics_weighted');
+      
+      if (analyticsError) {
+        console.error('Error updating weighted analytics:', analyticsError);
+      }
+
+      // Then generate the monthly calculations using the updated weighted scores
       const { error: calcError } = await supabase.rpc('calculate_monthly_payouts', {
         target_month: targetMonth
       });
