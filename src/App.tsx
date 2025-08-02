@@ -38,7 +38,9 @@ import { Academy } from "./pages/Academy";
 
 const queryClient = new QueryClient();
 
-const App = () => (
+const App = () => {
+  console.log("App component rendering");
+  return (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <CSRFProvider>
@@ -87,6 +89,7 @@ const App = () => (
       </CSRFProvider>
     </TooltipProvider>
   </QueryClientProvider>
-);
+  );
+};
 
 export default App;

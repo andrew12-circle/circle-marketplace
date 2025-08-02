@@ -11,12 +11,16 @@ export const NavigationTabs = ({ activeTab, onTabChange }: NavigationTabsProps) 
   const { t } = useTranslation();
   const location = useLocation();
   
+  console.log("NavigationTabs rendering, location:", location.pathname);
+  
   // Determine active tab from URL if not provided
   const currentTab = activeTab || (
     location.pathname === "/command-center" ? "command-center" :
     location.pathname === "/academy" ? "academy" : 
     "marketplace"
   );
+  
+  console.log("Current tab:", currentTab);
   return (
     <div className="flex bg-muted/50 rounded-xl p-1 w-fit mx-auto backdrop-blur-sm border border-border/50">
       <Button
