@@ -680,6 +680,90 @@ export type Database = {
           },
         ]
       }
+      creator_onboarding: {
+        Row: {
+          completed_at: string | null
+          completed_steps: Json | null
+          created_at: string
+          id: string
+          onboarding_data: Json | null
+          step: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          completed_steps?: Json | null
+          created_at?: string
+          id?: string
+          onboarding_data?: Json | null
+          step?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          completed_steps?: Json | null
+          created_at?: string
+          id?: string
+          onboarding_data?: Json | null
+          step?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      creator_verification_requests: {
+        Row: {
+          admin_notes: string | null
+          bio: string | null
+          created_at: string
+          experience_years: number | null
+          id: string
+          portfolio_links: string[] | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          sample_content_urls: string[] | null
+          social_links: Json | null
+          specialties: string[] | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          bio?: string | null
+          created_at?: string
+          experience_years?: number | null
+          id?: string
+          portfolio_links?: string[] | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          sample_content_urls?: string[] | null
+          social_links?: Json | null
+          specialties?: string[] | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          bio?: string | null
+          created_at?: string
+          experience_years?: number | null
+          id?: string
+          portfolio_links?: string[] | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          sample_content_urls?: string[] | null
+          social_links?: Json | null
+          specialties?: string[] | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       failed_login_attempts: {
         Row: {
           attempt_type: string
@@ -2542,6 +2626,10 @@ export type Database = {
       }
       get_agent_points_summary: {
         Args: { p_agent_id: string }
+        Returns: Json
+      }
+      get_creator_earnings_summary: {
+        Args: { creator_user_id: string }
         Returns: Json
       }
       get_public_profile: {
