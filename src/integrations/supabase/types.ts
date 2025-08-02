@@ -47,6 +47,36 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_recommendation_log: {
+        Row: {
+          context_data: Json | null
+          created_at: string
+          id: string
+          question: string
+          recommendation: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          context_data?: Json | null
+          created_at?: string
+          id?: string
+          question: string
+          recommendation: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          context_data?: Json | null
+          created_at?: string
+          id?: string
+          question?: string
+          recommendation?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       audit_log: {
         Row: {
           id: string
