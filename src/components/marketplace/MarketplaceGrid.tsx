@@ -723,15 +723,16 @@ export const MarketplaceGrid = () => {
           {/* Campaign Services Header */}
           <CampaignServicesHeader />
 
-           {/* Enhanced Search Component */}
+           {/* Search Bar Only */}
           <div className="space-y-6">
-            <EnhancedSearch
-              onSearchChange={setSearchFilters}
-              availableCategories={Array.from(new Set(services.map(service => service.category).filter(Boolean)))}
-              availableTags={Array.from(new Set(services.flatMap(service => service.tags || [])))}
-            />
-            
-            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+              <Input
+                placeholder={t('searchServices')}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
             </div>
           </div>
 
