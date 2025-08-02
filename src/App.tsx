@@ -91,8 +91,8 @@ const App = () => {
             <Route path="/buyer-protection" element={<BuyerProtection />} />
             <Route path="/prohibited-items" element={<ProhibitedItems />} />
             
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
+            {/* Catch-all route MUST be last */}
+            <Route path="*" element={<div style={{ backgroundColor: 'green', color: 'white', padding: '50px', fontSize: '24px' }}>404 NOT FOUND: {window.location.pathname}</div>} />
             </Routes>
           </BrowserRouter>
         </AuthProvider>
