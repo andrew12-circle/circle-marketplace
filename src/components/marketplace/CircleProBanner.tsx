@@ -4,34 +4,36 @@ import { Crown, Sparkles } from "lucide-react";
 
 export const CircleProBanner = () => {
   return (
-    <div className="my-6 sm:my-8">
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 via-purple-600 to-purple-700 p-6 sm:p-8">
+    <div className="my-4">
+      <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-blue-600 via-purple-600 to-purple-700 p-4 sm:p-6">
         {/* Background decorative elements */}
-        <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-white/10 rounded-full blur-xl"></div>
-        <div className="absolute bottom-0 left-0 -mb-8 -ml-8 w-32 h-32 bg-white/5 rounded-full blur-2xl"></div>
+        <div className="absolute top-0 right-0 -mt-2 -mr-2 w-16 h-16 bg-white/10 rounded-full blur-lg"></div>
+        <div className="absolute bottom-0 left-0 -mb-4 -ml-4 w-20 h-20 bg-white/5 rounded-full blur-xl"></div>
         
-        <div className="relative text-center text-white">
-          <div className="flex items-center justify-center gap-2 mb-3">
-            <Crown className="w-6 h-6 text-yellow-300" />
-            <Sparkles className="w-5 h-5 text-yellow-300" />
+        <div className="relative flex flex-col sm:flex-row items-center justify-between text-white gap-4">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1">
+              <Crown className="w-5 h-5 text-yellow-300" />
+              <Sparkles className="w-4 h-4 text-yellow-300" />
+            </div>
+            
+            <div className="text-center sm:text-left">
+              <h3 className="text-lg sm:text-xl font-bold leading-tight">
+                Unlock Your Full Potential
+              </h3>
+              <p className="text-xs sm:text-sm text-white/80 mt-1">
+                Circle Pro: Exclusive pricing + earn points on every campaign
+              </p>
+            </div>
           </div>
-          
-          <h3 className="text-xl sm:text-2xl font-bold mb-2">
-            Unlock Your Full Potential with Circle Pro
-          </h3>
-          
-          <p className="text-sm sm:text-base text-white/90 mb-6 max-w-2xl mx-auto">
-            Get exclusive member pricing, earn Circle Points™ on every campaign, and access 
-            powerful marketing tools to grow your business.
-          </p>
           
           <Button 
             asChild 
             variant="secondary" 
-            className="bg-white text-purple-700 hover:bg-white/90 font-semibold px-6 py-2.5 h-auto"
+            className="bg-white text-purple-700 hover:bg-white/90 font-semibold px-4 py-2 h-auto text-sm whitespace-nowrap"
           >
             <Link to="/pricing">
-              Start Your Free Trial
+              Start Free Trial
             </Link>
           </Button>
         </div>
