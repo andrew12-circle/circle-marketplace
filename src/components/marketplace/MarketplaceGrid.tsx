@@ -294,9 +294,9 @@ export const MarketplaceGrid = () => {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
       
-      // First try to load vendors only - simpler query
+      // Load vendors from the correct table
       const vendorsResponse = await supabase
-        .from('service_providers')
+        .from('vendors')
         .select('*')
         .order('rating', { ascending: false })
         .limit(50);
@@ -336,11 +336,11 @@ export const MarketplaceGrid = () => {
         }
       }));
       
-      // Format vendors data using service_providers table
+      // Format vendors data using vendors table
       const formattedVendors = (vendorsResponse.data || []).map(vendor => ({
         ...vendor,
         id: vendor.id,
-        name: vendor.name || vendor.individual_name || 'Unknown Vendor',
+        name: vendor.name || 'Unknown Vendor',
         description: vendor.description || '',
         logo_url: vendor.logo_url,
         website_url: vendor.website_url,
@@ -356,7 +356,7 @@ export const MarketplaceGrid = () => {
         license_states: vendor.license_states || [],
         latitude: vendor.latitude,
         longitude: vendor.longitude,
-        vendor_type: vendor.provider_type || 'company',
+        vendor_type: vendor.vendor_type || 'company',
         local_representatives: []
       }));
       
