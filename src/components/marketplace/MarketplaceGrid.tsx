@@ -288,49 +288,97 @@ export const MarketplaceGrid = () => {
       setLoading(true);
       setError(null);
       
+      console.log('Loading marketplace data...');
+      
       // Create abort controller for request timeout
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
       
-      // Load services and vendors in parallel for better performance
-      const [servicesResponse, vendorsResponse] = await Promise.all([
-        supabase
+      // First try to load vendors only - simpler query
+      const vendorsResponse = await supabase
+        .from('service_providers')
+        .select('*')
+        .order('rating', { ascending: false })
+        .limit(50);
+
+      console.log('Vendors response:', vendorsResponse);
+
+      // Then try to load services with a fallback approach
+      let servicesResponse;
+      try {
+        servicesResponse = await supabase
           .from('services')
           .select(`
             *,
-            vendor:vendors (
+            vendor:vendor_id (
               name,
               rating,
               review_count,
               is_verified
             )
           `)
-          .order('sort_order', { ascending: true })
-          .order('title', { ascending: true }),
-          
-        supabase
-          .from('vendors')
+          .order('created_at', { ascending: false })
+          .limit(100);
+      } catch (serviceError) {
+        console.warn('Failed to load services with vendor join, trying without join:', serviceError);
+        // Fallback: load services without vendor join
+        servicesResponse = await supabase
+          .from('services')
           .select('*')
-          .order('sort_order', { ascending: true })
-          .order('rating', { ascending: false })
-      ]);
+          .order('created_at', { ascending: false })
+          .limit(100);
+      }
+
+      console.log('Services response:', servicesResponse);
 
       clearTimeout(timeoutId);
 
-      if (servicesResponse.error) throw servicesResponse.error;
-      if (vendorsResponse.error) throw vendorsResponse.error;
+      if (vendorsResponse.error) {
+        console.error('Vendors error:', vendorsResponse.error);
+        throw vendorsResponse.error;
+      }
+      if (servicesResponse.error) {
+        console.error('Services error:', servicesResponse.error);
+        throw servicesResponse.error;
+      }
 
       // Convert the database response to match our interface
       const formattedServices = (servicesResponse.data || []).map(service => ({
         ...service,
         discount_percentage: service.discount_percentage ? String(service.discount_percentage) : undefined,
+        vendor: service.vendor || {
+          name: 'Unknown Vendor',
+          rating: 0,
+          review_count: 0,
+          is_verified: false
+        }
       }));
       
-      // Format vendors data
+      // Format vendors data using service_providers table
       const formattedVendors = (vendorsResponse.data || []).map(vendor => ({
         ...vendor,
+        id: vendor.id,
+        name: vendor.name || vendor.individual_name || 'Unknown Vendor',
+        description: vendor.description || '',
+        logo_url: vendor.logo_url,
+        website_url: vendor.website_url,
+        location: vendor.location,
+        rating: vendor.rating || 0,
+        review_count: vendor.review_count || 0,
+        is_verified: vendor.is_verified || false,
+        co_marketing_agents: vendor.co_marketing_agents || 0,
+        campaigns_funded: vendor.campaigns_funded || 0,
+        service_states: vendor.service_states || [],
+        mls_areas: vendor.mls_areas || [],
+        service_radius_miles: vendor.service_radius_miles,
+        license_states: vendor.license_states || [],
+        latitude: vendor.latitude,
+        longitude: vendor.longitude,
+        vendor_type: vendor.provider_type || 'company',
         local_representatives: []
       }));
+      
+      console.log(`Loaded ${formattedServices.length} services and ${formattedVendors.length} vendors`);
       
       setServices(formattedServices);
       setVendors(formattedVendors);
@@ -344,6 +392,8 @@ export const MarketplaceGrid = () => {
       });
       
     } catch (error) {
+      console.error('Marketplace data loading error:', error);
+      
       // Record failure
       setCircuitBreakerState(prev => {
         const newFailureCount = prev.failureCount + 1;
@@ -362,13 +412,12 @@ export const MarketplaceGrid = () => {
       if (error.name === 'AbortError') {
         setError('Request timed out. Please check your connection and try again.');
       } else {
-        setError('Failed to load marketplace data. Please try again.');
+        setError(`Failed to load marketplace data: ${error.message || 'Unknown error'}`);
       }
       
-      console.error('Marketplace data loading error:', error);
       toast({
         title: "Error loading data",
-        description: "Failed to load marketplace data. Please try again.",
+        description: `Failed to load marketplace data: ${error.message || 'Please try again.'}`,
         variant: "destructive",
       });
     } finally {
