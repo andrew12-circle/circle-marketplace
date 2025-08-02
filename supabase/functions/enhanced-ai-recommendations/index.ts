@@ -43,64 +43,68 @@ serve(async (req) => {
     const marketAnalysis = await analyzeMarketData(supabase);
     console.log('Market analysis completed');
 
-    // Create enhanced prompt with real data
-    const enhancedPrompt = createContextualPrompt(message, userContext, marketAnalysis, context);
-    console.log('Enhanced prompt created');
+    // Create sanitized prompt (no proprietary data to OpenAI)
+    const sanitizedPrompt = createSanitizedPrompt(message, userContext, marketAnalysis, context);
+    
+    // Generate local recommendation based on your data
+    const localRecommendation = generateLocalRecommendation(userContext, marketAnalysis);
+    console.log('Local recommendation generated');
 
-    // Get AI recommendations
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          {
-            role: 'system',
-            content: `You are Circle AI, the intelligent marketplace advisor for real estate professionals. 
-            You have exclusive access to real marketplace data, user behavior patterns, and purchasing analytics.
-            
-            CORE MISSION: Recommend specific services/products for immediate purchase based on:
-            - What similar agents in their market are buying
-            - Services that deliver proven ROI in their situation
-            - Trending solutions in their specialty/location
-            
-            RESPONSE FORMAT:
-            1. Start with a data-driven insight about their situation
-            2. Recommend 2-3 specific marketplace services with direct purchase links
-            3. Explain why others in similar situations bought these
-            4. Include quick ROI expectations
-            
-            Keep responses conversational but focused on actionable marketplace purchases.
-            Use phrases like "I see agents like you are buying..." or "Based on your recent activity..."
-            Always include service IDs for direct linking when recommending specific services.`
-          },
-          {
-            role: 'user',
-            content: enhancedPrompt
-          }
-        ],
-        temperature: 0.7,
-        max_tokens: 1000,
-      }),
-    });
+    // Enhanced prompt created
 
-    const aiResponse = await response.json();
-    console.log('OpenAI response received');
+    
+    let finalRecommendation;
+    
+    // If we have strong local data, use it primarily
+    if (localRecommendation.confidence > 0.7) {
+      finalRecommendation = localRecommendation.recommendation;
+      console.log('Using local recommendation due to high confidence');
+    } else {
+      // Only send generic, non-proprietary data to OpenAI for general advice
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${openAIApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          messages: [
+            {
+              role: 'system',
+              content: `You are a business advisor for real estate professionals. 
+              Provide general business growth advice based on the sanitized data provided.
+              Do not reference specific services, vendors, or marketplace details.
+              Keep advice generic and focused on business strategy, not specific purchases.`
+            },
+            {
+              role: 'user',
+              content: sanitizedPrompt
+            }
+          ],
+          temperature: 0.7,
+          max_tokens: 500,
+        }),
+      });
 
-    if (!response.ok) {
-      throw new Error(`OpenAI API error: ${aiResponse.error?.message || 'Unknown error'}`);
+      const aiResponse = await response.json();
+      console.log('OpenAI response received (sanitized)');
+
+      if (!response.ok) {
+        throw new Error(`OpenAI API error: ${aiResponse.error?.message || 'Unknown error'}`);
+      }
+
+      const genericAdvice = aiResponse.choices[0].message.content;
+      
+      // Combine generic advice with local marketplace recommendations
+      finalRecommendation = combineRecommendations(genericAdvice, localRecommendation.recommendation);
     }
 
-    const recommendation = aiResponse.choices[0].message.content;
-
-    // Log the recommendation for analytics
-    await logRecommendation(supabase, userId, message, recommendation, userContext);
+    // Log the recommendation for analytics (keeping your data local)
+    await logRecommendation(supabase, userId, message, finalRecommendation, userContext);
 
     return new Response(JSON.stringify({ 
-      recommendation,
+      recommendation: finalRecommendation,
       context: userContext,
       insights: marketAnalysis
     }), {
@@ -463,4 +467,91 @@ async function logRecommendation(supabase: any, userId: string, question: string
     console.error('Error logging recommendation:', error);
     // Don't throw - logging shouldn't break the main flow
   }
+}
+
+function createSanitizedPrompt(userMessage: string, userContext: any, marketAnalysis: any, additionalContext: any) {
+  // Only send generic, non-identifying data to OpenAI
+  let prompt = `User Question: "${userMessage}"\n\n`;
+  
+  prompt += `GENERIC USER PROFILE:\n`;
+  prompt += `- Experience Level: ${userContext.profile?.years_experience ? 
+    (userContext.profile.years_experience > 5 ? 'Experienced' : 'New') : 'Not specified'}\n`;
+  prompt += `- Business Focus: ${userContext.profile?.vendor_enabled ? 'Service Provider' : 'Service Buyer'}\n`;
+  prompt += `- General Location: ${userContext.profile?.state ? 'United States' : 'Not specified'}\n\n`;
+  
+  prompt += `BEHAVIOR PATTERNS:\n`;
+  prompt += `- Services Saved: ${userContext.totalSavedServices}\n`;
+  prompt += `- General Categories of Interest: ${userContext.uniqueCategories.length} different types\n`;
+  prompt += `- Activity Level: ${userContext.recentViews?.length || 0 > 10 ? 'High' : 'Moderate'}\n\n`;
+  
+  prompt += `MARKET CONTEXT:\n`;
+  prompt += `- Total Market Categories: ${Object.keys(marketAnalysis.categoryTrends || {}).length}\n`;
+  prompt += `- Market Activity Level: ${marketAnalysis.marketActivity > 100 ? 'High' : 'Moderate'}\n\n`;
+  
+  prompt += `Please provide general business growth advice for this profile type. Do not reference specific services or vendors.`;
+  
+  return prompt;
+}
+
+function generateLocalRecommendation(userContext: any, marketAnalysis: any) {
+  const { profile, savedServices, similarUserPurchases, trendingInCategories, purchasingPower } = userContext;
+  
+  let recommendation = "";
+  let confidence = 0;
+  
+  // Start with personalized insight
+  if (profile?.city && profile?.state) {
+    recommendation += `Based on agents in ${profile.city}, ${profile.state} `;
+    confidence += 0.2;
+  }
+  
+  // Add trending insights
+  if (trendingInCategories?.length > 0) {
+    const topTrending = trendingInCategories[0];
+    recommendation += `I see ${topTrending.services?.category} services are trending in your market. `;
+    confidence += 0.3;
+  }
+  
+  // Add similar user purchase data
+  if (similarUserPurchases?.length > 0) {
+    const topPurchase = similarUserPurchases[0];
+    recommendation += `\n\n🔥 **What similar agents are buying:**\n`;
+    recommendation += `• **${topPurchase.services?.title}** - $${topPurchase.services?.retail_price}\n`;
+    recommendation += `  Rating: ${topPurchase.services?.rating}/5 | `;
+    recommendation += `Provider: ${topPurchase.services?.service_providers?.name}\n`;
+    recommendation += `  *[Service ID: ${topPurchase.services?.id} - Click to view]*\n`;
+    confidence += 0.4;
+  }
+  
+  // Add saved services ready for purchase
+  if (savedServices?.length > 0) {
+    recommendation += `\n\n💾 **Your saved services ready to purchase:**\n`;
+    savedServices.slice(0, 2).forEach((service: any, index: number) => {
+      recommendation += `${index + 1}. **${service.services?.title}** - $${service.services?.retail_price}\n`;
+      recommendation += `   *[Service ID: ${service.services?.id} - Ready to buy]*\n`;
+    });
+    confidence += 0.3;
+  }
+  
+  // Add budget context
+  if (purchasingPower.total > 0) {
+    recommendation += `\n\n💰 **Your purchasing power:** $${purchasingPower.total} available`;
+    if (purchasingPower.activeAllocations > 0) {
+      recommendation += ` across ${purchasingPower.activeAllocations} vendor partnerships`;
+    }
+    confidence += 0.2;
+  }
+  
+  // Fallback if no specific data
+  if (confidence < 0.3) {
+    recommendation = `I'm analyzing your marketplace activity to provide personalized recommendations. `;
+    recommendation += `Save some services you're interested in, and I'll show you what similar agents in your market are buying.`;
+    confidence = 0.5; // Medium confidence for fallback
+  }
+  
+  return { recommendation, confidence };
+}
+
+function combineRecommendations(genericAdvice: string, localRecommendation: string) {
+  return `${localRecommendation}\n\n📈 **Strategic insight:** ${genericAdvice}`;
 }
