@@ -3298,13 +3298,6 @@ export type Database = {
         Args: { p_vendor_id: string }
         Returns: Json
       }
-      get_visible_agent_playbooks: {
-        Args: { viewer_user_id?: string }
-        Returns: {
-          content_id: string
-          distance_miles: number
-        }[]
-      }
       increment_content_plays: {
         Args: { content_uuid: string }
         Returns: undefined
