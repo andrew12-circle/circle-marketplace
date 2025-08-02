@@ -55,9 +55,9 @@ const App = () => {
             <Route path="/" element={<Index />} />
             <Route path="/academy" element={<Academy />} />
             <Route path="/command-center" element={
-              <div>
-                <h1>Debug: Command Center Route Hit!</h1>
-                <CommandCenterTest />
+              <div style={{ padding: '20px', backgroundColor: 'red', color: 'white', minHeight: '100vh' }}>
+                <h1 style={{ fontSize: '48px' }}>COMMAND CENTER TEST PAGE</h1>
+                <p style={{ fontSize: '24px' }}>If you can see this, routing works!</p>
               </div>
             } />
             <Route path="/auth" element={<Auth />} />
