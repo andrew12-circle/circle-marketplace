@@ -1740,7 +1740,9 @@ export type Database = {
           is_admin: boolean | null
           is_creator: boolean | null
           is_pro_member: boolean | null
+          latitude: number | null
           location: string | null
+          longitude: number | null
           phone: string | null
           revenue_share_percentage: number | null
           specialties: string[] | null
@@ -1776,7 +1778,9 @@ export type Database = {
           is_admin?: boolean | null
           is_creator?: boolean | null
           is_pro_member?: boolean | null
+          latitude?: number | null
           location?: string | null
+          longitude?: number | null
           phone?: string | null
           revenue_share_percentage?: number | null
           specialties?: string[] | null
@@ -1812,7 +1816,9 @@ export type Database = {
           is_admin?: boolean | null
           is_creator?: boolean | null
           is_pro_member?: boolean | null
+          latitude?: number | null
           location?: string | null
+          longitude?: number | null
           phone?: string | null
           revenue_share_percentage?: number | null
           specialties?: string[] | null
