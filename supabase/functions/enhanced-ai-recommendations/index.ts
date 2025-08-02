@@ -23,6 +23,18 @@ serve(async (req) => {
 
     console.log('Received request:', { message, userId, context });
 
+    // Check if OpenAI API key is available
+    if (!openAIApiKey) {
+      console.error('OpenAI API key is not set');
+      return new Response(JSON.stringify({ 
+        error: 'OpenAI API key not configured',
+        recommendation: "I'm currently unable to access AI services. Please try again later or contact support."
+      }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     // Get comprehensive user context
     const userContext = await gatherUserContext(supabase, userId);
     console.log('User context gathered:', userContext);

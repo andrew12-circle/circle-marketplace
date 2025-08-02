@@ -105,13 +105,24 @@ export const AskCircleAIModal = ({ open, onOpenChange }: AskCircleAIModalProps) 
       return;
     }
 
+    if (!user?.id) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to get personalized recommendations",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       setLoading(true);
+      
+      console.log('Getting contextual recommendation for:', prompt);
       
       const { data, error } = await supabase.functions.invoke('enhanced-ai-recommendations', {
         body: {
           message: prompt.trim(),
-          userId: user?.id,
+          userId: user.id,
           context: {
             currentPage: "ai_modal",
             timestamp: new Date().toISOString(),
@@ -120,9 +131,12 @@ export const AskCircleAIModal = ({ open, onOpenChange }: AskCircleAIModalProps) 
         }
       });
 
+      console.log('Enhanced AI response:', { data, error });
+
       if (error) {
         console.error('Error getting contextual recommendation:', error);
         // Fallback to original service
+        console.log('Falling back to original AI service');
         const fallbackData = await supabase.functions.invoke('ask-circle-ai', {
           body: { 
             type: 'quick',
@@ -130,15 +144,25 @@ export const AskCircleAIModal = ({ open, onOpenChange }: AskCircleAIModalProps) 
           },
         });
         
-        if (fallbackData.error) throw fallbackData.error;
+        if (fallbackData.error) {
+          throw new Error('Both AI services failed');
+        }
         setRecommendation(fallbackData.data.recommendation);
+        toast({
+          title: "Using Standard AI",
+          description: "Enhanced AI temporarily unavailable, using standard recommendations",
+          variant: "default",
+        });
       } else if (data?.recommendation) {
         setContextualResponse(data.recommendation);
+      } else {
+        throw new Error('No recommendation received from AI service');
       }
     } catch (error) {
+      console.error('All AI services failed:', error);
       toast({
-        title: "Error",
-        description: "Failed to get AI recommendation. Please try again.",
+        title: "AI Service Error",
+        description: "Unable to get AI recommendation. Please try again later.",
         variant: "destructive",
       });
     } finally {
