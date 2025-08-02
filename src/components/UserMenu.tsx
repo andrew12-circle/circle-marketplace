@@ -15,7 +15,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 
 import { supabase } from "@/integrations/supabase/client";
-import { User, Settings, ShoppingBag, Crown, LogOut, Loader2, Heart, BarChart3, Shield, Building2, DollarSign, Store, Briefcase, Package } from "lucide-react";
+import { User, Settings, ShoppingBag, Crown, LogOut, Loader2, Heart, BarChart3, Shield, Building2, DollarSign, Store, Briefcase, Package, Brain } from "lucide-react";
 import { CustomerPortalButton } from "@/components/marketplace/CustomerPortalButton";
 
 
@@ -204,6 +204,13 @@ export const UserMenu = () => {
         
         <DropdownMenuSeparator />
         
+        {/* AI Dashboard Link */}
+        <DropdownMenuItem asChild>
+          <Link to="/ai-dashboard" className="flex items-center">
+            <Brain className="mr-2 h-4 w-4 text-primary" />
+            <span>AI Concierge</span>
+          </Link>
+        </DropdownMenuItem>
         
         <DropdownMenuItem asChild>
           <Link to="/profile-settings" className="flex items-center">

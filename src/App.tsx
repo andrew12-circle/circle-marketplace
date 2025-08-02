@@ -24,6 +24,7 @@ import { VendorRegistration } from "./pages/VendorRegistration";
 import AnalyticsDashboard from "./pages/AnalyticsDashboard";
 import SupportDashboard from "./pages/SupportDashboard";
 import AdvancedFeaturesDashboard from "./pages/AdvancedFeaturesDashboard";
+import AIDashboard from "./pages/AIDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 import { TermsOfService } from "./pages/legal/TermsOfService";
@@ -62,6 +63,7 @@ const App = () => (
             <Route path="/analytics" element={<AnalyticsDashboard />} />
             <Route path="/support" element={<SupportDashboard />} />
             <Route path="/advanced-features" element={<AdvancedFeaturesDashboard />} />
+            <Route path="/ai-dashboard" element={<AIDashboard />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/accounting" element={<AdminAccounting />} />
             
