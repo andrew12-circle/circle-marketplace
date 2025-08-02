@@ -712,13 +712,13 @@ export const MarketplaceGrid = () => {
             </p>
           </div>
 
-          {/* AI Concierge Banner - Show for all users */}
-          <AIConciergeBanner />
-
           {/* Circle Pro Banner - Show for non-signed-in users and non-pro members */}
           {(!user || !profile?.is_pro_member) && (
             <CircleProBanner />
           )}
+
+          {/* AI Concierge Banner - Show for all users */}
+          <AIConciergeBanner />
 
           {/* Campaign Services Header */}
           <CampaignServicesHeader />
