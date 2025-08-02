@@ -2,8 +2,9 @@ import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Brain, TrendingUp, Target, ArrowRight, Lightbulb, Users } from "lucide-react";
+import { Brain, TrendingUp, Target, ArrowRight, Lightbulb, Users, MessageCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { AskCircleAIModal } from "./AskCircleAIModal";
 
 interface BusinessInsight {
   type: 'performance' | 'opportunity' | 'recommendation';
@@ -19,6 +20,7 @@ export const AIConciergeBanner = () => {
   const { user, profile } = useAuth();
   const [currentInsight, setCurrentInsight] = useState<BusinessInsight | null>(null);
   const [currentTime] = useState(new Date());
+  const [isAIModalOpen, setIsAIModalOpen] = useState(false);
 
   // Mock insights based on agent performance data
   const businessInsights: BusinessInsight[] = [
@@ -111,9 +113,19 @@ export const AIConciergeBanner = () => {
                 </Badge>
               </div>
               
-              <p className="text-muted-foreground mb-4">
-                How can I help you grow your business today? Here's a personalized insight based on market data:
-              </p>
+              <div className="flex items-center justify-between mb-4">
+                <p className="text-muted-foreground">
+                  How can I help you grow your business today? Here's a personalized insight based on market data:
+                </p>
+                <Button 
+                  onClick={() => setIsAIModalOpen(true)}
+                  size="sm" 
+                  className="bg-primary hover:bg-primary/90 flex items-center gap-2"
+                >
+                  <MessageCircle className="h-4 w-4" />
+                  Start Conversation
+                </Button>
+              </div>
 
               {currentInsight && (
                 <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-lg p-4 mb-4">
@@ -165,6 +177,11 @@ export const AIConciergeBanner = () => {
           </div>
         </CardContent>
       </Card>
+      
+      <AskCircleAIModal 
+        open={isAIModalOpen} 
+        onOpenChange={setIsAIModalOpen} 
+      />
     </div>
   );
 };
