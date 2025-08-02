@@ -58,6 +58,7 @@ const mockCourses = [
     isPro: false,
     rating: 4.9,
     progress: 25,
+    isEnrolled: true,
   },
   {
     id: "2",
@@ -68,6 +69,7 @@ const mockCourses = [
     isPro: true,
     rating: 4.8,
     progress: 75,
+    isEnrolled: true,
   },
   {
     id: "3",
@@ -87,6 +89,7 @@ const mockCourses = [
     isPro: false,
     rating: 4.7,
     progress: 100,
+    isEnrolled: true,
   },
   {
     id: "5",
@@ -96,6 +99,7 @@ const mockCourses = [
     thumbnail: "/placeholder.svg",
     isPro: true,
     rating: 4.6,
+    isEnrolled: false,
   },
   {
     id: "6",
@@ -106,6 +110,7 @@ const mockCourses = [
     isPro: false,
     rating: 4.8,
     progress: 50,
+    isEnrolled: true,
   },
 ];
 

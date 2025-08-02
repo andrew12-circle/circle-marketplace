@@ -91,8 +91,8 @@ export const CourseCard = ({
 
   // Enhanced click handler for better course viewing
   const handleCourseClick = () => {
-    if (canAccess && course.isEnrolled) {
-      // Open course viewer instead of just continuing
+    if (canAccess && (course.isEnrolled || course.progress !== undefined)) {
+      // Open course viewer for enrolled courses or those with progress
       onContinue?.(course.id);
     } else if (canAccess) {
       handleEnroll();
