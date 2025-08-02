@@ -304,6 +304,8 @@ export const MarketplaceGrid = () => {
         .limit(50);
 
       console.log('Vendors response:', vendorsResponse);
+      console.log('Vendors data:', vendorsResponse.data);
+      console.log('Vendors error:', vendorsResponse.error);
 
       // Load services without vendor join for now, then get vendors separately
       const servicesResponse = await supabase
@@ -314,6 +316,8 @@ export const MarketplaceGrid = () => {
         .limit(100);
 
       console.log('Services response:', servicesResponse);
+      console.log('Services data:', servicesResponse.data);
+      console.log('Services error:', servicesResponse.error);
 
       clearTimeout(timeoutId);
 
@@ -405,6 +409,7 @@ export const MarketplaceGrid = () => {
         variant: "destructive",
       });
     } finally {
+      console.log('Setting loading to false');
       setLoading(false);
     }
   }, [CIRCUIT_BREAKER_CONFIG.failureThreshold, CIRCUIT_BREAKER_CONFIG.timeout, circuitBreakerState.isOpen, circuitBreakerState.nextAttempt, toast]);
