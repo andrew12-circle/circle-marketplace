@@ -13,6 +13,7 @@ import { useNavigate } from "react-router-dom";
 import { useServiceAnalytics } from "@/hooks/useServiceAnalytics";
 import { useCurrency } from "@/hooks/useCurrency";
 import { extractAndValidatePrice, validateCartPricing, safeFormatPrice } from "@/utils/priceValidation";
+import { supabase } from "@/integrations/supabase/client";
 import { ConsultationFlow } from "./ConsultationFlow";
 import { ServiceFunnelModal } from "./ServiceFunnelModal";
 import { VendorSelectionModal } from "./VendorSelectionModal";
@@ -45,6 +46,7 @@ interface Service {
   respa_category?: string;
   respa_notes?: string;
   vendor: {
+    id?: string;
     name: string;
     rating: number;
     review_count: number;
@@ -70,7 +72,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
   const [isDirectPurchaseModalOpen, setIsDirectPurchaseModalOpen] = useState(false);
   const { toast } = useToast();
   const { addToCart } = useCart();
-  const { profile } = useAuth();
+  const { profile, user } = useAuth();
   const { trackServiceView } = useServiceAnalytics();
   const navigate = useNavigate();
   const { formatPrice } = useCurrency();
@@ -566,6 +568,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
         isOpen={isPricingChoiceModalOpen}
         onClose={() => setIsPricingChoiceModalOpen(false)}
         service={{
+          id: service.id,
           title: service.title,
           pro_price: service.pro_price,
           retail_price: service.retail_price,
@@ -581,22 +584,60 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
           setIsPricingChoiceModalOpen(false);
           setIsVendorSelectionModalOpen(true);
         }}
-        onChooseAgentPoints={() => {
+        onChooseAgentPoints={async () => {
           setIsPricingChoiceModalOpen(false);
-          // Add to cart with agent points payment method
-          addToCart({
-            id: service.id,
-            title: service.title,
-            price: parseFloat(service.pro_price?.replace(/[^\d.]/g, '') || '0'),
-            image_url: service.image_url,
-            vendor: service.vendor?.name || 'Unknown Vendor',
-            type: 'service',
-            description: `Paid with agent points - ${service.description || ''}`,
-          });
-          toast({
-            title: "Added to Cart",
-            description: "Service added to cart with agent points payment",
-          });
+          
+          try {
+            // Call the agent points purchase edge function
+            const { data, error } = await supabase.functions.invoke('process-agent-points-purchase', {
+              body: {
+                service_id: service.id,
+                agent_id: user?.id,
+                vendor_id: service.vendor?.id,
+                total_amount: parseFloat(service.pro_price?.replace(/[^\d.]/g, '') || '0')
+              }
+            });
+
+            if (error) {
+              throw error;
+            }
+
+            if (data.success) {
+              toast({
+                title: "Purchase Successful! 🎉",
+                description: `Purchased ${service.title} using ${data.respa_compliance.respa_points_used + data.respa_compliance.non_respa_points_used} agent points`,
+              });
+              
+              // Show RESPA compliance details if relevant
+              if (data.respa_compliance.respa_points_used > 0) {
+                toast({
+                  title: "RESPA Compliance Applied",
+                  description: `RESPA points: ${data.respa_compliance.respa_points_used}, Non-RESPA: ${data.respa_compliance.non_respa_points_used}`,
+                  variant: "default",
+                });
+              }
+            } else {
+              throw new Error(data.error || 'Purchase failed');
+            }
+          } catch (error) {
+            console.error('Agent points purchase error:', error);
+            toast({
+              title: "Purchase Failed",
+              description: error.message || "Failed to complete purchase with agent points",
+              variant: "destructive",
+            });
+            
+            // Fallback: add to cart for manual processing
+            addToCart({
+              id: service.id,
+              title: service.title,
+              price: parseFloat(service.pro_price?.replace(/[^\d.]/g, '') || '0'),
+              image_url: service.image_url,
+              vendor: service.vendor?.name || 'Unknown Vendor',
+              type: 'service',
+              description: `Agent points purchase failed - ${error.message}`,
+            });
+          }
         }}
       />
 
