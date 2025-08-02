@@ -486,7 +486,7 @@ export const CreatorPaymentSetup = () => {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <strong>Revenue Share:</strong> 75%
+                <strong>Revenue Share:</strong> 25%
               </div>
               <div>
                 <strong>Minimum Payout:</strong> ${paymentStatus.minimum_payout_amount}

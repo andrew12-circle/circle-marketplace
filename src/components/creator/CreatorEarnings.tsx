@@ -162,9 +162,9 @@ export const CreatorEarnings = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {formatCurrency(earningsData?.total_revenue ? earningsData.total_revenue * 0.75 : 0)}
+              {formatCurrency(earningsData?.total_revenue ? earningsData.total_revenue * 0.25 : 0)}
             </div>
-            <p className="text-xs text-muted-foreground">75% revenue share</p>
+            <p className="text-xs text-muted-foreground">25% revenue share</p>
           </CardContent>
         </Card>
 
@@ -233,16 +233,16 @@ export const CreatorEarnings = () => {
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm">Platform Fee (25%)</span>
+                  <span className="text-sm">Platform Fee (75%)</span>
                   <span className="font-medium text-red-600">
-                    -{formatCurrency((earningsData?.total_revenue || 0) * 0.25)}
+                    -{formatCurrency((earningsData?.total_revenue || 0) * 0.75)}
                   </span>
                 </div>
                 <div className="border-t pt-2">
                   <div className="flex justify-between items-center">
-                    <span className="font-medium">Your Earnings (75%)</span>
+                    <span className="font-medium">Your Earnings (25%)</span>
                     <span className="font-bold text-green-600">
-                      {formatCurrency((earningsData?.total_revenue || 0) * 0.75)}
+                      {formatCurrency((earningsData?.total_revenue || 0) * 0.25)}
                     </span>
                   </div>
                 </div>
@@ -313,7 +313,7 @@ export const CreatorEarnings = () => {
                       </div>
                       <div className="text-right">
                         <div className="font-medium text-green-600">
-                          {formatCurrency(content.total_revenue * 0.75)}
+                          {formatCurrency(content.total_revenue * 0.25)}
                         </div>
                         <div className="text-sm text-muted-foreground">
                           {content.total_plays.toLocaleString()} plays
@@ -378,7 +378,7 @@ export const CreatorEarnings = () => {
                 <div className="flex justify-between items-center">
                   <span>Available for payout:</span>
                   <span className="font-bold text-green-600">
-                    {formatCurrency((earningsData?.total_revenue || 0) * 0.75)}
+                    {formatCurrency((earningsData?.total_revenue || 0) * 0.25)}
                   </span>
                 </div>
                 <p className="text-sm text-muted-foreground mt-2">

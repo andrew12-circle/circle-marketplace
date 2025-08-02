@@ -382,7 +382,7 @@ const CreatorWelcome = ({ onNext }: any) => (
     <div className="bg-muted p-4 rounded-lg">
       <h4 className="font-medium mb-2">What you'll get:</h4>
       <ul className="text-sm text-muted-foreground space-y-1">
-        <li>• 75% revenue share on all content sales</li>
+        <li>• 25% revenue share on all content sales</li>
         <li>• Professional creator dashboard</li>
         <li>• Analytics and insights</li>
         <li>• Direct fan engagement tools</li>
