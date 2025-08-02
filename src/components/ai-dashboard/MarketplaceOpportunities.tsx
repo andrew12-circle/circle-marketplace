@@ -108,7 +108,10 @@ export const MarketplaceOpportunities = () => {
                     <DollarSign className="h-4 w-4 text-green-500" />
                     <span className="font-bold text-lg">${opportunity.price}</span>
                   </div>
-                  <Button size="sm" className="group-hover:bg-primary/90">
+                  <Button size="sm" className="group-hover:bg-primary/90" onClick={() => {
+                    // TODO: Implement booking flow
+                    console.log('Booking opportunity:', opportunity.id);
+                  }}>
                     Book Now
                     <ArrowUpRight className="h-3 w-3 ml-1" />
                   </Button>
@@ -120,7 +123,10 @@ export const MarketplaceOpportunities = () => {
       </div>
       
       <div className="mt-8 text-center">
-        <Button variant="outline" size="lg" className="bg-background/50 hover:bg-background">
+        <Button variant="outline" size="lg" className="bg-background/50 hover:bg-background" onClick={() => {
+          // TODO: Navigate to marketplace with filter applied
+          console.log('View all opportunities clicked');
+        }}>
           View All Opportunities
           <ArrowUpRight className="h-4 w-4 ml-2" />
         </Button>

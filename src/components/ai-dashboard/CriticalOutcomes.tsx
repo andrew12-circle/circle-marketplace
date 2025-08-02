@@ -111,7 +111,10 @@ export const CriticalOutcomes = () => {
                     </div>
                   </div>
                   
-                  <Button className="shrink-0 bg-primary hover:bg-primary/90">
+                  <Button className="shrink-0 bg-primary hover:bg-primary/90" onClick={() => {
+                    // TODO: Implement outcome action
+                    console.log('Taking action on outcome:', outcome.id);
+                  }}>
                     {outcome.cta}
                   </Button>
                 </div>
