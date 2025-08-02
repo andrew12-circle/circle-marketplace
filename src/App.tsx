@@ -35,7 +35,7 @@ import { CookiePolicy } from "./pages/legal/CookiePolicy";
 import { SellerAgreement } from "./pages/legal/SellerAgreement";
 import { BuyerProtection } from "./pages/legal/BuyerProtection";
 import { ProhibitedItems } from "./pages/legal/ProhibitedItems";
-import { CommandCenter } from "./pages/CommandCenter";
+import CommandCenter from "./pages/CommandCenter";
 import { CommandCenterTest } from "./pages/CommandCenterTest";
 import { Academy } from "./pages/Academy";
 
