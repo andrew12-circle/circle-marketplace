@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useState, forwardRef } from "react";
 import { Button } from "@/components/ui/button";
 import { CreditCard } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 
-export const CustomerPortalButton = () => {
+export const CustomerPortalButton = forwardRef<HTMLDivElement>((props, ref) => {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
@@ -50,11 +50,13 @@ export const CustomerPortalButton = () => {
 
   return (
     <div 
-      className="flex items-center"
+      ref={ref}
+      className="flex items-center cursor-pointer"
       onClick={handleManageSubscription}
+      {...props}
     >
       <CreditCard className="mr-2 h-4 w-4" />
       <span>{loading ? "Loading..." : "Manage Subscription"}</span>
     </div>
   );
-};
+});
