@@ -2370,6 +2370,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      check_admin_operation_rate_limit_strict: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       check_and_update_lockout: {
         Args: { p_identifier: string; p_attempt_type: string }
         Returns: Json
@@ -2481,9 +2485,17 @@ export type Database = {
         Args: { session_token: string }
         Returns: boolean
       }
+      validate_admin_session_context: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       validate_password_strength: {
         Args: { password: string }
         Returns: Json
+      }
+      validate_secure_admin_operation: {
+        Args: { operation_type: string; target_data?: Json }
+        Returns: boolean
       }
       verify_backup_integrity: {
         Args: { backup_id_param: string }
