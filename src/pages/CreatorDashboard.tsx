@@ -219,7 +219,10 @@ export const CreatorDashboard = () => {
                 size="lg" 
                 variant="outline" 
                 className="gap-2 border-2 hover:bg-muted/50 transition-all duration-300"
-                onClick={() => navigate('/analytics')}
+                onClick={() => {
+                  console.log('View Analytics button clicked, navigating to /analytics');
+                  navigate('/analytics');
+                }}
               >
                 <BarChart3 className="w-5 h-5" />
                 View Analytics
