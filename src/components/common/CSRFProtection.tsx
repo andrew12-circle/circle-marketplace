@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useSecurityMonitoring } from '@/components/security/SecurityEnhancementSystem';
 
 interface CSRFContextType {
   token: string | null;
@@ -21,6 +22,7 @@ export const useCSRF = () => {
 
 export const CSRFProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [token, setToken] = useState<string | null>(null);
+  const { logSecurityEvent } = useSecurityMonitoring();
 
   const generateToken = () => {
     const array = new Uint8Array(32);
@@ -35,22 +37,11 @@ export const CSRFProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Store token in session storage for validation
     sessionStorage.setItem('csrf_token', newToken);
     
-    try {
-      // Log CSRF token generation for security monitoring
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        await supabase.from('security_events').insert({
-          event_type: 'csrf_token_generated',
-          user_id: user.id,
-          event_data: {
-            timestamp: new Date().toISOString(),
-            user_agent: navigator.userAgent
-          }
-        });
-      }
-    } catch (error) {
-      console.error('Failed to log CSRF token generation:', error);
-    }
+    // Log CSRF token generation using enhanced security system
+    await logSecurityEvent('csrf_token_generated', {
+      token_length: newToken.length,
+      generation_method: 'crypto.getRandomValues'
+    });
   };
 
   useEffect(() => {

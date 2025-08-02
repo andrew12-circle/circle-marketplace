@@ -7,6 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { CSRFProvider } from "@/components/common/CSRFProtection";
 import { SecurityHeaders } from "@/components/common/SecurityHeaders";
 import { EnhancedSecurityHeaders } from "@/components/security/EnhancedSecurityHeaders";
+import { SecurityStatusIndicator } from "@/components/security/SecurityEnhancementSystem";
 import Index from "./pages/Index";
 import { Auth } from "./pages/Auth";
 import { OrderHistory } from "./pages/OrderHistory";
@@ -48,8 +49,8 @@ const App = () => {
         <AuthProvider>
           <Toaster />
           <Sonner />
-          <div style={{ padding: '20px', backgroundColor: 'blue', color: 'white' }}>
-            <p>Current URL: {window.location.pathname}</p>
+          <div className="fixed top-4 right-4 z-50">
+            <SecurityStatusIndicator />
           </div>
           <BrowserRouter>
             <SecurityHeaders />
@@ -57,13 +58,7 @@ const App = () => {
             <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/academy" element={<Academy />} />
-            <Route path="/command-center" element={
-              <div style={{ padding: '20px', backgroundColor: 'red', color: 'white', minHeight: '100vh', position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999 }}>
-                <h1 style={{ fontSize: '48px' }}>COMMAND CENTER IS WORKING!</h1>
-                <p style={{ fontSize: '24px' }}>URL: {window.location.pathname}</p>
-                <p style={{ fontSize: '24px' }}>Time: {new Date().toISOString()}</p>
-              </div>
-            } />
+            <Route path="/command-center" element={<CommandCenter />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/orders" element={<OrderHistory />} />
             <Route path="/pricing" element={<Pricing />} />
@@ -92,7 +87,7 @@ const App = () => {
             <Route path="/prohibited-items" element={<ProhibitedItems />} />
             
             {/* Catch-all route MUST be last */}
-            <Route path="*" element={<div style={{ backgroundColor: 'green', color: 'white', padding: '50px', fontSize: '24px' }}>404 NOT FOUND: {window.location.pathname}</div>} />
+            <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
         </AuthProvider>

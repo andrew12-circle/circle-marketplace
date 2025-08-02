@@ -2398,6 +2398,10 @@ export type Database = {
         Args: { p_identifier: string; p_attempt_type: string }
         Returns: Json
       }
+      check_security_operation_rate_limit: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       cleanup_old_security_events: {
         Args: Record<PropertyKey, never>
         Returns: undefined
@@ -2531,12 +2535,20 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      validate_and_sanitize_text_input: {
+        Args: { input_text: string }
+        Returns: string
+      }
       validate_password_strength: {
         Args: { password: string }
         Returns: Json
       }
       validate_secure_admin_operation: {
         Args: { operation_type: string; target_data?: Json }
+        Returns: boolean
+      }
+      validate_session_context: {
+        Args: Record<PropertyKey, never>
         Returns: boolean
       }
       verify_admin_operation_request: {
@@ -2549,6 +2561,10 @@ export type Database = {
       }
       verify_backup_integrity: {
         Args: { backup_id_param: string }
+        Returns: boolean
+      }
+      verify_critical_data_integrity: {
+        Args: Record<PropertyKey, never>
         Returns: boolean
       }
     }
