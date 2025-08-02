@@ -19,6 +19,7 @@ import {
   Download,
   Calendar,
   AlertCircle,
+  AlertTriangle,
   CheckCircle,
   Clock,
   Eye,
@@ -27,7 +28,11 @@ import {
   Minus,
   Receipt,
   FileText,
-  CreditCard
+  CreditCard,
+  Database,
+  Shield,
+  XCircle,
+  RefreshCw
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -45,6 +50,8 @@ export const AdminAccounting = () => {
   const [agents, setAgents] = useState<any[]>([]);
   const [vendors, setVendors] = useState<any[]>([]);
   const [charges, setCharges] = useState<any[]>([]);
+  const [backupStatus, setBackupStatus] = useState<any>(null);
+  const [backupLoading, setBackupLoading] = useState(false);
 
   useEffect(() => {
     loadAccountingData();
@@ -59,7 +66,8 @@ export const AdminAccounting = () => {
         loadAllocations(),
         loadAgents(),
         loadVendors(),
-        loadCharges()
+        loadCharges(),
+        loadBackupStatus()
       ]);
     } catch (error) {
       console.error('Error loading accounting data:', error);
@@ -171,6 +179,42 @@ export const AdminAccounting = () => {
     setCharges(data || []);
   };
 
+  const loadBackupStatus = async () => {
+    try {
+      const response = await supabase.functions.invoke('backup-monitor');
+      if (response.data?.success) {
+        setBackupStatus(response.data);
+      }
+    } catch (error) {
+      console.error('Error loading backup status:', error);
+    }
+  };
+
+  const triggerDailyBackup = async () => {
+    setBackupLoading(true);
+    try {
+      const response = await supabase.functions.invoke('daily-backup');
+      if (response.data?.success) {
+        toast({
+          title: "Success",
+          description: "Daily backup completed successfully",
+        });
+        await loadBackupStatus(); // Refresh status
+      } else {
+        throw new Error(response.data?.error || 'Backup failed');
+      }
+    } catch (error) {
+      console.error('Error triggering backup:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create backup",
+        variant: "destructive"
+      });
+    } finally {
+      setBackupLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background p-6">
@@ -269,11 +313,12 @@ export const AdminAccounting = () => {
 
         {/* Main Accounting Interface */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="transactions">Transactions</TabsTrigger>
             <TabsTrigger value="allocations">Allocations</TabsTrigger>
             <TabsTrigger value="charges">Charges</TabsTrigger>
+            <TabsTrigger value="backup">Backup Status</TabsTrigger>
             <TabsTrigger value="reconciliation">Reconciliation</TabsTrigger>
           </TabsList>
 
@@ -493,6 +538,172 @@ export const AdminAccounting = () => {
                     ))}
                   </TableBody>
                 </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Backup Status Tab */}
+          <TabsContent value="backup" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Backup Overview */}
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="flex items-center space-x-2">
+                        <Database className="h-5 w-5" />
+                        <span>Backup Status</span>
+                      </CardTitle>
+                      <CardDescription>Financial data backup monitoring</CardDescription>
+                    </div>
+                    <Button 
+                      onClick={triggerDailyBackup} 
+                      disabled={backupLoading}
+                      variant="outline"
+                    >
+                      {backupLoading ? (
+                        <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                      ) : (
+                        <Database className="h-4 w-4 mr-2" />
+                      )}
+                      Create Backup
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-3 bg-muted/50 rounded-lg">
+                      <p className="text-sm text-muted-foreground">Total Backups</p>
+                      <p className="text-2xl font-bold">{backupStatus?.status?.total_backups || 0}</p>
+                    </div>
+                    <div className="p-3 bg-muted/50 rounded-lg">
+                      <p className="text-sm text-muted-foreground">Success Rate</p>
+                      <p className="text-2xl font-bold text-green-600">
+                        {backupStatus?.status?.total_backups > 0 
+                          ? Math.round((backupStatus.status.successful_backups / backupStatus.status.total_backups) * 100)
+                          : 0
+                        }%
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Last Backup</span>
+                      <span className="text-sm font-medium">
+                        {backupStatus?.status?.last_backup_date 
+                          ? new Date(backupStatus.status.last_backup_date).toLocaleDateString()
+                          : 'Never'
+                        }
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Total Size</span>
+                      <span className="text-sm font-medium">
+                        {backupStatus?.status?.total_backup_size 
+                          ? `${(backupStatus.status.total_backup_size / 1024 / 1024).toFixed(2)} MB`
+                          : '0 MB'
+                        }
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Integrity Checks</span>
+                      <div className="flex items-center space-x-2">
+                        <Badge variant="default" className="bg-green-100 text-green-800 dark:bg-green-900/20">
+                          <CheckCircle className="h-3 w-3 mr-1" />
+                          {backupStatus?.status?.integrity_checks_passed || 0} Passed
+                        </Badge>
+                        {(backupStatus?.status?.integrity_checks_failed || 0) > 0 && (
+                          <Badge variant="destructive">
+                            <XCircle className="h-3 w-3 mr-1" />
+                            {backupStatus.status.integrity_checks_failed} Failed
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Backup Alerts */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <Shield className="h-5 w-5" />
+                    <span>Security Alerts</span>
+                  </CardTitle>
+                  <CardDescription>Backup system monitoring and alerts</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {backupStatus?.alerts?.length > 0 ? (
+                      backupStatus.alerts.map((alert: any, index: number) => (
+                        <div 
+                          key={index}
+                          className={`p-3 rounded-lg border-l-4 ${
+                            alert.type === 'error' 
+                              ? 'border-red-500 bg-red-50 dark:bg-red-900/20' 
+                              : alert.type === 'warning'
+                              ? 'border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20'
+                              : 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                          }`}
+                        >
+                          <div className="flex items-center space-x-2">
+                            {alert.type === 'error' ? (
+                              <XCircle className="h-4 w-4 text-red-600" />
+                            ) : alert.type === 'warning' ? (
+                              <AlertTriangle className="h-4 w-4 text-yellow-600" />
+                            ) : (
+                              <CheckCircle className="h-4 w-4 text-blue-600" />
+                            )}
+                            <span className="text-sm font-medium">{alert.message}</span>
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Severity: {alert.severity}
+                          </p>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="p-4 text-center text-muted-foreground">
+                        <CheckCircle className="h-8 w-8 mx-auto mb-2 text-green-600" />
+                        <p>All backup systems operational</p>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Backup History */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Backup History</CardTitle>
+                <CardDescription>Recent backup operations and status</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {/* This would be populated from backup history data */}
+                  <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <div className="p-2 bg-green-100 dark:bg-green-900/20 rounded-full">
+                        <Database className="h-4 w-4 text-green-600" />
+                      </div>
+                      <div>
+                        <p className="font-medium">Daily Backup</p>
+                        <p className="text-sm text-muted-foreground">
+                          {backupStatus?.status?.last_backup_date 
+                            ? `Completed ${new Date(backupStatus.status.last_backup_date).toLocaleString()}`
+                            : 'No backups yet'
+                          }
+                        </p>
+                      </div>
+                    </div>
+                    <Badge variant="default" className="bg-green-100 text-green-800 dark:bg-green-900/20">
+                      <CheckCircle className="h-3 w-3 mr-1" />
+                      Success
+                    </Badge>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>

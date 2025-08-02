@@ -77,6 +77,62 @@ export type Database = {
         }
         Relationships: []
       }
+      audit_log_checksums: {
+        Row: {
+          audit_log_id: string
+          checksum: string
+          created_at: string
+          id: string
+        }
+        Insert: {
+          audit_log_id: string
+          checksum: string
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          audit_log_id?: string
+          checksum?: string
+          created_at?: string
+          id?: string
+        }
+        Relationships: []
+      }
+      backup_monitoring: {
+        Row: {
+          backup_id: string | null
+          check_details: Json | null
+          check_result: boolean
+          check_type: string
+          checked_at: string
+          id: string
+        }
+        Insert: {
+          backup_id?: string | null
+          check_details?: Json | null
+          check_result: boolean
+          check_type: string
+          checked_at?: string
+          id?: string
+        }
+        Update: {
+          backup_id?: string | null
+          check_details?: Json | null
+          check_result?: boolean
+          check_type?: string
+          checked_at?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "backup_monitoring_backup_id_fkey"
+            columns: ["backup_id"]
+            isOneToOne: false
+            referencedRelation: "financial_data_backups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       channels: {
         Row: {
           cover_image_url: string | null
@@ -585,6 +641,42 @@ export type Database = {
           identifier?: string
           last_attempt_at?: string | null
           locked_until?: string | null
+        }
+        Relationships: []
+      }
+      financial_data_backups: {
+        Row: {
+          backup_data: Json
+          backup_date: string
+          backup_size: number
+          backup_type: string
+          created_at: string
+          data_hash: string
+          error_message: string | null
+          id: string
+          status: string
+        }
+        Insert: {
+          backup_data: Json
+          backup_date?: string
+          backup_size: number
+          backup_type: string
+          created_at?: string
+          data_hash: string
+          error_message?: string | null
+          id?: string
+          status?: string
+        }
+        Update: {
+          backup_data?: Json
+          backup_date?: string
+          backup_size?: number
+          backup_type?: string
+          created_at?: string
+          data_hash?: string
+          error_message?: string | null
+          id?: string
+          status?: string
         }
         Relationships: []
       }
@@ -2250,6 +2342,10 @@ export type Database = {
       }
     }
     Functions: {
+      backup_financial_data: {
+        Args: { backup_type_param: string }
+        Returns: string
+      }
       calculate_distance: {
         Args: { lat1: number; lon1: number; lat2: number; lon2: number }
         Returns: number
@@ -2285,6 +2381,10 @@ export type Database = {
       clear_failed_attempts: {
         Args: { p_identifier: string; p_attempt_type?: string }
         Returns: undefined
+      }
+      create_data_checksum: {
+        Args: { data_json: Json }
+        Returns: string
       }
       expire_co_pay_requests: {
         Args: Record<PropertyKey, never>
@@ -2384,6 +2484,10 @@ export type Database = {
       validate_password_strength: {
         Args: { password: string }
         Returns: Json
+      }
+      verify_backup_integrity: {
+        Args: { backup_id_param: string }
+        Returns: boolean
       }
     }
     Enums: {
