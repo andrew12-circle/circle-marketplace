@@ -34,6 +34,7 @@ import { SellerAgreement } from "./pages/legal/SellerAgreement";
 import { BuyerProtection } from "./pages/legal/BuyerProtection";
 import { ProhibitedItems } from "./pages/legal/ProhibitedItems";
 import { CommandCenter } from "./pages/CommandCenter";
+import { CommandCenterTest } from "./pages/CommandCenterTest";
 import { Academy } from "./pages/Academy";
 
 const queryClient = new QueryClient();
@@ -53,7 +54,7 @@ const App = () => {
             <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/academy" element={<Academy />} />
-            <Route path="/command-center" element={<CommandCenter />} />
+            <Route path="/command-center" element={<CommandCenterTest />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/orders" element={<OrderHistory />} />
             <Route path="/pricing" element={<Pricing />} />
