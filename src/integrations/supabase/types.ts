@@ -2434,6 +2434,14 @@ export type Database = {
         Args: { video_uuid: string }
         Returns: undefined
       }
+      log_admin_operation_secure: {
+        Args: {
+          operation_type: string
+          target_user_id: string
+          operation_data?: Json
+        }
+        Returns: boolean
+      }
       log_login_attempt: {
         Args: {
           user_email: string
@@ -2463,6 +2471,10 @@ export type Database = {
           p_points_used: number
           p_amount_to_charge: number
         }
+        Returns: Json
+      }
+      secure_profile_update: {
+        Args: { target_user_id: string; update_data: Json }
         Returns: Json
       }
       track_vendor_activity: {
@@ -2496,6 +2508,14 @@ export type Database = {
       validate_secure_admin_operation: {
         Args: { operation_type: string; target_data?: Json }
         Returns: boolean
+      }
+      verify_admin_operation_request: {
+        Args: {
+          operation_type: string
+          target_user_id: string
+          verification_token?: string
+        }
+        Returns: Json
       }
       verify_backup_integrity: {
         Args: { backup_id_param: string }
