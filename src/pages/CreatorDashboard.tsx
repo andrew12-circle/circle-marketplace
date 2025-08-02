@@ -114,11 +114,41 @@ export const CreatorDashboard = () => {
   };
 
   const contentTypes = [
-    { type: 'video', label: 'Video', icon: Video, color: 'bg-red-500' },
-    { type: 'podcast', label: 'Podcast', icon: Headphones, color: 'bg-purple-500' },
-    { type: 'book', label: 'Book', icon: Book, color: 'bg-blue-500' },
-    { type: 'course', label: 'Course', icon: GraduationCap, color: 'bg-green-500' },
-    { type: 'playbook', label: 'Playbook', icon: BookOpen, color: 'bg-orange-500' },
+    { 
+      type: 'video', 
+      label: 'Video', 
+      icon: Video, 
+      gradient: 'from-red-500 to-pink-500',
+      description: 'Share video content'
+    },
+    { 
+      type: 'podcast', 
+      label: 'Podcast', 
+      icon: Headphones, 
+      gradient: 'from-purple-500 to-indigo-500',
+      description: 'Create audio experiences'
+    },
+    { 
+      type: 'book', 
+      label: 'Book', 
+      icon: Book, 
+      gradient: 'from-blue-500 to-cyan-500',
+      description: 'Write and publish books'
+    },
+    { 
+      type: 'course', 
+      label: 'Course', 
+      icon: GraduationCap, 
+      gradient: 'from-green-500 to-emerald-500',
+      description: 'Teach through courses'
+    },
+    { 
+      type: 'playbook', 
+      label: 'Playbook', 
+      icon: BookOpen, 
+      gradient: 'from-orange-500 to-red-500',
+      description: 'Create step-by-step guides'
+    },
   ];
 
   const getContentTypeIcon = (type: string) => {
@@ -146,135 +176,244 @@ export const CreatorDashboard = () => {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Creator Dashboard</h1>
-          <p className="text-muted-foreground">Manage your content and track your earnings</p>
-        </div>
-        <Button className="gap-2" onClick={() => setUploadModalOpen(true)}>
-          <Plus className="w-4 h-4" />
-          Create Content
-        </Button>
-      </div>
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Plays</CardTitle>
-            <Play className="w-4 h-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalPlays.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground">+12% from last month</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            <DollarSign className="w-4 h-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">${stats.totalRevenue.toFixed(2)}</div>
-            <p className="text-xs text-muted-foreground">Revenue share</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Content Items</CardTitle>
-            <BarChart3 className="w-4 h-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalContent}</div>
-            <p className="text-xs text-muted-foreground">Across all types</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Avg Rating</CardTitle>
-            <Users className="w-4 h-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.avgRating}/5</div>
-            <p className="text-xs text-muted-foreground">From user reviews</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Quick Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-            {contentTypes.map((contentType) => {
-              const Icon = contentType.icon;
-              return (
-                <Button
-                  key={contentType.type}
-                  variant="outline"
-                  className="flex flex-col items-center gap-2 h-24"
-                  onClick={() => handleUploadClick(contentType.type)}
-                >
-                  <div className={`w-8 h-8 rounded-lg ${contentType.color} flex items-center justify-center`}>
-                    <Icon className="w-4 h-4 text-white" />
-                  </div>
-                  <span className="text-sm">Upload {contentType.label}</span>
-                </Button>
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Recent Content */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Content</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {recentContent.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <Upload className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              <p>No content uploaded yet</p>
-              <p className="text-sm">Start creating content to see it here</p>
-            </div>
-          ) : (
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
+      {/* Hero Section */}
+      <div className="relative overflow-hidden bg-gradient-to-r from-primary/10 via-primary/5 to-background border-b">
+        <div className="absolute inset-0 bg-grid-white/5 bg-[size:30px_30px]" />
+        <div className="container mx-auto px-6 py-12">
+          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
             <div className="space-y-4">
-              {recentContent.map((content) => (
-                <div key={content.id} className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex items-center gap-3">
-                    {getContentTypeIcon(content.content_type)}
-                    <div>
-                      <h3 className="font-medium">{content.title}</h3>
-                      <p className="text-sm text-muted-foreground">
-                        {new Date(content.created_at).toLocaleDateString()}
-                      </p>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium">
+                <span className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+                Creator Dashboard
+              </div>
+              <h1 className="text-4xl lg:text-6xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+                Create. Share. Earn.
+              </h1>
+              <p className="text-lg text-muted-foreground max-w-2xl">
+                Transform your expertise into engaging content and start earning from your passion. 
+                Join thousands of creators building their digital empire.
+              </p>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button 
+                size="lg" 
+                className="gap-2 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg hover:shadow-xl transition-all duration-300" 
+                onClick={() => setUploadModalOpen(true)}
+              >
+                <Plus className="w-5 h-5" />
+                Create Content
+              </Button>
+              <Button 
+                size="lg" 
+                variant="outline" 
+                className="gap-2 border-2 hover:bg-muted/50 transition-all duration-300"
+              >
+                <BarChart3 className="w-5 h-5" />
+                View Analytics
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="container mx-auto px-6 space-y-8">
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card className="relative overflow-hidden bg-gradient-to-br from-card to-card/50 border-primary/20 hover:border-primary/40 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 group">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Total Plays</CardTitle>
+              <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500/20 to-cyan-500/20">
+                <Play className="w-4 h-4 text-blue-500" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
+                {stats.totalPlays.toLocaleString()}
+              </div>
+              <p className="text-xs text-green-600 font-medium">+12% from last month</p>
+            </CardContent>
+          </Card>
+
+          <Card className="relative overflow-hidden bg-gradient-to-br from-card to-card/50 border-primary/20 hover:border-primary/40 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 group">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Total Revenue</CardTitle>
+              <div className="p-2 rounded-lg bg-gradient-to-br from-green-500/20 to-emerald-500/20">
+                <DollarSign className="w-4 h-4 text-green-500" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                ${stats.totalRevenue.toFixed(2)}
+              </div>
+              <p className="text-xs text-muted-foreground">75% revenue share</p>
+            </CardContent>
+          </Card>
+
+          <Card className="relative overflow-hidden bg-gradient-to-br from-card to-card/50 border-primary/20 hover:border-primary/40 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 group">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Content Items</CardTitle>
+              <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/20 to-pink-500/20">
+                <BarChart3 className="w-4 h-4 text-purple-500" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
+                {stats.totalContent}
+              </div>
+              <p className="text-xs text-muted-foreground">Across all types</p>
+            </CardContent>
+          </Card>
+
+          <Card className="relative overflow-hidden bg-gradient-to-br from-card to-card/50 border-primary/20 hover:border-primary/40 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 group">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Avg Rating</CardTitle>
+              <div className="p-2 rounded-lg bg-gradient-to-br from-yellow-500/20 to-orange-500/20">
+                <Users className="w-4 h-4 text-yellow-500" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent">
+                {stats.avgRating}/5
+              </div>
+              <p className="text-xs text-muted-foreground">From user reviews</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Content Creation Hub */}
+        <Card className="bg-gradient-to-r from-card to-card/80 border-primary/20 overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent" />
+          <CardHeader className="relative">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-2xl bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
+                  Content Creation Hub
+                </CardTitle>
+                <p className="text-muted-foreground mt-1">
+                  Choose your medium and start creating amazing content
+                </p>
+              </div>
+              <div className="hidden sm:block p-3 rounded-full bg-gradient-to-br from-primary/20 to-primary/10">
+                <Upload className="w-6 h-6 text-primary" />
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="relative">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+              {contentTypes.map((contentType) => {
+                const Icon = contentType.icon;
+                return (
+                  <div
+                    key={contentType.type}
+                    className="group cursor-pointer"
+                    onClick={() => handleUploadClick(contentType.type)}
+                  >
+                    <div className="relative p-6 rounded-xl border-2 border-muted hover:border-primary/50 bg-card hover:bg-card/80 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1">
+                      <div className="flex flex-col items-center text-center space-y-3">
+                        <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${contentType.gradient} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                          <Icon className="w-6 h-6 text-white" />
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                            {contentType.label}
+                          </h4>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {contentType.description}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary/0 to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     </div>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <Badge variant="secondary">
-                      {content.total_plays} plays
-                    </Badge>
-                    <Badge variant="outline">
-                      ★ {content.rating || 0}
-                    </Badge>
-                    <Button variant="ghost" size="sm">
-                      Edit
-                    </Button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
-          )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+
+        {/* Recent Content */}
+        <Card className="bg-gradient-to-r from-card to-card/80 border-primary/20">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-xl bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
+                  Recent Content
+                </CardTitle>
+                <p className="text-muted-foreground text-sm mt-1">
+                  Your latest creations and their performance
+                </p>
+              </div>
+              <Button variant="outline" size="sm" className="hover:bg-primary/10 hover:border-primary/50">
+                View All
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {recentContent.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center">
+                  <Upload className="w-12 h-12 text-primary opacity-70" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">Ready to create your first masterpiece?</h3>
+                <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                  Upload your content and start building your creator empire. Every expert was once a beginner.
+                </p>
+                <Button 
+                  className="gap-2 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
+                  onClick={() => setUploadModalOpen(true)}
+                >
+                  <Plus className="w-4 h-4" />
+                  Create Your First Content
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {recentContent.map((content, index) => (
+                  <div 
+                    key={content.id} 
+                    className="group flex items-center justify-between p-4 rounded-lg border border-muted hover:border-primary/30 bg-card/50 hover:bg-card transition-all duration-300 hover:shadow-md"
+                    style={{ animationDelay: `${index * 100}ms` }}
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center">
+                        {getContentTypeIcon(content.content_type)}
+                      </div>
+                      <div>
+                        <h3 className="font-medium group-hover:text-primary transition-colors">
+                          {content.title}
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          {new Date(content.created_at).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Badge variant="secondary" className="bg-blue-500/10 text-blue-700 border-blue-200">
+                        {content.total_plays} plays
+                      </Badge>
+                      <Badge variant="outline" className="bg-yellow-500/10 text-yellow-700 border-yellow-200">
+                        ★ {content.rating || 0}
+                      </Badge>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="opacity-0 group-hover:opacity-100 transition-opacity hover:bg-primary/10 hover:text-primary"
+                      >
+                        Edit
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Upload Modal */}
       <ContentUploadModal
