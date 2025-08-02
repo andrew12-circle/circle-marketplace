@@ -42,8 +42,9 @@ export const NavigationTabs = ({ activeTab, onTabChange }: NavigationTabsProps) 
             ? "bg-background text-foreground shadow-sm" 
             : "text-muted-foreground hover:text-foreground hover:bg-background/50"
         }`}
+        onClick={() => console.log("Command Center clicked!")}
       >
-        <Link to="/command-center">Command Center</Link>
+        <Link to="/command-center" onClick={() => console.log("Link to /command-center clicked")}>Command Center</Link>
       </Button>
       <Button
         asChild

@@ -54,7 +54,12 @@ const App = () => {
             <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/academy" element={<Academy />} />
-            <Route path="/command-center" element={<CommandCenterTest />} />
+            <Route path="/command-center" element={
+              <div>
+                <h1>Debug: Command Center Route Hit!</h1>
+                <CommandCenterTest />
+              </div>
+            } />
             <Route path="/auth" element={<Auth />} />
             <Route path="/orders" element={<OrderHistory />} />
             <Route path="/pricing" element={<Pricing />} />
