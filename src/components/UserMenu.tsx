@@ -15,7 +15,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 
 import { supabase } from "@/integrations/supabase/client";
-import { User, Settings, ShoppingBag, Crown, LogOut, Loader2, Heart, BarChart3, Shield, Building2, DollarSign, Store, Briefcase, Package, Brain } from "lucide-react";
+import { User, Settings, ShoppingBag, Crown, LogOut, Loader2, Heart, BarChart3, Shield, Building2, DollarSign, Store, Briefcase, Package, Brain, Command } from "lucide-react";
 import { CustomerPortalButton } from "@/components/marketplace/CustomerPortalButton";
 
 
@@ -203,6 +203,14 @@ export const UserMenu = () => {
          )}
         
         <DropdownMenuSeparator />
+        
+        {/* Command Center Link */}
+        <DropdownMenuItem asChild>
+          <Link to="/command-center" className="flex items-center">
+            <Command className="mr-2 h-4 w-4 text-primary" />
+            <span>Command Center</span>
+          </Link>
+        </DropdownMenuItem>
         
         {/* AI Dashboard Link */}
         <DropdownMenuItem asChild>

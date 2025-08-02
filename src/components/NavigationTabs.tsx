@@ -3,24 +3,19 @@ import { useTranslation } from "react-i18next";
 import { Link, useLocation } from "react-router-dom";
 
 interface NavigationTabsProps {
-  activeTab?: "marketplace" | "academy" | "command-center";
-  onTabChange?: (tab: "marketplace" | "academy" | "command-center") => void;
+  activeTab?: "marketplace" | "academy";
+  onTabChange?: (tab: "marketplace" | "academy") => void;
 }
 
 export const NavigationTabs = ({ activeTab, onTabChange }: NavigationTabsProps) => {
   const { t } = useTranslation();
   const location = useLocation();
   
-  console.log("NavigationTabs rendering, location:", location.pathname);
-  
   // Determine active tab from URL if not provided
   const currentTab = activeTab || (
-    location.pathname === "/command-center" ? "command-center" :
     location.pathname === "/academy" ? "academy" : 
     "marketplace"
   );
-  
-  console.log("Current tab:", currentTab);
   return (
     <div className="flex bg-muted/50 rounded-xl p-1 w-fit mx-auto backdrop-blur-sm border border-border/50">
       <Button
@@ -33,18 +28,6 @@ export const NavigationTabs = ({ activeTab, onTabChange }: NavigationTabsProps) 
         }`}
       >
         <Link to="/">{t('marketplace')}</Link>
-      </Button>
-      <Button
-        asChild
-        variant="ghost"
-        className={`rounded-lg px-6 py-2 font-medium transition-all duration-200 ${
-          currentTab === "command-center" 
-            ? "bg-background text-foreground shadow-sm" 
-            : "text-muted-foreground hover:text-foreground hover:bg-background/50"
-        }`}
-        onClick={() => console.log("Command Center clicked!")}
-      >
-        <Link to="/command-center" onClick={() => console.log("Link to /command-center clicked")}>Command Center</Link>
       </Button>
       <Button
         asChild
