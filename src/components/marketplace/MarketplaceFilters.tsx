@@ -4,9 +4,10 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
-import { X } from "lucide-react";
+import { X, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CategoryMegaMenu } from "./CategoryMegaMenu";
+import { useLocation } from "@/hooks/useLocation";
 
 interface FilterState {
   category: string; // Should be "all" or a valid category, never empty string
@@ -14,6 +15,7 @@ interface FilterState {
   verified: boolean;
   featured: boolean;
   coPayEligible: boolean;
+  locationFilter: boolean; // New location filter
   riskLevel?: string; // Only for services view
 }
 
@@ -22,10 +24,20 @@ export interface MarketplaceFiltersProps {
   onFiltersChange: (filters: FilterState) => void;
   categories: string[];
   viewMode?: 'services' | 'products' | 'vendors'; // Add viewMode prop
+  vendorCount?: number;
+  localVendorCount?: number;
 }
 
-export const MarketplaceFilters = ({ filters, onFiltersChange, categories, viewMode = 'services' }: MarketplaceFiltersProps) => {
+export const MarketplaceFilters = ({ 
+  filters, 
+  onFiltersChange, 
+  categories, 
+  viewMode = 'services',
+  vendorCount = 0,
+  localVendorCount = 0 
+}: MarketplaceFiltersProps) => {
   const { t } = useTranslation();
+  const { location } = useLocation();
   // Provide default values to prevent undefined errors
   const safeFilters = filters || {
     category: "all",
@@ -33,6 +45,7 @@ export const MarketplaceFilters = ({ filters, onFiltersChange, categories, viewM
     verified: false,
     featured: false,
     coPayEligible: false,
+    locationFilter: false,
   };
   const updateFilter = (key: keyof FilterState, value: any) => {
     onFiltersChange({
@@ -48,11 +61,12 @@ export const MarketplaceFilters = ({ filters, onFiltersChange, categories, viewM
       verified: false,
       featured: false,
       coPayEligible: false,
+      locationFilter: false,
     });
   };
 
   const hasActiveFilters = (safeFilters.category && safeFilters.category !== "all") || 
-    safeFilters.verified || safeFilters.featured || safeFilters.coPayEligible ||
+    safeFilters.verified || safeFilters.featured || safeFilters.coPayEligible || safeFilters.locationFilter ||
     safeFilters.priceRange[0] > 0 || safeFilters.priceRange[1] < 2000;
 
   return (
@@ -143,6 +157,22 @@ export const MarketplaceFilters = ({ filters, onFiltersChange, categories, viewM
             </div>
           )}
 
+          {/* Location Filter - Only show if user has location */}
+          {location?.state && (
+            <div className="flex items-center gap-2 bg-muted/20 hover:bg-muted/30 rounded-full px-3 py-2 transition-all duration-200 cursor-pointer group">
+              <Checkbox
+                id="locationFilter"
+                checked={safeFilters.locationFilter}
+                onCheckedChange={(checked) => updateFilter("locationFilter", checked)}
+                className="data-[state=checked]:bg-circle-primary data-[state=checked]:border-circle-primary"
+              />
+              <Label htmlFor="locationFilter" className="text-xs font-medium cursor-pointer group-hover:text-foreground transition-colors flex items-center gap-1">
+                <MapPin className="w-3 h-3" />
+                {location.state}
+              </Label>
+            </div>
+          )}
+
         </div>
 
         {/* Active Filters Display */}
@@ -182,6 +212,16 @@ export const MarketplaceFilters = ({ filters, onFiltersChange, categories, viewM
                   <X 
                     className="w-3 h-3 cursor-pointer hover:text-destructive transition-colors" 
                     onClick={() => updateFilter("coPayEligible", false)}
+                  />
+                </Badge>
+              )}
+              {safeFilters.locationFilter && location?.state && (
+                <Badge variant="secondary" className="flex items-center gap-1 rounded-full">
+                  <MapPin className="w-3 h-3" />
+                  {location.state} Only
+                  <X 
+                    className="w-3 h-3 cursor-pointer hover:text-destructive transition-colors" 
+                    onClick={() => updateFilter("locationFilter", false)}
                   />
                 </Badge>
               )}

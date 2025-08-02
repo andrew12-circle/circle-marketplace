@@ -8,7 +8,7 @@ import { CircleProBanner } from "./CircleProBanner";
 import { ServiceDetailsModal } from "./ServiceDetailsModal";
 import { AIConciergeBanner } from "./AIConciergeBanner";
 import { AddProductModal } from "./AddProductModal";
-import { LocationFilterBanner } from "./LocationFilterBanner";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Filter, Sparkles, Zap, Facebook, Globe, Mail, Share2, Monitor, TrendingUp, Database, Camera, Video, Printer, ArrowRight } from "lucide-react";
@@ -27,6 +27,7 @@ interface FilterState {
   verified: boolean;
   featured: boolean;
   coPayEligible: boolean;
+  locationFilter: boolean;
 }
 
 interface Service {
@@ -243,7 +244,6 @@ export const MarketplaceGrid = () => {
   const [savedServiceIds, setSavedServiceIds] = useState<string[]>([]);
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
-  const [isLocationFilterActive, setIsLocationFilterActive] = useState(false);
   const [isAddProductModalOpen, setIsAddProductModalOpen] = useState(false);
   const [filters, setFilters] = useState<FilterState>({
     category: "all",
@@ -251,6 +251,7 @@ export const MarketplaceGrid = () => {
     verified: false,
     featured: false,
     coPayEligible: false,
+    locationFilter: false,
   });
   const { toast } = useToast();
   const { user, profile } = useAuth();
@@ -460,7 +461,7 @@ export const MarketplaceGrid = () => {
     
     // Location-based filtering
     let matchesLocation = true;
-    if (isLocationFilterActive && location?.state) {
+    if (filters.locationFilter && location?.state) {
       matchesLocation = vendor.license_states?.includes(location.state) ||
                        vendor.service_states?.includes(location.state) ||
                        false;
@@ -690,15 +691,8 @@ export const MarketplaceGrid = () => {
           {/* Campaign Services Header */}
           <CampaignServicesHeader />
 
-          {/* Enhanced Search Component */}
+           {/* Enhanced Search Component */}
           <div className="space-y-6">
-            <LocationFilterBanner 
-              onToggleLocationFilter={() => setIsLocationFilterActive(!isLocationFilterActive)}
-              isLocationFilterActive={isLocationFilterActive}
-              vendorCount={vendors.length}
-              localVendorCount={localVendorCount}
-            />
-            
             <EnhancedSearch
               onSearchChange={setSearchFilters}
               availableCategories={Array.from(new Set(services.map(service => service.category).filter(Boolean)))}
@@ -737,15 +731,15 @@ export const MarketplaceGrid = () => {
             </Button>
           </div>
 
-          {/* Location Filter Banner - Only for vendors */}
-          {viewMode === "vendors" && (
-            <LocationFilterBanner 
-              onToggleLocationFilter={() => setIsLocationFilterActive(!isLocationFilterActive)}
-              isLocationFilterActive={isLocationFilterActive}
-              vendorCount={vendors.length}
-              localVendorCount={localVendorCount}
-            />
-          )}
+          {/* Marketplace Filters */}
+          <MarketplaceFilters
+            filters={filters}
+            onFiltersChange={setFilters}
+            categories={getCategories()}
+            viewMode={viewMode}
+            vendorCount={vendors.length}
+            localVendorCount={localVendorCount}
+          />
 
           {/* Legacy filters section - temporarily removed for Phase 1 */}
 
@@ -883,6 +877,7 @@ export const MarketplaceGrid = () => {
                     verified: false,
                     featured: false,
                     coPayEligible: false,
+                    locationFilter: false,
                   });
                 }}
               >
