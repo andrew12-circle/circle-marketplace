@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -18,7 +18,8 @@ import {
   BarChart3,
   DollarSign,
   Play,
-  Users
+  Users,
+  ArrowLeft
 } from "lucide-react";
 
 interface ContentStats {
@@ -39,6 +40,7 @@ interface RecentContent {
 
 export const CreatorDashboard = () => {
   const { user, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
   const [stats, setStats] = useState<ContentStats>({
     totalPlays: 0,
     totalRevenue: 0,
@@ -183,6 +185,15 @@ export const CreatorDashboard = () => {
         <div className="container mx-auto px-6 py-12">
           <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
             <div className="space-y-4">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="gap-2 hover:bg-primary/10 text-muted-foreground hover:text-primary mb-4"
+                onClick={() => navigate(-1)}
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Back
+              </Button>
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium">
                 <span className="w-2 h-2 bg-primary rounded-full animate-pulse" />
                 Creator Dashboard
