@@ -1,25 +1,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { 
-  TrendingUp, 
-  Calendar, 
-  Clock, 
-  DollarSign, 
-  Home, 
-  Users, 
-  Zap,
-  Target,
-  AlertCircle,
-  CheckCircle2,
-  ArrowUpRight,
-  Brain
-} from "lucide-react";
-import { BusinessHealthOverview } from "@/components/ai-dashboard/BusinessHealthOverview";
-import { CriticalOutcomes } from "@/components/ai-dashboard/CriticalOutcomes";
-import { MarketplaceOpportunities } from "@/components/ai-dashboard/MarketplaceOpportunities";
+import { Brain } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 const AIDashboard = () => {
@@ -67,16 +49,18 @@ const AIDashboard = () => {
           </div>
         </div>
 
-        {/* Dashboard Grid */}
+        {/* Dashboard Content */}
         <div className="grid gap-8">
-          {/* Business Health Overview */}
-          <BusinessHealthOverview />
-          
-          {/* Critical Outcomes */}
-          <CriticalOutcomes />
-          
-          {/* Marketplace Opportunities */}
-          <MarketplaceOpportunities />
+          <Card className="bg-card/50 backdrop-blur-sm border-border/50">
+            <CardHeader>
+              <CardTitle>Dashboard Loading...</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">
+                Your AI Dashboard is being set up. Advanced features coming soon!
+              </p>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
