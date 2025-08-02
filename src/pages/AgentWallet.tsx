@@ -41,6 +41,7 @@ export const AgentWallet = () => {
   const [transactions, setTransactions] = useState<any[]>([]);
   const [allocations, setAllocations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showFullAccountNumber, setShowFullAccountNumber] = useState(false);
 
   useEffect(() => {
     if (user?.id) {
@@ -190,9 +191,17 @@ export const AgentWallet = () => {
                   <Wallet className="h-8 w-8" />
                   <h1 className="text-2xl sm:text-3xl font-bold">Circle Wallet</h1>
                 </div>
-                <p className="text-white/80 text-sm sm:text-base">
-                  Your co-pay points • Account Number: ****{user?.id?.slice(-4)}
-                </p>
+                <div className="flex items-center space-x-2">
+                  <p className="text-white/80 text-sm sm:text-base">
+                    Your co-pay points • Account Number: {showFullAccountNumber ? user?.id : `****${user?.id?.slice(-4)}`}
+                  </p>
+                  <button
+                    onClick={() => setShowFullAccountNumber(!showFullAccountNumber)}
+                    className="text-white/60 hover:text-white transition-colors"
+                  >
+                    <Eye className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
             </div>
             <div className="flex items-center space-x-3">
