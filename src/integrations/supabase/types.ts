@@ -831,6 +831,7 @@ export type Database = {
           notes: string | null
           pre_authorized: boolean | null
           remaining_points: number | null
+          respa_compliance_notes: string | null
           start_date: string
           status: string | null
           stripe_customer_id: string | null
@@ -838,6 +839,8 @@ export type Database = {
           updated_at: string
           used_points: number | null
           vendor_id: string
+          vendor_respa_category: string | null
+          vendor_respa_status: boolean | null
         }
         Insert: {
           agent_id: string
@@ -851,6 +854,7 @@ export type Database = {
           notes?: string | null
           pre_authorized?: boolean | null
           remaining_points?: number | null
+          respa_compliance_notes?: string | null
           start_date: string
           status?: string | null
           stripe_customer_id?: string | null
@@ -858,6 +862,8 @@ export type Database = {
           updated_at?: string
           used_points?: number | null
           vendor_id: string
+          vendor_respa_category?: string | null
+          vendor_respa_status?: boolean | null
         }
         Update: {
           agent_id?: string
@@ -871,6 +877,7 @@ export type Database = {
           notes?: string | null
           pre_authorized?: boolean | null
           remaining_points?: number | null
+          respa_compliance_notes?: string | null
           start_date?: string
           status?: string | null
           stripe_customer_id?: string | null
@@ -878,6 +885,8 @@ export type Database = {
           updated_at?: string
           used_points?: number | null
           vendor_id?: string
+          vendor_respa_category?: string | null
+          vendor_respa_status?: boolean | null
         }
         Relationships: []
       }
@@ -1372,6 +1381,7 @@ export type Database = {
           individual_phone: string | null
           individual_title: string | null
           is_active: boolean | null
+          is_respa_regulated: boolean | null
           is_verified: boolean | null
           latitude: number | null
           license_states: string[] | null
@@ -1385,6 +1395,7 @@ export type Database = {
           phone: string | null
           provider_type: string | null
           rating: number | null
+          respa_risk_level: string | null
           review_count: number | null
           service_radius_miles: number | null
           service_states: string[] | null
@@ -1405,6 +1416,7 @@ export type Database = {
           individual_phone?: string | null
           individual_title?: string | null
           is_active?: boolean | null
+          is_respa_regulated?: boolean | null
           is_verified?: boolean | null
           latitude?: number | null
           license_states?: string[] | null
@@ -1418,6 +1430,7 @@ export type Database = {
           phone?: string | null
           provider_type?: string | null
           rating?: number | null
+          respa_risk_level?: string | null
           review_count?: number | null
           service_radius_miles?: number | null
           service_states?: string[] | null
@@ -1438,6 +1451,7 @@ export type Database = {
           individual_phone?: string | null
           individual_title?: string | null
           is_active?: boolean | null
+          is_respa_regulated?: boolean | null
           is_verified?: boolean | null
           latitude?: number | null
           license_states?: string[] | null
@@ -1451,6 +1465,7 @@ export type Database = {
           phone?: string | null
           provider_type?: string | null
           rating?: number | null
+          respa_risk_level?: string | null
           review_count?: number | null
           service_radius_miles?: number | null
           service_states?: string[] | null
@@ -2351,6 +2366,14 @@ export type Database = {
         Args: { target_month: string }
         Returns: undefined
       }
+      calculate_respa_compliant_usage: {
+        Args: {
+          p_service_id: string
+          p_agent_id: string
+          p_total_amount: number
+        }
+        Returns: Json
+      }
       calculate_vendor_active_agents: {
         Args: { vendor_uuid: string }
         Returns: number
@@ -2467,6 +2490,16 @@ export type Database = {
           p_agent_id: string
           p_points_used: number
           p_amount_to_charge: number
+        }
+        Returns: Json
+      }
+      process_respa_compliant_transaction: {
+        Args: {
+          p_service_id: string
+          p_agent_id: string
+          p_vendor_id: string
+          p_total_amount: number
+          p_order_id?: string
         }
         Returns: Json
       }
