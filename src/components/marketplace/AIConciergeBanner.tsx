@@ -2,9 +2,10 @@ import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Brain, TrendingUp, Target, ArrowRight, Lightbulb, Users, MessageCircle } from "lucide-react";
+import { Brain, TrendingUp, Target, ArrowRight, Lightbulb, Users, MessageCircle, Mic, Send } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { AskCircleAIModal } from "./AskCircleAIModal";
+import { Input } from "@/components/ui/input";
 
 interface BusinessInsight {
   type: 'performance' | 'opportunity' | 'recommendation';
@@ -21,6 +22,17 @@ export const AIConciergeBanner = () => {
   const [currentInsight, setCurrentInsight] = useState<BusinessInsight | null>(null);
   const [currentTime] = useState(new Date());
   const [isAIModalOpen, setIsAIModalOpen] = useState(false);
+  const [chatInput, setChatInput] = useState("");
+  const [placeholderText, setPlaceholderText] = useState("");
+  const [isTyping, setIsTyping] = useState(true);
+
+  const placeholderQuestions = [
+    "How can I help you today?",
+    "Anything particular you're looking for?", 
+    "What business goals are you working on?",
+    "Need help finding the right services?",
+    "How can I boost your sales this month?"
+  ];
 
   // Mock insights based on agent performance data
   const businessInsights: BusinessInsight[] = [
@@ -67,6 +79,64 @@ export const AIConciergeBanner = () => {
     const randomInsight = businessInsights[Math.floor(Math.random() * businessInsights.length)];
     setCurrentInsight(randomInsight);
   }, []);
+
+  // Animated placeholder text effect
+  useEffect(() => {
+    let currentQuestionIndex = 0;
+    let currentCharIndex = 0;
+    let isDeleting = false;
+    
+    const typeEffect = () => {
+      const currentQuestion = placeholderQuestions[currentQuestionIndex];
+      
+      if (isDeleting) {
+        setPlaceholderText(currentQuestion.substring(0, currentCharIndex - 1));
+        currentCharIndex--;
+        
+        if (currentCharIndex === 0) {
+          isDeleting = false;
+          currentQuestionIndex = (currentQuestionIndex + 1) % placeholderQuestions.length;
+          setTimeout(typeEffect, 500); // Pause before typing next question
+          return;
+        }
+      } else {
+        setPlaceholderText(currentQuestion.substring(0, currentCharIndex + 1));
+        currentCharIndex++;
+        
+        if (currentCharIndex === currentQuestion.length) {
+          setTimeout(() => {
+            isDeleting = true;
+            typeEffect();
+          }, 2000); // Pause when finished typing
+          return;
+        }
+      }
+      
+      setTimeout(typeEffect, isDeleting ? 50 : 100);
+    };
+    
+    typeEffect();
+  }, []);
+
+  useEffect(() => {
+    // Randomly select an insight to show personalized recommendations
+    const randomInsight = businessInsights[Math.floor(Math.random() * businessInsights.length)];
+    setCurrentInsight(randomInsight);
+  }, []);
+
+  const handleSendMessage = () => {
+    if (chatInput.trim()) {
+      // Open the AI modal with the user's message
+      setIsAIModalOpen(true);
+      setChatInput("");
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSendMessage();
+    }
+  };
 
   const getTimeOfDayGreeting = () => {
     const hour = currentTime.getHours();
@@ -115,16 +185,39 @@ export const AIConciergeBanner = () => {
               
               <div className="flex items-center justify-between mb-4">
                 <p className="text-muted-foreground">
-                  How can I help you grow your business today? Here's a personalized insight based on market data:
+                  How can I help you grow your business today?
                 </p>
-                <Button 
-                  onClick={() => setIsAIModalOpen(true)}
-                  size="sm" 
-                  className="bg-primary hover:bg-primary/90 flex items-center gap-2"
-                >
-                  <MessageCircle className="h-4 w-4" />
-                  Start Conversation
-                </Button>
+              </div>
+
+              {/* Chat Input Area */}
+              <div className="bg-card/30 backdrop-blur-sm border border-border/50 rounded-lg p-4 mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 relative">
+                    <Input
+                      value={chatInput}
+                      onChange={(e) => setChatInput(e.target.value)}
+                      onKeyPress={handleKeyPress}
+                      placeholder={placeholderText}
+                      className="bg-background/50 border-border/50 placeholder:text-muted-foreground/70 focus:bg-background"
+                    />
+                  </div>
+                  <Button 
+                    onClick={() => setIsAIModalOpen(true)}
+                    size="sm" 
+                    variant="outline"
+                    className="bg-background/50 hover:bg-background border-border/50"
+                  >
+                    <Mic className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    onClick={handleSendMessage}
+                    size="sm" 
+                    className="bg-primary hover:bg-primary/90"
+                    disabled={!chatInput.trim()}
+                  >
+                    <Send className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
 
               {currentInsight && (
