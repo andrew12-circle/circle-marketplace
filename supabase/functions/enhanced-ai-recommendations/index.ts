@@ -59,11 +59,23 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: `You are an AI business advisor for real estate professionals on Circle Platform. 
-            You have access to real marketplace data and user behavior patterns.
-            Provide specific, actionable recommendations based on the data provided.
-            Keep responses concise but insightful. Focus on ROI and practical next steps.
-            Use data-driven insights to support your recommendations.`
+            content: `You are Circle AI, the intelligent marketplace advisor for real estate professionals. 
+            You have exclusive access to real marketplace data, user behavior patterns, and purchasing analytics.
+            
+            CORE MISSION: Recommend specific services/products for immediate purchase based on:
+            - What similar agents in their market are buying
+            - Services that deliver proven ROI in their situation
+            - Trending solutions in their specialty/location
+            
+            RESPONSE FORMAT:
+            1. Start with a data-driven insight about their situation
+            2. Recommend 2-3 specific marketplace services with direct purchase links
+            3. Explain why others in similar situations bought these
+            4. Include quick ROI expectations
+            
+            Keep responses conversational but focused on actionable marketplace purchases.
+            Use phrases like "I see agents like you are buying..." or "Based on your recent activity..."
+            Always include service IDs for direct linking when recommending specific services.`
           },
           {
             role: 'user',
@@ -122,12 +134,38 @@ async function gatherUserContext(supabase: any, userId: string) {
       .select(`
         *,
         services (
-          title, category, tags, retail_price, pro_price,
-          rating, respa_category
+          id, title, category, tags, retail_price, pro_price,
+          rating, respa_category, vendor_id
         )
       `)
       .eq('user_id', userId)
       .limit(10);
+
+    // Get purchase patterns of similar users (same location/specialty)
+    const { data: similarUserPurchases } = await supabase
+      .from('consultation_bookings')
+      .select(`
+        services (
+          id, title, category, retail_price, rating,
+          service_providers (name, location)
+        )
+      `)
+      .in('user_id', await getSimilarUsers(supabase, profile))
+      .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
+      .limit(20);
+
+    // Get trending services in user's categories
+    const { data: trendingInCategories } = await supabase
+      .from('service_views')
+      .select(`
+        services (
+          id, title, category, retail_price, rating,
+          tags, service_providers (name, location)
+        )
+      `)
+      .in('services.category', profile?.specialties || ['marketing'])
+      .gte('viewed_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
+      .limit(15);
 
     // Get recent service views for behavior analysis
     const { data: recentViews } = await supabase
@@ -181,10 +219,13 @@ async function gatherUserContext(supabase: any, userId: string) {
       consultations: consultations || [],
       pointAllocations: pointAllocations || [],
       coPayRequests: coPayRequests || [],
+      similarUserPurchases: similarUserPurchases || [],
+      trendingInCategories: trendingInCategories || [],
       totalSavedServices: savedServices?.length || 0,
       uniqueCategories: [...new Set((savedServices || []).map(s => s.services?.category).filter(Boolean))],
       averageServicePrice: calculateAveragePrice(savedServices || []),
-      lastActivity: recentViews?.[0]?.viewed_at || null
+      lastActivity: recentViews?.[0]?.viewed_at || null,
+      purchasingPower: calculatePurchasingPower(pointAllocations || [], profile?.circle_points || 0)
     };
   } catch (error) {
     console.error('Error gathering user context:', error);
@@ -238,18 +279,19 @@ async function analyzeMarketData(supabase: any) {
 }
 
 function createContextualPrompt(userMessage: string, userContext: any, marketAnalysis: any, additionalContext: any) {
-  const { profile, savedServices, recentViews, uniqueCategories, pointAllocations } = userContext;
+  const { profile, savedServices, recentViews, uniqueCategories, pointAllocations, similarUserPurchases, trendingInCategories, purchasingPower } = userContext;
   const { categoryTrends, priceRanges, vendorInsights } = marketAnalysis;
 
   let prompt = `User Question: "${userMessage}"\n\n`;
 
   // User Profile Context
-  prompt += `USER PROFILE:\n`;
+  prompt += `AGENT PROFILE:\n`;
   prompt += `- Role: ${profile?.specialties?.join(', ') || 'Real Estate Professional'}\n`;
   prompt += `- Experience: ${profile?.years_experience || 'Not specified'} years\n`;
-  prompt += `- Location: ${profile?.city && profile?.state ? `${profile.city}, ${profile.state}` : 'Location not specified'}\n`;
+  prompt += `- Market: ${profile?.city && profile?.state ? `${profile.city}, ${profile.state}` : 'Location not specified'}\n`;
   prompt += `- Business Type: ${profile?.vendor_enabled ? 'Vendor/Service Provider' : 'Agent/Buyer'}\n`;
-  prompt += `- Circle Points: ${profile?.circle_points || 0}\n\n`;
+  prompt += `- Available Budget: ${purchasingPower.total} points ($${purchasingPower.total} value)\n`;
+  prompt += `- Active Allocations: ${purchasingPower.activeAllocations} vendors\n\n`;
 
   // User Behavior Context
   prompt += `USER BEHAVIOR INSIGHTS:\n`;
@@ -266,11 +308,34 @@ function createContextualPrompt(userMessage: string, userContext: any, marketAna
   prompt += `- Top Vendor Types: ${vendorInsights.topTypes?.join(', ') || 'Mixed'}\n`;
   prompt += `- Market Activity: ${marketAnalysis.marketActivity} recent interactions\n\n`;
 
-  // Recent Services Context
+  // What Similar Agents Are Buying
+  if (similarUserPurchases?.length > 0) {
+    prompt += `WHAT SIMILAR AGENTS IN YOUR MARKET ARE BUYING:\n`;
+    similarUserPurchases.slice(0, 5).forEach((purchase: any, index: number) => {
+      prompt += `${index + 1}. [ID: ${purchase.services?.id}] ${purchase.services?.title} - $${purchase.services?.retail_price} (${purchase.services?.service_providers?.name})\n`;
+    });
+    prompt += `\n`;
+  }
+
+  // Trending in Your Categories
+  if (trendingInCategories?.length > 0) {
+    prompt += `TRENDING SERVICES IN YOUR SPECIALTIES:\n`;
+    const uniqueTrending = trendingInCategories
+      .filter((item: any, index: number, self: any) => 
+        index === self.findIndex((t: any) => t.services?.id === item.services?.id))
+      .slice(0, 5);
+    
+    uniqueTrending.forEach((trending: any, index: number) => {
+      prompt += `${index + 1}. [ID: ${trending.services?.id}] ${trending.services?.title} - $${trending.services?.retail_price} (Rating: ${trending.services?.rating})\n`;
+    });
+    prompt += `\n`;
+  }
+
+  // Recently Saved Services
   if (savedServices?.length > 0) {
-    prompt += `RECENTLY SAVED SERVICES:\n`;
-    savedServices.slice(0, 5).forEach((service: any, index: number) => {
-      prompt += `${index + 1}. ${service.services?.title} (${service.services?.category}) - $${service.services?.retail_price}\n`;
+    prompt += `YOUR SAVED SERVICES (Ready to Purchase):\n`;
+    savedServices.slice(0, 3).forEach((service: any, index: number) => {
+      prompt += `${index + 1}. [ID: ${service.services?.id}] ${service.services?.title} - $${service.services?.retail_price}\n`;
     });
     prompt += `\n`;
   }
@@ -348,6 +413,38 @@ function analyzeVendorData(vendors: any[]) {
     nonRespaRegulated: respaCounts.nonRespa,
     averageRating: Math.round(avgRating * 100) / 100,
     topTypes: ['Settlement Services', 'Marketing', 'Photography', 'Direct Mail']
+  };
+}
+
+async function getSimilarUsers(supabase: any, profile: any) {
+  if (!profile) return [];
+  
+  try {
+    const { data: similarUsers } = await supabase
+      .from('profiles')
+      .select('user_id')
+      .overlaps('specialties', profile.specialties || [])
+      .eq('city', profile.city)
+      .eq('state', profile.state)
+      .neq('user_id', profile.user_id)
+      .limit(20);
+    
+    return similarUsers?.map(u => u.user_id) || [];
+  } catch (error) {
+    console.error('Error finding similar users:', error);
+    return [];
+  }
+}
+
+function calculatePurchasingPower(pointAllocations: any[], circlePoints: number) {
+  const totalAllocatedPoints = pointAllocations.reduce((sum, allocation) => 
+    sum + (allocation.remaining_points || 0), 0);
+  
+  return {
+    total: totalAllocatedPoints + circlePoints,
+    allocated: totalAllocatedPoints,
+    personal: circlePoints,
+    activeAllocations: pointAllocations.length
   };
 }
 
