@@ -252,7 +252,7 @@ export const AIConciergeBanner = () => {
                           </span>
                         </div>
                         
-                        <Button size="sm" className="bg-primary hover:bg-primary/90">
+                        <Button size="sm" variant="outline" className="text-blue-600 border-blue-600 hover:bg-blue-50">
                           {currentInsight.actionText}
                           <ArrowRight className="h-3 w-3 ml-1" />
                         </Button>
