@@ -13,12 +13,13 @@ import { useToast } from '@/hooks/use-toast';
 
 interface BlockedIP {
   id: string;
-  ip_address: string;
+  ip_address: unknown; // INET type from Postgres
   reason: string;
   blocked_at: string;
   requests_count: number;
   user_agent?: string;
   is_permanent: boolean;
+  expires_at?: string;
 }
 
 interface SuspiciousActivity {
@@ -81,10 +82,10 @@ const AntiScrapingSystem: React.FC = () => {
         { event: 'INSERT', schema: 'public', table: 'blocked_ips' },
         (payload) => {
           const newBlock = payload.new as BlockedIP;
-          setRealTimeAlerts(prev => [...prev, `IP ${newBlock.ip_address} blocked for ${newBlock.reason}`]);
+          setRealTimeAlerts(prev => [...prev, `IP ${String(newBlock.ip_address)} blocked for ${newBlock.reason}`]);
           toast({
             title: "🚨 IP Blocked",
-            description: `${newBlock.ip_address} blocked for ${newBlock.reason}`,
+            description: `${String(newBlock.ip_address)} blocked for ${newBlock.reason}`,
             variant: "destructive"
           });
           fetchBlockedIPs();
@@ -337,7 +338,7 @@ const AntiScrapingSystem: React.FC = () => {
                 {blockedIPs.map((blocked) => (
                   <div key={blocked.id} className="border rounded-lg p-3">
                     <div className="flex items-center justify-between mb-2">
-                      <code className="text-sm font-mono">{blocked.ip_address}</code>
+                      <code className="text-sm font-mono">{String(blocked.ip_address)}</code>
                       <Badge variant={blocked.is_permanent ? 'destructive' : 'secondary'}>
                         {blocked.is_permanent ? 'Permanent' : 'Temporary'}
                       </Badge>
@@ -352,7 +353,7 @@ const AntiScrapingSystem: React.FC = () => {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => unblockIP(blocked.ip_address)}
+                        onClick={() => unblockIP(String(blocked.ip_address))}
                         className="mt-2 w-full"
                       >
                         Unblock

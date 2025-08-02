@@ -171,6 +171,48 @@ export type Database = {
           },
         ]
       }
+      blocked_ips: {
+        Row: {
+          blocked_at: string
+          blocked_by: string | null
+          created_at: string
+          expires_at: string | null
+          id: string
+          ip_address: unknown
+          is_permanent: boolean
+          reason: string
+          requests_count: number
+          updated_at: string
+          user_agent: string | null
+        }
+        Insert: {
+          blocked_at?: string
+          blocked_by?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          ip_address: unknown
+          is_permanent?: boolean
+          reason: string
+          requests_count?: number
+          updated_at?: string
+          user_agent?: string | null
+        }
+        Update: {
+          blocked_at?: string
+          blocked_by?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          ip_address?: unknown
+          is_permanent?: boolean
+          reason?: string
+          requests_count?: number
+          updated_at?: string
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       channels: {
         Row: {
           cover_image_url: string | null
@@ -1134,6 +1176,48 @@ export type Database = {
         }
         Relationships: []
       }
+      request_logs: {
+        Row: {
+          endpoint: string
+          id: string
+          ip_address: unknown
+          method: string
+          referer: string | null
+          request_size: number | null
+          response_status: number | null
+          response_time_ms: number | null
+          timestamp: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          endpoint: string
+          id?: string
+          ip_address: unknown
+          method: string
+          referer?: string | null
+          request_size?: number | null
+          response_status?: number | null
+          response_time_ms?: number | null
+          timestamp?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          endpoint?: string
+          id?: string
+          ip_address?: unknown
+          method?: string
+          referer?: string | null
+          request_size?: number | null
+          response_status?: number | null
+          response_time_ms?: number | null
+          timestamp?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       revenue_tracking: {
         Row: {
           content_id: string | null
@@ -1222,6 +1306,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      scraping_settings: {
+        Row: {
+          auto_block_threshold: number
+          enabled: boolean
+          id: string
+          rate_limit_per_minute: number
+          time_window_seconds: number
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          auto_block_threshold?: number
+          enabled?: boolean
+          id?: string
+          rate_limit_per_minute?: number
+          time_window_seconds?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          auto_block_threshold?: number
+          enabled?: boolean
+          id?: string
+          rate_limit_per_minute?: number
+          time_window_seconds?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
       }
       security_events: {
         Row: {
@@ -2354,6 +2468,10 @@ export type Database = {
       }
     }
     Functions: {
+      auto_block_suspicious_ips: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       backup_financial_data: {
         Args: { backup_type_param: string }
         Returns: string
@@ -2413,6 +2531,10 @@ export type Database = {
       create_data_checksum: {
         Args: { data_json: Json }
         Returns: string
+      }
+      detect_suspicious_activity: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
       }
       expire_co_pay_requests: {
         Args: Record<PropertyKey, never>

@@ -8,6 +8,7 @@ import { CSRFProvider } from "@/components/common/CSRFProtection";
 import { SecurityHeaders } from "@/components/common/SecurityHeaders";
 import { EnhancedSecurityHeaders } from "@/components/security/EnhancedSecurityHeaders";
 import { SecurityStatusIndicator } from "@/components/security/SecurityEnhancementSystem";
+import RequestLogger from "@/components/security/RequestLogger";
 import Index from "./pages/Index";
 import { Auth } from "./pages/Auth";
 import { OrderHistory } from "./pages/OrderHistory";
@@ -52,10 +53,11 @@ const App = () => {
           <div className="fixed top-4 right-4 z-50">
             <SecurityStatusIndicator />
           </div>
-          <BrowserRouter>
-            <SecurityHeaders />
-            <EnhancedSecurityHeaders />
-            <Routes>
+           <BrowserRouter>
+             <SecurityHeaders />
+             <EnhancedSecurityHeaders />
+             <RequestLogger />
+             <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/academy" element={<Academy />} />
             <Route path="/command-center" element={<CommandCenter />} />

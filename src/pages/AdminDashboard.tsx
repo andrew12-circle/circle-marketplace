@@ -27,8 +27,9 @@ import { ImageVectorizationPanel } from '@/components/admin/ImageVectorizationPa
 import { VendorActivityAnalytics } from '@/components/admin/VendorActivityAnalytics';
 import { VendorInvitationPanel } from '@/components/admin/VendorInvitationPanel';
 import VendorPointAllocationPanel from '@/components/admin/VendorPointAllocationPanel';
+import AntiScrapingSystem from '@/components/security/AntiScrapingSystem';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Zap, Upload, Building, Youtube, DollarSign, BarChart3, Coins } from 'lucide-react';
+import { Zap, Upload, Building, Youtube, DollarSign, BarChart3, Coins, Shield as ShieldIcon } from 'lucide-react';
 
 interface UserProfile {
   id: string;
@@ -175,10 +176,14 @@ export default function AdminDashboard() {
         </div>
 
       <Tabs defaultValue="users" className="w-full space-y-6">
-        <TabsList className="grid w-full grid-cols-8">
+        <TabsList className="grid w-full grid-cols-9">
           <TabsTrigger value="users" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
             Users
+          </TabsTrigger>
+          <TabsTrigger value="security" className="flex items-center gap-2">
+            <ShieldIcon className="h-4 w-4" />
+            Security
           </TabsTrigger>
           <TabsTrigger value="vectorization" className="flex items-center gap-2">
             <Zap className="h-4 w-4" />
@@ -342,6 +347,10 @@ export default function AdminDashboard() {
 
         <TabsContent value="analytics" className="space-y-6">
           <VendorActivityAnalytics />
+        </TabsContent>
+
+        <TabsContent value="security" className="space-y-6">
+          <AntiScrapingSystem />
         </TabsContent>
 
         <TabsContent value="youtube" className="space-y-6">
