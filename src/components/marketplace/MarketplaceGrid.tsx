@@ -298,6 +298,7 @@ export const MarketplaceGrid = () => {
       const vendorsResponse = await supabase
         .from('vendors')
         .select('*')
+        .order('sort_order', { ascending: true })
         .order('rating', { ascending: false })
         .limit(50);
 
