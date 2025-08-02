@@ -28,8 +28,9 @@ import { VendorActivityAnalytics } from '@/components/admin/VendorActivityAnalyt
 import { VendorInvitationPanel } from '@/components/admin/VendorInvitationPanel';
 import VendorPointAllocationPanel from '@/components/admin/VendorPointAllocationPanel';
 import AntiScrapingSystem from '@/components/security/AntiScrapingSystem';
+import { CreatorPayoutDashboard } from '@/components/admin/CreatorPayoutDashboard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Zap, Upload, Building, Youtube, DollarSign, BarChart3, Coins, Shield as ShieldIcon } from 'lucide-react';
+import { Zap, Upload, Building, Youtube, DollarSign, BarChart3, Coins, Shield as ShieldIcon, Users2 } from 'lucide-react';
 
 interface UserProfile {
   id: string;
@@ -176,10 +177,14 @@ export default function AdminDashboard() {
         </div>
 
       <Tabs defaultValue="users" className="w-full space-y-6">
-        <TabsList className="grid w-full grid-cols-9">
+        <TabsList className="grid w-full grid-cols-10">
           <TabsTrigger value="users" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
             Users
+          </TabsTrigger>
+          <TabsTrigger value="creators" className="flex items-center gap-2">
+            <Users2 className="h-4 w-4" />
+            Creators
           </TabsTrigger>
           <TabsTrigger value="security" className="flex items-center gap-2">
             <ShieldIcon className="h-4 w-4" />
@@ -214,6 +219,10 @@ export default function AdminDashboard() {
             YouTube
           </TabsTrigger>
         </TabsList>
+
+        <TabsContent value="creators" className="space-y-6">
+          <CreatorPayoutDashboard />
+        </TabsContent>
 
         <TabsContent value="users" className="space-y-6">
           <SecurityMonitoringPanel />

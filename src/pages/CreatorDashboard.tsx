@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ContentUploadModal } from "@/components/creator/ContentUploadModal";
+import { CreatorPaymentStatusBanner } from "@/components/creator/CreatorPaymentStatusBanner";
 import { 
   Upload, 
   Video, 
@@ -19,7 +20,8 @@ import {
   DollarSign,
   Play,
   Users,
-  ArrowLeft
+  ArrowLeft,
+  AlertTriangle
 } from "lucide-react";
 
 interface ContentStats {
@@ -51,6 +53,7 @@ export const CreatorDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const [selectedContentType, setSelectedContentType] = useState<string>('video');
+  const [paymentSetupComplete, setPaymentSetupComplete] = useState(false);
   const { toast } = useToast();
 
   // Redirect if not authenticated
@@ -61,8 +64,34 @@ export const CreatorDashboard = () => {
   useEffect(() => {
     if (user) {
       fetchCreatorData();
+      checkPaymentSetup();
     }
   }, [user]);
+
+  const checkPaymentSetup = async () => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('creator_payment_info')
+        .select('stripe_onboarding_completed, verified, tax_form_completed')
+        .eq('creator_id', user.id)
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        return; // No payment info yet
+      }
+
+      const isComplete = data && 
+        data.stripe_onboarding_completed && 
+        data.verified && 
+        data.tax_form_completed;
+
+      setPaymentSetupComplete(!!isComplete);
+    } catch (error) {
+      console.error('Error checking payment setup:', error);
+    }
+  };
 
   const fetchCreatorData = async () => {
     if (!user) return;
@@ -161,6 +190,16 @@ export const CreatorDashboard = () => {
   };
 
   const handleUploadClick = (contentType: string) => {
+    if (!paymentSetupComplete) {
+      toast({
+        title: 'Payment Setup Required',
+        description: 'Complete your payment setup before uploading content.',
+        variant: 'destructive'
+      });
+      navigate('/creator-payment-setup');
+      return;
+    }
+    
     setSelectedContentType(contentType);
     setUploadModalOpen(true);
   };
@@ -233,6 +272,8 @@ export const CreatorDashboard = () => {
       </div>
 
       <div className="container mx-auto px-6 space-y-8">
+        {/* Payment Setup Banner */}
+        <CreatorPaymentStatusBanner />
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card className="relative overflow-hidden bg-gradient-to-br from-card to-card/50 border-primary/20 hover:border-primary/40 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 group">

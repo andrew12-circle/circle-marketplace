@@ -13,6 +13,7 @@ import { Marketplace } from "./pages/Marketplace";
 import { Academy } from "./pages/Academy";
 import Auth from "./pages/Auth";
 import { CreatorDashboard } from "./pages/CreatorDashboard";
+import CreatorPaymentSetupPage from "./pages/CreatorPaymentSetup";
 import AdminDashboard from "./pages/AdminDashboard";
 import { ProfileSettings } from "./pages/ProfileSettings";
 import { SavedItems } from "./pages/SavedItems";
@@ -49,6 +50,7 @@ createRoot(document.getElementById("root")!).render(
               <Route path="/marketplace" element={<Marketplace />} />
               <Route path="/academy" element={<Academy />} />
               <Route path="/creator-dashboard" element={<CreatorDashboard />} />
+              <Route path="/creator-payment-setup" element={<CreatorPaymentSetupPage />} />
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/profile-settings" element={<ProfileSettings />} />
               <Route path="/saved" element={<SavedItems />} />

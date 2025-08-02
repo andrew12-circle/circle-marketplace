@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -15,7 +15,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
-import { Upload, X, Plus } from 'lucide-react';
+import { Upload, X, Plus, AlertTriangle, CreditCard } from 'lucide-react';
 
 interface ContentUploadModalProps {
   isOpen: boolean;
@@ -34,6 +34,8 @@ export const ContentUploadModal = ({
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [paymentSetupComplete, setPaymentSetupComplete] = useState(false);
+  const [checkingPayment, setCheckingPayment] = useState(true);
   
   const [formData, setFormData] = useState({
     title: '',
@@ -53,6 +55,43 @@ export const ContentUploadModal = ({
   });
   
   const [newTag, setNewTag] = useState('');
+
+  // Check payment setup on modal open
+  useEffect(() => {
+    if (isOpen && user) {
+      checkPaymentSetup();
+    }
+  }, [isOpen, user]);
+
+  const checkPaymentSetup = async () => {
+    if (!user) return;
+
+    setCheckingPayment(true);
+    try {
+      const { data, error } = await supabase
+        .from('creator_payment_info')
+        .select('stripe_onboarding_completed, verified, tax_form_completed')
+        .eq('creator_id', user.id)
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        setPaymentSetupComplete(false);
+        return;
+      }
+
+      const isComplete = data && 
+        data.stripe_onboarding_completed && 
+        data.verified && 
+        data.tax_form_completed;
+
+      setPaymentSetupComplete(!!isComplete);
+    } catch (error) {
+      console.error('Error checking payment setup:', error);
+      setPaymentSetupComplete(false);
+    } finally {
+      setCheckingPayment(false);
+    }
+  };
 
   const categories = [
     'Marketing', 'Sales', 'Technology', 'Finance', 'Real Estate',
@@ -110,6 +149,18 @@ export const ContentUploadModal = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !files.content) return;
+
+    // Check payment setup before allowing upload
+    if (!paymentSetupComplete) {
+      toast({
+        title: 'Payment Setup Required',
+        description: 'Complete your payment setup before uploading content.',
+        variant: 'destructive'
+      });
+      onClose();
+      window.location.href = '/creator-payment-setup';
+      return;
+    }
 
     setLoading(true);
     setUploadProgress(0);
@@ -247,7 +298,33 @@ export const ContentUploadModal = ({
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        {checkingPayment ? (
+          <div className="flex items-center justify-center py-8">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto mb-4"></div>
+              <p className="text-muted-foreground">Checking payment setup...</p>
+            </div>
+          </div>
+        ) : !paymentSetupComplete ? (
+          <div className="text-center py-8">
+            <AlertTriangle className="w-12 h-12 text-yellow-500 mx-auto mb-4" />
+            <h3 className="text-lg font-medium mb-2">Payment Setup Required</h3>
+            <p className="text-muted-foreground mb-6">
+              You must complete your payment setup before uploading content. This ensures you can receive earnings from your content sales.
+            </p>
+            <Button 
+              onClick={() => {
+                onClose();
+                window.location.href = '/creator-payment-setup';
+              }}
+              className="gap-2"
+            >
+              <CreditCard className="w-4 h-4" />
+              Complete Payment Setup
+            </Button>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-6">
           {/* Basic Information */}
           <div className="space-y-4">
             <div>
@@ -431,6 +508,7 @@ export const ContentUploadModal = ({
             </Button>
           </div>
         </form>
+        )}
       </DialogContent>
     </Dialog>
   );

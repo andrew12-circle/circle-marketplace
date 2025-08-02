@@ -21,8 +21,11 @@ import {
   Upload,
   ExternalLink,
   Plus,
-  X
+  X,
+  Shield,
+  CreditCard
 } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface OnboardingStep {
   id: number;
@@ -321,6 +324,49 @@ const CreatorVerification = ({ data, onUpdate, onNext }: any) => {
   );
 };
 
+const CreatorPaymentStep = ({ data, onUpdate, onNext }: any) => {
+  const [paymentSetupComplete, setPaymentSetupComplete] = useState(false);
+  
+  return (
+    <div className="space-y-6">
+      <div className="text-center mb-6">
+        <h3 className="text-2xl font-bold mb-2">Payment Setup Required</h3>
+        <p className="text-muted-foreground">
+          Complete your payment setup to start earning from your content
+        </p>
+      </div>
+      
+      <Alert>
+        <Shield className="w-4 h-4" />
+        <AlertDescription>
+          <strong>Important:</strong> Payment setup is required before you can upload content or receive earnings. 
+          This ensures all creators meet our payment standards for automated monthly payouts.
+        </AlertDescription>
+      </Alert>
+      
+      <div className="bg-muted p-4 rounded-lg">
+        <h4 className="font-medium mb-2">Payment Setup Requirements:</h4>
+        <ul className="text-sm text-muted-foreground space-y-1">
+          <li>• Stripe Connect account verification</li>
+          <li>• Tax information (W-9/W-8)</li>
+          <li>• Bank account verification</li>
+          <li>• Identity verification</li>
+        </ul>
+      </div>
+      
+      <Button 
+        onClick={() => {
+          onUpdate({ paymentSetup: { completed: true } });
+          onNext();
+        }} 
+        className="w-full"
+      >
+        Continue to Payment Setup <ArrowRight className="w-4 h-4 ml-2" />
+      </Button>
+    </div>
+  );
+};
+
 const CreatorWelcome = ({ onNext }: any) => (
   <div className="text-center space-y-6">
     <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
@@ -379,6 +425,13 @@ export const CreatorOnboarding = () => {
       title: 'Verification',
       description: 'Submit verification materials',
       component: CreatorVerification,
+      completed: false
+    },
+    {
+      id: 3,
+      title: 'Payment Setup',
+      description: 'Setup payments to start earning',
+      component: CreatorPaymentStep,
       completed: false
     }
   ];
@@ -449,8 +502,8 @@ export const CreatorOnboarding = () => {
         description: 'Your creator application has been submitted for review. You\'ll be notified once approved.',
       });
 
-      // Redirect to creator dashboard
-      window.location.href = '/creator-dashboard';
+      // Redirect to payment setup page
+      window.location.href = '/creator-payment-setup';
 
     } catch (error) {
       console.error('Onboarding error:', error);
