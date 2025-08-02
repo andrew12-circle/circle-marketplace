@@ -552,6 +552,57 @@ export type Database = {
           },
         ]
       }
+      content_engagement_events: {
+        Row: {
+          completion_percentage: number | null
+          content_id: string
+          created_at: string | null
+          creator_id: string
+          device_type: string | null
+          event_type: string
+          id: string
+          ip_address: unknown | null
+          referrer: string | null
+          revenue_attributed: number | null
+          session_id: string | null
+          user_agent: string | null
+          user_id: string | null
+          watch_time_seconds: number | null
+        }
+        Insert: {
+          completion_percentage?: number | null
+          content_id: string
+          created_at?: string | null
+          creator_id: string
+          device_type?: string | null
+          event_type: string
+          id?: string
+          ip_address?: unknown | null
+          referrer?: string | null
+          revenue_attributed?: number | null
+          session_id?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+          watch_time_seconds?: number | null
+        }
+        Update: {
+          completion_percentage?: number | null
+          content_id?: string
+          created_at?: string | null
+          creator_id?: string
+          device_type?: string | null
+          event_type?: string
+          id?: string
+          ip_address?: unknown | null
+          referrer?: string | null
+          revenue_attributed?: number | null
+          session_id?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+          watch_time_seconds?: number | null
+        }
+        Relationships: []
+      }
       content_plays: {
         Row: {
           completion_percentage: number | null
@@ -680,6 +731,63 @@ export type Database = {
           },
         ]
       }
+      creator_analytics: {
+        Row: {
+          completion_rate: number | null
+          content_id: string | null
+          created_at: string | null
+          creator_earnings: number | null
+          creator_id: string
+          creator_revenue_percentage: number | null
+          creator_share_percentage: number | null
+          id: string
+          month_year: string
+          platform_total_revenue: number | null
+          revenue_generated: number | null
+          total_downloads: number | null
+          total_plays: number | null
+          total_watch_time_minutes: number | null
+          unique_viewers: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          completion_rate?: number | null
+          content_id?: string | null
+          created_at?: string | null
+          creator_earnings?: number | null
+          creator_id: string
+          creator_revenue_percentage?: number | null
+          creator_share_percentage?: number | null
+          id?: string
+          month_year: string
+          platform_total_revenue?: number | null
+          revenue_generated?: number | null
+          total_downloads?: number | null
+          total_plays?: number | null
+          total_watch_time_minutes?: number | null
+          unique_viewers?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          completion_rate?: number | null
+          content_id?: string | null
+          created_at?: string | null
+          creator_earnings?: number | null
+          creator_id?: string
+          creator_revenue_percentage?: number | null
+          creator_share_percentage?: number | null
+          id?: string
+          month_year?: string
+          platform_total_revenue?: number | null
+          revenue_generated?: number | null
+          total_downloads?: number | null
+          total_plays?: number | null
+          total_watch_time_minutes?: number | null
+          unique_viewers?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       creator_api_configs: {
         Row: {
           created_at: string
@@ -740,6 +848,129 @@ export type Database = {
           step?: number
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      creator_payment_info: {
+        Row: {
+          auto_payout_enabled: boolean | null
+          bank_account_holder: string | null
+          bank_account_number: string | null
+          bank_name: string | null
+          bank_routing_number: string | null
+          created_at: string | null
+          creator_id: string
+          id: string
+          minimum_payout_amount: number | null
+          payment_method: string
+          paypal_email: string | null
+          stripe_account_id: string | null
+          stripe_onboarding_completed: boolean | null
+          tax_form_completed: boolean | null
+          tax_id: string | null
+          updated_at: string | null
+          verification_documents: Json | null
+          verified: boolean | null
+        }
+        Insert: {
+          auto_payout_enabled?: boolean | null
+          bank_account_holder?: string | null
+          bank_account_number?: string | null
+          bank_name?: string | null
+          bank_routing_number?: string | null
+          created_at?: string | null
+          creator_id: string
+          id?: string
+          minimum_payout_amount?: number | null
+          payment_method?: string
+          paypal_email?: string | null
+          stripe_account_id?: string | null
+          stripe_onboarding_completed?: boolean | null
+          tax_form_completed?: boolean | null
+          tax_id?: string | null
+          updated_at?: string | null
+          verification_documents?: Json | null
+          verified?: boolean | null
+        }
+        Update: {
+          auto_payout_enabled?: boolean | null
+          bank_account_holder?: string | null
+          bank_account_number?: string | null
+          bank_name?: string | null
+          bank_routing_number?: string | null
+          created_at?: string | null
+          creator_id?: string
+          id?: string
+          minimum_payout_amount?: number | null
+          payment_method?: string
+          paypal_email?: string | null
+          stripe_account_id?: string | null
+          stripe_onboarding_completed?: boolean | null
+          tax_form_completed?: boolean | null
+          tax_id?: string | null
+          updated_at?: string | null
+          verification_documents?: Json | null
+          verified?: boolean | null
+        }
+        Relationships: []
+      }
+      creator_payouts: {
+        Row: {
+          breakdown: Json | null
+          created_at: string | null
+          creator_id: string
+          error_message: string | null
+          final_amount: number
+          id: string
+          net_payout: number
+          payment_date: string | null
+          payment_method: string
+          payment_processor_fee: number | null
+          payment_processor_id: string | null
+          payout_month: string
+          platform_fee: number | null
+          retry_count: number | null
+          status: string
+          total_earnings: number
+          updated_at: string | null
+        }
+        Insert: {
+          breakdown?: Json | null
+          created_at?: string | null
+          creator_id: string
+          error_message?: string | null
+          final_amount?: number
+          id?: string
+          net_payout?: number
+          payment_date?: string | null
+          payment_method: string
+          payment_processor_fee?: number | null
+          payment_processor_id?: string | null
+          payout_month: string
+          platform_fee?: number | null
+          retry_count?: number | null
+          status?: string
+          total_earnings?: number
+          updated_at?: string | null
+        }
+        Update: {
+          breakdown?: Json | null
+          created_at?: string | null
+          creator_id?: string
+          error_message?: string | null
+          final_amount?: number
+          id?: string
+          net_payout?: number
+          payment_date?: string | null
+          payment_method?: string
+          payment_processor_fee?: number | null
+          payment_processor_id?: string | null
+          payout_month?: string
+          platform_fee?: number | null
+          retry_count?: number | null
+          status?: string
+          total_earnings?: number
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -988,6 +1219,66 @@ export type Database = {
           identifier?: string
           locked_until?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      monthly_platform_revenue: {
+        Row: {
+          average_creator_payout: number | null
+          churned_subscribers: number | null
+          created_at: string | null
+          creator_share_percentage: number | null
+          id: string
+          month_year: string
+          new_subscribers: number | null
+          platform_net_revenue: number | null
+          revenue_per_subscriber: number | null
+          total_content_plays: number | null
+          total_creator_earnings: number | null
+          total_one_time_payments: number | null
+          total_platform_revenue: number | null
+          total_subscribers: number | null
+          total_subscription_revenue: number | null
+          total_watch_time_hours: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          average_creator_payout?: number | null
+          churned_subscribers?: number | null
+          created_at?: string | null
+          creator_share_percentage?: number | null
+          id?: string
+          month_year: string
+          new_subscribers?: number | null
+          platform_net_revenue?: number | null
+          revenue_per_subscriber?: number | null
+          total_content_plays?: number | null
+          total_creator_earnings?: number | null
+          total_one_time_payments?: number | null
+          total_platform_revenue?: number | null
+          total_subscribers?: number | null
+          total_subscription_revenue?: number | null
+          total_watch_time_hours?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          average_creator_payout?: number | null
+          churned_subscribers?: number | null
+          created_at?: string | null
+          creator_share_percentage?: number | null
+          id?: string
+          month_year?: string
+          new_subscribers?: number | null
+          platform_net_revenue?: number | null
+          revenue_per_subscriber?: number | null
+          total_content_plays?: number | null
+          total_creator_earnings?: number | null
+          total_one_time_payments?: number | null
+          total_platform_revenue?: number | null
+          total_subscribers?: number | null
+          total_subscription_revenue?: number | null
+          total_watch_time_hours?: number | null
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -2660,6 +2951,10 @@ export type Database = {
         Args: { lat1: number; lon1: number; lat2: number; lon2: number }
         Returns: number
       }
+      calculate_monthly_payouts: {
+        Args: { target_month?: string }
+        Returns: undefined
+      }
       calculate_monthly_revenue: {
         Args: { target_month: string }
         Returns: undefined
@@ -2826,6 +3121,10 @@ export type Database = {
         Returns: string
       }
       trigger_trending_import: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      update_creator_analytics: {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
