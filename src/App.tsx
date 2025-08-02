@@ -48,6 +48,9 @@ const App = () => {
         <AuthProvider>
           <Toaster />
           <Sonner />
+          <div style={{ padding: '20px', backgroundColor: 'blue', color: 'white' }}>
+            <p>Current URL: {window.location.pathname}</p>
+          </div>
           <BrowserRouter>
             <SecurityHeaders />
             <EnhancedSecurityHeaders />
@@ -55,9 +58,10 @@ const App = () => {
             <Route path="/" element={<Index />} />
             <Route path="/academy" element={<Academy />} />
             <Route path="/command-center" element={
-              <div style={{ padding: '20px', backgroundColor: 'red', color: 'white', minHeight: '100vh' }}>
-                <h1 style={{ fontSize: '48px' }}>COMMAND CENTER TEST PAGE</h1>
-                <p style={{ fontSize: '24px' }}>If you can see this, routing works!</p>
+              <div style={{ padding: '20px', backgroundColor: 'red', color: 'white', minHeight: '100vh', position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999 }}>
+                <h1 style={{ fontSize: '48px' }}>COMMAND CENTER IS WORKING!</h1>
+                <p style={{ fontSize: '24px' }}>URL: {window.location.pathname}</p>
+                <p style={{ fontSize: '24px' }}>Time: {new Date().toISOString()}</p>
               </div>
             } />
             <Route path="/auth" element={<Auth />} />
