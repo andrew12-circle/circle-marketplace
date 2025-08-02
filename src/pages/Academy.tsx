@@ -7,6 +7,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { LocationSwitcher } from "@/components/LocationSwitcher";
 import { LegalFooter } from "@/components/LegalFooter";
+import { AgentPlaybookSection } from "@/components/academy/AgentPlaybookSection";
+import { PlaybookCreator } from "@/components/academy/PlaybookCreator";
 import { Crown } from "lucide-react";
 import { VideoSection } from "@/components/academy/VideoSection";
 import { VideoPlayerModal } from "@/components/academy/VideoPlayerModal";
@@ -253,8 +255,9 @@ export const Academy = () => {
   const { courses: allCourses, loading: coursesLoading, enrollInCourse } = useCourses();
 
   const categories = [
+    { id: "playbooks", label: "Agent Playbooks", icon: BookOpen },
+    { id: "create", label: "Create Playbook", icon: GraduationCap },
     { id: "courses", label: "Courses", icon: GraduationCap },
-    { id: "playbooks", label: "Playbooks", icon: BookOpen },
     { id: "videos", label: "Videos", icon: Video },
     { id: "podcasts", label: "Podcasts", icon: Headphones },
     { id: "books", label: "Books", icon: Book },
@@ -1407,6 +1410,18 @@ export const Academy = () => {
     switch (activeView) {
       case "home":
         return renderHomeView();
+      case "playbooks":
+        return (
+          <div className="flex-1 p-8 max-w-7xl">
+            <AgentPlaybookSection />
+          </div>
+        );
+      case "create":
+        return (
+          <div className="flex-1 p-8 max-w-7xl">
+            <PlaybookCreator />
+          </div>
+        );
       case "videos":
         return renderVideosView();
       case "channels":

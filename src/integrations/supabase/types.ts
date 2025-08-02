@@ -47,6 +47,39 @@ export type Database = {
         }
         Relationships: []
       }
+      agent_playbook_templates: {
+        Row: {
+          created_at: string
+          difficulty_level: string | null
+          estimated_completion_time: string | null
+          id: string
+          sections: Json
+          template_description: string | null
+          template_name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          difficulty_level?: string | null
+          estimated_completion_time?: string | null
+          id?: string
+          sections?: Json
+          template_description?: string | null
+          template_name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          difficulty_level?: string | null
+          estimated_completion_time?: string | null
+          id?: string
+          sections?: Json
+          template_description?: string | null
+          template_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       ai_recommendation_log: {
         Row: {
           context_data: Json | null
@@ -465,6 +498,10 @@ export type Database = {
       }
       content: {
         Row: {
+          agent_annual_volume: number | null
+          agent_location: string | null
+          agent_tier: string | null
+          agent_years_experience: number | null
           category: string
           content_type: Database["public"]["Enums"]["content_type"]
           content_url: string | null
@@ -474,23 +511,33 @@ export type Database = {
           description: string | null
           duration: string | null
           id: string
+          is_agent_playbook: boolean | null
           is_featured: boolean | null
           is_pro: boolean | null
           is_published: boolean | null
           lesson_count: number | null
           metadata: Json | null
           page_count: number | null
+          playbook_price: number | null
           preview_url: string | null
           price: number | null
           published_at: string | null
           rating: number | null
+          revenue_share_percentage: number | null
+          success_metrics: Json | null
           tags: string[] | null
+          target_audience: string | null
           title: string
+          tools_mentioned: Json | null
           total_plays: number | null
           total_revenue: number | null
           updated_at: string | null
         }
         Insert: {
+          agent_annual_volume?: number | null
+          agent_location?: string | null
+          agent_tier?: string | null
+          agent_years_experience?: number | null
           category: string
           content_type: Database["public"]["Enums"]["content_type"]
           content_url?: string | null
@@ -500,23 +547,33 @@ export type Database = {
           description?: string | null
           duration?: string | null
           id?: string
+          is_agent_playbook?: boolean | null
           is_featured?: boolean | null
           is_pro?: boolean | null
           is_published?: boolean | null
           lesson_count?: number | null
           metadata?: Json | null
           page_count?: number | null
+          playbook_price?: number | null
           preview_url?: string | null
           price?: number | null
           published_at?: string | null
           rating?: number | null
+          revenue_share_percentage?: number | null
+          success_metrics?: Json | null
           tags?: string[] | null
+          target_audience?: string | null
           title: string
+          tools_mentioned?: Json | null
           total_plays?: number | null
           total_revenue?: number | null
           updated_at?: string | null
         }
         Update: {
+          agent_annual_volume?: number | null
+          agent_location?: string | null
+          agent_tier?: string | null
+          agent_years_experience?: number | null
           category?: string
           content_type?: Database["public"]["Enums"]["content_type"]
           content_url?: string | null
@@ -526,18 +583,24 @@ export type Database = {
           description?: string | null
           duration?: string | null
           id?: string
+          is_agent_playbook?: boolean | null
           is_featured?: boolean | null
           is_pro?: boolean | null
           is_published?: boolean | null
           lesson_count?: number | null
           metadata?: Json | null
           page_count?: number | null
+          playbook_price?: number | null
           preview_url?: string | null
           price?: number | null
           published_at?: string | null
           rating?: number | null
+          revenue_share_percentage?: number | null
+          success_metrics?: Json | null
           tags?: string[] | null
+          target_audience?: string | null
           title?: string
+          tools_mentioned?: Json | null
           total_plays?: number | null
           total_revenue?: number | null
           updated_at?: string | null
@@ -1359,6 +1422,60 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      playbook_creation_progress: {
+        Row: {
+          completed_sections: Json | null
+          content_id: string | null
+          created_at: string
+          creator_id: string
+          current_section: number | null
+          draft_data: Json | null
+          id: string
+          status: string | null
+          template_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          completed_sections?: Json | null
+          content_id?: string | null
+          created_at?: string
+          creator_id: string
+          current_section?: number | null
+          draft_data?: Json | null
+          id?: string
+          status?: string | null
+          template_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          completed_sections?: Json | null
+          content_id?: string | null
+          created_at?: string
+          creator_id?: string
+          current_section?: number | null
+          draft_data?: Json | null
+          id?: string
+          status?: string | null
+          template_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "playbook_creation_progress_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "content"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "playbook_creation_progress_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "agent_playbook_templates"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       point_allocations: {
         Row: {
@@ -2992,6 +3109,10 @@ export type Database = {
         Args: { backup_type_param: string }
         Returns: string
       }
+      calculate_agent_playbook_earnings: {
+        Args: { p_content_id: string; p_total_revenue: number }
+        Returns: number
+      }
       calculate_distance: {
         Args: { lat1: number; lon1: number; lat2: number; lon2: number }
         Returns: number
@@ -3191,6 +3312,10 @@ export type Database = {
         Returns: undefined
       }
       update_creator_analytics_weighted: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      update_playbook_creator_analytics: {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
