@@ -581,6 +581,23 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
           setIsPricingChoiceModalOpen(false);
           setIsVendorSelectionModalOpen(true);
         }}
+        onChooseAgentPoints={() => {
+          setIsPricingChoiceModalOpen(false);
+          // Add to cart with agent points payment method
+          addToCart({
+            id: service.id,
+            title: service.title,
+            price: parseFloat(service.pro_price?.replace(/[^\d.]/g, '') || '0'),
+            image_url: service.image_url,
+            vendor: service.vendor?.name || 'Unknown Vendor',
+            type: 'service',
+            description: `Paid with agent points - ${service.description || ''}`,
+          });
+          toast({
+            title: "Added to Cart",
+            description: "Service added to cart with agent points payment",
+          });
+        }}
       />
 
       <DirectPurchaseModal

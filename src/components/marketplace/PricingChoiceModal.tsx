@@ -1,7 +1,10 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Crown, Users, ShoppingCart } from "lucide-react";
+import { Crown, Users, ShoppingCart, Coins } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 interface PricingChoiceModalProps {
   isOpen: boolean;
@@ -16,6 +19,7 @@ interface PricingChoiceModalProps {
   };
   onChooseProPrice: () => void;
   onChooseCoPay: () => void;
+  onChooseAgentPoints: () => void;
 }
 
 export const PricingChoiceModal = ({ 
@@ -23,13 +27,45 @@ export const PricingChoiceModal = ({
   onClose, 
   service, 
   onChooseProPrice, 
-  onChooseCoPay 
+  onChooseCoPay,
+  onChooseAgentPoints
 }: PricingChoiceModalProps) => {
+  const { user } = useAuth();
+  const [agentPoints, setAgentPoints] = useState<any>(null);
+  const [loadingPoints, setLoadingPoints] = useState(false);
+
   const proPrice = service.pro_price ? parseFloat(service.pro_price.replace(/[^\d.]/g, '')) : 0;
   const retailPrice = service.retail_price ? parseFloat(service.retail_price.replace(/[^\d.]/g, '')) : 0;
   const coPayPrice = retailPrice && service.max_vendor_split_percentage 
     ? retailPrice * (1 - (service.max_vendor_split_percentage / 100))
     : 0;
+
+  // Load agent points when modal opens
+  useEffect(() => {
+    if (isOpen && user?.id) {
+      loadAgentPointsData();
+    }
+  }, [isOpen, user?.id]);
+
+  const loadAgentPointsData = async () => {
+    if (!user?.id) return;
+    
+    setLoadingPoints(true);
+    try {
+      const { data, error } = await supabase.rpc('get_agent_points_summary', {
+        p_agent_id: user.id
+      });
+
+      if (error) throw error;
+      setAgentPoints(data);
+    } catch (error) {
+      console.error('Error loading agent points:', error);
+    } finally {
+      setLoadingPoints(false);
+    }
+  };
+
+  const canAffordWithPoints = agentPoints && proPrice > 0 && agentPoints.total_available_points >= proPrice;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -77,15 +113,79 @@ export const PricingChoiceModal = ({
             </CardContent>
           </Card>
 
+          {/* Agent Points Option */}
+          {loadingPoints ? (
+            <Card className="border-2 border-blue-200">
+              <CardContent className="p-4">
+                <p className="text-sm text-muted-foreground text-center">Loading your points...</p>
+              </CardContent>
+            </Card>
+          ) : agentPoints && canAffordWithPoints ? (
+            <Card className="border-2 border-blue-200 bg-blue-50/50">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Coins className="w-5 h-5 text-blue-600" />
+                  Pay with Agent Points
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-lg font-bold text-blue-600">
+                    {Math.ceil(proPrice)} Points
+                  </span>
+                  <span className="text-sm text-muted-foreground">
+                    Instant Purchase
+                  </span>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Use your co-pay points. You have {agentPoints.total_available_points} points available.
+                </p>
+                <Button 
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white" 
+                  onClick={onChooseAgentPoints}
+                >
+                  <Coins className="w-4 h-4 mr-2" />
+                  Use {Math.ceil(proPrice)} Points
+                </Button>
+              </CardContent>
+            </Card>
+          ) : agentPoints ? (
+            <Card className="border-2 border-gray-200 opacity-60">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Coins className="w-5 h-5 text-gray-500" />
+                  Pay with Agent Points
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-lg font-bold text-gray-500">
+                    {Math.ceil(proPrice)} Points
+                  </span>
+                  <span className="text-sm text-muted-foreground">
+                    Insufficient Balance
+                  </span>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  You need {Math.ceil(proPrice)} points but only have {agentPoints.total_available_points} available.
+                </p>
+                <Button disabled className="w-full">
+                  <Coins className="w-4 h-4 mr-2" />
+                  Insufficient Points
+                </Button>
+              </CardContent>
+            </Card>
+          ) : null}
+
           {/* OR Divider */}
           <div className="flex items-center justify-center">
             <div className="flex-1 border-t border-muted-foreground/20"></div>
-            <span className="px-4 text-sm font-medium text-muted-foreground bg-background">OR get your billed reduced</span>
+            <span className="px-4 text-sm font-medium text-muted-foreground bg-background">OR get your bill reduced</span>
             <div className="flex-1 border-t border-muted-foreground/20"></div>
           </div>
 
           {/* Co-Pay Option */}
-          <Card className="border-2 border-green-200 animate-pulse ring-2 ring-green-300 ring-opacity-75">
+          <Card className="border-2 border-green-200">
             <CardHeader className="pb-2">
               <CardTitle className="text-base flex items-center gap-2">
                 <Users className="w-5 h-5 text-green-600" />
