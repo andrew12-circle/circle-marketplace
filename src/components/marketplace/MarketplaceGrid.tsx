@@ -6,6 +6,7 @@ import { MarketplaceFilters } from "./MarketplaceFilters";
 import { CampaignServicesHeader } from "./CampaignServicesHeader";
 import { CircleProBanner } from "./CircleProBanner";
 import { ServiceDetailsModal } from "./ServiceDetailsModal";
+import { AIConciergeBanner } from "./AIConciergeBanner";
 import { AddProductModal } from "./AddProductModal";
 import { LocationFilterBanner } from "./LocationFilterBanner";
 import { Button } from "@/components/ui/button";
@@ -685,6 +686,9 @@ export const MarketplaceGrid = () => {
 
           {/* Campaign Services Header */}
           <CampaignServicesHeader />
+
+          {/* AI Concierge Banner - Show for logged-in users */}
+          <AIConciergeBanner />
 
           {/* Enhanced Search Component */}
           <div className="space-y-6">
