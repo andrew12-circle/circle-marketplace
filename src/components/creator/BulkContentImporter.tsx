@@ -21,7 +21,13 @@ import {
   Download,
   CheckCircle,
   AlertCircle,
-  X
+  X,
+  Facebook,
+  Mail,
+  Link,
+  Smartphone,
+  FileText,
+  Zap
 } from 'lucide-react';
 
 interface ImportResult {
@@ -43,6 +49,15 @@ export const BulkContentImporter = () => {
   // YouTube Channel Import
   const [youtubeUrl, setYoutubeUrl] = useState('');
   const [maxVideos, setMaxVideos] = useState('50');
+  
+  // Facebook Import
+  const [facebookUrls, setFacebookUrls] = useState('');
+  
+  // Email Content Import
+  const [emailContent, setEmailContent] = useState('');
+  
+  // Cold Call Scripts Import
+  const [callScripts, setCallScripts] = useState('');
   
   // Playlist Import
   const [playlistData, setPlaylistData] = useState('');
@@ -269,10 +284,289 @@ export const BulkContentImporter = () => {
     }
   };
 
+  const handleFacebookImport = async () => {
+    if (!facebookUrls.trim() || !user) return;
+
+    setLoading(true);
+    setProgress(0);
+    
+    const urls = facebookUrls.split('\n').filter(url => url.trim());
+    const imported: number[] = [];
+    const errors: string[] = [];
+    
+    try {
+      for (let i = 0; i < urls.length; i++) {
+        const url = urls[i].trim();
+        setProgress((i / urls.length) * 100);
+        
+        try {
+          // Extract basic info from Facebook URL
+          let title = `Facebook Video ${i + 1}`;
+          let description = `Imported Facebook content from: ${url}`;
+          
+          // Try to extract video ID or post info from URL
+          if (url.includes('/videos/')) {
+            const videoMatch = url.match(/\/videos\/(\d+)/);
+            if (videoMatch) {
+              title = `Facebook Video - ${videoMatch[1]}`;
+            }
+          } else if (url.includes('/posts/')) {
+            title = `Facebook Post ${i + 1}`;
+            description = `Imported Facebook post from: ${url}`;
+          }
+
+          const { error } = await supabase
+            .from('content')
+            .insert({
+              creator_id: user.id,
+              title,
+              description,
+              content_type: 'video',
+              category: defaultCategory || 'Social Media',
+              content_url: url,
+              is_published: false, // Needs manual review
+              metadata: { source: 'facebook', originalUrl: url },
+              created_at: new Date().toISOString()
+            });
+
+          if (error) {
+            errors.push(`Failed to import ${url}: ${error.message}`);
+          } else {
+            imported.push(i);
+          }
+          
+          await new Promise(resolve => setTimeout(resolve, 100));
+          
+        } catch (error) {
+          errors.push(`Failed to process ${url}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
+      }
+
+      setResult({
+        success: imported.length > 0,
+        total: urls.length,
+        imported: imported.length,
+        skipped: 0,
+        errors
+      });
+
+      if (imported.length > 0) {
+        toast({
+          title: 'Facebook Import Complete',
+          description: `Successfully imported ${imported.length} out of ${urls.length} Facebook items`,
+        });
+      }
+      
+    } catch (error) {
+      console.error('Facebook import error:', error);
+      toast({
+        title: 'Import Failed',
+        description: 'Facebook import failed. Please try again.',
+        variant: 'destructive'
+      });
+    } finally {
+      setLoading(false);
+      setProgress(100);
+    }
+  };
+
+  const handleEmailContentImport = async () => {
+    if (!emailContent.trim() || !user) return;
+
+    setLoading(true);
+    setProgress(0);
+    
+    try {
+      // Split email content by common delimiters
+      const emailBodies = emailContent.split(/\n\s*---\s*\n|\n\s*===\s*\n|\n\s*###\s*\n/)
+        .filter(content => content.trim().length > 100); // Only meaningful content
+      
+      const imported: number[] = [];
+      const errors: string[] = [];
+      
+      for (let i = 0; i < emailBodies.length; i++) {
+        const content = emailBodies[i].trim();
+        setProgress((i / emailBodies.length) * 100);
+        
+        try {
+          // Extract subject line if present
+          const lines = content.split('\n');
+          let title = `Email Content ${i + 1}`;
+          let description = content;
+          
+          // Look for subject line patterns
+          const subjectMatch = lines.find(line => 
+            line.toLowerCase().includes('subject:') || 
+            line.toLowerCase().includes('re:') ||
+            line.toLowerCase().includes('fwd:')
+          );
+          
+          if (subjectMatch) {
+            title = subjectMatch.replace(/^(subject:|re:|fwd:)/i, '').trim();
+            description = lines.slice(lines.indexOf(subjectMatch) + 1).join('\n').trim();
+          } else if (lines[0] && lines[0].length < 100) {
+            // Use first line as title if it's reasonably short
+            title = lines[0];
+            description = lines.slice(1).join('\n').trim();
+          }
+
+          const { error } = await supabase
+            .from('content')
+            .insert({
+              creator_id: user.id,
+              title: title.substring(0, 200), // Limit title length
+              description: description.substring(0, 2000), // Limit description
+              content_type: 'playbook', // Email content works well as playbooks
+              category: defaultCategory || 'Marketing',
+              is_published: false,
+              metadata: { 
+                source: 'email',
+                originalLength: content.length,
+                wordCount: content.split(/\s+/).length
+              },
+              created_at: new Date().toISOString()
+            });
+
+          if (error) {
+            errors.push(`Failed to import email ${i + 1}: ${error.message}`);
+          } else {
+            imported.push(i);
+          }
+          
+        } catch (error) {
+          errors.push(`Failed to process email ${i + 1}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
+      }
+
+      setResult({
+        success: imported.length > 0,
+        total: emailBodies.length,
+        imported: imported.length,
+        skipped: 0,
+        errors
+      });
+
+      if (imported.length > 0) {
+        toast({
+          title: 'Email Import Complete',
+          description: `Successfully converted ${imported.length} emails into playbook content`,
+        });
+      }
+      
+    } catch (error) {
+      console.error('Email import error:', error);
+      toast({
+        title: 'Import Failed',
+        description: 'Email import failed. Please try again.',
+        variant: 'destructive'
+      });
+    } finally {
+      setLoading(false);
+      setProgress(100);
+    }
+  };
+
+  const handleCallScriptsImport = async () => {
+    if (!callScripts.trim() || !user) return;
+
+    setLoading(true);
+    setProgress(0);
+    
+    try {
+      // Split scripts by common separators
+      const scripts = callScripts.split(/\n\s*---\s*\n|\n\s*Script \d+:|\n\s*SCRIPT \d+:/)
+        .filter(script => script.trim().length > 50);
+      
+      const imported: number[] = [];
+      const errors: string[] = [];
+      
+      for (let i = 0; i < scripts.length; i++) {
+        const script = scripts[i].trim();
+        setProgress((i / scripts.length) * 100);
+        
+        try {
+          const lines = script.split('\n');
+          let title = `Cold Call Script ${i + 1}`;
+          let description = script;
+          
+          // Look for title patterns
+          const titleMatch = lines.find(line => 
+            line.toLowerCase().includes('title:') ||
+            line.toLowerCase().includes('script:') ||
+            line.toLowerCase().includes('objective:')
+          );
+          
+          if (titleMatch) {
+            title = titleMatch.replace(/^(title:|script:|objective:)/i, '').trim();
+            description = lines.slice(lines.indexOf(titleMatch) + 1).join('\n').trim();
+          } else if (lines[0] && lines[0].length < 100) {
+            title = lines[0];
+            description = lines.slice(1).join('\n').trim();
+          }
+
+          const { error } = await supabase
+            .from('content')
+            .insert({
+              creator_id: user.id,
+              title: title.substring(0, 200),
+              description: description.substring(0, 2000),
+              content_type: 'playbook', // Scripts work well as playbooks
+              category: 'Sales',
+              is_published: false,
+              metadata: { 
+                source: 'cold_call_script',
+                scriptLength: script.length,
+                estimatedDuration: `${Math.ceil(script.split(/\s+/).length / 150)} minutes`
+              },
+              created_at: new Date().toISOString()
+            });
+
+          if (error) {
+            errors.push(`Failed to import script ${i + 1}: ${error.message}`);
+          } else {
+            imported.push(i);
+          }
+          
+        } catch (error) {
+          errors.push(`Failed to process script ${i + 1}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
+      }
+
+      setResult({
+        success: imported.length > 0,
+        total: scripts.length,
+        imported: imported.length,
+        skipped: 0,
+        errors
+      });
+
+      if (imported.length > 0) {
+        toast({
+          title: 'Scripts Import Complete',
+          description: `Successfully converted ${imported.length} call scripts into playbook content`,
+        });
+      }
+      
+    } catch (error) {
+      console.error('Scripts import error:', error);
+      toast({
+        title: 'Import Failed',
+        description: 'Scripts import failed. Please try again.',
+        variant: 'destructive'
+      });
+    } finally {
+      setLoading(false);
+      setProgress(100);
+    }
+  };
+
   const resetImport = () => {
     setResult(null);
     setProgress(0);
     setYoutubeUrl('');
+    setFacebookUrls('');
+    setEmailContent('');
+    setCallScripts('');
     setPlaylistData('');
     setUrlList('');
     setImportType('');
@@ -282,11 +576,11 @@ export const BulkContentImporter = () => {
     <Card className="max-w-4xl mx-auto">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Upload className="w-5 h-5" />
-          Bulk Content Importer
+          <Zap className="w-5 h-5 text-primary" />
+          One-Click Content Import
         </CardTitle>
         <p className="text-sm text-muted-foreground">
-          Import multiple pieces of content at once to quickly populate your library
+          Import your existing content from YouTube, Facebook, emails, and more - no need to change your workflow!
         </p>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -294,40 +588,87 @@ export const BulkContentImporter = () => {
           <>
             {/* Import Type Selection */}
             <div>
-              <Label>Import Type</Label>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-2">
+              <Label className="text-base font-medium">Choose Your Content Source</Label>
+              <p className="text-sm text-muted-foreground mb-4">Select where your content is currently living</p>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                 <Button
                   variant={importType === 'youtube' ? 'default' : 'outline'}
                   onClick={() => setImportType('youtube')}
-                  className="flex flex-col items-center gap-2 h-20"
+                  className="flex flex-col items-center gap-2 h-24 hover:scale-105 transition-transform"
                 >
-                  <Youtube className="w-6 h-6" />
-                  <span className="text-xs">YouTube Channel</span>
+                  <Youtube className="w-8 h-8 text-red-600" />
+                  <span className="text-xs font-medium">YouTube</span>
+                  <span className="text-xs text-muted-foreground">Channels & Videos</span>
                 </Button>
+                
                 <Button
-                  variant={importType === 'playlist' ? 'default' : 'outline'}
-                  onClick={() => setImportType('playlist')}
-                  className="flex flex-col items-center gap-2 h-20"
+                  variant={importType === 'facebook' ? 'default' : 'outline'}
+                  onClick={() => setImportType('facebook')}
+                  className="flex flex-col items-center gap-2 h-24 hover:scale-105 transition-transform"
                 >
-                  <Music className="w-6 h-6" />
-                  <span className="text-xs">Playlist Data</span>
+                  <Facebook className="w-8 h-8 text-blue-600" />
+                  <span className="text-xs font-medium">Facebook</span>
+                  <span className="text-xs text-muted-foreground">Videos & Lives</span>
                 </Button>
+                
+                <Button
+                  variant={importType === 'email-content' ? 'default' : 'outline'}
+                  onClick={() => setImportType('email-content')}
+                  className="flex flex-col items-center gap-2 h-24 hover:scale-105 transition-transform"
+                >
+                  <Mail className="w-8 h-8 text-green-600" />
+                  <span className="text-xs font-medium">Email Content</span>
+                  <span className="text-xs text-muted-foreground">Convert to Playbooks</span>
+                </Button>
+                
+                <Button
+                  variant={importType === 'call-scripts' ? 'default' : 'outline'}
+                  onClick={() => setImportType('call-scripts')}
+                  className="flex flex-col items-center gap-2 h-24 hover:scale-105 transition-transform"
+                >
+                  <Smartphone className="w-8 h-8 text-purple-600" />
+                  <span className="text-xs font-medium">Call Scripts</span>
+                  <span className="text-xs text-muted-foreground">Cold Call Material</span>
+                </Button>
+                
                 <Button
                   variant={importType === 'bulk-urls' ? 'default' : 'outline'}
                   onClick={() => setImportType('bulk-urls')}
-                  className="flex flex-col items-center gap-2 h-20"
+                  className="flex flex-col items-center gap-2 h-24 hover:scale-105 transition-transform"
                 >
-                  <Download className="w-6 h-6" />
-                  <span className="text-xs">Bulk URLs</span>
+                  <Link className="w-8 h-8 text-orange-600" />
+                  <span className="text-xs font-medium">Any URLs</span>
+                  <span className="text-xs text-muted-foreground">Bulk Import</span>
                 </Button>
+                
                 <Button
-                  variant={importType === 'podcasts' ? 'default' : 'outline'}
-                  onClick={() => setImportType('podcasts')}
-                  className="flex flex-col items-center gap-2 h-20"
-                  disabled
+                  variant={importType === 'playlist' ? 'default' : 'outline'}
+                  onClick={() => setImportType('playlist')}
+                  className="flex flex-col items-center gap-2 h-24 hover:scale-105 transition-transform"
                 >
-                  <Podcast className="w-6 h-6" />
-                  <span className="text-xs">Podcasts (Soon)</span>
+                  <FileText className="w-8 h-8 text-indigo-600" />
+                  <span className="text-xs font-medium">Structured Data</span>
+                  <span className="text-xs text-muted-foreground">CSV/List Format</span>
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  disabled
+                  className="flex flex-col items-center gap-2 h-24 opacity-50"
+                >
+                  <Podcast className="w-8 h-8 text-cyan-600" />
+                  <span className="text-xs font-medium">Podcasts</span>
+                  <span className="text-xs text-muted-foreground">Coming Soon</span>
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  disabled
+                  className="flex flex-col items-center gap-2 h-24 opacity-50"
+                >
+                  <Plus className="w-8 h-8 text-gray-600" />
+                  <span className="text-xs font-medium">More Sources</span>
+                  <span className="text-xs text-muted-foreground">Request Feature</span>
                 </Button>
               </div>
             </div>
@@ -432,6 +773,127 @@ export const BulkContentImporter = () => {
                   className="w-full"
                 >
                   {loading ? 'Importing...' : 'Import Playlist'}
+                </Button>
+              </div>
+            )}
+
+            {/* Facebook Import */}
+            {importType === 'facebook' && (
+              <div className="space-y-4 p-4 border rounded-lg bg-blue-50/50">
+                <div className="flex items-center gap-2">
+                  <Facebook className="w-5 h-5 text-blue-600" />
+                  <h4 className="font-medium">Facebook Content Import</h4>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Paste Facebook video URLs or live stream links. We'll import them as video content for your platform.
+                </p>
+                <div>
+                  <Label htmlFor="default-category">Category for Facebook Content</Label>
+                  <Select value={defaultCategory} onValueChange={setDefaultCategory}>
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories.map(cat => (
+                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="facebook-urls">Facebook URLs (one per line)</Label>
+                  <Textarea
+                    id="facebook-urls"
+                    value={facebookUrls}
+                    onChange={(e) => setFacebookUrls(e.target.value)}
+                    placeholder="https://www.facebook.com/watch?v=123456789&#10;https://www.facebook.com/your.page/videos/987654321&#10;https://www.facebook.com/your.page/posts/456789123"
+                    rows={8}
+                    className="mt-1"
+                  />
+                </div>
+                <Button 
+                  onClick={handleFacebookImport} 
+                  disabled={!facebookUrls.trim() || !defaultCategory || loading}
+                  className="w-full bg-blue-600 hover:bg-blue-700"
+                >
+                  {loading ? 'Importing Facebook Content...' : 'Import from Facebook'}
+                </Button>
+              </div>
+            )}
+
+            {/* Email Content Import */}
+            {importType === 'email-content' && (
+              <div className="space-y-4 p-4 border rounded-lg bg-green-50/50">
+                <div className="flex items-center gap-2">
+                  <Mail className="w-5 h-5 text-green-600" />
+                  <h4 className="font-medium">Email Content to Playbooks</h4>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Convert your email blasts, newsletters, and outreach templates into valuable playbook content. 
+                  Separate multiple emails with --- on a new line.
+                </p>
+                <div>
+                  <Label htmlFor="default-category">Category for Email Content</Label>
+                  <Select value={defaultCategory} onValueChange={setDefaultCategory}>
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories.map(cat => (
+                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="email-content">Email Content</Label>
+                  <Textarea
+                    id="email-content"
+                    value={emailContent}
+                    onChange={(e) => setEmailContent(e.target.value)}
+                    placeholder="Subject: Your first email subject line&#10;Email body content goes here...&#10;&#10;---&#10;&#10;Subject: Your second email subject line&#10;Second email content goes here..."
+                    rows={12}
+                    className="mt-1"
+                  />
+                </div>
+                <Button 
+                  onClick={handleEmailContentImport} 
+                  disabled={!emailContent.trim() || !defaultCategory || loading}
+                  className="w-full bg-green-600 hover:bg-green-700"
+                >
+                  {loading ? 'Converting Emails...' : 'Convert Emails to Playbooks'}
+                </Button>
+              </div>
+            )}
+
+            {/* Call Scripts Import */}
+            {importType === 'call-scripts' && (
+              <div className="space-y-4 p-4 border rounded-lg bg-purple-50/50">
+                <div className="flex items-center gap-2">
+                  <Smartphone className="w-5 h-5 text-purple-600" />
+                  <h4 className="font-medium">Cold Call Scripts to Playbooks</h4>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Transform your cold calling scripts into structured playbook content that others can learn from. 
+                  Separate multiple scripts with --- on a new line.
+                </p>
+                <div>
+                  <Label htmlFor="call-scripts">Call Scripts</Label>
+                  <Textarea
+                    id="call-scripts"
+                    value={callScripts}
+                    onChange={(e) => setCallScripts(e.target.value)}
+                    placeholder="Script 1: Introduction Call&#10;Hi [Name], this is [Your Name] from [Company]...&#10;&#10;---&#10;&#10;Script 2: Follow-up Call&#10;Hi [Name], I'm following up on our conversation..."
+                    rows={12}
+                    className="mt-1"
+                  />
+                </div>
+                <Button 
+                  onClick={handleCallScriptsImport} 
+                  disabled={!callScripts.trim() || loading}
+                  className="w-full bg-purple-600 hover:bg-purple-700"
+                >
+                  {loading ? 'Converting Scripts...' : 'Convert Scripts to Playbooks'}
                 </Button>
               </div>
             )}

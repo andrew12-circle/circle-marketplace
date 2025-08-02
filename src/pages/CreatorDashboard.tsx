@@ -370,17 +370,28 @@ export const CreatorDashboard = () => {
                 <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center">
                   <Upload className="w-12 h-12 text-primary opacity-70" />
                 </div>
-                <h3 className="text-lg font-semibold mb-2">Ready to create your first masterpiece?</h3>
+                <h3 className="text-lg font-semibold mb-2">Import Your Existing Content in Minutes!</h3>
                 <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                  Upload your content and start building your creator empire. Every expert was once a beginner.
+                  Don't recreate what you've already built. Import from YouTube, Facebook, email campaigns, 
+                  call scripts, and more - all in one click!
                 </p>
-                <Button 
-                  className="gap-2 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
-                  onClick={() => setUploadModalOpen(true)}
-                >
-                  <Plus className="w-4 h-4" />
-                  Create Your First Content
-                </Button>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  <Button 
+                    className="gap-2 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
+                    onClick={() => setUploadModalOpen(true)}
+                  >
+                    <Plus className="w-4 h-4" />
+                    Quick Import
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    className="gap-2 hover:bg-muted/50"
+                    onClick={() => setUploadModalOpen(true)}
+                  >
+                    <Upload className="w-4 h-4" />
+                    Start Creating
+                  </Button>
+                </div>
               </div>
             ) : (
               <div className="space-y-3">
