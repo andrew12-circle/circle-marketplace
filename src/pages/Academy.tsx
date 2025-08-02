@@ -9,7 +9,7 @@ import { LocationSwitcher } from "@/components/LocationSwitcher";
 import { LegalFooter } from "@/components/LegalFooter";
 import { AgentPlaybookSection } from "@/components/academy/AgentPlaybookSection";
 import { PlaybookCreator } from "@/components/academy/PlaybookCreator";
-import { Crown } from "lucide-react";
+
 import { VideoSection } from "@/components/academy/VideoSection";
 import { VideoPlayerModal } from "@/components/academy/VideoPlayerModal";
 import { PodcastSection } from "@/components/academy/PodcastSection";
@@ -28,6 +28,7 @@ import { CourseViewerModal } from "@/components/academy/course/CourseViewerModal
 import { CourseCard } from "@/components/academy/CourseCard";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { 
   GraduationCap, 
@@ -43,7 +44,10 @@ import {
   Heart,
   Award,
   ChevronRight,
-  Play
+  Play,
+  Clock,
+  Star,
+  Crown
 } from "lucide-react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 
@@ -1428,64 +1432,223 @@ export const Academy = () => {
   };
 
   const renderCoursesView = () => (
-    <div className="flex-1 p-4 md:p-8 max-w-7xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">Courses</h1>
-        <p className="text-muted-foreground">Master real estate with our comprehensive courses</p>
+    <div className="flex-1 max-w-6xl mx-auto">
+      {/* Header Section */}
+      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-12 mb-8">
+        <div className="max-w-4xl">
+          <h1 className="text-4xl font-bold mb-4">Real Estate Academy</h1>
+          <p className="text-xl opacity-90 mb-6">
+            Master your craft with courses from top-producing agents and industry experts
+          </p>
+          <div className="flex items-center gap-6 text-sm">
+            <div className="flex items-center gap-2">
+              <Users className="w-5 h-5" />
+              <span>50,000+ Students</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <GraduationCap className="w-5 h-5" />
+              <span>200+ Courses</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Award className="w-5 h-5" />
+              <span>Expert Instructors</span>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {coursesLoading ? (
-        <div className="flex justify-center items-center py-12">
-          <div className="text-muted-foreground">Loading courses...</div>
+      <div className="px-8">
+        {/* Course Categories Navigation */}
+        <div className="flex items-center gap-2 mb-8 overflow-x-auto pb-2">
+          {['All Courses', 'My Learning', 'Lead Generation', 'Sales', 'Marketing', 'Mindset', 'Technology', 'New Releases'].map((category) => (
+            <Button 
+              key={category}
+              variant={category === 'All Courses' ? 'default' : 'outline'}
+              size="sm"
+              className="whitespace-nowrap"
+            >
+              {category}
+            </Button>
+          ))}
         </div>
-      ) : (
-        <>
-          {/* Featured Courses */}
-          <div className="mb-12">
-            <h2 className="text-xl md:text-2xl font-bold text-foreground mb-6">🔥 Featured Courses</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-              {featuredCourses.map((course) => (
-                <CourseCard 
-                  key={course.id} 
-                  course={course} 
-                  onEnroll={handleEnrollInCourse}
-                  onContinue={handleContinueCourse}
-                />
-              ))}
-            </div>
-          </div>
 
-          {/* Free Courses */}
-          <div className="mb-12">
-            <h2 className="text-xl md:text-2xl font-bold text-foreground mb-6">🎁 Free Courses</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-              {freeCourses.map((course) => (
-                <CourseCard 
-                  key={course.id} 
-                  course={course} 
-                  onEnroll={handleEnrollInCourse}
-                  onContinue={handleContinueCourse}
-                />
-              ))}
-            </div>
+        {coursesLoading ? (
+          <div className="flex justify-center items-center py-12">
+            <div className="text-muted-foreground">Loading courses...</div>
           </div>
+        ) : (
+          <div className="space-y-8">
+            {/* Continue Learning Section */}
+            <div className="mb-12">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                  <Play className="w-4 h-4 text-green-600" />
+                </div>
+                <h2 className="text-2xl font-bold">Continue Learning</h2>
+              </div>
+              
+              <div className="space-y-4">
+                {mockCourses.filter(course => course.progress && course.progress > 0).map((course) => (
+                  <div 
+                    key={course.id}
+                    className="bg-card border border-border rounded-lg p-6 hover:shadow-md transition-shadow cursor-pointer"
+                    onClick={() => handleContinueCourse(course.id)}
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-16 h-16 bg-muted rounded-lg overflow-hidden">
+                        <img
+                          src={course.thumbnail || "/placeholder.svg"}
+                          alt={course.title}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-lg mb-1">{course.title}</h3>
+                        <p className="text-sm text-muted-foreground mb-2">By {course.creator}</p>
+                        
+                        <div className="flex items-center gap-4 mb-3">
+                          <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                            <Clock className="w-4 h-4" />
+                            {course.duration}
+                          </div>
+                          <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                            <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                            {course.rating}
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center gap-3">
+                          <Progress value={course.progress} className="flex-1 h-2" />
+                          <span className="text-sm font-medium">{course.progress}% complete</span>
+                        </div>
+                      </div>
+                      
+                      <Button className="ml-4">
+                        <Play className="w-4 h-4 mr-2" />
+                        Continue
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
 
-          {/* Premium Courses */}
-          <div className="mb-12">
-            <h2 className="text-xl md:text-2xl font-bold text-foreground mb-6">💎 Premium Courses</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-              {paidCourses.map((course) => (
-                <CourseCard 
-                  key={course.id} 
-                  course={course} 
-                  onEnroll={handleEnrollInCourse}
-                  onContinue={handleContinueCourse}
-                />
-              ))}
+            {/* Featured Courses */}
+            <div className="mb-12">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
+                  <Crown className="w-4 h-4 text-yellow-600" />
+                </div>
+                <h2 className="text-2xl font-bold">Featured Courses</h2>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {mockCourses.slice(0, 4).map((course) => (
+                  <div 
+                    key={course.id}
+                    className="bg-card border border-border rounded-lg overflow-hidden hover:shadow-lg transition-shadow cursor-pointer group"
+                    onClick={() => handleContinueCourse(course.id)}
+                  >
+                    <div className="aspect-video bg-gradient-to-br from-blue-500 to-purple-600 relative">
+                      <img
+                        src={course.thumbnail || "/placeholder.svg"}
+                        alt={course.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                      />
+                      <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
+                      <div className="absolute top-4 right-4">
+                        {course.isPro && <Crown className="w-5 h-5 text-yellow-400" />}
+                      </div>
+                    </div>
+                    
+                    <div className="p-6">
+                      <h3 className="font-bold text-xl mb-2">{course.title}</h3>
+                      <p className="text-muted-foreground mb-4">By {course.creator}</p>
+                      
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                          <div className="flex items-center gap-1">
+                            <Clock className="w-4 h-4" />
+                            {course.duration}
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                            {course.rating}
+                          </div>
+                        </div>
+                        
+                        <Button size="sm">
+                          {course.progress ? 'Continue' : 'Start Course'}
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* All Courses List */}
+            <div>
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <BookOpen className="w-4 h-4 text-blue-600" />
+                </div>
+                <h2 className="text-2xl font-bold">All Courses</h2>
+              </div>
+              
+              <div className="space-y-4">
+                {mockCourses.map((course, index) => (
+                  <div 
+                    key={course.id}
+                    className="bg-card border border-border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
+                    onClick={() => handleContinueCourse(course.id)}
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center font-bold text-muted-foreground">
+                        #{index + 1}
+                      </div>
+                      
+                      <div className="w-16 h-12 bg-muted rounded overflow-hidden">
+                        <img
+                          src={course.thumbnail || "/placeholder.svg"}
+                          alt={course.title}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="font-semibold">{course.title}</h3>
+                          {course.isPro && <Crown className="w-4 h-4 text-yellow-500" />}
+                        </div>
+                        <p className="text-sm text-muted-foreground">By {course.creator}</p>
+                      </div>
+                      
+                      <div className="flex items-center gap-6 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-1">
+                          <Clock className="w-4 h-4" />
+                          {course.duration}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                          {course.rating}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Users className="w-4 h-4" />
+                          12.5k
+                        </div>
+                      </div>
+                      
+                      <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
-        </>
-      )}
+        )}
+      </div>
     </div>
   );
 
