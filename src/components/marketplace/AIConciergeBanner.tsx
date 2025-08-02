@@ -107,12 +107,12 @@ export const AIConciergeBanner = () => {
           setTimeout(() => {
             isDeleting = true;
             typeEffect();
-          }, 2000); // Pause when finished typing
+          }, 1500); // Pause when finished typing
           return;
         }
       }
       
-      setTimeout(typeEffect, isDeleting ? 50 : 100);
+      setTimeout(typeEffect, isDeleting ? 30 : 60);
     };
     
     typeEffect();
