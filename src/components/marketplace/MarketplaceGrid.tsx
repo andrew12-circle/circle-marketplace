@@ -723,16 +723,15 @@ export const MarketplaceGrid = () => {
           {/* Campaign Services Header */}
           <CampaignServicesHeader />
 
-           {/* Search Bar Only */}
+           {/* Enhanced Search Component */}
           <div className="space-y-6">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-              <Input
-                placeholder={t('searchServices')}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
+            <EnhancedSearch
+              onSearchChange={setSearchFilters}
+              availableCategories={Array.from(new Set(services.map(service => service.category).filter(Boolean)))}
+              availableTags={Array.from(new Set(services.flatMap(service => service.tags || [])))}
+            />
+            
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
             </div>
           </div>
 
@@ -764,17 +763,6 @@ export const MarketplaceGrid = () => {
             </Button>
           </div>
 
-          {/* Marketplace Filters */}
-          <MarketplaceFilters
-            filters={filters}
-            onFiltersChange={setFilters}
-            categories={getCategories()}
-            viewMode={viewMode}
-            vendorCount={vendors.length}
-            localVendorCount={localVendorCount}
-          />
-
-          {/* Legacy filters section - temporarily removed for Phase 1 */}
 
           {/* Grid - Mobile Responsive */}
           {viewMode === "services" ? (
