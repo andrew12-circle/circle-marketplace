@@ -24,6 +24,7 @@ import { useChannels } from "@/hooks/useChannels";
 import { usePodcasts } from "@/hooks/usePodcasts";
 import { useBooks } from "@/hooks/useBooks";
 import { useCourses } from "@/hooks/useCourses";
+import { CourseViewerModal } from "@/components/academy/course/CourseViewerModal";
 import { CourseCard } from "@/components/academy/CourseCard";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
@@ -224,6 +225,8 @@ export const Academy = () => {
   const [selectedBook, setSelectedBook] = useState<any>(null);
   const [isBookModalOpen, setIsBookModalOpen] = useState(false);
   const [currentBookUrl, setCurrentBookUrl] = useState<string>("");
+  const [selectedCourse, setSelectedCourse] = useState<any>(null);
+  const [isCourseModalOpen, setIsCourseModalOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState("All");
   const { toast } = useToast();
   
@@ -573,6 +576,20 @@ export const Academy = () => {
     toast({
       title: "Download Started",
       description: "Book download has begun",
+    });
+  };
+
+  // Course handlers
+  const handleEnrollInCourse = (courseId: string) => {
+    enrollInCourse(courseId);
+  };
+
+  const handleContinueCourse = (courseId: string) => {
+    setSelectedCourse(courseId);
+    setIsCourseModalOpen(true);
+    toast({
+      title: "Opening Course",
+      description: "Loading course content...",
     });
   };
 
@@ -1423,7 +1440,12 @@ export const Academy = () => {
             <h2 className="text-xl md:text-2xl font-bold text-foreground mb-6">🔥 Featured Courses</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {featuredCourses.map((course) => (
-                <CourseCard key={course.id} course={course} onEnroll={enrollInCourse} />
+                <CourseCard 
+                  key={course.id} 
+                  course={course} 
+                  onEnroll={handleEnrollInCourse}
+                  onContinue={handleContinueCourse}
+                />
               ))}
             </div>
           </div>
@@ -1433,7 +1455,12 @@ export const Academy = () => {
             <h2 className="text-xl md:text-2xl font-bold text-foreground mb-6">🎁 Free Courses</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {freeCourses.map((course) => (
-                <CourseCard key={course.id} course={course} onEnroll={enrollInCourse} />
+                <CourseCard 
+                  key={course.id} 
+                  course={course} 
+                  onEnroll={handleEnrollInCourse}
+                  onContinue={handleContinueCourse}
+                />
               ))}
             </div>
           </div>
@@ -1443,7 +1470,12 @@ export const Academy = () => {
             <h2 className="text-xl md:text-2xl font-bold text-foreground mb-6">💎 Premium Courses</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {paidCourses.map((course) => (
-                <CourseCard key={course.id} course={course} onEnroll={enrollInCourse} />
+                <CourseCard 
+                  key={course.id} 
+                  course={course} 
+                  onEnroll={handleEnrollInCourse}
+                  onContinue={handleContinueCourse}
+                />
               ))}
             </div>
           </div>
@@ -1598,6 +1630,12 @@ export const Academy = () => {
           isOpen={isBookModalOpen}
           onClose={() => setIsBookModalOpen(false)}
           contentUrl={currentBookUrl}
+        />
+
+        <CourseViewerModal
+          isOpen={isCourseModalOpen}
+          onClose={() => setIsCourseModalOpen(false)}
+          courseId={selectedCourse || ""}
         />
       </div>
     </SidebarProvider>

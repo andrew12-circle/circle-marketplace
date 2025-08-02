@@ -89,6 +89,16 @@ export const CourseCard = ({
     }
   };
 
+  // Enhanced click handler for better course viewing
+  const handleCourseClick = () => {
+    if (canAccess && course.isEnrolled) {
+      // Open course viewer instead of just continuing
+      onContinue?.(course.id);
+    } else if (canAccess) {
+      handleEnroll();
+    }
+  };
+
   const sizeClasses = {
     small: "w-48",
     medium: "w-64", 
@@ -101,7 +111,7 @@ export const CourseCard = ({
         className="group hover:shadow-lg transition-all duration-200 cursor-pointer"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        onClick={() => canAccess && (course.isEnrolled ? onContinue?.(course.id) : onEnroll?.(course.id))}
+        onClick={handleCourseClick}
       >
         <CardContent className="p-4">
           <div className="flex gap-4">
@@ -195,9 +205,10 @@ export const CourseCard = ({
 
   return (
     <Card 
-      className="group hover:shadow-lg transition-all duration-200 cursor-pointer overflow-hidden"
+      className="group hover:shadow-lg transition-all duration-200 cursor-pointer overflow-hidden hover-scale"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      onClick={handleCourseClick}
     >
       <CardContent className="p-0">
         {/* Course Banner Image */}
