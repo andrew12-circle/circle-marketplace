@@ -299,24 +299,24 @@ export const Academy = () => {
               <div className="p-2 bg-white/20 rounded-lg">
                 <BookOpen className="w-6 h-6" />
               </div>
-              <span className="text-sm font-medium text-green-100">TOP AGENT OPPORTUNITY</span>
+              <span className="text-sm font-medium text-green-100">SHARE YOUR SUCCESS</span>
             </div>
-            <h2 className="text-3xl font-bold mb-3">Share Your Success & Earn $69.30 Per Sale</h2>
+            <h2 className="text-3xl font-bold mb-3">Turn Your Story Into A Global Playbook</h2>
             <p className="text-lg text-green-50 mb-4">
-              Turn your proven strategies into a playbook. Help other agents succeed while earning 70% revenue share.
+              We make it super easy to share your proven strategies and create playbooks. Your content won't be shared with local agents within 50 miles, but over a million agents nationwide will see it — which could lead to substantial income.
             </p>
             <div className="flex items-center gap-6 text-sm">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-green-300 rounded-full"></div>
-                <span>$99 price point</span>
+                <span>70% revenue share</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-green-300 rounded-full"></div>
-                <span>70% to you ($69.30)</span>
+                <span>1M+ agent audience</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-green-300 rounded-full"></div>
-                <span>Help other agents</span>
+                <span>Protected local territory</span>
               </div>
             </div>
           </div>
