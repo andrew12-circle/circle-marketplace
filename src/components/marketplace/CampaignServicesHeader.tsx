@@ -1,20 +1,14 @@
 import { Button } from "@/components/ui/button";
-import { Sparkles, MessageCircle, UserPlus } from "lucide-react";
+import { MessageCircle, UserPlus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { AskCircleAIModal } from "./AskCircleAIModal";
 import { InviteVendorModal } from "./InviteVendorModal";
-import { FindPerfectCampaignModal } from "./FindPerfectCampaignModal";
 import { useState } from "react";
 
 export const CampaignServicesHeader = () => {
   const { toast } = useToast();
   const [isAIModalOpen, setIsAIModalOpen] = useState(false);
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
-  const [isCampaignModalOpen, setIsCampaignModalOpen] = useState(false);
-
-  const handleFindCampaign = () => {
-    setIsCampaignModalOpen(true);
-  };
 
   const handleAskCircleAI = () => {
     setIsAIModalOpen(true);
@@ -35,13 +29,6 @@ export const CampaignServicesHeader = () => {
           </div>
           
           <div className="flex flex-col sm:flex-row gap-3">
-            <Button
-              onClick={handleFindCampaign}
-              className="bg-purple-600 hover:bg-purple-700 text-white flex items-center gap-2 h-10 px-4"
-            >
-              <Sparkles className="w-4 h-4" />
-              Find My Perfect Campaign
-            </Button>
             
             <Button
               onClick={handleAskCircleAI}
@@ -72,10 +59,6 @@ export const CampaignServicesHeader = () => {
         onOpenChange={setIsInviteModalOpen} 
       />
       
-      <FindPerfectCampaignModal 
-        open={isCampaignModalOpen} 
-        onOpenChange={setIsCampaignModalOpen} 
-      />
       
     </>
   );
