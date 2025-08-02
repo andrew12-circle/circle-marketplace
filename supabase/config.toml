@@ -44,3 +44,12 @@ verify_jwt = false
 
 [functions.enhanced-ai-recommendations]
 verify_jwt = false
+
+[functions.creator-stripe-onboarding]
+verify_jwt = false
+
+[functions.check-creator-onboarding]
+verify_jwt = false
+
+[functions.process-creator-payouts]
+verify_jwt = false
