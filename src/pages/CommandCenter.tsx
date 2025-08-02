@@ -40,7 +40,7 @@ interface KPIData {
 }
 
 export const CommandCenter = () => {
-  console.log("CommandCenter component is rendering");
+  console.log("CommandCenter component is rendering - DEBUG");
   const { user, profile } = useAuth();
   const { toast } = useToast();
   const [deals, setDeals] = useState<Deal[]>([]);
