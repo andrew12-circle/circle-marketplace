@@ -1,15 +1,21 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Download, TrendingUp, MapPin, PieChart, BarChart3, Brain, ArrowRight, CheckCircle, AlertTriangle } from "lucide-react";
+import { Download, TrendingUp, MapPin, PieChart, BarChart3, Brain, ArrowRight, CheckCircle, AlertTriangle, Crown } from "lucide-react";
 import { DealsTable } from "@/components/command-center/DealsTable";
 import { GeographicHeatMap } from "@/components/command-center/GeographicHeatMap";
 import { BusinessMixChart } from "@/components/command-center/BusinessMixChart";
 import { SalePriceTrendChart } from "@/components/command-center/SalePriceTrendChart";
+import { NavigationTabs } from "@/components/NavigationTabs";
+import { UserMenu } from "@/components/UserMenu";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { LocationSwitcher } from "@/components/LocationSwitcher";
+import { LegalFooter } from "@/components/LegalFooter";
 import { useToast } from "@/hooks/use-toast";
 
 interface Deal {
@@ -139,8 +145,75 @@ export const CommandCenter = () => {
   const verifiedDeals = deals.filter(deal => deal.status === 'verified').length;
   const missingInfoDeals = deals.filter(deal => deal.status === 'missing_info').length;
 
+  const circleLogoUrl = "/lovable-uploads/97692497-6d98-46a8-b6fc-05cd68bdc160.png";
+
   return (
     <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="border-b bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/50 sticky top-0 z-50">
+        <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4">
+          <div className="flex items-center justify-between">
+            {/* Logo */}
+            <div className="flex items-center gap-2 sm:gap-3">
+              <img 
+                src={circleLogoUrl}
+                alt="Circle Logo" 
+                className="w-12 h-12 sm:w-16 sm:h-16 object-contain"
+                style={{
+                  imageRendering: 'crisp-edges'
+                }}
+              />
+            </div>
+            
+            {/* Navigation Tabs - Responsive */}
+            <div className="hidden sm:flex flex-1 justify-center">
+              <NavigationTabs />
+            </div>
+            
+            <div className="sm:hidden flex-1 px-4">
+              <div className="flex bg-muted rounded-full p-1">
+                <Link
+                  to="/"
+                  className="flex-1 text-xs py-2 px-2 rounded-full font-medium transition-all text-center text-muted-foreground"
+                >
+                  Market
+                </Link>
+                <Link
+                  to="/command-center"
+                  className="flex-1 text-xs py-2 px-2 rounded-full font-medium transition-all text-center bg-background text-foreground shadow-sm"
+                >
+                  Command
+                </Link>
+                <Link
+                  to="/academy"
+                  className="flex-1 text-xs py-2 px-2 rounded-full font-medium transition-all text-center text-muted-foreground"
+                >
+                  Academy
+                </Link>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-2 sm:gap-4">
+              {/* Language & Location Switchers */}
+              <LanguageSwitcher />
+              <LocationSwitcher />
+              
+              {/* Circle Points - Mobile Optimized */}
+              {user && profile && (
+                <Link to="/wallet" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm hover:bg-accent hover:text-accent-foreground rounded-md px-2 sm:px-3 py-1.5 sm:py-2 transition-colors cursor-pointer touch-target">
+                  <Crown className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-500" />
+                  <span className="font-medium">{profile.circle_points}</span>
+                  <span className="text-muted-foreground hidden sm:inline">Points</span>
+                </Link>
+              )}
+              
+              {/* User menu */}
+              <UserMenu />
+            </div>
+          </div>
+        </div>
+      </header>
+
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -306,6 +379,9 @@ export const CommandCenter = () => {
           </CardContent>
         </Card>
       </div>
+      
+      {/* Legal Footer */}
+      <LegalFooter />
     </div>
   );
 };

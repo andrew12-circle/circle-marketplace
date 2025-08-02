@@ -1,10 +1,7 @@
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { NavigationTabs } from "@/components/NavigationTabs";
 import { Marketplace } from "./Marketplace";
-import { Academy } from "./Academy";
-import { CommandCenter } from "./CommandCenter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Crown } from "lucide-react";
@@ -19,9 +16,9 @@ import { LegalFooter } from "@/components/LegalFooter";
 import { Building, Store } from "lucide-react";
 
 const Index = () => {
-  const [activeTab, setActiveTab] = useState<"marketplace" | "academy" | "command-center">("marketplace");
   const { user, profile } = useAuth();
   const { t } = useTranslation();
+  const location = useLocation();
 
   return (
     <CartProvider>
@@ -44,41 +41,41 @@ const Index = () => {
               
               {/* Navigation Tabs - Responsive */}
               <div className="hidden sm:flex flex-1 justify-center">
-                <NavigationTabs activeTab={activeTab} onTabChange={setActiveTab} />
+                <NavigationTabs />
               </div>
               
               <div className="sm:hidden flex-1 px-4">
                 <div className="flex bg-muted rounded-full p-1">
-                  <button
-                    onClick={() => setActiveTab("marketplace")}
-                    className={`flex-1 text-xs py-2 px-2 rounded-full font-medium transition-all ${
-                      activeTab === "marketplace" 
+                  <Link
+                    to="/"
+                    className={`flex-1 text-xs py-2 px-2 rounded-full font-medium transition-all text-center ${
+                      location.pathname === "/" 
                         ? "bg-background text-foreground shadow-sm" 
                         : "text-muted-foreground"
                     }`}
                   >
                     Market
-                  </button>
-                  <button
-                    onClick={() => setActiveTab("command-center")}
-                    className={`flex-1 text-xs py-2 px-2 rounded-full font-medium transition-all ${
-                      activeTab === "command-center" 
+                  </Link>
+                  <Link
+                    to="/command-center"
+                    className={`flex-1 text-xs py-2 px-2 rounded-full font-medium transition-all text-center ${
+                      location.pathname === "/command-center" 
                         ? "bg-background text-foreground shadow-sm" 
                         : "text-muted-foreground"
                     }`}
                   >
                     Command
-                  </button>
-                  <button
-                    onClick={() => setActiveTab("academy")}
-                    className={`flex-1 text-xs py-2 px-2 rounded-full font-medium transition-all ${
-                      activeTab === "academy" 
+                  </Link>
+                  <Link
+                    to="/academy"
+                    className={`flex-1 text-xs py-2 px-2 rounded-full font-medium transition-all text-center ${
+                      location.pathname === "/academy" 
                         ? "bg-background text-foreground shadow-sm" 
                         : "text-muted-foreground"
                     }`}
                   >
                     Academy
-                  </button>
+                  </Link>
                 </div>
               </div>
               
@@ -88,7 +85,7 @@ const Index = () => {
                 <LocationSwitcher />
                 
                 {/* Cart Button - only show on marketplace */}
-                {activeTab === "marketplace" && (
+                {location.pathname === "/" && (
                   <CartDrawer />
                 )}
                 
@@ -121,7 +118,7 @@ const Index = () => {
 
         {/* Main Content */}
         <main>
-          {activeTab === "marketplace" ? <Marketplace /> : activeTab === "command-center" ? <CommandCenter /> : <Academy />}
+          <Marketplace />
         </main>
 
         {/* Legal Footer */}

@@ -1,47 +1,56 @@
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
+import { Link, useLocation } from "react-router-dom";
 
 interface NavigationTabsProps {
-  activeTab: "marketplace" | "academy" | "command-center";
-  onTabChange: (tab: "marketplace" | "academy" | "command-center") => void;
+  activeTab?: "marketplace" | "academy" | "command-center";
+  onTabChange?: (tab: "marketplace" | "academy" | "command-center") => void;
 }
 
 export const NavigationTabs = ({ activeTab, onTabChange }: NavigationTabsProps) => {
   const { t } = useTranslation();
+  const location = useLocation();
+  
+  // Determine active tab from URL if not provided
+  const currentTab = activeTab || (
+    location.pathname === "/command-center" ? "command-center" :
+    location.pathname === "/academy" ? "academy" : 
+    "marketplace"
+  );
   return (
     <div className="flex bg-muted/50 rounded-xl p-1 w-fit mx-auto backdrop-blur-sm border border-border/50">
       <Button
+        asChild
         variant="ghost"
-        onClick={() => onTabChange("marketplace")}
         className={`rounded-lg px-6 py-2 font-medium transition-all duration-200 ${
-          activeTab === "marketplace" 
+          currentTab === "marketplace" 
             ? "bg-background text-foreground shadow-sm" 
             : "text-muted-foreground hover:text-foreground hover:bg-background/50"
         }`}
       >
-        {t('marketplace')}
+        <Link to="/">{t('marketplace')}</Link>
       </Button>
       <Button
+        asChild
         variant="ghost"
-        onClick={() => onTabChange("command-center")}
         className={`rounded-lg px-6 py-2 font-medium transition-all duration-200 ${
-          activeTab === "command-center" 
+          currentTab === "command-center" 
             ? "bg-background text-foreground shadow-sm" 
             : "text-muted-foreground hover:text-foreground hover:bg-background/50"
         }`}
       >
-        Command Center
+        <Link to="/command-center">Command Center</Link>
       </Button>
       <Button
+        asChild
         variant="ghost"
-        onClick={() => onTabChange("academy")}
         className={`rounded-lg px-6 py-2 font-medium transition-all duration-200 ${
-          activeTab === "academy" 
+          currentTab === "academy" 
             ? "bg-background text-foreground shadow-sm" 
             : "text-muted-foreground hover:text-foreground hover:bg-background/50"
         }`}
       >
-        {t('academy')}
+        <Link to="/academy">{t('academy')}</Link>
       </Button>
     </div>
   );
