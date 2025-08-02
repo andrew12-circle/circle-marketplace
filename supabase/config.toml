@@ -41,3 +41,6 @@ verify_jwt = false
 
 [functions.vectorize-images]
 verify_jwt = false
+
+[functions.enhanced-ai-recommendations]
+verify_jwt = false

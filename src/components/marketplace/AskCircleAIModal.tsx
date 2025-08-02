@@ -7,9 +7,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Sparkles, X, MapPin, TrendingUp, Clock, BarChart, Target } from "lucide-react";
+import { Sparkles, X, MapPin, TrendingUp, Clock, BarChart, Target, Brain } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface AIRecommendation {
   locationAnalysis: string;
@@ -54,9 +55,11 @@ interface AskCircleAIModalProps {
 }
 
 export const AskCircleAIModal = ({ open, onOpenChange }: AskCircleAIModalProps) => {
-  const [activeTab, setActiveTab] = useState("quick");
+  const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState("contextual");
   const [loading, setLoading] = useState(false);
   const [recommendation, setRecommendation] = useState<AIRecommendation | null>(null);
+  const [contextualResponse, setContextualResponse] = useState<string | null>(null);
   const { toast } = useToast();
   
   // Quick assessment state
@@ -86,10 +89,62 @@ export const AskCircleAIModal = ({ open, onOpenChange }: AskCircleAIModalProps) 
   });
 
   const suggestionChips = [
-    "Analyze my location for ROI",
-    "Best bundle for Franklin, TN", 
-    "Top 3 marketing items"
+    "How can I improve my business ROI?",
+    "What services match my recent activity?", 
+    "Best strategies for my current market?",
+    "Analyze my saved services patterns"
   ];
+
+  const handleContextualRecommendation = async () => {
+    if (!prompt.trim()) {
+      toast({
+        title: "Please enter a question",
+        description: "Ask me anything about your business or the marketplace",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setLoading(true);
+      
+      const { data, error } = await supabase.functions.invoke('enhanced-ai-recommendations', {
+        body: {
+          message: prompt.trim(),
+          userId: user?.id,
+          context: {
+            currentPage: "ai_modal",
+            timestamp: new Date().toISOString(),
+            previousQuestion: prompt
+          }
+        }
+      });
+
+      if (error) {
+        console.error('Error getting contextual recommendation:', error);
+        // Fallback to original service
+        const fallbackData = await supabase.functions.invoke('ask-circle-ai', {
+          body: { 
+            type: 'quick',
+            prompt: prompt.trim() 
+          },
+        });
+        
+        if (fallbackData.error) throw fallbackData.error;
+        setRecommendation(fallbackData.data.recommendation);
+      } else if (data?.recommendation) {
+        setContextualResponse(data.recommendation);
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to get AI recommendation. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleQuickRecommendation = async () => {
     if (!prompt.trim()) {
@@ -167,6 +222,7 @@ export const AskCircleAIModal = ({ open, onOpenChange }: AskCircleAIModalProps) 
 
   const handleReset = () => {
     setRecommendation(null);
+    setContextualResponse(null);
     setPrompt("");
     setCurrentPerformance({
       dealVolume12m: "",
@@ -205,9 +261,13 @@ export const AskCircleAIModal = ({ open, onOpenChange }: AskCircleAIModalProps) 
           </p>
         </DialogHeader>
 
-        {!recommendation ? (
+        {!recommendation && !contextualResponse ? (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="contextual" className="flex items-center gap-2">
+                <Brain className="w-4 h-4" />
+                Context-Aware
+              </TabsTrigger>
               <TabsTrigger value="quick" className="flex items-center gap-2">
                 <Sparkles className="w-4 h-4" />
                 Quick Assessment
@@ -217,6 +277,50 @@ export const AskCircleAIModal = ({ open, onOpenChange }: AskCircleAIModalProps) 
                 Detailed Assessment
               </TabsTrigger>
             </TabsList>
+
+            <TabsContent value="contextual" className="space-y-6 mt-6">
+              <div className="space-y-4">
+                <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Brain className="w-5 h-5 text-blue-600" />
+                    <h3 className="font-semibold text-blue-900">AI-Powered Context Analysis</h3>
+                  </div>
+                  <p className="text-sm text-blue-700">
+                    Get personalized recommendations based on your profile, saved services, recent activity, and market trends.
+                  </p>
+                </div>
+                
+                <Input
+                  placeholder="How can I improve my business based on my current activity?"
+                  value={prompt}
+                  onChange={(e) => setPrompt(e.target.value)}
+                  className="h-12 text-base"
+                  onKeyPress={(e) => e.key === 'Enter' && handleContextualRecommendation()}
+                />
+                
+                <div className="flex flex-wrap gap-2">
+                  {suggestionChips.map((chip) => (
+                    <Button
+                      key={chip}
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleChipClick(chip)}
+                      className="text-xs"
+                    >
+                      {chip}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+
+              <Button 
+                onClick={handleContextualRecommendation}
+                disabled={loading || !prompt.trim()}
+                className="w-full h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium"
+              >
+                {loading ? "Analyzing Your Data..." : "Get Context-Aware Recommendation"}
+              </Button>
+            </TabsContent>
 
             <TabsContent value="quick" className="space-y-6 mt-6">
               <div className="space-y-4">
@@ -424,6 +528,55 @@ export const AskCircleAIModal = ({ open, onOpenChange }: AskCircleAIModalProps) 
               </div>
             </TabsContent>
           </Tabs>
+        ) : contextualResponse ? (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Brain className="w-5 h-5 text-blue-600" />
+                <h3 className="text-lg font-semibold">Context-Aware AI Analysis</h3>
+              </div>
+              <Button variant="ghost" size="sm" onClick={handleReset}>
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+
+            <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-6">
+              <div className="flex items-start gap-3 mb-4">
+                <div className="p-2 rounded-lg bg-blue-100">
+                  <Sparkles className="w-5 h-5 text-blue-600" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-blue-900 mb-1">Personalized Recommendation</h4>
+                  <p className="text-sm text-blue-700">Based on your profile, activity, and current market data</p>
+                </div>
+              </div>
+              
+              <div className="text-sm text-gray-800 leading-relaxed whitespace-pre-line">
+                {contextualResponse}
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <Button 
+                variant="outline" 
+                onClick={handleReset}
+                className="flex-1"
+              >
+                Ask Another Question
+              </Button>
+              <Button 
+                className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+                onClick={() => {
+                  onOpenChange(false);
+                  // Trigger marketplace to show recommended services
+                  const event = new CustomEvent('showContextualRecommendations');
+                  window.dispatchEvent(event);
+                }}
+              >
+                Apply Recommendations
+              </Button>
+            </div>
+          </div>
         ) : (
           <div className="space-y-6">
             <div className="flex items-center justify-between">

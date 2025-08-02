@@ -2,10 +2,12 @@ import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Brain, TrendingUp, Target, ArrowRight, Lightbulb, Users, MessageCircle, Mic, Send } from "lucide-react";
+import { Brain, TrendingUp, Target, ArrowRight, Lightbulb, Users, MessageCircle, Mic, Send, Sparkles } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { AskCircleAIModal } from "./AskCircleAIModal";
 import { Input } from "@/components/ui/input";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
 interface BusinessInsight {
   type: 'performance' | 'opportunity' | 'recommendation';
@@ -25,6 +27,9 @@ export const AIConciergeBanner = () => {
   const [chatInput, setChatInput] = useState("");
   const [placeholderText, setPlaceholderText] = useState("");
   const [isTyping, setIsTyping] = useState(true);
+  const [isLoadingRecommendation, setIsLoadingRecommendation] = useState(false);
+  const [aiRecommendation, setAiRecommendation] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const placeholderQuestions = [
     "How can I help you today?",
@@ -74,11 +79,51 @@ export const AIConciergeBanner = () => {
     }
   ];
 
+  // Get context-aware AI recommendation on component mount
   useEffect(() => {
-    // Randomly select an insight to show personalized recommendations
-    const randomInsight = businessInsights[Math.floor(Math.random() * businessInsights.length)];
-    setCurrentInsight(randomInsight);
-  }, []);
+    if (user && profile) {
+      getContextualRecommendation();
+    }
+  }, [user, profile]);
+
+  const getContextualRecommendation = async () => {
+    try {
+      setIsLoadingRecommendation(true);
+      
+      const { data, error } = await supabase.functions.invoke('enhanced-ai-recommendations', {
+        body: {
+          message: "Provide a personalized business recommendation based on my profile and current market trends",
+          userId: user?.id,
+          context: {
+            currentPage: "marketplace",
+            timestamp: new Date().toISOString()
+          }
+        }
+      });
+
+      if (error) {
+        console.error('Error getting AI recommendation:', error);
+        toast({
+          title: "AI Analysis Unavailable",
+          description: "Using general insights for now. Please try again later.",
+          variant: "destructive"
+        });
+        // Fall back to static insights
+        const randomInsight = businessInsights[Math.floor(Math.random() * businessInsights.length)];
+        setCurrentInsight(randomInsight);
+      } else if (data?.recommendation) {
+        setAiRecommendation(data.recommendation);
+        console.log('Context-aware recommendation received:', data);
+      }
+    } catch (error) {
+      console.error('Failed to get contextual recommendation:', error);
+      // Fall back to static insights
+      const randomInsight = businessInsights[Math.floor(Math.random() * businessInsights.length)];
+      setCurrentInsight(randomInsight);
+    } finally {
+      setIsLoadingRecommendation(false);
+    }
+  };
 
   // Animated placeholder text effect
   useEffect(() => {
@@ -118,11 +163,6 @@ export const AIConciergeBanner = () => {
     typeEffect();
   }, []);
 
-  useEffect(() => {
-    // Randomly select an insight to show personalized recommendations
-    const randomInsight = businessInsights[Math.floor(Math.random() * businessInsights.length)];
-    setCurrentInsight(randomInsight);
-  }, []);
 
   const handleSendMessage = () => {
     if (chatInput.trim()) {
@@ -220,45 +260,102 @@ export const AIConciergeBanner = () => {
                 </div>
               </div>
 
-              {currentInsight && (
+              {/* Context-Aware AI Recommendation or Static Insight */}
+              {(aiRecommendation || currentInsight) && (
                 <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-lg p-4 mb-4">
-                  <div className="flex items-start gap-3">
-                    <div className="p-2 rounded-lg bg-primary/10">
-                      {(() => {
-                        const IconComponent = getTypeIcon(currentInsight.type);
-                        return <IconComponent className="h-4 w-4 text-primary" />;
-                      })()}
+                  {isLoadingRecommendation ? (
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-lg bg-primary/10">
+                        <Sparkles className="h-4 w-4 text-primary animate-pulse" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="h-4 bg-muted animate-pulse rounded w-48"></div>
+                          <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
+                            AI Analysis
+                          </Badge>
+                        </div>
+                        <div className="space-y-2">
+                          <div className="h-3 bg-muted animate-pulse rounded w-full"></div>
+                          <div className="h-3 bg-muted animate-pulse rounded w-3/4"></div>
+                        </div>
+                      </div>
                     </div>
-                    
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <h4 className="font-semibold text-foreground">{currentInsight.title}</h4>
-                        <Badge className={getPriorityColor(currentInsight.priority)} variant="outline">
-                          {currentInsight.priority} priority
-                        </Badge>
+                  ) : aiRecommendation ? (
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 rounded-lg bg-primary/10">
+                        <Sparkles className="h-4 w-4 text-primary" />
                       </div>
                       
-                      <p className="text-sm text-muted-foreground mb-3">
-                        {currentInsight.description}
-                      </p>
-                      
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          <Badge variant="secondary" className="bg-green-500/10 text-green-700 border-green-500/20">
-                            {currentInsight.impact}
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <h4 className="font-semibold text-foreground">AI-Powered Business Insight</h4>
+                          <Badge variant="outline" className="bg-emerald-500/10 text-emerald-700 border-emerald-500/20">
+                            Personalized
                           </Badge>
-                          <span className="text-xs text-muted-foreground">
-                            Category: {currentInsight.category}
-                          </span>
                         </div>
                         
-                        <Button size="sm" variant="outline" className="text-blue-600 border-blue-600 hover:bg-blue-50">
-                          {currentInsight.actionText}
-                          <ArrowRight className="h-3 w-3 ml-1" />
-                        </Button>
+                        <div className="text-sm text-muted-foreground mb-3 whitespace-pre-line">
+                          {aiRecommendation}
+                        </div>
+                        
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-4">
+                            <Badge variant="secondary" className="bg-blue-500/10 text-blue-700 border-blue-500/20">
+                              <Brain className="h-3 w-3 mr-1" />
+                              Context-Aware
+                            </Badge>
+                            <Button 
+                              size="sm" 
+                              variant="ghost" 
+                              onClick={getContextualRecommendation}
+                              className="text-xs"
+                            >
+                              Refresh Analysis
+                            </Button>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  ) : currentInsight && (
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 rounded-lg bg-primary/10">
+                        {(() => {
+                          const IconComponent = getTypeIcon(currentInsight.type);
+                          return <IconComponent className="h-4 w-4 text-primary" />;
+                        })()}
+                      </div>
+                      
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <h4 className="font-semibold text-foreground">{currentInsight.title}</h4>
+                          <Badge className={getPriorityColor(currentInsight.priority)} variant="outline">
+                            {currentInsight.priority} priority
+                          </Badge>
+                        </div>
+                        
+                        <p className="text-sm text-muted-foreground mb-3">
+                          {currentInsight.description}
+                        </p>
+                        
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-4">
+                            <Badge variant="secondary" className="bg-green-500/10 text-green-700 border-green-500/20">
+                              {currentInsight.impact}
+                            </Badge>
+                            <span className="text-xs text-muted-foreground">
+                              Category: {currentInsight.category}
+                            </span>
+                          </div>
+                          
+                          <Button size="sm" variant="outline" className="text-blue-600 border-blue-600 hover:bg-blue-50">
+                            {currentInsight.actionText}
+                            <ArrowRight className="h-3 w-3 ml-1" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
