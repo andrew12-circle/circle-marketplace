@@ -13,7 +13,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { LocationSwitcher } from "@/components/LocationSwitcher";
 import { LegalFooter } from "@/components/LegalFooter";
-import { Building, Store } from "lucide-react";
+import { Building, Store, BookOpen } from "lucide-react";
 
 const Index = () => {
   const { user, profile } = useAuth();

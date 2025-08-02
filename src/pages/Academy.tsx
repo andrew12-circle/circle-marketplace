@@ -291,6 +291,53 @@ export const Academy = () => {
         </p>
       </div>
 
+      {/* Creator Opportunity Banner */}
+      <div className="mb-12 bg-gradient-to-r from-green-600 to-emerald-600 rounded-2xl p-8 text-white">
+        <div className="flex items-center justify-between">
+          <div className="flex-1">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-white/20 rounded-lg">
+                <BookOpen className="w-6 h-6" />
+              </div>
+              <span className="text-sm font-medium text-green-100">TOP AGENT OPPORTUNITY</span>
+            </div>
+            <h2 className="text-3xl font-bold mb-3">Share Your Success & Earn $69.30 Per Sale</h2>
+            <p className="text-lg text-green-50 mb-4">
+              Turn your proven strategies into a playbook. Help other agents succeed while earning 70% revenue share.
+            </p>
+            <div className="flex items-center gap-6 text-sm">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-300 rounded-full"></div>
+                <span>$99 price point</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-300 rounded-full"></div>
+                <span>70% to you ($69.30)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-300 rounded-full"></div>
+                <span>Help other agents</span>
+              </div>
+            </div>
+          </div>
+          <div className="flex flex-col gap-3">
+            <Button 
+              onClick={() => setActiveView('create')}
+              className="bg-white text-green-600 hover:bg-green-50 font-semibold px-6 py-3"
+            >
+              Create Your Playbook
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={() => setActiveView('playbooks')}
+              className="border-white/30 text-white hover:bg-white/10"
+            >
+              View Examples
+            </Button>
+          </div>
+        </div>
+      </div>
+
       {/* Category Icons */}
       <div className="flex gap-8 mb-16">
         {categories.map((category) => {

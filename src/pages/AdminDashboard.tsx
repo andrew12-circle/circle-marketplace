@@ -26,11 +26,12 @@ import { VendorManagementPanel } from '@/components/admin/VendorManagementPanel'
 import { ImageVectorizationPanel } from '@/components/admin/ImageVectorizationPanel';
 import { VendorActivityAnalytics } from '@/components/admin/VendorActivityAnalytics';
 import { VendorInvitationPanel } from '@/components/admin/VendorInvitationPanel';
+import { AgentInvitationPanel } from '@/components/admin/AgentInvitationPanel';
 import VendorPointAllocationPanel from '@/components/admin/VendorPointAllocationPanel';
 import AntiScrapingSystem from '@/components/security/AntiScrapingSystem';
 import { CreatorPayoutDashboard } from '@/components/admin/CreatorPayoutDashboard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Zap, Upload, Building, Youtube, DollarSign, BarChart3, Coins, Shield as ShieldIcon, Users2 } from 'lucide-react';
+import { Zap, Upload, Building, Youtube, DollarSign, BarChart3, Coins, Shield as ShieldIcon, Users2, Send, BookOpen } from 'lucide-react';
 
 interface UserProfile {
   id: string;
@@ -218,6 +219,10 @@ export default function AdminDashboard() {
             <Youtube className="h-4 w-4" />
             YouTube
           </TabsTrigger>
+          <TabsTrigger value="agent-invites" className="flex items-center gap-2">
+            <BookOpen className="h-4 w-4" />
+            Agent Invites
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="creators" className="space-y-6">
@@ -367,6 +372,10 @@ export default function AdminDashboard() {
             <YouTubeImportPanel />
             <YouTubeChannelImportPanel />
           </div>
+        </TabsContent>
+
+        <TabsContent value="agent-invites" className="space-y-6">
+          <AgentInvitationPanel />
         </TabsContent>
       </Tabs>
       </div>

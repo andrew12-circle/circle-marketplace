@@ -11,12 +11,13 @@ import { AddProductModal } from "./AddProductModal";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Filter, Sparkles, Zap, Facebook, Globe, Mail, Share2, Monitor, TrendingUp, Database, Camera, Video, Printer, ArrowRight } from "lucide-react";
+import { Search, Filter, Sparkles, Zap, Facebook, Globe, Mail, Share2, Monitor, TrendingUp, Database, Camera, Video, Printer, ArrowRight, BookOpen } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLocation } from "@/hooks/useLocation";
 import { determineServiceRisk } from "./RESPAComplianceSystem";
+import { Link } from "react-router-dom";
 import { CategoryMegaMenu } from "./CategoryMegaMenu";
 import { EnhancedSearch, SearchFilters } from "./EnhancedSearch";
 import { VendorCallToAction } from "./VendorCallToAction";
@@ -710,6 +711,34 @@ export const MarketplaceGrid = () => {
             <p className="text-lg text-gray-600 max-w-2xl">
               {t('marketplaceDescription')}
             </p>
+          </div>
+
+          {/* Agent Playbook Promotion */}
+          <div className="mb-8 bg-gradient-to-r from-emerald-600 to-green-600 rounded-xl p-6 text-white">
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-3">
+                  <BookOpen className="w-6 h-6" />
+                  <span className="text-sm font-medium text-emerald-100">SHARE YOUR EXPERTISE</span>
+                </div>
+                <h3 className="text-2xl font-bold mb-2">Got proven strategies? Turn them into profit.</h3>
+                <p className="text-emerald-50 mb-3">
+                  Create agent playbooks sharing your success methods. Earn $69.30 per $99 sale.
+                </p>
+                <div className="flex items-center gap-4 text-sm">
+                  <span>✓ 70% revenue share</span>
+                  <span>✓ Help other agents</span>
+                  <span>✓ Build authority</span>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <Link to="/academy">
+                  <Button variant="secondary" className="bg-white text-emerald-600 hover:bg-emerald-50">
+                    Learn More
+                  </Button>
+                </Link>
+              </div>
+            </div>
           </div>
 
           {/* Circle Pro Banner - Show for non-signed-in users and non-pro members */}
