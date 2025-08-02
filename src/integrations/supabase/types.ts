@@ -680,6 +680,36 @@ export type Database = {
           },
         ]
       }
+      creator_api_configs: {
+        Row: {
+          created_at: string
+          id: string
+          mailchimp_api_key: string | null
+          updated_at: string
+          user_id: string
+          youtube_api_key: string | null
+          zapier_webhook: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mailchimp_api_key?: string | null
+          updated_at?: string
+          user_id: string
+          youtube_api_key?: string | null
+          zapier_webhook?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mailchimp_api_key?: string | null
+          updated_at?: string
+          user_id?: string
+          youtube_api_key?: string | null
+          zapier_webhook?: string | null
+        }
+        Relationships: []
+      }
       creator_onboarding: {
         Row: {
           completed_at: string | null
@@ -761,6 +791,39 @@ export type Database = {
           status?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      creator_webhooks: {
+        Row: {
+          content_type: string
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string
+          user_id: string
+          webhook_url: string
+        }
+        Insert: {
+          content_type?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          updated_at?: string
+          user_id: string
+          webhook_url: string
+        }
+        Update: {
+          content_type?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          updated_at?: string
+          user_id?: string
+          webhook_url?: string
         }
         Relationships: []
       }
@@ -1355,6 +1418,39 @@ export type Database = {
             referencedColumns: ["user_id"]
           },
         ]
+      }
+      rss_import_feeds: {
+        Row: {
+          created_at: string
+          feed_title: string | null
+          feed_url: string
+          id: string
+          is_active: boolean
+          last_imported_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          feed_title?: string | null
+          feed_url: string
+          id?: string
+          is_active?: boolean
+          last_imported_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          feed_title?: string | null
+          feed_url?: string
+          id?: string
+          is_active?: boolean
+          last_imported_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       saved_services: {
         Row: {
