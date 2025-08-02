@@ -39,9 +39,8 @@ const Index = () => {
                 />
               </div>
               
-              {/* Navigation Tabs - Responsive */}
+              {/* Empty space for centering */}
               <div className="hidden sm:flex flex-1 justify-center">
-                <NavigationTabs />
               </div>
               
               <div className="sm:hidden flex-1 px-4">
@@ -55,16 +54,6 @@ const Index = () => {
                     }`}
                   >
                     Market
-                  </Link>
-                  <Link
-                    to="/command-center"
-                    className={`flex-1 text-xs py-2 px-2 rounded-full font-medium transition-all text-center ${
-                      location.pathname === "/command-center" 
-                        ? "bg-background text-foreground shadow-sm" 
-                        : "text-muted-foreground"
-                    }`}
-                  >
-                    Command
                   </Link>
                   <Link
                     to="/academy"
