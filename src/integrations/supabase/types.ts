@@ -2450,6 +2450,15 @@ export type Database = {
         Args: { p_vendor_id: string }
         Returns: Json
       }
+      identify_security_definer_views: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          schema_name: string
+          view_name: string
+          view_definition: string
+          has_security_definer: boolean
+        }[]
+      }
       increment_content_plays: {
         Args: { content_uuid: string }
         Returns: undefined
