@@ -47,6 +47,54 @@ export type Database = {
         }
         Relationships: []
       }
+      agent_invitations: {
+        Row: {
+          agent_company: string | null
+          agent_email: string
+          agent_name: string | null
+          created_at: string
+          id: string
+          invitation_message: string | null
+          invitation_type: string
+          invited_at: string
+          invited_by: string | null
+          responded_at: string | null
+          response_data: Json | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          agent_company?: string | null
+          agent_email: string
+          agent_name?: string | null
+          created_at?: string
+          id?: string
+          invitation_message?: string | null
+          invitation_type?: string
+          invited_at?: string
+          invited_by?: string | null
+          responded_at?: string | null
+          response_data?: Json | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          agent_company?: string | null
+          agent_email?: string
+          agent_name?: string | null
+          created_at?: string
+          id?: string
+          invitation_message?: string | null
+          invitation_type?: string
+          invited_at?: string
+          invited_by?: string | null
+          responded_at?: string | null
+          response_data?: Json | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       agent_playbook_templates: {
         Row: {
           created_at: string
@@ -1687,6 +1735,8 @@ export type Database = {
           creator_website: string | null
           display_name: string | null
           id: string
+          invitation_source: string | null
+          invited_as_creator: boolean | null
           is_admin: boolean | null
           is_creator: boolean | null
           is_pro_member: boolean | null
@@ -1721,6 +1771,8 @@ export type Database = {
           creator_website?: string | null
           display_name?: string | null
           id?: string
+          invitation_source?: string | null
+          invited_as_creator?: boolean | null
           is_admin?: boolean | null
           is_creator?: boolean | null
           is_pro_member?: boolean | null
@@ -1755,6 +1807,8 @@ export type Database = {
           creator_website?: string | null
           display_name?: string | null
           id?: string
+          invitation_source?: string | null
+          invited_as_creator?: boolean | null
           is_admin?: boolean | null
           is_creator?: boolean | null
           is_pro_member?: boolean | null
