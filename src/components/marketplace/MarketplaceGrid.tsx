@@ -712,7 +712,7 @@ export const MarketplaceGrid = () => {
             </p>
           </div>
 
-          {/* AI Concierge Banner - Show for logged-in users */}
+          {/* AI Concierge Banner - Show for all users */}
           <AIConciergeBanner />
 
           {/* Circle Pro Banner - Show for non-signed-in users and non-pro members */}

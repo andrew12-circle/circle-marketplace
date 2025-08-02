@@ -84,6 +84,9 @@ export const AIConciergeBanner = () => {
   useEffect(() => {
     if (user && profile) {
       getContextualRecommendation();
+    } else {
+      // Show generic demo recommendation for non-authenticated users
+      setAiRecommendation("🚀 Based on market data, real estate agents using professional photography see 118% more listing views and close deals 23% faster. Our AI can help you find the perfect services to boost your business!");
     }
   }, [user, profile]);
 
@@ -216,8 +219,7 @@ export const AIConciergeBanner = () => {
     }
   };
 
-  // Only show for logged-in users
-  if (!user || !profile) return null;
+  // Show for all users with different content
 
   return (
     <div className="mb-8">
@@ -231,7 +233,7 @@ export const AIConciergeBanner = () => {
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-3">
                 <h3 className="text-xl font-semibold text-foreground">
-                  {getTimeOfDayGreeting()}, {profile.display_name || 'Agent'}! 
+                  {getTimeOfDayGreeting()}, {user && profile ? (profile.display_name || 'Agent') : 'Future Circle Member'}! 
                 </h3>
                 <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
                   AI Concierge
