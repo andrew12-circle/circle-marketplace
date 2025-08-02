@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { NavigationTabs } from "@/components/NavigationTabs";
 import { Marketplace } from "./Marketplace";
 import { Academy } from "./Academy";
+import { CommandCenter } from "./CommandCenter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Crown } from "lucide-react";
@@ -18,7 +19,7 @@ import { LegalFooter } from "@/components/LegalFooter";
 import { Building, Store } from "lucide-react";
 
 const Index = () => {
-  const [activeTab, setActiveTab] = useState<"marketplace" | "academy">("marketplace");
+  const [activeTab, setActiveTab] = useState<"marketplace" | "academy" | "command-center">("marketplace");
   const { user, profile } = useAuth();
   const { t } = useTranslation();
 
@@ -46,28 +47,37 @@ const Index = () => {
                 <NavigationTabs activeTab={activeTab} onTabChange={setActiveTab} />
               </div>
               
-              {/* Mobile Navigation Tabs */}
               <div className="sm:hidden flex-1 px-4">
                 <div className="flex bg-muted rounded-full p-1">
                   <button
                     onClick={() => setActiveTab("marketplace")}
-                    className={`flex-1 text-xs py-2 px-3 rounded-full font-medium transition-all ${
+                    className={`flex-1 text-xs py-2 px-2 rounded-full font-medium transition-all ${
                       activeTab === "marketplace" 
                         ? "bg-background text-foreground shadow-sm" 
                         : "text-muted-foreground"
                     }`}
                   >
-                    {t('marketplace').substring(0, 6)}
+                    Market
+                  </button>
+                  <button
+                    onClick={() => setActiveTab("command-center")}
+                    className={`flex-1 text-xs py-2 px-2 rounded-full font-medium transition-all ${
+                      activeTab === "command-center" 
+                        ? "bg-background text-foreground shadow-sm" 
+                        : "text-muted-foreground"
+                    }`}
+                  >
+                    Command
                   </button>
                   <button
                     onClick={() => setActiveTab("academy")}
-                    className={`flex-1 text-xs py-2 px-3 rounded-full font-medium transition-all ${
+                    className={`flex-1 text-xs py-2 px-2 rounded-full font-medium transition-all ${
                       activeTab === "academy" 
                         ? "bg-background text-foreground shadow-sm" 
                         : "text-muted-foreground"
                     }`}
                   >
-                    {t('academy')}
+                    Academy
                   </button>
                 </div>
               </div>
@@ -111,7 +121,7 @@ const Index = () => {
 
         {/* Main Content */}
         <main>
-          {activeTab === "marketplace" ? <Marketplace /> : <Academy />}
+          {activeTab === "marketplace" ? <Marketplace /> : activeTab === "command-center" ? <CommandCenter /> : <Academy />}
         </main>
 
         {/* Legal Footer */}

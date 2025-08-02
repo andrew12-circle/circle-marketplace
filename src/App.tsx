@@ -33,6 +33,7 @@ import { CookiePolicy } from "./pages/legal/CookiePolicy";
 import { SellerAgreement } from "./pages/legal/SellerAgreement";
 import { BuyerProtection } from "./pages/legal/BuyerProtection";
 import { ProhibitedItems } from "./pages/legal/ProhibitedItems";
+import { CommandCenter } from "./pages/CommandCenter";
 
 const queryClient = new QueryClient();
 
@@ -48,6 +49,7 @@ const App = () => (
             <EnhancedSecurityHeaders />
             <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/command-center" element={<CommandCenter />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/orders" element={<OrderHistory />} />
             <Route path="/pricing" element={<Pricing />} />

@@ -2,8 +2,8 @@ import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
 
 interface NavigationTabsProps {
-  activeTab: "marketplace" | "academy";
-  onTabChange: (tab: "marketplace" | "academy") => void;
+  activeTab: "marketplace" | "academy" | "command-center";
+  onTabChange: (tab: "marketplace" | "academy" | "command-center") => void;
 }
 
 export const NavigationTabs = ({ activeTab, onTabChange }: NavigationTabsProps) => {
@@ -20,6 +20,17 @@ export const NavigationTabs = ({ activeTab, onTabChange }: NavigationTabsProps) 
         }`}
       >
         {t('marketplace')}
+      </Button>
+      <Button
+        variant="ghost"
+        onClick={() => onTabChange("command-center")}
+        className={`rounded-lg px-6 py-2 font-medium transition-all duration-200 ${
+          activeTab === "command-center" 
+            ? "bg-background text-foreground shadow-sm" 
+            : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+        }`}
+      >
+        Command Center
       </Button>
       <Button
         variant="ghost"
