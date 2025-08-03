@@ -225,54 +225,54 @@ export const AIConciergeBanner = () => {
     <div className="mb-8">
       <Card className="bg-gradient-to-br from-primary/5 via-background to-accent/5 border-primary/20 shadow-lg">
         <CardContent className="p-3 md:p-6">
-          <div className="flex flex-col md:flex-row md:items-start gap-3 md:gap-4">
-            <div className="p-2 md:p-3 rounded-xl bg-primary/10 border border-primary/20 shrink-0 self-start">
-              <Brain className="h-5 w-5 md:h-6 md:w-6 text-primary" />
+          <div className="flex items-start gap-2 md:flex-row md:items-start md:gap-4">
+            <div className="p-2 md:p-3 rounded-xl bg-primary/10 border border-primary/20 shrink-0">
+              <Brain className="h-4 w-4 md:h-6 md:w-6 text-primary" />
             </div>
             
             <div className="flex-1 min-w-0">
-              <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3 mb-3">
-                <h3 className="text-base md:text-lg lg:text-xl font-semibold text-foreground">
+              <div className="flex items-center gap-2 md:flex-row md:items-center md:gap-3 mb-2 md:mb-3">
+                <h3 className="text-sm md:text-lg lg:text-xl font-semibold text-foreground leading-tight">
                   {getTimeOfDayGreeting()}, {user && profile ? (profile.display_name || 'Agent') : 'Future Circle Member'}! 
                 </h3>
-                <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 text-xs self-start md:self-auto">
+                <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 text-xs shrink-0">
                   AI Concierge
                 </Badge>
               </div>
               
-              <div className="mb-3 md:mb-4">
-                <p className="text-sm md:text-base text-muted-foreground">
+              <div className="mb-2 md:mb-4">
+                <p className="text-xs md:text-base text-muted-foreground">
                   How can I help you grow your business today?
                 </p>
               </div>
 
               {/* Chat Input Area */}
-              <div className="bg-card/30 backdrop-blur-sm border border-border/50 rounded-lg p-3 md:p-4 mb-3 md:mb-4">
-                <div className="flex items-center gap-3">
+              <div className="bg-card/30 backdrop-blur-sm border border-border/50 rounded-lg p-2 md:p-4 mb-2 md:mb-4">
+                <div className="flex items-center gap-2 md:gap-3">
                   <div className="flex-1 relative">
                     <Input
                       value={chatInput}
                       onChange={(e) => setChatInput(e.target.value)}
                       onKeyPress={handleKeyPress}
                       placeholder={placeholderText}
-                      className="bg-background/50 border-border/50 placeholder:text-muted-foreground/70 focus:bg-background"
+                      className="bg-background/50 border-border/50 placeholder:text-muted-foreground/70 focus:bg-background text-sm md:text-base"
                     />
                   </div>
                   <Button 
                     onClick={() => setIsAIModalOpen(true)}
                     size="sm" 
                     variant="outline"
-                    className="bg-background/50 hover:bg-background border-border/50"
+                    className="bg-background/50 hover:bg-background border-border/50 p-2"
                   >
-                    <Mic className="h-4 w-4" />
+                    <Mic className="h-3 w-3 md:h-4 md:w-4" />
                   </Button>
                   <Button 
                     onClick={handleSendMessage}
                     size="sm" 
-                    className="bg-primary hover:bg-primary/90"
+                    className="bg-primary hover:bg-primary/90 p-2"
                     disabled={!chatInput.trim()}
                   >
-                    <Send className="h-4 w-4" />
+                    <Send className="h-3 w-3 md:h-4 md:w-4" />
                   </Button>
                 </div>
               </div>
