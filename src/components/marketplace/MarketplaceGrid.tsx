@@ -259,6 +259,20 @@ export const MarketplaceGrid = () => {
       setLoading(true);
       setError(null);
       
+      console.log('MarketplaceGrid: Testing Supabase connection...');
+      
+      // Test basic connection first
+      const testQuery = await supabase
+        .from('vendors')
+        .select('count', { count: 'exact', head: true });
+      
+      console.log('MarketplaceGrid: Test query result:', testQuery);
+      
+      if (testQuery.error) {
+        console.error('MarketplaceGrid: Basic connection failed:', testQuery.error);
+        throw new Error(`Database connection failed: ${testQuery.error.message}`);
+      }
+      
       console.log('MarketplaceGrid: Making Supabase queries...');
       
       // Load vendors and services with optimized queries
@@ -287,11 +301,19 @@ export const MarketplaceGrid = () => {
 
       if (vendorsResponse.error) {
         console.error('Vendors query error:', vendorsResponse.error);
-        throw vendorsResponse.error;
+        throw new Error(`Vendors query failed: ${vendorsResponse.error.message}`);
       }
       if (servicesResponse.error) {
         console.error('Services query error:', servicesResponse.error);
-        throw servicesResponse.error;
+        throw new Error(`Services query failed: ${servicesResponse.error.message}`);
+      }
+
+      // Check if we got empty results
+      if (!vendorsResponse.data || vendorsResponse.data.length === 0) {
+        console.warn('MarketplaceGrid: No vendors found');
+      }
+      if (!servicesResponse.data || servicesResponse.data.length === 0) {
+        console.warn('MarketplaceGrid: No services found');
       }
 
       // Convert and deduplicate services to prevent duplicate key errors
@@ -336,9 +358,15 @@ export const MarketplaceGrid = () => {
         local_representatives: []
       }));
       
+      console.log('MarketplaceGrid: About to set state with:', { 
+        services: formattedServices.length, 
+        vendors: formattedVendors.length 
+      });
+      
       setServices(formattedServices);
       setVendors(formattedVendors);
-      console.log('MarketplaceGrid: State updated successfully', { services: formattedServices.length, vendors: formattedVendors.length });
+      
+      console.log('MarketplaceGrid: State updated successfully');
       
     } catch (error) {
       console.error('Marketplace data loading error:', error);
