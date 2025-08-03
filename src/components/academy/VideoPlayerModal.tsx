@@ -5,7 +5,9 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
-import { Star, Clock, User, X, ThumbsUp, ThumbsDown, Heart, MessageCircle, Share, Bell, BellRing, Pin } from "lucide-react";
+import { Star, Clock, User, X, ThumbsUp, ThumbsDown, Heart, MessageCircle, Share, Bell, BellRing, Pin, CheckCircle } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useEnhancedCreatorInfo } from "@/hooks/useEnhancedCreatorInfo";
 
 interface Channel {
   id: string;
@@ -65,15 +67,17 @@ interface VideoPlayerModalProps {
 
 export const VideoPlayerModal = ({ video, isOpen, onClose, videoUrl }: VideoPlayerModalProps) => {
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+  const { creatorInfo, loading: creatorLoading } = useEnhancedCreatorInfo(video?.id);
+  
   if (!video || !videoUrl) return null;
 
-  // Create mock data for features not yet in database
-  const mockChannel: Channel = {
+  // Create enhanced channel data using either platform user info or fallback
+  const enhancedChannel: Channel = {
     id: video.creator_id || 'unknown',
-    name: video.metadata?.channel_title || video.creator || 'Unknown Creator',
-    subscribers: 12500,
-    isSubscribed: false,
-    avatar: undefined
+    name: creatorInfo?.display_name || video.metadata?.channel_title || video.creator || 'Unknown Creator',
+    avatar: creatorInfo?.display_avatar || undefined,
+    subscribers: creatorInfo?.display_subscribers || video.metadata?.subscriber_count || 12500,
+    isSubscribed: false
   };
 
   const mockComments: Comment[] = [
@@ -109,7 +113,7 @@ export const VideoPlayerModal = ({ video, isOpen, onClose, videoUrl }: VideoPlay
   // Enhance video object with mock social features
   const enhancedVideo = {
     ...video,
-    channel: mockChannel,
+    channel: enhancedChannel,
     likes: video.metadata?.like_count || 150,
     dislikes: 12,
     isLiked: false,
@@ -229,10 +233,40 @@ export const VideoPlayerModal = ({ video, isOpen, onClose, videoUrl }: VideoPlay
                   <AvatarFallback>{enhancedVideo.channel.name.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <div>
-                  <h4 className="font-medium">{enhancedVideo.channel.name}</h4>
+                  <div className="flex items-center gap-2">
+                    <h4 className="font-medium">{enhancedVideo.channel.name}</h4>
+                    <TooltipProvider>
+                      {creatorInfo?.creator_type === 'platform_user' && (
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <CheckCircle className="w-4 h-4 text-blue-600" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Verified Platform Creator</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
+                      {creatorInfo?.creator_type === 'claimed_channel' && (
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <CheckCircle className="w-4 h-4 text-green-600" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Claimed Channel</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
+                    </TooltipProvider>
+                  </div>
                   <p className="text-sm text-muted-foreground">
                     {formatSubscriberCount(enhancedVideo.channel.subscribers)} subscribers
+                    {creatorInfo?.creator_type === 'youtube_import' && (
+                      <span className="ml-1 text-xs">(YouTube Import)</span>
+                    )}
                   </p>
+                  {creatorInfo?.platform_bio && (
+                    <p className="text-xs text-muted-foreground mt-1">{creatorInfo.platform_bio}</p>
+                  )}
                 </div>
               </div>
               <Button 
