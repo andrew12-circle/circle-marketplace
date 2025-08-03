@@ -247,7 +247,7 @@ export const AIConciergeBanner = () => {
               </div>
 
               {/* Chat Input Area */}
-              <div className="bg-card/30 backdrop-blur-sm border border-border/50 rounded-lg p-2 md:p-4 mb-2 md:mb-4">
+              <div className="bg-card/30 backdrop-blur-sm border border-border/50 rounded-lg p-2 md:p-4 mb-2 md:mb-4 -mx-1 md:mx-0">
                 <div className="flex items-center gap-2 md:gap-3">
                   <div className="flex-1 relative">
                     <Input
