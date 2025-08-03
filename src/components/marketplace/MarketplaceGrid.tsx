@@ -258,6 +258,7 @@ export const MarketplaceGrid = () => {
       console.log('Services response:', servicesResponse);
       console.log('Services data:', servicesResponse.data);
       console.log('Services error:', servicesResponse.error);
+      console.log('Services data length:', servicesResponse.data?.length);
 
       if (vendorsResponse.error) {
         console.error('Vendors error:', vendorsResponse.error);
@@ -305,9 +306,13 @@ export const MarketplaceGrid = () => {
       }));
       
       console.log(`Loaded ${formattedServices.length} services and ${formattedVendors.length} vendors`);
+      console.log('Formatted services:', formattedServices);
+      console.log('Setting services state...');
       
       setServices(formattedServices);
       setVendors(formattedVendors);
+      
+      console.log('Services and vendors state set successfully');
       
     } catch (error) {
       console.error('Marketplace data loading error:', error);
