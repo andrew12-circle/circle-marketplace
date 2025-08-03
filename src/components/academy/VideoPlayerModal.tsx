@@ -1,6 +1,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Star, Clock, User, X } from "lucide-react";
 
 interface Video {
@@ -93,9 +94,11 @@ export const VideoPlayerModal = ({ video, isOpen, onClose, videoUrl }: VideoPlay
 
           {/* Description */}
           {video.description && (
-            <div className="px-6 py-4 border-t bg-muted/50">
+            <div className="px-6 py-4 border-t bg-muted/50 max-h-32">
               <h4 className="font-medium mb-2">Description</h4>
-              <p className="text-sm text-muted-foreground">{video.description}</p>
+              <ScrollArea className="h-20">
+                <p className="text-sm text-muted-foreground pr-4">{video.description}</p>
+              </ScrollArea>
             </div>
           )}
         </div>
