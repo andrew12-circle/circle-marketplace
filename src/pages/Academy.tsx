@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 import { Link } from "react-router-dom";
 import { AcademySidebar } from "@/components/academy/AcademySidebar";
 import { NavigationTabs } from "@/components/NavigationTabs";
@@ -224,6 +225,12 @@ const mockVideos = {
 };
 
 export const Academy = () => {
+  return (
+    <ErrorBoundary section="Academy">{AcademyContent()}</ErrorBoundary>
+  );
+};
+
+const AcademyContent = () => {
   const [activeView, setActiveView] = useState("home");
   const [selectedVideo, setSelectedVideo] = useState<any>(null);
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);

@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 import { CSRFProvider } from "@/components/common/CSRFProtection";
 import { SecurityHeaders } from "@/components/common/SecurityHeaders";
 import { EnhancedSecurityHeaders } from "@/components/security/EnhancedSecurityHeaders";
@@ -44,58 +45,60 @@ const queryClient = new QueryClient();
 const App = () => {
   console.log("App component rendering");
   return (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <CSRFProvider>
-        <AuthProvider>
-          <Toaster />
-          <Sonner />
-          <div className="fixed top-4 right-4 z-50">
-            <SecurityStatusIndicator />
-          </div>
-           <BrowserRouter>
-             <SecurityHeaders />
-             <EnhancedSecurityHeaders />
-             <RequestLogger />
-             <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/academy" element={<Academy />} />
-            <Route path="/command-center" element={<CommandCenter />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/orders" element={<OrderHistory />} />
-            <Route path="/pricing" element={<Pricing />} />
-            <Route path="/profile-settings" element={<ProfileSettings />} />
-            <Route path="/wallet" element={<AgentWallet />} />
-            <Route path="/saved" element={<SavedItems />} />
-            <Route path="/payment-success" element={<PaymentSuccess />} />
-            <Route path="/payment-canceled" element={<PaymentCanceled />} />
-            <Route path="/consultation-demo" element={<ConsultationDemo />} />
-            <Route path="/vendor-dashboard" element={<VendorDashboard />} />
-            <Route path="/vendor-analytics" element={<VendorAnalyticsDashboard />} />
-            <Route path="/vendor-registration" element={<VendorRegistration />} />
-            <Route path="/analytics" element={<AnalyticsDashboard />} />
-            <Route path="/support" element={<SupportDashboard />} />
-            <Route path="/advanced-features" element={<AdvancedFeaturesDashboard />} />
-            <Route path="/ai-dashboard" element={<AIDashboard />} />
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/admin/accounting" element={<AdminAccounting />} />
-            
-            {/* Legal Pages */}
-            <Route path="/terms" element={<TermsOfService />} />
-            <Route path="/privacy" element={<PrivacyPolicy />} />
-            <Route path="/cookies" element={<CookiePolicy />} />
-            <Route path="/seller-agreement" element={<SellerAgreement />} />
-            <Route path="/buyer-protection" element={<BuyerProtection />} />
-            <Route path="/prohibited-items" element={<ProhibitedItems />} />
-            
-            {/* Catch-all route MUST be last */}
-            <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </AuthProvider>
-      </CSRFProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
+    <ErrorBoundary section="Application">
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <CSRFProvider>
+            <AuthProvider>
+              <Toaster />
+              <Sonner />
+              <div className="fixed top-4 right-4 z-50">
+                <SecurityStatusIndicator />
+              </div>
+               <BrowserRouter>
+                 <SecurityHeaders />
+                 <EnhancedSecurityHeaders />
+                 <RequestLogger />
+                 <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/academy" element={<Academy />} />
+                <Route path="/command-center" element={<CommandCenter />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/orders" element={<OrderHistory />} />
+                <Route path="/pricing" element={<Pricing />} />
+                <Route path="/profile-settings" element={<ProfileSettings />} />
+                <Route path="/wallet" element={<AgentWallet />} />
+                <Route path="/saved" element={<SavedItems />} />
+                <Route path="/payment-success" element={<PaymentSuccess />} />
+                <Route path="/payment-canceled" element={<PaymentCanceled />} />
+                <Route path="/consultation-demo" element={<ConsultationDemo />} />
+                <Route path="/vendor-dashboard" element={<VendorDashboard />} />
+                <Route path="/vendor-analytics" element={<VendorAnalyticsDashboard />} />
+                <Route path="/vendor-registration" element={<VendorRegistration />} />
+                <Route path="/analytics" element={<AnalyticsDashboard />} />
+                <Route path="/support" element={<SupportDashboard />} />
+                <Route path="/advanced-features" element={<AdvancedFeaturesDashboard />} />
+                <Route path="/ai-dashboard" element={<AIDashboard />} />
+                <Route path="/admin" element={<AdminDashboard />} />
+                <Route path="/admin/accounting" element={<AdminAccounting />} />
+                
+                {/* Legal Pages */}
+                <Route path="/terms" element={<TermsOfService />} />
+                <Route path="/privacy" element={<PrivacyPolicy />} />
+                <Route path="/cookies" element={<CookiePolicy />} />
+                <Route path="/seller-agreement" element={<SellerAgreement />} />
+                <Route path="/buyer-protection" element={<BuyerProtection />} />
+                <Route path="/prohibited-items" element={<ProhibitedItems />} />
+                
+                {/* Catch-all route MUST be last */}
+                <Route path="*" element={<NotFound />} />
+                </Routes>
+              </BrowserRouter>
+            </AuthProvider>
+          </CSRFProvider>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 };
 
