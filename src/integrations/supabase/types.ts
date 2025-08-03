@@ -2022,6 +2022,9 @@ export type Database = {
           location: string | null
           longitude: number | null
           phone: string | null
+          respa_max_copay_percentage: number | null
+          respa_notes: string | null
+          respa_service_categories: string[] | null
           revenue_share_percentage: number | null
           specialties: string[] | null
           state: string | null
@@ -2060,6 +2063,9 @@ export type Database = {
           location?: string | null
           longitude?: number | null
           phone?: string | null
+          respa_max_copay_percentage?: number | null
+          respa_notes?: string | null
+          respa_service_categories?: string[] | null
           revenue_share_percentage?: number | null
           specialties?: string[] | null
           state?: string | null
@@ -2098,6 +2104,9 @@ export type Database = {
           location?: string | null
           longitude?: number | null
           phone?: string | null
+          respa_max_copay_percentage?: number | null
+          respa_notes?: string | null
+          respa_service_categories?: string[] | null
           revenue_share_percentage?: number | null
           specialties?: string[] | null
           state?: string | null
