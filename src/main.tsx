@@ -6,11 +6,13 @@ import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { suppressConsoleLogs } from "./utils/performance";
+import initializePerformanceOptimizations from "./utils/consoleCleanup";
 import "./index.css";
 import "./i18n";
 
-// Optimize performance for production
+// Initialize performance optimizations immediately
 suppressConsoleLogs();
+initializePerformanceOptimizations();
 
 import Index from "./pages/Index";
 import { Marketplace } from "./pages/Marketplace";
