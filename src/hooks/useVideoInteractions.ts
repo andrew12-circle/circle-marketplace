@@ -269,18 +269,44 @@ export const useVideoInteractions = (contentId: string, channelId?: string) => {
 
   const handleShare = async () => {
     try {
-      if (navigator.share) {
-        await navigator.share({
+      // Check if Web Share API is available and supported
+      if (navigator.share && navigator.canShare) {
+        const shareData = {
           title: 'Check out this video',
           url: window.location.href,
-        });
-      } else {
-        await navigator.clipboard.writeText(window.location.href);
-        toast({ title: "Link copied to clipboard" });
+        };
+        
+        // Check if the data can be shared
+        if (navigator.canShare(shareData)) {
+          await navigator.share(shareData);
+          return;
+        }
       }
+      
+      // Fallback to clipboard
+      await navigator.clipboard.writeText(window.location.href);
+      toast({ title: "Link copied to clipboard" });
+      
     } catch (error) {
       console.error('Error sharing:', error);
-      toast({ title: "Error sharing video", variant: "destructive" });
+      
+      // Try alternative clipboard method as final fallback
+      try {
+        const textArea = document.createElement('textarea');
+        textArea.value = window.location.href;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        toast({ title: "Link copied to clipboard" });
+      } catch (fallbackError) {
+        console.error('Fallback sharing failed:', fallbackError);
+        toast({ 
+          title: "Unable to share", 
+          description: "Please copy the URL manually from your address bar",
+          variant: "destructive" 
+        });
+      }
     }
   };
 
