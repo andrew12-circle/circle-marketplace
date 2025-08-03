@@ -369,7 +369,7 @@ const AcademyContent = () => {
       {/* Hero Section */}
       <div className="mb-12">
         <h1 className="text-6xl font-bold text-black mb-4">Academy.</h1>
-        <p className="text-lg text-gray-600 max-w-2xl">
+        <p className="text-gray-600 max-w-2xl text-sm">
           Finally, we silenced the noise. Welcome to the Academy. A place you can take a 
           breath, learn, and actually move your career forward.
         </p>
@@ -1600,29 +1600,22 @@ const AcademyContent = () => {
       {/* Header */}
       <header className="border-b bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/50 sticky top-0 z-50">
         <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4">
-          {isMobile ? (
-            // Mobile Header Layout
-            <div className="space-y-3">
+          {isMobile ?
+        // Mobile Header Layout
+        <div className="space-y-3">
               {/* Top row - Logo and User Actions */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <img 
-                    src={circleLogoUrl}
-                    alt="Circle Logo" 
-                    className="w-10 h-10 object-contain"
-                    style={{
-                      imageRendering: 'crisp-edges'
-                    }}
-                  />
+                  <img src={circleLogoUrl} alt="Circle Logo" className="w-10 h-10 object-contain" style={{
+                imageRendering: 'crisp-edges'
+              }} />
                 </div>
                 
                 <div className="flex items-center gap-2">
-                  {user && profile && (
-                    <Link to="/wallet" className="flex items-center gap-1 text-xs hover:bg-accent hover:text-accent-foreground rounded-md px-1.5 py-1 transition-colors cursor-pointer touch-target">
+                  {user && profile && <Link to="/wallet" className="flex items-center gap-1 text-xs hover:bg-accent hover:text-accent-foreground rounded-md px-1.5 py-1 transition-colors cursor-pointer touch-target">
                       <Crown className="w-3 h-3 text-yellow-500" />
                       <span className="font-medium text-xs">{profile.circle_points}</span>
-                    </Link>
-                  )}
+                    </Link>}
                   
                   <UserMenu />
                 </div>
@@ -1631,42 +1624,22 @@ const AcademyContent = () => {
               {/* Bottom row - Navigation Tabs */}
               <div className="flex justify-center">
                 <div className="flex bg-muted rounded-full p-1 w-full max-w-xs">
-                  <Link
-                    to="/"
-                    className={`flex-1 text-xs py-1.5 px-3 rounded-full font-medium transition-all text-center ${
-                      location.pathname === "/" 
-                        ? "bg-background text-foreground shadow-sm" 
-                        : "text-muted-foreground"
-                    }`}
-                  >
+                  <Link to="/" className={`flex-1 text-xs py-1.5 px-3 rounded-full font-medium transition-all text-center ${location.pathname === "/" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground"}`}>
                     Marketplace
                   </Link>
-                  <Link
-                    to="/academy"
-                    className={`flex-1 text-xs py-1.5 px-3 rounded-full font-medium transition-all text-center ${
-                      location.pathname === "/academy" 
-                        ? "bg-background text-foreground shadow-sm" 
-                        : "text-muted-foreground"
-                    }`}
-                  >
+                  <Link to="/academy" className={`flex-1 text-xs py-1.5 px-3 rounded-full font-medium transition-all text-center ${location.pathname === "/academy" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground"}`}>
                     Academy
                   </Link>
                 </div>
               </div>
-            </div>
-          ) : (
-            // Desktop Header Layout (unchanged)
-            <div className="flex items-center justify-between">
+            </div> :
+        // Desktop Header Layout (unchanged)
+        <div className="flex items-center justify-between">
               {/* Logo */}
               <div className="flex items-center gap-2 sm:gap-3">
-                <img 
-                  src={circleLogoUrl}
-                  alt="Circle Logo" 
-                  className="w-12 h-12 sm:w-16 sm:h-16 object-contain"
-                  style={{
-                    imageRendering: 'crisp-edges'
-                  }}
-                />
+                <img src={circleLogoUrl} alt="Circle Logo" className="w-12 h-12 sm:w-16 sm:h-16 object-contain" style={{
+              imageRendering: 'crisp-edges'
+            }} />
               </div>
               
               {/* Navigation Tabs - Desktop */}
@@ -1680,19 +1653,16 @@ const AcademyContent = () => {
                 <LocationSwitcher />
                 
                 {/* Circle Points - Desktop */}
-                {user && profile && (
-                  <Link to="/wallet" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm hover:bg-accent hover:text-accent-foreground rounded-md px-2 sm:px-3 py-1.5 sm:py-2 transition-colors cursor-pointer touch-target">
+                {user && profile && <Link to="/wallet" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm hover:bg-accent hover:text-accent-foreground rounded-md px-2 sm:px-3 py-1.5 sm:py-2 transition-colors cursor-pointer touch-target">
                     <Crown className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-500" />
                     <span className="font-medium">{profile.circle_points}</span>
                     <span className="text-muted-foreground hidden sm:inline">Points</span>
-                  </Link>
-                )}
+                  </Link>}
                 
                 {/* User menu */}
                 <UserMenu />
               </div>
-            </div>
-          )}
+            </div>}
         </div>
       </header>
 
