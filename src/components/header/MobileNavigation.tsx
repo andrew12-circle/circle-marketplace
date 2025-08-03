@@ -13,20 +13,20 @@ export const MobileNavigation = ({ currentPath }: MobileNavigationProps) => {
       <div className="flex bg-muted rounded-full p-0.5 shadow-sm">
         <Link
           to="/"
-          className={`flex-1 py-2 px-4 rounded-full font-medium transition-all duration-200 text-center touch-target ${
+          className={`flex-1 py-2 px-3 rounded-full font-medium transition-all duration-200 text-center touch-target ${
             currentPath === "/" 
-              ? "bg-background text-foreground shadow-sm text-sm" 
-              : "text-muted-foreground hover:text-foreground text-sm"
+              ? "bg-background text-foreground shadow-sm text-xs" 
+              : "text-muted-foreground hover:text-foreground text-xs"
           }`}
         >
           {t('marketplace')}
         </Link>
         <Link
           to="/academy"
-          className={`flex-1 py-2 px-4 rounded-full font-medium transition-all duration-200 text-center touch-target ${
+          className={`flex-1 py-2 px-3 rounded-full font-medium transition-all duration-200 text-center touch-target ${
             currentPath === "/academy" 
-              ? "bg-background text-foreground shadow-sm text-sm" 
-              : "text-muted-foreground hover:text-foreground text-sm"
+              ? "bg-background text-foreground shadow-sm text-xs" 
+              : "text-muted-foreground hover:text-foreground text-xs"
           }`}
         >
           {t('academy')}
