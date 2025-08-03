@@ -142,7 +142,8 @@ export const VideoPlayerModal = ({ video, isOpen, onClose, videoUrl }: VideoPlay
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-6xl max-h-[90vh] p-0 overflow-hidden">
-        <div className="flex flex-col h-[90vh]">
+        <ScrollArea className="h-[90vh]">
+          <div className="flex flex-col">
           {/* Header */}
           <DialogHeader className="px-6 py-4 border-b">
             <div className="flex items-center justify-between">
@@ -394,6 +395,7 @@ export const VideoPlayerModal = ({ video, isOpen, onClose, videoUrl }: VideoPlay
             </div>
           </div>
         </div>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );
