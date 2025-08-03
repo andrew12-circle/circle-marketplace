@@ -18,6 +18,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useVendorActivityTracking } from '@/hooks/useVendorActivityTracking';
 import { CoPayRequestsManager } from '@/components/vendor/CoPayRequestsManager';
+import { VendorCoPaySettings } from '@/components/vendor/VendorCoPaySettings';
 
 interface VendorService {
   id: string;
@@ -617,6 +618,7 @@ export const VendorDashboard = () => {
 
           {/* Co-Pay Requests Tab */}
           <TabsContent value="copay" className="space-y-6">
+            <VendorCoPaySettings vendorId={vendorId || ''} />
             <CoPayRequestsManager />
           </TabsContent>
 

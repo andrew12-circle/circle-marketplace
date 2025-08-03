@@ -31,8 +31,12 @@ import {
   Building2,
   CheckCircle,
   XCircle,
-  Minus
+  Minus,
+  DollarSign,
+  BarChart3
 } from "lucide-react";
+import { AgentCoPayDashboard } from '@/components/agent/AgentCoPayDashboard';
+import { CoPayAnalyticsDashboard } from '@/components/agent/CoPayAnalyticsDashboard';
 
 export const AgentWallet = () => {
   const { user, profile } = useAuth();
@@ -267,7 +271,7 @@ export const AgentWallet = () => {
 
         {/* Banking Navigation */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 h-12 bg-muted/50 rounded-xl p-1">
+          <TabsList className="grid w-full grid-cols-7 h-12 bg-muted/50 rounded-xl p-1">
             <TabsTrigger value="overview" className="text-sm font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:shadow-sm">
               <Receipt className="h-4 w-4 mr-2" />
               Overview
@@ -279,6 +283,14 @@ export const AgentWallet = () => {
             <TabsTrigger value="allocations" className="text-sm font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:shadow-sm">
               <Building2 className="h-4 w-4 mr-2" />
               Vendors
+            </TabsTrigger>
+            <TabsTrigger value="copay" className="text-sm font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:shadow-sm">
+              <DollarSign className="h-4 w-4 mr-2" />
+              Co-Pay
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="text-sm font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:shadow-sm">
+              <BarChart3 className="h-4 w-4 mr-2" />
+              Analytics
             </TabsTrigger>
             <TabsTrigger value="earn" className="text-sm font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:shadow-sm">
               <Plus className="h-4 w-4 mr-2" />
@@ -592,6 +604,16 @@ export const AgentWallet = () => {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          {/* Co-Pay Tab */}
+          <TabsContent value="copay" className="space-y-6">
+            <AgentCoPayDashboard />
+          </TabsContent>
+
+          {/* Analytics Tab */}
+          <TabsContent value="analytics" className="space-y-6">
+            <CoPayAnalyticsDashboard />
           </TabsContent>
 
           {/* Spend Points Tab */}
