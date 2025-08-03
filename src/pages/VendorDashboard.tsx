@@ -17,6 +17,7 @@ import { ServiceFunnelEditorModal } from '@/components/marketplace/ServiceFunnel
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useVendorActivityTracking } from '@/hooks/useVendorActivityTracking';
+import { CoPayRequestsManager } from '@/components/vendor/CoPayRequestsManager';
 
 interface VendorService {
   id: string;
@@ -531,73 +532,115 @@ export const VendorDashboard = () => {
           </Card>
         </div>
 
-        {/* Services Management */}
-        <Card className="border-0 shadow-lg">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
-                <Package className="w-5 h-5 text-blue-600" />
-                Your Services ({services.length})
-              </CardTitle>
-              <Button 
-                onClick={openServiceBuilder}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Add Service
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {services.length === 0 ? (
-              <div className="text-center py-12">
-                <Package className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-xl font-semibold mb-2">No services yet</h3>
-                <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                  Start building your business by creating your first service listing. 
-                  Showcase your expertise and connect with customers.
-                </p>
-                <Button 
-                  onClick={openServiceBuilder}
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
-                  size="lg"
-                >
-                  <Plus className="w-5 h-5 mr-2" />
-                  Create Your First Service
-                </Button>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {services.map((service) => (
-                  <div 
-                    key={service.id} 
-                    className="group cursor-pointer transform transition-all duration-300 hover:scale-105"
-                    onClick={() => handleServiceClick(service)}
+        {/* Main Dashboard Tabs */}
+        <Tabs defaultValue="services" className="space-y-8">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="services" className="flex items-center gap-2">
+              <Package className="w-4 h-4" />
+              Services ({services.length})
+            </TabsTrigger>
+            <TabsTrigger value="copay" className="flex items-center gap-2">
+              <DollarSign className="w-4 h-4" />
+              Co-Pay Requests
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="flex items-center gap-2">
+              <BarChart3 className="w-4 h-4" />
+              Analytics
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Services Tab */}
+          <TabsContent value="services" className="space-y-6">
+            <Card className="border-0 shadow-lg">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <Package className="w-5 h-5 text-blue-600" />
+                    Your Services ({services.length})
+                  </CardTitle>
+                  <Button 
+                    onClick={openServiceBuilder}
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
                   >
-                    <ServiceCard 
-                      service={{
-                        id: service.id,
-                        title: service.title,
-                        description: service.description,
-                        retail_price: service.retail_price || '0',
-                        category: service.category,
-                        image_url: service.image_url,
-                        is_featured: service.is_featured || false,
-                        is_top_pick: false,
-                        vendor: {
-                          name: 'Vendor Name',
-                          rating: service.rating || 4.5,
-                          review_count: service.reviews_count || 0,
-                          is_verified: true
-                        }
-                      }}
-                    />
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Service
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {services.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Package className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-xl font-semibold mb-2">No services yet</h3>
+                    <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                      Start building your business by creating your first service listing. 
+                      Showcase your expertise and connect with customers.
+                    </p>
+                    <Button 
+                      onClick={openServiceBuilder}
+                      className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+                      size="lg"
+                    >
+                      <Plus className="w-5 h-5 mr-2" />
+                      Create Your First Service
+                    </Button>
                   </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {services.map((service) => (
+                      <ServiceCard
+                        key={service.id}
+                        service={{
+                          id: service.id,
+                          title: service.title,
+                          description: service.description,
+                          category: service.category,
+                          retail_price: service.retail_price || '0',
+                          image_url: service.image_url,
+                          is_featured: service.is_featured || false,
+                          is_top_pick: false,
+                          vendor: {
+                            name: 'Your Business',
+                            rating: service.rating || 4.5,
+                            review_count: service.reviews_count || 0,
+                            is_verified: true
+                          }
+                        }}
+                        onViewDetails={() => handleServiceClick(service)}
+                      />
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Co-Pay Requests Tab */}
+          <TabsContent value="copay" className="space-y-6">
+            <CoPayRequestsManager />
+          </TabsContent>
+
+          {/* Analytics Tab */}
+          <TabsContent value="analytics" className="space-y-6">
+            <Card className="border-0 shadow-lg">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BarChart3 className="w-5 h-5 text-blue-600" />
+                  Performance Analytics
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-12">
+                  <BarChart3 className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold mb-2">Analytics Coming Soon</h3>
+                  <p className="text-muted-foreground">
+                    Detailed analytics and insights about your service performance will be available here.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
 
       {/* Modals */}
