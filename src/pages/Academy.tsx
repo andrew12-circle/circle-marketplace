@@ -32,6 +32,8 @@ import { Progress } from "@/components/ui/progress";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { GraduationCap, BookOpen, Video, Headphones, Book, Search, Filter, Users, TrendingUp, Sparkles, Heart, Award, ChevronRight, Play, Clock, Star, Crown } from "lucide-react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useLocation } from "react-router-dom";
 
 // Mock data - replace with actual data
 const mockCourses = [{
@@ -1592,53 +1594,105 @@ const AcademyContent = () => {
     profile
   } = useAuth();
   const circleLogoUrl = "/lovable-uploads/97692497-6d98-46a8-b6fc-05cd68bdc160.png";
+  const isMobile = useIsMobile();
+  const location = useLocation();
   return <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/50 sticky top-0 z-50">
         <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4">
-          <div className="flex items-center justify-between">
-            {/* Logo */}
-            <div className="flex items-center gap-2 sm:gap-3">
-              <img src={circleLogoUrl} alt="Circle Logo" className="w-12 h-12 sm:w-16 sm:h-16 object-contain" style={{
-              imageRendering: 'crisp-edges'
-            }} />
-            </div>
-            
-            {/* Navigation Tabs - Responsive */}
-            <div className="hidden sm:flex flex-1 justify-center">
-              <NavigationTabs />
-            </div>
-            
-            <div className="sm:hidden flex-1 px-4">
-              <div className="flex bg-muted rounded-full p-1">
-                <Link to="/" className="flex-1 text-xs py-2 px-2 rounded-full font-medium transition-all text-center text-muted-foreground">
-                  Market
-                </Link>
-                <Link to="/command-center" className="flex-1 text-xs py-2 px-2 rounded-full font-medium transition-all text-center text-muted-foreground">
-                  Command
-                </Link>
-                <Link to="/academy" className="flex-1 text-xs py-2 px-2 rounded-full font-medium transition-all text-center bg-background text-foreground shadow-sm">
-                  Academy
-                </Link>
+          {isMobile ? (
+            // Mobile Header Layout
+            <div className="space-y-3">
+              {/* Top row - Logo and User Actions */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <img 
+                    src={circleLogoUrl}
+                    alt="Circle Logo" 
+                    className="w-10 h-10 object-contain"
+                    style={{
+                      imageRendering: 'crisp-edges'
+                    }}
+                  />
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  {user && profile && (
+                    <Link to="/wallet" className="flex items-center gap-1 text-xs hover:bg-accent hover:text-accent-foreground rounded-md px-1.5 py-1 transition-colors cursor-pointer touch-target">
+                      <Crown className="w-3 h-3 text-yellow-500" />
+                      <span className="font-medium text-xs">{profile.circle_points}</span>
+                    </Link>
+                  )}
+                  
+                  <UserMenu />
+                </div>
+              </div>
+              
+              {/* Bottom row - Navigation Tabs */}
+              <div className="flex justify-center">
+                <div className="flex bg-muted rounded-full p-1 w-full max-w-xs">
+                  <Link
+                    to="/"
+                    className={`flex-1 text-xs py-1.5 px-3 rounded-full font-medium transition-all text-center ${
+                      location.pathname === "/" 
+                        ? "bg-background text-foreground shadow-sm" 
+                        : "text-muted-foreground"
+                    }`}
+                  >
+                    Marketplace
+                  </Link>
+                  <Link
+                    to="/academy"
+                    className={`flex-1 text-xs py-1.5 px-3 rounded-full font-medium transition-all text-center ${
+                      location.pathname === "/academy" 
+                        ? "bg-background text-foreground shadow-sm" 
+                        : "text-muted-foreground"
+                    }`}
+                  >
+                    Academy
+                  </Link>
+                </div>
               </div>
             </div>
-            
-            <div className="flex items-center gap-2 sm:gap-4">
-              {/* Language & Location Switchers */}
-              <LanguageSwitcher />
-              <LocationSwitcher />
+          ) : (
+            // Desktop Header Layout (unchanged)
+            <div className="flex items-center justify-between">
+              {/* Logo */}
+              <div className="flex items-center gap-2 sm:gap-3">
+                <img 
+                  src={circleLogoUrl}
+                  alt="Circle Logo" 
+                  className="w-12 h-12 sm:w-16 sm:h-16 object-contain"
+                  style={{
+                    imageRendering: 'crisp-edges'
+                  }}
+                />
+              </div>
               
-              {/* Circle Points - Mobile Optimized */}
-              {user && profile && <Link to="/wallet" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm hover:bg-accent hover:text-accent-foreground rounded-md px-2 sm:px-3 py-1.5 sm:py-2 transition-colors cursor-pointer touch-target">
-                  <Crown className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-500" />
-                  <span className="font-medium">{profile.circle_points}</span>
-                  <span className="text-muted-foreground hidden sm:inline">Points</span>
-                </Link>}
+              {/* Navigation Tabs - Desktop */}
+              <div className="flex flex-1 justify-center">
+                <NavigationTabs />
+              </div>
               
-              {/* User menu */}
-              <UserMenu />
+              <div className="flex items-center gap-2 sm:gap-4">
+                {/* Language & Location Switchers */}
+                <LanguageSwitcher />
+                <LocationSwitcher />
+                
+                {/* Circle Points - Desktop */}
+                {user && profile && (
+                  <Link to="/wallet" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm hover:bg-accent hover:text-accent-foreground rounded-md px-2 sm:px-3 py-1.5 sm:py-2 transition-colors cursor-pointer touch-target">
+                    <Crown className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-500" />
+                    <span className="font-medium">{profile.circle_points}</span>
+                    <span className="text-muted-foreground hidden sm:inline">Points</span>
+                  </Link>
+                )}
+                
+                {/* User menu */}
+                <UserMenu />
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </header>
 
