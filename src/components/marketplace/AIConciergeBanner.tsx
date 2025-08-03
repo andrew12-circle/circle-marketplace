@@ -279,7 +279,7 @@ export const AIConciergeBanner = () => {
 
               {/* Context-Aware AI Recommendation or Static Insight */}
               {(aiRecommendation || currentInsight) && (
-                <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-lg p-4 mb-4">
+                <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-lg p-2 md:p-4 mb-2 md:mb-4 -mx-1 md:mx-0">
                   {isLoadingRecommendation ? (
                     <div className="flex items-center gap-3">
                       <div className="p-2 rounded-lg bg-primary/10">
