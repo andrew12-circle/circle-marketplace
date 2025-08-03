@@ -545,44 +545,44 @@ export const MarketplaceGrid = () => {
     setSelectedProductCategory(null);
   };
 
-  // Filter services by selected product category
-  const getServicesForProduct = (productId: string) => {
-    const productMapping: { [key: string]: string[] } = {
-      'facebook-ads': ['facebook', 'social media ads', 'digital marketing', 'meta ads', 'instagram ads', 'social advertising', 'paid social'],
-      'google-ads': ['google', 'ppc', 'search ads', 'google adwords', 'paid search', 'sem', 'display ads', 'youtube ads'],
-      'direct-mail': ['direct mail', 'postcards', 'flyers', 'mailers', 'print marketing', 'door hangers', 'marketing materials'],
-      'social-media': ['social media', 'social marketing', 'instagram', 'linkedin', 'social management', 'content creation'],
-      'website-design': ['website', 'web design', 'landing page', 'web development', 'site design', 'wordpress', 'real estate website'],
-      'seo-services': ['seo', 'search optimization', 'search engine', 'organic search', 'local seo', 'google ranking'],
-      'crm-tools': ['crm', 'lead management', 'customer management', 'database', 'contact management', 'follow up', 'automation'],
-      'photography': ['photography', 'photos', 'listing photos', 'real estate photography', 'professional photos', 'photo shoot'],
-      'videography': ['video', 'videography', 'virtual tour', 'listing video', 'drone video', 'property video', 'video production'],
-      'print-marketing': ['print', 'business cards', 'brochures', 'signage', 'yard signs', 'banners', 'flyers', 'marketing materials'],
-      // Adding more comprehensive mappings for new categories
-      'Business Cards': ['business cards', 'cards', 'professional cards', 'networking cards'],
-      'Yard Signs': ['yard signs', 'signs', 'real estate signs', 'property signs', 'lawn signs'],
-      'Open House Signs': ['open house', 'open house signs', 'directional signs', 'event signs'],
-      'Property Flyers': ['flyers', 'property flyers', 'listing flyers', 'marketing flyers'],
-      'Listing Brochures': ['brochures', 'listing brochures', 'property brochures', 'marketing brochures'],
-      'Door Hangers': ['door hangers', 'door marketing', 'neighborhood marketing'],
-      'Postcards': ['postcards', 'direct mail', 'mailers', 'farming postcards'],
-      'Branded Materials': ['branded', 'branding', 'logo design', 'brand materials'],
-      'Social Media Graphics': ['graphics', 'social graphics', 'design', 'social media design'],
-      'Website Templates': ['templates', 'website templates', 'web templates', 'real estate templates'],
-      'Email Marketing Templates': ['email', 'email marketing', 'email templates', 'newsletters'],
-      'Virtual Tour Software': ['virtual tours', 'virtual tour', '3d tours', 'matterport'],
-      'Professional Photography': ['photography', 'professional photos', 'listing photography'],
-      'Drone Photography': ['drone', 'aerial photography', 'drone photos', 'aerial shots'],
-      'Zillow Leads': ['zillow', 'zillow leads', 'online leads', 'internet leads'],
-      'Realtor.com Advertising': ['realtor.com', 'realtor advertising', 'listing syndication'],
-      'Lead Generation Software': ['lead generation', 'leads', 'lead capture', 'lead system'],
-      'CRM Systems': ['crm', 'customer management', 'contact management', 'database management'],
-      'Contact Management Tools': ['contact management', 'contacts', 'database', 'client management'],
-      'Sphere Marketing Tools': ['sphere', 'past clients', 'database marketing', 'relationship marketing'],
-      'Referral Programs': ['referrals', 'referral system', 'referral marketing'],
-      'Expired Listing Data': ['expired listings', 'expired', 'listing data', 'prospect data']
-    };
+  // Memoize product mapping to prevent recreation on every render
+  const productMapping = useMemo(() => ({
+    'facebook-ads': ['facebook', 'social media ads', 'digital marketing', 'meta ads', 'instagram ads', 'social advertising', 'paid social'],
+    'google-ads': ['google', 'ppc', 'search ads', 'google adwords', 'paid search', 'sem', 'display ads', 'youtube ads'],
+    'direct-mail': ['direct mail', 'postcards', 'flyers', 'mailers', 'print marketing', 'door hangers', 'marketing materials'],
+    'social-media': ['social media', 'social marketing', 'instagram', 'linkedin', 'social management', 'content creation'],
+    'website-design': ['website', 'web design', 'landing page', 'web development', 'site design', 'wordpress', 'real estate website'],
+    'seo-services': ['seo', 'search optimization', 'search engine', 'organic search', 'local seo', 'google ranking'],
+    'crm-tools': ['crm', 'lead management', 'customer management', 'database', 'contact management', 'follow up', 'automation'],
+    'photography': ['photography', 'photos', 'listing photos', 'real estate photography', 'professional photos', 'photo shoot'],
+    'videography': ['video', 'videography', 'virtual tour', 'listing video', 'drone video', 'property video', 'video production'],
+    'print-marketing': ['print', 'business cards', 'brochures', 'signage', 'yard signs', 'banners', 'flyers', 'marketing materials'],
+    'Business Cards': ['business cards', 'cards', 'professional cards', 'networking cards'],
+    'Yard Signs': ['yard signs', 'signs', 'real estate signs', 'property signs', 'lawn signs'],
+    'Open House Signs': ['open house', 'open house signs', 'directional signs', 'event signs'],
+    'Property Flyers': ['flyers', 'property flyers', 'listing flyers', 'marketing flyers'],
+    'Listing Brochures': ['brochures', 'listing brochures', 'property brochures', 'marketing brochures'],
+    'Door Hangers': ['door hangers', 'door marketing', 'neighborhood marketing'],
+    'Postcards': ['postcards', 'direct mail', 'mailers', 'farming postcards'],
+    'Branded Materials': ['branded', 'branding', 'logo design', 'brand materials'],
+    'Social Media Graphics': ['graphics', 'social graphics', 'design', 'social media design'],
+    'Website Templates': ['templates', 'website templates', 'web templates', 'real estate templates'],
+    'Email Marketing Templates': ['email', 'email marketing', 'email templates', 'newsletters'],
+    'Virtual Tour Software': ['virtual tours', 'virtual tour', '3d tours', 'matterport'],
+    'Professional Photography': ['photography', 'professional photos', 'listing photography'],
+    'Drone Photography': ['drone', 'aerial photography', 'drone photos', 'aerial shots'],
+    'Zillow Leads': ['zillow', 'zillow leads', 'online leads', 'internet leads'],
+    'Realtor.com Advertising': ['realtor.com', 'realtor advertising', 'listing syndication'],
+    'Lead Generation Software': ['lead generation', 'leads', 'lead capture', 'lead system'],
+    'CRM Systems': ['crm', 'customer management', 'contact management', 'database management'],
+    'Contact Management Tools': ['contact management', 'contacts', 'database', 'client management'],
+    'Sphere Marketing Tools': ['sphere', 'past clients', 'database marketing', 'relationship marketing'],
+    'Referral Programs': ['referrals', 'referral system', 'referral marketing'],
+    'Expired Listing Data': ['expired listings', 'expired', 'listing data', 'prospect data']
+  }), []);
 
+  // Memoize filtered services for products to prevent recalculation on every render
+  const getServicesForProduct = useCallback((productId: string) => {
     const keywords = productMapping[productId] || [];
     return services.filter(service => {
       const title = service.title?.toLowerCase() || '';
@@ -597,7 +597,25 @@ export const MarketplaceGrid = () => {
         tags.some(tag => tag.includes(keyword))
       );
     });
-  };
+  }, [services, productMapping]);
+
+  // Memoize the reload function to prevent creating new references
+  const handleProductAdded = useCallback(() => {
+    loadData();
+  }, [loadData]);
+
+  // Memoize clear filters function to prevent recreation
+  const handleClearFilters = useCallback(() => {
+    setSearchTerm("");
+    setFilters({
+      category: "all",
+      priceRange: [0, 2000],
+      verified: false,
+      featured: false,
+      coPayEligible: false,
+      locationFilter: false,
+    });
+  }, []);
 
   if (loading) {
     return (
@@ -805,17 +823,7 @@ export const MarketplaceGrid = () => {
               </p>
               <Button 
                 variant="outline" 
-                onClick={() => {
-                  setSearchTerm("");
-                  setFilters({
-                    category: "all",
-                    priceRange: [0, 2000],
-                    verified: false,
-                    featured: false,
-                    coPayEligible: false,
-                    locationFilter: false,
-                  });
-                }}
+                onClick={handleClearFilters}
               >
                 {t('clearAll')} filters
               </Button>
@@ -837,7 +845,7 @@ export const MarketplaceGrid = () => {
       <AddProductModal
         open={isAddProductModalOpen}
         onOpenChange={setIsAddProductModalOpen}
-        onProductAdded={loadData}
+        onProductAdded={handleProductAdded}
       />
     </>
   );
