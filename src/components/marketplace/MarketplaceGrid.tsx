@@ -111,6 +111,7 @@ export const MarketplaceGrid = () => {
   });
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [sortBy, setSortBy] = useState<'featured' | 'rating' | 'price'>('featured');
+  const [dataLoaded, setDataLoaded] = useState(false); // Track if data has been loaded
   
   // Define product categories with enhanced styling
   const PRODUCT_CATEGORIES = [
@@ -249,6 +250,13 @@ export const MarketplaceGrid = () => {
   const loadData = useCallback(async () => {
     console.log('MarketplaceGrid: loadData called - starting fetch');
     
+    // Skip loading if data already loaded (prevents double loading on remount)
+    if (dataLoaded) {
+      console.log('MarketplaceGrid: Data already loaded, skipping');
+      setLoading(false);
+      return;
+    }
+    
     try {
       console.log('MarketplaceGrid: Setting loading state');
       setLoading(true);
@@ -338,6 +346,7 @@ export const MarketplaceGrid = () => {
       
       setServices(formattedServices);
       setVendors(formattedVendors);
+      setDataLoaded(true); // Mark data as loaded
       
       console.log('MarketplaceGrid: State updated successfully');
       
@@ -348,7 +357,7 @@ export const MarketplaceGrid = () => {
       setLoading(false);
       console.log('MarketplaceGrid: Loading complete');
     }
-  }, []); // Empty dependency array
+  }, [dataLoaded]); // Include dataLoaded in dependencies
 
   // Single useEffect that runs only once on mount
   useEffect(() => {
