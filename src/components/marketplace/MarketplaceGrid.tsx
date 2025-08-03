@@ -112,26 +112,16 @@ export const MarketplaceGrid = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [sortBy, setSortBy] = useState<'featured' | 'rating' | 'price'>('featured');
   
-  // Circuit breaker state for marketplace
+  // Simplified circuit breaker
   const [circuitBreakerState, setCircuitBreakerState] = useState({
     isOpen: false,
     failureCount: 0,
-    lastFailureTime: 0,
     nextAttempt: 0,
   });
 
   const CIRCUIT_BREAKER_CONFIG = {
     failureThreshold: 3,
-    timeout: 30000, // 30 seconds
-  };
-
-  const checkCircuitBreaker = () => {
-    const now = Date.now();
-    if (circuitBreakerState.isOpen && now >= circuitBreakerState.nextAttempt) {
-      setCircuitBreakerState(prev => ({ ...prev, isOpen: false }));
-      return false;
-    }
-    return circuitBreakerState.isOpen;
+    timeout: 30000,
   };
 
   const recordFailure = () => {
@@ -142,7 +132,6 @@ export const MarketplaceGrid = () => {
           ...prev,
           isOpen: true,
           failureCount: newFailureCount,
-          lastFailureTime: Date.now(),
           nextAttempt: Date.now() + CIRCUIT_BREAKER_CONFIG.timeout,
         };
       }
@@ -154,7 +143,6 @@ export const MarketplaceGrid = () => {
     setCircuitBreakerState({
       isOpen: false,
       failureCount: 0,
-      lastFailureTime: 0,
       nextAttempt: 0,
     });
   };
@@ -276,10 +264,7 @@ export const MarketplaceGrid = () => {
   };
 
   const loadData = useCallback(async () => {
-    // Check circuit breaker before making request
-    const now = Date.now();
-    if (circuitBreakerState.isOpen && now < circuitBreakerState.nextAttempt) {
-      console.log('Circuit breaker is open, skipping request');
+    if (circuitBreakerState.isOpen && Date.now() < circuitBreakerState.nextAttempt) {
       setError('Service temporarily unavailable. Please try again in a moment.');
       setLoading(false);
       return;
@@ -289,20 +274,16 @@ export const MarketplaceGrid = () => {
       setLoading(true);
       setError(null);
       
-      console.log('Loading marketplace data...');
-      
-      // Create abort controller for request timeout - reduced for mobile
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 6000); // 6 second timeout for better mobile performance
+      const timeoutId = setTimeout(() => controller.abort(), 6000);
       
-      // Load data in parallel for better performance
       const [vendorsResponse, servicesResponse] = await Promise.all([
         supabase
           .from('vendors')
           .select('*')
           .order('sort_order', { ascending: true })
           .order('rating', { ascending: false })
-          .limit(15) // Further reduced for better mobile performance
+          .limit(15)
           .abortSignal(controller.signal),
         
         supabase
@@ -310,21 +291,14 @@ export const MarketplaceGrid = () => {
           .select('*')
           .order('sort_order', { ascending: true })
           .order('created_at', { ascending: false })
-          .limit(30) // Further reduced for better mobile performance
+          .limit(30)
           .abortSignal(controller.signal)
       ]);
 
       clearTimeout(timeoutId);
 
-      if (vendorsResponse.error) {
-        console.error('Vendors error:', vendorsResponse.error);
-        // Don't throw, continue with empty vendors
-        console.log('Continuing with empty vendors array');
-      }
-      if (servicesResponse.error) {
-        console.error('Services error:', servicesResponse.error);
-        // Don't throw, continue with empty services
-        console.log('Continuing with empty services array');
+      if (vendorsResponse.error || servicesResponse.error) {
+        console.error('API errors:', { vendorsResponse, servicesResponse });
       }
 
       // Convert the database response to match our interface with unique keys

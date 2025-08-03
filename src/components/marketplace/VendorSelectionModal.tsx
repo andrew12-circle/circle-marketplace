@@ -59,135 +59,83 @@ export const VendorSelectionModal = ({
   const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null);
   const [showFunnelModal, setShowFunnelModal] = useState(false);
   const [funnelVendor, setFunnelVendor] = useState<Vendor | null>(null);
-  const [hasLoadedVendors, setHasLoadedVendors] = useState(false);
+  
   const { toast } = useToast();
   const { location } = useLocation();
-  const mountedRef = useRef(true);
 
-  // Cleanup function to prevent state updates on unmounted component
+  // Clean state management
   useEffect(() => {
-    mountedRef.current = true;
-    return () => {
-      mountedRef.current = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    if (isOpen && !hasLoadedVendors) {
-      console.log('VendorSelectionModal: Modal opened, loading vendors...');
+    if (isOpen) {
+      loadVendors();
+    } else {
+      // Reset all state when modal closes
       setVendors([]);
       setFilteredVendors([]);
-      setHasLoadedVendors(true);
-      loadVendors();
-    } else if (!isOpen) {
-      console.log('VendorSelectionModal: Modal closed, resetting state...');
       setSearchQuery("");
       setSelectedVendor(null);
       setShowConfirmation(false);
       setShowFunnelModal(false);
       setFunnelVendor(null);
-      setHasLoadedVendors(false);
-      // Clear vendors when modal closes to prevent memory leaks
-      setVendors([]);
-      setFilteredVendors([]);
     }
-  }, [isOpen, hasLoadedVendors]);
+  }, [isOpen]);
 
+  // Filter vendors when search or vendors change
   useEffect(() => {
-    // Only filter vendors when modal is open and we have vendors
     if (isOpen && vendors.length > 0) {
-      const timeoutId = setTimeout(() => {
-        filterVendors();
-      }, 100); // Debounce filtering to prevent excessive calls
-      
-      return () => clearTimeout(timeoutId);
+      filterVendors();
     }
   }, [searchQuery, vendors, isOpen]);
 
   const loadVendors = async () => {
-    if (!mountedRef.current) return;
-    
-    console.log('VendorSelectionModal: Starting to load vendors...');
     setIsLoading(true);
     try {
       const { data, error } = await supabase
         .from('vendors')
         .select('id, name, description, logo_url, location, rating, review_count, is_verified, co_marketing_agents, campaigns_funded, service_states, vendor_type')
         .eq('is_active', true)
-        .order('sort_order', { ascending: true }) // Higher sort_order = higher priority
+        .order('sort_order', { ascending: true })
         .order('rating', { ascending: false })
-        .limit(20); // Limit initial results for faster loading
+        .limit(20);
 
-      console.log('VendorSelectionModal: Supabase response:', { data, error, dataLength: data?.length });
-
-      if (error) {
-        console.error('VendorSelectionModal: Supabase error details:', error);
-        throw error;
-      }
+      if (error) throw error;
       
-      // Only update state if component is still mounted
-      if (mountedRef.current) {
-        setVendors(data || []);
-        console.log('VendorSelectionModal: Vendors set successfully, count:', (data || []).length);
-      }
+      setVendors(data || []);
     } catch (error) {
-      console.error('VendorSelectionModal: Error loading vendors:', error);
+      console.error('Error loading vendors:', error);
       toast({
         title: "Error",
         description: "Failed to load vendors. Please try again.",
         variant: "destructive",
       });
     } finally {
-      if (mountedRef.current) {
-        setIsLoading(false);
-        console.log('VendorSelectionModal: Loading complete');
-      }
+      setIsLoading(false);
     }
   };
 
   const filterVendors = () => {
-    // Don't filter if modal is not open or no vendors loaded
-    if (!isOpen || vendors.length === 0) {
-      return;
-    }
+    if (!isOpen || vendors.length === 0) return;
 
     let filtered = vendors;
-    console.log('VendorSelectionModal: Filtering vendors...', { 
-      totalVendors: vendors.length, 
-      searchQuery, 
-      userLocation: location?.state 
-    });
 
-    // Filter by location if available - but don't filter out ALL vendors
+    // Location filter
     if (location?.state) {
       const locationFiltered = filtered.filter(vendor => 
         vendor.service_states?.includes(location.state) ||
         vendor.location?.toLowerCase().includes(location.state.toLowerCase())
       );
-      // Only apply location filter if we still have vendors, otherwise show all
       if (locationFiltered.length > 0) {
         filtered = locationFiltered;
-      } else {
-        console.log('VendorSelectionModal: No vendors found for location, showing all vendors');
       }
     }
 
-    // Apply search filter
+    // Search filter
     if (searchQuery.trim()) {
       filtered = filtered.filter(vendor =>
         vendor.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        vendor.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        vendor.location?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        vendor.service_states?.some(state => 
-          state.toLowerCase().includes(searchQuery.toLowerCase())
-        )
+        vendor.description?.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
-    console.log('VendorSelectionModal: Filtering complete', { 
-      filteredCount: filtered.length,
-      originalCount: vendors.length 
-    });
     setFilteredVendors(filtered);
   };
 
