@@ -32,15 +32,6 @@ export const useVideos = (options: UseVideosOptions = {}) => {
       setLoading(true);
       setError(null);
 
-      console.log('fetchVideos called with options:', options);
-
-      // Set a hard timeout to prevent infinite loading
-      const timeoutId = setTimeout(() => {
-        console.log('Video loading timeout reached');
-        setLoading(false);
-        setError('Unable to load videos. Please try again later.');
-      }, 5000); // 5 second timeout
-
       // Build query conditions
       const baseConditions = {
         content_type: 'video',
@@ -61,7 +52,6 @@ export const useVideos = (options: UseVideosOptions = {}) => {
       }
 
       const allConditions = { ...baseConditions, ...additionalConditions };
-      console.log('Query conditions:', allConditions);
 
       // Execute query
       let queryBuilder = supabase
@@ -74,10 +64,7 @@ export const useVideos = (options: UseVideosOptions = {}) => {
         queryBuilder = queryBuilder.limit(options.limit * 2); // Get extra for shorts filtering
       }
 
-      console.log('About to execute video query...');
       const { data, error: fetchError } = await queryBuilder;
-
-      console.log('Video query result:', { data: data?.length, error: fetchError });
 
       if (fetchError) {
         throw fetchError;
@@ -117,54 +104,10 @@ export const useVideos = (options: UseVideosOptions = {}) => {
         description: video.description || undefined,
       }));
 
-      clearTimeout(timeoutId);
       setVideos(formattedVideos);
     } catch (err) {
-      console.error('Video fetch error:', err);
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch videos';
       setError(errorMessage);
-      
-      // Provide fallback mock data so users can still see content
-      const mockVideos: Video[] = [
-        {
-          id: 'mock-1',
-          title: 'Lead Generation Mastery for Real Estate Agents',
-          creator: 'Sarah Johnson',
-          thumbnail: '/placeholder.svg',
-          duration: '12:34',
-          category: 'Lead Generation',
-          rating: 4.9,
-          isPro: true,
-          views: '24K',
-          description: 'Learn proven strategies to generate quality leads consistently.'
-        },
-        {
-          id: 'mock-2', 
-          title: 'Social Media Marketing That Actually Works',
-          creator: 'Mike Chen',
-          thumbnail: '/placeholder.svg',
-          duration: '8:45',
-          category: 'Marketing',
-          rating: 4.7,
-          isPro: false,
-          views: '18K',
-          description: 'Build your brand and attract clients through social media.'
-        },
-        {
-          id: 'mock-3',
-          title: 'Closing Techniques That Never Fail',
-          creator: 'Emma Wilson',
-          thumbnail: '/placeholder.svg', 
-          duration: '15:22',
-          category: 'Sales',
-          rating: 4.8,
-          isPro: true,
-          views: '31K',
-          description: 'Master the art of closing deals and overcoming objections.'
-        }
-      ];
-      
-      setVideos(mockVideos);
       toast({
         title: "Error",
         description: errorMessage,

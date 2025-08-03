@@ -291,45 +291,34 @@ export const MarketplaceGrid = () => {
       
       console.log('Loading marketplace data...');
       
-      // Set a hard timeout to prevent infinite loading
-      const timeoutId = setTimeout(() => {
-        console.log('Force stopping loading due to timeout');
-        setLoading(false);
-        setError('Unable to load marketplace data. Please try again later.');
-      }, 5000); // 5 second timeout
+      // Create abort controller for request timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
       
-      // Try just getting a count first to test connectivity
-      console.log('Testing database connection...');
-      const testResponse = await supabase
-        .from('vendors')
-        .select('count')
-        .limit(1);
-      
-      console.log('Test response:', testResponse);
-      
-      if (testResponse.error) {
-        clearTimeout(timeoutId);
-        console.error('Database connection failed:', testResponse.error);
-        throw new Error('Database connection failed');
-      }
-      
-      // If test passes, try getting actual data with minimal query
-      console.log('About to query vendors table...');
+      // Load vendors from the correct table
       const vendorsResponse = await supabase
         .from('vendors')
-        .select('id, name, description, rating, is_verified')
-        .limit(10);
+        .select('*')
+        .order('sort_order', { ascending: true })
+        .order('rating', { ascending: false })
+        .limit(50);
 
-      console.log('Vendors query completed:', vendorsResponse);
+      console.log('Vendors response:', vendorsResponse);
+      console.log('Vendors data:', vendorsResponse.data);
+      console.log('Vendors error:', vendorsResponse.error);
 
-      console.log('About to query services table...');
+      // Load services without vendor join for now, then get vendors separately
       const servicesResponse = await supabase
         .from('services')
-        .select('id, title, description, category, is_featured')
-        .limit(10);
+        .select('*')
+        .order('sort_order', { ascending: true })
+        .order('created_at', { ascending: false })
+        .limit(100);
 
-      console.log('Services query completed:', servicesResponse);
-      
+      console.log('Services response:', servicesResponse);
+      console.log('Services data:', servicesResponse.data);
+      console.log('Services error:', servicesResponse.error);
+
       clearTimeout(timeoutId);
 
       if (vendorsResponse.error) {
@@ -343,12 +332,8 @@ export const MarketplaceGrid = () => {
 
       // Convert the database response to match our interface
       const formattedServices = (servicesResponse.data || []).map(service => ({
-        id: service.id,
-        title: service.title,
-        description: service.description,
-        category: service.category,
-        is_featured: service.is_featured,
-        is_top_pick: false, // Add missing field
+        ...service,
+        discount_percentage: service.discount_percentage ? String(service.discount_percentage) : undefined,
         vendor: {
           name: 'Service Provider',
           rating: 4.5,
@@ -357,21 +342,28 @@ export const MarketplaceGrid = () => {
         }
       }));
       
-      // Format vendors data
+      // Format vendors data using vendors table
       const formattedVendors = (vendorsResponse.data || []).map(vendor => ({
+        ...vendor,
         id: vendor.id,
         name: vendor.name || 'Unknown Vendor',
         description: vendor.description || '',
+        logo_url: vendor.logo_url,
+        website_url: vendor.website_url,
+        location: vendor.location,
         rating: vendor.rating || 0,
-        review_count: 0, // Add missing field
+        review_count: vendor.review_count || 0,
         is_verified: vendor.is_verified || false,
-        co_marketing_agents: 0, // Add missing field
-        campaigns_funded: 0, // Add missing field
-        service_states: [], // Add missing field
-        mls_areas: [], // Add missing field
-        license_states: [], // Add missing field
-        vendor_type: 'company', // Add missing field
-        local_representatives: [] // Add missing field
+        co_marketing_agents: vendor.co_marketing_agents || 0,
+        campaigns_funded: vendor.campaigns_funded || 0,
+        service_states: vendor.service_states || [],
+        mls_areas: vendor.mls_areas || [],
+        service_radius_miles: vendor.service_radius_miles,
+        license_states: vendor.license_states || [],
+        latitude: vendor.latitude,
+        longitude: vendor.longitude,
+        vendor_type: vendor.vendor_type || 'company',
+        local_representatives: []
       }));
       
       console.log(`Loaded ${formattedServices.length} services and ${formattedVendors.length} vendors`);
@@ -380,13 +372,36 @@ export const MarketplaceGrid = () => {
       setVendors(formattedVendors);
       
       // Record success
-      recordSuccess();
+      setCircuitBreakerState({
+        isOpen: false,
+        failureCount: 0,
+        lastFailureTime: 0,
+        nextAttempt: 0,
+      });
       
     } catch (error) {
       console.error('Marketplace data loading error:', error);
-      recordFailure();
       
-      setError(`Failed to load marketplace data: ${error.message || 'Unknown error'}`);
+      // Record failure
+      setCircuitBreakerState(prev => {
+        const newFailureCount = prev.failureCount + 1;
+        if (newFailureCount >= CIRCUIT_BREAKER_CONFIG.failureThreshold) {
+          return {
+            ...prev,
+            isOpen: true,
+            failureCount: newFailureCount,
+            lastFailureTime: Date.now(),
+            nextAttempt: Date.now() + CIRCUIT_BREAKER_CONFIG.timeout,
+          };
+        }
+        return { ...prev, failureCount: newFailureCount };
+      });
+      
+      if (error.name === 'AbortError') {
+        setError('Request timed out. Please check your connection and try again.');
+      } else {
+        setError(`Failed to load marketplace data: ${error.message || 'Unknown error'}`);
+      }
       
       toast({
         title: "Error loading data",
