@@ -317,15 +317,15 @@ export const AIConciergeBanner = () => {
                         </div>
                         
                         <div className="flex-1 text-left">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h4 className="font-semibold text-foreground">
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-1">
+                            <h4 className="font-semibold text-foreground text-sm sm:text-base">
                               {aiRecommendation ? "AI-Powered Business Insight" : currentInsight!.title}
                             </h4>
-                            <Badge variant="outline" className={
+                            <Badge variant="outline" className={`text-xs self-start sm:self-auto ${
                               aiRecommendation 
                                 ? "bg-emerald-500/10 text-emerald-700 border-emerald-500/20"
                                 : getPriorityColor(currentInsight!.priority)
-                            }>
+                            }`}>
                               {aiRecommendation ? "Personalized" : `${currentInsight!.priority} priority`}
                             </Badge>
                           </div>
