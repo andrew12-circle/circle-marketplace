@@ -196,25 +196,46 @@ export const useVideoInteractions = (contentId: string, channelId?: string) => {
   };
 
   const handleSave = async () => {
+    console.log('Save button clicked, contentId:', contentId);
+    
     const { data: { user } } = await supabase.auth.getUser();
+    console.log('Current user:', user);
+    
     if (!user) {
+      console.log('No user found, showing sign in toast');
       toast({ title: "Please sign in to save videos", variant: "destructive" });
       return;
     }
 
+    if (!contentId) {
+      console.log('No contentId provided');
+      toast({ title: "Unable to save - missing video ID", variant: "destructive" });
+      return;
+    }
+
     try {
+      console.log('Current save state:', interactions.isSaved);
+      
       if (interactions.isSaved) {
-        await supabase
+        console.log('Removing save...');
+        const { error } = await supabase
           .from('content_interactions')
           .delete()
           .eq('content_id', contentId)
           .eq('user_id', user.id)
           .eq('interaction_type', 'save');
         
+        if (error) {
+          console.error('Error removing save:', error);
+          throw error;
+        }
+        
         setInteractions(prev => ({ ...prev, isSaved: false }));
         toast({ title: "Removed from saved videos" });
+        console.log('Save removed successfully');
       } else {
-        await supabase
+        console.log('Adding save...');
+        const { error } = await supabase
           .from('content_interactions')
           .insert({
             content_id: contentId,
@@ -222,8 +243,14 @@ export const useVideoInteractions = (contentId: string, channelId?: string) => {
             interaction_type: 'save',
           });
 
+        if (error) {
+          console.error('Error adding save:', error);
+          throw error;
+        }
+
         setInteractions(prev => ({ ...prev, isSaved: true }));
         toast({ title: "Added to saved videos" });
+        console.log('Save added successfully');
       }
     } catch (error) {
       console.error('Error handling save:', error);
