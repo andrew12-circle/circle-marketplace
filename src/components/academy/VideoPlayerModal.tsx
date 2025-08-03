@@ -154,9 +154,6 @@ export const VideoPlayerModal = ({ video, isOpen, onClose, videoUrl }: VideoPlay
                   {enhancedVideo.uploadDate && <span>{enhancedVideo.uploadDate}</span>}
                 </div>
               </div>
-              <Button variant="ghost" size="sm" onClick={onClose}>
-                <X className="w-4 h-4" />
-              </Button>
             </div>
           </DialogHeader>
 
