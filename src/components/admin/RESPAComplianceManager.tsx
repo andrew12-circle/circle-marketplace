@@ -122,8 +122,17 @@ export const RESPAComplianceManager = () => {
         .order('title');
 
       if (error) throw error;
-      setServices(data || []);
-      setFilteredServices(data || []);
+      // Filter out any data with invalid vendor structure and cast properly
+      const validServices = (data || []).filter((service: any) => 
+        service.vendor && 
+        typeof service.vendor === 'object' && 
+        !Array.isArray(service.vendor) &&
+        service.vendor.id && 
+        service.vendor.business_name
+      ) as unknown as Service[];
+      
+      setServices(validServices);
+      setFilteredServices(validServices);
     } catch (error) {
       toast({
         title: "Error",
@@ -152,7 +161,8 @@ export const RESPAComplianceManager = () => {
 
     if (filterRisk !== "all") {
       filtered = filtered.filter(service => {
-        const risk = service.respa_risk_level || determineVendorRisk(service);
+        const riskData = { name: service.title, description: service.description, is_respa_regulated: service.is_respa_regulated, respa_risk_level: service.respa_risk_level };
+        const risk = service.respa_risk_level || determineVendorRisk(riskData);
         return risk === filterRisk;
       });
     }
@@ -196,12 +206,13 @@ export const RESPAComplianceManager = () => {
     setSaving(true);
     try {
       const updates = services.map(service => {
-        const risk = determineVendorRisk(service);
+        const riskData = { name: service.title, description: service.description, is_respa_regulated: service.is_respa_regulated, respa_risk_level: service.respa_risk_level };
+        const risk = determineVendorRisk(riskData);
         const checklist = generateComplianceChecklist(service);
-        const rule = DEFAULT_COMPLIANCE_RULES.find(r => 
-          service.category.toLowerCase().includes(r.serviceType.toLowerCase()) ||
-          service.title.toLowerCase().includes(r.serviceType.toLowerCase())
-        );
+      const rule = DEFAULT_COMPLIANCE_RULES.find(r => 
+        service.category.toLowerCase().includes(r.serviceType.toLowerCase()) ||
+        service.title.toLowerCase().includes(r.serviceType.toLowerCase())
+      );
 
         return {
           id: service.id,
@@ -217,7 +228,6 @@ export const RESPAComplianceManager = () => {
         const { error } = await supabase
           .from('services')
           .update({
-            is_respa_regulated: update.is_respa_regulated,
             respa_risk_level: update.respa_risk_level,
             max_split_percentage: update.max_split_percentage,
             compliance_checklist: update.compliance_checklist,
@@ -272,8 +282,12 @@ export const RESPAComplianceManager = () => {
 
   const getComplianceStats = () => {
     const total = services.length;
-    const evaluated = services.filter(s => s.is_respa_regulated !== null).length;
-    const highRisk = services.filter(s => (s.respa_risk_level || determineVendorRisk(s)) === 'high').length;
+    const evaluated = services.filter(s => s.respa_risk_level !== null).length;
+    const highRisk = services.filter(s => {
+      const riskData = { name: s.title, description: s.description, is_respa_regulated: s.is_respa_regulated, respa_risk_level: s.respa_risk_level };
+      const currentRisk = (s.respa_risk_level || determineVendorRisk(riskData)) as string;
+      return currentRisk === 'high';
+    }).length;
     const approved = services.filter(s => s.max_split_percentage && s.max_split_percentage > 0).length;
 
     return { total, evaluated, highRisk, approved };
@@ -421,8 +435,11 @@ const ServiceComplianceCard = ({
     respa_compliance_notes: service.respa_compliance_notes || ''
   });
 
-  const currentRisk = service.respa_risk_level || determineVendorRisk(service);
-  const isEvaluated = service.is_respa_regulated !== null;
+  const currentRisk = service.respa_risk_level || (() => {
+    const riskData = { name: service.title, description: service.description, is_respa_regulated: service.is_respa_regulated, respa_risk_level: service.respa_risk_level };
+    return determineVendorRisk(riskData);
+  })();
+  const isEvaluated = service.respa_risk_level !== null;
 
   return (
     <Card className={`transition-all ${expanded ? 'ring-2 ring-primary' : ''}`}>
@@ -433,7 +450,7 @@ const ServiceComplianceCard = ({
             <p className="text-sm text-muted-foreground">{service.vendor.business_name}</p>
           </div>
           <div className="flex items-center gap-2">
-            {getRiskBadge(currentRisk)}
+            {getRiskBadge(currentRisk as 'high' | 'medium' | 'low')}
             {!isEvaluated && (
               <Badge variant="outline" className="text-yellow-600 border-yellow-600">
                 Pending Review
@@ -566,7 +583,8 @@ const ComplianceRulesManager = () => {
 const ComplianceReports = ({ services }: { services: Service[] }) => {
   const generateReport = () => {
     const byRisk = services.reduce((acc, service) => {
-      const risk = service.respa_risk_level || determineVendorRisk(service);
+      const riskData = { name: service.title, description: service.description, is_respa_regulated: service.is_respa_regulated, respa_risk_level: service.respa_risk_level };
+      const risk = service.respa_risk_level || determineVendorRisk(riskData);
       acc[risk] = (acc[risk] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);

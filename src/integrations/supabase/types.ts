@@ -2820,6 +2820,7 @@ export type Database = {
           category: string | null
           co_pay_allowed: boolean | null
           co_pay_price: string | null
+          compliance_checklist: Json | null
           created_at: string | null
           description: string | null
           direct_purchase_enabled: boolean | null
@@ -2830,7 +2831,9 @@ export type Database = {
           id: string
           image_url: string | null
           is_featured: boolean | null
+          is_respa_regulated: boolean | null
           is_top_pick: boolean | null
+          max_split_percentage: number | null
           max_vendor_split_percentage: number | null
           original_image_url: string | null
           price_duration: string | null
@@ -2839,7 +2842,9 @@ export type Database = {
           rating: number | null
           requires_quote: boolean | null
           respa_category: string | null
+          respa_compliance_notes: string | null
           respa_notes: string | null
+          respa_risk_level: string | null
           retail_price: string | null
           service_provider_id: string | null
           sort_order: number | null
@@ -2854,6 +2859,7 @@ export type Database = {
           category?: string | null
           co_pay_allowed?: boolean | null
           co_pay_price?: string | null
+          compliance_checklist?: Json | null
           created_at?: string | null
           description?: string | null
           direct_purchase_enabled?: boolean | null
@@ -2864,7 +2870,9 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_featured?: boolean | null
+          is_respa_regulated?: boolean | null
           is_top_pick?: boolean | null
+          max_split_percentage?: number | null
           max_vendor_split_percentage?: number | null
           original_image_url?: string | null
           price_duration?: string | null
@@ -2873,7 +2881,9 @@ export type Database = {
           rating?: number | null
           requires_quote?: boolean | null
           respa_category?: string | null
+          respa_compliance_notes?: string | null
           respa_notes?: string | null
+          respa_risk_level?: string | null
           retail_price?: string | null
           service_provider_id?: string | null
           sort_order?: number | null
@@ -2888,6 +2898,7 @@ export type Database = {
           category?: string | null
           co_pay_allowed?: boolean | null
           co_pay_price?: string | null
+          compliance_checklist?: Json | null
           created_at?: string | null
           description?: string | null
           direct_purchase_enabled?: boolean | null
@@ -2898,7 +2909,9 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_featured?: boolean | null
+          is_respa_regulated?: boolean | null
           is_top_pick?: boolean | null
+          max_split_percentage?: number | null
           max_vendor_split_percentage?: number | null
           original_image_url?: string | null
           price_duration?: string | null
@@ -2907,7 +2920,9 @@ export type Database = {
           rating?: number | null
           requires_quote?: boolean | null
           respa_category?: string | null
+          respa_compliance_notes?: string | null
           respa_notes?: string | null
+          respa_risk_level?: string | null
           retail_price?: string | null
           service_provider_id?: string | null
           sort_order?: number | null

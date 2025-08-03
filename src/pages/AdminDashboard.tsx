@@ -14,6 +14,8 @@ import { ContentPromotionPanel } from '@/components/admin/ContentPromotionPanel'
 import { YouTubeImportPanel } from '@/components/admin/YouTubeImportPanel';
 import { YouTubeChannelImportPanel } from '@/components/admin/YouTubeChannelImportPanel';
 import SecurityMonitoringPanel from '@/components/admin/SecurityMonitoringPanel';
+import { RESPAComplianceManager } from '@/components/admin/RESPAComplianceManager';
+import { AdvancedSplitCalculator } from '@/components/admin/AdvancedSplitCalculator';
 import { SecurityEventMonitor } from '@/components/security/SecurityEventMonitor';
 import { SecurityAuditLog } from '@/components/security/SecurityAuditLog';
 import { ServiceImportPanel } from '@/components/admin/ServiceImportPanel';
@@ -178,7 +180,7 @@ export default function AdminDashboard() {
         </div>
 
       <Tabs defaultValue="users" className="w-full space-y-6">
-        <TabsList className="grid w-full grid-cols-10">
+        <TabsList className="grid w-full grid-cols-12">
           <TabsTrigger value="users" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
             Users
@@ -222,6 +224,14 @@ export default function AdminDashboard() {
           <TabsTrigger value="agent-invites" className="flex items-center gap-2">
             <BookOpen className="h-4 w-4" />
             Agent Invites
+          </TabsTrigger>
+          <TabsTrigger value="respa" className="flex items-center gap-2">
+            <ShieldIcon className="h-4 w-4" />
+            RESPA
+          </TabsTrigger>
+          <TabsTrigger value="calculator" className="flex items-center gap-2">
+            <DollarSign className="h-4 w-4" />
+            Calculator
           </TabsTrigger>
         </TabsList>
 
@@ -376,6 +386,14 @@ export default function AdminDashboard() {
 
         <TabsContent value="agent-invites" className="space-y-6">
           <AgentInvitationPanel />
+        </TabsContent>
+
+        <TabsContent value="respa" className="space-y-6">
+          <RESPAComplianceManager />
+        </TabsContent>
+
+        <TabsContent value="calculator" className="space-y-6">
+          <AdvancedSplitCalculator />
         </TabsContent>
       </Tabs>
       </div>
