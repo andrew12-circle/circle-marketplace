@@ -296,6 +296,7 @@ export type Database = {
       }
       channels: {
         Row: {
+          auto_imported: boolean | null
           cover_image_url: string | null
           created_at: string | null
           creator_id: string
@@ -305,8 +306,11 @@ export type Database = {
           name: string
           subscriber_count: number | null
           updated_at: string | null
+          youtube_channel_id: string | null
+          youtube_channel_url: string | null
         }
         Insert: {
+          auto_imported?: boolean | null
           cover_image_url?: string | null
           created_at?: string | null
           creator_id: string
@@ -316,8 +320,11 @@ export type Database = {
           name: string
           subscriber_count?: number | null
           updated_at?: string | null
+          youtube_channel_id?: string | null
+          youtube_channel_url?: string | null
         }
         Update: {
+          auto_imported?: boolean | null
           cover_image_url?: string | null
           created_at?: string | null
           creator_id?: string
@@ -327,6 +334,8 @@ export type Database = {
           name?: string
           subscriber_count?: number | null
           updated_at?: string | null
+          youtube_channel_id?: string | null
+          youtube_channel_url?: string | null
         }
         Relationships: [
           {
@@ -3270,6 +3279,18 @@ export type Database = {
         Args: { creator_user_id: string }
         Returns: Json
       }
+      get_enhanced_creator_info: {
+        Args: { p_content_id: string }
+        Returns: {
+          creator_type: string
+          display_name: string
+          display_avatar: string
+          display_subscribers: number
+          display_verified: boolean
+          platform_bio: string
+          youtube_channel_id: string
+        }[]
+      }
       get_public_profile: {
         Args: { profile_id: string }
         Returns: {
@@ -3305,6 +3326,14 @@ export type Database = {
       increment_video_views: {
         Args: { video_uuid: string }
         Returns: undefined
+      }
+      link_youtube_channel_to_user: {
+        Args: {
+          p_user_id: string
+          p_youtube_channel_id: string
+          p_youtube_channel_url?: string
+        }
+        Returns: string
       }
       log_admin_operation_secure: {
         Args: {
