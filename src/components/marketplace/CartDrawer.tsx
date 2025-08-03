@@ -37,14 +37,15 @@ export const CartDrawer = () => {
   }, [setIsOpen]);
 
   const handleCheckout = async () => {
-    const purchasableItems = cartItems.filter(item => !item.requiresQuote);
+    const purchasableItems = cartItems.filter(item => !item.requiresQuote && item.type !== 'co-pay-request');
+    const coPayItems = cartItems.filter(item => item.type === 'co-pay-request' && item.status === 'approved');
     const quoteItems = cartItems.filter(item => item.requiresQuote);
     
+    // Handle regular purchasable items
     if (purchasableItems.length > 0) {
       setIsCheckingOut(true);
       
       try {
-        // Get current session to include auth header if user is logged in
         const { data: { session } } = await supabase.auth.getSession();
         
         const { data, error } = await supabase.functions.invoke('create-checkout', {
@@ -62,15 +63,10 @@ export const CartDrawer = () => {
           } : {},
         });
 
-        if (error) {
-          throw error;
-        }
+        if (error) throw error;
 
         if (data?.url) {
-          // Open Stripe checkout in new tab
           window.open(data.url, '_blank');
-          
-          // Clear purchasable items from cart after successful checkout initiation
           purchasableItems.forEach(item => removeFromCart(item.id));
           
           toast({
@@ -81,11 +77,53 @@ export const CartDrawer = () => {
           throw new Error("No checkout URL received");
         }
       } catch (error) {
-        // Log error details for debugging without exposing sensitive information
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         toast({
           title: "Checkout failed",
           description: "Unable to process checkout. Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsCheckingOut(false);
+      }
+    }
+
+    // Handle co-pay items
+    if (coPayItems.length > 0) {
+      setIsCheckingOut(true);
+      
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        const { data, error } = await supabase.functions.invoke('copay-checkout', {
+          body: { 
+            coPayRequests: coPayItems.map(item => ({
+              requestId: item.id, // Using the cart item id which should correspond to request id
+              serviceId: item.service?.title || item.title, // Service identifier
+              vendorId: typeof item.vendor === 'object' ? item.vendor.id : item.vendor,
+              splitPercentage: item.requestedSplit || 50,
+              totalAmount: item.price.toString()
+            }))
+          },
+          headers: session?.access_token ? {
+            Authorization: `Bearer ${session.access_token}`,
+          } : {},
+        });
+
+        if (error) throw error;
+
+        if (data?.url) {
+          window.open(data.url, '_blank');
+          coPayItems.forEach(item => removeFromCart(item.id));
+          
+          toast({
+            title: "Co-Pay Checkout Started! 🎉",
+            description: "Processing your co-pay assisted purchase...",
+          });
+        }
+      } catch (error) {
+        toast({
+          title: "Co-Pay Checkout Failed",
+          description: "Unable to process co-pay checkout. Please try again.",
           variant: "destructive",
         });
       } finally {
@@ -122,7 +160,8 @@ export const CartDrawer = () => {
     });
   };
 
-  const purchasableItems = cartItems.filter(item => !item.requiresQuote);
+  const purchasableItems = cartItems.filter(item => !item.requiresQuote && item.type !== 'co-pay-request');
+  const coPayItems = cartItems.filter(item => item.type === 'co-pay-request' && item.status === 'approved');
   const quoteItems = cartItems.filter(item => item.requiresQuote);
 
   return (
@@ -355,6 +394,17 @@ export const CartDrawer = () => {
                     >
                       <CreditCard className="w-4 h-4 mr-2" />
                       {isCheckingOut ? "Processing..." : `Checkout ${purchasableItems.length} item(s) - $${getCartTotal()}`}
+                    </Button>
+                  )}
+                  
+                  {coPayItems.length > 0 && (
+                    <Button 
+                      className="w-full bg-green-600 hover:bg-green-700" 
+                      onClick={handleCheckout}
+                      disabled={isCheckingOut}
+                    >
+                      <CreditCard className="w-4 h-4 mr-2" />
+                      {isCheckingOut ? "Processing..." : `Co-Pay Checkout (${coPayItems.length} item(s))`}
                     </Button>
                   )}
                   
