@@ -280,9 +280,9 @@ export const MarketplaceGrid = () => {
   };
 
   const loadData = useCallback(async () => {
-    // Prevent multiple concurrent loads but allow reload if no data
-    if (loadingRef.current || (dataLoadedRef.current && services.length > 0)) {
-      console.log('Load already in progress or data already loaded, skipping');
+    // Prevent multiple concurrent loads but allow initial load
+    if (loadingRef.current) {
+      console.log('Load already in progress, skipping');
       return;
     }
     
