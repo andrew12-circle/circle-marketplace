@@ -335,13 +335,12 @@ export const MarketplaceGrid = () => {
   useEffect(() => {
     console.log('MarketplaceGrid: useEffect triggered for loadData');
     loadData();
-  }, []); // Only run once on mount
-
-  useEffect(() => {
+    
+    // Load saved services if user is logged in
     if (profile?.user_id) {
       loadSavedServices();
     }
-  }, [profile?.user_id]);
+  }, []); // Only run once on mount - remove profile dependency to prevent loops
 
 
   // Helper function to extract numeric price from strings like "$150" or "150"
