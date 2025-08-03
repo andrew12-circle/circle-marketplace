@@ -32,6 +32,8 @@ export const useVideos = (options: UseVideosOptions = {}) => {
       setLoading(true);
       setError(null);
 
+      console.log('fetchVideos called with options:', options);
+
       // Build query conditions
       const baseConditions = {
         content_type: 'video',
@@ -52,6 +54,7 @@ export const useVideos = (options: UseVideosOptions = {}) => {
       }
 
       const allConditions = { ...baseConditions, ...additionalConditions };
+      console.log('Query conditions:', allConditions);
 
       // Execute query
       let queryBuilder = supabase
@@ -64,7 +67,10 @@ export const useVideos = (options: UseVideosOptions = {}) => {
         queryBuilder = queryBuilder.limit(options.limit * 2); // Get extra for shorts filtering
       }
 
+      console.log('About to execute video query...');
       const { data, error: fetchError } = await queryBuilder;
+
+      console.log('Video query result:', { data: data?.length, error: fetchError });
 
       if (fetchError) {
         throw fetchError;

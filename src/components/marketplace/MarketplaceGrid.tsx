@@ -291,42 +291,24 @@ export const MarketplaceGrid = () => {
       
       console.log('Loading marketplace data...');
       
-      // Create abort controller for request timeout
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => {
-        console.log('Request timeout reached, aborting...');
-        controller.abort();
-      }, 15000); // 15 second timeout
-      
+      // Simplified query without ordering that might be causing issues
       console.log('About to query vendors table...');
-      // Load vendors from the correct table
       const vendorsResponse = await supabase
         .from('vendors')
         .select('*')
-        .order('sort_order', { ascending: true })
-        .order('rating', { ascending: false })
         .limit(50);
 
       console.log('Vendors query completed');
       console.log('Vendors response:', vendorsResponse);
-      console.log('Vendors data length:', vendorsResponse.data?.length);
-      console.log('Vendors error:', vendorsResponse.error);
 
       console.log('About to query services table...');
-      // Load services without vendor join for now, then get vendors separately
       const servicesResponse = await supabase
         .from('services')
         .select('*')
-        .order('sort_order', { ascending: true })
-        .order('created_at', { ascending: false })
         .limit(100);
 
       console.log('Services query completed');
       console.log('Services response:', servicesResponse);
-      console.log('Services data length:', servicesResponse.data?.length);
-      console.log('Services error:', servicesResponse.error);
-
-      clearTimeout(timeoutId);
 
       if (vendorsResponse.error) {
         console.error('Vendors error:', vendorsResponse.error);
@@ -349,7 +331,7 @@ export const MarketplaceGrid = () => {
         }
       }));
       
-      // Format vendors data using vendors table
+      // Format vendors data
       const formattedVendors = (vendorsResponse.data || []).map(vendor => ({
         ...vendor,
         id: vendor.id,
@@ -379,36 +361,13 @@ export const MarketplaceGrid = () => {
       setVendors(formattedVendors);
       
       // Record success
-      setCircuitBreakerState({
-        isOpen: false,
-        failureCount: 0,
-        lastFailureTime: 0,
-        nextAttempt: 0,
-      });
+      recordSuccess();
       
     } catch (error) {
       console.error('Marketplace data loading error:', error);
+      recordFailure();
       
-      // Record failure
-      setCircuitBreakerState(prev => {
-        const newFailureCount = prev.failureCount + 1;
-        if (newFailureCount >= CIRCUIT_BREAKER_CONFIG.failureThreshold) {
-          return {
-            ...prev,
-            isOpen: true,
-            failureCount: newFailureCount,
-            lastFailureTime: Date.now(),
-            nextAttempt: Date.now() + CIRCUIT_BREAKER_CONFIG.timeout,
-          };
-        }
-        return { ...prev, failureCount: newFailureCount };
-      });
-      
-      if (error.name === 'AbortError') {
-        setError('Request timed out. Please check your connection and try again.');
-      } else {
-        setError(`Failed to load marketplace data: ${error.message || 'Unknown error'}`);
-      }
+      setError(`Failed to load marketplace data: ${error.message || 'Unknown error'}`);
       
       toast({
         title: "Error loading data",
