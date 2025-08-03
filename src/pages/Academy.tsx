@@ -10,7 +10,6 @@ import { LocationSwitcher } from "@/components/LocationSwitcher";
 import { LegalFooter } from "@/components/LegalFooter";
 import { AgentPlaybookSection } from "@/components/academy/AgentPlaybookSection";
 import { PlaybookCreator } from "@/components/academy/PlaybookCreator";
-
 import { VideoSection } from "@/components/academy/VideoSection";
 import { VideoPlayerModal } from "@/components/academy/VideoPlayerModal";
 import { PodcastSection } from "@/components/academy/PodcastSection";
@@ -31,205 +30,175 @@ import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { 
-  GraduationCap, 
-  BookOpen, 
-  Video, 
-  Headphones, 
-  Book,
-  Search,
-  Filter,
-  Users,
-  TrendingUp,
-  Sparkles,
-  Heart,
-  Award,
-  ChevronRight,
-  Play,
-  Clock,
-  Star,
-  Crown
-} from "lucide-react";
+import { GraduationCap, BookOpen, Video, Headphones, Book, Search, Filter, Users, TrendingUp, Sparkles, Heart, Award, ChevronRight, Play, Clock, Star, Crown } from "lucide-react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 
 // Mock data - replace with actual data
-const mockCourses = [
-  {
-    id: "1",
-    title: "Lead Generation Mastery: From Zero to Hero",
-    creator: "Circle Team",
-    duration: "2h 30m",
-    thumbnail: "/placeholder.svg",
-    isPro: false,
-    rating: 4.9,
-    progress: 25,
-    isEnrolled: true,
-  },
-  {
-    id: "2",
-    title: "Social Media Branding for Real Estate",
-    creator: "Sarah Johnson",
-    duration: "1h 45m",
-    thumbnail: "/placeholder.svg",
-    isPro: true,
-    rating: 4.8,
-    progress: 75,
-    isEnrolled: true,
-  },
-  {
-    id: "3",
-    title: "Conversion Psychology: Close More Deals",
-    creator: "Mike Chen",
-    duration: "3h 15m",
-    thumbnail: "/placeholder.svg",
-    isPro: true,
-    rating: 4.9,
-  },
-  {
-    id: "4",
-    title: "Mindset Shift: Think Like a Top Producer",
-    creator: "Circle Team",
-    duration: "45m",
-    thumbnail: "/placeholder.svg",
-    isPro: false,
-    rating: 4.7,
-    progress: 100,
-    isEnrolled: true,
-  },
-  {
-    id: "5",
-    title: "Instagram Marketing Masterclass",
-    creator: "Emma Wilson",
-    duration: "2h 15m",
-    thumbnail: "/placeholder.svg",
-    isPro: true,
-    rating: 4.6,
-    isEnrolled: false,
-  },
-  {
-    id: "6",
-    title: "Negotiation Tactics That Win",
-    creator: "David Rodriguez",
-    duration: "1h 30m",
-    thumbnail: "/placeholder.svg",
-    isPro: false,
-    rating: 4.8,
-    progress: 50,
-    isEnrolled: true,
-  },
-];
-
-const mockPlaylists = [
-  { id: "1", name: "Getting Started", courseCount: 5 },
-  { id: "2", name: "Advanced Strategies", courseCount: 8 },
-  { id: "3", name: "Quick Wins", courseCount: 3 },
-  { id: "4", name: "My Favorites", courseCount: 12 },
-];
+const mockCourses = [{
+  id: "1",
+  title: "Lead Generation Mastery: From Zero to Hero",
+  creator: "Circle Team",
+  duration: "2h 30m",
+  thumbnail: "/placeholder.svg",
+  isPro: false,
+  rating: 4.9,
+  progress: 25,
+  isEnrolled: true
+}, {
+  id: "2",
+  title: "Social Media Branding for Real Estate",
+  creator: "Sarah Johnson",
+  duration: "1h 45m",
+  thumbnail: "/placeholder.svg",
+  isPro: true,
+  rating: 4.8,
+  progress: 75,
+  isEnrolled: true
+}, {
+  id: "3",
+  title: "Conversion Psychology: Close More Deals",
+  creator: "Mike Chen",
+  duration: "3h 15m",
+  thumbnail: "/placeholder.svg",
+  isPro: true,
+  rating: 4.9
+}, {
+  id: "4",
+  title: "Mindset Shift: Think Like a Top Producer",
+  creator: "Circle Team",
+  duration: "45m",
+  thumbnail: "/placeholder.svg",
+  isPro: false,
+  rating: 4.7,
+  progress: 100,
+  isEnrolled: true
+}, {
+  id: "5",
+  title: "Instagram Marketing Masterclass",
+  creator: "Emma Wilson",
+  duration: "2h 15m",
+  thumbnail: "/placeholder.svg",
+  isPro: true,
+  rating: 4.6,
+  isEnrolled: false
+}, {
+  id: "6",
+  title: "Negotiation Tactics That Win",
+  creator: "David Rodriguez",
+  duration: "1h 30m",
+  thumbnail: "/placeholder.svg",
+  isPro: false,
+  rating: 4.8,
+  progress: 50,
+  isEnrolled: true
+}];
+const mockPlaylists = [{
+  id: "1",
+  name: "Getting Started",
+  courseCount: 5
+}, {
+  id: "2",
+  name: "Advanced Strategies",
+  courseCount: 8
+}, {
+  id: "3",
+  name: "Quick Wins",
+  courseCount: 3
+}, {
+  id: "4",
+  name: "My Favorites",
+  courseCount: 12
+}];
 
 // Mock video data
 const mockVideos = {
-  trending: [
-    {
-      id: "1",
-      title: "The Psychology of Lead Conversion: What Every Agent Needs to Know",
-      creator: "Sarah Johnson",
-      thumbnail: "/placeholder.svg",
-      duration: "12:34",
-      category: "Lead Generation",
-      rating: 4.9,
-      isPro: true,
-      views: "24K"
-    },
-    {
-      id: "2", 
-      title: "Social Media Branding That Actually Works",
-      creator: "Mike Chen",
-      thumbnail: "/placeholder.svg",
-      duration: "8:45",
-      category: "Marketing",
-      rating: 4.7,
-      isPro: false,
-      views: "18K"
-    },
-    {
-      id: "3",
-      title: "Objection Handling Masterclass",
-      creator: "Tom Ferry",
-      thumbnail: "/placeholder.svg", 
-      duration: "15:22",
-      category: "Sales",
-      rating: 4.8,
-      isPro: true,
-      views: "31K"
-    },
-    {
-      id: "4",
-      title: "Instagram Reels for Real Estate",
-      creator: "Emma Wilson",
-      thumbnail: "/placeholder.svg",
-      duration: "6:18",
-      category: "Social Media",
-      rating: 4.6,
-      isPro: false,
-      views: "12K"
-    },
-    {
-      id: "5",
-      title: "The Mindset of Million Dollar Producers",
-      creator: "Ryan Serhant",
-      thumbnail: "/placeholder.svg",
-      duration: "20:15",
-      category: "Mindset",
-      rating: 4.9,
-      isPro: true,
-      views: "45K"
-    }
-  ],
-  forYou: [
-    {
-      id: "6",
-      title: "Local Market Analysis Deep Dive",
-      creator: "Maria Rodriguez",
-      thumbnail: "/placeholder.svg",
-      duration: "14:30",
-      category: "Market Analysis", 
-      rating: 4.8,
-      isPro: true,
-      views: "16K"
-    },
-    {
-      id: "7",
-      title: "Client Communication Scripts That Work",
-      creator: "David Kim",
-      thumbnail: "/placeholder.svg", 
-      duration: "9:45",
-      category: "Communication",
-      rating: 4.7,
-      isPro: false,
-      views: "22K"
-    }
-  ],
-  newReleases: [
-    {
-      id: "8",
-      title: "AI Tools for Real Estate Agents in 2024",
-      creator: "Tech Real Estate",
-      thumbnail: "/placeholder.svg",
-      duration: "11:20",
-      category: "Technology",
-      rating: 4.5,
-      isPro: true,
-      views: "8K"
-    }
-  ]
+  trending: [{
+    id: "1",
+    title: "The Psychology of Lead Conversion: What Every Agent Needs to Know",
+    creator: "Sarah Johnson",
+    thumbnail: "/placeholder.svg",
+    duration: "12:34",
+    category: "Lead Generation",
+    rating: 4.9,
+    isPro: true,
+    views: "24K"
+  }, {
+    id: "2",
+    title: "Social Media Branding That Actually Works",
+    creator: "Mike Chen",
+    thumbnail: "/placeholder.svg",
+    duration: "8:45",
+    category: "Marketing",
+    rating: 4.7,
+    isPro: false,
+    views: "18K"
+  }, {
+    id: "3",
+    title: "Objection Handling Masterclass",
+    creator: "Tom Ferry",
+    thumbnail: "/placeholder.svg",
+    duration: "15:22",
+    category: "Sales",
+    rating: 4.8,
+    isPro: true,
+    views: "31K"
+  }, {
+    id: "4",
+    title: "Instagram Reels for Real Estate",
+    creator: "Emma Wilson",
+    thumbnail: "/placeholder.svg",
+    duration: "6:18",
+    category: "Social Media",
+    rating: 4.6,
+    isPro: false,
+    views: "12K"
+  }, {
+    id: "5",
+    title: "The Mindset of Million Dollar Producers",
+    creator: "Ryan Serhant",
+    thumbnail: "/placeholder.svg",
+    duration: "20:15",
+    category: "Mindset",
+    rating: 4.9,
+    isPro: true,
+    views: "45K"
+  }],
+  forYou: [{
+    id: "6",
+    title: "Local Market Analysis Deep Dive",
+    creator: "Maria Rodriguez",
+    thumbnail: "/placeholder.svg",
+    duration: "14:30",
+    category: "Market Analysis",
+    rating: 4.8,
+    isPro: true,
+    views: "16K"
+  }, {
+    id: "7",
+    title: "Client Communication Scripts That Work",
+    creator: "David Kim",
+    thumbnail: "/placeholder.svg",
+    duration: "9:45",
+    category: "Communication",
+    rating: 4.7,
+    isPro: false,
+    views: "22K"
+  }],
+  newReleases: [{
+    id: "8",
+    title: "AI Tools for Real Estate Agents in 2024",
+    creator: "Tech Real Estate",
+    thumbnail: "/placeholder.svg",
+    duration: "11:20",
+    category: "Technology",
+    rating: 4.5,
+    isPro: true,
+    views: "8K"
+  }]
 };
-
 export const Academy = () => {
-  return (
-    <ErrorBoundary section="Academy">{AcademyContent()}</ErrorBoundary>
-  );
+  return <ErrorBoundary section="Academy">{AcademyContent()}</ErrorBoundary>;
 };
-
 const AcademyContent = () => {
   const [activeView, setActiveView] = useState("home");
   const [selectedVideo, setSelectedVideo] = useState<any>(null);
@@ -244,63 +213,157 @@ const AcademyContent = () => {
   const [selectedCourse, setSelectedCourse] = useState<any>(null);
   const [isCourseModalOpen, setIsCourseModalOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState("All");
-  const { toast } = useToast();
-  
+  const {
+    toast
+  } = useToast();
+
   // Fetch videos using the custom hook
-  const { videos: allVideos, loading, incrementView } = useVideos();
-  const { videos: featuredVideos } = useVideos({ featured: true, limit: 10 });
-  const { videos: trendingVideos } = useVideos({ limit: 10 });
-  const { videos: shortsVideos } = useVideos({ category: 'shorts', limit: 15 });
-  
+  const {
+    videos: allVideos,
+    loading,
+    incrementView
+  } = useVideos();
+  const {
+    videos: featuredVideos
+  } = useVideos({
+    featured: true,
+    limit: 10
+  });
+  const {
+    videos: trendingVideos
+  } = useVideos({
+    limit: 10
+  });
+  const {
+    videos: shortsVideos
+  } = useVideos({
+    category: 'shorts',
+    limit: 15
+  });
+
   // Fetch channels using the custom hook
-  const { channels: featuredChannels } = useChannels({ verified: true, limit: 6 });
-  const { channels: newChannels } = useChannels({ orderBy: 'created_at', orderDirection: 'desc', limit: 8 });
-  const { channels: allChannels, loading: channelsLoading } = useChannels();
-  
+  const {
+    channels: featuredChannels
+  } = useChannels({
+    verified: true,
+    limit: 6
+  });
+  const {
+    channels: newChannels
+  } = useChannels({
+    orderBy: 'created_at',
+    orderDirection: 'desc',
+    limit: 8
+  });
+  const {
+    channels: allChannels,
+    loading: channelsLoading
+  } = useChannels();
+
   // Fetch podcasts using the custom hook
-  const { podcasts: featuredPodcasts } = usePodcasts({ featured: true, limit: 10 });
-  const { podcasts: newPodcasts } = usePodcasts({ orderBy: 'created_at', orderDirection: 'desc', limit: 8 });
-  const { podcasts: allPodcasts, loading: podcastsLoading, incrementPlay } = usePodcasts();
-  
+  const {
+    podcasts: featuredPodcasts
+  } = usePodcasts({
+    featured: true,
+    limit: 10
+  });
+  const {
+    podcasts: newPodcasts
+  } = usePodcasts({
+    orderBy: 'created_at',
+    orderDirection: 'desc',
+    limit: 8
+  });
+  const {
+    podcasts: allPodcasts,
+    loading: podcastsLoading,
+    incrementPlay
+  } = usePodcasts();
+
   // Fetch books using the custom hook
-  const { books: featuredBooks } = useBooks({ featured: true, limit: 10 });
-  const { books: newBooks } = useBooks({ orderBy: 'created_at', orderDirection: 'desc', limit: 8 });
-  const { books: allBooks, loading: booksLoading, incrementRead, updateProgress } = useBooks();
+  const {
+    books: featuredBooks
+  } = useBooks({
+    featured: true,
+    limit: 10
+  });
+  const {
+    books: newBooks
+  } = useBooks({
+    orderBy: 'created_at',
+    orderDirection: 'desc',
+    limit: 8
+  });
+  const {
+    books: allBooks,
+    loading: booksLoading,
+    incrementRead,
+    updateProgress
+  } = useBooks();
 
   // Fetch courses using the custom hook
-  const { courses: featuredCourses } = useCourses({ featured: true, limit: 8 });
-  const { courses: freeCourses } = useCourses({ free: true, limit: 12 });
-  const { courses: paidCourses } = useCourses({ paid: true, limit: 12 });
-  const { courses: allCourses, loading: coursesLoading, enrollInCourse } = useCourses();
-
-  const categories = [
-    { id: "playbooks", label: "Agent Playbooks", icon: BookOpen },
-    { id: "create", label: "Create Playbook", icon: GraduationCap },
-    { id: "courses", label: "Courses", icon: GraduationCap },
-    { id: "videos", label: "Videos", icon: Video },
-    { id: "podcasts", label: "Podcasts", icon: Headphones },
-    { id: "books", label: "Books", icon: Book },
-  ];
-
-  const featuredContent = [
-    {
-      id: "1",
-      type: "NEW COURSE",
-      title: "The Agent Operating System",
-      isNew: true,
-      isDark: true,
-    },
-    {
-      id: "2", 
-      type: "NEW PLAYBOOK",
-      title: "The 30-Day Content Machine",
-      isNew: true,
-      isDark: false,
-    },
-  ];
-
-  const renderHomeView = () => (
-    <div className="flex-1 p-8 max-w-6xl">
+  const {
+    courses: featuredCourses
+  } = useCourses({
+    featured: true,
+    limit: 8
+  });
+  const {
+    courses: freeCourses
+  } = useCourses({
+    free: true,
+    limit: 12
+  });
+  const {
+    courses: paidCourses
+  } = useCourses({
+    paid: true,
+    limit: 12
+  });
+  const {
+    courses: allCourses,
+    loading: coursesLoading,
+    enrollInCourse
+  } = useCourses();
+  const categories = [{
+    id: "playbooks",
+    label: "Agent Playbooks",
+    icon: BookOpen
+  }, {
+    id: "create",
+    label: "Create Playbook",
+    icon: GraduationCap
+  }, {
+    id: "courses",
+    label: "Courses",
+    icon: GraduationCap
+  }, {
+    id: "videos",
+    label: "Videos",
+    icon: Video
+  }, {
+    id: "podcasts",
+    label: "Podcasts",
+    icon: Headphones
+  }, {
+    id: "books",
+    label: "Books",
+    icon: Book
+  }];
+  const featuredContent = [{
+    id: "1",
+    type: "NEW COURSE",
+    title: "The Agent Operating System",
+    isNew: true,
+    isDark: true
+  }, {
+    id: "2",
+    type: "NEW PLAYBOOK",
+    title: "The 30-Day Content Machine",
+    isNew: true,
+    isDark: false
+  }];
+  const renderHomeView = () => <div className="flex-1 p-8 max-w-6xl">
       {/* Hero Section */}
       <div className="mb-12">
         <h1 className="text-6xl font-bold text-black mb-4">Academy.</h1>
@@ -320,10 +383,8 @@ const AcademyContent = () => {
               </div>
               <span className="text-sm font-medium text-green-100">SHARE YOUR SUCCESS</span>
             </div>
-            <h2 className="text-3xl font-bold mb-3">Turn Your Story Into A Global Playbook</h2>
-            <p className="text-lg text-green-50 mb-4">
-              We make it super easy to share your proven strategies and create playbooks. Your content won't be shared with local agents within 50 miles, but over a million agents nationwide will see it — which could lead to substantial income.
-            </p>
+            <h2 className="text-3xl font-bold mb-3">Turn Your Story Into A National Playbook</h2>
+            <p className="text-lg text-green-50 mb-4">We make it super easy to share your proven strategies and create playbooks & courses. Your content won't be shared with local agents within 50 miles, but over a million agents nationwide will see it — which could lead to substantial income. Agents want to learn for agents in the market not outdated coaching. </p>
             <div className="flex items-center gap-6 text-sm">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-green-300 rounded-full"></div>
@@ -340,17 +401,10 @@ const AcademyContent = () => {
             </div>
           </div>
           <div className="flex flex-col gap-3">
-            <Button 
-              onClick={() => setActiveView('create')}
-              className="bg-white text-green-600 hover:bg-green-50 font-semibold px-6 py-3"
-            >
+            <Button onClick={() => setActiveView('create')} className="bg-white text-green-600 hover:bg-green-50 font-semibold px-6 py-3">
               Create Your Playbook
             </Button>
-            <Button 
-              variant="outline" 
-              onClick={() => setActiveView('playbooks')}
-              className="border-primary/30 text-primary hover:bg-primary/10"
-            >
+            <Button variant="outline" onClick={() => setActiveView('playbooks')} className="border-primary/30 text-primary hover:bg-primary/10">
               View Examples
             </Button>
           </div>
@@ -359,21 +413,15 @@ const AcademyContent = () => {
 
       {/* Category Icons */}
       <div className="flex gap-8 mb-16">
-        {categories.map((category) => {
-          const Icon = category.icon;
-          return (
-            <button
-              key={category.id}
-              onClick={() => setActiveView(category.id)}
-              className="flex flex-col items-center gap-2 p-4 rounded-lg hover:bg-gray-50 transition-colors group"
-            >
+        {categories.map(category => {
+        const Icon = category.icon;
+        return <button key={category.id} onClick={() => setActiveView(category.id)} className="flex flex-col items-center gap-2 p-4 rounded-lg hover:bg-gray-50 transition-colors group">
               <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center group-hover:bg-gray-200 transition-colors">
                 <Icon className="w-6 h-6 text-gray-700" />
               </div>
               <span className="text-sm text-gray-700 font-medium">{category.label}</span>
-            </button>
-          );
-        })}
+            </button>;
+      })}
       </div>
 
       {/* The Latest Section */}
@@ -382,25 +430,14 @@ const AcademyContent = () => {
         <p className="text-gray-600 mb-8">Take a look at what's new.</p>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          {featuredContent.map((item) => (
-            <Card
-              key={item.id}
-              className={`p-8 cursor-pointer transition-transform hover:scale-105 ${
-                item.isDark 
-                  ? "bg-gray-900 text-white" 
-                  : "bg-blue-50 text-gray-900"
-              }`}
-            >
+          {featuredContent.map(item => <Card key={item.id} className={`p-8 cursor-pointer transition-transform hover:scale-105 ${item.isDark ? "bg-gray-900 text-white" : "bg-blue-50 text-gray-900"}`}>
               <div className="mb-4">
-                <span className={`text-sm font-medium ${
-                  item.isDark ? "text-red-400" : "text-blue-600"
-                }`}>
+                <span className={`text-sm font-medium ${item.isDark ? "text-red-400" : "text-blue-600"}`}>
                   {item.type}
                 </span>
               </div>
               <h3 className="text-2xl font-bold">{item.title}</h3>
-            </Card>
-          ))}
+            </Card>)}
         </div>
       </div>
 
@@ -414,184 +451,161 @@ const AcademyContent = () => {
           Try It Free
         </Button>
       </div>
-    </div>
-  );
-
+    </div>;
   const handlePlayVideo = (videoId: string) => {
     console.log("handlePlayVideo called with videoId:", videoId);
-    
+
     // Find the video in our data
-    const video = allVideos.find(v => v.id === videoId) || 
-                  trendingVideos.find(v => v.id === videoId) || 
-                  featuredVideos.find(v => v.id === videoId);
-    
+    const video = allVideos.find(v => v.id === videoId) || trendingVideos.find(v => v.id === videoId) || featuredVideos.find(v => v.id === videoId);
     console.log("Found video:", video);
-    
     if (video) {
       // Increment view count
       incrementView(videoId);
-      
+
       // Get the content URL from Supabase and play in modal
-      supabase
-        .from('content')
-        .select('content_url')
-        .eq('id', videoId)
-        .single()
-        .then(({ data, error }) => {
-          console.log("Supabase response:", { data, error });
-          
-          if (data?.content_url && !error) {
-            console.log("Setting video modal state");
-            setSelectedVideo(video);
-            setCurrentVideoUrl(data.content_url);
-            setIsVideoModalOpen(true);
-            
-            toast({
-              title: "Playing Video",
-              description: `Now playing: ${video.title}`,
-            });
-          } else {
-            toast({
-              title: "Error",
-              description: "Could not load video",
-              variant: "destructive",
-            });
-          }
+      supabase.from('content').select('content_url').eq('id', videoId).single().then(({
+        data,
+        error
+      }) => {
+        console.log("Supabase response:", {
+          data,
+          error
         });
+        if (data?.content_url && !error) {
+          console.log("Setting video modal state");
+          setSelectedVideo(video);
+          setCurrentVideoUrl(data.content_url);
+          setIsVideoModalOpen(true);
+          toast({
+            title: "Playing Video",
+            description: `Now playing: ${video.title}`
+          });
+        } else {
+          toast({
+            title: "Error",
+            description: "Could not load video",
+            variant: "destructive"
+          });
+        }
+      });
     } else {
       toast({
-        title: "Error", 
+        title: "Error",
         description: "Video not found",
-        variant: "destructive",
+        variant: "destructive"
       });
     }
   };
-
   const handlePlayPodcast = (podcastId: string) => {
     console.log("handlePlayPodcast called with podcastId:", podcastId);
-    
+
     // Find the podcast in our data
-    const podcast = allPodcasts.find(p => p.id === podcastId) || 
-                    featuredPodcasts.find(p => p.id === podcastId) || 
-                    newPodcasts.find(p => p.id === podcastId);
-    
+    const podcast = allPodcasts.find(p => p.id === podcastId) || featuredPodcasts.find(p => p.id === podcastId) || newPodcasts.find(p => p.id === podcastId);
     console.log("Found podcast:", podcast);
-    
     if (podcast) {
       // Increment play count
       incrementPlay(podcastId);
-      
+
       // Get the content URL from Supabase and play in modal
-      supabase
-        .from('content')
-        .select('content_url')
-        .eq('id', podcastId)
-        .single()
-        .then(({ data, error }) => {
-          console.log("Supabase response:", { data, error });
-          
-          if (data?.content_url && !error) {
-            console.log("Setting podcast modal state");
-            setSelectedPodcast(podcast);
-            setCurrentPodcastUrl(data.content_url);
-            setIsPodcastModalOpen(true);
-            
-            toast({
-              title: "Playing Podcast",
-              description: `Now playing: ${podcast.title}`,
-            });
-          } else {
-            toast({
-              title: "Error",
-              description: "Could not load podcast",
-              variant: "destructive",
-            });
-          }
+      supabase.from('content').select('content_url').eq('id', podcastId).single().then(({
+        data,
+        error
+      }) => {
+        console.log("Supabase response:", {
+          data,
+          error
         });
+        if (data?.content_url && !error) {
+          console.log("Setting podcast modal state");
+          setSelectedPodcast(podcast);
+          setCurrentPodcastUrl(data.content_url);
+          setIsPodcastModalOpen(true);
+          toast({
+            title: "Playing Podcast",
+            description: `Now playing: ${podcast.title}`
+          });
+        } else {
+          toast({
+            title: "Error",
+            description: "Could not load podcast",
+            variant: "destructive"
+          });
+        }
+      });
     } else {
       toast({
-        title: "Error", 
+        title: "Error",
         description: "Podcast not found",
-        variant: "destructive",
+        variant: "destructive"
       });
     }
   };
-
   const handleAddToLibrary = (podcastId: string) => {
     toast({
       title: "Added to Library",
-      description: "Podcast saved to your library",
+      description: "Podcast saved to your library"
     });
   };
-
   const handleDownloadPodcast = (podcastId: string) => {
     toast({
       title: "Download Started",
-      description: "Podcast download has begun",
+      description: "Podcast download has begun"
     });
   };
-
   const handleReadBook = (bookId: string) => {
     console.log("handleReadBook called with bookId:", bookId);
-    
+
     // Find the book in our data
-    const book = allBooks.find(b => b.id === bookId) || 
-                 featuredBooks.find(b => b.id === bookId) || 
-                 newBooks.find(b => b.id === bookId);
-    
+    const book = allBooks.find(b => b.id === bookId) || featuredBooks.find(b => b.id === bookId) || newBooks.find(b => b.id === bookId);
     console.log("Found book:", book);
-    
     if (book) {
       // Increment read count
       incrementRead(bookId);
-      
+
       // Get the content URL from Supabase and open in reader modal
-      supabase
-        .from('content')
-        .select('content_url')
-        .eq('id', bookId)
-        .single()
-        .then(({ data, error }) => {
-          console.log("Supabase response:", { data, error });
-          
-          if (data?.content_url && !error) {
-            console.log("Setting book modal state");
-            setSelectedBook(book);
-            setCurrentBookUrl(data.content_url);
-            setIsBookModalOpen(true);
-            
-            toast({
-              title: "Opening Book",
-              description: `Now reading: ${book.title}`,
-            });
-          } else {
-            toast({
-              title: "Error",
-              description: "Could not load book",
-              variant: "destructive",
-            });
-          }
+      supabase.from('content').select('content_url').eq('id', bookId).single().then(({
+        data,
+        error
+      }) => {
+        console.log("Supabase response:", {
+          data,
+          error
         });
+        if (data?.content_url && !error) {
+          console.log("Setting book modal state");
+          setSelectedBook(book);
+          setCurrentBookUrl(data.content_url);
+          setIsBookModalOpen(true);
+          toast({
+            title: "Opening Book",
+            description: `Now reading: ${book.title}`
+          });
+        } else {
+          toast({
+            title: "Error",
+            description: "Could not load book",
+            variant: "destructive"
+          });
+        }
+      });
     } else {
       toast({
-        title: "Error", 
+        title: "Error",
         description: "Book not found",
-        variant: "destructive",
+        variant: "destructive"
       });
     }
   };
-
   const handleAddBookToLibrary = (bookId: string) => {
     toast({
       title: "Added to Library",
-      description: "Book saved to your library",
+      description: "Book saved to your library"
     });
   };
-
   const handleDownloadBook = (bookId: string) => {
     toast({
       title: "Download Started",
-      description: "Book download has begun",
+      description: "Book download has begun"
     });
   };
 
@@ -599,18 +613,15 @@ const AcademyContent = () => {
   const handleEnrollInCourse = (courseId: string) => {
     enrollInCourse(courseId);
   };
-
   const handleContinueCourse = (courseId: string) => {
     setSelectedCourse(courseId);
     setIsCourseModalOpen(true);
     toast({
       title: "Opening Course",
-      description: "Loading course content...",
+      description: "Loading course content..."
     });
   };
-
-  const renderVideosView = () => (
-    <div className="flex-1 p-8 max-w-7xl">
+  const renderVideosView = () => <div className="flex-1 p-8 max-w-7xl">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-4xl font-bold text-foreground mb-2">Videos</h1>
@@ -623,11 +634,7 @@ const AcademyContent = () => {
       <div className="flex gap-4 mb-8">
         <div className="flex-1 relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-          <input 
-            type="text"
-            placeholder="Search videos..."
-            className="w-full pl-10 pr-4 py-2 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-          />
+          <input type="text" placeholder="Search videos..." className="w-full pl-10 pr-4 py-2 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary" />
         </div>
         <Button variant="outline" className="gap-2">
           <Filter className="w-4 h-4" />
@@ -636,77 +643,41 @@ const AcademyContent = () => {
       </div>
 
       {/* Video Sections */}
-      {loading ? (
-        <div className="flex justify-center items-center py-12">
+      {loading ? <div className="flex justify-center items-center py-12">
           <div className="text-muted-foreground">Loading videos...</div>
-        </div>
-      ) : (
-        <>
-          <VideoSection
-            title="🚀 Quick Wins (Shorts)"
-            subtitle="Bite-sized tips you can implement today"
-            videos={shortsVideos}
-            onPlayVideo={handlePlayVideo}
-            showSeeAll={true}
-            onSeeAll={() => toast({ title: "See All", description: "Show all real estate shorts" })}
-            size="small"
-          />
+        </div> : <>
+          <VideoSection title="🚀 Quick Wins (Shorts)" subtitle="Bite-sized tips you can implement today" videos={shortsVideos} onPlayVideo={handlePlayVideo} showSeeAll={true} onSeeAll={() => toast({
+        title: "See All",
+        description: "Show all real estate shorts"
+      })} size="small" />
 
-          <VideoSection
-            title="Trending Now"
-            subtitle="Most watched real estate training this week"
-            videos={trendingVideos}
-            onPlayVideo={handlePlayVideo}
-            showSeeAll={true}
-            onSeeAll={() => toast({ title: "See All", description: "Show all trending videos" })}
-            size="large"
-          />
+          <VideoSection title="Trending Now" subtitle="Most watched real estate training this week" videos={trendingVideos} onPlayVideo={handlePlayVideo} showSeeAll={true} onSeeAll={() => toast({
+        title: "See All",
+        description: "Show all trending videos"
+      })} size="large" />
 
-          <VideoSection
-            title="Featured Training"
-            subtitle="Hand-picked by real estate experts"
-            videos={featuredVideos}
-            onPlayVideo={handlePlayVideo}
-            showSeeAll={true}
-            onSeeAll={() => toast({ title: "See All", description: "Show all featured videos" })}
-            size="medium"
-          />
+          <VideoSection title="Featured Training" subtitle="Hand-picked by real estate experts" videos={featuredVideos} onPlayVideo={handlePlayVideo} showSeeAll={true} onSeeAll={() => toast({
+        title: "See All",
+        description: "Show all featured videos"
+      })} size="medium" />
 
-          <VideoSection
-            title="All Training Videos"
-            subtitle="Browse our complete library of real estate education"
-            videos={allVideos.slice(0, 8)}
-            onPlayVideo={handlePlayVideo}
-            showSeeAll={true}
-            onSeeAll={() => toast({ title: "See All", description: "Show all videos" })}
-            size="medium"
-          />
-        </>
-      )}
+          <VideoSection title="All Training Videos" subtitle="Browse our complete library of real estate education" videos={allVideos.slice(0, 8)} onPlayVideo={handlePlayVideo} showSeeAll={true} onSeeAll={() => toast({
+        title: "See All",
+        description: "Show all videos"
+      })} size="medium" />
+        </>}
 
       {/* Categories Grid */}
       <div className="mt-12">
         <h2 className="text-2xl font-bold text-foreground mb-6">Browse by Category</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          {[
-            "Lead Generation", "Marketing", "Sales", "Social Media", 
-            "Mindset", "Technology", "Market Analysis", "Communication",
-            "Negotiation", "Listing Presentation", "Buyer Consultation", "Closing"
-          ].map((category) => (
-            <Card 
-              key={category}
-              className="p-4 text-center cursor-pointer hover:bg-muted/50 transition-colors"
-            >
+          {["Lead Generation", "Marketing", "Sales", "Social Media", "Mindset", "Technology", "Market Analysis", "Communication", "Negotiation", "Listing Presentation", "Buyer Consultation", "Closing"].map(category => <Card key={category} className="p-4 text-center cursor-pointer hover:bg-muted/50 transition-colors">
               <h3 className="font-medium text-sm">{category}</h3>
-            </Card>
-          ))}
+            </Card>)}
         </div>
       </div>
-    </div>
-  );
-
-  const renderChannelsView = () => (
-    <div className="flex-1 p-8 max-w-7xl">
+    </div>;
+  const renderChannelsView = () => <div className="flex-1 p-8 max-w-7xl">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-4xl font-bold text-foreground mb-2">Channels</h1>
@@ -719,11 +690,7 @@ const AcademyContent = () => {
       <div className="flex gap-4 mb-8">
         <div className="flex-1 relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-          <input 
-            type="text"
-            placeholder="Search channels..."
-            className="w-full pl-10 pr-4 py-2 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-          />
+          <input type="text" placeholder="Search channels..." className="w-full pl-10 pr-4 py-2 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary" />
         </div>
         <Button variant="outline" className="gap-2">
           <Filter className="w-4 h-4" />
@@ -731,32 +698,19 @@ const AcademyContent = () => {
         </Button>
       </div>
 
-      {channelsLoading ? (
-        <div className="flex justify-center items-center py-12">
+      {channelsLoading ? <div className="flex justify-center items-center py-12">
           <div className="text-muted-foreground">Loading channels...</div>
-        </div>
-      ) : (
-        <>
+        </div> : <>
           {/* Featured Channels */}
           <div className="mb-12">
             <h2 className="text-2xl font-bold text-foreground mb-6">Featured Channels</h2>
-            {featuredChannels.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {featuredChannels.map((channel) => (
-                  <Card key={channel.id} className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
+            {featuredChannels.length > 0 ? <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {featuredChannels.map(channel => <Card key={channel.id} className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
                     {/* Cover Image */}
                     <div className="relative h-32 bg-gradient-to-r from-blue-500 to-purple-600">
-                      {channel.cover_image_url ? (
-                        <img 
-                          src={channel.cover_image_url} 
-                          alt={`${channel.name} cover`}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
+                      {channel.cover_image_url ? <img src={channel.cover_image_url} alt={`${channel.name} cover`} className="w-full h-full object-cover" /> : <div className="w-full h-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
                           <Video className="w-8 h-8 text-white" />
-                        </div>
-                      )}
+                        </div>}
                       <div className="absolute top-3 right-3">
                         <span className="bg-black/50 text-white text-xs px-2 py-1 rounded">
                           Education
@@ -773,11 +727,9 @@ const AcademyContent = () => {
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
                             <h3 className="font-semibold text-foreground">{channel.name}</h3>
-                            {channel.is_verified && (
-                              <div className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
+                            {channel.is_verified && <div className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
                                 <span className="text-white text-xs">✓</span>
-                              </div>
-                            )}
+                              </div>}
                           </div>
                           <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
                             {channel.description || 'Real estate education and training content'}
@@ -792,55 +744,64 @@ const AcademyContent = () => {
                         Subscribe
                       </Button>
                     </div>
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-12">
+                  </Card>)}
+              </div> : <div className="text-center py-12">
                 <Video className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                 <h3 className="text-lg font-semibold mb-2">No Featured Channels Yet</h3>
                 <p className="text-muted-foreground mb-4">Import some YouTube channels to get started!</p>
-                <Button onClick={() => toast({ title: "Import Channels", description: "Use the YouTube import feature in Admin Dashboard" })}>
+                <Button onClick={() => toast({
+            title: "Import Channels",
+            description: "Use the YouTube import feature in Admin Dashboard"
+          })}>
                   Import YouTube Channels
                 </Button>
-              </div>
-            )}
+              </div>}
           </div>
 
           {/* Channel Categories */}
           <div className="mb-12">
             <h2 className="text-2xl font-bold text-foreground mb-6">Browse by Category</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {[
-                { name: "Coaching", count: 15, icon: Users },
-                { name: "Sales Training", count: 23, icon: TrendingUp },
-                { name: "Marketing", count: 18, icon: Sparkles },
-                { name: "Technology", count: 12, icon: Video },
-                { name: "Mindset", count: 9, icon: Heart },
-                { name: "Lead Generation", count: 21, icon: Award }
-              ].map((category) => {
-                const Icon = category.icon;
-                return (
-                  <Card 
-                    key={category.name}
-                    className="p-4 text-center cursor-pointer hover:bg-muted/50 transition-colors"
-                  >
+              {[{
+            name: "Coaching",
+            count: 15,
+            icon: Users
+          }, {
+            name: "Sales Training",
+            count: 23,
+            icon: TrendingUp
+          }, {
+            name: "Marketing",
+            count: 18,
+            icon: Sparkles
+          }, {
+            name: "Technology",
+            count: 12,
+            icon: Video
+          }, {
+            name: "Mindset",
+            count: 9,
+            icon: Heart
+          }, {
+            name: "Lead Generation",
+            count: 21,
+            icon: Award
+          }].map(category => {
+            const Icon = category.icon;
+            return <Card key={category.name} className="p-4 text-center cursor-pointer hover:bg-muted/50 transition-colors">
                     <Icon className="w-6 h-6 mx-auto mb-2 text-muted-foreground" />
                     <h3 className="font-medium text-sm mb-1">{category.name}</h3>
                     <p className="text-xs text-muted-foreground">{category.count} channels</p>
-                  </Card>
-                );
-              })}
+                  </Card>;
+          })}
             </div>
           </div>
 
           {/* New Channels */}
           <div>
             <h2 className="text-2xl font-bold text-foreground mb-6">Recently Added Channels</h2>
-            {newChannels.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {newChannels.map((channel) => (
-                  <Card key={channel.id} className="p-4 hover:shadow-md transition-shadow cursor-pointer">
+            {newChannels.length > 0 ? <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {newChannels.map(channel => <Card key={channel.id} className="p-4 hover:shadow-md transition-shadow cursor-pointer">
                     <div className="text-center">
                       <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-3">
                         <Video className="w-8 h-8 text-gray-500" />
@@ -859,29 +820,18 @@ const AcademyContent = () => {
                         Subscribe
                       </Button>
                     </div>
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-12">
+                  </Card>)}
+              </div> : <div className="text-center py-12">
                 <Video className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                 <h3 className="text-lg font-semibold mb-2">No Channels Added Yet</h3>
                 <p className="text-muted-foreground mb-4">
-                  {allChannels.length === 0 
-                    ? "Import YouTube channels to populate this section!"
-                    : "All channels have been here for a while. Check back later for new additions!"
-                  }
+                  {allChannels.length === 0 ? "Import YouTube channels to populate this section!" : "All channels have been here for a while. Check back later for new additions!"}
                 </p>
-              </div>
-            )}
+              </div>}
           </div>
-        </>
-      )}
-    </div>
-  );
-
-  const renderPodcastsView = () => (
-    <div className="flex-1 p-8 max-w-7xl">
+        </>}
+    </div>;
+  const renderPodcastsView = () => <div className="flex-1 p-8 max-w-7xl">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-4xl font-bold text-foreground mb-2">Browse</h1>
@@ -894,11 +844,7 @@ const AcademyContent = () => {
       <div className="mb-8">
         <div className="relative max-w-2xl">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-          <input 
-            type="text"
-            placeholder="Search podcasts..."
-            className="w-full pl-10 pr-4 py-3 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-          />
+          <input type="text" placeholder="Search podcasts..." className="w-full pl-10 pr-4 py-3 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary" />
         </div>
       </div>
 
@@ -972,10 +918,11 @@ const AcademyContent = () => {
             </div>
           
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {podcastsLoading ? (
-              // Loading skeleton
-              Array.from({ length: 6 }).map((_, index) => (
-                <div key={index} className="text-center">
+            {podcastsLoading ?
+          // Loading skeleton
+          Array.from({
+            length: 6
+          }).map((_, index) => <div key={index} className="text-center">
                   <Card className="overflow-hidden mb-3">
                     <AspectRatio ratio={1}>
                       <div className="w-full h-full bg-muted animate-pulse" />
@@ -985,21 +932,10 @@ const AcademyContent = () => {
                     <div className="h-4 bg-muted rounded animate-pulse" />
                     <div className="h-3 bg-muted rounded animate-pulse" />
                   </div>
-                </div>
-              ))
-            ) : featuredPodcasts.length > 0 ? (
-              featuredPodcasts.slice(0, 6).map((podcast, index) => (
-                <div key={podcast.id} className="text-center">
-                  <Card 
-                    className="overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer group mb-3"
-                    onClick={() => handlePlayPodcast(podcast.id)}
-                  >
+                </div>) : featuredPodcasts.length > 0 ? featuredPodcasts.slice(0, 6).map((podcast, index) => <div key={podcast.id} className="text-center">
+                  <Card className="overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer group mb-3" onClick={() => handlePlayPodcast(podcast.id)}>
                     <AspectRatio ratio={1}>
-                      <img 
-                        src={podcast.thumbnail} 
-                        alt={podcast.title}
-                        className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
-                      />
+                      <img src={podcast.thumbnail} alt={podcast.title} className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105" />
                     </AspectRatio>
                   </Card>
                   
@@ -1008,12 +944,11 @@ const AcademyContent = () => {
                     <h3 className="text-sm font-semibold text-foreground line-clamp-2">{podcast.title}</h3>
                     <p className="text-xs text-muted-foreground">{podcast.creator}</p>
                   </div>
-                </div>
-              ))
-            ) : (
-              // Empty state
-              Array.from({ length: 6 }).map((_, index) => (
-                <div key={index} className="text-center">
+                </div>) :
+          // Empty state
+          Array.from({
+            length: 6
+          }).map((_, index) => <div key={index} className="text-center">
                   <Card className="overflow-hidden mb-3 border-dashed border-2">
                     <AspectRatio ratio={1}>
                       <div className="w-full h-full bg-muted/30 flex items-center justify-center">
@@ -1026,9 +961,7 @@ const AcademyContent = () => {
                     <h3 className="text-sm text-muted-foreground">Coming Soon</h3>
                     <p className="text-xs text-muted-foreground">Real Estate Show</p>
                   </div>
-                </div>
-              ))
-            )}
+                </div>)}
             </div>
           </div>
 
@@ -1042,10 +975,11 @@ const AcademyContent = () => {
             </div>
           
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {podcastsLoading ? (
-              // Loading skeleton
-              Array.from({ length: 6 }).map((_, index) => (
-                <div key={index}>
+            {podcastsLoading ?
+          // Loading skeleton
+          Array.from({
+            length: 6
+          }).map((_, index) => <div key={index}>
                   <Card className="overflow-hidden mb-3">
                     <AspectRatio ratio={1}>
                       <div className="w-full h-full bg-muted animate-pulse" />
@@ -1056,21 +990,10 @@ const AcademyContent = () => {
                     <div className="h-3 bg-muted rounded animate-pulse" />
                     <div className="h-3 bg-muted rounded animate-pulse" />
                   </div>
-                </div>
-              ))
-            ) : newPodcasts.length > 0 ? (
-              newPodcasts.map((podcast) => (
-                <div key={podcast.id}>
-                  <Card 
-                    className="overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer group mb-3"
-                    onClick={() => handlePlayPodcast(podcast.id)}
-                  >
+                </div>) : newPodcasts.length > 0 ? newPodcasts.map(podcast => <div key={podcast.id}>
+                  <Card className="overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer group mb-3" onClick={() => handlePlayPodcast(podcast.id)}>
                     <AspectRatio ratio={1}>
-                      <img 
-                        src={podcast.thumbnail} 
-                        alt={podcast.title}
-                        className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
-                      />
+                      <img src={podcast.thumbnail} alt={podcast.title} className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105" />
                     </AspectRatio>
                   </Card>
                   
@@ -1079,12 +1002,11 @@ const AcademyContent = () => {
                     <p className="text-xs text-muted-foreground">{podcast.category}</p>
                     <p className="text-xs text-muted-foreground">Updated Weekly</p>
                   </div>
-                </div>
-              ))
-            ) : (
-              // Empty state
-              Array.from({ length: 6 }).map((_, index) => (
-                <div key={index}>
+                </div>) :
+          // Empty state
+          Array.from({
+            length: 6
+          }).map((_, index) => <div key={index}>
                   <Card className="overflow-hidden mb-3 border-dashed border-2">
                     <AspectRatio ratio={1}>
                       <div className="w-full h-full bg-muted/30 flex items-center justify-center">
@@ -1097,9 +1019,7 @@ const AcademyContent = () => {
                     <p className="text-xs text-muted-foreground">Real Estate</p>
                     <p className="text-xs text-muted-foreground">Coming Soon</p>
                   </div>
-                </div>
-              ))
-            )}
+                </div>)}
             </div>
           </div>
 
@@ -1110,29 +1030,47 @@ const AcademyContent = () => {
             </div>
             
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {[
-                { name: "Lead Generation", color: "from-blue-500 to-blue-600" },
-                { name: "Marketing", color: "from-green-500 to-green-600" },
-                { name: "Sales Training", color: "from-purple-500 to-purple-600" },
-                { name: "Mindset", color: "from-orange-500 to-orange-600" },
-                { name: "Technology", color: "from-teal-500 to-teal-600" },
-                { name: "Success Stories", color: "from-pink-500 to-pink-600" },
-                { name: "Market Trends", color: "from-indigo-500 to-indigo-600" },
-                { name: "Team Building", color: "from-red-500 to-red-600" },
-                { name: "Personal Branding", color: "from-yellow-500 to-yellow-600" },
-                { name: "Client Relations", color: "from-cyan-500 to-cyan-600" },
-                { name: "Investment", color: "from-emerald-500 to-emerald-600" },
-                { name: "Coaching", color: "from-violet-500 to-violet-600" }
-              ].map((category) => (
-                <Card 
-                  key={category.name}
-                  className="overflow-hidden cursor-pointer hover:shadow-lg transition-all duration-200 group"
-                >
+              {[{
+            name: "Lead Generation",
+            color: "from-blue-500 to-blue-600"
+          }, {
+            name: "Marketing",
+            color: "from-green-500 to-green-600"
+          }, {
+            name: "Sales Training",
+            color: "from-purple-500 to-purple-600"
+          }, {
+            name: "Mindset",
+            color: "from-orange-500 to-orange-600"
+          }, {
+            name: "Technology",
+            color: "from-teal-500 to-teal-600"
+          }, {
+            name: "Success Stories",
+            color: "from-pink-500 to-pink-600"
+          }, {
+            name: "Market Trends",
+            color: "from-indigo-500 to-indigo-600"
+          }, {
+            name: "Team Building",
+            color: "from-red-500 to-red-600"
+          }, {
+            name: "Personal Branding",
+            color: "from-yellow-500 to-yellow-600"
+          }, {
+            name: "Client Relations",
+            color: "from-cyan-500 to-cyan-600"
+          }, {
+            name: "Investment",
+            color: "from-emerald-500 to-emerald-600"
+          }, {
+            name: "Coaching",
+            color: "from-violet-500 to-violet-600"
+          }].map(category => <Card key={category.name} className="overflow-hidden cursor-pointer hover:shadow-lg transition-all duration-200 group">
                   <div className={`aspect-square bg-gradient-to-br ${category.color} p-4 text-white flex items-end`}>
                     <h3 className="font-semibold text-sm leading-tight">{category.name}</h3>
                   </div>
-                </Card>
-              ))}
+                </Card>)}
             </div>
           </div>
 
@@ -1146,10 +1084,11 @@ const AcademyContent = () => {
             </div>
           
           <div className="space-y-4">
-            {podcastsLoading ? (
-              // Loading skeleton
-              Array.from({ length: 8 }).map((_, index) => (
-                <Card key={index} className="p-4">
+            {podcastsLoading ?
+          // Loading skeleton
+          Array.from({
+            length: 8
+          }).map((_, index) => <Card key={index} className="p-4">
                   <div className="flex items-center gap-4">
                     <div className="text-lg font-bold text-muted-foreground min-w-[24px]">
                       {index + 1}
@@ -1162,26 +1101,14 @@ const AcademyContent = () => {
                     </div>
                     <div className="w-10 h-10 rounded-full bg-muted animate-pulse shrink-0" />
                   </div>
-                </Card>
-              ))
-            ) : allPodcasts.length > 0 ? (
-              allPodcasts.slice(0, 8).map((podcast, index) => (
-                <Card 
-                  key={podcast.id}
-                  className="p-4 hover:shadow-md transition-all duration-200 cursor-pointer"
-                  onClick={() => handlePlayPodcast(podcast.id)}
-                >
+                </Card>) : allPodcasts.length > 0 ? allPodcasts.slice(0, 8).map((podcast, index) => <Card key={podcast.id} className="p-4 hover:shadow-md transition-all duration-200 cursor-pointer" onClick={() => handlePlayPodcast(podcast.id)}>
                   <div className="flex items-center gap-4">
                     <div className="text-lg font-bold text-muted-foreground min-w-[24px]">
                       {index + 1}
                     </div>
                     
                     <div className="w-16 h-16 rounded-lg overflow-hidden shrink-0">
-                      <img 
-                        src={podcast.thumbnail} 
-                        alt={podcast.title}
-                        className="w-full h-full object-cover"
-                      />
+                      <img src={podcast.thumbnail} alt={podcast.title} className="w-full h-full object-cover" />
                     </div>
                     
                     <div className="flex-1 min-w-0">
@@ -1196,20 +1123,15 @@ const AcademyContent = () => {
                       </p>
                     </div>
                     
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="w-10 h-10 rounded-full shrink-0"
-                    >
+                    <Button size="icon" variant="ghost" className="w-10 h-10 rounded-full shrink-0">
                       <Play className="w-4 h-4" />
                     </Button>
                   </div>
-                </Card>
-              ))
-            ) : (
-              // Empty state
-              Array.from({ length: 8 }).map((_, index) => (
-                <Card key={index} className="p-4 border-dashed border-2">
+                </Card>) :
+          // Empty state
+          Array.from({
+            length: 8
+          }).map((_, index) => <Card key={index} className="p-4 border-dashed border-2">
                   <div className="flex items-center gap-4">
                     <div className="text-lg font-bold text-muted-foreground min-w-[24px]">
                       {index + 1}
@@ -1231,82 +1153,109 @@ const AcademyContent = () => {
                       </p>
                     </div>
                     
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="w-10 h-10 rounded-full shrink-0"
-                      disabled
-                    >
+                    <Button size="icon" variant="ghost" className="w-10 h-10 rounded-full shrink-0" disabled>
                       <Play className="w-4 h-4" />
                     </Button>
                   </div>
-                </Card>
-              ))
-            )}
+                </Card>)}
           </div>
         </div>
       </>
-    </div>
-  );
-
+    </div>;
   const renderBooksView = () => {
-    const categories = [
-      "Biographies & Memoirs",
-      "Business & Personal Finance", 
-      "Comics & Graphic Novels",
-      "Computers & Internet",
-      "Genre Charts"
-    ];
+    const categories = ["Biographies & Memoirs", "Business & Personal Finance", "Comics & Graphic Novels", "Computers & Internet", "Genre Charts"];
 
     // Mock data for demonstration - in a real app, these would come from your API
-    const topPaidBooks = [
-      { id: "1", title: "Dead Line", author: "Marc Cameron", cover: "/placeholder.svg", ranking: 1 },
-      { id: "2", title: "Robert Ludlum's The Bourne Escape", author: "Brian Freeman", cover: "/placeholder.svg", ranking: 2 },
-      { id: "3", title: "She Didn't See It Coming", author: "Shari Lapena", cover: "/placeholder.svg", ranking: 3 },
-      { id: "4", title: "Shattered Truth (Thrilling FBI...)", author: "Barbara Freethy", cover: "/placeholder.svg", ranking: 4 },
-      { id: "5", title: "An Inside Job", author: "Daniel Silva", cover: "/placeholder.svg", ranking: 5 },
-      { id: "6", title: "Immortal by Morning", author: "Lynsay Sands", cover: "/placeholder.svg", ranking: 6 },
-    ];
-
-    const topFreeBooks = [
-      { id: "7", title: "The Bossy Billionaire", author: "Samantha Skye", cover: "/placeholder.svg", ranking: 1 },
-      { id: "8", title: "Concrete Angels", author: "Tom Fowler", cover: "/placeholder.svg", ranking: 2 },
-      { id: "9", title: "Falling", author: "Noelle Adams", cover: "/placeholder.svg", ranking: 3 },
-      { id: "10", title: "Beach Club", author: "Elana Johnson", cover: "/placeholder.svg", ranking: 4 },
-      { id: "11", title: "Hiring Mr. Darcy", author: "Valerie Bowman", cover: "/placeholder.svg", ranking: 5 },
-      { id: "12", title: "Little Girl Vanished", author: "Denise Grover Swank", cover: "/placeholder.svg", ranking: 6 },
-    ];
-
-    return (
-      <div className="flex-1 p-8 max-w-7xl">
+    const topPaidBooks = [{
+      id: "1",
+      title: "Dead Line",
+      author: "Marc Cameron",
+      cover: "/placeholder.svg",
+      ranking: 1
+    }, {
+      id: "2",
+      title: "Robert Ludlum's The Bourne Escape",
+      author: "Brian Freeman",
+      cover: "/placeholder.svg",
+      ranking: 2
+    }, {
+      id: "3",
+      title: "She Didn't See It Coming",
+      author: "Shari Lapena",
+      cover: "/placeholder.svg",
+      ranking: 3
+    }, {
+      id: "4",
+      title: "Shattered Truth (Thrilling FBI...)",
+      author: "Barbara Freethy",
+      cover: "/placeholder.svg",
+      ranking: 4
+    }, {
+      id: "5",
+      title: "An Inside Job",
+      author: "Daniel Silva",
+      cover: "/placeholder.svg",
+      ranking: 5
+    }, {
+      id: "6",
+      title: "Immortal by Morning",
+      author: "Lynsay Sands",
+      cover: "/placeholder.svg",
+      ranking: 6
+    }];
+    const topFreeBooks = [{
+      id: "7",
+      title: "The Bossy Billionaire",
+      author: "Samantha Skye",
+      cover: "/placeholder.svg",
+      ranking: 1
+    }, {
+      id: "8",
+      title: "Concrete Angels",
+      author: "Tom Fowler",
+      cover: "/placeholder.svg",
+      ranking: 2
+    }, {
+      id: "9",
+      title: "Falling",
+      author: "Noelle Adams",
+      cover: "/placeholder.svg",
+      ranking: 3
+    }, {
+      id: "10",
+      title: "Beach Club",
+      author: "Elana Johnson",
+      cover: "/placeholder.svg",
+      ranking: 4
+    }, {
+      id: "11",
+      title: "Hiring Mr. Darcy",
+      author: "Valerie Bowman",
+      cover: "/placeholder.svg",
+      ranking: 5
+    }, {
+      id: "12",
+      title: "Little Girl Vanished",
+      author: "Denise Grover Swank",
+      cover: "/placeholder.svg",
+      ranking: 6
+    }];
+    return <div className="flex-1 p-8 max-w-7xl">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-5xl font-bold text-foreground mb-6">Top Books</h1>
           
           {/* Category Tabs */}
           <div className="flex gap-1 bg-muted/30 p-1 rounded-lg w-fit">
-            {categories.map((category) => (
-              <button
-                key={category}
-                onClick={() => setActiveCategory(category)}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                  activeCategory === category
-                    ? 'bg-background text-foreground shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
+            {categories.map(category => <button key={category} onClick={() => setActiveCategory(category)} className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${activeCategory === category ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}>
                 {category}
-              </button>
-            ))}
+              </button>)}
           </div>
         </div>
 
-        {booksLoading ? (
-          <div className="flex justify-center items-center py-12">
+        {booksLoading ? <div className="flex justify-center items-center py-12">
             <div className="text-muted-foreground">Loading books...</div>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          </div> : <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             {/* Top Paid Section */}
             <div>
               <div className="flex items-center justify-between mb-6">
@@ -1317,23 +1266,14 @@ const AcademyContent = () => {
               </div>
               
               <div className="space-y-4">
-                {topPaidBooks.map((book) => (
-                  <Card 
-                    key={book.id}
-                    className="p-4 hover:shadow-md transition-all duration-200 cursor-pointer group"
-                    onClick={() => handleReadBook(book.id)}
-                  >
+                {topPaidBooks.map(book => <Card key={book.id} className="p-4 hover:shadow-md transition-all duration-200 cursor-pointer group" onClick={() => handleReadBook(book.id)}>
                     <div className="flex items-center gap-4">
                       <div className="text-xl font-bold text-muted-foreground min-w-[24px]">
                         {book.ranking}
                       </div>
                       
                       <div className="w-16 h-20 rounded-lg overflow-hidden shrink-0 shadow-sm">
-                        <img 
-                          src={book.cover} 
-                          alt={book.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-                        />
+                        <img src={book.cover} alt={book.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" />
                       </div>
                       
                       <div className="flex-1 min-w-0">
@@ -1345,8 +1285,7 @@ const AcademyContent = () => {
                         </p>
                       </div>
                     </div>
-                  </Card>
-                ))}
+                  </Card>)}
               </div>
             </div>
 
@@ -1360,23 +1299,14 @@ const AcademyContent = () => {
               </div>
               
               <div className="space-y-4">
-                {topFreeBooks.map((book) => (
-                  <Card 
-                    key={book.id}
-                    className="p-4 hover:shadow-md transition-all duration-200 cursor-pointer group"
-                    onClick={() => handleReadBook(book.id)}
-                  >
+                {topFreeBooks.map(book => <Card key={book.id} className="p-4 hover:shadow-md transition-all duration-200 cursor-pointer group" onClick={() => handleReadBook(book.id)}>
                     <div className="flex items-center gap-4">
                       <div className="text-xl font-bold text-muted-foreground min-w-[24px]">
                         {book.ranking}
                       </div>
                       
                       <div className="w-16 h-20 rounded-lg overflow-hidden shrink-0 shadow-sm">
-                        <img 
-                          src={book.cover} 
-                          alt={book.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-                        />
+                        <img src={book.cover} alt={book.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" />
                       </div>
                       
                       <div className="flex-1 min-w-0">
@@ -1388,12 +1318,10 @@ const AcademyContent = () => {
                         </p>
                       </div>
                     </div>
-                  </Card>
-                ))}
+                  </Card>)}
               </div>
             </div>
-          </div>
-        )}
+          </div>}
 
         {/* Featured Collections Section */}
         <div className="mt-16">
@@ -1406,18 +1334,31 @@ const AcademyContent = () => {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[
-              { title: "Real Estate Classics", subtitle: "Timeless wisdom for agents", bookCount: 25 },
-              { title: "Lead Generation Mastery", subtitle: "Convert more prospects", bookCount: 18 },
-              { title: "Market Analysis Expert", subtitle: "Data-driven insights", bookCount: 12 },
-              { title: "Negotiation Powerhouse", subtitle: "Close deals like a pro", bookCount: 15 },
-              { title: "Digital Marketing Edge", subtitle: "Modern marketing strategies", bookCount: 22 },
-              { title: "Investment Strategies", subtitle: "Building wealth through real estate", bookCount: 16 }
-            ].map((collection, index) => (
-              <Card 
-                key={index}
-                className="p-6 cursor-pointer hover:shadow-lg transition-all duration-200 group border-2 border-transparent hover:border-primary/20"
-              >
+            {[{
+            title: "Real Estate Classics",
+            subtitle: "Timeless wisdom for agents",
+            bookCount: 25
+          }, {
+            title: "Lead Generation Mastery",
+            subtitle: "Convert more prospects",
+            bookCount: 18
+          }, {
+            title: "Market Analysis Expert",
+            subtitle: "Data-driven insights",
+            bookCount: 12
+          }, {
+            title: "Negotiation Powerhouse",
+            subtitle: "Close deals like a pro",
+            bookCount: 15
+          }, {
+            title: "Digital Marketing Edge",
+            subtitle: "Modern marketing strategies",
+            bookCount: 22
+          }, {
+            title: "Investment Strategies",
+            subtitle: "Building wealth through real estate",
+            bookCount: 16
+          }].map((collection, index) => <Card key={index} className="p-6 cursor-pointer hover:shadow-lg transition-all duration-200 group border-2 border-transparent hover:border-primary/20">
                 <div className="h-32 bg-gradient-to-br from-primary/10 to-primary/5 rounded-lg mb-4 flex items-center justify-center">
                   <Book className="w-12 h-12 text-primary/60" />
                 </div>
@@ -1430,16 +1371,12 @@ const AcademyContent = () => {
                 <p className="text-xs text-muted-foreground">
                   {collection.bookCount} books
                 </p>
-              </Card>
-            ))}
+              </Card>)}
           </div>
         </div>
-      </div>
-    );
+      </div>;
   };
-
-  const renderCoursesView = () => (
-    <div className="flex-1 max-w-6xl mx-auto">
+  const renderCoursesView = () => <div className="flex-1 max-w-6xl mx-auto">
       {/* Header Section */}
       <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-12 mb-8">
         <div className="max-w-4xl">
@@ -1467,24 +1404,14 @@ const AcademyContent = () => {
       <div className="px-8">
         {/* Course Categories Navigation */}
         <div className="flex items-center gap-2 mb-8 overflow-x-auto pb-2">
-          {['All Courses', 'My Learning', 'Lead Generation', 'Sales', 'Marketing', 'Mindset', 'Technology', 'New Releases'].map((category) => (
-            <Button 
-              key={category}
-              variant={category === 'All Courses' ? 'default' : 'outline'}
-              size="sm"
-              className="whitespace-nowrap"
-            >
+          {['All Courses', 'My Learning', 'Lead Generation', 'Sales', 'Marketing', 'Mindset', 'Technology', 'New Releases'].map(category => <Button key={category} variant={category === 'All Courses' ? 'default' : 'outline'} size="sm" className="whitespace-nowrap">
               {category}
-            </Button>
-          ))}
+            </Button>)}
         </div>
 
-        {coursesLoading ? (
-          <div className="flex justify-center items-center py-12">
+        {coursesLoading ? <div className="flex justify-center items-center py-12">
             <div className="text-muted-foreground">Loading courses...</div>
-          </div>
-        ) : (
-          <div className="space-y-8">
+          </div> : <div className="space-y-8">
             {/* Continue Learning Section */}
             <div className="mb-12">
               <div className="flex items-center gap-3 mb-6">
@@ -1495,19 +1422,10 @@ const AcademyContent = () => {
               </div>
               
               <div className="space-y-4">
-                {mockCourses.filter(course => course.progress && course.progress > 0).map((course) => (
-                  <div 
-                    key={course.id}
-                    className="bg-card border border-border rounded-lg p-6 hover:shadow-md transition-shadow cursor-pointer"
-                    onClick={() => handleContinueCourse(course.id)}
-                  >
+                {mockCourses.filter(course => course.progress && course.progress > 0).map(course => <div key={course.id} className="bg-card border border-border rounded-lg p-6 hover:shadow-md transition-shadow cursor-pointer" onClick={() => handleContinueCourse(course.id)}>
                     <div className="flex items-center gap-4">
                       <div className="w-16 h-16 bg-muted rounded-lg overflow-hidden">
-                        <img
-                          src={course.thumbnail || "/placeholder.svg"}
-                          alt={course.title}
-                          className="w-full h-full object-cover"
-                        />
+                        <img src={course.thumbnail || "/placeholder.svg"} alt={course.title} className="w-full h-full object-cover" />
                       </div>
                       
                       <div className="flex-1">
@@ -1536,8 +1454,7 @@ const AcademyContent = () => {
                         Continue
                       </Button>
                     </div>
-                  </div>
-                ))}
+                  </div>)}
               </div>
             </div>
 
@@ -1551,18 +1468,9 @@ const AcademyContent = () => {
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {mockCourses.slice(0, 4).map((course) => (
-                  <div 
-                    key={course.id}
-                    className="bg-card border border-border rounded-lg overflow-hidden hover:shadow-lg transition-shadow cursor-pointer group"
-                    onClick={() => handleContinueCourse(course.id)}
-                  >
+                {mockCourses.slice(0, 4).map(course => <div key={course.id} className="bg-card border border-border rounded-lg overflow-hidden hover:shadow-lg transition-shadow cursor-pointer group" onClick={() => handleContinueCourse(course.id)}>
                     <div className="aspect-video bg-gradient-to-br from-blue-500 to-purple-600 relative">
-                      <img
-                        src={course.thumbnail || "/placeholder.svg"}
-                        alt={course.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-                      />
+                      <img src={course.thumbnail || "/placeholder.svg"} alt={course.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" />
                       <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
                       <div className="absolute top-4 right-4">
                         {course.isPro && <Crown className="w-5 h-5 text-yellow-400" />}
@@ -1590,8 +1498,7 @@ const AcademyContent = () => {
                         </Button>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  </div>)}
               </div>
             </div>
 
@@ -1605,23 +1512,14 @@ const AcademyContent = () => {
               </div>
               
               <div className="space-y-4">
-                {mockCourses.map((course, index) => (
-                  <div 
-                    key={course.id}
-                    className="bg-card border border-border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
-                    onClick={() => handleContinueCourse(course.id)}
-                  >
+                {mockCourses.map((course, index) => <div key={course.id} className="bg-card border border-border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer" onClick={() => handleContinueCourse(course.id)}>
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center font-bold text-muted-foreground">
                         #{index + 1}
                       </div>
                       
                       <div className="w-16 h-12 bg-muted rounded overflow-hidden">
-                        <img
-                          src={course.thumbnail || "/placeholder.svg"}
-                          alt={course.title}
-                          className="w-full h-full object-cover"
-                        />
+                        <img src={course.thumbnail || "/placeholder.svg"} alt={course.title} className="w-full h-full object-cover" />
                       </div>
                       
                       <div className="flex-1">
@@ -1649,33 +1547,25 @@ const AcademyContent = () => {
                       
                       <ChevronRight className="w-5 h-5 text-muted-foreground" />
                     </div>
-                  </div>
-                ))}
+                  </div>)}
               </div>
             </div>
-          </div>
-        )}
+          </div>}
       </div>
-    </div>
-  );
-
+    </div>;
   const renderContent = () => {
     console.log("Current activeView:", activeView); // Debug log
     switch (activeView) {
       case "home":
         return renderHomeView();
       case "playbooks":
-        return (
-          <div className="flex-1 p-8 max-w-7xl">
+        return <div className="flex-1 p-8 max-w-7xl">
             <AgentPlaybookSection />
-          </div>
-        );
+          </div>;
       case "create":
-        return (
-          <div className="flex-1 p-8 max-w-7xl">
+        return <div className="flex-1 p-8 max-w-7xl">
             <PlaybookCreator />
-          </div>
-        );
+          </div>;
       case "videos":
         return renderVideosView();
       case "channels":
@@ -1691,34 +1581,27 @@ const AcademyContent = () => {
         return renderBooksView();
       default:
         console.log("Rendering default view for:", activeView); // Debug log
-        return (
-          <div className="flex-1 p-8">
+        return <div className="flex-1 p-8">
             <h2 className="text-2xl font-bold mb-4">{activeView.charAt(0).toUpperCase() + activeView.slice(1)}</h2>
             <p className="text-gray-600">Content for {activeView} coming soon...</p>
-          </div>
-        );
+          </div>;
     }
   };
-
-  const { user, profile } = useAuth();
+  const {
+    user,
+    profile
+  } = useAuth();
   const circleLogoUrl = "/lovable-uploads/97692497-6d98-46a8-b6fc-05cd68bdc160.png";
-
-  return (
-    <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/50 sticky top-0 z-50">
         <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4">
           <div className="flex items-center justify-between">
             {/* Logo */}
             <div className="flex items-center gap-2 sm:gap-3">
-              <img 
-                src={circleLogoUrl}
-                alt="Circle Logo" 
-                className="w-12 h-12 sm:w-16 sm:h-16 object-contain"
-                style={{
-                  imageRendering: 'crisp-edges'
-                }}
-              />
+              <img src={circleLogoUrl} alt="Circle Logo" className="w-12 h-12 sm:w-16 sm:h-16 object-contain" style={{
+              imageRendering: 'crisp-edges'
+            }} />
             </div>
             
             {/* Navigation Tabs - Responsive */}
@@ -1728,22 +1611,13 @@ const AcademyContent = () => {
             
             <div className="sm:hidden flex-1 px-4">
               <div className="flex bg-muted rounded-full p-1">
-                <Link
-                  to="/"
-                  className="flex-1 text-xs py-2 px-2 rounded-full font-medium transition-all text-center text-muted-foreground"
-                >
+                <Link to="/" className="flex-1 text-xs py-2 px-2 rounded-full font-medium transition-all text-center text-muted-foreground">
                   Market
                 </Link>
-                <Link
-                  to="/command-center"
-                  className="flex-1 text-xs py-2 px-2 rounded-full font-medium transition-all text-center text-muted-foreground"
-                >
+                <Link to="/command-center" className="flex-1 text-xs py-2 px-2 rounded-full font-medium transition-all text-center text-muted-foreground">
                   Command
                 </Link>
-                <Link
-                  to="/academy"
-                  className="flex-1 text-xs py-2 px-2 rounded-full font-medium transition-all text-center bg-background text-foreground shadow-sm"
-                >
+                <Link to="/academy" className="flex-1 text-xs py-2 px-2 rounded-full font-medium transition-all text-center bg-background text-foreground shadow-sm">
                   Academy
                 </Link>
               </div>
@@ -1755,13 +1629,11 @@ const AcademyContent = () => {
               <LocationSwitcher />
               
               {/* Circle Points - Mobile Optimized */}
-              {user && profile && (
-                <Link to="/wallet" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm hover:bg-accent hover:text-accent-foreground rounded-md px-2 sm:px-3 py-1.5 sm:py-2 transition-colors cursor-pointer touch-target">
+              {user && profile && <Link to="/wallet" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm hover:bg-accent hover:text-accent-foreground rounded-md px-2 sm:px-3 py-1.5 sm:py-2 transition-colors cursor-pointer touch-target">
                   <Crown className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-500" />
                   <span className="font-medium">{profile.circle_points}</span>
                   <span className="text-muted-foreground hidden sm:inline">Points</span>
-                </Link>
-              )}
+                </Link>}
               
               {/* User menu */}
               <UserMenu />
@@ -1777,46 +1649,23 @@ const AcademyContent = () => {
           <SidebarTrigger className="bg-white shadow-md border rounded-md p-2" />
         </div>
 
-        <AcademySidebar
-          activeView={activeView}
-          onViewChange={setActiveView}
-        />
+        <AcademySidebar activeView={activeView} onViewChange={setActiveView} />
         
         <div className="flex-1 overflow-auto">
           {renderContent()}
         </div>
 
-        <VideoPlayerModal
-          video={selectedVideo}
-          isOpen={isVideoModalOpen}
-          onClose={() => setIsVideoModalOpen(false)}
-          videoUrl={currentVideoUrl}
-        />
+        <VideoPlayerModal video={selectedVideo} isOpen={isVideoModalOpen} onClose={() => setIsVideoModalOpen(false)} videoUrl={currentVideoUrl} />
 
-        <PodcastPlayerModal
-          podcast={selectedPodcast}
-          isOpen={isPodcastModalOpen}
-          onClose={() => setIsPodcastModalOpen(false)}
-          audioUrl={currentPodcastUrl}
-        />
+        <PodcastPlayerModal podcast={selectedPodcast} isOpen={isPodcastModalOpen} onClose={() => setIsPodcastModalOpen(false)} audioUrl={currentPodcastUrl} />
 
-        <BookReaderModal
-          book={selectedBook}
-          isOpen={isBookModalOpen}
-          onClose={() => setIsBookModalOpen(false)}
-          contentUrl={currentBookUrl}
-        />
+        <BookReaderModal book={selectedBook} isOpen={isBookModalOpen} onClose={() => setIsBookModalOpen(false)} contentUrl={currentBookUrl} />
 
-        <CourseViewerModal
-          isOpen={isCourseModalOpen}
-          onClose={() => setIsCourseModalOpen(false)}
-          courseId={selectedCourse || ""}
-        />
+        <CourseViewerModal isOpen={isCourseModalOpen} onClose={() => setIsCourseModalOpen(false)} courseId={selectedCourse || ""} />
       </div>
     </SidebarProvider>
     
     {/* Legal Footer */}
     <LegalFooter />
-  </div>
-  );
+  </div>;
 };
