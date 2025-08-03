@@ -229,7 +229,7 @@ export const MarketplaceGrid = () => {
     'coaching', 'consulting', 'accountability'
   ], []);
 
-  const loadSavedServices = async () => {
+  const loadSavedServices = useCallback(async () => {
     if (!profile?.user_id) return;
 
     try {
@@ -244,7 +244,7 @@ export const MarketplaceGrid = () => {
     } catch (error) {
       console.error('Error loading saved services:', error);
     }
-  };
+  }, [profile?.user_id]); // Add profile.user_id as dependency
 
   const loadData = useCallback(async () => {
     console.log('MarketplaceGrid: loadData called - starting fetch');
@@ -354,16 +354,26 @@ export const MarketplaceGrid = () => {
   useEffect(() => {
     console.log('MarketplaceGrid: useEffect triggered - mounting component');
     
+    // Use a ref to prevent race conditions
+    let cancelled = false;
+    
     const initializeData = async () => {
-      await loadData();
-      
-      // Load saved services if user is logged in
-      if (profile?.user_id) {
-        await loadSavedServices();
+      if (!cancelled) {
+        await loadData();
+        
+        // Load saved services if user is logged in
+        if (profile?.user_id && !cancelled) {
+          await loadSavedServices();
+        }
       }
     };
     
     initializeData();
+    
+    return () => {
+      cancelled = true;
+      console.log('MarketplaceGrid: Component cleanup');
+    };
   }, []); // Empty dependency array - run only once on mount
 
 
