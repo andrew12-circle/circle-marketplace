@@ -294,6 +294,35 @@ export type Database = {
         }
         Relationships: []
       }
+      channel_subscriptions: {
+        Row: {
+          channel_id: string
+          id: string
+          subscribed_at: string
+          user_id: string
+        }
+        Insert: {
+          channel_id: string
+          id?: string
+          subscribed_at?: string
+          user_id: string
+        }
+        Update: {
+          channel_id?: string
+          id?: string
+          subscribed_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_channel_subscriptions_channel"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "channels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       channels: {
         Row: {
           auto_imported: boolean | null
@@ -454,6 +483,35 @@ export type Database = {
             columns: ["vendor_id"]
             isOneToOne: false
             referencedRelation: "vendors_with_local_reps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      comment_likes: {
+        Row: {
+          comment_id: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          comment_id: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          comment_id?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_comment_likes_comment"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "content_comments"
             referencedColumns: ["id"]
           },
         ]
@@ -672,6 +730,54 @@ export type Database = {
           },
         ]
       }
+      content_comments: {
+        Row: {
+          content: string
+          content_id: string
+          created_at: string
+          id: string
+          likes_count: number
+          parent_comment_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          content_id: string
+          created_at?: string
+          id?: string
+          likes_count?: number
+          parent_comment_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          content_id?: string
+          created_at?: string
+          id?: string
+          likes_count?: number
+          parent_comment_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_content_comments_content"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "content"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_content_comments_parent"
+            columns: ["parent_comment_id"]
+            isOneToOne: false
+            referencedRelation: "content_comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       content_engagement_events: {
         Row: {
           completion_percentage: number | null
@@ -731,6 +837,41 @@ export type Database = {
           weighted_score?: number | null
         }
         Relationships: []
+      }
+      content_interactions: {
+        Row: {
+          content_id: string
+          created_at: string
+          id: string
+          interaction_type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content_id: string
+          created_at?: string
+          id?: string
+          interaction_type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content_id?: string
+          created_at?: string
+          id?: string
+          interaction_type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_content_interactions_content"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "content"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       content_plays: {
         Row: {
