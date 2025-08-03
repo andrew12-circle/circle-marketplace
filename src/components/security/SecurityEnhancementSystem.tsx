@@ -54,7 +54,7 @@ export const SecurityProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           .single();
 
         if (profile?.is_admin) {
-          const { data, error: contextError } = await supabase.rpc('validate_session_context');
+          const { data, error: contextError } = await supabase.rpc('validate_admin_session_context');
           
           if (contextError || !data) {
             setSessionValid(false);
