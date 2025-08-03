@@ -8,7 +8,7 @@ import { CartProvider } from "@/contexts/CartContext";
 import { suppressConsoleLogs } from "./utils/performance";
 import { initializePerformanceOptimizations } from "./utils/advancedPerformance";
 import { initializePerformanceOptimizations as initConsoleCleanup } from "./utils/consoleCleanup";
-import OptimizedRouter from "./components/OptimizedRouter";
+import App from "./App";
 import "./index.css";
 import "./i18n";
 
@@ -48,7 +48,7 @@ createRoot(document.getElementById("root")!).render(
       <AuthProvider>
         <CartProvider>
           <BrowserRouter>
-            <OptimizedRouter />
+            <App />
             <Toaster />
           </BrowserRouter>
         </CartProvider>

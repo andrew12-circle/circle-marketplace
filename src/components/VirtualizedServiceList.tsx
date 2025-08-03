@@ -276,6 +276,7 @@ const VirtualizedServiceList: React.FC<VirtualizedListProps> = ({
           ) : (
             <List
               height={height}
+              width="100%"
               itemCount={filteredItems.length}
               itemSize={itemSize}
               itemData={listData}
