@@ -39,6 +39,7 @@ import { ProhibitedItems } from "./pages/legal/ProhibitedItems";
 import CommandCenter from "./pages/CommandCenter";
 import { CommandCenterTest } from "./pages/CommandCenterTest";
 import { Academy } from "./pages/Academy";
+import { Marketplace } from "./pages/Marketplace";
 
 const queryClient = new QueryClient();
 
@@ -61,6 +62,7 @@ const App = () => {
                  <RequestLogger />
                  <Routes>
                 <Route path="/" element={<Index />} />
+                <Route path="/marketplace" element={<Marketplace />} />
                 <Route path="/academy" element={<Academy />} />
                 <Route path="/command-center" element={<CommandCenter />} />
                 <Route path="/auth" element={<Auth />} />

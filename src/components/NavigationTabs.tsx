@@ -14,6 +14,7 @@ export const NavigationTabs = ({ activeTab, onTabChange }: NavigationTabsProps) 
   // Determine active tab from URL if not provided
   const currentTab = activeTab || (
     location.pathname === "/academy" ? "academy" : 
+    location.pathname === "/marketplace" ? "marketplace" :
     "marketplace"
   );
   return (
@@ -27,7 +28,7 @@ export const NavigationTabs = ({ activeTab, onTabChange }: NavigationTabsProps) 
             : "text-muted-foreground hover:text-foreground hover:bg-background/50"
         }`}
       >
-        <Link to="/">{t('marketplace')}</Link>
+        <Link to="/marketplace">{t('marketplace')}</Link>
       </Button>
       <Button
         asChild
