@@ -376,8 +376,8 @@ const AcademyContent = () => {
       </div>
 
       {/* Creator Opportunity Banner */}
-      <div className="mb-12 bg-gradient-to-r from-green-600 to-emerald-600 rounded-2xl p-8 text-white">
-        <div className="flex items-center justify-between">
+      <div className="mb-12 bg-gradient-to-r from-green-600 to-emerald-600 rounded-2xl p-6 sm:p-8 text-white">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-4">
               <div className="p-2 bg-white/20 rounded-lg">
@@ -385,9 +385,9 @@ const AcademyContent = () => {
               </div>
               <span className="text-sm font-medium text-green-100">SHARE YOUR SUCCESS</span>
             </div>
-            <h2 className="text-3xl font-bold mb-3">Turn Your Story Into A National Playbook</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold mb-3">Turn Your Story Into A National Playbook</h2>
             <p className="text-green-50 mb-4 text-base">We make it super easy to share your proven strategies and create playbooks & courses. Your content won't be shared with local agents within 50 miles, but over a million agents nationwide will see it — which could lead to substantial income. Agents want to learn for agents in the market not outdated coaching. </p>
-            <div className="flex items-center gap-6 text-sm">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 text-sm">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-green-300 rounded-full"></div>
                 <span>Earn passive income</span>
@@ -402,11 +402,11 @@ const AcademyContent = () => {
               </div>
             </div>
           </div>
-          <div className="flex flex-col gap-3">
-            <Button onClick={() => setActiveView('create')} className="bg-white text-green-600 hover:bg-green-50 font-semibold px-6 py-3">
+          <div className="flex flex-col gap-3 w-full sm:w-auto">
+            <Button onClick={() => setActiveView('create')} className="bg-white text-green-600 hover:bg-green-50 font-semibold px-6 py-3 w-full sm:w-auto">
               Create Your Playbook
             </Button>
-            <Button variant="outline" onClick={() => setActiveView('playbooks')} className="border-primary/30 text-primary hover:bg-primary/10">
+            <Button variant="outline" onClick={() => setActiveView('playbooks')} className="border-white/30 text-white hover:bg-white/10 w-full sm:w-auto">
               View Examples
             </Button>
           </div>
