@@ -329,8 +329,9 @@ export const AIConciergeBanner = () => {
                               {aiRecommendation ? "Personalized" : `${currentInsight!.priority} priority`}
                             </Badge>
                           </div>
-                          <p className="text-sm text-muted-foreground">
-                            Click to view personalized recommendation
+                          <p className="text-xs sm:text-sm text-muted-foreground">
+                            <span className="hidden sm:inline">Click to view personalized recommendation</span>
+                            <span className="sm:hidden">Tap for recommendation</span>
                           </p>
                         </div>
                         
