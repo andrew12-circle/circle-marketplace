@@ -454,11 +454,17 @@ export type Database = {
         Row: {
           agent_id: string | null
           agent_notes: string | null
+          compliance_notes: string | null
+          compliance_reviewed_at: string | null
+          compliance_reviewed_by: string | null
+          compliance_status: string | null
           created_at: string
           expires_at: string
           id: string
           ip_address: unknown | null
+          marketing_campaign_details: Json | null
           requested_split_percentage: number
+          requires_documentation: boolean | null
           service_id: string | null
           status: string
           updated_at: string
@@ -469,11 +475,17 @@ export type Database = {
         Insert: {
           agent_id?: string | null
           agent_notes?: string | null
+          compliance_notes?: string | null
+          compliance_reviewed_at?: string | null
+          compliance_reviewed_by?: string | null
+          compliance_status?: string | null
           created_at?: string
           expires_at?: string
           id?: string
           ip_address?: unknown | null
+          marketing_campaign_details?: Json | null
           requested_split_percentage: number
+          requires_documentation?: boolean | null
           service_id?: string | null
           status?: string
           updated_at?: string
@@ -484,11 +496,17 @@ export type Database = {
         Update: {
           agent_id?: string | null
           agent_notes?: string | null
+          compliance_notes?: string | null
+          compliance_reviewed_at?: string | null
+          compliance_reviewed_by?: string | null
+          compliance_status?: string | null
           created_at?: string
           expires_at?: string
           id?: string
           ip_address?: unknown | null
+          marketing_campaign_details?: Json | null
           requested_split_percentage?: number
+          requires_documentation?: boolean | null
           service_id?: string | null
           status?: string
           updated_at?: string
@@ -545,6 +563,148 @@ export type Database = {
             columns: ["comment_id"]
             isOneToOne: false
             referencedRelation: "content_comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      compliance_documents: {
+        Row: {
+          co_pay_request_id: string
+          compliance_approved: boolean | null
+          compliance_notes: string | null
+          created_at: string
+          description: string | null
+          document_type: string
+          file_name: string
+          file_path: string
+          file_size: number | null
+          id: string
+          is_required: boolean | null
+          mime_type: string | null
+          updated_at: string
+          uploaded_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          co_pay_request_id: string
+          compliance_approved?: boolean | null
+          compliance_notes?: string | null
+          created_at?: string
+          description?: string | null
+          document_type: string
+          file_name: string
+          file_path: string
+          file_size?: number | null
+          id?: string
+          is_required?: boolean | null
+          mime_type?: string | null
+          updated_at?: string
+          uploaded_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          co_pay_request_id?: string
+          compliance_approved?: boolean | null
+          compliance_notes?: string | null
+          created_at?: string
+          description?: string | null
+          document_type?: string
+          file_name?: string
+          file_path?: string
+          file_size?: number | null
+          id?: string
+          is_required?: boolean | null
+          mime_type?: string | null
+          updated_at?: string
+          uploaded_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compliance_documents_co_pay_request_id_fkey"
+            columns: ["co_pay_request_id"]
+            isOneToOne: false
+            referencedRelation: "co_pay_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      compliance_team_members: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean | null
+          role: string
+          specialties: string[] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          role: string
+          specialties?: string[] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          role?: string
+          specialties?: string[] | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      compliance_workflow_log: {
+        Row: {
+          action_type: string
+          attachments: Json | null
+          co_pay_request_id: string
+          created_at: string
+          id: string
+          ip_address: unknown | null
+          new_status: string | null
+          notes: string | null
+          performed_by: string | null
+          previous_status: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          action_type: string
+          attachments?: Json | null
+          co_pay_request_id: string
+          created_at?: string
+          id?: string
+          ip_address?: unknown | null
+          new_status?: string | null
+          notes?: string | null
+          performed_by?: string | null
+          previous_status?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          action_type?: string
+          attachments?: Json | null
+          co_pay_request_id?: string
+          created_at?: string
+          id?: string
+          ip_address?: unknown | null
+          new_status?: string | null
+          notes?: string | null
+          performed_by?: string | null
+          previous_status?: string | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compliance_workflow_log_co_pay_request_id_fkey"
+            columns: ["co_pay_request_id"]
+            isOneToOne: false
+            referencedRelation: "co_pay_requests"
             referencedColumns: ["id"]
           },
         ]

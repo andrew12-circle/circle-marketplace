@@ -9,10 +9,14 @@ interface CoPayRequest {
   vendor_id: string;
   agent_id: string;
   status: string;
+  compliance_status: string;
   requested_split_percentage: number;
   expires_at: string;
   agent_notes?: string;
   vendor_notes?: string;
+  compliance_notes?: string;
+  requires_documentation?: boolean;
+  marketing_campaign_details?: any;
   created_at: string;
   updated_at: string;
   services?: Service | null;
@@ -103,16 +107,26 @@ export const useCoPayRequests = () => {
           // Show toast for status changes
           if (payload.eventType === 'UPDATE') {
             const newData = payload.new as CoPayRequest;
-            if (newData.status === 'approved') {
+            if (newData.compliance_status === 'vendor_approved') {
               toast({
-                title: "Co-pay Approved! 🎉",
-                description: "Your co-pay request has been approved. You can now proceed to checkout.",
+                title: "Vendor Approved! 🎉",
+                description: "Your co-pay request has been approved by the vendor. Now pending compliance review.",
               });
-            } else if (newData.status === 'declined') {
+            } else if (newData.compliance_status === 'compliance_approved') {
               toast({
-                title: "Co-pay Declined",
-                description: "Your co-pay request was declined. You can try with another vendor.",
+                title: "Compliance Approved! ✅",
+                description: "Your co-pay request has passed compliance review. You can now proceed to checkout.",
+              });
+            } else if (newData.compliance_status === 'compliance_rejected') {
+              toast({
+                title: "Compliance Review Failed",
+                description: "Your co-pay request was rejected during compliance review.",
                 variant: "destructive",
+              });
+            } else if (newData.compliance_status === 'final_approved') {
+              toast({
+                title: "Co-pay Final Approval! 🎉",
+                description: "Your co-pay request is fully approved and ready for checkout.",
               });
             }
           }
@@ -146,7 +160,8 @@ export const useCoPayRequests = () => {
           requested_split_percentage: requestedSplitPercentage,
           agent_notes: agentNotes,
           expires_at: expiresAt.toISOString(),
-          status: 'pending'
+          status: 'pending',
+          compliance_status: 'pending_vendor'
         })
         .select()
         .single();
@@ -219,11 +234,11 @@ export const useCoPayRequests = () => {
   };
 
   const getApprovedRequests = () => {
-    return requests.filter(req => req.status === 'approved');
+    return requests.filter(req => req.compliance_status === 'final_approved');
   };
 
   const getPendingRequests = () => {
-    return requests.filter(req => req.status === 'pending');
+    return requests.filter(req => ['pending_vendor', 'vendor_approved', 'pending_compliance', 'compliance_approved'].includes(req.compliance_status));
   };
 
   return {

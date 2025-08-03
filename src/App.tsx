@@ -39,6 +39,7 @@ import { ProhibitedItems } from "./pages/legal/ProhibitedItems";
 import CommandCenter from "./pages/CommandCenter";
 import { CommandCenterTest } from "./pages/CommandCenterTest";
 import { Academy } from "./pages/Academy";
+import CompliancePage from "./pages/CompliancePage";
 
 const queryClient = new QueryClient();
 
@@ -79,8 +80,9 @@ const App = () => {
                 <Route path="/support" element={<SupportDashboard />} />
                 <Route path="/advanced-features" element={<AdvancedFeaturesDashboard />} />
                 <Route path="/ai-dashboard" element={<AIDashboard />} />
-                <Route path="/admin" element={<AdminDashboard />} />
-                <Route path="/admin/accounting" element={<AdminAccounting />} />
+                 <Route path="/admin" element={<AdminDashboard />} />
+                 <Route path="/admin/accounting" element={<AdminAccounting />} />
+                 <Route path="/compliance" element={<CompliancePage />} />
                 
                 {/* Legal Pages */}
                 <Route path="/terms" element={<TermsOfService />} />

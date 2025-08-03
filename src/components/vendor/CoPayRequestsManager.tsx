@@ -17,8 +17,12 @@ interface CoPayRequest {
   service_id: string | null;
   requested_split_percentage: number;
   status: 'pending' | 'approved' | 'denied';
+  compliance_status: string;
   agent_notes?: string | null;
   vendor_notes?: string | null;
+  compliance_notes?: string | null;
+  requires_documentation?: boolean;
+  marketing_campaign_details?: any;
   created_at: string;
   expires_at: string;
   agent_profile?: {
@@ -116,6 +120,7 @@ export const CoPayRequestsManager = () => {
       
       const updates: any = {
         status: action,
+        compliance_status: action === 'approved' ? 'vendor_approved' : 'compliance_rejected',
         vendor_notes: vendorNotes || null
       };
 
@@ -133,7 +138,7 @@ export const CoPayRequestsManager = () => {
       toast({
         title: action === 'approved' ? "Request Approved! ✅" : "Request Denied",
         description: action === 'approved' 
-          ? `Co-pay request approved with ${splitPercentage || 'original'}% split`
+          ? `Co-pay request approved with ${splitPercentage || 'original'}% split. Now pending compliance review.`
           : "Co-pay request has been denied",
         variant: action === 'approved' ? "default" : "destructive"
       });
@@ -196,9 +201,9 @@ export const CoPayRequestsManager = () => {
     );
   }
 
-  const pendingRequests = requests.filter(r => r.status === 'pending' && !isExpired(r.expires_at));
-  const expiredRequests = requests.filter(r => r.status === 'pending' && isExpired(r.expires_at));
-  const processedRequests = requests.filter(r => r.status !== 'pending');
+  const pendingRequests = requests.filter(r => r.compliance_status === 'pending_vendor' && !isExpired(r.expires_at));
+  const expiredRequests = requests.filter(r => r.compliance_status === 'pending_vendor' && isExpired(r.expires_at));
+  const processedRequests = requests.filter(r => !['pending_vendor'].includes(r.compliance_status));
 
   return (
     <div className="space-y-6">
