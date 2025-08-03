@@ -161,6 +161,60 @@ export type Database = {
         }
         Relationships: []
       }
+      agreement_signatures: {
+        Row: {
+          agreement_template_id: string | null
+          co_pay_request_id: string
+          created_at: string
+          id: string
+          ip_address: unknown | null
+          signature_data: string | null
+          signed_at: string
+          signer_id: string
+          signer_type: string
+          user_agent: string | null
+        }
+        Insert: {
+          agreement_template_id?: string | null
+          co_pay_request_id: string
+          created_at?: string
+          id?: string
+          ip_address?: unknown | null
+          signature_data?: string | null
+          signed_at?: string
+          signer_id: string
+          signer_type: string
+          user_agent?: string | null
+        }
+        Update: {
+          agreement_template_id?: string | null
+          co_pay_request_id?: string
+          created_at?: string
+          id?: string
+          ip_address?: unknown | null
+          signature_data?: string | null
+          signed_at?: string
+          signer_id?: string
+          signer_type?: string
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_agreement_signatures_co_pay_request"
+            columns: ["co_pay_request_id"]
+            isOneToOne: false
+            referencedRelation: "co_pay_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_agreement_signatures_template"
+            columns: ["agreement_template_id"]
+            isOneToOne: false
+            referencedRelation: "comarketing_agreement_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_recommendation_log: {
         Row: {
           context_data: Json | null
@@ -454,6 +508,9 @@ export type Database = {
         Row: {
           agent_id: string | null
           agent_notes: string | null
+          agent_signature_date: string | null
+          agreement_template_version: string | null
+          comarketing_agreement_url: string | null
           compliance_notes: string | null
           compliance_reviewed_at: string | null
           compliance_reviewed_by: string | null
@@ -471,10 +528,14 @@ export type Database = {
           user_agent: string | null
           vendor_id: string | null
           vendor_notes: string | null
+          vendor_signature_date: string | null
         }
         Insert: {
           agent_id?: string | null
           agent_notes?: string | null
+          agent_signature_date?: string | null
+          agreement_template_version?: string | null
+          comarketing_agreement_url?: string | null
           compliance_notes?: string | null
           compliance_reviewed_at?: string | null
           compliance_reviewed_by?: string | null
@@ -492,10 +553,14 @@ export type Database = {
           user_agent?: string | null
           vendor_id?: string | null
           vendor_notes?: string | null
+          vendor_signature_date?: string | null
         }
         Update: {
           agent_id?: string | null
           agent_notes?: string | null
+          agent_signature_date?: string | null
+          agreement_template_version?: string | null
+          comarketing_agreement_url?: string | null
           compliance_notes?: string | null
           compliance_reviewed_at?: string | null
           compliance_reviewed_by?: string | null
@@ -513,6 +578,7 @@ export type Database = {
           user_agent?: string | null
           vendor_id?: string | null
           vendor_notes?: string | null
+          vendor_signature_date?: string | null
         }
         Relationships: [
           {
@@ -537,6 +603,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      comarketing_agreement_templates: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          template_content: string
+          template_name: string
+          updated_at: string
+          version: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          template_content: string
+          template_name: string
+          updated_at?: string
+          version: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          template_content?: string
+          template_name?: string
+          updated_at?: string
+          version?: string
+        }
+        Relationships: []
       }
       comment_likes: {
         Row: {
