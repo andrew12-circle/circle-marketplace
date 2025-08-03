@@ -2,11 +2,7 @@ import { useState, useEffect } from "react";
 import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 import { Link } from "react-router-dom";
 import { AcademySidebar } from "@/components/academy/AcademySidebar";
-import { NavigationTabs } from "@/components/NavigationTabs";
-import { UserMenu } from "@/components/UserMenu";
-import { useAuth } from "@/contexts/AuthContext";
-import { LanguageSwitcher } from "@/components/LanguageSwitcher";
-import { LocationSwitcher } from "@/components/LocationSwitcher";
+import { Header } from "@/components/header";
 import { LegalFooter } from "@/components/LegalFooter";
 import { AgentPlaybookSection } from "@/components/academy/AgentPlaybookSection";
 import { PlaybookCreator } from "@/components/academy/PlaybookCreator";
@@ -1587,60 +1583,9 @@ const AcademyContent = () => {
           </div>;
     }
   };
-  const {
-    user,
-    profile
-  } = useAuth();
-  const circleLogoUrl = "/lovable-uploads/97692497-6d98-46a8-b6fc-05cd68bdc160.png";
   return <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/50 sticky top-0 z-50">
-        <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4">
-          <div className="flex items-center justify-between">
-            {/* Logo */}
-            <div className="flex items-center gap-2 sm:gap-3">
-              <img src={circleLogoUrl} alt="Circle Logo" className="w-12 h-12 sm:w-16 sm:h-16 object-contain" style={{
-              imageRendering: 'crisp-edges'
-            }} />
-            </div>
-            
-            {/* Navigation Tabs - Responsive */}
-            <div className="hidden sm:flex flex-1 justify-center">
-              <NavigationTabs />
-            </div>
-            
-            <div className="sm:hidden flex-1 px-4">
-              <div className="flex bg-muted rounded-full p-1">
-                <Link to="/" className="flex-1 text-xs py-2 px-2 rounded-full font-medium transition-all text-center text-muted-foreground">
-                  Market
-                </Link>
-                <Link to="/command-center" className="flex-1 text-xs py-2 px-2 rounded-full font-medium transition-all text-center text-muted-foreground">
-                  Command
-                </Link>
-                <Link to="/academy" className="flex-1 text-xs py-2 px-2 rounded-full font-medium transition-all text-center bg-background text-foreground shadow-sm">
-                  Academy
-                </Link>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-2 sm:gap-4">
-              {/* Language & Location Switchers */}
-              <LanguageSwitcher />
-              <LocationSwitcher />
-              
-              {/* Circle Points - Mobile Optimized */}
-              {user && profile && <Link to="/wallet" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm hover:bg-accent hover:text-accent-foreground rounded-md px-2 sm:px-3 py-1.5 sm:py-2 transition-colors cursor-pointer touch-target">
-                  <Crown className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-500" />
-                  <span className="font-medium">{profile.circle_points}</span>
-                  <span className="text-muted-foreground hidden sm:inline">Points</span>
-                </Link>}
-              
-              {/* User menu */}
-              <UserMenu />
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       <SidebarProvider>
         <div className="min-h-screen flex w-full bg-white">
