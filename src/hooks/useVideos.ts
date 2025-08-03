@@ -34,6 +34,13 @@ export const useVideos = (options: UseVideosOptions = {}) => {
 
       console.log('fetchVideos called with options:', options);
 
+      // Set a hard timeout to prevent infinite loading
+      const timeoutId = setTimeout(() => {
+        console.log('Video loading timeout reached');
+        setLoading(false);
+        setError('Unable to load videos. Please try again later.');
+      }, 5000); // 5 second timeout
+
       // Build query conditions
       const baseConditions = {
         content_type: 'video',
@@ -110,6 +117,7 @@ export const useVideos = (options: UseVideosOptions = {}) => {
         description: video.description || undefined,
       }));
 
+      clearTimeout(timeoutId);
       setVideos(formattedVideos);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch videos';
