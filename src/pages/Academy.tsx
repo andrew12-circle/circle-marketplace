@@ -383,11 +383,11 @@ const AcademyContent = () => {
               <div className="p-2 bg-white/20 rounded-lg">
                 <BookOpen className="w-6 h-6" />
               </div>
-              <span className="text-sm font-medium text-green-100">SHARE YOUR SUCCESS</span>
+              <span className="text-xs sm:text-sm font-medium text-green-100">SHARE YOUR SUCCESS</span>
             </div>
-            <h2 className="text-2xl sm:text-3xl font-bold mb-3">Turn Your Story Into A National Playbook</h2>
+            <h2 className="text-xl sm:text-3xl font-bold mb-3">Turn Your Story Into A National Playbook</h2>
             <p className="text-green-50 mb-4 text-base">We make it super easy to share your proven strategies and create playbooks & courses. Your content won't be shared with local agents within 50 miles, but over a million agents nationwide will see it — which could lead to substantial income. Agents want to learn for agents in the market not outdated coaching. </p>
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 text-sm">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 text-xs sm:text-sm">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-green-300 rounded-full"></div>
                 <span>Earn passive income</span>
