@@ -1,48 +1,46 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { suppressConsoleLogs } from "./utils/performance";
-import initializePerformanceOptimizations from "./utils/consoleCleanup";
+import { initializePerformanceOptimizations } from "./utils/advancedPerformance";
+import { initializePerformanceOptimizations as initConsoleCleanup } from "./utils/consoleCleanup";
+import OptimizedRouter from "./components/OptimizedRouter";
 import "./index.css";
 import "./i18n";
 
 // Initialize performance optimizations immediately
 suppressConsoleLogs();
-initializePerformanceOptimizations();
+initConsoleCleanup();
 
-import Index from "./pages/Index";
-import { Marketplace } from "./pages/Marketplace";
-import { Academy } from "./pages/Academy";
-import Auth from "./pages/Auth";
-import { CreatorDashboard } from "./pages/CreatorDashboard";
-import CreatorPaymentSetupPage from "./pages/CreatorPaymentSetup";
-import AdminDashboard from "./pages/AdminDashboard";
-import { ProfileSettings } from "./pages/ProfileSettings";
-import { SavedItems } from "./pages/SavedItems";
-import { OrderHistory } from "./pages/OrderHistory";
-import { AgentWallet } from "./pages/AgentWallet";
-import { Pricing } from "./pages/Pricing";
-import { PaymentSuccess } from "./pages/PaymentSuccess";
-import { PaymentCanceled } from "./pages/PaymentCanceled";
-import { ConsultationDemo } from "./pages/ConsultationDemo";
-import { VendorRegistration } from "./pages/VendorRegistration";
-import { VendorDashboard } from "./pages/VendorDashboard";
-import { VendorAnalyticsDashboard } from "./pages/VendorAnalyticsDashboard";
-import NotFound from "./pages/NotFound";
+// Enhanced React Query client with optimizations
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes
+      retry: (failureCount, error) => {
+        // Don't retry on 4xx errors
+        if (error instanceof Error && error.message.includes('4')) {
+          return false;
+        }
+        return failureCount < 3;
+      },
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    },
+    mutations: {
+      retry: 1,
+    }
+  }
+});
 
-// Legal pages
-import { TermsOfService } from "./pages/legal/TermsOfService";
-import { PrivacyPolicy } from "./pages/legal/PrivacyPolicy";
-import { CookiePolicy } from "./pages/legal/CookiePolicy";
-import { BuyerProtection } from "./pages/legal/BuyerProtection";
-import { SellerAgreement } from "./pages/legal/SellerAgreement";
-import { ProhibitedItems } from "./pages/legal/ProhibitedItems";
-
-const queryClient = new QueryClient();
+// Initialize advanced performance features
+initializePerformanceOptimizations().catch(error => {
+  console.warn('Performance optimization init failed:', error);
+});
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -50,36 +48,7 @@ createRoot(document.getElementById("root")!).render(
       <AuthProvider>
         <CartProvider>
           <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/marketplace" element={<Marketplace />} />
-              <Route path="/academy" element={<Academy />} />
-              <Route path="/creator-dashboard" element={<CreatorDashboard />} />
-              <Route path="/creator-payment-setup" element={<CreatorPaymentSetupPage />} />
-              <Route path="/admin" element={<AdminDashboard />} />
-              <Route path="/profile-settings" element={<ProfileSettings />} />
-              <Route path="/saved" element={<SavedItems />} />
-              <Route path="/orders" element={<OrderHistory />} />
-              <Route path="/wallet" element={<AgentWallet />} />
-              <Route path="/pricing" element={<Pricing />} />
-              <Route path="/payment-success" element={<PaymentSuccess />} />
-              <Route path="/payment-canceled" element={<PaymentCanceled />} />
-              <Route path="/consultation-demo" element={<ConsultationDemo />} />
-              <Route path="/vendor-registration" element={<VendorRegistration />} />
-              <Route path="/vendor-dashboard" element={<VendorDashboard />} />
-              <Route path="/vendor-analytics" element={<VendorAnalyticsDashboard />} />
-              
-              {/* Legal routes */}
-              <Route path="/legal/terms" element={<TermsOfService />} />
-              <Route path="/legal/privacy" element={<PrivacyPolicy />} />
-              <Route path="/legal/cookies" element={<CookiePolicy />} />
-              <Route path="/legal/buyer-protection" element={<BuyerProtection />} />
-              <Route path="/legal/seller-agreement" element={<SellerAgreement />} />
-              <Route path="/legal/prohibited-items" element={<ProhibitedItems />} />
-              
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+            <OptimizedRouter />
             <Toaster />
           </BrowserRouter>
         </CartProvider>
