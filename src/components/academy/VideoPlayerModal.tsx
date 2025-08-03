@@ -291,15 +291,15 @@ export const VideoPlayerModal = ({ video, isOpen, onClose, videoUrl }: VideoPlay
           </div>
 
           {/* Comments Section */}
-          <div className="px-6 py-4 flex-1">
-            <div className="space-y-4">
+          <div className="px-6 py-4 flex-1 min-h-0 overflow-hidden">
+            <div className="space-y-4 h-full">
               <div className="flex items-center gap-2">
                 <MessageCircle className="w-5 h-5" />
                 <h3 className="font-medium">{enhancedVideo.comments.length} Comments</h3>
               </div>
 
               {/* Comments List with Add Comment inside ScrollArea */}
-              <ScrollArea className="h-64">
+              <ScrollArea className="h-[calc(100%-2rem)]">
                 <div className="space-y-4 pr-4">
                   {/* Add Comment */}
                   <div className="flex gap-3 pb-4 border-b">
