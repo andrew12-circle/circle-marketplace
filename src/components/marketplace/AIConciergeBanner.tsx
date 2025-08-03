@@ -224,30 +224,30 @@ export const AIConciergeBanner = () => {
   return (
     <div className="mb-8">
       <Card className="bg-gradient-to-br from-primary/5 via-background to-accent/5 border-primary/20 shadow-lg">
-        <CardContent className="p-6">
-          <div className="flex items-start gap-4">
-            <div className="p-3 rounded-xl bg-primary/10 border border-primary/20 shrink-0">
-              <Brain className="h-6 w-6 text-primary" />
+        <CardContent className="p-3 md:p-6">
+          <div className="flex flex-col md:flex-row md:items-start gap-3 md:gap-4">
+            <div className="p-2 md:p-3 rounded-xl bg-primary/10 border border-primary/20 shrink-0 self-start">
+              <Brain className="h-5 w-5 md:h-6 md:w-6 text-primary" />
             </div>
             
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-3">
-                <h3 className="text-lg md:text-xl font-semibold text-foreground">
+            <div className="flex-1 min-w-0">
+              <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3 mb-3">
+                <h3 className="text-base md:text-lg lg:text-xl font-semibold text-foreground">
                   {getTimeOfDayGreeting()}, {user && profile ? (profile.display_name || 'Agent') : 'Future Circle Member'}! 
                 </h3>
-                <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 text-xs">
+                <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 text-xs self-start md:self-auto">
                   AI Concierge
                 </Badge>
               </div>
               
-              <div className="flex items-center justify-between mb-4">
+              <div className="mb-3 md:mb-4">
                 <p className="text-sm md:text-base text-muted-foreground">
                   How can I help you grow your business today?
                 </p>
               </div>
 
               {/* Chat Input Area */}
-              <div className="bg-card/30 backdrop-blur-sm border border-border/50 rounded-lg p-4 mb-4">
+              <div className="bg-card/30 backdrop-blur-sm border border-border/50 rounded-lg p-3 md:p-4 mb-3 md:mb-4">
                 <div className="flex items-center gap-3">
                   <div className="flex-1 relative">
                     <Input
