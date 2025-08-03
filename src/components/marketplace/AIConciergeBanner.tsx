@@ -225,7 +225,7 @@ export const AIConciergeBanner = () => {
     <div className="mb-8">
       <Card className="bg-gradient-to-br from-primary/5 via-background to-accent/5 border-primary/20 shadow-lg">
         <CardContent className="p-3 md:p-6">
-          <div className="flex items-start gap-2 md:flex-row md:items-start md:gap-4">
+          <div className="flex items-start gap-2 md:flex-row md:items-start md:gap-4 overflow-hidden md:overflow-visible">
             <div className="p-2 md:p-3 rounded-xl bg-primary/10 border border-primary/20 shrink-0">
               <Brain className="h-4 w-4 md:h-6 md:w-6 text-primary" />
             </div>
