@@ -291,6 +291,13 @@ export const MarketplaceGrid = () => {
       
       console.log('Loading marketplace data...');
       
+      // Set a hard timeout to prevent infinite loading
+      const timeoutId = setTimeout(() => {
+        console.log('Force stopping loading due to timeout');
+        setLoading(false);
+        setError('Unable to load marketplace data. Please try again later.');
+      }, 5000); // 5 second timeout
+      
       // Try just getting a count first to test connectivity
       console.log('Testing database connection...');
       const testResponse = await supabase
@@ -301,6 +308,7 @@ export const MarketplaceGrid = () => {
       console.log('Test response:', testResponse);
       
       if (testResponse.error) {
+        clearTimeout(timeoutId);
         console.error('Database connection failed:', testResponse.error);
         throw new Error('Database connection failed');
       }
@@ -321,6 +329,8 @@ export const MarketplaceGrid = () => {
         .limit(10);
 
       console.log('Services query completed:', servicesResponse);
+      
+      clearTimeout(timeoutId);
 
       if (vendorsResponse.error) {
         console.error('Vendors error:', vendorsResponse.error);
