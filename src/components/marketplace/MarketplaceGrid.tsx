@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { ServiceCard } from "./ServiceCard";
 import { EnhancedVendorCard } from "./EnhancedVendorCard";
@@ -257,6 +257,10 @@ export const MarketplaceGrid = () => {
   const { toast } = useToast();
   const { user, profile } = useAuth();
   const { location } = useLocation();
+  
+  // Prevent multiple concurrent loads
+  const loadingRef = useRef(false);
+  const dataLoadedRef = useRef(false);
 
   const loadSavedServices = async () => {
     if (!profile?.user_id) return;
@@ -276,12 +280,21 @@ export const MarketplaceGrid = () => {
   };
 
   const loadData = useCallback(async () => {
+    // Prevent multiple concurrent loads
+    if (loadingRef.current || dataLoadedRef.current) {
+      console.log('Load already in progress or data already loaded, skipping');
+      return;
+    }
+    
+    loadingRef.current = true;
+    
     // Check circuit breaker before making request
     const now = Date.now();
     if (circuitBreakerState.isOpen && now < circuitBreakerState.nextAttempt) {
       console.log('Circuit breaker is open, skipping request');
       setError('Service temporarily unavailable. Please try again in a moment.');
       setLoading(false);
+      loadingRef.current = false;
       return;
     }
 
@@ -371,6 +384,9 @@ export const MarketplaceGrid = () => {
       setServices(formattedServices);
       setVendors(formattedVendors);
       
+      // Mark data as loaded successfully
+      dataLoadedRef.current = true;
+      
       // Record success
       setCircuitBreakerState({
         isOpen: false,
@@ -411,6 +427,7 @@ export const MarketplaceGrid = () => {
     } finally {
       console.log('Setting loading to false');
       setLoading(false);
+      loadingRef.current = false;
     }
   }, [CIRCUIT_BREAKER_CONFIG.failureThreshold, CIRCUIT_BREAKER_CONFIG.timeout, circuitBreakerState.isOpen, circuitBreakerState.nextAttempt, toast]);
 
