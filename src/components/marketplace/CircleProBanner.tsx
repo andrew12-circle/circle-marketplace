@@ -22,7 +22,7 @@ export const CircleProBanner = () => {
                 Unlock up to 80% off. Build real partnerships. Discover what's actually working.
               </h3>
               <p className="text-xs sm:text-sm text-white/80 mt-1">
-                Circle Pro: Exclusive pricing + earn points on every campaign
+                Circle Pro: Save more. Earn more. Grow smarter. Get exclusive pricing and earn points on every campaign — all vetted by high-performing agents who've done the work.
               </p>
             </div>
           </div>
