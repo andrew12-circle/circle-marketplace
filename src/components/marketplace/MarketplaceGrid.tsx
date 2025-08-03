@@ -247,6 +247,7 @@ export const MarketplaceGrid = () => {
   };
 
   const loadData = useCallback(async () => {
+    console.log('MarketplaceGrid: loadData called');
     try {
       setLoading(true);
       setError(null);
@@ -315,6 +316,7 @@ export const MarketplaceGrid = () => {
       
       setServices(formattedServices);
       setVendors(formattedVendors);
+      console.log('MarketplaceGrid: Data loaded successfully', { services: formattedServices.length, vendors: formattedVendors.length });
       
     } catch (error) {
       console.error('Marketplace data loading error:', error);
@@ -328,11 +330,15 @@ export const MarketplaceGrid = () => {
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  }, []); // Remove toast dependency to prevent infinite loops
 
   useEffect(() => {
-    loadData();
-  }, [loadData]);
+    console.log('MarketplaceGrid: useEffect triggered for loadData');
+    const loadDataOnce = async () => {
+      await loadData();
+    };
+    loadDataOnce();
+  }, []); // Only run once on mount
 
   useEffect(() => {
     if (profile?.user_id) {
