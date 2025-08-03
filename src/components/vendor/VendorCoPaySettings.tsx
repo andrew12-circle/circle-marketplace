@@ -8,7 +8,8 @@ import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Settings, Percent, DollarSign, Clock, AlertTriangle, Check } from 'lucide-react';
+import { Settings, Percent, DollarSign, Clock, AlertTriangle, Check, Shield } from 'lucide-react';
+import { determineVendorRisk } from '@/components/marketplace/RESPAComplianceSystem';
 
 export const VendorCoPaySettings = ({ vendorId }: { vendorId: string }) => {
   const [settings, setSettings] = useState({
@@ -17,9 +18,27 @@ export const VendorCoPaySettings = ({ vendorId }: { vendorId: string }) => {
     monthly_limit_per_agent: 1000,
     is_active: true
   });
+  const [vendorProfile, setVendorProfile] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
+
+  // Calculate RESPA-compliant max percentage
+  const getMaxAllowedPercentage = () => {
+    if (!vendorProfile) return 100;
+    
+    const riskLevel = determineVendorRisk({
+      name: vendorProfile.business_name || vendorProfile.display_name || '',
+      description: vendorProfile.bio || '',
+      is_respa_regulated: vendorProfile.is_respa_regulated,
+      respa_risk_level: vendorProfile.respa_risk_level
+    });
+    
+    // Settlement service providers limited to 30% due to RESPA
+    if (riskLevel === 'high') return 30;
+    if (riskLevel === 'medium') return 50; 
+    return 100; // Non-settlement providers can cover up to 100%
+  };
 
   useEffect(() => {
     loadSettings();
@@ -27,6 +46,20 @@ export const VendorCoPaySettings = ({ vendorId }: { vendorId: string }) => {
 
   const loadSettings = async () => {
     try {
+      // Load vendor profile for RESPA compliance checking
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('business_name, display_name, bio, is_respa_regulated, respa_risk_level')
+        .eq('user_id', vendorId)
+        .single();
+
+      if (profileError && profileError.code !== 'PGRST116') {
+        throw profileError;
+      }
+
+      setVendorProfile(profile);
+
+      // Load co-pay settings
       const { data, error } = await supabase
         .from('vendor_copay_rules')
         .select('*')
@@ -58,6 +91,18 @@ export const VendorCoPaySettings = ({ vendorId }: { vendorId: string }) => {
   };
 
   const saveSettings = async () => {
+    const maxAllowed = getMaxAllowedPercentage();
+    
+    // Validate settings against RESPA limits
+    if (settings.max_split_percentage > maxAllowed) {
+      toast({
+        title: "RESPA Compliance Warning",
+        description: `Maximum split percentage cannot exceed ${maxAllowed}% for your service type.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSaving(true);
     try {
       const { error } = await supabase
@@ -118,6 +163,48 @@ export const VendorCoPaySettings = ({ vendorId }: { vendorId: string }) => {
 
         <Separator />
 
+        {/* RESPA Compliance Notice */}
+        {vendorProfile && (() => {
+          const riskLevel = determineVendorRisk({
+            name: vendorProfile.business_name || vendorProfile.display_name || '',
+            description: vendorProfile.bio || '',
+            is_respa_regulated: vendorProfile.is_respa_regulated,
+            respa_risk_level: vendorProfile.respa_risk_level
+          });
+          const maxAllowed = getMaxAllowedPercentage();
+          
+          if (riskLevel === 'high') {
+            return (
+              <div className="bg-amber-50 p-4 rounded-lg border border-amber-200 flex items-start gap-3">
+                <Shield className="w-5 h-5 text-amber-600 mt-0.5" />
+                <div>
+                  <h4 className="font-medium text-amber-900">RESPA Compliance Notice</h4>
+                  <p className="text-sm text-amber-800">
+                    As a settlement service provider, your maximum co-pay coverage is limited to {maxAllowed}% 
+                    to comply with RESPA regulations. This helps ensure all arrangements are for true advertising value only.
+                  </p>
+                </div>
+              </div>
+            );
+          }
+          
+          if (riskLevel === 'low') {
+            return (
+              <div className="bg-green-50 p-4 rounded-lg border border-green-200 flex items-start gap-3">
+                <Check className="w-5 h-5 text-green-600 mt-0.5" />
+                <div>
+                  <h4 className="font-medium text-green-900">Non-RESPA Service</h4>
+                  <p className="text-sm text-green-800">
+                    Your service type is not subject to RESPA restrictions, allowing for flexible co-pay arrangements up to 100%.
+                  </p>
+                </div>
+              </div>
+            );
+          }
+          
+          return null;
+        })()}
+
         {/* Auto-Approval Settings */}
         <div className="space-y-4">
           <div className="flex items-center gap-2 mb-3">
@@ -149,24 +236,28 @@ export const VendorCoPaySettings = ({ vendorId }: { vendorId: string }) => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="max-split">Maximum Split (%)</Label>
+              <Label htmlFor="max-split">Maximum Split (%) - RESPA Compliant</Label>
               <div className="relative">
                 <Input
                   id="max-split"
                   type="number"
                   min="0"
-                  max="100"
+                  max={getMaxAllowedPercentage()}
                   value={settings.max_split_percentage}
-                  onChange={(e) => setSettings(prev => ({ 
-                    ...prev, 
-                    max_split_percentage: parseInt(e.target.value) || 0 
-                  }))}
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value) || 0;
+                    const maxAllowed = getMaxAllowedPercentage();
+                    setSettings(prev => ({ 
+                      ...prev, 
+                      max_split_percentage: Math.min(value, maxAllowed)
+                    }));
+                  }}
                   className="pr-8"
                 />
                 <Percent className="w-4 h-4 absolute right-3 top-3 text-gray-400" />
               </div>
               <p className="text-xs text-gray-500">
-                Maximum co-pay percentage you'll accept
+                Maximum co-pay percentage you'll accept (limit: {getMaxAllowedPercentage()}% based on service type)
               </p>
             </div>
           </div>
