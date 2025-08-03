@@ -284,26 +284,27 @@ export const VideoPlayerModal = ({ video, isOpen, onClose, videoUrl }: VideoPlay
                 <h3 className="font-medium">{enhancedVideo.comments.length} Comments</h3>
               </div>
 
-              {/* Add Comment */}
-              <div className="flex gap-3">
-                <Avatar className="w-8 h-8">
-                  <AvatarFallback>U</AvatarFallback>
-                </Avatar>
-                <div className="flex-1">
-                  <Textarea 
-                    placeholder="Add a comment..." 
-                    className="min-h-[80px] resize-none"
-                  />
-                  <div className="flex justify-end gap-2 mt-2">
-                    <Button variant="ghost" size="sm">Cancel</Button>
-                    <Button size="sm">Comment</Button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Comments List */}
+              {/* Comments List with Add Comment inside ScrollArea */}
               <ScrollArea className="h-64">
                 <div className="space-y-4 pr-4">
+                  {/* Add Comment */}
+                  <div className="flex gap-3 pb-4 border-b">
+                    <Avatar className="w-8 h-8">
+                      <AvatarFallback>U</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <Textarea 
+                        placeholder="Add a comment..." 
+                        className="min-h-[80px] resize-none"
+                      />
+                      <div className="flex justify-end gap-2 mt-2">
+                        <Button variant="ghost" size="sm">Cancel</Button>
+                        <Button size="sm">Comment</Button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Comments */}
                   {enhancedVideo.comments.map((comment) => (
                     <div key={comment.id} className="space-y-2">
                       {comment.isPinned && (
