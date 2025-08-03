@@ -49,21 +49,17 @@ export const EnhancedSearch = ({
   const [activeFiltersCount, setActiveFiltersCount] = useState(0);
 
   useEffect(() => {
-    // Debounced filter count calculation
-    const timeoutId = setTimeout(() => {
-      let count = 0;
-      if (filters.query) count++;
-      if (filters.categories.length > 0) count++;
-      if (filters.tags.length > 0) count++;
-      if (filters.priceRange[0] > 0 || filters.priceRange[1] < 1000) count++;
-      if (filters.rating > 0) count++;
-      if (filters.features.length > 0) count++;
-      
-      setActiveFiltersCount(count);
-      onSearchChange(filters);
-    }, 300); // Debounce for 300ms
-
-    return () => clearTimeout(timeoutId);
+    // Count active filters
+    let count = 0;
+    if (filters.query) count++;
+    if (filters.categories.length > 0) count++;
+    if (filters.tags.length > 0) count++;
+    if (filters.priceRange[0] > 0 || filters.priceRange[1] < 1000) count++;
+    if (filters.rating > 0) count++;
+    if (filters.features.length > 0) count++;
+    
+    setActiveFiltersCount(count);
+    onSearchChange(filters);
   }, [filters, onSearchChange]);
 
   const updateFilters = (key: keyof SearchFilters, value: any) => {

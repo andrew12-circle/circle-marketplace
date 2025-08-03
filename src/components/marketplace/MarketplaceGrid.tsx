@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { ServiceCard } from "./ServiceCard";
 import { EnhancedVendorCard } from "./EnhancedVendorCard";
@@ -111,7 +111,53 @@ export const MarketplaceGrid = () => {
   });
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [sortBy, setSortBy] = useState<'featured' | 'rating' | 'price'>('featured');
-  const [dataLoaded, setDataLoaded] = useState(false); // Track if data has been loaded
+  
+  // Circuit breaker state for marketplace
+  const [circuitBreakerState, setCircuitBreakerState] = useState({
+    isOpen: false,
+    failureCount: 0,
+    lastFailureTime: 0,
+    nextAttempt: 0,
+  });
+
+  const CIRCUIT_BREAKER_CONFIG = {
+    failureThreshold: 3,
+    timeout: 30000, // 30 seconds
+  };
+
+  const checkCircuitBreaker = () => {
+    const now = Date.now();
+    if (circuitBreakerState.isOpen && now >= circuitBreakerState.nextAttempt) {
+      setCircuitBreakerState(prev => ({ ...prev, isOpen: false }));
+      return false;
+    }
+    return circuitBreakerState.isOpen;
+  };
+
+  const recordFailure = () => {
+    setCircuitBreakerState(prev => {
+      const newFailureCount = prev.failureCount + 1;
+      if (newFailureCount >= CIRCUIT_BREAKER_CONFIG.failureThreshold) {
+        return {
+          ...prev,
+          isOpen: true,
+          failureCount: newFailureCount,
+          lastFailureTime: Date.now(),
+          nextAttempt: Date.now() + CIRCUIT_BREAKER_CONFIG.timeout,
+        };
+      }
+      return { ...prev, failureCount: newFailureCount };
+    });
+  };
+
+  const recordSuccess = () => {
+    setCircuitBreakerState({
+      isOpen: false,
+      failureCount: 0,
+      lastFailureTime: 0,
+      nextAttempt: 0,
+    });
+  };
   
   // Define product categories with enhanced styling
   const PRODUCT_CATEGORIES = [
@@ -212,25 +258,7 @@ export const MarketplaceGrid = () => {
   const { user, profile } = useAuth();
   const { location } = useLocation();
 
-  // Memoize expensive keyword arrays to prevent recreation on every render
-  const SAFE_KEYWORDS = useMemo(() => [
-    'digital ads', 'facebook ads', 'google ads', 'display ads', 'retargeting',
-    'postcards', 'direct mail', 'flyers', 'door hangers', 'brochures',
-    'educational', 'seminar', 'workshop', 'market report', 'buyer education',
-    'joint advertising', 'co-branded', 'print advertising'
-  ], []);
-
-  const RESTRICTED_KEYWORDS = useMemo(() => [
-    'crm', 'lead capture', 'lead generation', 'funnel', 'drip email',
-    'follow-up', 'seo', 'landing page', 'chatbot', 'sms', 'automation',
-    'business card', 'sign', 'social media management', 'posting',
-    'content calendar', 'listing video', 'drone', 'agent video',
-    'testimonial', 'open house', 'appreciation', 'pop-by', 'gift',
-    'closing gift', 'referral', 'past client', 'database', 'strategy',
-    'coaching', 'consulting', 'accountability'
-  ], []);
-
-  const loadSavedServices = useCallback(async () => {
+  const loadSavedServices = async () => {
     if (!profile?.user_id) return;
 
     try {
@@ -245,75 +273,74 @@ export const MarketplaceGrid = () => {
     } catch (error) {
       console.error('Error loading saved services:', error);
     }
-  }, [profile?.user_id]); // Add profile.user_id as dependency
+  };
 
   const loadData = useCallback(async () => {
-    console.log('MarketplaceGrid: loadData called - starting fetch');
-    
-    // Skip loading if data already loaded (prevents double loading on remount)
-    if (dataLoaded) {
-      console.log('MarketplaceGrid: Data already loaded, skipping');
+    // Check circuit breaker before making request
+    const now = Date.now();
+    if (circuitBreakerState.isOpen && now < circuitBreakerState.nextAttempt) {
+      console.log('Circuit breaker is open, skipping request');
+      setError('Service temporarily unavailable. Please try again in a moment.');
       setLoading(false);
       return;
     }
-    
+
     try {
-      console.log('MarketplaceGrid: Setting loading state');
       setLoading(true);
       setError(null);
       
-      console.log('MarketplaceGrid: Making Supabase queries...');
+      console.log('Loading marketplace data...');
       
-      // Load vendors and services with optimized queries
-      const [vendorsResponse, servicesResponse] = await Promise.all([
-        supabase
-          .from('vendors')
-          .select('*')
-          .eq('is_active', true)
-          .order('sort_order', { ascending: true })
-          .order('rating', { ascending: false })
-          .limit(15),
-        supabase
-          .from('services')
-          .select('*')
-          .order('sort_order', { ascending: true })
-          .order('created_at', { ascending: false })
-          .limit(30)
-      ]);
+      // Create abort controller for request timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+      
+      // Load vendors from the correct table
+      const vendorsResponse = await supabase
+        .from('vendors')
+        .select('*')
+        .order('sort_order', { ascending: true })
+        .order('rating', { ascending: false })
+        .limit(50);
 
-      console.log('MarketplaceGrid: Supabase responses received', {
-        vendorsError: vendorsResponse.error,
-        servicesError: servicesResponse.error,
-        vendorsData: vendorsResponse.data?.length,
-        servicesData: servicesResponse.data?.length
-      });
+      console.log('Vendors response:', vendorsResponse);
+      console.log('Vendors data:', vendorsResponse.data);
+      console.log('Vendors error:', vendorsResponse.error);
+
+      // Load services without vendor join for now, then get vendors separately
+      const servicesResponse = await supabase
+        .from('services')
+        .select('*')
+        .order('sort_order', { ascending: true })
+        .order('created_at', { ascending: false })
+        .limit(100);
+
+      console.log('Services response:', servicesResponse);
+      console.log('Services data:', servicesResponse.data);
+      console.log('Services error:', servicesResponse.error);
+
+      clearTimeout(timeoutId);
 
       if (vendorsResponse.error) {
-        console.error('Vendors query error:', vendorsResponse.error);
-        throw new Error(`Vendors query failed: ${vendorsResponse.error.message}`);
+        console.error('Vendors error:', vendorsResponse.error);
+        throw vendorsResponse.error;
       }
       if (servicesResponse.error) {
-        console.error('Services query error:', servicesResponse.error);
-        throw new Error(`Services query failed: ${servicesResponse.error.message}`);
+        console.error('Services error:', servicesResponse.error);
+        throw servicesResponse.error;
       }
 
-      // Convert and deduplicate services to prevent duplicate key errors
-      const uniqueServices = new Map();
-      (servicesResponse.data || []).forEach(service => {
-        if (!uniqueServices.has(service.id)) {
-          uniqueServices.set(service.id, {
-            ...service,
-            discount_percentage: service.discount_percentage ? String(service.discount_percentage) : undefined,
-            vendor: {
-              name: 'Service Provider',
-              rating: 4.5,
-              review_count: 0,
-              is_verified: true
-            }
-          });
+      // Convert the database response to match our interface
+      const formattedServices = (servicesResponse.data || []).map(service => ({
+        ...service,
+        discount_percentage: service.discount_percentage ? String(service.discount_percentage) : undefined,
+        vendor: {
+          name: 'Service Provider',
+          rating: 4.5,
+          review_count: 0,
+          is_verified: true
         }
-      });
-      const formattedServices = Array.from(uniqueServices.values());
+      }));
       
       // Format vendors data using vendors table
       const formattedVendors = (vendorsResponse.data || []).map(vendor => ({
@@ -339,52 +366,63 @@ export const MarketplaceGrid = () => {
         local_representatives: []
       }));
       
-      console.log('MarketplaceGrid: About to set state with:', { 
-        services: formattedServices.length, 
-        vendors: formattedVendors.length 
-      });
+      console.log(`Loaded ${formattedServices.length} services and ${formattedVendors.length} vendors`);
       
       setServices(formattedServices);
       setVendors(formattedVendors);
-      setDataLoaded(true); // Mark data as loaded
       
-      console.log('MarketplaceGrid: State updated successfully');
+      // Record success
+      setCircuitBreakerState({
+        isOpen: false,
+        failureCount: 0,
+        lastFailureTime: 0,
+        nextAttempt: 0,
+      });
       
     } catch (error) {
       console.error('Marketplace data loading error:', error);
-      setError(`Failed to load marketplace data: ${error.message || 'Unknown error'}`);
-    } finally {
-      setLoading(false);
-      console.log('MarketplaceGrid: Loading complete');
-    }
-  }, [dataLoaded]); // Include dataLoaded in dependencies
-
-  // Single useEffect that runs only once on mount
-  useEffect(() => {
-    console.log('MarketplaceGrid: useEffect triggered - mounting component');
-    
-    // Use a ref to prevent race conditions
-    let cancelled = false;
-    
-    const initializeData = async () => {
-      if (!cancelled) {
-        await loadData();
-        
-        // Load saved services if user is logged in
-        if (profile?.user_id && !cancelled) {
-          await loadSavedServices();
+      
+      // Record failure
+      setCircuitBreakerState(prev => {
+        const newFailureCount = prev.failureCount + 1;
+        if (newFailureCount >= CIRCUIT_BREAKER_CONFIG.failureThreshold) {
+          return {
+            ...prev,
+            isOpen: true,
+            failureCount: newFailureCount,
+            lastFailureTime: Date.now(),
+            nextAttempt: Date.now() + CIRCUIT_BREAKER_CONFIG.timeout,
+          };
         }
+        return { ...prev, failureCount: newFailureCount };
+      });
+      
+      if (error.name === 'AbortError') {
+        setError('Request timed out. Please check your connection and try again.');
+      } else {
+        setError(`Failed to load marketplace data: ${error.message || 'Unknown error'}`);
       }
-    };
-    
-    initializeData();
-    
-    return () => {
-      cancelled = true;
-      console.log('MarketplaceGrid: Component cleanup');
-    };
-  }, []); // Empty dependency array - run only once on mount
+      
+      toast({
+        title: "Error loading data",
+        description: `Failed to load marketplace data: ${error.message || 'Please try again.'}`,
+        variant: "destructive",
+      });
+    } finally {
+      console.log('Setting loading to false');
+      setLoading(false);
+    }
+  }, [CIRCUIT_BREAKER_CONFIG.failureThreshold, CIRCUIT_BREAKER_CONFIG.timeout, circuitBreakerState.isOpen, circuitBreakerState.nextAttempt, toast]);
 
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  useEffect(() => {
+    if (profile?.user_id) {
+      loadSavedServices();
+    }
+  }, [profile?.user_id]);
 
   // Helper function to extract numeric price from strings like "$150" or "150"
   const extractNumericPrice = (priceString: string | null | undefined): number => {
@@ -394,76 +432,87 @@ export const MarketplaceGrid = () => {
     return parseFloat(cleanedPrice) || 0;
   };
 
-  // Memoize filtering for performance under load
-  const filteredServices = useMemo(() => {
-    return services.filter(service => {
-      const matchesSearch = service.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           service.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           service.vendor?.name?.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredServices = services.filter(service => {
+    const matchesSearch = service.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         service.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         service.vendor?.name?.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesCategory = filters.category === "all" || service.category === filters.category;
+    
+    // Fix price filtering to handle currency symbols
+    const priceValue = extractNumericPrice(service.retail_price);
+    const matchesPrice = priceValue >= filters.priceRange[0] && priceValue <= filters.priceRange[1];
+    const matchesVerified = !filters.verified || service.vendor?.is_verified;
+    const matchesFeatured = !filters.featured || service.is_featured;
+
+    // Co-pay eligibility filtering
+    let matchesCoPayEligible = true;
+    if (filters.coPayEligible) {
+      const category = service.category?.toLowerCase() || '';
+      const title = service.title?.toLowerCase() || '';
+      const tags = service.tags?.map(tag => tag.toLowerCase()) || [];
       
-      const matchesCategory = filters.category === "all" || service.category === filters.category;
+      // Safe for co-pay (True advertising)
+      const safeKeywords = [
+        'digital ads', 'facebook ads', 'google ads', 'display ads', 'retargeting',
+        'postcards', 'direct mail', 'flyers', 'door hangers', 'brochures',
+        'educational', 'seminar', 'workshop', 'market report', 'buyer education',
+        'joint advertising', 'co-branded', 'print advertising'
+      ];
       
-      // Fix price filtering to handle currency symbols
-      const priceValue = extractNumericPrice(service.retail_price);
-      const matchesPrice = priceValue >= filters.priceRange[0] && priceValue <= filters.priceRange[1];
-      const matchesVerified = !filters.verified || service.vendor?.is_verified;
-      const matchesFeatured = !filters.featured || service.is_featured;
-
-      // Optimized co-pay eligibility filtering
-      let matchesCoPayEligible = true;
-      if (filters.coPayEligible) {
-        const searchText = `${service.category?.toLowerCase() || ''} ${service.title?.toLowerCase() || ''} ${service.tags?.join(' ').toLowerCase() || ''}`;
-        
-        const hasRestricted = RESTRICTED_KEYWORDS.some(keyword => searchText.includes(keyword));
-        const hasSafe = SAFE_KEYWORDS.some(keyword => searchText.includes(keyword));
-        
-        matchesCoPayEligible = hasSafe && !hasRestricted;
-      }
-
-      return matchesSearch && matchesCategory && matchesPrice && matchesVerified && matchesFeatured && matchesCoPayEligible;
-    });
-  }, [services, searchTerm, filters, SAFE_KEYWORDS, RESTRICTED_KEYWORDS]);
-
-  // Memoize vendor filtering
-  const filteredVendors = useMemo(() => {
-    return vendors.filter(vendor => {
-      if (!vendor) return false;
+      // Never allow co-pay (Business tools/lead generation)
+      const restrictedKeywords = [
+        'crm', 'lead capture', 'lead generation', 'funnel', 'drip email',
+        'follow-up', 'seo', 'landing page', 'chatbot', 'sms', 'automation',
+        'business card', 'sign', 'social media management', 'posting',
+        'content calendar', 'listing video', 'drone', 'agent video',
+        'testimonial', 'open house', 'appreciation', 'pop-by', 'gift',
+        'closing gift', 'referral', 'past client', 'database', 'strategy',
+        'coaching', 'consulting', 'accountability'
+      ];
       
-      const matchesSearch = vendor.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           vendor.description?.toLowerCase().includes(searchTerm.toLowerCase());
+      const hasRestricted = restrictedKeywords.some(keyword => 
+        title.includes(keyword) || category.includes(keyword) || 
+        tags.some(tag => tag.includes(keyword))
+      );
       
-      const matchesVerified = !filters.verified || vendor.is_verified;
+      const hasSafe = safeKeywords.some(keyword => 
+        title.includes(keyword) || category.includes(keyword) || 
+        tags.some(tag => tag.includes(keyword))
+      );
       
-      let matchesLocation = true;
-      if (filters.locationFilter && location?.state) {
-        matchesLocation = vendor.license_states?.includes(location.state) ||
-                         vendor.service_states?.includes(location.state) ||
-                         false;
-      }
+    // Only show services that are eligible for co-pay (safe keywords and no restricted keywords)
+      matchesCoPayEligible = hasSafe && !hasRestricted;
+    }
 
-      return matchesSearch && matchesVerified && matchesLocation;
-    });
-  }, [vendors, searchTerm, filters, location?.state]);
+    return matchesSearch && matchesCategory && matchesPrice && matchesVerified && matchesFeatured && matchesCoPayEligible;
+  });
 
-  // Memoize expensive calculations
-  const localVendorCount = useMemo(() => {
-    if (!location?.state) return 0;
-    return vendors.filter(vendor => 
-      vendor && (vendor.license_states?.includes(location.state) ||
-      vendor.service_states?.includes(location.state))
-    ).length;
-  }, [vendors, location?.state]);
+  const filteredVendors = vendors.filter(vendor => {
+    // Skip null vendors
+    if (!vendor) return false;
+    
+    const matchesSearch = vendor.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         vendor.description?.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesVerified = !filters.verified || vendor.is_verified;
+    
+    // Location-based filtering
+    let matchesLocation = true;
+    if (filters.locationFilter && location?.state) {
+      matchesLocation = vendor.license_states?.includes(location.state) ||
+                       vendor.service_states?.includes(location.state) ||
+                       false;
+    }
 
-  // Memoize category and tag calculations
-  const availableCategories = useMemo(() => 
-    Array.from(new Set(services.map(service => service.category).filter(Boolean))), 
-    [services]
-  );
-  
-  const availableTags = useMemo(() => 
-    Array.from(new Set(services.flatMap(service => service.tags || []))), 
-    [services]
-  );
+    return matchesSearch && matchesVerified && matchesLocation;
+  });
+
+  // Count local vendors for the banner
+  const localVendorCount = location?.state ? vendors.filter(vendor => 
+    vendor && (vendor.license_states?.includes(location.state) ||
+    vendor.service_states?.includes(location.state))
+  ).length : 0;
 
   // Get categories based on view mode
   const getCategories = () => {
@@ -588,44 +637,44 @@ export const MarketplaceGrid = () => {
     setSelectedProductCategory(null);
   };
 
-  // Memoize product mapping to prevent recreation on every render
-  const productMapping = useMemo(() => ({
-    'facebook-ads': ['facebook', 'social media ads', 'digital marketing', 'meta ads', 'instagram ads', 'social advertising', 'paid social'],
-    'google-ads': ['google', 'ppc', 'search ads', 'google adwords', 'paid search', 'sem', 'display ads', 'youtube ads'],
-    'direct-mail': ['direct mail', 'postcards', 'flyers', 'mailers', 'print marketing', 'door hangers', 'marketing materials'],
-    'social-media': ['social media', 'social marketing', 'instagram', 'linkedin', 'social management', 'content creation'],
-    'website-design': ['website', 'web design', 'landing page', 'web development', 'site design', 'wordpress', 'real estate website'],
-    'seo-services': ['seo', 'search optimization', 'search engine', 'organic search', 'local seo', 'google ranking'],
-    'crm-tools': ['crm', 'lead management', 'customer management', 'database', 'contact management', 'follow up', 'automation'],
-    'photography': ['photography', 'photos', 'listing photos', 'real estate photography', 'professional photos', 'photo shoot'],
-    'videography': ['video', 'videography', 'virtual tour', 'listing video', 'drone video', 'property video', 'video production'],
-    'print-marketing': ['print', 'business cards', 'brochures', 'signage', 'yard signs', 'banners', 'flyers', 'marketing materials'],
-    'Business Cards': ['business cards', 'cards', 'professional cards', 'networking cards'],
-    'Yard Signs': ['yard signs', 'signs', 'real estate signs', 'property signs', 'lawn signs'],
-    'Open House Signs': ['open house', 'open house signs', 'directional signs', 'event signs'],
-    'Property Flyers': ['flyers', 'property flyers', 'listing flyers', 'marketing flyers'],
-    'Listing Brochures': ['brochures', 'listing brochures', 'property brochures', 'marketing brochures'],
-    'Door Hangers': ['door hangers', 'door marketing', 'neighborhood marketing'],
-    'Postcards': ['postcards', 'direct mail', 'mailers', 'farming postcards'],
-    'Branded Materials': ['branded', 'branding', 'logo design', 'brand materials'],
-    'Social Media Graphics': ['graphics', 'social graphics', 'design', 'social media design'],
-    'Website Templates': ['templates', 'website templates', 'web templates', 'real estate templates'],
-    'Email Marketing Templates': ['email', 'email marketing', 'email templates', 'newsletters'],
-    'Virtual Tour Software': ['virtual tours', 'virtual tour', '3d tours', 'matterport'],
-    'Professional Photography': ['photography', 'professional photos', 'listing photography'],
-    'Drone Photography': ['drone', 'aerial photography', 'drone photos', 'aerial shots'],
-    'Zillow Leads': ['zillow', 'zillow leads', 'online leads', 'internet leads'],
-    'Realtor.com Advertising': ['realtor.com', 'realtor advertising', 'listing syndication'],
-    'Lead Generation Software': ['lead generation', 'leads', 'lead capture', 'lead system'],
-    'CRM Systems': ['crm', 'customer management', 'contact management', 'database management'],
-    'Contact Management Tools': ['contact management', 'contacts', 'database', 'client management'],
-    'Sphere Marketing Tools': ['sphere', 'past clients', 'database marketing', 'relationship marketing'],
-    'Referral Programs': ['referrals', 'referral system', 'referral marketing'],
-    'Expired Listing Data': ['expired listings', 'expired', 'listing data', 'prospect data']
-  }), []);
+  // Filter services by selected product category
+  const getServicesForProduct = (productId: string) => {
+    const productMapping: { [key: string]: string[] } = {
+      'facebook-ads': ['facebook', 'social media ads', 'digital marketing', 'meta ads', 'instagram ads', 'social advertising', 'paid social'],
+      'google-ads': ['google', 'ppc', 'search ads', 'google adwords', 'paid search', 'sem', 'display ads', 'youtube ads'],
+      'direct-mail': ['direct mail', 'postcards', 'flyers', 'mailers', 'print marketing', 'door hangers', 'marketing materials'],
+      'social-media': ['social media', 'social marketing', 'instagram', 'linkedin', 'social management', 'content creation'],
+      'website-design': ['website', 'web design', 'landing page', 'web development', 'site design', 'wordpress', 'real estate website'],
+      'seo-services': ['seo', 'search optimization', 'search engine', 'organic search', 'local seo', 'google ranking'],
+      'crm-tools': ['crm', 'lead management', 'customer management', 'database', 'contact management', 'follow up', 'automation'],
+      'photography': ['photography', 'photos', 'listing photos', 'real estate photography', 'professional photos', 'photo shoot'],
+      'videography': ['video', 'videography', 'virtual tour', 'listing video', 'drone video', 'property video', 'video production'],
+      'print-marketing': ['print', 'business cards', 'brochures', 'signage', 'yard signs', 'banners', 'flyers', 'marketing materials'],
+      // Adding more comprehensive mappings for new categories
+      'Business Cards': ['business cards', 'cards', 'professional cards', 'networking cards'],
+      'Yard Signs': ['yard signs', 'signs', 'real estate signs', 'property signs', 'lawn signs'],
+      'Open House Signs': ['open house', 'open house signs', 'directional signs', 'event signs'],
+      'Property Flyers': ['flyers', 'property flyers', 'listing flyers', 'marketing flyers'],
+      'Listing Brochures': ['brochures', 'listing brochures', 'property brochures', 'marketing brochures'],
+      'Door Hangers': ['door hangers', 'door marketing', 'neighborhood marketing'],
+      'Postcards': ['postcards', 'direct mail', 'mailers', 'farming postcards'],
+      'Branded Materials': ['branded', 'branding', 'logo design', 'brand materials'],
+      'Social Media Graphics': ['graphics', 'social graphics', 'design', 'social media design'],
+      'Website Templates': ['templates', 'website templates', 'web templates', 'real estate templates'],
+      'Email Marketing Templates': ['email', 'email marketing', 'email templates', 'newsletters'],
+      'Virtual Tour Software': ['virtual tours', 'virtual tour', '3d tours', 'matterport'],
+      'Professional Photography': ['photography', 'professional photos', 'listing photography'],
+      'Drone Photography': ['drone', 'aerial photography', 'drone photos', 'aerial shots'],
+      'Zillow Leads': ['zillow', 'zillow leads', 'online leads', 'internet leads'],
+      'Realtor.com Advertising': ['realtor.com', 'realtor advertising', 'listing syndication'],
+      'Lead Generation Software': ['lead generation', 'leads', 'lead capture', 'lead system'],
+      'CRM Systems': ['crm', 'customer management', 'contact management', 'database management'],
+      'Contact Management Tools': ['contact management', 'contacts', 'database', 'client management'],
+      'Sphere Marketing Tools': ['sphere', 'past clients', 'database marketing', 'relationship marketing'],
+      'Referral Programs': ['referrals', 'referral system', 'referral marketing'],
+      'Expired Listing Data': ['expired listings', 'expired', 'listing data', 'prospect data']
+    };
 
-  // Memoize filtered services for products to prevent recalculation on every render
-  const getServicesForProduct = useCallback((productId: string) => {
     const keywords = productMapping[productId] || [];
     return services.filter(service => {
       const title = service.title?.toLowerCase() || '';
@@ -640,25 +689,7 @@ export const MarketplaceGrid = () => {
         tags.some(tag => tag.includes(keyword))
       );
     });
-  }, [services, productMapping]);
-
-  // Memoize the reload function to prevent creating new references
-  const handleProductAdded = useCallback(() => {
-    loadData();
-  }, [loadData]);
-
-  // Memoize clear filters function to prevent recreation
-  const handleClearFilters = useCallback(() => {
-    setSearchTerm("");
-    setFilters({
-      category: "all",
-      priceRange: [0, 2000],
-      verified: false,
-      featured: false,
-      coPayEligible: false,
-      locationFilter: false,
-    });
-  }, []);
+  };
 
   if (loading) {
     return (
@@ -701,11 +732,11 @@ export const MarketplaceGrid = () => {
 
            {/* Enhanced Search Component */}
           <div className="space-y-6">
-             <EnhancedSearch
-               onSearchChange={setSearchFilters}
-               availableCategories={availableCategories}
-               availableTags={availableTags}
-             />
+            <EnhancedSearch
+              onSearchChange={setSearchFilters}
+              availableCategories={Array.from(new Set(services.map(service => service.category).filter(Boolean)))}
+              availableTags={Array.from(new Set(services.flatMap(service => service.tags || [])))}
+            />
             
             <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
             </div>
@@ -866,7 +897,17 @@ export const MarketplaceGrid = () => {
               </p>
               <Button 
                 variant="outline" 
-                onClick={handleClearFilters}
+                onClick={() => {
+                  setSearchTerm("");
+                  setFilters({
+                    category: "all",
+                    priceRange: [0, 2000],
+                    verified: false,
+                    featured: false,
+                    coPayEligible: false,
+                    locationFilter: false,
+                  });
+                }}
               >
                 {t('clearAll')} filters
               </Button>
@@ -888,7 +929,7 @@ export const MarketplaceGrid = () => {
       <AddProductModal
         open={isAddProductModalOpen}
         onOpenChange={setIsAddProductModalOpen}
-        onProductAdded={handleProductAdded}
+        onProductAdded={loadData}
       />
     </>
   );

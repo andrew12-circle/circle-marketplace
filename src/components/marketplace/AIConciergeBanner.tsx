@@ -94,7 +94,7 @@ export const AIConciergeBanner = () => {
     try {
       setIsLoadingRecommendation(true);
       
-      // Requesting contextual AI recommendation
+      console.log('Requesting contextual AI recommendation for user:', user?.id);
       
       const { data, error } = await supabase.functions.invoke('enhanced-ai-recommendations', {
         body: {
@@ -107,10 +107,10 @@ export const AIConciergeBanner = () => {
         }
       });
 
-      // AI recommendation response received
+      console.log('AI recommendation response:', { data, error });
 
       if (error) {
-        // Error getting AI recommendation
+        console.error('Error getting AI recommendation:', error);
         toast({
           title: "AI Analysis Unavailable", 
           description: "Using general insights for now. Please try again later.",
@@ -121,15 +121,15 @@ export const AIConciergeBanner = () => {
         setCurrentInsight(randomInsight);
       } else if (data?.recommendation) {
         setAiRecommendation(data.recommendation);
-        // Context-aware recommendation received
+        console.log('Context-aware recommendation received:', data);
       } else {
-        // No recommendation received from AI service
+        console.warn('No recommendation received from AI service');
         // Fall back to static insights
         const randomInsight = businessInsights[Math.floor(Math.random() * businessInsights.length)];
         setCurrentInsight(randomInsight);
       }
     } catch (error) {
-      // Failed to get contextual recommendation
+      console.error('Failed to get contextual recommendation:', error);
       toast({
         title: "Connection Error",
         description: "Please check your connection and try again.",
@@ -143,12 +143,11 @@ export const AIConciergeBanner = () => {
     }
   };
 
-  // Animated placeholder text effect with cleanup
+  // Animated placeholder text effect
   useEffect(() => {
     let currentQuestionIndex = 0;
     let currentCharIndex = 0;
     let isDeleting = false;
-    let timeoutId: NodeJS.Timeout;
     
     const typeEffect = () => {
       const currentQuestion = placeholderQuestions[currentQuestionIndex];
@@ -160,7 +159,7 @@ export const AIConciergeBanner = () => {
         if (currentCharIndex === 0) {
           isDeleting = false;
           currentQuestionIndex = (currentQuestionIndex + 1) % placeholderQuestions.length;
-          timeoutId = setTimeout(typeEffect, 500);
+          setTimeout(typeEffect, 500); // Pause before typing next question
           return;
         }
       } else {
@@ -168,22 +167,18 @@ export const AIConciergeBanner = () => {
         currentCharIndex++;
         
         if (currentCharIndex === currentQuestion.length) {
-          timeoutId = setTimeout(() => {
+          setTimeout(() => {
             isDeleting = true;
             typeEffect();
-          }, 2000);
+          }, 2000); // Pause when finished typing
           return;
         }
       }
       
-      timeoutId = setTimeout(typeEffect, isDeleting ? 50 : 100);
+      setTimeout(typeEffect, isDeleting ? 50 : 100);
     };
     
     typeEffect();
-    
-    return () => {
-      if (timeoutId) clearTimeout(timeoutId);
-    };
   }, []);
 
 

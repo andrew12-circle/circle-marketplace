@@ -453,10 +453,11 @@ const AcademyContent = () => {
       </div>
     </div>;
   const handlePlayVideo = (videoId: string) => {
-    // Find the video in our data efficiently
-    const allVideoCollections = [allVideos, trendingVideos, featuredVideos];
-    const video = allVideoCollections.flatMap(collection => collection).find(v => v.id === videoId);
-    // Video found and ready for playback
+    console.log("handlePlayVideo called with videoId:", videoId);
+
+    // Find the video in our data
+    const video = allVideos.find(v => v.id === videoId) || trendingVideos.find(v => v.id === videoId) || featuredVideos.find(v => v.id === videoId);
+    console.log("Found video:", video);
     if (video) {
       // Increment view count
       incrementView(videoId);
@@ -496,10 +497,11 @@ const AcademyContent = () => {
     }
   };
   const handlePlayPodcast = (podcastId: string) => {
-    // Find the podcast in our data efficiently
-    const allPodcastCollections = [allPodcasts, featuredPodcasts, newPodcasts];
-    const podcast = allPodcastCollections.flatMap(collection => collection).find(p => p.id === podcastId);
-    // Podcast found and ready for playback
+    console.log("handlePlayPodcast called with podcastId:", podcastId);
+
+    // Find the podcast in our data
+    const podcast = allPodcasts.find(p => p.id === podcastId) || featuredPodcasts.find(p => p.id === podcastId) || newPodcasts.find(p => p.id === podcastId);
+    console.log("Found podcast:", podcast);
     if (podcast) {
       // Increment play count
       incrementPlay(podcastId);
@@ -551,10 +553,11 @@ const AcademyContent = () => {
     });
   };
   const handleReadBook = (bookId: string) => {
-    // Find the book in our data efficiently
-    const allBookCollections = [allBooks, featuredBooks, newBooks];
-    const book = allBookCollections.flatMap(collection => collection).find(b => b.id === bookId);
-    // Book found and ready for reading
+    console.log("handleReadBook called with bookId:", bookId);
+
+    // Find the book in our data
+    const book = allBooks.find(b => b.id === bookId) || featuredBooks.find(b => b.id === bookId) || newBooks.find(b => b.id === bookId);
+    console.log("Found book:", book);
     if (book) {
       // Increment read count
       incrementRead(bookId);

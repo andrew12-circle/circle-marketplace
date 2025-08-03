@@ -43,7 +43,7 @@ import { Academy } from "./pages/Academy";
 const queryClient = new QueryClient();
 
 const App = () => {
-  // App component rendering
+  console.log("App component rendering");
   return (
     <ErrorBoundary section="Application">
       <QueryClientProvider client={queryClient}>
