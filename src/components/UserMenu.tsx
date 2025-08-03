@@ -70,7 +70,7 @@ export const UserMenu = () => {
 
   if (!user) {
     return (
-      <Button asChild variant="outline" className="min-h-[44px] sm:min-h-0 px-4 py-2 text-sm touch-target">
+      <Button asChild variant="outline">
         <Link to="/auth">Sign In</Link>
       </Button>
     );
@@ -89,7 +89,7 @@ export const UserMenu = () => {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <div className="relative">
-          <Button variant="ghost" className="relative h-10 w-10 sm:h-12 sm:w-12 rounded-full touch-target min-h-[44px] sm:min-h-0">
+          <Button variant="ghost" className="relative h-10 w-10 rounded-full">
             <Avatar className={`h-10 w-10 ${profile?.is_pro_member ? 'ring-2 ring-circle-accent ring-offset-2 ring-offset-background' : ''}`}>
               <AvatarImage src={profile?.avatar_url} alt={profile?.display_name || 'User'} />
               <AvatarFallback className="bg-circle-primary text-primary-foreground">

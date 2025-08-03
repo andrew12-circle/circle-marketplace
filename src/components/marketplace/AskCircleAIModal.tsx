@@ -272,47 +272,44 @@ export const AskCircleAIModal = ({ open, onOpenChange }: AskCircleAIModalProps) 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[95vw] max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader className="text-center pb-4">
           <div className="flex items-center justify-center gap-2 mb-2">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-100 rounded-full flex items-center justify-center">
-              <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
+            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+              <Sparkles className="w-5 h-5 text-blue-600" />
             </div>
           </div>
-          <DialogTitle className="text-lg sm:text-xl font-semibold">Ask Circle AI</DialogTitle>
-          <p className="text-xs sm:text-sm text-muted-foreground">
+          <DialogTitle className="text-xl font-semibold">Ask Circle AI</DialogTitle>
+          <p className="text-sm text-muted-foreground">
             Get data-driven marketing recommendations for your area.
           </p>
         </DialogHeader>
 
         {!recommendation && !contextualResponse ? (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-1 sm:grid-cols-3 h-auto sm:h-10">
-              <TabsTrigger value="contextual" className="flex items-center gap-1 sm:gap-2 h-10 text-xs sm:text-sm">
-                <Brain className="w-3 h-3 sm:w-4 sm:h-4" />
-                <span className="hidden xs:inline">Context-Aware</span>
-                <span className="xs:hidden">Context</span>
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="contextual" className="flex items-center gap-2">
+                <Brain className="w-4 h-4" />
+                Context-Aware
               </TabsTrigger>
-              <TabsTrigger value="quick" className="flex items-center gap-1 sm:gap-2 h-10 text-xs sm:text-sm">
-                <Sparkles className="w-3 h-3 sm:w-4 sm:h-4" />
-                <span className="hidden xs:inline">Quick Assessment</span>
-                <span className="xs:hidden">Quick</span>
+              <TabsTrigger value="quick" className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4" />
+                Quick Assessment
               </TabsTrigger>
-              <TabsTrigger value="detailed" className="flex items-center gap-1 sm:gap-2 h-10 text-xs sm:text-sm">
-                <BarChart className="w-3 h-3 sm:w-4 sm:h-4" />
-                <span className="hidden xs:inline">Detailed Assessment</span>
-                <span className="xs:hidden">Detailed</span>
+              <TabsTrigger value="detailed" className="flex items-center gap-2">
+                <BarChart className="w-4 h-4" />
+                Detailed Assessment
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="contextual" className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
+            <TabsContent value="contextual" className="space-y-6 mt-6">
               <div className="space-y-4">
-                <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-3 sm:p-4">
+                <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-4">
                   <div className="flex items-center gap-2 mb-2">
-                    <Brain className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
-                    <h3 className="font-semibold text-blue-900 text-sm sm:text-base">AI-Powered Context Analysis</h3>
+                    <Brain className="w-5 h-5 text-blue-600" />
+                    <h3 className="font-semibold text-blue-900">AI-Powered Context Analysis</h3>
                   </div>
-                  <p className="text-xs sm:text-sm text-blue-700">
+                  <p className="text-sm text-blue-700">
                     Get personalized recommendations based on your profile, saved services, recent activity, and market trends.
                   </p>
                 </div>
@@ -321,18 +318,18 @@ export const AskCircleAIModal = ({ open, onOpenChange }: AskCircleAIModalProps) 
                   placeholder="How can I improve my business based on my current activity?"
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
-                  className="h-10 sm:h-12 text-sm sm:text-base"
+                  className="h-12 text-base"
                   onKeyPress={(e) => e.key === 'Enter' && handleContextualRecommendation()}
                 />
                 
-                <div className="flex flex-wrap gap-1 sm:gap-2">
+                <div className="flex flex-wrap gap-2">
                   {suggestionChips.map((chip) => (
                     <Button
                       key={chip}
                       variant="outline"
                       size="sm"
                       onClick={() => handleChipClick(chip)}
-                      className="text-xs touch-target h-8 sm:h-auto"
+                      className="text-xs"
                     >
                       {chip}
                     </Button>
@@ -343,30 +340,30 @@ export const AskCircleAIModal = ({ open, onOpenChange }: AskCircleAIModalProps) 
               <Button 
                 onClick={handleContextualRecommendation}
                 disabled={loading || !prompt.trim()}
-                className="w-full h-10 sm:h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium text-sm sm:text-base touch-target"
+                className="w-full h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium"
               >
                 {loading ? "Analyzing Your Data..." : "Get Context-Aware Recommendation"}
               </Button>
             </TabsContent>
 
-            <TabsContent value="quick" className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
+            <TabsContent value="quick" className="space-y-6 mt-6">
               <div className="space-y-4">
                 <Input
                   placeholder="Best bundle for Franklin, TN"
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
-                  className="h-10 sm:h-12 text-sm sm:text-base"
+                  className="h-12 text-base"
                   onKeyPress={(e) => e.key === 'Enter' && handleQuickRecommendation()}
                 />
                 
-                <div className="flex flex-wrap gap-1 sm:gap-2">
+                <div className="flex flex-wrap gap-2">
                   {suggestionChips.map((chip) => (
                     <Button
                       key={chip}
                       variant="outline"
                       size="sm"
                       onClick={() => handleChipClick(chip)}
-                      className="text-xs touch-target h-8 sm:h-auto"
+                      className="text-xs"
                     >
                       {chip}
                     </Button>
@@ -377,22 +374,22 @@ export const AskCircleAIModal = ({ open, onOpenChange }: AskCircleAIModalProps) 
               <Button 
                 onClick={handleQuickRecommendation}
                 disabled={loading || !prompt.trim()}
-                className="w-full h-10 sm:h-12 bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm sm:text-base touch-target"
+                className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-medium"
               >
                 {loading ? "Getting Recommendation..." : "Get Quick Recommendation"}
               </Button>
             </TabsContent>
 
-            <TabsContent value="detailed" className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
-              <div className="space-y-4 sm:space-y-6">
-                {/* Current Performance Section - Mobile Optimized */}
-                <div className="space-y-3 sm:space-y-4">
+            <TabsContent value="detailed" className="space-y-6 mt-6">
+              <div className="space-y-6">
+                {/* Current Performance Section */}
+                <div className="space-y-4">
                   <div className="flex items-center gap-2">
-                    <BarChart className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
-                    <h3 className="text-base sm:text-lg font-semibold">Where You Are At</h3>
+                    <BarChart className="w-5 h-5 text-blue-600" />
+                    <h3 className="text-lg font-semibold">Where You Are At</h3>
                   </div>
                   
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                  <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="location">Location *</Label>
                       <Input

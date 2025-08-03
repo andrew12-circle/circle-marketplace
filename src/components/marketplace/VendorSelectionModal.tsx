@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Search, MapPin, Star, Users, TrendingUp, Building, Plus, CheckCircle } from "lucide-react";
 import confirmationImage from "@/assets/confirmation-image.png";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "@/hooks/useLocation";
@@ -59,18 +59,17 @@ export const VendorSelectionModal = ({
   const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null);
   const [showFunnelModal, setShowFunnelModal] = useState(false);
   const [funnelVendor, setFunnelVendor] = useState<Vendor | null>(null);
-  
   const { toast } = useToast();
   const { location } = useLocation();
 
-  // Clean state management
   useEffect(() => {
     if (isOpen) {
+      console.log('VendorSelectionModal: Modal opened, loading vendors...');
+      setVendors([]); // Reset vendors to ensure clean state
+      setFilteredVendors([]);
       loadVendors();
     } else {
-      // Reset all state when modal closes
-      setVendors([]);
-      setFilteredVendors([]);
+      console.log('VendorSelectionModal: Modal closed, resetting state...');
       setSearchQuery("");
       setSelectedVendor(null);
       setShowConfirmation(false);
@@ -79,29 +78,32 @@ export const VendorSelectionModal = ({
     }
   }, [isOpen]);
 
-  // Filter vendors when search or vendors change
   useEffect(() => {
-    if (isOpen && vendors.length > 0) {
-      filterVendors();
-    }
-  }, [searchQuery, vendors, isOpen]);
+    filterVendors();
+  }, [searchQuery, vendors]);
 
   const loadVendors = async () => {
+    console.log('VendorSelectionModal: Starting to load vendors...');
     setIsLoading(true);
     try {
       const { data, error } = await supabase
         .from('vendors')
         .select('id, name, description, logo_url, location, rating, review_count, is_verified, co_marketing_agents, campaigns_funded, service_states, vendor_type')
         .eq('is_active', true)
-        .order('sort_order', { ascending: true })
+        .order('sort_order', { ascending: true }) // Higher sort_order = higher priority
         .order('rating', { ascending: false })
-        .limit(20);
+        .limit(20); // Limit initial results for faster loading
 
-      if (error) throw error;
-      
+      console.log('VendorSelectionModal: Supabase response:', { data, error, dataLength: data?.length });
+
+      if (error) {
+        console.error('VendorSelectionModal: Supabase error details:', error);
+        throw error;
+      }
       setVendors(data || []);
+      console.log('VendorSelectionModal: Vendors set successfully, count:', (data || []).length);
     } catch (error) {
-      console.error('Error loading vendors:', error);
+      console.error('VendorSelectionModal: Error loading vendors:', error);
       toast({
         title: "Error",
         description: "Failed to load vendors. Please try again.",
@@ -109,33 +111,48 @@ export const VendorSelectionModal = ({
       });
     } finally {
       setIsLoading(false);
+      console.log('VendorSelectionModal: Loading complete');
     }
   };
 
   const filterVendors = () => {
-    if (!isOpen || vendors.length === 0) return;
-
     let filtered = vendors;
+    console.log('VendorSelectionModal: Filtering vendors...', { 
+      totalVendors: vendors.length, 
+      searchQuery, 
+      userLocation: location?.state 
+    });
 
-    // Location filter
+    // Filter by location if available - but don't filter out ALL vendors
     if (location?.state) {
       const locationFiltered = filtered.filter(vendor => 
         vendor.service_states?.includes(location.state) ||
         vendor.location?.toLowerCase().includes(location.state.toLowerCase())
       );
+      // Only apply location filter if we still have vendors, otherwise show all
       if (locationFiltered.length > 0) {
         filtered = locationFiltered;
+      } else {
+        console.log('VendorSelectionModal: No vendors found for location, showing all vendors');
       }
     }
 
-    // Search filter
+    // Apply search filter
     if (searchQuery.trim()) {
       filtered = filtered.filter(vendor =>
         vendor.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        vendor.description?.toLowerCase().includes(searchQuery.toLowerCase())
+        vendor.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        vendor.location?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        vendor.service_states?.some(state => 
+          state.toLowerCase().includes(searchQuery.toLowerCase())
+        )
       );
     }
 
+    console.log('VendorSelectionModal: Filtering complete', { 
+      filteredCount: filtered.length,
+      originalCount: vendors.length 
+    });
     setFilteredVendors(filtered);
   };
 

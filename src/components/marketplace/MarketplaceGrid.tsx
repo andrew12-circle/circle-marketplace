@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { ServiceCard } from "./ServiceCard";
 import { EnhancedVendorCard } from "./EnhancedVendorCard";
@@ -112,16 +112,26 @@ export const MarketplaceGrid = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [sortBy, setSortBy] = useState<'featured' | 'rating' | 'price'>('featured');
   
-  // Simplified circuit breaker
+  // Circuit breaker state for marketplace
   const [circuitBreakerState, setCircuitBreakerState] = useState({
     isOpen: false,
     failureCount: 0,
+    lastFailureTime: 0,
     nextAttempt: 0,
   });
 
   const CIRCUIT_BREAKER_CONFIG = {
     failureThreshold: 3,
-    timeout: 30000,
+    timeout: 30000, // 30 seconds
+  };
+
+  const checkCircuitBreaker = () => {
+    const now = Date.now();
+    if (circuitBreakerState.isOpen && now >= circuitBreakerState.nextAttempt) {
+      setCircuitBreakerState(prev => ({ ...prev, isOpen: false }));
+      return false;
+    }
+    return circuitBreakerState.isOpen;
   };
 
   const recordFailure = () => {
@@ -132,6 +142,7 @@ export const MarketplaceGrid = () => {
           ...prev,
           isOpen: true,
           failureCount: newFailureCount,
+          lastFailureTime: Date.now(),
           nextAttempt: Date.now() + CIRCUIT_BREAKER_CONFIG.timeout,
         };
       }
@@ -143,6 +154,7 @@ export const MarketplaceGrid = () => {
     setCircuitBreakerState({
       isOpen: false,
       failureCount: 0,
+      lastFailureTime: 0,
       nextAttempt: 0,
     });
   };
@@ -264,7 +276,10 @@ export const MarketplaceGrid = () => {
   };
 
   const loadData = useCallback(async () => {
-    if (circuitBreakerState.isOpen && Date.now() < circuitBreakerState.nextAttempt) {
+    // Check circuit breaker before making request
+    const now = Date.now();
+    if (circuitBreakerState.isOpen && now < circuitBreakerState.nextAttempt) {
+      console.log('Circuit breaker is open, skipping request');
       setError('Service temporarily unavailable. Please try again in a moment.');
       setLoading(false);
       return;
@@ -274,38 +289,50 @@ export const MarketplaceGrid = () => {
       setLoading(true);
       setError(null);
       
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 6000);
+      console.log('Loading marketplace data...');
       
-      const [vendorsResponse, servicesResponse] = await Promise.all([
-        supabase
-          .from('vendors')
-          .select('*')
-          .order('sort_order', { ascending: true })
-          .order('rating', { ascending: false })
-          .limit(15)
-          .abortSignal(controller.signal),
-        
-        supabase
-          .from('services')
-          .select('*')
-          .order('sort_order', { ascending: true })
-          .order('created_at', { ascending: false })
-          .limit(30)
-          .abortSignal(controller.signal)
-      ]);
+      // Create abort controller for request timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+      
+      // Load vendors from the correct table
+      const vendorsResponse = await supabase
+        .from('vendors')
+        .select('*')
+        .order('sort_order', { ascending: true })
+        .order('rating', { ascending: false })
+        .limit(50);
+
+      console.log('Vendors response:', vendorsResponse);
+      console.log('Vendors data:', vendorsResponse.data);
+      console.log('Vendors error:', vendorsResponse.error);
+
+      // Load services without vendor join for now, then get vendors separately
+      const servicesResponse = await supabase
+        .from('services')
+        .select('*')
+        .order('sort_order', { ascending: true })
+        .order('created_at', { ascending: false })
+        .limit(100);
+
+      console.log('Services response:', servicesResponse);
+      console.log('Services data:', servicesResponse.data);
+      console.log('Services error:', servicesResponse.error);
 
       clearTimeout(timeoutId);
 
-      if (vendorsResponse.error || servicesResponse.error) {
-        console.error('API errors:', { vendorsResponse, servicesResponse });
+      if (vendorsResponse.error) {
+        console.error('Vendors error:', vendorsResponse.error);
+        throw vendorsResponse.error;
+      }
+      if (servicesResponse.error) {
+        console.error('Services error:', servicesResponse.error);
+        throw servicesResponse.error;
       }
 
-      // Convert the database response to match our interface with unique keys
-      const formattedServices = (servicesResponse.data || []).map((service, index) => ({
+      // Convert the database response to match our interface
+      const formattedServices = (servicesResponse.data || []).map(service => ({
         ...service,
-        // Ensure unique keys by adding index to prevent duplicate key warnings
-        uniqueKey: `${service.id}-${index}`,
         discount_percentage: service.discount_percentage ? String(service.discount_percentage) : undefined,
         vendor: {
           name: 'Service Provider',
@@ -315,10 +342,9 @@ export const MarketplaceGrid = () => {
         }
       }));
       
-      // Format vendors data with unique keys
-      const formattedVendors = (vendorsResponse.data || []).map((vendor, index) => ({
+      // Format vendors data using vendors table
+      const formattedVendors = (vendorsResponse.data || []).map(vendor => ({
         ...vendor,
-        uniqueKey: `${vendor.id}-${index}`,
         id: vendor.id,
         name: vendor.name || 'Unknown Vendor',
         description: vendor.description || '',
@@ -346,13 +372,30 @@ export const MarketplaceGrid = () => {
       setVendors(formattedVendors);
       
       // Record success
-      recordSuccess();
+      setCircuitBreakerState({
+        isOpen: false,
+        failureCount: 0,
+        lastFailureTime: 0,
+        nextAttempt: 0,
+      });
       
     } catch (error) {
       console.error('Marketplace data loading error:', error);
       
       // Record failure
-      recordFailure();
+      setCircuitBreakerState(prev => {
+        const newFailureCount = prev.failureCount + 1;
+        if (newFailureCount >= CIRCUIT_BREAKER_CONFIG.failureThreshold) {
+          return {
+            ...prev,
+            isOpen: true,
+            failureCount: newFailureCount,
+            lastFailureTime: Date.now(),
+            nextAttempt: Date.now() + CIRCUIT_BREAKER_CONFIG.timeout,
+          };
+        }
+        return { ...prev, failureCount: newFailureCount };
+      });
       
       if (error.name === 'AbortError') {
         setError('Request timed out. Please check your connection and try again.');
@@ -369,7 +412,7 @@ export const MarketplaceGrid = () => {
       console.log('Setting loading to false');
       setLoading(false);
     }
-  }, [recordSuccess, recordFailure, toast]);
+  }, [CIRCUIT_BREAKER_CONFIG.failureThreshold, CIRCUIT_BREAKER_CONFIG.timeout, circuitBreakerState.isOpen, circuitBreakerState.nextAttempt, toast]);
 
   useEffect(() => {
     loadData();
@@ -389,9 +432,7 @@ export const MarketplaceGrid = () => {
     return parseFloat(cleanedPrice) || 0;
   };
 
-  // Memoize expensive filtering operations
-  const filteredServices = useMemo(() => {
-    return services.filter(service => {
+  const filteredServices = services.filter(service => {
     const matchesSearch = service.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          service.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          service.vendor?.name?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -446,11 +487,8 @@ export const MarketplaceGrid = () => {
 
     return matchesSearch && matchesCategory && matchesPrice && matchesVerified && matchesFeatured && matchesCoPayEligible;
   });
-  }, [services, searchTerm, filters]);
 
-  // Memoize vendor filtering
-  const filteredVendors = useMemo(() => {
-    return vendors.filter(vendor => {
+  const filteredVendors = vendors.filter(vendor => {
     // Skip null vendors
     if (!vendor) return false;
     
@@ -469,7 +507,6 @@ export const MarketplaceGrid = () => {
 
     return matchesSearch && matchesVerified && matchesLocation;
   });
-  }, [vendors, searchTerm, filters, location]);
 
   // Count local vendors for the banner
   const localVendorCount = location?.state ? vendors.filter(vendor => 
@@ -657,31 +694,12 @@ export const MarketplaceGrid = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
-        <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
-          {/* Hero Section Skeleton */}
-          <div className="mb-8 sm:mb-12">
-            <div className="h-8 sm:h-12 bg-muted animate-pulse rounded-lg mb-4 w-2/3"></div>
-            <div className="h-4 sm:h-6 bg-muted animate-pulse rounded-lg w-full max-w-2xl"></div>
-          </div>
-          
-          {/* Loading Grid Skeleton */}
-          <div className="mobile-grid gap-4 sm:gap-6 mb-8">
-            {Array.from({ length: 8 }).map((_, index) => (
-              <div key={index} className="bg-card border border-border rounded-lg p-4 animate-pulse">
-                <div className="h-32 sm:h-48 bg-muted rounded-lg mb-4"></div>
-                <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
-                <div className="h-3 bg-muted rounded w-1/2 mb-4"></div>
-                <div className="flex gap-2">
-                  <div className="h-8 bg-muted rounded flex-1"></div>
-                  <div className="h-8 bg-muted rounded w-8"></div>
-                </div>
-              </div>
-            ))}
-          </div>
-          
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-circle-primary mx-auto mb-2"></div>
-            <p className="text-muted-foreground text-sm">Loading marketplace...</p>
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-center h-64">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-circle-primary mx-auto mb-4"></div>
+              <p className="text-muted-foreground">{t('loading')} marketplace...</p>
+            </div>
           </div>
         </div>
       </div>
@@ -692,10 +710,10 @@ export const MarketplaceGrid = () => {
     <>
       <div className="min-h-screen bg-background">
         <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
-          {/* Hero Section - Mobile Optimized */}
-          <div className="mb-8 sm:mb-12">
-            <h1 className="text-3xl sm:text-4xl lg:text-6xl font-bold text-foreground mb-3 sm:mb-4">{t('marketplaceTitle')}</h1>
-            <p className="text-base sm:text-lg text-muted-foreground max-w-2xl">
+          {/* Hero Section */}
+          <div className="mb-12">
+            <h1 className="text-6xl font-bold text-black mb-4">{t('marketplaceTitle')}</h1>
+            <p className="text-lg text-gray-600 max-w-2xl">
               {t('marketplaceDescription')}
             </p>
           </div>
@@ -724,34 +742,31 @@ export const MarketplaceGrid = () => {
             </div>
           </div>
 
-          {/* View Mode Toggle - Mobile Optimized */}
-          <div className="flex gap-1 sm:gap-2 mb-4 sm:mb-6 bg-muted p-1 rounded-lg">
+          {/* View Mode Toggle */}
+          <div className="flex gap-2 mb-6">
             <Button
-              variant={viewMode === "services" ? "default" : "ghost"}
+              variant={viewMode === "services" ? "default" : "outline"}
               onClick={() => setViewMode("services")}
-              className="flex-1 touch-target flex items-center justify-center gap-1 sm:gap-2 h-10 sm:h-11 text-xs sm:text-sm"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-9 sm:h-10 text-sm sm:text-base"
             >
               <Sparkles className="w-3 h-3 sm:w-4 sm:h-4" />
-              <span className="hidden xs:inline">{t('services')}</span>
-              <span className="xs:hidden">Services</span>
+              {t('services')}
             </Button>
             <Button
-              variant={viewMode === "products" ? "default" : "ghost"}
+              variant={viewMode === "products" ? "default" : "outline"}
               onClick={() => setViewMode("products")}
-              className="flex-1 touch-target flex items-center justify-center gap-1 sm:gap-2 h-10 sm:h-11 text-xs sm:text-sm"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-9 sm:h-10 text-sm sm:text-base"
             >
               <Filter className="w-3 h-3 sm:w-4 sm:h-4" />
-              <span className="hidden xs:inline">Products</span>
-              <span className="xs:hidden">Products</span>
+              Products
             </Button>
             <Button
-              variant={viewMode === "vendors" ? "default" : "ghost"}
+              variant={viewMode === "vendors" ? "default" : "outline"}
               onClick={() => setViewMode("vendors")}
-              className="flex-1 touch-target flex items-center justify-center gap-1 sm:gap-2 h-10 sm:h-11 text-xs sm:text-sm"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-9 sm:h-10 text-sm sm:text-base"
             >
               <Zap className="w-3 h-3 sm:w-4 sm:h-4" />
-              <span className="hidden xs:inline">{t('vendors')}</span>
-              <span className="xs:hidden">Vendors</span>
+              {t('vendors')}
             </Button>
           </div>
 

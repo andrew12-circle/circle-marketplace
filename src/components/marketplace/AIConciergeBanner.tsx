@@ -143,12 +143,11 @@ export const AIConciergeBanner = () => {
     }
   };
 
-  // Animated placeholder text effect with proper cleanup
+  // Animated placeholder text effect
   useEffect(() => {
     let currentQuestionIndex = 0;
     let currentCharIndex = 0;
     let isDeleting = false;
-    let timeoutId: NodeJS.Timeout;
     
     const typeEffect = () => {
       const currentQuestion = placeholderQuestions[currentQuestionIndex];
@@ -160,7 +159,7 @@ export const AIConciergeBanner = () => {
         if (currentCharIndex === 0) {
           isDeleting = false;
           currentQuestionIndex = (currentQuestionIndex + 1) % placeholderQuestions.length;
-          timeoutId = setTimeout(typeEffect, 500);
+          setTimeout(typeEffect, 500); // Pause before typing next question
           return;
         }
       } else {
@@ -168,25 +167,18 @@ export const AIConciergeBanner = () => {
         currentCharIndex++;
         
         if (currentCharIndex === currentQuestion.length) {
-          timeoutId = setTimeout(() => {
+          setTimeout(() => {
             isDeleting = true;
             typeEffect();
-          }, 2000);
+          }, 2000); // Pause when finished typing
           return;
         }
       }
       
-      timeoutId = setTimeout(typeEffect, isDeleting ? 50 : 100);
+      setTimeout(typeEffect, isDeleting ? 50 : 100);
     };
     
     typeEffect();
-    
-    // Cleanup timeout on component unmount
-    return () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-    };
   }, []);
 
 
@@ -230,68 +222,64 @@ export const AIConciergeBanner = () => {
   // Show for all users with different content
 
   return (
-    <div className="mb-6 sm:mb-8">
+    <div className="mb-8">
       <Card className="bg-gradient-to-br from-primary/5 via-background to-accent/5 border-primary/20 shadow-lg">
-        <CardContent className="p-3 sm:p-6">
-          <div className="flex items-start gap-3 sm:gap-4">
-            <div className="p-2 sm:p-3 rounded-xl bg-primary/10 border border-primary/20 shrink-0">
-              <Brain className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+        <CardContent className="p-6">
+          <div className="flex items-start gap-4">
+            <div className="p-3 rounded-xl bg-primary/10 border border-primary/20 shrink-0">
+              <Brain className="h-6 w-6 text-primary" />
             </div>
             
-            <div className="flex-1 min-w-0">
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-3">
-                <h3 className="text-lg sm:text-xl font-semibold text-foreground leading-tight">
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-3">
+                <h3 className="text-xl font-semibold text-foreground">
                   {getTimeOfDayGreeting()}, {user && profile ? (profile.display_name || 'Agent') : 'Future Circle Member'}! 
                 </h3>
-                <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 text-xs sm:text-sm self-start sm:self-auto">
+                <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
                   AI Concierge
                 </Badge>
               </div>
               
-              <div className="mb-3 sm:mb-4">
-                <p className="text-sm sm:text-base text-muted-foreground">
+              <div className="flex items-center justify-between mb-4">
+                <p className="text-muted-foreground">
                   How can I help you grow your business today?
                 </p>
               </div>
 
-              {/* Chat Input Area - Mobile Optimized */}
-              <div className="bg-card/30 backdrop-blur-sm border border-border/50 rounded-lg p-3 sm:p-4 mb-3 sm:mb-4">
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
-                  <div className="flex-1">
+              {/* Chat Input Area */}
+              <div className="bg-card/30 backdrop-blur-sm border border-border/50 rounded-lg p-4 mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 relative">
                     <Input
                       value={chatInput}
                       onChange={(e) => setChatInput(e.target.value)}
                       onKeyPress={handleKeyPress}
                       placeholder={placeholderText}
-                      className="bg-background/50 border-border/50 placeholder:text-muted-foreground/70 focus:bg-background h-10 sm:h-auto"
+                      className="bg-background/50 border-border/50 placeholder:text-muted-foreground/70 focus:bg-background"
                     />
                   </div>
-                  <div className="flex gap-2 sm:gap-0">
-                    <Button 
-                      onClick={() => setIsAIModalOpen(true)}
-                      size="sm" 
-                      variant="outline"
-                      className="bg-background/50 hover:bg-background border-border/50 flex-1 sm:flex-none touch-target"
-                    >
-                      <Mic className="h-4 w-4 mr-1 sm:mr-0" />
-                      <span className="sm:hidden">Voice</span>
-                    </Button>
-                    <Button 
-                      onClick={handleSendMessage}
-                      size="sm" 
-                      className="bg-primary hover:bg-primary/90 flex-1 sm:flex-none touch-target"
-                      disabled={!chatInput.trim()}
-                    >
-                      <Send className="h-4 w-4 mr-1 sm:mr-0" />
-                      <span className="sm:hidden">Send</span>
-                    </Button>
-                  </div>
+                  <Button 
+                    onClick={() => setIsAIModalOpen(true)}
+                    size="sm" 
+                    variant="outline"
+                    className="bg-background/50 hover:bg-background border-border/50"
+                  >
+                    <Mic className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    onClick={handleSendMessage}
+                    size="sm" 
+                    className="bg-primary hover:bg-primary/90"
+                    disabled={!chatInput.trim()}
+                  >
+                    <Send className="h-4 w-4" />
+                  </Button>
                 </div>
               </div>
 
-              {/* Context-Aware AI Recommendation or Static Insight - Mobile Optimized */}
+              {/* Context-Aware AI Recommendation or Static Insight */}
               {(aiRecommendation || currentInsight) && (
-                <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-lg p-3 sm:p-4 mb-3 sm:mb-4">
+                <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-lg p-4 mb-4">
                   {isLoadingRecommendation ? (
                     <div className="flex items-center gap-3">
                       <div className="p-2 rounded-lg bg-primary/10">
@@ -314,10 +302,10 @@ export const AIConciergeBanner = () => {
                     <Button
                       variant="ghost"
                       onClick={() => setIsRecommendationExpanded(true)}
-                      className="w-full justify-start p-0 h-auto touch-friendly"
+                      className="w-full justify-start p-0 h-auto"
                     >
-                      <div className="flex items-center gap-2 sm:gap-3 w-full">
-                        <div className="p-2 rounded-lg bg-primary/10 shrink-0">
+                      <div className="flex items-center gap-3 w-full">
+                        <div className="p-2 rounded-lg bg-primary/10">
                           {aiRecommendation ? (
                             <Sparkles className="h-4 w-4 text-primary" />
                           ) : (
@@ -328,36 +316,36 @@ export const AIConciergeBanner = () => {
                           )}
                         </div>
                         
-                        <div className="flex-1 text-left min-w-0">
-                          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-1">
-                            <h4 className="font-semibold text-foreground text-sm sm:text-base leading-tight">
+                        <div className="flex-1 text-left">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h4 className="font-semibold text-foreground">
                               {aiRecommendation ? "AI-Powered Business Insight" : currentInsight!.title}
                             </h4>
-                            <Badge variant="outline" className={`text-xs self-start sm:self-auto ${
+                            <Badge variant="outline" className={
                               aiRecommendation 
                                 ? "bg-emerald-500/10 text-emerald-700 border-emerald-500/20"
                                 : getPriorityColor(currentInsight!.priority)
-                            }`}>
+                            }>
                               {aiRecommendation ? "Personalized" : `${currentInsight!.priority} priority`}
                             </Badge>
                           </div>
-                          <p className="text-xs sm:text-sm text-muted-foreground">
-                            Tap to view personalized recommendation
+                          <p className="text-sm text-muted-foreground">
+                            Click to view personalized recommendation
                           </p>
                         </div>
                         
-                        <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
+                        <ArrowRight className="h-4 w-4 text-muted-foreground" />
                       </div>
                     </Button>
                   ) : aiRecommendation ? (
                     <div className="space-y-3">
-                      <div className="flex items-start sm:items-center justify-between gap-2">
-                        <div className="flex items-center gap-2 min-w-0 flex-1">
-                          <div className="p-2 rounded-lg bg-primary/10 shrink-0">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="p-2 rounded-lg bg-primary/10">
                             <Sparkles className="h-4 w-4 text-primary" />
                           </div>
-                          <h4 className="font-semibold text-foreground text-sm sm:text-base">AI-Powered Business Insight</h4>
-                          <Badge variant="outline" className="bg-emerald-500/10 text-emerald-700 border-emerald-500/20 text-xs">
+                          <h4 className="font-semibold text-foreground">AI-Powered Business Insight</h4>
+                          <Badge variant="outline" className="bg-emerald-500/10 text-emerald-700 border-emerald-500/20">
                             Personalized
                           </Badge>
                         </div>
@@ -365,19 +353,18 @@ export const AIConciergeBanner = () => {
                           variant="ghost" 
                           size="sm" 
                           onClick={() => setIsRecommendationExpanded(false)}
-                          className="shrink-0 touch-target"
                         >
                           <X className="h-4 w-4" />
                         </Button>
                       </div>
                       
-                      <div className="text-sm sm:text-base text-muted-foreground whitespace-pre-line leading-relaxed">
+                      <div className="text-sm text-muted-foreground whitespace-pre-line">
                         {aiRecommendation}
                       </div>
                       
-                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                        <div className="flex flex-wrap items-center gap-2 sm:gap-4">
-                          <Badge variant="secondary" className="bg-blue-500/10 text-blue-700 border-blue-500/20 text-xs">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <Badge variant="secondary" className="bg-blue-500/10 text-blue-700 border-blue-500/20">
                             <Brain className="h-3 w-3 mr-1" />
                             Context-Aware
                           </Badge>
@@ -385,7 +372,7 @@ export const AIConciergeBanner = () => {
                             size="sm" 
                             variant="ghost" 
                             onClick={getContextualRecommendation}
-                            className="text-xs touch-target"
+                            className="text-xs"
                           >
                             Refresh Analysis
                           </Button>
