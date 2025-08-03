@@ -25,6 +25,7 @@ export const AccountLockoutAlert = ({
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
+          clearInterval(timer);
           // Reload the page when lockout expires to allow login attempts
           window.location.reload();
           return 0;

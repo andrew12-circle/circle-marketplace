@@ -94,7 +94,7 @@ export const AIConciergeBanner = () => {
     try {
       setIsLoadingRecommendation(true);
       
-      console.log('Requesting contextual AI recommendation for user:', user?.id);
+      // Requesting contextual AI recommendation
       
       const { data, error } = await supabase.functions.invoke('enhanced-ai-recommendations', {
         body: {
@@ -107,10 +107,10 @@ export const AIConciergeBanner = () => {
         }
       });
 
-      console.log('AI recommendation response:', { data, error });
+      // AI recommendation response received
 
       if (error) {
-        console.error('Error getting AI recommendation:', error);
+        // Error getting AI recommendation
         toast({
           title: "AI Analysis Unavailable", 
           description: "Using general insights for now. Please try again later.",
@@ -121,15 +121,15 @@ export const AIConciergeBanner = () => {
         setCurrentInsight(randomInsight);
       } else if (data?.recommendation) {
         setAiRecommendation(data.recommendation);
-        console.log('Context-aware recommendation received:', data);
+        // Context-aware recommendation received
       } else {
-        console.warn('No recommendation received from AI service');
+        // No recommendation received from AI service
         // Fall back to static insights
         const randomInsight = businessInsights[Math.floor(Math.random() * businessInsights.length)];
         setCurrentInsight(randomInsight);
       }
     } catch (error) {
-      console.error('Failed to get contextual recommendation:', error);
+      // Failed to get contextual recommendation
       toast({
         title: "Connection Error",
         description: "Please check your connection and try again.",

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, memo } from "react";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -665,3 +665,6 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
     </TooltipProvider>
   );
 };
+
+// Memoize the component to prevent unnecessary re-renders
+export default memo(ServiceCard);

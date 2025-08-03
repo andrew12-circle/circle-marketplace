@@ -5,8 +5,12 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
+import { suppressConsoleLogs } from "./utils/performance";
 import "./index.css";
 import "./i18n";
+
+// Optimize performance for production
+suppressConsoleLogs();
 
 import Index from "./pages/Index";
 import { Marketplace } from "./pages/Marketplace";
