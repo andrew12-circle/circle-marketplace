@@ -293,8 +293,12 @@ export const MarketplaceGrid = () => {
       
       // Create abort controller for request timeout
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+      const timeoutId = setTimeout(() => {
+        console.log('Request timeout reached, aborting...');
+        controller.abort();
+      }, 15000); // 15 second timeout
       
+      console.log('About to query vendors table...');
       // Load vendors from the correct table
       const vendorsResponse = await supabase
         .from('vendors')
@@ -303,10 +307,12 @@ export const MarketplaceGrid = () => {
         .order('rating', { ascending: false })
         .limit(50);
 
+      console.log('Vendors query completed');
       console.log('Vendors response:', vendorsResponse);
-      console.log('Vendors data:', vendorsResponse.data);
+      console.log('Vendors data length:', vendorsResponse.data?.length);
       console.log('Vendors error:', vendorsResponse.error);
 
+      console.log('About to query services table...');
       // Load services without vendor join for now, then get vendors separately
       const servicesResponse = await supabase
         .from('services')
@@ -315,8 +321,9 @@ export const MarketplaceGrid = () => {
         .order('created_at', { ascending: false })
         .limit(100);
 
+      console.log('Services query completed');
       console.log('Services response:', servicesResponse);
-      console.log('Services data:', servicesResponse.data);
+      console.log('Services data length:', servicesResponse.data?.length);
       console.log('Services error:', servicesResponse.error);
 
       clearTimeout(timeoutId);
