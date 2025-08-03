@@ -247,10 +247,19 @@ export const MarketplaceGrid = () => {
   };
 
   const loadData = useCallback(async () => {
-    console.log('MarketplaceGrid: loadData called');
+    console.log('MarketplaceGrid: loadData called - starting fetch');
+    
+    // Don't load if already loading
+    if (loading) {
+      console.log('MarketplaceGrid: Already loading, skipping');
+      return;
+    }
+    
     try {
       setLoading(true);
       setError(null);
+      
+      console.log('MarketplaceGrid: Making Supabase queries...');
       
       // Load vendors and services with optimized queries
       const [vendorsResponse, servicesResponse] = await Promise.all([
@@ -268,6 +277,13 @@ export const MarketplaceGrid = () => {
           .order('created_at', { ascending: false })
           .limit(30)
       ]);
+
+      console.log('MarketplaceGrid: Supabase responses received', {
+        vendorsError: vendorsResponse.error,
+        servicesError: servicesResponse.error,
+        vendorsData: vendorsResponse.data?.length,
+        servicesData: servicesResponse.data?.length
+      });
 
       if (vendorsResponse.error) {
         console.error('Vendors query error:', vendorsResponse.error);
@@ -322,25 +338,42 @@ export const MarketplaceGrid = () => {
       
       setServices(formattedServices);
       setVendors(formattedVendors);
-      console.log('MarketplaceGrid: Data loaded successfully', { services: formattedServices.length, vendors: formattedVendors.length });
+      console.log('MarketplaceGrid: State updated successfully', { services: formattedServices.length, vendors: formattedVendors.length });
       
     } catch (error) {
       console.error('Marketplace data loading error:', error);
       setError(`Failed to load marketplace data: ${error.message || 'Unknown error'}`);
     } finally {
       setLoading(false);
+      console.log('MarketplaceGrid: Loading complete');
     }
   }, []); // CRITICAL: Empty dependency array to prevent infinite loops
 
+  // Single useEffect that runs only once on mount
   useEffect(() => {
-    console.log('MarketplaceGrid: useEffect triggered for loadData');
-    loadData();
+    console.log('MarketplaceGrid: useEffect triggered - mounting component');
     
-    // Load saved services if user is logged in
-    if (profile?.user_id) {
-      loadSavedServices();
-    }
-  }, []); // Only run once on mount - remove profile dependency to prevent loops
+    let isMounted = true;
+    
+    const initializeData = async () => {
+      if (isMounted) {
+        await loadData();
+        
+        // Load saved services if user is logged in
+        if (profile?.user_id) {
+          await loadSavedServices();
+        }
+      }
+    };
+    
+    initializeData();
+    
+    // Cleanup function
+    return () => {
+      isMounted = false;
+      console.log('MarketplaceGrid: Component unmounting');
+    };
+  }, []); // Empty dependency array - run only once on mount
 
 
   // Helper function to extract numeric price from strings like "$150" or "150"
