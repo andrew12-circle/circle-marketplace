@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
+import { SignatureWorkflowDebug } from './SignatureWorkflowDebug';
 import { PenTool, CheckCircle, Clock, AlertCircle } from 'lucide-react';
 
 interface CoPayRequest {
@@ -21,15 +22,15 @@ interface CoPayRequest {
   agent?: {
     display_name: string;
     email: string;
-  };
+  } | null;
   vendor?: {
     display_name: string;
-    business_name: string;
+    business_name?: string;
     email: string;
-  };
+  } | null;
   service?: {
     title: string;
-  };
+  } | null;
 }
 
 interface SignatureWorkflowProps {
@@ -61,14 +62,23 @@ export const SignatureWorkflow: React.FC<SignatureWorkflowProps> = ({
 
       if (error) throw error;
       
-      // Transform the data to match our interface
+      console.log('Raw Supabase data:', data);
+      
+      // Safely transform the data to handle potential errors in related data
       const transformedData: CoPayRequest = {
         ...data,
-        agent: Array.isArray(data.agent) ? data.agent[0] : data.agent,
-        vendor: Array.isArray(data.vendor) ? data.vendor[0] : data.vendor,
-        service: Array.isArray(data.service) ? data.service[0] : data.service,
+        agent: (data.agent && typeof data.agent === 'object' && !Array.isArray(data.agent) && 'display_name' in data.agent) 
+          ? data.agent as { display_name: string; email: string }
+          : null,
+        vendor: (data.vendor && typeof data.vendor === 'object' && !Array.isArray(data.vendor) && 'display_name' in data.vendor) 
+          ? data.vendor as { display_name: string; business_name?: string; email: string }
+          : null,
+        service: (data.service && typeof data.service === 'object' && !Array.isArray(data.service) && 'title' in data.service) 
+          ? data.service as { title: string }
+          : null,
       };
       
+      console.log('Transformed data:', transformedData);
       setRequest(transformedData);
 
       // Decode agreement content if available
@@ -201,8 +211,8 @@ export const SignatureWorkflow: React.FC<SignatureWorkflowProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <h4 className="font-medium text-sm text-muted-foreground">Agent</h4>
-              <p className="font-medium">{request.agent?.display_name}</p>
-              <p className="text-sm text-muted-foreground">{request.agent?.email}</p>
+              <p className="font-medium">{request.agent?.display_name || 'Unknown Agent'}</p>
+              <p className="text-sm text-muted-foreground">{request.agent?.email || 'No email'}</p>
               {request.agent_signature_date ? (
                 <Badge variant="default" className="mt-1 bg-green-100 text-green-800">
                   <CheckCircle className="w-3 h-3 mr-1" />
@@ -217,8 +227,8 @@ export const SignatureWorkflow: React.FC<SignatureWorkflowProps> = ({
             </div>
             <div>
               <h4 className="font-medium text-sm text-muted-foreground">Vendor</h4>
-              <p className="font-medium">{request.vendor?.business_name || request.vendor?.display_name}</p>
-              <p className="text-sm text-muted-foreground">{request.vendor?.email}</p>
+              <p className="font-medium">{request.vendor?.business_name || request.vendor?.display_name || 'Unknown Vendor'}</p>
+              <p className="text-sm text-muted-foreground">{request.vendor?.email || 'No email'}</p>
               {request.vendor_signature_date ? (
                 <Badge variant="default" className="mt-1 bg-green-100 text-green-800">
                   <CheckCircle className="w-3 h-3 mr-1" />
@@ -237,7 +247,7 @@ export const SignatureWorkflow: React.FC<SignatureWorkflowProps> = ({
 
           <div>
             <h4 className="font-medium mb-2">Service Details</h4>
-            <p className="text-sm"><span className="font-medium">Service:</span> {request.service?.title}</p>
+            <p className="text-sm"><span className="font-medium">Service:</span> {request.service?.title || 'Unknown Service'}</p>
             <p className="text-sm"><span className="font-medium">Split Percentage:</span> {request.requested_split_percentage}%</p>
             <p className="text-sm"><span className="font-medium">Agreement Version:</span> {request.agreement_template_version}</p>
           </div>
@@ -300,6 +310,9 @@ export const SignatureWorkflow: React.FC<SignatureWorkflowProps> = ({
           )}
         </CardContent>
       </Card>
+      
+      {/* Temporary debug component */}
+      <SignatureWorkflowDebug coPayRequestId={coPayRequestId} />
     </div>
   );
 };
