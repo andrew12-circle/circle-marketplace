@@ -291,48 +291,47 @@ export const MarketplaceGrid = () => {
       
       console.log('Loading marketplace data...');
       
-      // Create abort controller for request timeout
+      // Create abort controller for request timeout - reduced for mobile
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout for mobile
       
-      // Load vendors from the correct table
-      const vendorsResponse = await supabase
-        .from('vendors')
-        .select('*')
-        .order('sort_order', { ascending: true })
-        .order('rating', { ascending: false })
-        .limit(50);
-
-      console.log('Vendors response:', vendorsResponse);
-      console.log('Vendors data:', vendorsResponse.data);
-      console.log('Vendors error:', vendorsResponse.error);
-
-      // Load services without vendor join for now, then get vendors separately
-      const servicesResponse = await supabase
-        .from('services')
-        .select('*')
-        .order('sort_order', { ascending: true })
-        .order('created_at', { ascending: false })
-        .limit(100);
-
-      console.log('Services response:', servicesResponse);
-      console.log('Services data:', servicesResponse.data);
-      console.log('Services error:', servicesResponse.error);
+      // Load data in parallel for better performance
+      const [vendorsResponse, servicesResponse] = await Promise.all([
+        supabase
+          .from('vendors')
+          .select('*')
+          .order('sort_order', { ascending: true })
+          .order('rating', { ascending: false })
+          .limit(20) // Reduced limit for faster mobile loading
+          .abortSignal(controller.signal),
+        
+        supabase
+          .from('services')
+          .select('*')
+          .order('sort_order', { ascending: true })
+          .order('created_at', { ascending: false })
+          .limit(50) // Reduced limit for faster mobile loading
+          .abortSignal(controller.signal)
+      ]);
 
       clearTimeout(timeoutId);
 
       if (vendorsResponse.error) {
         console.error('Vendors error:', vendorsResponse.error);
-        throw vendorsResponse.error;
+        // Don't throw, continue with empty vendors
+        console.log('Continuing with empty vendors array');
       }
       if (servicesResponse.error) {
         console.error('Services error:', servicesResponse.error);
-        throw servicesResponse.error;
+        // Don't throw, continue with empty services
+        console.log('Continuing with empty services array');
       }
 
-      // Convert the database response to match our interface
-      const formattedServices = (servicesResponse.data || []).map(service => ({
+      // Convert the database response to match our interface with unique keys
+      const formattedServices = (servicesResponse.data || []).map((service, index) => ({
         ...service,
+        // Ensure unique keys by adding index to prevent duplicate key warnings
+        uniqueKey: `${service.id}-${index}`,
         discount_percentage: service.discount_percentage ? String(service.discount_percentage) : undefined,
         vendor: {
           name: 'Service Provider',
@@ -342,9 +341,10 @@ export const MarketplaceGrid = () => {
         }
       }));
       
-      // Format vendors data using vendors table
-      const formattedVendors = (vendorsResponse.data || []).map(vendor => ({
+      // Format vendors data with unique keys
+      const formattedVendors = (vendorsResponse.data || []).map((vendor, index) => ({
         ...vendor,
+        uniqueKey: `${vendor.id}-${index}`,
         id: vendor.id,
         name: vendor.name || 'Unknown Vendor',
         description: vendor.description || '',
@@ -372,30 +372,13 @@ export const MarketplaceGrid = () => {
       setVendors(formattedVendors);
       
       // Record success
-      setCircuitBreakerState({
-        isOpen: false,
-        failureCount: 0,
-        lastFailureTime: 0,
-        nextAttempt: 0,
-      });
+      recordSuccess();
       
     } catch (error) {
       console.error('Marketplace data loading error:', error);
       
       // Record failure
-      setCircuitBreakerState(prev => {
-        const newFailureCount = prev.failureCount + 1;
-        if (newFailureCount >= CIRCUIT_BREAKER_CONFIG.failureThreshold) {
-          return {
-            ...prev,
-            isOpen: true,
-            failureCount: newFailureCount,
-            lastFailureTime: Date.now(),
-            nextAttempt: Date.now() + CIRCUIT_BREAKER_CONFIG.timeout,
-          };
-        }
-        return { ...prev, failureCount: newFailureCount };
-      });
+      recordFailure();
       
       if (error.name === 'AbortError') {
         setError('Request timed out. Please check your connection and try again.');
@@ -412,7 +395,7 @@ export const MarketplaceGrid = () => {
       console.log('Setting loading to false');
       setLoading(false);
     }
-  }, [CIRCUIT_BREAKER_CONFIG.failureThreshold, CIRCUIT_BREAKER_CONFIG.timeout, circuitBreakerState.isOpen, circuitBreakerState.nextAttempt, toast]);
+  }, [recordSuccess, recordFailure, toast]);
 
   useEffect(() => {
     loadData();
@@ -694,12 +677,31 @@ export const MarketplaceGrid = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex items-center justify-center h-64">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-circle-primary mx-auto mb-4"></div>
-              <p className="text-muted-foreground">{t('loading')} marketplace...</p>
-            </div>
+        <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
+          {/* Hero Section Skeleton */}
+          <div className="mb-8 sm:mb-12">
+            <div className="h-8 sm:h-12 bg-muted animate-pulse rounded-lg mb-4 w-2/3"></div>
+            <div className="h-4 sm:h-6 bg-muted animate-pulse rounded-lg w-full max-w-2xl"></div>
+          </div>
+          
+          {/* Loading Grid Skeleton */}
+          <div className="mobile-grid gap-4 sm:gap-6 mb-8">
+            {Array.from({ length: 8 }).map((_, index) => (
+              <div key={index} className="bg-card border border-border rounded-lg p-4 animate-pulse">
+                <div className="h-32 sm:h-48 bg-muted rounded-lg mb-4"></div>
+                <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
+                <div className="h-3 bg-muted rounded w-1/2 mb-4"></div>
+                <div className="flex gap-2">
+                  <div className="h-8 bg-muted rounded flex-1"></div>
+                  <div className="h-8 bg-muted rounded w-8"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+          
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-circle-primary mx-auto mb-2"></div>
+            <p className="text-muted-foreground text-sm">Loading marketplace...</p>
           </div>
         </div>
       </div>
