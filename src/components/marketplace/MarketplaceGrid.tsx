@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { ServiceCard } from "./ServiceCard";
 import { EnhancedVendorCard } from "./EnhancedVendorCard";
@@ -211,6 +211,24 @@ export const MarketplaceGrid = () => {
   const { user, profile } = useAuth();
   const { location } = useLocation();
 
+  // Memoize expensive keyword arrays to prevent recreation on every render
+  const SAFE_KEYWORDS = useMemo(() => [
+    'digital ads', 'facebook ads', 'google ads', 'display ads', 'retargeting',
+    'postcards', 'direct mail', 'flyers', 'door hangers', 'brochures',
+    'educational', 'seminar', 'workshop', 'market report', 'buyer education',
+    'joint advertising', 'co-branded', 'print advertising'
+  ], []);
+
+  const RESTRICTED_KEYWORDS = useMemo(() => [
+    'crm', 'lead capture', 'lead generation', 'funnel', 'drip email',
+    'follow-up', 'seo', 'landing page', 'chatbot', 'sms', 'automation',
+    'business card', 'sign', 'social media management', 'posting',
+    'content calendar', 'listing video', 'drone', 'agent video',
+    'testimonial', 'open house', 'appreciation', 'pop-by', 'gift',
+    'closing gift', 'referral', 'past client', 'database', 'strategy',
+    'coaching', 'consulting', 'accountability'
+  ], []);
+
   const loadSavedServices = async () => {
     if (!profile?.user_id) return;
 
@@ -331,86 +349,65 @@ export const MarketplaceGrid = () => {
     return parseFloat(cleanedPrice) || 0;
   };
 
-  const filteredServices = services.filter(service => {
-    const matchesSearch = service.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         service.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         service.vendor?.name?.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesCategory = filters.category === "all" || service.category === filters.category;
-    
-    // Fix price filtering to handle currency symbols
-    const priceValue = extractNumericPrice(service.retail_price);
-    const matchesPrice = priceValue >= filters.priceRange[0] && priceValue <= filters.priceRange[1];
-    const matchesVerified = !filters.verified || service.vendor?.is_verified;
-    const matchesFeatured = !filters.featured || service.is_featured;
-
-    // Co-pay eligibility filtering
-    let matchesCoPayEligible = true;
-    if (filters.coPayEligible) {
-      const category = service.category?.toLowerCase() || '';
-      const title = service.title?.toLowerCase() || '';
-      const tags = service.tags?.map(tag => tag.toLowerCase()) || [];
+  // Memoize filtering for performance under load
+  const filteredServices = useMemo(() => {
+    return services.filter(service => {
+      const matchesSearch = service.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           service.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           service.vendor?.name?.toLowerCase().includes(searchTerm.toLowerCase());
       
-      // Safe for co-pay (True advertising)
-      const safeKeywords = [
-        'digital ads', 'facebook ads', 'google ads', 'display ads', 'retargeting',
-        'postcards', 'direct mail', 'flyers', 'door hangers', 'brochures',
-        'educational', 'seminar', 'workshop', 'market report', 'buyer education',
-        'joint advertising', 'co-branded', 'print advertising'
-      ];
+      const matchesCategory = filters.category === "all" || service.category === filters.category;
       
-      // Never allow co-pay (Business tools/lead generation)
-      const restrictedKeywords = [
-        'crm', 'lead capture', 'lead generation', 'funnel', 'drip email',
-        'follow-up', 'seo', 'landing page', 'chatbot', 'sms', 'automation',
-        'business card', 'sign', 'social media management', 'posting',
-        'content calendar', 'listing video', 'drone', 'agent video',
-        'testimonial', 'open house', 'appreciation', 'pop-by', 'gift',
-        'closing gift', 'referral', 'past client', 'database', 'strategy',
-        'coaching', 'consulting', 'accountability'
-      ];
+      // Fix price filtering to handle currency symbols
+      const priceValue = extractNumericPrice(service.retail_price);
+      const matchesPrice = priceValue >= filters.priceRange[0] && priceValue <= filters.priceRange[1];
+      const matchesVerified = !filters.verified || service.vendor?.is_verified;
+      const matchesFeatured = !filters.featured || service.is_featured;
+
+      // Optimized co-pay eligibility filtering
+      let matchesCoPayEligible = true;
+      if (filters.coPayEligible) {
+        const searchText = `${service.category?.toLowerCase() || ''} ${service.title?.toLowerCase() || ''} ${service.tags?.join(' ').toLowerCase() || ''}`;
+        
+        const hasRestricted = RESTRICTED_KEYWORDS.some(keyword => searchText.includes(keyword));
+        const hasSafe = SAFE_KEYWORDS.some(keyword => searchText.includes(keyword));
+        
+        matchesCoPayEligible = hasSafe && !hasRestricted;
+      }
+
+      return matchesSearch && matchesCategory && matchesPrice && matchesVerified && matchesFeatured && matchesCoPayEligible;
+    });
+  }, [services, searchTerm, filters, SAFE_KEYWORDS, RESTRICTED_KEYWORDS]);
+
+  // Memoize vendor filtering
+  const filteredVendors = useMemo(() => {
+    return vendors.filter(vendor => {
+      if (!vendor) return false;
       
-      const hasRestricted = restrictedKeywords.some(keyword => 
-        title.includes(keyword) || category.includes(keyword) || 
-        tags.some(tag => tag.includes(keyword))
-      );
+      const matchesSearch = vendor.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           vendor.description?.toLowerCase().includes(searchTerm.toLowerCase());
       
-      const hasSafe = safeKeywords.some(keyword => 
-        title.includes(keyword) || category.includes(keyword) || 
-        tags.some(tag => tag.includes(keyword))
-      );
+      const matchesVerified = !filters.verified || vendor.is_verified;
       
-      matchesCoPayEligible = hasSafe && !hasRestricted;
-    }
+      let matchesLocation = true;
+      if (filters.locationFilter && location?.state) {
+        matchesLocation = vendor.license_states?.includes(location.state) ||
+                         vendor.service_states?.includes(location.state) ||
+                         false;
+      }
 
-    return matchesSearch && matchesCategory && matchesPrice && matchesVerified && matchesFeatured && matchesCoPayEligible;
-  });
+      return matchesSearch && matchesVerified && matchesLocation;
+    });
+  }, [vendors, searchTerm, filters, location?.state]);
 
-  const filteredVendors = vendors.filter(vendor => {
-    // Skip null vendors
-    if (!vendor) return false;
-    
-    const matchesSearch = vendor.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         vendor.description?.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesVerified = !filters.verified || vendor.is_verified;
-    
-    // Location-based filtering
-    let matchesLocation = true;
-    if (filters.locationFilter && location?.state) {
-      matchesLocation = vendor.license_states?.includes(location.state) ||
-                       vendor.service_states?.includes(location.state) ||
-                       false;
-    }
-
-    return matchesSearch && matchesVerified && matchesLocation;
-  });
-
-  // Count local vendors for the banner
-  const localVendorCount = location?.state ? vendors.filter(vendor => 
-    vendor && (vendor.license_states?.includes(location.state) ||
-    vendor.service_states?.includes(location.state))
-  ).length : 0;
+  // Memoize expensive calculations
+  const localVendorCount = useMemo(() => {
+    if (!location?.state) return 0;
+    return vendors.filter(vendor => 
+      vendor && (vendor.license_states?.includes(location.state) ||
+      vendor.service_states?.includes(location.state))
+    ).length;
+  }, [vendors, location?.state]);
 
   // Get categories based on view mode
   const getCategories = () => {
@@ -632,8 +629,14 @@ export const MarketplaceGrid = () => {
           <div className="space-y-6">
             <EnhancedSearch
               onSearchChange={setSearchFilters}
-              availableCategories={Array.from(new Set(services.map(service => service.category).filter(Boolean)))}
-              availableTags={Array.from(new Set(services.flatMap(service => service.tags || [])))}
+              availableCategories={useMemo(() => 
+                Array.from(new Set(services.map(service => service.category).filter(Boolean))), 
+                [services]
+              )}
+              availableTags={useMemo(() => 
+                Array.from(new Set(services.flatMap(service => service.tags || []))), 
+                [services]
+              )}
             />
             
             <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
