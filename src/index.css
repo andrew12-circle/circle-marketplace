@@ -295,10 +295,49 @@ All colors MUST be HSL.
     }
   }
 
-  /* Prevent zoom on input focus on iOS */
+  /* Prevent zoom on input focus on iOS and ensure readable fonts */
   @media screen and (max-width: 768px) {
     input, select, textarea {
       font-size: 16px !important;
+    }
+    
+    /* Enhanced mobile typography */
+    .mobile-nav-text {
+      font-size: 0.875rem !important;
+      font-weight: 500 !important;
+      line-height: 1.25rem !important;
+    }
+    
+    /* Better button text sizing */
+    button, .button {
+      font-size: 0.875rem !important;
+      line-height: 1.25rem !important;
+    }
+    
+    /* Improved mobile navigation */
+    .mobile-nav {
+      font-size: 0.875rem !important;
+      min-height: 44px !important;
+      padding: 0.75rem 1rem !important;
+    }
+    
+    /* Enhanced touch targets */
+    .touch-target {
+      min-height: 44px !important;
+      min-width: 44px !important;
+    }
+    
+    /* Mobile-optimized avatars and icons */
+    .mobile-avatar {
+      height: 2.5rem !important;
+      width: 2.5rem !important;
+    }
+    
+    /* Better spacing for mobile cards */
+    .mobile-card-improved {
+      padding: 1rem !important;
+      border-radius: 0.75rem !important;
+      margin-bottom: 0.75rem !important;
     }
   }
 
