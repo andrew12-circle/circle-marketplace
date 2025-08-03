@@ -30,10 +30,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { GraduationCap, BookOpen, Video, Headphones, Book, Search, Filter, Users, TrendingUp, Sparkles, Heart, Award, ChevronRight, Play, Clock, Star, Crown } from "lucide-react";
+import { GraduationCap, BookOpen, Video, Headphones, Book, Search, Filter, Users, TrendingUp, Sparkles, Heart, Award, ChevronRight, Play, Clock, Star, Crown, Brain } from "lucide-react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useLocation } from "react-router-dom";
+import { AcademyAIContentCurator } from "@/components/academy/AcademyAIContentCurator";
 
 // Mock data - replace with actual data
 const mockCourses = [{
@@ -215,6 +216,7 @@ const AcademyContent = () => {
   const [selectedCourse, setSelectedCourse] = useState<any>(null);
   const [isCourseModalOpen, setIsCourseModalOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState("All");
+  const [isAICuratorOpen, setIsAICuratorOpen] = useState(false);
   const {
     toast
   } = useToast();
@@ -368,11 +370,42 @@ const AcademyContent = () => {
   const renderHomeView = () => <div className="flex-1 p-8 max-w-6xl">
       {/* Hero Section */}
       <div className="mb-12">
-        <h1 className="text-6xl font-bold text-black mb-4">Academy.</h1>
-        <p className="text-gray-600 max-w-2xl text-sm">
-          Finally, we silenced the noise. Welcome to the Academy. A place you can take a 
-          breath, learn, and actually move your career forward.
-        </p>
+        <div className="flex items-start justify-between mb-6">
+          <div>
+            <h1 className="text-6xl font-bold text-black mb-4">Academy.</h1>
+            <p className="text-gray-600 max-w-2xl text-sm">
+              Finally, we silenced the noise. Welcome to the Academy. A place you can take a 
+              breath, learn, and actually move your career forward.
+            </p>
+          </div>
+          <Button 
+            onClick={() => setIsAICuratorOpen(true)}
+            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-3 rounded-lg font-medium flex items-center gap-2"
+          >
+            <Brain className="w-5 h-5" />
+            AI Content Curator
+          </Button>
+        </div>
+        
+        {/* AI Curator Banner */}
+        <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-4 mb-6">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-blue-100 rounded-lg">
+              <Brain className="w-5 h-5 text-blue-600" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold text-blue-900">Get Your Personalized Learning Path</h3>
+              <p className="text-sm text-blue-700">Tell us where you are and where you want to be. Our AI will curate the exact content you need from our entire library.</p>
+            </div>
+            <Button 
+              onClick={() => setIsAICuratorOpen(true)}
+              size="sm"
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              Get Started
+            </Button>
+          </div>
+        </div>
       </div>
 
       {/* Creator Opportunity Banner */}
@@ -547,6 +580,35 @@ const AcademyContent = () => {
       title: "Added to Library",
       description: "Podcast saved to your library"
     });
+  };
+
+  const handleAIContentSelect = (content: any) => {
+    console.log("AI Content Selected:", content);
+    
+    // Handle different content types
+    switch (content.type) {
+      case 'video':
+        handlePlayVideo(content.id);
+        break;
+      case 'podcast':
+        handlePlayPodcast(content.id);
+        break;
+      case 'book':
+        handleReadBook(content.id);
+        break;
+      case 'course':
+        setSelectedCourse(content.id);
+        setIsCourseModalOpen(true);
+        break;
+      default:
+        toast({
+          title: "Content Selected",
+          description: `Opening: ${content.title}`,
+        });
+    }
+    
+    // Close the AI curator modal
+    setIsAICuratorOpen(false);
   };
   const handleDownloadPodcast = (podcastId: string) => {
     toast({
@@ -1674,6 +1736,12 @@ const AcademyContent = () => {
         <BookReaderModal book={selectedBook} isOpen={isBookModalOpen} onClose={() => setIsBookModalOpen(false)} contentUrl={currentBookUrl} />
 
         <CourseViewerModal isOpen={isCourseModalOpen} onClose={() => setIsCourseModalOpen(false)} courseId={selectedCourse || ""} />
+
+        <AcademyAIContentCurator 
+          open={isAICuratorOpen} 
+          onOpenChange={setIsAICuratorOpen}
+          onContentSelect={handleAIContentSelect}
+        />
       </div>
     </SidebarProvider>
     
