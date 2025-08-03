@@ -330,14 +330,11 @@ export const MarketplaceGrid = () => {
     } finally {
       setLoading(false);
     }
-  }, []); // Remove toast dependency to prevent infinite loops
+  }, []); // Empty dependency array to prevent infinite loops
 
   useEffect(() => {
     console.log('MarketplaceGrid: useEffect triggered for loadData');
-    const loadDataOnce = async () => {
-      await loadData();
-    };
-    loadDataOnce();
+    loadData();
   }, []); // Only run once on mount
 
   useEffect(() => {
