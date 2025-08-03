@@ -294,8 +294,38 @@ export type Database = {
         }
         Relationships: []
       }
+      channel_subscriptions: {
+        Row: {
+          channel_id: string
+          id: string
+          subscribed_at: string
+          user_id: string
+        }
+        Insert: {
+          channel_id: string
+          id?: string
+          subscribed_at?: string
+          user_id: string
+        }
+        Update: {
+          channel_id?: string
+          id?: string
+          subscribed_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_channel_subscriptions_channel"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "channels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       channels: {
         Row: {
+          auto_imported: boolean | null
           cover_image_url: string | null
           created_at: string | null
           creator_id: string
@@ -305,8 +335,11 @@ export type Database = {
           name: string
           subscriber_count: number | null
           updated_at: string | null
+          youtube_channel_id: string | null
+          youtube_channel_url: string | null
         }
         Insert: {
+          auto_imported?: boolean | null
           cover_image_url?: string | null
           created_at?: string | null
           creator_id: string
@@ -316,8 +349,11 @@ export type Database = {
           name: string
           subscriber_count?: number | null
           updated_at?: string | null
+          youtube_channel_id?: string | null
+          youtube_channel_url?: string | null
         }
         Update: {
+          auto_imported?: boolean | null
           cover_image_url?: string | null
           created_at?: string | null
           creator_id?: string
@@ -327,6 +363,8 @@ export type Database = {
           name?: string
           subscriber_count?: number | null
           updated_at?: string | null
+          youtube_channel_id?: string | null
+          youtube_channel_url?: string | null
         }
         Relationships: [
           {
@@ -445,6 +483,35 @@ export type Database = {
             columns: ["vendor_id"]
             isOneToOne: false
             referencedRelation: "vendors_with_local_reps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      comment_likes: {
+        Row: {
+          comment_id: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          comment_id: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          comment_id?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_comment_likes_comment"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "content_comments"
             referencedColumns: ["id"]
           },
         ]
@@ -663,6 +730,54 @@ export type Database = {
           },
         ]
       }
+      content_comments: {
+        Row: {
+          content: string
+          content_id: string
+          created_at: string
+          id: string
+          likes_count: number
+          parent_comment_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          content_id: string
+          created_at?: string
+          id?: string
+          likes_count?: number
+          parent_comment_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          content_id?: string
+          created_at?: string
+          id?: string
+          likes_count?: number
+          parent_comment_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_content_comments_content"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "content"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_content_comments_parent"
+            columns: ["parent_comment_id"]
+            isOneToOne: false
+            referencedRelation: "content_comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       content_engagement_events: {
         Row: {
           completion_percentage: number | null
@@ -722,6 +837,41 @@ export type Database = {
           weighted_score?: number | null
         }
         Relationships: []
+      }
+      content_interactions: {
+        Row: {
+          content_id: string
+          created_at: string
+          id: string
+          interaction_type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content_id: string
+          created_at?: string
+          id?: string
+          interaction_type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content_id?: string
+          created_at?: string
+          id?: string
+          interaction_type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_content_interactions_content"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "content"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       content_plays: {
         Row: {
@@ -3270,6 +3420,18 @@ export type Database = {
         Args: { creator_user_id: string }
         Returns: Json
       }
+      get_enhanced_creator_info: {
+        Args: { p_content_id: string }
+        Returns: {
+          creator_type: string
+          display_name: string
+          display_avatar: string
+          display_subscribers: number
+          display_verified: boolean
+          platform_bio: string
+          youtube_channel_id: string
+        }[]
+      }
       get_public_profile: {
         Args: { profile_id: string }
         Returns: {
@@ -3305,6 +3467,14 @@ export type Database = {
       increment_video_views: {
         Args: { video_uuid: string }
         Returns: undefined
+      }
+      link_youtube_channel_to_user: {
+        Args: {
+          p_user_id: string
+          p_youtube_channel_id: string
+          p_youtube_channel_url?: string
+        }
+        Returns: string
       }
       log_admin_operation_secure: {
         Args: {
