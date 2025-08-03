@@ -15,6 +15,9 @@ interface Video {
   isPro?: boolean;
   views?: string;
   description?: string;
+  uploadDate?: string;
+  tags?: string[];
+  difficulty?: string;
 }
 
 interface VideoPlayerModalProps {
@@ -92,15 +95,42 @@ export const VideoPlayerModal = ({ video, isOpen, onClose, videoUrl }: VideoPlay
             )}
           </div>
 
-          {/* Description */}
-          {video.description && (
-            <div className="px-6 py-4 border-t bg-muted/50 max-h-32">
-              <h4 className="font-medium mb-2">Description</h4>
-              <ScrollArea className="h-20">
-                <p className="text-sm text-muted-foreground pr-4">{video.description}</p>
-              </ScrollArea>
+          {/* Description - YouTube Style */}
+          <div className="px-6 py-4 border-t bg-muted/50">
+            <div className="space-y-3">
+              {/* Video Stats */}
+              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                {video.views && <span>{video.views} views</span>}
+                {video.uploadDate && <span>•</span>}
+                {video.uploadDate && <span>{video.uploadDate}</span>}
+                {video.difficulty && <span>•</span>}
+                {video.difficulty && <Badge variant="outline" className="text-xs">{video.difficulty}</Badge>}
+              </div>
+              
+              {/* Description */}
+              {video.description && (
+                <div>
+                  <ScrollArea className="h-24">
+                    <p className="text-sm leading-relaxed pr-4">{video.description}</p>
+                  </ScrollArea>
+                </div>
+              )}
+              
+              {/* Tags */}
+              {video.tags && video.tags.length > 0 && (
+                <div>
+                  <h5 className="text-sm font-medium mb-2">Tags</h5>
+                  <div className="flex flex-wrap gap-2">
+                    {video.tags.map((tag, index) => (
+                      <Badge key={index} variant="secondary" className="text-xs">
+                        #{tag}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
       </DialogContent>
     </Dialog>
