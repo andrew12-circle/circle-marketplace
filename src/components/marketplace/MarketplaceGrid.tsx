@@ -628,7 +628,7 @@ export const MarketplaceGrid = () => {
           {/* Hero Section */}
           <div className="mb-12">
             <h1 className="text-3xl sm:text-6xl font-bold text-black mb-4">{t('marketplaceTitle')}</h1>
-            <p className="text-sm sm:text-lg text-gray-600 max-w-2xl">
+            <p className="text-lg text-gray-600 max-w-2xl">
               {t('marketplaceDescription')}
             </p>
           </div>
