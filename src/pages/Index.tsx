@@ -48,9 +48,9 @@ const Index = () => {
                     {location.pathname === "/" && <CartDrawer />}
                     
                     {user && profile && (
-                      <Link to="/wallet" className="flex items-center gap-1 text-xs hover:bg-accent hover:text-accent-foreground rounded-md px-2 py-1.5 transition-colors cursor-pointer touch-target">
+                      <Link to="/wallet" className="flex items-center gap-1 text-xs hover:bg-accent hover:text-accent-foreground rounded-md px-1.5 py-1 transition-colors cursor-pointer touch-target">
                         <Crown className="w-3 h-3 text-yellow-500" />
-                        <span className="font-medium">{profile.circle_points}</span>
+                        <span className="font-medium text-xs">{profile.circle_points}</span>
                       </Link>
                     )}
                     
@@ -63,7 +63,7 @@ const Index = () => {
                   <div className="flex bg-muted rounded-full p-1 w-full max-w-xs">
                     <Link
                       to="/"
-                      className={`flex-1 text-sm py-2 px-4 rounded-full font-medium transition-all text-center ${
+                      className={`flex-1 text-xs py-1.5 px-3 rounded-full font-medium transition-all text-center ${
                         location.pathname === "/" 
                           ? "bg-background text-foreground shadow-sm" 
                           : "text-muted-foreground"
@@ -73,7 +73,7 @@ const Index = () => {
                     </Link>
                     <Link
                       to="/academy"
-                      className={`flex-1 text-sm py-2 px-4 rounded-full font-medium transition-all text-center ${
+                      className={`flex-1 text-xs py-1.5 px-3 rounded-full font-medium transition-all text-center ${
                         location.pathname === "/academy" 
                           ? "bg-background text-foreground shadow-sm" 
                           : "text-muted-foreground"

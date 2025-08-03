@@ -232,16 +232,16 @@ export const AIConciergeBanner = () => {
             
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-3">
-                <h3 className="text-xl font-semibold text-foreground">
+                <h3 className="text-lg md:text-xl font-semibold text-foreground">
                   {getTimeOfDayGreeting()}, {user && profile ? (profile.display_name || 'Agent') : 'Future Circle Member'}! 
                 </h3>
-                <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
+                <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 text-xs">
                   AI Concierge
                 </Badge>
               </div>
               
               <div className="flex items-center justify-between mb-4">
-                <p className="text-muted-foreground">
+                <p className="text-sm md:text-base text-muted-foreground">
                   How can I help you grow your business today?
                 </p>
               </div>
@@ -427,8 +427,8 @@ export const AIConciergeBanner = () => {
                 </div>
               )}
 
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Users className="h-4 w-4" />
+              <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
+                <Users className="h-3 w-3 sm:h-4 sm:w-4" />
                 <span>Based on analysis of 10,000+ successful real estate professionals</span>
               </div>
             </div>
