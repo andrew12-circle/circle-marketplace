@@ -70,7 +70,7 @@ export const VideoPlayerModal = ({ video, isOpen, onClose, videoUrl }: VideoPlay
   // Create mock data for features not yet in database
   const mockChannel: Channel = {
     id: video.creator_id || 'unknown',
-    name: video.metadata?.channel_title || video.creator || 'Unknown Channel',
+    name: video.metadata?.channel_title || video.creator || 'Unknown Creator',
     subscribers: 12500,
     isSubscribed: false,
     avatar: undefined
