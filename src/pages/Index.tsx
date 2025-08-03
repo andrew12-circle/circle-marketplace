@@ -39,8 +39,9 @@ const Index = () => {
                 />
               </div>
               
-              {/* Empty space for centering */}
+              {/* Navigation Tabs - Desktop */}
               <div className="hidden sm:flex flex-1 justify-center">
+                <NavigationTabs activeTab="marketplace" />
               </div>
               
               <div className="sm:hidden flex-1 px-4">
