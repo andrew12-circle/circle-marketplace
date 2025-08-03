@@ -60,7 +60,16 @@ export const SignatureWorkflow: React.FC<SignatureWorkflowProps> = ({
         .single();
 
       if (error) throw error;
-      setRequest(data);
+      
+      // Transform the data to match our interface
+      const transformedData: CoPayRequest = {
+        ...data,
+        agent: Array.isArray(data.agent) ? data.agent[0] : data.agent,
+        vendor: Array.isArray(data.vendor) ? data.vendor[0] : data.vendor,
+        service: Array.isArray(data.service) ? data.service[0] : data.service,
+      };
+      
+      setRequest(transformedData);
 
       // Decode agreement content if available
       if (data.comarketing_agreement_url?.startsWith('data:text/plain;base64,')) {

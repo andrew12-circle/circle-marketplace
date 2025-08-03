@@ -20,10 +20,12 @@ import {
   Shield,
   Users,
   Calendar,
-  FileUp
+  FileUp,
+  PenTool
 } from 'lucide-react';
 import { ComplianceDocumentUpload } from './ComplianceDocumentUpload';
 import { ComplianceWorkflowLog } from './ComplianceWorkflowLog';
+import { SignatureWorkflow } from './SignatureWorkflow';
 
 interface CoPayRequest {
   id: string;
