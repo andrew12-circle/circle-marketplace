@@ -224,15 +224,15 @@ export const AIConciergeBanner = () => {
   return (
     <div className="mb-8">
       <Card className="bg-gradient-to-br from-primary/5 via-background to-accent/5 border-primary/20 shadow-lg">
-        <CardContent className="p-3 md:p-6">
-          <div className="flex items-start gap-2 md:flex-row md:items-start md:gap-4 overflow-hidden md:overflow-visible">
-            <div className="p-2 md:p-3 rounded-xl bg-primary/10 border border-primary/20 shrink-0">
-              <Brain className="h-4 w-4 md:h-6 md:w-6 text-primary" />
+        <CardContent className="p-2 md:p-3">
+          <div className="flex items-start gap-2 overflow-hidden">
+            <div className="p-1.5 rounded-lg bg-primary/10 border border-primary/20 shrink-0">
+              <Brain className="h-3 w-3 md:h-4 md:w-4 text-primary" />
             </div>
             
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 md:flex-row md:items-center md:gap-3 mb-2 md:mb-3">
-                <h3 className="text-sm md:text-lg lg:text-xl font-semibold text-foreground leading-tight">
+              <div className="flex items-center gap-2 mb-1.5">
+                <h3 className="text-xs md:text-sm font-semibold text-foreground leading-tight">
                   {getTimeOfDayGreeting()}, {user && profile ? (profile.display_name || 'Agent') : 'Future Circle Member'}! 
                 </h3>
                 <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 text-xs shrink-0">
@@ -240,14 +240,14 @@ export const AIConciergeBanner = () => {
                 </Badge>
               </div>
               
-              <div className="mb-2 md:mb-4">
-                <p className="text-xs md:text-base text-muted-foreground">
+              <div className="mb-2">
+                <p className="text-xs text-muted-foreground">
                   How can I help you grow your business today?
                 </p>
               </div>
 
               {/* Chat Input Area */}
-              <div className="bg-card/30 backdrop-blur-sm border border-border/50 rounded-lg p-2 md:p-4 mb-2 md:mb-4 -mx-1 md:mx-0">
+              <div className="bg-card/30 backdrop-blur-sm border border-border/50 rounded-lg p-2 mb-2 -mx-1 md:mx-0">
                 <div className="flex items-center gap-2 md:gap-3">
                   <div className="flex-1 relative">
                     <Input
