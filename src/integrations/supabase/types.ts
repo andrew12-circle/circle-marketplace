@@ -47,6 +47,39 @@ export type Database = {
         }
         Relationships: []
       }
+      agent_copay_spending: {
+        Row: {
+          agent_id: string
+          created_at: string
+          id: string
+          month_year: string
+          total_requests: number | null
+          total_spent: number | null
+          updated_at: string
+          vendor_id: string
+        }
+        Insert: {
+          agent_id: string
+          created_at?: string
+          id?: string
+          month_year: string
+          total_requests?: number | null
+          total_spent?: number | null
+          updated_at?: string
+          vendor_id: string
+        }
+        Update: {
+          agent_id?: string
+          created_at?: string
+          id?: string
+          month_year?: string
+          total_requests?: number | null
+          total_spent?: number | null
+          updated_at?: string
+          vendor_id?: string
+        }
+        Relationships: []
+      }
       agent_invitations: {
         Row: {
           agent_company: string | null
@@ -989,6 +1022,101 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      copay_notification_preferences: {
+        Row: {
+          created_at: string
+          email_notifications: boolean | null
+          id: string
+          payment_processed: boolean | null
+          push_notifications: boolean | null
+          request_approved: boolean | null
+          request_created: boolean | null
+          request_declined: boolean | null
+          updated_at: string
+          user_id: string
+          weekly_summary: boolean | null
+        }
+        Insert: {
+          created_at?: string
+          email_notifications?: boolean | null
+          id?: string
+          payment_processed?: boolean | null
+          push_notifications?: boolean | null
+          request_approved?: boolean | null
+          request_created?: boolean | null
+          request_declined?: boolean | null
+          updated_at?: string
+          user_id: string
+          weekly_summary?: boolean | null
+        }
+        Update: {
+          created_at?: string
+          email_notifications?: boolean | null
+          id?: string
+          payment_processed?: boolean | null
+          push_notifications?: boolean | null
+          request_approved?: boolean | null
+          request_created?: boolean | null
+          request_declined?: boolean | null
+          updated_at?: string
+          user_id?: string
+          weekly_summary?: boolean | null
+        }
+        Relationships: []
+      }
+      copay_payments: {
+        Row: {
+          agent_amount: number
+          copay_request_id: string
+          created_at: string
+          error_message: string | null
+          id: string
+          order_id: string | null
+          payment_status: string | null
+          processed_at: string | null
+          stripe_payment_intent_id: string | null
+          total_service_amount: number
+          updated_at: string
+          vendor_reimbursement: number
+        }
+        Insert: {
+          agent_amount: number
+          copay_request_id: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          order_id?: string | null
+          payment_status?: string | null
+          processed_at?: string | null
+          stripe_payment_intent_id?: string | null
+          total_service_amount: number
+          updated_at?: string
+          vendor_reimbursement: number
+        }
+        Update: {
+          agent_amount?: number
+          copay_request_id?: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          order_id?: string | null
+          payment_status?: string | null
+          processed_at?: string | null
+          stripe_payment_intent_id?: string | null
+          total_service_amount?: number
+          updated_at?: string
+          vendor_reimbursement?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "copay_payments_copay_request_id_fkey"
+            columns: ["copay_request_id"]
+            isOneToOne: false
+            referencedRelation: "co_pay_requests"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       course_progress: {
         Row: {
@@ -2754,6 +2882,39 @@ export type Database = {
           id?: string
           is_available_now?: boolean
           next_available_slot?: string | null
+          updated_at?: string
+          vendor_id?: string
+        }
+        Relationships: []
+      }
+      vendor_copay_rules: {
+        Row: {
+          auto_approve_threshold: number | null
+          created_at: string
+          id: string
+          is_active: boolean | null
+          max_split_percentage: number | null
+          monthly_limit_per_agent: number | null
+          updated_at: string
+          vendor_id: string
+        }
+        Insert: {
+          auto_approve_threshold?: number | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          max_split_percentage?: number | null
+          monthly_limit_per_agent?: number | null
+          updated_at?: string
+          vendor_id: string
+        }
+        Update: {
+          auto_approve_threshold?: number | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          max_split_percentage?: number | null
+          monthly_limit_per_agent?: number | null
           updated_at?: string
           vendor_id?: string
         }
