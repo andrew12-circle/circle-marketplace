@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -63,6 +64,7 @@ interface VideoPlayerModalProps {
 }
 
 export const VideoPlayerModal = ({ video, isOpen, onClose, videoUrl }: VideoPlayerModalProps) => {
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   if (!video || !videoUrl) return null;
 
   // Create mock data for features not yet in database
@@ -259,9 +261,21 @@ export const VideoPlayerModal = ({ video, isOpen, onClose, videoUrl }: VideoPlay
           <div className="px-6 py-4 border-b bg-muted/30">
             <div className="space-y-3">
               {enhancedVideo.description && (
-                <ScrollArea className="h-20">
-                  <p className="text-sm leading-relaxed pr-4">{enhancedVideo.description}</p>
-                </ScrollArea>
+                <div className="space-y-2">
+                  <div className={`text-sm leading-relaxed ${!isDescriptionExpanded ? 'line-clamp-3' : ''}`}>
+                    {enhancedVideo.description}
+                  </div>
+                  {enhancedVideo.description.length > 150 && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-auto p-0 text-xs text-muted-foreground hover:text-foreground"
+                      onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+                    >
+                      {isDescriptionExpanded ? 'Show less' : 'Show more'}
+                    </Button>
+                  )}
+                </div>
               )}
               
               {enhancedVideo.tags && enhancedVideo.tags.length > 0 && (
