@@ -291,24 +291,36 @@ export const MarketplaceGrid = () => {
       
       console.log('Loading marketplace data...');
       
-      // Simplified query without ordering that might be causing issues
+      // Try just getting a count first to test connectivity
+      console.log('Testing database connection...');
+      const testResponse = await supabase
+        .from('vendors')
+        .select('count')
+        .limit(1);
+      
+      console.log('Test response:', testResponse);
+      
+      if (testResponse.error) {
+        console.error('Database connection failed:', testResponse.error);
+        throw new Error('Database connection failed');
+      }
+      
+      // If test passes, try getting actual data with minimal query
       console.log('About to query vendors table...');
       const vendorsResponse = await supabase
         .from('vendors')
-        .select('*')
-        .limit(50);
+        .select('id, name, description, rating, is_verified')
+        .limit(10);
 
-      console.log('Vendors query completed');
-      console.log('Vendors response:', vendorsResponse);
+      console.log('Vendors query completed:', vendorsResponse);
 
       console.log('About to query services table...');
       const servicesResponse = await supabase
         .from('services')
-        .select('*')
-        .limit(100);
+        .select('id, title, description, category, is_featured')
+        .limit(10);
 
-      console.log('Services query completed');
-      console.log('Services response:', servicesResponse);
+      console.log('Services query completed:', servicesResponse);
 
       if (vendorsResponse.error) {
         console.error('Vendors error:', vendorsResponse.error);
@@ -321,8 +333,12 @@ export const MarketplaceGrid = () => {
 
       // Convert the database response to match our interface
       const formattedServices = (servicesResponse.data || []).map(service => ({
-        ...service,
-        discount_percentage: service.discount_percentage ? String(service.discount_percentage) : undefined,
+        id: service.id,
+        title: service.title,
+        description: service.description,
+        category: service.category,
+        is_featured: service.is_featured,
+        is_top_pick: false, // Add missing field
         vendor: {
           name: 'Service Provider',
           rating: 4.5,
@@ -333,26 +349,19 @@ export const MarketplaceGrid = () => {
       
       // Format vendors data
       const formattedVendors = (vendorsResponse.data || []).map(vendor => ({
-        ...vendor,
         id: vendor.id,
         name: vendor.name || 'Unknown Vendor',
         description: vendor.description || '',
-        logo_url: vendor.logo_url,
-        website_url: vendor.website_url,
-        location: vendor.location,
         rating: vendor.rating || 0,
-        review_count: vendor.review_count || 0,
+        review_count: 0, // Add missing field
         is_verified: vendor.is_verified || false,
-        co_marketing_agents: vendor.co_marketing_agents || 0,
-        campaigns_funded: vendor.campaigns_funded || 0,
-        service_states: vendor.service_states || [],
-        mls_areas: vendor.mls_areas || [],
-        service_radius_miles: vendor.service_radius_miles,
-        license_states: vendor.license_states || [],
-        latitude: vendor.latitude,
-        longitude: vendor.longitude,
-        vendor_type: vendor.vendor_type || 'company',
-        local_representatives: []
+        co_marketing_agents: 0, // Add missing field
+        campaigns_funded: 0, // Add missing field
+        service_states: [], // Add missing field
+        mls_areas: [], // Add missing field
+        license_states: [], // Add missing field
+        vendor_type: 'company', // Add missing field
+        local_representatives: [] // Add missing field
       }));
       
       console.log(`Loaded ${formattedServices.length} services and ${formattedVendors.length} vendors`);
