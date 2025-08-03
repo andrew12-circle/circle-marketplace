@@ -19,7 +19,7 @@ export const CircleProBanner = () => {
             
             <div className="text-center sm:text-left">
               <h3 className="text-lg sm:text-xl font-bold leading-tight">
-                Unlock Your Full Potential
+                Unlock up to 80% off. Build real partnerships. Discover what's actually working.
               </h3>
               <p className="text-xs sm:text-sm text-white/80 mt-1">
                 Circle Pro: Exclusive pricing + earn points on every campaign
