@@ -648,25 +648,13 @@ const AcademyContent = () => {
       {loading ? <div className="flex justify-center items-center py-12">
           <div className="text-muted-foreground">Loading videos...</div>
         </div> : <>
-          <VideoSection title="🚀 Quick Wins (Shorts)" subtitle="Bite-sized tips you can implement today" videos={shortsVideos} onPlayVideo={handlePlayVideo} showSeeAll={true} onSeeAll={() => toast({
-        title: "See All",
-        description: "Show all real estate shorts"
-      })} size="small" />
+          <VideoSection title="🚀 Quick Wins (Shorts)" subtitle="Bite-sized tips you can implement today" videos={shortsVideos} onPlayVideo={handlePlayVideo} showSeeAll={true} onSeeAll={() => setActiveView('videos')} size="small" />
 
-          <VideoSection title="Trending Now" subtitle="Most watched real estate training this week" videos={trendingVideos} onPlayVideo={handlePlayVideo} showSeeAll={true} onSeeAll={() => toast({
-        title: "See All",
-        description: "Show all trending videos"
-      })} size="large" />
+          <VideoSection title="Trending Now" subtitle="Most watched real estate training this week" videos={trendingVideos} onPlayVideo={handlePlayVideo} showSeeAll={true} onSeeAll={() => setActiveView('videos')} size="large" />
 
-          <VideoSection title="Featured Training" subtitle="Hand-picked by real estate experts" videos={featuredVideos} onPlayVideo={handlePlayVideo} showSeeAll={true} onSeeAll={() => toast({
-        title: "See All",
-        description: "Show all featured videos"
-      })} size="medium" />
+          <VideoSection title="Featured Training" subtitle="Hand-picked by real estate experts" videos={featuredVideos} onPlayVideo={handlePlayVideo} showSeeAll={true} onSeeAll={() => setActiveView('videos')} size="medium" />
 
-          <VideoSection title="All Training Videos" subtitle="Browse our complete library of real estate education" videos={allVideos.slice(0, 8)} onPlayVideo={handlePlayVideo} showSeeAll={true} onSeeAll={() => toast({
-        title: "See All",
-        description: "Show all videos"
-      })} size="medium" />
+          <VideoSection title="All Training Videos" subtitle="Browse our complete library of real estate education" videos={allVideos.slice(0, 8)} onPlayVideo={handlePlayVideo} showSeeAll={true} onSeeAll={() => setActiveView('videos')} size="medium" />
         </>}
 
       {/* Categories Grid */}
