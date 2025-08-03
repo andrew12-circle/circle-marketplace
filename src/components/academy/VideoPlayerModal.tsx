@@ -30,7 +30,7 @@ interface Video {
   id: string;
   title: string;
   creator: string;
-  thumbnail: string;
+  thumbnail?: string;
   duration: string;
   category: string;
   rating?: number;
@@ -40,13 +40,19 @@ interface Video {
   uploadDate?: string;
   tags?: string[];
   difficulty?: string;
-  channel: Channel;
-  likes: number;
-  dislikes: number;
-  isLiked: boolean;
-  isDisliked: boolean;
-  isSaved: boolean;
-  comments: Comment[];
+  // Database fields
+  creator_id?: string;
+  metadata?: any;
+  published_at?: string;
+  total_plays?: number;
+  // Social features (will be enhanced in component)
+  channel?: Channel;
+  likes?: number;
+  dislikes?: number;
+  isLiked?: boolean;
+  isDisliked?: boolean;
+  isSaved?: boolean;
+  comments?: Comment[];
 }
 
 interface VideoPlayerModalProps {
@@ -58,6 +64,59 @@ interface VideoPlayerModalProps {
 
 export const VideoPlayerModal = ({ video, isOpen, onClose, videoUrl }: VideoPlayerModalProps) => {
   if (!video || !videoUrl) return null;
+
+  // Create mock data for features not yet in database
+  const mockChannel: Channel = {
+    id: video.creator_id || 'unknown',
+    name: video.metadata?.channel_title || video.creator || 'Unknown Channel',
+    subscribers: 12500,
+    isSubscribed: false,
+    avatar: undefined
+  };
+
+  const mockComments: Comment[] = [
+    {
+      id: '1',
+      author: 'John Doe',
+      content: 'Great insights! This really helped me understand the market better.',
+      timestamp: '2 days ago',
+      likes: 24,
+      isLiked: false,
+      isPinned: true
+    },
+    {
+      id: '2', 
+      author: 'Sarah Chen',
+      content: 'Thank you for breaking down the complex topics into easy-to-understand concepts.',
+      timestamp: '1 day ago',
+      likes: 12,
+      isLiked: false,
+      replies: [
+        {
+          id: '2a',
+          author: video.metadata?.channel_title || video.creator || 'Creator',
+          content: 'Thanks for watching! Glad it was helpful.',
+          timestamp: '1 day ago',
+          likes: 5,
+          isLiked: false
+        }
+      ]
+    }
+  ];
+
+  // Enhance video object with mock social features
+  const enhancedVideo = {
+    ...video,
+    channel: mockChannel,
+    likes: video.metadata?.like_count || 150,
+    dislikes: 12,
+    isLiked: false,
+    isDisliked: false,
+    isSaved: false,
+    comments: mockComments,
+    uploadDate: video.published_at ? new Date(video.published_at).toLocaleDateString() : 'Unknown',
+    views: `${video.total_plays?.toLocaleString() || '0'} views`
+  };
 
   // Extract video ID from YouTube URL for embedding
   const getYouTubeEmbedUrl = (url: string) => {
@@ -86,11 +145,11 @@ export const VideoPlayerModal = ({ video, isOpen, onClose, videoUrl }: VideoPlay
           <DialogHeader className="px-6 py-4 border-b">
             <div className="flex items-center justify-between">
               <div className="flex-1">
-                <DialogTitle className="text-xl font-bold text-left">{video.title}</DialogTitle>
+                <DialogTitle className="text-xl font-bold text-left">{enhancedVideo.title}</DialogTitle>
                 <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                  {video.views && <span>{video.views} views</span>}
-                  {video.uploadDate && <span>•</span>}
-                  {video.uploadDate && <span>{video.uploadDate}</span>}
+                  {enhancedVideo.views && <span>{enhancedVideo.views}</span>}
+                  {enhancedVideo.uploadDate && <span>•</span>}
+                  {enhancedVideo.uploadDate && <span>{enhancedVideo.uploadDate}</span>}
                 </div>
               </div>
               <Button variant="ghost" size="sm" onClick={onClose}>
@@ -104,7 +163,7 @@ export const VideoPlayerModal = ({ video, isOpen, onClose, videoUrl }: VideoPlay
             {embedUrl ? (
               <iframe
                 src={embedUrl}
-                title={video.title}
+                title={enhancedVideo.title}
                 className="w-full h-[400px]"
                 frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -121,28 +180,28 @@ export const VideoPlayerModal = ({ video, isOpen, onClose, videoUrl }: VideoPlay
           <div className="px-6 py-4 border-b">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Badge variant="secondary">{video.category}</Badge>
-                {video.isPro && <Badge variant="default">PRO</Badge>}
-                {video.difficulty && <Badge variant="outline">{video.difficulty}</Badge>}
+                <Badge variant="secondary">{enhancedVideo.category}</Badge>
+                {enhancedVideo.isPro && <Badge variant="default">PRO</Badge>}
+                {enhancedVideo.difficulty && <Badge variant="outline">{enhancedVideo.difficulty}</Badge>}
               </div>
               <div className="flex items-center gap-2">
                 <div className="flex items-center bg-muted rounded-full">
                   <Button 
                     variant="ghost" 
                     size="sm" 
-                    className={`rounded-l-full ${video.isLiked ? 'text-blue-600' : ''}`}
+                    className={`rounded-l-full ${enhancedVideo.isLiked ? 'text-blue-600' : ''}`}
                   >
                     <ThumbsUp className="w-4 h-4 mr-1" />
-                    {formatLikeCount(video.likes)}
+                    {formatLikeCount(enhancedVideo.likes)}
                   </Button>
                   <div className="w-px h-6 bg-border" />
                   <Button 
                     variant="ghost" 
                     size="sm" 
-                    className={`rounded-r-full ${video.isDisliked ? 'text-red-600' : ''}`}
+                    className={`rounded-r-full ${enhancedVideo.isDisliked ? 'text-red-600' : ''}`}
                   >
                     <ThumbsDown className="w-4 h-4 mr-1" />
-                    {formatLikeCount(video.dislikes)}
+                    {formatLikeCount(enhancedVideo.dislikes)}
                   </Button>
                 </div>
                 <Button variant="ghost" size="sm" className="rounded-full">
@@ -152,10 +211,10 @@ export const VideoPlayerModal = ({ video, isOpen, onClose, videoUrl }: VideoPlay
                 <Button 
                   variant="ghost" 
                   size="sm" 
-                  className={`rounded-full ${video.isSaved ? 'text-blue-600' : ''}`}
+                  className={`rounded-full ${enhancedVideo.isSaved ? 'text-blue-600' : ''}`}
                 >
                   <Heart className="w-4 h-4 mr-1" />
-                  {video.isSaved ? 'Saved' : 'Save'}
+                  {enhancedVideo.isSaved ? 'Saved' : 'Save'}
                 </Button>
               </div>
             </div>
@@ -166,22 +225,22 @@ export const VideoPlayerModal = ({ video, isOpen, onClose, videoUrl }: VideoPlay
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Avatar className="w-10 h-10">
-                  <AvatarImage src={video.channel.avatar} />
-                  <AvatarFallback>{video.channel.name.charAt(0)}</AvatarFallback>
+                  <AvatarImage src={enhancedVideo.channel.avatar} />
+                  <AvatarFallback>{enhancedVideo.channel.name.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <div>
-                  <h4 className="font-medium">{video.channel.name}</h4>
+                  <h4 className="font-medium">{enhancedVideo.channel.name}</h4>
                   <p className="text-sm text-muted-foreground">
-                    {formatSubscriberCount(video.channel.subscribers)} subscribers
+                    {formatSubscriberCount(enhancedVideo.channel.subscribers)} subscribers
                   </p>
                 </div>
               </div>
               <Button 
-                variant={video.channel.isSubscribed ? "outline" : "default"}
+                variant={enhancedVideo.channel.isSubscribed ? "outline" : "default"}
                 size="sm"
                 className="flex items-center gap-2"
               >
-                {video.channel.isSubscribed ? (
+                {enhancedVideo.channel.isSubscribed ? (
                   <>
                     <BellRing className="w-4 h-4" />
                     Subscribed
@@ -199,15 +258,15 @@ export const VideoPlayerModal = ({ video, isOpen, onClose, videoUrl }: VideoPlay
           {/* Description */}
           <div className="px-6 py-4 border-b bg-muted/30">
             <div className="space-y-3">
-              {video.description && (
+              {enhancedVideo.description && (
                 <ScrollArea className="h-20">
-                  <p className="text-sm leading-relaxed pr-4">{video.description}</p>
+                  <p className="text-sm leading-relaxed pr-4">{enhancedVideo.description}</p>
                 </ScrollArea>
               )}
               
-              {video.tags && video.tags.length > 0 && (
+              {enhancedVideo.tags && enhancedVideo.tags.length > 0 && (
                 <div className="flex flex-wrap gap-2">
-                  {video.tags.map((tag, index) => (
+                  {enhancedVideo.tags.map((tag, index) => (
                     <Badge key={index} variant="secondary" className="text-xs">
                       #{tag}
                     </Badge>
@@ -222,7 +281,7 @@ export const VideoPlayerModal = ({ video, isOpen, onClose, videoUrl }: VideoPlay
             <div className="space-y-4">
               <div className="flex items-center gap-2">
                 <MessageCircle className="w-5 h-5" />
-                <h3 className="font-medium">{video.comments.length} Comments</h3>
+                <h3 className="font-medium">{enhancedVideo.comments.length} Comments</h3>
               </div>
 
               {/* Add Comment */}
@@ -245,12 +304,12 @@ export const VideoPlayerModal = ({ video, isOpen, onClose, videoUrl }: VideoPlay
               {/* Comments List */}
               <ScrollArea className="h-64">
                 <div className="space-y-4 pr-4">
-                  {video.comments.map((comment) => (
+                  {enhancedVideo.comments.map((comment) => (
                     <div key={comment.id} className="space-y-2">
                       {comment.isPinned && (
                         <div className="flex items-center gap-1 text-xs text-muted-foreground">
                           <Pin className="w-3 h-3" />
-                          Pinned by {video.channel.name}
+                          Pinned by {enhancedVideo.channel.name}
                         </div>
                       )}
                       <div className="flex gap-3">
