@@ -349,7 +349,7 @@ const AcademyContent = () => {
             <Button 
               variant="outline" 
               onClick={() => setActiveView('playbooks')}
-              className="border-white/30 text-white hover:bg-white/10"
+              className="border-primary/30 text-primary hover:bg-primary/10"
             >
               View Examples
             </Button>
