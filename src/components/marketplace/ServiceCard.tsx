@@ -283,8 +283,8 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
         <div className="h-8 mb-3">
           {service.tags && service.tags.length > 0 && (
             <div className="flex flex-wrap gap-1">
-              {service.tags.slice(0, 3).map((tag) => (
-                <Badge key={tag} variant="outline" className="text-xs">
+              {service.tags.slice(0, 3).map((tag, index) => (
+                <Badge key={`${service.id}-${tag}-${index}`} variant="outline" className="text-xs">
                   {tag}
                 </Badge>
               ))}
