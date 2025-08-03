@@ -12,7 +12,7 @@ const resources = {
       
       // Marketplace
       marketplaceTitle: "Marketplace.",
-      marketplaceDescription: "Finally, we silenced the noise. Welcome to the Marketplace. Discover premium marketing services and connect with top-performing vendors who will actually move your business forward.",
+      marketplaceDescription: "Finally, we silenced the noise. Welcome to the Marketplace. Explore premium services you already use — now at a fraction of the cost. Everything is curated, easy to compare, and backed by verified agents like you. Stop guessing. Start growing. Buy outcomes, not tools.",
       services: "Services",
       vendors: "Vendors",
       searchPlaceholder: "Search services, vendors, or categories...",
