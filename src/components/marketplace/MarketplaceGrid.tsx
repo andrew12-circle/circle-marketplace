@@ -269,8 +269,14 @@ export const MarketplaceGrid = () => {
           .limit(30)
       ]);
 
-      if (vendorsResponse.error) throw vendorsResponse.error;
-      if (servicesResponse.error) throw servicesResponse.error;
+      if (vendorsResponse.error) {
+        console.error('Vendors query error:', vendorsResponse.error);
+        throw vendorsResponse.error;
+      }
+      if (servicesResponse.error) {
+        console.error('Services query error:', servicesResponse.error);
+        throw servicesResponse.error;
+      }
 
       // Convert and deduplicate services to prevent duplicate key errors
       const uniqueServices = new Map();
@@ -321,16 +327,10 @@ export const MarketplaceGrid = () => {
     } catch (error) {
       console.error('Marketplace data loading error:', error);
       setError(`Failed to load marketplace data: ${error.message || 'Unknown error'}`);
-      
-      toast({
-        title: "Error loading data",
-        description: `Failed to load marketplace data: ${error.message || 'Please try again.'}`,
-        variant: "destructive",
-      });
     } finally {
       setLoading(false);
     }
-  }, []); // Empty dependency array to prevent infinite loops
+  }, []); // CRITICAL: Empty dependency array to prevent infinite loops
 
   useEffect(() => {
     console.log('MarketplaceGrid: useEffect triggered for loadData');
