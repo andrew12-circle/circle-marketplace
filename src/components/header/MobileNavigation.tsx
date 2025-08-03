@@ -13,7 +13,7 @@ export const MobileNavigation = ({ currentPath }: MobileNavigationProps) => {
       <div className="flex bg-muted rounded-full p-0.5 shadow-sm">
         <Link
           to="/"
-          className={`flex-1 py-2 px-3 rounded-full font-medium transition-all duration-200 text-center touch-target ${
+          className={`flex-1 py-1.5 px-3 rounded-full font-medium transition-all duration-200 text-center touch-target flex items-center justify-center ${
             currentPath === "/" 
               ? "bg-background text-foreground shadow-sm text-xs" 
               : "text-muted-foreground hover:text-foreground text-xs"
@@ -23,7 +23,7 @@ export const MobileNavigation = ({ currentPath }: MobileNavigationProps) => {
         </Link>
         <Link
           to="/academy"
-          className={`flex-1 py-2 px-3 rounded-full font-medium transition-all duration-200 text-center touch-target ${
+          className={`flex-1 py-1.5 px-3 rounded-full font-medium transition-all duration-200 text-center touch-target flex items-center justify-center ${
             currentPath === "/academy" 
               ? "bg-background text-foreground shadow-sm text-xs" 
               : "text-muted-foreground hover:text-foreground text-xs"
