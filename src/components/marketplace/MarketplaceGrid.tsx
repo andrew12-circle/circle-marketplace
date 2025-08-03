@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { ServiceCard } from "./ServiceCard";
 import { EnhancedVendorCard } from "./EnhancedVendorCard";
@@ -293,7 +293,7 @@ export const MarketplaceGrid = () => {
       
       // Create abort controller for request timeout - reduced for mobile
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout for mobile
+      const timeoutId = setTimeout(() => controller.abort(), 6000); // 6 second timeout for better mobile performance
       
       // Load data in parallel for better performance
       const [vendorsResponse, servicesResponse] = await Promise.all([
@@ -302,7 +302,7 @@ export const MarketplaceGrid = () => {
           .select('*')
           .order('sort_order', { ascending: true })
           .order('rating', { ascending: false })
-          .limit(20) // Reduced limit for faster mobile loading
+          .limit(15) // Further reduced for better mobile performance
           .abortSignal(controller.signal),
         
         supabase
@@ -310,7 +310,7 @@ export const MarketplaceGrid = () => {
           .select('*')
           .order('sort_order', { ascending: true })
           .order('created_at', { ascending: false })
-          .limit(50) // Reduced limit for faster mobile loading
+          .limit(30) // Further reduced for better mobile performance
           .abortSignal(controller.signal)
       ]);
 
@@ -415,7 +415,9 @@ export const MarketplaceGrid = () => {
     return parseFloat(cleanedPrice) || 0;
   };
 
-  const filteredServices = services.filter(service => {
+  // Memoize expensive filtering operations
+  const filteredServices = useMemo(() => {
+    return services.filter(service => {
     const matchesSearch = service.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          service.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          service.vendor?.name?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -470,8 +472,11 @@ export const MarketplaceGrid = () => {
 
     return matchesSearch && matchesCategory && matchesPrice && matchesVerified && matchesFeatured && matchesCoPayEligible;
   });
+  }, [services, searchTerm, filters]);
 
-  const filteredVendors = vendors.filter(vendor => {
+  // Memoize vendor filtering
+  const filteredVendors = useMemo(() => {
+    return vendors.filter(vendor => {
     // Skip null vendors
     if (!vendor) return false;
     
@@ -490,6 +495,7 @@ export const MarketplaceGrid = () => {
 
     return matchesSearch && matchesVerified && matchesLocation;
   });
+  }, [vendors, searchTerm, filters, location]);
 
   // Count local vendors for the banner
   const localVendorCount = location?.state ? vendors.filter(vendor => 

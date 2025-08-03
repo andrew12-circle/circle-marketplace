@@ -75,12 +75,18 @@ export const VendorSelectionModal = ({
       setShowConfirmation(false);
       setShowFunnelModal(false);
       setFunnelVendor(null);
+      // Clear vendors when modal closes to prevent memory leaks
+      setVendors([]);
+      setFilteredVendors([]);
     }
   }, [isOpen]);
 
   useEffect(() => {
-    filterVendors();
-  }, [searchQuery, vendors]);
+    // Only filter vendors when modal is open
+    if (isOpen && vendors.length > 0) {
+      filterVendors();
+    }
+  }, [searchQuery, vendors, isOpen]);
 
   const loadVendors = async () => {
     console.log('VendorSelectionModal: Starting to load vendors...');
@@ -116,6 +122,11 @@ export const VendorSelectionModal = ({
   };
 
   const filterVendors = () => {
+    // Don't filter if modal is not open or no vendors loaded
+    if (!isOpen || vendors.length === 0) {
+      return;
+    }
+
     let filtered = vendors;
     console.log('VendorSelectionModal: Filtering vendors...', { 
       totalVendors: vendors.length, 
