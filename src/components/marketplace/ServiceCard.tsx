@@ -213,8 +213,8 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
         />
       </Button>
 
-      {/* Image - Fixed height */}
-      <div className="relative h-48 overflow-hidden bg-white flex-shrink-0 p-4">
+      {/* Image - Mobile Responsive */}
+      <div className="relative h-36 sm:h-48 overflow-hidden bg-white flex-shrink-0 p-3 sm:p-4">
         <img
           src={service.image_url || "/public/placeholder.svg"}
           alt={service.title}
@@ -222,10 +222,10 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
         />
       </div>
 
-      <CardContent className="p-4 flex flex-col flex-grow mobile-card-content">
-        {/* Title and Vendor Info - Fixed height */}
-        <div className="flex items-center gap-2 text-sm text-muted-foreground h-6 mb-3">
-          <h3 className="font-semibold text-foreground leading-tight mobile-title">
+      <CardContent className="p-3 sm:p-4 flex flex-col flex-grow mobile-card-content">
+        {/* Title and Vendor Info - Mobile Optimized */}
+        <div className="mb-3">
+          <h3 className="font-semibold text-foreground leading-tight mobile-title text-sm sm:text-base mb-2">
             {service.title.split(' - ').pop() || service.title.split(': ').pop() || service.title}
           </h3>
           {service.vendor?.is_verified && (
@@ -245,20 +245,20 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
               const fillPercentage = isPartialStar ? (rating <= 4.9 ? 50 : (rating % 1) * 100) : 0;
               
               return (
-                <div key={i} className="relative h-4 w-4">
-                  <Star className="h-4 w-4 text-gray-300 absolute" />
-                  {isFullStar && (
-                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 absolute" />
-                  )}
-                  {isPartialStar && (
-                    <div 
-                      className="overflow-hidden absolute"
-                      style={{ width: `${fillPercentage}%` }}
-                    >
-                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                    </div>
-                  )}
-                </div>
+                 <div key={`star-${i}`} className="relative h-4 w-4">
+                   <Star className="h-4 w-4 text-gray-300 absolute" />
+                   {isFullStar && (
+                     <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 absolute" />
+                   )}
+                   {isPartialStar && (
+                     <div 
+                       className="overflow-hidden absolute"
+                       style={{ width: `${fillPercentage}%` }}
+                     >
+                       <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                     </div>
+                   )}
+                 </div>
               );
             })}
             <span className="text-sm text-muted-foreground ml-1">
@@ -267,10 +267,10 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
           </div>
         )}
 
-        {/* Description - Fixed height */}
+        {/* Description - Mobile Optimized */}
         <Tooltip>
           <TooltipTrigger asChild>
-            <p className="text-sm text-muted-foreground line-clamp-2 h-10 mb-3 cursor-help">
+            <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2 h-8 sm:h-10 mb-3 cursor-help mobile-body">
               {service.description}
             </p>
           </TooltipTrigger>
@@ -279,18 +279,18 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
           </TooltipContent>
         </Tooltip>
 
-        {/* Tags - Fixed height */}
-        <div className="h-8 mb-3">
+        {/* Tags - Mobile Optimized */}
+        <div className="h-6 sm:h-8 mb-3">
           {service.tags && service.tags.length > 0 && (
             <div className="flex flex-wrap gap-1">
-              {service.tags.slice(0, 3).map((tag) => (
+              {service.tags.slice(0, 2).map((tag) => (
                 <Badge key={tag} variant="outline" className="text-xs">
                   {tag}
                 </Badge>
               ))}
-              {service.tags.length > 3 && (
+              {service.tags.length > 2 && (
                 <span className="text-xs text-muted-foreground">
-                  +{service.tags.length - 3} more
+                  +{service.tags.length - 2} more
                 </span>
               )}
             </div>
@@ -486,42 +486,45 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
           )}
         </div>
 
-        {/* Action Buttons - Fixed at bottom */}
-        <div className="flex gap-2 mt-auto">
+        {/* Action Buttons - Mobile Optimized */}
+        <div className="flex gap-1 sm:gap-2 mt-auto">
           {service.requires_quote ? (
             <Button
               variant="outline" 
               size="sm"
-              className="flex-1 h-9"
+              className="flex-1 touch-target h-10 sm:h-9 mobile-btn text-xs sm:text-sm"
               onClick={handleAddToCart}
             >
-              <ShoppingCart className="w-4 h-4 mr-1" />
-              Add to Cart
+              <ShoppingCart className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+              <span className="hidden xs:inline">Add to Cart</span>
+              <span className="xs:hidden">Add</span>
             </Button>
           ) : (
             <>
               {/* Primary action - Consultation (traditional flow) */}
               <Button
                 size="sm"
-                className="flex-1 h-9"
+                className="flex-1 touch-target h-10 sm:h-9 mobile-btn text-xs sm:text-sm"
                 onClick={(e) => {
                   e.stopPropagation();
                   setIsConsultationFlowOpen(true);
                 }}
               >
-                <Calendar className="w-4 h-4 mr-1" />
-                Book Consultation
+                <Calendar className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                <span className="hidden xs:inline">Book Consultation</span>
+                <span className="xs:hidden">Book</span>
               </Button>
               
               {/* Add to Cart Button */}
               <Button
                 variant="outline"
                 size="sm"
-                className="flex-1 h-9"
+                className="flex-1 touch-target h-10 sm:h-9 mobile-btn text-xs sm:text-sm"
                 onClick={handleAddToCart}
               >
-                <ShoppingCart className="w-4 h-4 mr-1" />
-                Add to Cart
+                <ShoppingCart className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                <span className="hidden xs:inline">Add to Cart</span>
+                <span className="xs:hidden">Add</span>
               </Button>
             </>
           )}
@@ -529,10 +532,10 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
           <Button 
             variant="outline" 
             size="sm"
-            className="h-9 px-3"
+            className="touch-target h-10 sm:h-9 px-2 sm:px-3"
             onClick={handleViewDetailsButton}
           >
-            <ArrowRight className="w-4 h-4" />
+            <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4" />
           </Button>
         </div>
       </CardContent>

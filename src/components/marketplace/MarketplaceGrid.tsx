@@ -710,10 +710,10 @@ export const MarketplaceGrid = () => {
     <>
       <div className="min-h-screen bg-background">
         <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
-          {/* Hero Section */}
-          <div className="mb-12">
-            <h1 className="text-6xl font-bold text-black mb-4">{t('marketplaceTitle')}</h1>
-            <p className="text-lg text-gray-600 max-w-2xl">
+          {/* Hero Section - Mobile Optimized */}
+          <div className="mb-8 sm:mb-12">
+            <h1 className="text-3xl sm:text-4xl lg:text-6xl font-bold text-foreground mb-3 sm:mb-4">{t('marketplaceTitle')}</h1>
+            <p className="text-base sm:text-lg text-muted-foreground max-w-2xl">
               {t('marketplaceDescription')}
             </p>
           </div>
@@ -742,31 +742,34 @@ export const MarketplaceGrid = () => {
             </div>
           </div>
 
-          {/* View Mode Toggle */}
-          <div className="flex gap-2 mb-6">
+          {/* View Mode Toggle - Mobile Optimized */}
+          <div className="flex gap-1 sm:gap-2 mb-4 sm:mb-6 bg-muted p-1 rounded-lg">
             <Button
-              variant={viewMode === "services" ? "default" : "outline"}
+              variant={viewMode === "services" ? "default" : "ghost"}
               onClick={() => setViewMode("services")}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-9 sm:h-10 text-sm sm:text-base"
+              className="flex-1 touch-target flex items-center justify-center gap-1 sm:gap-2 h-10 sm:h-11 text-xs sm:text-sm"
             >
               <Sparkles className="w-3 h-3 sm:w-4 sm:h-4" />
-              {t('services')}
+              <span className="hidden xs:inline">{t('services')}</span>
+              <span className="xs:hidden">Services</span>
             </Button>
             <Button
-              variant={viewMode === "products" ? "default" : "outline"}
+              variant={viewMode === "products" ? "default" : "ghost"}
               onClick={() => setViewMode("products")}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-9 sm:h-10 text-sm sm:text-base"
+              className="flex-1 touch-target flex items-center justify-center gap-1 sm:gap-2 h-10 sm:h-11 text-xs sm:text-sm"
             >
               <Filter className="w-3 h-3 sm:w-4 sm:h-4" />
-              Products
+              <span className="hidden xs:inline">Products</span>
+              <span className="xs:hidden">Products</span>
             </Button>
             <Button
-              variant={viewMode === "vendors" ? "default" : "outline"}
+              variant={viewMode === "vendors" ? "default" : "ghost"}
               onClick={() => setViewMode("vendors")}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-9 sm:h-10 text-sm sm:text-base"
+              className="flex-1 touch-target flex items-center justify-center gap-1 sm:gap-2 h-10 sm:h-11 text-xs sm:text-sm"
             >
               <Zap className="w-3 h-3 sm:w-4 sm:h-4" />
-              {t('vendors')}
+              <span className="hidden xs:inline">{t('vendors')}</span>
+              <span className="xs:hidden">Vendors</span>
             </Button>
           </div>
 
