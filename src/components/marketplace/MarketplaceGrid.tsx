@@ -8,7 +8,6 @@ import { CircleProBanner } from "./CircleProBanner";
 import { ServiceDetailsModal } from "./ServiceDetailsModal";
 import { AIConciergeBanner } from "./AIConciergeBanner";
 import { AddProductModal } from "./AddProductModal";
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Filter, Sparkles, Zap, Facebook, Globe, Mail, Share2, Monitor, TrendingUp, Database, Camera, Video, Printer, ArrowRight, BookOpen } from "lucide-react";
@@ -21,7 +20,6 @@ import { Link } from "react-router-dom";
 import { CategoryMegaMenu } from "./CategoryMegaMenu";
 import { EnhancedSearch, SearchFilters } from "./EnhancedSearch";
 import { VendorCallToAction } from "./VendorCallToAction";
-
 interface FilterState {
   category: string;
   priceRange: number[];
@@ -30,7 +28,6 @@ interface FilterState {
   coPayEligible: boolean;
   locationFilter: boolean;
 }
-
 interface Service {
   id: string;
   title: string;
@@ -54,7 +51,6 @@ interface Service {
     is_verified: boolean;
   };
 }
-
 interface Vendor {
   id: string;
   name: string;
@@ -76,7 +72,6 @@ interface Vendor {
   vendor_type?: string;
   local_representatives?: any; // JSON data from database
 }
-
 interface LocalRepresentative {
   id: string;
   name: string;
@@ -89,11 +84,11 @@ interface LocalRepresentative {
   latitude?: number;
   longitude?: number;
 }
-
 type ViewMode = "services" | "products" | "vendors";
-
 export const MarketplaceGrid = () => {
-  const { t } = useTranslation();
+  const {
+    t
+  } = useTranslation();
   const [services, setServices] = useState<Service[]>([]);
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [loading, setLoading] = useState(true);
@@ -111,90 +106,79 @@ export const MarketplaceGrid = () => {
   });
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [sortBy, setSortBy] = useState<'featured' | 'rating' | 'price'>('featured');
-  
+
   // Define product categories with enhanced styling
-  const PRODUCT_CATEGORIES = [
-    { 
-      id: 'facebook-ads', 
-      name: 'Facebook Ad Campaigns', 
-      description: 'Professional Facebook advertising services for real estate',
-      icon: Facebook,
-      gradient: 'from-blue-500 to-blue-600',
-      color: 'text-blue-600'
-    },
-    { 
-      id: 'google-ads', 
-      name: 'Google Ad Campaigns', 
-      description: 'Google Ads and search marketing services',
-      icon: Globe,
-      gradient: 'from-green-500 to-green-600',
-      color: 'text-green-600'
-    },
-    { 
-      id: 'direct-mail', 
-      name: 'Direct Mail Campaigns', 
-      description: 'Postcards, flyers, and targeted mail services',
-      icon: Mail,
-      gradient: 'from-purple-500 to-purple-600',
-      color: 'text-purple-600'
-    },
-    { 
-      id: 'social-media', 
-      name: 'Social Media Management', 
-      description: 'Complete social media marketing packages',
-      icon: Share2,
-      gradient: 'from-pink-500 to-pink-600',
-      color: 'text-pink-600'
-    },
-    { 
-      id: 'website-design', 
-      name: 'Website Design', 
-      description: 'Professional real estate websites and landing pages',
-      icon: Monitor,
-      gradient: 'from-indigo-500 to-indigo-600',
-      color: 'text-indigo-600'
-    },
-    { 
-      id: 'seo-services', 
-      name: 'SEO Services', 
-      description: 'Search engine optimization for real estate',
-      icon: TrendingUp,
-      gradient: 'from-orange-500 to-orange-600',
-      color: 'text-orange-600'
-    },
-    { 
-      id: 'crm-tools', 
-      name: 'CRM & Lead Management', 
-      description: 'Customer relationship management systems',
-      icon: Database,
-      gradient: 'from-teal-500 to-teal-600',
-      color: 'text-teal-600'
-    },
-    { 
-      id: 'photography', 
-      name: 'Real Estate Photography', 
-      description: 'Professional listing photography services',
-      icon: Camera,
-      gradient: 'from-yellow-500 to-yellow-600',
-      color: 'text-yellow-600'
-    },
-    { 
-      id: 'videography', 
-      name: 'Video Marketing', 
-      description: 'Real estate video production and marketing',
-      icon: Video,
-      gradient: 'from-red-500 to-red-600',
-      color: 'text-red-600'
-    },
-    { 
-      id: 'print-marketing', 
-      name: 'Print Marketing Materials', 
-      description: 'Business cards, brochures, and signage',
-      icon: Printer,
-      gradient: 'from-gray-500 to-gray-600',
-      color: 'text-gray-600'
-    },
-  ];
+  const PRODUCT_CATEGORIES = [{
+    id: 'facebook-ads',
+    name: 'Facebook Ad Campaigns',
+    description: 'Professional Facebook advertising services for real estate',
+    icon: Facebook,
+    gradient: 'from-blue-500 to-blue-600',
+    color: 'text-blue-600'
+  }, {
+    id: 'google-ads',
+    name: 'Google Ad Campaigns',
+    description: 'Google Ads and search marketing services',
+    icon: Globe,
+    gradient: 'from-green-500 to-green-600',
+    color: 'text-green-600'
+  }, {
+    id: 'direct-mail',
+    name: 'Direct Mail Campaigns',
+    description: 'Postcards, flyers, and targeted mail services',
+    icon: Mail,
+    gradient: 'from-purple-500 to-purple-600',
+    color: 'text-purple-600'
+  }, {
+    id: 'social-media',
+    name: 'Social Media Management',
+    description: 'Complete social media marketing packages',
+    icon: Share2,
+    gradient: 'from-pink-500 to-pink-600',
+    color: 'text-pink-600'
+  }, {
+    id: 'website-design',
+    name: 'Website Design',
+    description: 'Professional real estate websites and landing pages',
+    icon: Monitor,
+    gradient: 'from-indigo-500 to-indigo-600',
+    color: 'text-indigo-600'
+  }, {
+    id: 'seo-services',
+    name: 'SEO Services',
+    description: 'Search engine optimization for real estate',
+    icon: TrendingUp,
+    gradient: 'from-orange-500 to-orange-600',
+    color: 'text-orange-600'
+  }, {
+    id: 'crm-tools',
+    name: 'CRM & Lead Management',
+    description: 'Customer relationship management systems',
+    icon: Database,
+    gradient: 'from-teal-500 to-teal-600',
+    color: 'text-teal-600'
+  }, {
+    id: 'photography',
+    name: 'Real Estate Photography',
+    description: 'Professional listing photography services',
+    icon: Camera,
+    gradient: 'from-yellow-500 to-yellow-600',
+    color: 'text-yellow-600'
+  }, {
+    id: 'videography',
+    name: 'Video Marketing',
+    description: 'Real estate video production and marketing',
+    icon: Video,
+    gradient: 'from-red-500 to-red-600',
+    color: 'text-red-600'
+  }, {
+    id: 'print-marketing',
+    name: 'Print Marketing Materials',
+    description: 'Business cards, brochures, and signage',
+    icon: Printer,
+    gradient: 'from-gray-500 to-gray-600',
+    color: 'text-gray-600'
+  }];
   const [savedServiceIds, setSavedServiceIds] = useState<string[]>([]);
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
@@ -205,61 +189,57 @@ export const MarketplaceGrid = () => {
     verified: false,
     featured: false,
     coPayEligible: false,
-    locationFilter: false,
+    locationFilter: false
   });
-  const { toast } = useToast();
-  const { user, profile } = useAuth();
-  const { location } = useLocation();
-
+  const {
+    toast
+  } = useToast();
+  const {
+    user,
+    profile
+  } = useAuth();
+  const {
+    location
+  } = useLocation();
   const loadSavedServices = async () => {
     if (!profile?.user_id) return;
-
     try {
-      const { data, error } = await supabase
-        .from('saved_services')
-        .select('service_id')
-        .eq('user_id', profile.user_id);
-
+      const {
+        data,
+        error
+      } = await supabase.from('saved_services').select('service_id').eq('user_id', profile.user_id);
       if (error) throw error;
-
       setSavedServiceIds(data?.map(item => item.service_id) || []);
     } catch (error) {
       console.error('Error loading saved services:', error);
     }
   };
-
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      
       console.log('Loading marketplace data...');
-      
-      // Load vendors from the correct table
-      const vendorsResponse = await supabase
-        .from('vendors')
-        .select('*')
-        .order('sort_order', { ascending: true })
-        .order('rating', { ascending: false })
-        .limit(50);
 
+      // Load vendors from the correct table
+      const vendorsResponse = await supabase.from('vendors').select('*').order('sort_order', {
+        ascending: true
+      }).order('rating', {
+        ascending: false
+      }).limit(50);
       console.log('Vendors response:', vendorsResponse);
       console.log('Vendors data:', vendorsResponse.data);
       console.log('Vendors error:', vendorsResponse.error);
 
       // Load services without vendor join for now, then get vendors separately
-      const servicesResponse = await supabase
-        .from('services')
-        .select('*')
-        .order('sort_order', { ascending: true })
-        .order('created_at', { ascending: false })
-        .limit(100);
-
+      const servicesResponse = await supabase.from('services').select('*').order('sort_order', {
+        ascending: true
+      }).order('created_at', {
+        ascending: false
+      }).limit(100);
       console.log('Services response:', servicesResponse);
       console.log('Services data:', servicesResponse.data);
       console.log('Services error:', servicesResponse.error);
       console.log('Services data length:', servicesResponse.data?.length);
-
       if (vendorsResponse.error) {
         console.error('Vendors error:', vendorsResponse.error);
         throw vendorsResponse.error;
@@ -280,7 +260,7 @@ export const MarketplaceGrid = () => {
           is_verified: true
         }
       }));
-      
+
       // Format vendors data using vendors table
       const formattedVendors = (vendorsResponse.data || []).map(vendor => ({
         ...vendor,
@@ -304,35 +284,28 @@ export const MarketplaceGrid = () => {
         vendor_type: vendor.vendor_type || 'company',
         local_representatives: []
       }));
-      
       console.log(`Loaded ${formattedServices.length} services and ${formattedVendors.length} vendors`);
       console.log('Formatted services:', formattedServices);
       console.log('Setting services state...');
-      
       setServices(formattedServices);
       setVendors(formattedVendors);
-      
       console.log('Services and vendors state set successfully');
-      
     } catch (error) {
       console.error('Marketplace data loading error:', error);
       setError(`Failed to load marketplace data: ${error.message || 'Unknown error'}`);
-      
       toast({
         title: "Error loading data",
         description: `Failed to load marketplace data: ${error.message || 'Please try again.'}`,
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       console.log('Setting loading to false');
       setLoading(false);
     }
   }, [toast]);
-
   useEffect(() => {
     loadData();
   }, []);
-
   useEffect(() => {
     if (profile?.user_id) {
       loadSavedServices();
@@ -346,14 +319,10 @@ export const MarketplaceGrid = () => {
     const cleanedPrice = priceString.replace(/[^0-9.]/g, '');
     return parseFloat(cleanedPrice) || 0;
   };
-
   const filteredServices = services.filter(service => {
-    const matchesSearch = service.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         service.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         service.vendor?.name?.toLowerCase().includes(searchTerm.toLowerCase());
-    
+    const matchesSearch = service.title?.toLowerCase().includes(searchTerm.toLowerCase()) || service.description?.toLowerCase().includes(searchTerm.toLowerCase()) || service.vendor?.name?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = filters.category === "all" || service.category === filters.category;
-    
+
     // Fix price filtering to handle currency symbols
     const priceValue = extractNumericPrice(service.retail_price);
     const matchesPrice = priceValue >= filters.priceRange[0] && priceValue <= filters.priceRange[1];
@@ -366,68 +335,36 @@ export const MarketplaceGrid = () => {
       const category = service.category?.toLowerCase() || '';
       const title = service.title?.toLowerCase() || '';
       const tags = service.tags?.map(tag => tag.toLowerCase()) || [];
-      
+
       // Safe for co-pay (True advertising)
-      const safeKeywords = [
-        'digital ads', 'facebook ads', 'google ads', 'display ads', 'retargeting',
-        'postcards', 'direct mail', 'flyers', 'door hangers', 'brochures',
-        'educational', 'seminar', 'workshop', 'market report', 'buyer education',
-        'joint advertising', 'co-branded', 'print advertising'
-      ];
-      
+      const safeKeywords = ['digital ads', 'facebook ads', 'google ads', 'display ads', 'retargeting', 'postcards', 'direct mail', 'flyers', 'door hangers', 'brochures', 'educational', 'seminar', 'workshop', 'market report', 'buyer education', 'joint advertising', 'co-branded', 'print advertising'];
+
       // Never allow co-pay (Business tools/lead generation)
-      const restrictedKeywords = [
-        'crm', 'lead capture', 'lead generation', 'funnel', 'drip email',
-        'follow-up', 'seo', 'landing page', 'chatbot', 'sms', 'automation',
-        'business card', 'sign', 'social media management', 'posting',
-        'content calendar', 'listing video', 'drone', 'agent video',
-        'testimonial', 'open house', 'appreciation', 'pop-by', 'gift',
-        'closing gift', 'referral', 'past client', 'database', 'strategy',
-        'coaching', 'consulting', 'accountability'
-      ];
-      
-      const hasRestricted = restrictedKeywords.some(keyword => 
-        title.includes(keyword) || category.includes(keyword) || 
-        tags.some(tag => tag.includes(keyword))
-      );
-      
-      const hasSafe = safeKeywords.some(keyword => 
-        title.includes(keyword) || category.includes(keyword) || 
-        tags.some(tag => tag.includes(keyword))
-      );
-      
-    // Only show services that are eligible for co-pay (safe keywords and no restricted keywords)
+      const restrictedKeywords = ['crm', 'lead capture', 'lead generation', 'funnel', 'drip email', 'follow-up', 'seo', 'landing page', 'chatbot', 'sms', 'automation', 'business card', 'sign', 'social media management', 'posting', 'content calendar', 'listing video', 'drone', 'agent video', 'testimonial', 'open house', 'appreciation', 'pop-by', 'gift', 'closing gift', 'referral', 'past client', 'database', 'strategy', 'coaching', 'consulting', 'accountability'];
+      const hasRestricted = restrictedKeywords.some(keyword => title.includes(keyword) || category.includes(keyword) || tags.some(tag => tag.includes(keyword)));
+      const hasSafe = safeKeywords.some(keyword => title.includes(keyword) || category.includes(keyword) || tags.some(tag => tag.includes(keyword)));
+
+      // Only show services that are eligible for co-pay (safe keywords and no restricted keywords)
       matchesCoPayEligible = hasSafe && !hasRestricted;
     }
-
     return matchesSearch && matchesCategory && matchesPrice && matchesVerified && matchesFeatured && matchesCoPayEligible;
   });
-
   const filteredVendors = vendors.filter(vendor => {
     // Skip null vendors
     if (!vendor) return false;
-    
-    const matchesSearch = vendor.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         vendor.description?.toLowerCase().includes(searchTerm.toLowerCase());
-    
+    const matchesSearch = vendor.name?.toLowerCase().includes(searchTerm.toLowerCase()) || vendor.description?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesVerified = !filters.verified || vendor.is_verified;
-    
+
     // Location-based filtering
     let matchesLocation = true;
     if (filters.locationFilter && location?.state) {
-      matchesLocation = vendor.license_states?.includes(location.state) ||
-                       vendor.service_states?.includes(location.state) ||
-                       false;
+      matchesLocation = vendor.license_states?.includes(location.state) || vendor.service_states?.includes(location.state) || false;
     }
-
     return matchesSearch && matchesVerified && matchesLocation;
   });
 
   // Count local vendors for the banner
-  const localVendorCount = location?.state ? vendors.filter(vendor => 
-    vendor && (vendor.license_states?.includes(location.state) ||
-    vendor.service_states?.includes(location.state))
-  ).length : 0;
+  const localVendorCount = location?.state ? vendors.filter(vendor => vendor && (vendor.license_states?.includes(location.state) || vendor.service_states?.includes(location.state))).length : 0;
 
   // Get categories based on view mode
   const getCategories = () => {
@@ -435,9 +372,11 @@ export const MarketplaceGrid = () => {
       case 'services':
         return Array.from(new Set(services.map(s => s.category).filter(category => category && category.trim() !== "")));
       case 'vendors':
-        return []; // CategoryMegaMenu has its own vendor categories
+        return [];
+      // CategoryMegaMenu has its own vendor categories
       case 'products':
-        return []; // CategoryMegaMenu has its own product categories
+        return [];
+      // CategoryMegaMenu has its own product categories
       default:
         return [];
     }
@@ -446,65 +385,52 @@ export const MarketplaceGrid = () => {
   // Filter product categories based on search term
   const filteredProducts = PRODUCT_CATEGORIES.filter(product => {
     if (!searchTerm) return true;
-    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         product.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) || product.description.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesSearch;
   });
-
   const handleSaveService = async (serviceId: string) => {
     if (!profile?.user_id) {
       toast({
         title: "Please sign in",
         description: "You need to be signed in to save services.",
-        variant: "destructive",
+        variant: "destructive"
       });
       return;
     }
-
     try {
       // Check if already saved
-      const { data: existingSave } = await supabase
-        .from('saved_services')
-        .select('id')
-        .eq('user_id', profile.user_id)
-        .eq('service_id', serviceId)
-        .maybeSingle();
-
+      const {
+        data: existingSave
+      } = await supabase.from('saved_services').select('id').eq('user_id', profile.user_id).eq('service_id', serviceId).maybeSingle();
       if (existingSave) {
         // Remove from saved
-        const { error } = await supabase
-          .from('saved_services')
-          .delete()
-          .eq('user_id', profile.user_id)
-          .eq('service_id', serviceId);
-
+        const {
+          error
+        } = await supabase.from('saved_services').delete().eq('user_id', profile.user_id).eq('service_id', serviceId);
         if (error) throw error;
 
         // Update local state
         setSavedServiceIds(prev => prev.filter(id => id !== serviceId));
-
         toast({
           title: "Removed from saved",
-          description: "Service removed from your saved list",
+          description: "Service removed from your saved list"
         });
       } else {
         // Add to saved
-        const { error } = await supabase
-          .from('saved_services')
-          .insert({
-            user_id: profile.user_id,
-            service_id: serviceId,
-            notes: ''
-          });
-
+        const {
+          error
+        } = await supabase.from('saved_services').insert({
+          user_id: profile.user_id,
+          service_id: serviceId,
+          notes: ''
+        });
         if (error) throw error;
 
         // Update local state
         setSavedServiceIds(prev => [...prev, serviceId]);
-
         toast({
           title: "Saved successfully",
-          description: "Service added to your saved list",
+          description: "Service added to your saved list"
         });
       }
     } catch (error) {
@@ -512,11 +438,10 @@ export const MarketplaceGrid = () => {
       toast({
         title: "Error",
         description: "Failed to save service. Please try again.",
-        variant: "destructive",
+        variant: "destructive"
       });
     }
   };
-
   const handleViewServiceDetails = (serviceId: string) => {
     const service = services.find(s => s.id === serviceId);
     if (service) {
@@ -524,37 +449,34 @@ export const MarketplaceGrid = () => {
       setIsServiceModalOpen(true);
     }
   };
-
   const handleCloseServiceModal = () => {
     setIsServiceModalOpen(false);
     setSelectedService(null);
   };
-
   const handleConnectVendor = (vendorId: string) => {
     toast({
       title: "Connect with Vendor",
-      description: "Connection feature coming soon!",
+      description: "Connection feature coming soon!"
     });
   };
-
   const handleViewVendorProfile = (vendorId: string) => {
     toast({
       title: "Vendor Profile",
-      description: `Viewing profile for vendor: ${vendorId}`,
+      description: `Viewing profile for vendor: ${vendorId}`
     });
   };
-
   const handleSelectProduct = (productId: string) => {
     setSelectedProductCategory(productId);
   };
-
   const handleBackToProducts = () => {
     setSelectedProductCategory(null);
   };
 
   // Filter services by selected product category
   const getServicesForProduct = (productId: string) => {
-    const productMapping: { [key: string]: string[] } = {
+    const productMapping: {
+      [key: string]: string[];
+    } = {
       'facebook-ads': ['facebook', 'social media ads', 'digital marketing', 'meta ads', 'instagram ads', 'social advertising', 'paid social'],
       'google-ads': ['google', 'ppc', 'search ads', 'google adwords', 'paid search', 'sem', 'display ads', 'youtube ads'],
       'direct-mail': ['direct mail', 'postcards', 'flyers', 'mailers', 'print marketing', 'door hangers', 'marketing materials'],
@@ -589,26 +511,17 @@ export const MarketplaceGrid = () => {
       'Referral Programs': ['referrals', 'referral system', 'referral marketing'],
       'Expired Listing Data': ['expired listings', 'expired', 'listing data', 'prospect data']
     };
-
     const keywords = productMapping[productId] || [];
     return services.filter(service => {
       const title = service.title?.toLowerCase() || '';
       const description = service.description?.toLowerCase() || '';
       const category = service.category?.toLowerCase() || '';
       const tags = service.tags?.map(tag => tag?.toLowerCase() || '') || [];
-      
-      return keywords.some(keyword => 
-        title.includes(keyword) || 
-        description.includes(keyword) || 
-        category.includes(keyword) ||
-        tags.some(tag => tag.includes(keyword))
-      );
+      return keywords.some(keyword => title.includes(keyword) || description.includes(keyword) || category.includes(keyword) || tags.some(tag => tag.includes(keyword)));
     });
   };
-
   if (loading) {
-    return (
-      <div className="min-h-screen bg-background">
+    return <div className="min-h-screen bg-background">
         <div className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-center h-64">
             <div className="text-center">
@@ -617,27 +530,22 @@ export const MarketplaceGrid = () => {
             </div>
           </div>
         </div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <>
+  return <>
       <div className="min-h-screen bg-background">
         <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
           {/* Hero Section */}
           <div className="mb-12">
             <h1 className="text-3xl sm:text-6xl font-bold text-black mb-4">{t('marketplaceTitle')}</h1>
-            <p className="text-lg text-gray-600 max-w-2xl">
+            <p className="text-gray-600 max-w-2xl text-sm">
               {t('marketplaceDescription')}
             </p>
           </div>
 
 
           {/* Circle Pro Banner - Show for non-signed-in users and non-pro members */}
-          {(!user || !profile?.is_pro_member) && (
-            <CircleProBanner />
-          )}
+          {(!user || !profile?.is_pro_member) && <CircleProBanner />}
 
           {/* AI Concierge Banner - Show for all users */}
           <AIConciergeBanner />
@@ -647,11 +555,7 @@ export const MarketplaceGrid = () => {
 
            {/* Enhanced Search Component */}
           <div className="space-y-6">
-            <EnhancedSearch
-              onSearchChange={setSearchFilters}
-              availableCategories={Array.from(new Set(services.map(service => service.category).filter(Boolean)))}
-              availableTags={Array.from(new Set(services.flatMap(service => service.tags || [])))}
-            />
+            <EnhancedSearch onSearchChange={setSearchFilters} availableCategories={Array.from(new Set(services.map(service => service.category).filter(Boolean)))} availableTags={Array.from(new Set(services.flatMap(service => service.tags || [])))} />
             
             <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
             </div>
@@ -659,27 +563,15 @@ export const MarketplaceGrid = () => {
 
           {/* View Mode Toggle */}
           <div className="flex gap-2 mb-6">
-            <Button
-              variant={viewMode === "services" ? "default" : "outline"}
-              onClick={() => setViewMode("services")}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-9 sm:h-10 text-sm sm:text-base"
-            >
+            <Button variant={viewMode === "services" ? "default" : "outline"} onClick={() => setViewMode("services")} className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-9 sm:h-10 text-sm sm:text-base">
               <Sparkles className="w-3 h-3 sm:w-4 sm:h-4" />
               {t('services')}
             </Button>
-            <Button
-              variant={viewMode === "products" ? "default" : "outline"}
-              onClick={() => setViewMode("products")}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-9 sm:h-10 text-sm sm:text-base"
-            >
+            <Button variant={viewMode === "products" ? "default" : "outline"} onClick={() => setViewMode("products")} className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-9 sm:h-10 text-sm sm:text-base">
               <Filter className="w-3 h-3 sm:w-4 sm:h-4" />
               Products
             </Button>
-            <Button
-              variant={viewMode === "vendors" ? "default" : "outline"}
-              onClick={() => setViewMode("vendors")}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-9 sm:h-10 text-sm sm:text-base"
-            >
+            <Button variant={viewMode === "vendors" ? "default" : "outline"} onClick={() => setViewMode("vendors")} className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-9 sm:h-10 text-sm sm:text-base">
               <Zap className="w-3 h-3 sm:w-4 sm:h-4" />
               {t('vendors')}
             </Button>
@@ -687,21 +579,9 @@ export const MarketplaceGrid = () => {
 
 
           {/* Grid - Mobile Responsive */}
-          {viewMode === "services" ? (
-            <div className="mobile-grid gap-4 sm:gap-6">
-              {filteredServices.map((service) => (
-                <ServiceCard
-                  key={service.id}
-                  service={service}
-                  onSave={handleSaveService}
-                  onViewDetails={handleViewServiceDetails}
-                  isSaved={savedServiceIds.includes(service.id)}
-                />
-              ))}
-            </div>
-          ) : viewMode === "products" ? (
-            selectedProductCategory ? (
-              <div>
+          {viewMode === "services" ? <div className="mobile-grid gap-4 sm:gap-6">
+              {filteredServices.map(service => <ServiceCard key={service.id} service={service} onSave={handleSaveService} onViewDetails={handleViewServiceDetails} isSaved={savedServiceIds.includes(service.id)} />)}
+            </div> : viewMode === "products" ? selectedProductCategory ? <div>
                 <div className="mb-6 flex items-center gap-4">
                   <Button variant="outline" onClick={handleBackToProducts}>
                     ← Back to Products
@@ -711,27 +591,12 @@ export const MarketplaceGrid = () => {
                   </h2>
                 </div>
                 <div className="mobile-grid gap-4 sm:gap-6">
-                  {getServicesForProduct(selectedProductCategory).map((service) => (
-        <ServiceCard
-          key={service.id}
-          service={service}
-          onSave={handleSaveService}
-          onViewDetails={handleViewServiceDetails}
-          isSaved={savedServiceIds.includes(service.id)}
-        />
-                  ))}
+                  {getServicesForProduct(selectedProductCategory).map(service => <ServiceCard key={service.id} service={service} onSave={handleSaveService} onViewDetails={handleViewServiceDetails} isSaved={savedServiceIds.includes(service.id)} />)}
                 </div>
-              </div>
-            ) : (
-              <div className="mobile-grid gap-4 sm:gap-6">
-                {filteredProducts.map((product) => {
-                  const IconComponent = product.icon;
-                  return (
-                    <div
-                      key={product.id}
-                      className="group relative overflow-hidden bg-white rounded-xl border border-gray-200 hover:border-gray-300 cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
-                      onClick={() => handleSelectProduct(product.id)}
-                    >
+              </div> : <div className="mobile-grid gap-4 sm:gap-6">
+                {filteredProducts.map(product => {
+            const IconComponent = product.icon;
+            return <div key={product.id} className="group relative overflow-hidden bg-white rounded-xl border border-gray-200 hover:border-gray-300 cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1" onClick={() => handleSelectProduct(product.id)}>
                       {/* Background Gradient */}
                       <div className={`absolute inset-0 bg-gradient-to-br ${product.gradient} opacity-5 group-hover:opacity-10 transition-opacity duration-300`} />
                       
@@ -765,11 +630,7 @@ export const MarketplaceGrid = () => {
                               {getServicesForProduct(product.id).length} providers
                             </span>
                           </div>
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            className={`${product.color} hover:bg-gray-50 font-medium opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0`}
-                          >
+                          <Button variant="ghost" size="sm" className={`${product.color} hover:bg-gray-50 font-medium opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0`}>
                             Explore →
                           </Button>
                         </div>
@@ -777,75 +638,46 @@ export const MarketplaceGrid = () => {
 
                       {/* Hover Effect Overlay */}
                       <div className="absolute inset-0 ring-1 ring-gray-200 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    </div>
-                  );
-                })}
-              </div>
-            )
-          ) : (
-            <div className="mobile-grid gap-4 sm:gap-6">
-              {filteredVendors.map((vendor) => (
-                <EnhancedVendorCard
-                  key={vendor.id}
-                  vendor={vendor}
-                  onConnect={handleConnectVendor}
-                  onViewProfile={handleViewVendorProfile}
-                />
-              ))}
-            </div>
-          )}
+                    </div>;
+          })}
+              </div> : <div className="mobile-grid gap-4 sm:gap-6">
+              {filteredVendors.map(vendor => <EnhancedVendorCard key={vendor.id} vendor={vendor} onConnect={handleConnectVendor} onViewProfile={handleViewVendorProfile} />)}
+            </div>}
 
           {/* Empty State */}
-          {((viewMode === "services" && filteredServices.length === 0) || 
-            (viewMode === "vendors" && filteredVendors.length === 0) ||
-            (viewMode === "products" && !selectedProductCategory && filteredProducts.length === 0) ||
-            (viewMode === "products" && selectedProductCategory && getServicesForProduct(selectedProductCategory).length === 0)) && (
-            <div className="text-center py-12">
+          {(viewMode === "services" && filteredServices.length === 0 || viewMode === "vendors" && filteredVendors.length === 0 || viewMode === "products" && !selectedProductCategory && filteredProducts.length === 0 || viewMode === "products" && selectedProductCategory && getServicesForProduct(selectedProductCategory).length === 0) && <div className="text-center py-12">
               <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
                 <Search className="w-8 h-8 text-muted-foreground" />
               </div>
               <h3 className="text-lg font-semibold text-foreground mb-2">
-                {t('noResultsFound', { type: viewMode })}
+                {t('noResultsFound', {
+              type: viewMode
+            })}
               </h3>
               <p className="text-muted-foreground mb-4">
                 {t('tryAdjustingFilters')}
               </p>
-              <Button 
-                variant="outline" 
-                onClick={() => {
-                  setSearchTerm("");
-                  setFilters({
-                    category: "all",
-                    priceRange: [0, 2000],
-                    verified: false,
-                    featured: false,
-                    coPayEligible: false,
-                    locationFilter: false,
-                  });
-                }}
-              >
+              <Button variant="outline" onClick={() => {
+            setSearchTerm("");
+            setFilters({
+              category: "all",
+              priceRange: [0, 2000],
+              verified: false,
+              featured: false,
+              coPayEligible: false,
+              locationFilter: false
+            });
+          }}>
                 {t('clearAll')} filters
               </Button>
-            </div>
-          )}
+            </div>}
         </div>
       </div>
 
       {/* Service Details Modal */}
-      {selectedService && (
-        <ServiceDetailsModal
-          service={selectedService}
-          isOpen={isServiceModalOpen}
-          onClose={handleCloseServiceModal}
-        />
-      )}
+      {selectedService && <ServiceDetailsModal service={selectedService} isOpen={isServiceModalOpen} onClose={handleCloseServiceModal} />}
 
       {/* Add Product Modal */}
-      <AddProductModal
-        open={isAddProductModalOpen}
-        onOpenChange={setIsAddProductModalOpen}
-        onProductAdded={loadData}
-      />
-    </>
-  );
+      <AddProductModal open={isAddProductModalOpen} onOpenChange={setIsAddProductModalOpen} onProductAdded={loadData} />
+    </>;
 };
