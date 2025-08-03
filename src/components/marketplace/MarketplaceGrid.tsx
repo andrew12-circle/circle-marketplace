@@ -276,223 +276,143 @@ export const MarketplaceGrid = () => {
   };
 
   const loadData = useCallback(async () => {
+    // Check circuit breaker before making request
+    const now = Date.now();
+    if (circuitBreakerState.isOpen && now < circuitBreakerState.nextAttempt) {
+      console.log('Circuit breaker is open, skipping request');
+      setError('Service temporarily unavailable. Please try again in a moment.');
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
       
       console.log('Loading marketplace data...');
       
+      // Create abort controller for request timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+      
       // Load vendors from the correct table
       const vendorsResponse = await supabase
         .from('vendors')
         .select('*')
+        .order('sort_order', { ascending: true })
         .order('rating', { ascending: false })
         .limit(50);
 
-      // Load services
+      console.log('Vendors response:', vendorsResponse);
+      console.log('Vendors data:', vendorsResponse.data);
+      console.log('Vendors error:', vendorsResponse.error);
+
+      // Load services without vendor join for now, then get vendors separately
       const servicesResponse = await supabase
         .from('services')
         .select('*')
+        .order('sort_order', { ascending: true })
         .order('created_at', { ascending: false })
         .limit(100);
 
-      // Provide fallback data if queries fail
-      let formattedVendors = [];
-      let formattedServices = [];
+      console.log('Services response:', servicesResponse);
+      console.log('Services data:', servicesResponse.data);
+      console.log('Services error:', servicesResponse.error);
 
-      if (vendorsResponse.data && vendorsResponse.data.length > 0) {
-        formattedVendors = vendorsResponse.data.map(vendor => ({
-          ...vendor,
-          id: vendor.id,
-          name: vendor.name || 'Unknown Vendor',
-          description: vendor.description || '',
-          logo_url: vendor.logo_url,
-          website_url: vendor.website_url,
-          location: vendor.location,
-          rating: vendor.rating || 0,
-          review_count: vendor.review_count || 0,
-          is_verified: vendor.is_verified || false,
-          co_marketing_agents: vendor.co_marketing_agents || 0,
-          campaigns_funded: vendor.campaigns_funded || 0,
-          service_states: vendor.service_states || [],
-          mls_areas: vendor.mls_areas || [],
-          service_radius_miles: vendor.service_radius_miles,
-          license_states: vendor.license_states || [],
-          latitude: vendor.latitude,
-          longitude: vendor.longitude,
-          vendor_type: vendor.vendor_type || 'company',
-          local_representatives: []
-        }));
-      } else {
-        // Fallback vendor data
-        formattedVendors = [
-          {
-            id: '1',
-            name: 'Premier Marketing Solutions',
-            description: 'Full-service real estate marketing company specializing in digital advertising and lead generation.',
-            logo_url: null,
-            website_url: 'https://example.com',
-            location: 'Los Angeles, CA',
-            rating: 4.8,
-            review_count: 156,
-            is_verified: true,
-            co_marketing_agents: 45,
-            campaigns_funded: 89,
-            service_states: ['CA', 'NV'],
-            mls_areas: ['CRMLS', 'VGMLS'],
-            service_radius_miles: 50,
-            license_states: ['CA'],
-            latitude: 34.0522,
-            longitude: -118.2437,
-            vendor_type: 'company',
-            local_representatives: []
-          },
-          {
-            id: '2',
-            name: 'Elite Lead Generation',
-            description: 'Specialized in high-converting Facebook and Google ad campaigns for real estate professionals.',
-            logo_url: null,
-            website_url: 'https://example.com',
-            location: 'Austin, TX',
-            rating: 4.6,
-            review_count: 89,
-            is_verified: true,
-            co_marketing_agents: 32,
-            campaigns_funded: 67,
-            service_states: ['TX', 'OK'],
-            mls_areas: ['CTXMLS'],
-            service_radius_miles: 75,
-            license_states: ['TX'],
-            latitude: 30.2672,
-            longitude: -97.7431,
-            vendor_type: 'company',
-            local_representatives: []
-          }
-        ];
+      clearTimeout(timeoutId);
+
+      if (vendorsResponse.error) {
+        console.error('Vendors error:', vendorsResponse.error);
+        throw vendorsResponse.error;
+      }
+      if (servicesResponse.error) {
+        console.error('Services error:', servicesResponse.error);
+        throw servicesResponse.error;
       }
 
-      if (servicesResponse.data && servicesResponse.data.length > 0) {
-        formattedServices = servicesResponse.data.map(service => ({
-          ...service,
-          discount_percentage: service.discount_percentage ? String(service.discount_percentage) : undefined,
-          vendor: {
-            name: 'Service Provider',
-            rating: 4.5,
-            review_count: 0,
-            is_verified: true
-          }
-        }));
-      } else {
-        // Fallback service data
-        formattedServices = [
-          {
-            id: '1',
-            title: 'Facebook Lead Generation Campaign',
-            description: 'Professional Facebook ad campaign designed to generate high-quality real estate leads in your area.',
-            category: 'Digital Marketing',
-            retail_price: '299',
-            pro_price: '199',
-            co_pay_price: '99',
-            image_url: null,
-            tags: ['facebook-ads', 'lead-generation', 'digital-marketing'],
-            is_featured: true,
-            is_top_pick: true,
-            estimated_roi: 400,
-            duration: '30 days',
-            requires_quote: false,
-            vendor: {
-              name: 'Premier Marketing Solutions',
-              rating: 4.8,
-              review_count: 156,
-              is_verified: true
-            }
-          },
-          {
-            id: '2',
-            title: 'Google Ads Campaign Setup',
-            description: 'Complete Google Ads campaign setup and management for real estate professionals.',
-            category: 'Digital Marketing',
-            retail_price: '399',
-            pro_price: '299',
-            co_pay_price: '149',
-            image_url: null,
-            tags: ['google-ads', 'ppc', 'digital-marketing'],
-            is_featured: true,
-            is_top_pick: false,
-            estimated_roi: 350,
-            duration: '45 days',
-            requires_quote: false,
-            vendor: {
-              name: 'Elite Lead Generation',
-              rating: 4.6,
-              review_count: 89,
-              is_verified: true
-            }
-          }
-        ];
-      }
+      // Convert the database response to match our interface
+      const formattedServices = (servicesResponse.data || []).map(service => ({
+        ...service,
+        discount_percentage: service.discount_percentage ? String(service.discount_percentage) : undefined,
+        vendor: {
+          name: 'Service Provider',
+          rating: 4.5,
+          review_count: 0,
+          is_verified: true
+        }
+      }));
+      
+      // Format vendors data using vendors table
+      const formattedVendors = (vendorsResponse.data || []).map(vendor => ({
+        ...vendor,
+        id: vendor.id,
+        name: vendor.name || 'Unknown Vendor',
+        description: vendor.description || '',
+        logo_url: vendor.logo_url,
+        website_url: vendor.website_url,
+        location: vendor.location,
+        rating: vendor.rating || 0,
+        review_count: vendor.review_count || 0,
+        is_verified: vendor.is_verified || false,
+        co_marketing_agents: vendor.co_marketing_agents || 0,
+        campaigns_funded: vendor.campaigns_funded || 0,
+        service_states: vendor.service_states || [],
+        mls_areas: vendor.mls_areas || [],
+        service_radius_miles: vendor.service_radius_miles,
+        license_states: vendor.license_states || [],
+        latitude: vendor.latitude,
+        longitude: vendor.longitude,
+        vendor_type: vendor.vendor_type || 'company',
+        local_representatives: []
+      }));
       
       console.log(`Loaded ${formattedServices.length} services and ${formattedVendors.length} vendors`);
       
       setServices(formattedServices);
       setVendors(formattedVendors);
       
+      // Record success
+      setCircuitBreakerState({
+        isOpen: false,
+        failureCount: 0,
+        lastFailureTime: 0,
+        nextAttempt: 0,
+      });
+      
     } catch (error) {
       console.error('Marketplace data loading error:', error);
       
-      // Even on error, provide fallback data so the UI isn't empty
-      setVendors([
-        {
-          id: '1',
-          name: 'Premier Marketing Solutions',
-          description: 'Full-service real estate marketing company.',
-          logo_url: null,
-          website_url: 'https://example.com',
-          location: 'Los Angeles, CA',
-          rating: 4.8,
-          review_count: 156,
-          is_verified: true,
-          co_marketing_agents: 45,
-          campaigns_funded: 89,
-          service_states: ['CA'],
-          mls_areas: ['CRMLS'],
-          service_radius_miles: 50,
-          license_states: ['CA'],
-          latitude: 34.0522,
-          longitude: -118.2437,
-          vendor_type: 'company',
-          local_representatives: []
+      // Record failure
+      setCircuitBreakerState(prev => {
+        const newFailureCount = prev.failureCount + 1;
+        if (newFailureCount >= CIRCUIT_BREAKER_CONFIG.failureThreshold) {
+          return {
+            ...prev,
+            isOpen: true,
+            failureCount: newFailureCount,
+            lastFailureTime: Date.now(),
+            nextAttempt: Date.now() + CIRCUIT_BREAKER_CONFIG.timeout,
+          };
         }
-      ]);
+        return { ...prev, failureCount: newFailureCount };
+      });
       
-      setServices([
-        {
-          id: '1',
-          title: 'Facebook Lead Generation Campaign',
-          description: 'Professional Facebook ad campaign for real estate leads.',
-          category: 'Digital Marketing',
-          retail_price: '299',
-          pro_price: '199',
-          co_pay_price: '99',
-          image_url: null,
-          tags: ['facebook-ads', 'lead-generation'],
-          is_featured: true,
-          is_top_pick: true,
-          estimated_roi: 400,
-          duration: '30 days',
-          requires_quote: false,
-          vendor: {
-            name: 'Premier Marketing Solutions',
-            rating: 4.8,
-            review_count: 156,
-            is_verified: true
-          }
-        }
-      ]);
+      if (error.name === 'AbortError') {
+        setError('Request timed out. Please check your connection and try again.');
+      } else {
+        setError(`Failed to load marketplace data: ${error.message || 'Unknown error'}`);
+      }
+      
+      toast({
+        title: "Error loading data",
+        description: `Failed to load marketplace data: ${error.message || 'Please try again.'}`,
+        variant: "destructive",
+      });
     } finally {
+      console.log('Setting loading to false');
       setLoading(false);
     }
-  }, [toast]);
+  }, [CIRCUIT_BREAKER_CONFIG.failureThreshold, CIRCUIT_BREAKER_CONFIG.timeout, circuitBreakerState.isOpen, circuitBreakerState.nextAttempt, toast]);
 
   useEffect(() => {
     loadData();

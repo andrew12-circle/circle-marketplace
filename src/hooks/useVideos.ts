@@ -41,6 +41,7 @@ export const useVideos = (options: UseVideosOptions = {}) => {
       let additionalConditions = {};
       
       if (options.category === 'shorts') {
+        // For shorts, we'll filter in JavaScript since metadata queries are complex
         additionalConditions = {};
       } else if (options.category) {
         additionalConditions = { category: options.category };
@@ -60,105 +61,58 @@ export const useVideos = (options: UseVideosOptions = {}) => {
         .order('created_at', { ascending: false });
 
       if (options.limit) {
-        queryBuilder = queryBuilder.limit(options.limit * 2);
+        queryBuilder = queryBuilder.limit(options.limit * 2); // Get extra for shorts filtering
       }
 
       const { data, error: fetchError } = await queryBuilder;
 
-      let formattedVideos: Video[] = [];
-
-      if (data && data.length > 0) {
-        // Filter for shorts in JavaScript if needed
-        let filteredData = data;
-        if (options.category === 'shorts') {
-          filteredData = filteredData.filter(video => {
-            if (video.metadata && typeof video.metadata === 'object' && !Array.isArray(video.metadata)) {
-              return (video.metadata as any).is_short === true;
-            }
-            return false;
-          });
-        }
-
-        // Apply limit after filtering
-        if (options.limit) {
-          filteredData = filteredData.slice(0, options.limit);
-        }
-
-        formattedVideos = filteredData.map((video) => ({
-          id: video.id,
-          title: video.title,
-          creator: "Content Creator",
-          thumbnail: video.cover_image_url || "/placeholder.svg",
-          duration: video.duration || "0:00",
-          category: video.category,
-          rating: video.rating || undefined,
-          isPro: video.is_pro,
-          views: video.total_plays > 0 ? `${Math.floor(video.total_plays / 1000)}K` : "0",
-          description: video.description || undefined,
-        }));
-      } else {
-        // Fallback video data
-        formattedVideos = [
-          {
-            id: '1',
-            title: 'Real Estate Lead Generation Strategies',
-            creator: 'Marketing Expert',
-            thumbnail: '/placeholder.svg',
-            duration: '12:45',
-            category: 'Marketing',
-            rating: 4.8,
-            isPro: false,
-            views: '25K',
-            description: 'Learn the most effective strategies for generating quality real estate leads.',
-          },
-          {
-            id: '2',
-            title: 'Social Media Marketing for Realtors',
-            creator: 'Digital Marketing Pro',
-            thumbnail: '/placeholder.svg',
-            duration: '18:30',
-            category: 'Social Media',
-            rating: 4.6,
-            isPro: true,
-            views: '18K',
-            description: 'Master social media marketing to grow your real estate business.',
-          },
-          {
-            id: '3',
-            title: 'Closing Techniques That Work',
-            creator: 'Sales Coach',
-            thumbnail: '/placeholder.svg',
-            duration: '22:15',
-            category: 'Sales',
-            rating: 4.9,
-            isPro: false,
-            views: '32K',
-            description: 'Proven closing techniques used by top real estate professionals.',
-          }
-        ].slice(0, options.limit || 3);
+      if (fetchError) {
+        throw fetchError;
       }
+
+      // Filter for shorts in JavaScript if needed
+      let filteredData = data || [];
+      if (options.category === 'shorts') {
+        filteredData = filteredData.filter(video => {
+          // Check if metadata exists and has is_short property
+          if (video.metadata && typeof video.metadata === 'object' && !Array.isArray(video.metadata)) {
+            return (video.metadata as any).is_short === true;
+          }
+          return false;
+        });
+      }
+
+      // Apply limit after filtering
+      if (options.limit) {
+        filteredData = filteredData.slice(0, options.limit);
+      }
+
+      if (fetchError) {
+        throw fetchError;
+      }
+
+      const formattedVideos: Video[] = filteredData.map((video) => ({
+        id: video.id,
+        title: video.title,
+        creator: "Content Creator", // Will need to join with profiles table later
+        thumbnail: video.cover_image_url || "/placeholder.svg",
+        duration: video.duration || "0:00",
+        category: video.category,
+        rating: video.rating || undefined,
+        isPro: video.is_pro,
+        views: video.total_plays > 0 ? `${Math.floor(video.total_plays / 1000)}K` : "0",
+        description: video.description || undefined,
+      }));
 
       setVideos(formattedVideos);
     } catch (err) {
-      console.error('Video fetch error:', err);
-      
-      // Even on error, provide fallback data
-      const fallbackVideos: Video[] = [
-        {
-          id: '1',
-          title: 'Real Estate Lead Generation Strategies',
-          creator: 'Marketing Expert',
-          thumbnail: '/placeholder.svg',
-          duration: '12:45',
-          category: 'Marketing',
-          rating: 4.8,
-          isPro: false,
-          views: '25K',
-          description: 'Learn effective lead generation strategies.',
-        }
-      ];
-      
-      setVideos(fallbackVideos.slice(0, options.limit || 1));
+      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch videos';
+      setError(errorMessage);
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }

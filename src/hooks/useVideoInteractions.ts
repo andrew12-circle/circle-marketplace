@@ -196,46 +196,25 @@ export const useVideoInteractions = (contentId: string, channelId?: string) => {
   };
 
   const handleSave = async () => {
-    console.log('Save button clicked, contentId:', contentId);
-    
     const { data: { user } } = await supabase.auth.getUser();
-    console.log('Current user:', user);
-    
     if (!user) {
-      console.log('No user found, showing sign in toast');
       toast({ title: "Please sign in to save videos", variant: "destructive" });
       return;
     }
 
-    if (!contentId) {
-      console.log('No contentId provided');
-      toast({ title: "Unable to save - missing video ID", variant: "destructive" });
-      return;
-    }
-
     try {
-      console.log('Current save state:', interactions.isSaved);
-      
       if (interactions.isSaved) {
-        console.log('Removing save...');
-        const { error } = await supabase
+        await supabase
           .from('content_interactions')
           .delete()
           .eq('content_id', contentId)
           .eq('user_id', user.id)
           .eq('interaction_type', 'save');
         
-        if (error) {
-          console.error('Error removing save:', error);
-          throw error;
-        }
-        
         setInteractions(prev => ({ ...prev, isSaved: false }));
         toast({ title: "Removed from saved videos" });
-        console.log('Save removed successfully');
       } else {
-        console.log('Adding save...');
-        const { error } = await supabase
+        await supabase
           .from('content_interactions')
           .insert({
             content_id: contentId,
@@ -243,14 +222,8 @@ export const useVideoInteractions = (contentId: string, channelId?: string) => {
             interaction_type: 'save',
           });
 
-        if (error) {
-          console.error('Error adding save:', error);
-          throw error;
-        }
-
         setInteractions(prev => ({ ...prev, isSaved: true }));
         toast({ title: "Added to saved videos" });
-        console.log('Save added successfully');
       }
     } catch (error) {
       console.error('Error handling save:', error);
@@ -296,44 +269,18 @@ export const useVideoInteractions = (contentId: string, channelId?: string) => {
 
   const handleShare = async () => {
     try {
-      // Check if Web Share API is available and supported
-      if (navigator.share && navigator.canShare) {
-        const shareData = {
+      if (navigator.share) {
+        await navigator.share({
           title: 'Check out this video',
           url: window.location.href,
-        };
-        
-        // Check if the data can be shared
-        if (navigator.canShare(shareData)) {
-          await navigator.share(shareData);
-          return;
-        }
+        });
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+        toast({ title: "Link copied to clipboard" });
       }
-      
-      // Fallback to clipboard
-      await navigator.clipboard.writeText(window.location.href);
-      toast({ title: "Link copied to clipboard" });
-      
     } catch (error) {
       console.error('Error sharing:', error);
-      
-      // Try alternative clipboard method as final fallback
-      try {
-        const textArea = document.createElement('textarea');
-        textArea.value = window.location.href;
-        document.body.appendChild(textArea);
-        textArea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textArea);
-        toast({ title: "Link copied to clipboard" });
-      } catch (fallbackError) {
-        console.error('Fallback sharing failed:', fallbackError);
-        toast({ 
-          title: "Unable to share", 
-          description: "Please copy the URL manually from your address bar",
-          variant: "destructive" 
-        });
-      }
+      toast({ title: "Error sharing video", variant: "destructive" });
     }
   };
 
