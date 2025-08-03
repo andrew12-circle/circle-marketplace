@@ -2,7 +2,29 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Star, Clock, User, X } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Textarea } from "@/components/ui/textarea";
+import { Star, Clock, User, X, ThumbsUp, ThumbsDown, Heart, MessageCircle, Share, Bell, BellRing, Pin } from "lucide-react";
+
+interface Channel {
+  id: string;
+  name: string;
+  avatar?: string;
+  subscribers: number;
+  isSubscribed: boolean;
+}
+
+interface Comment {
+  id: string;
+  author: string;
+  avatar?: string;
+  content: string;
+  timestamp: string;
+  likes: number;
+  isLiked: boolean;
+  isPinned?: boolean;
+  replies?: Comment[];
+}
 
 interface Video {
   id: string;
@@ -18,6 +40,13 @@ interface Video {
   uploadDate?: string;
   tags?: string[];
   difficulty?: string;
+  channel: Channel;
+  likes: number;
+  dislikes: number;
+  isLiked: boolean;
+  isDisliked: boolean;
+  isSaved: boolean;
+  comments: Comment[];
 }
 
 interface VideoPlayerModalProps {
@@ -38,9 +67,20 @@ export const VideoPlayerModal = ({ video, isOpen, onClose, videoUrl }: VideoPlay
 
   const embedUrl = getYouTubeEmbedUrl(videoUrl);
 
+  const formatSubscriberCount = (count: number) => {
+    if (count >= 1000000) return `${(count / 1000000).toFixed(1)}M`;
+    if (count >= 1000) return `${(count / 1000).toFixed(1)}K`;
+    return count.toString();
+  };
+
+  const formatLikeCount = (count: number) => {
+    if (count >= 1000) return `${(count / 1000).toFixed(1)}K`;
+    return count.toString();
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] p-0">
+      <DialogContent className="max-w-6xl max-h-[95vh] p-0">
         <div className="flex flex-col h-full">
           {/* Header */}
           <DialogHeader className="px-6 py-4 border-b">
@@ -48,27 +88,9 @@ export const VideoPlayerModal = ({ video, isOpen, onClose, videoUrl }: VideoPlay
               <div className="flex-1">
                 <DialogTitle className="text-xl font-bold text-left">{video.title}</DialogTitle>
                 <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <User className="w-4 h-4" />
-                    {video.creator}
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Clock className="w-4 h-4" />
-                    {video.duration}
-                  </div>
-                  {video.rating && (
-                    <div className="flex items-center gap-1">
-                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                      {video.rating}
-                    </div>
-                  )}
-                  {video.views && (
-                    <span>{video.views} views</span>
-                  )}
-                </div>
-                <div className="flex items-center gap-2 mt-2">
-                  <Badge variant="secondary">{video.category}</Badge>
-                  {video.isPro && <Badge variant="default">PRO</Badge>}
+                  {video.views && <span>{video.views} views</span>}
+                  {video.uploadDate && <span>•</span>}
+                  {video.uploadDate && <span>{video.uploadDate}</span>}
                 </div>
               </div>
               <Button variant="ghost" size="sm" onClick={onClose}>
@@ -83,52 +105,221 @@ export const VideoPlayerModal = ({ video, isOpen, onClose, videoUrl }: VideoPlay
               <iframe
                 src={embedUrl}
                 title={video.title}
-                className="w-full h-[500px]"
+                className="w-full h-[400px]"
                 frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
               />
             ) : (
-              <div className="flex items-center justify-center h-[500px] text-white">
+              <div className="flex items-center justify-center h-[400px] text-white">
                 <p>Unable to load video</p>
               </div>
             )}
           </div>
 
-          {/* Description - YouTube Style */}
-          <div className="px-6 py-4 border-t bg-muted/50">
-            <div className="space-y-3">
-              {/* Video Stats */}
-              <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                {video.views && <span>{video.views} views</span>}
-                {video.uploadDate && <span>•</span>}
-                {video.uploadDate && <span>{video.uploadDate}</span>}
-                {video.difficulty && <span>•</span>}
-                {video.difficulty && <Badge variant="outline" className="text-xs">{video.difficulty}</Badge>}
+          {/* Video Actions */}
+          <div className="px-6 py-4 border-b">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Badge variant="secondary">{video.category}</Badge>
+                {video.isPro && <Badge variant="default">PRO</Badge>}
+                {video.difficulty && <Badge variant="outline">{video.difficulty}</Badge>}
               </div>
-              
-              {/* Description */}
-              {video.description && (
-                <div>
-                  <ScrollArea className="h-24">
-                    <p className="text-sm leading-relaxed pr-4">{video.description}</p>
-                  </ScrollArea>
+              <div className="flex items-center gap-2">
+                <div className="flex items-center bg-muted rounded-full">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className={`rounded-l-full ${video.isLiked ? 'text-blue-600' : ''}`}
+                  >
+                    <ThumbsUp className="w-4 h-4 mr-1" />
+                    {formatLikeCount(video.likes)}
+                  </Button>
+                  <div className="w-px h-6 bg-border" />
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className={`rounded-r-full ${video.isDisliked ? 'text-red-600' : ''}`}
+                  >
+                    <ThumbsDown className="w-4 h-4 mr-1" />
+                    {formatLikeCount(video.dislikes)}
+                  </Button>
                 </div>
+                <Button variant="ghost" size="sm" className="rounded-full">
+                  <Share className="w-4 h-4 mr-1" />
+                  Share
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className={`rounded-full ${video.isSaved ? 'text-blue-600' : ''}`}
+                >
+                  <Heart className="w-4 h-4 mr-1" />
+                  {video.isSaved ? 'Saved' : 'Save'}
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* Channel Info */}
+          <div className="px-6 py-4 border-b">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Avatar className="w-10 h-10">
+                  <AvatarImage src={video.channel.avatar} />
+                  <AvatarFallback>{video.channel.name.charAt(0)}</AvatarFallback>
+                </Avatar>
+                <div>
+                  <h4 className="font-medium">{video.channel.name}</h4>
+                  <p className="text-sm text-muted-foreground">
+                    {formatSubscriberCount(video.channel.subscribers)} subscribers
+                  </p>
+                </div>
+              </div>
+              <Button 
+                variant={video.channel.isSubscribed ? "outline" : "default"}
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                {video.channel.isSubscribed ? (
+                  <>
+                    <BellRing className="w-4 h-4" />
+                    Subscribed
+                  </>
+                ) : (
+                  <>
+                    <Bell className="w-4 h-4" />
+                    Subscribe
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+
+          {/* Description */}
+          <div className="px-6 py-4 border-b bg-muted/30">
+            <div className="space-y-3">
+              {video.description && (
+                <ScrollArea className="h-20">
+                  <p className="text-sm leading-relaxed pr-4">{video.description}</p>
+                </ScrollArea>
               )}
               
-              {/* Tags */}
               {video.tags && video.tags.length > 0 && (
-                <div>
-                  <h5 className="text-sm font-medium mb-2">Tags</h5>
-                  <div className="flex flex-wrap gap-2">
-                    {video.tags.map((tag, index) => (
-                      <Badge key={index} variant="secondary" className="text-xs">
-                        #{tag}
-                      </Badge>
-                    ))}
+                <div className="flex flex-wrap gap-2">
+                  {video.tags.map((tag, index) => (
+                    <Badge key={index} variant="secondary" className="text-xs">
+                      #{tag}
+                    </Badge>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Comments Section */}
+          <div className="px-6 py-4 flex-1">
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <MessageCircle className="w-5 h-5" />
+                <h3 className="font-medium">{video.comments.length} Comments</h3>
+              </div>
+
+              {/* Add Comment */}
+              <div className="flex gap-3">
+                <Avatar className="w-8 h-8">
+                  <AvatarFallback>U</AvatarFallback>
+                </Avatar>
+                <div className="flex-1">
+                  <Textarea 
+                    placeholder="Add a comment..." 
+                    className="min-h-[80px] resize-none"
+                  />
+                  <div className="flex justify-end gap-2 mt-2">
+                    <Button variant="ghost" size="sm">Cancel</Button>
+                    <Button size="sm">Comment</Button>
                   </div>
                 </div>
-              )}
+              </div>
+
+              {/* Comments List */}
+              <ScrollArea className="h-64">
+                <div className="space-y-4 pr-4">
+                  {video.comments.map((comment) => (
+                    <div key={comment.id} className="space-y-2">
+                      {comment.isPinned && (
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <Pin className="w-3 h-3" />
+                          Pinned by {video.channel.name}
+                        </div>
+                      )}
+                      <div className="flex gap-3">
+                        <Avatar className="w-8 h-8">
+                          <AvatarImage src={comment.avatar} />
+                          <AvatarFallback>{comment.author.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 space-y-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium text-sm">{comment.author}</span>
+                            <span className="text-xs text-muted-foreground">{comment.timestamp}</span>
+                          </div>
+                          <p className="text-sm">{comment.content}</p>
+                          <div className="flex items-center gap-4 text-xs">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className={`h-auto p-1 ${comment.isLiked ? 'text-blue-600' : ''}`}
+                            >
+                              <ThumbsUp className="w-3 h-3 mr-1" />
+                              {comment.likes}
+                            </Button>
+                            <Button variant="ghost" size="sm" className="h-auto p-1">
+                              <ThumbsDown className="w-3 h-3" />
+                            </Button>
+                            <Button variant="ghost" size="sm" className="h-auto p-1">
+                              Reply
+                            </Button>
+                          </div>
+                          
+                          {/* Replies */}
+                          {comment.replies && comment.replies.length > 0 && (
+                            <div className="ml-6 mt-3 space-y-3">
+                              {comment.replies.map((reply) => (
+                                <div key={reply.id} className="flex gap-3">
+                                  <Avatar className="w-6 h-6">
+                                    <AvatarImage src={reply.avatar} />
+                                    <AvatarFallback>{reply.author.charAt(0)}</AvatarFallback>
+                                  </Avatar>
+                                  <div className="flex-1 space-y-1">
+                                    <div className="flex items-center gap-2">
+                                      <span className="font-medium text-sm">{reply.author}</span>
+                                      <span className="text-xs text-muted-foreground">{reply.timestamp}</span>
+                                    </div>
+                                    <p className="text-sm">{reply.content}</p>
+                                    <div className="flex items-center gap-4 text-xs">
+                                      <Button 
+                                        variant="ghost" 
+                                        size="sm" 
+                                        className={`h-auto p-1 ${reply.isLiked ? 'text-blue-600' : ''}`}
+                                      >
+                                        <ThumbsUp className="w-3 h-3 mr-1" />
+                                        {reply.likes}
+                                      </Button>
+                                      <Button variant="ghost" size="sm" className="h-auto p-1">
+                                        <ThumbsDown className="w-3 h-3" />
+                                      </Button>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
             </div>
           </div>
         </div>
