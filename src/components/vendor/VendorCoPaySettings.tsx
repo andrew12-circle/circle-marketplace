@@ -27,6 +27,12 @@ export const VendorCoPaySettings = ({ vendorId }: { vendorId: string }) => {
   const getMaxAllowedPercentage = () => {
     if (!vendorProfile) return 100;
     
+    // Use custom RESPA limit if set by admin
+    if (vendorProfile.respa_max_copay_percentage !== null && vendorProfile.respa_max_copay_percentage !== undefined) {
+      return vendorProfile.respa_max_copay_percentage;
+    }
+    
+    // Fall back to automatic detection
     const riskLevel = determineVendorRisk({
       name: vendorProfile.business_name || vendorProfile.display_name || '',
       description: vendorProfile.bio || '',
@@ -34,7 +40,7 @@ export const VendorCoPaySettings = ({ vendorId }: { vendorId: string }) => {
       respa_risk_level: vendorProfile.respa_risk_level
     });
     
-    // Settlement service providers limited to 30% due to RESPA
+    // Default limits based on risk level
     if (riskLevel === 'high') return 30;
     if (riskLevel === 'medium') return 50; 
     return 100; // Non-settlement providers can cover up to 100%
@@ -49,7 +55,7 @@ export const VendorCoPaySettings = ({ vendorId }: { vendorId: string }) => {
       // Load vendor profile for RESPA compliance checking
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('business_name, display_name, bio, is_respa_regulated, respa_risk_level')
+        .select('business_name, display_name, bio, is_respa_regulated, respa_risk_level, respa_max_copay_percentage, respa_service_categories, respa_notes')
         .eq('user_id', vendorId)
         .single();
 
@@ -165,13 +171,34 @@ export const VendorCoPaySettings = ({ vendorId }: { vendorId: string }) => {
 
         {/* RESPA Compliance Notice */}
         {vendorProfile && (() => {
+          const maxAllowed = getMaxAllowedPercentage();
+          const hasCustomLimit = vendorProfile.respa_max_copay_percentage !== null && vendorProfile.respa_max_copay_percentage !== undefined;
+          
+          if (hasCustomLimit) {
+            return (
+              <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 flex items-start gap-3">
+                <Settings className="w-5 h-5 text-blue-600 mt-0.5" />
+                <div>
+                  <h4 className="font-medium text-blue-900">Custom RESPA Limit Set</h4>
+                  <p className="text-sm text-blue-800">
+                    Your maximum co-pay coverage has been set to {maxAllowed}% based on your specific service categories and RESPA compliance requirements.
+                  </p>
+                  {vendorProfile.respa_notes && (
+                    <p className="text-xs text-blue-700 mt-1 italic">
+                      Admin notes: {vendorProfile.respa_notes}
+                    </p>
+                  )}
+                </div>
+              </div>
+            );
+          }
+          
           const riskLevel = determineVendorRisk({
             name: vendorProfile.business_name || vendorProfile.display_name || '',
             description: vendorProfile.bio || '',
             is_respa_regulated: vendorProfile.is_respa_regulated,
             respa_risk_level: vendorProfile.respa_risk_level
           });
-          const maxAllowed = getMaxAllowedPercentage();
           
           if (riskLevel === 'high') {
             return (
