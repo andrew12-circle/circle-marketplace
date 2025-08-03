@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { ServiceCard } from "./ServiceCard";
 import { EnhancedVendorCard } from "./EnhancedVendorCard";
@@ -112,53 +112,6 @@ export const MarketplaceGrid = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [sortBy, setSortBy] = useState<'featured' | 'rating' | 'price'>('featured');
   
-  // Circuit breaker state for marketplace
-  const [circuitBreakerState, setCircuitBreakerState] = useState({
-    isOpen: false,
-    failureCount: 0,
-    lastFailureTime: 0,
-    nextAttempt: 0,
-  });
-
-  const CIRCUIT_BREAKER_CONFIG = {
-    failureThreshold: 3,
-    timeout: 30000, // 30 seconds
-  };
-
-  const checkCircuitBreaker = () => {
-    const now = Date.now();
-    if (circuitBreakerState.isOpen && now >= circuitBreakerState.nextAttempt) {
-      setCircuitBreakerState(prev => ({ ...prev, isOpen: false }));
-      return false;
-    }
-    return circuitBreakerState.isOpen;
-  };
-
-  const recordFailure = () => {
-    setCircuitBreakerState(prev => {
-      const newFailureCount = prev.failureCount + 1;
-      if (newFailureCount >= CIRCUIT_BREAKER_CONFIG.failureThreshold) {
-        return {
-          ...prev,
-          isOpen: true,
-          failureCount: newFailureCount,
-          lastFailureTime: Date.now(),
-          nextAttempt: Date.now() + CIRCUIT_BREAKER_CONFIG.timeout,
-        };
-      }
-      return { ...prev, failureCount: newFailureCount };
-    });
-  };
-
-  const recordSuccess = () => {
-    setCircuitBreakerState({
-      isOpen: false,
-      failureCount: 0,
-      lastFailureTime: 0,
-      nextAttempt: 0,
-    });
-  };
-  
   // Define product categories with enhanced styling
   const PRODUCT_CATEGORIES = [
     { 
@@ -257,10 +210,6 @@ export const MarketplaceGrid = () => {
   const { toast } = useToast();
   const { user, profile } = useAuth();
   const { location } = useLocation();
-  
-  // Prevent multiple concurrent loads
-  const loadingRef = useRef(false);
-  const dataLoadedRef = useRef(false);
 
   const loadSavedServices = async () => {
     if (!profile?.user_id) return;
@@ -280,33 +229,11 @@ export const MarketplaceGrid = () => {
   };
 
   const loadData = useCallback(async () => {
-    // Prevent multiple concurrent loads but allow initial load
-    if (loadingRef.current) {
-      console.log('Load already in progress, skipping');
-      return;
-    }
-    
-    loadingRef.current = true;
-    
-    // Check circuit breaker before making request
-    const now = Date.now();
-    if (circuitBreakerState.isOpen && now < circuitBreakerState.nextAttempt) {
-      console.log('Circuit breaker is open, skipping request');
-      setError('Service temporarily unavailable. Please try again in a moment.');
-      setLoading(false);
-      loadingRef.current = false;
-      return;
-    }
-
     try {
       setLoading(true);
       setError(null);
       
       console.log('Loading marketplace data...');
-      
-      // Create abort controller for request timeout
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
       
       // Load vendors from the correct table
       const vendorsResponse = await supabase
@@ -331,8 +258,6 @@ export const MarketplaceGrid = () => {
       console.log('Services response:', servicesResponse);
       console.log('Services data:', servicesResponse.data);
       console.log('Services error:', servicesResponse.error);
-
-      clearTimeout(timeoutId);
 
       if (vendorsResponse.error) {
         console.error('Vendors error:', vendorsResponse.error);
@@ -384,40 +309,9 @@ export const MarketplaceGrid = () => {
       setServices(formattedServices);
       setVendors(formattedVendors);
       
-      // Mark data as loaded successfully
-      dataLoadedRef.current = true;
-      
-      // Record success
-      setCircuitBreakerState({
-        isOpen: false,
-        failureCount: 0,
-        lastFailureTime: 0,
-        nextAttempt: 0,
-      });
-      
     } catch (error) {
       console.error('Marketplace data loading error:', error);
-      
-      // Record failure
-      setCircuitBreakerState(prev => {
-        const newFailureCount = prev.failureCount + 1;
-        if (newFailureCount >= CIRCUIT_BREAKER_CONFIG.failureThreshold) {
-          return {
-            ...prev,
-            isOpen: true,
-            failureCount: newFailureCount,
-            lastFailureTime: Date.now(),
-            nextAttempt: Date.now() + CIRCUIT_BREAKER_CONFIG.timeout,
-          };
-        }
-        return { ...prev, failureCount: newFailureCount };
-      });
-      
-      if (error.name === 'AbortError') {
-        setError('Request timed out. Please check your connection and try again.');
-      } else {
-        setError(`Failed to load marketplace data: ${error.message || 'Unknown error'}`);
-      }
+      setError(`Failed to load marketplace data: ${error.message || 'Unknown error'}`);
       
       toast({
         title: "Error loading data",
@@ -427,9 +321,8 @@ export const MarketplaceGrid = () => {
     } finally {
       console.log('Setting loading to false');
       setLoading(false);
-      loadingRef.current = false;
     }
-  }, [CIRCUIT_BREAKER_CONFIG.failureThreshold, CIRCUIT_BREAKER_CONFIG.timeout, circuitBreakerState.isOpen, circuitBreakerState.nextAttempt, toast]);
+  }, [toast]);
 
   useEffect(() => {
     loadData();
