@@ -1669,7 +1669,7 @@ const AcademyContent = () => {
       <SidebarProvider>
         <div className="min-h-screen flex w-full bg-white">
         {/* Mobile Sidebar Trigger - Only visible on mobile when sidebar is collapsed */}
-        <div className="md:hidden fixed top-20 left-4 z-30">
+        <div className="md:hidden fixed top-28 left-4 z-30">
           <SidebarTrigger className="bg-white shadow-md border rounded-md p-2" />
         </div>
 
