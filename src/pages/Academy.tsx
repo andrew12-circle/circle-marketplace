@@ -386,7 +386,7 @@ const AcademyContent = () => {
               <span className="text-sm font-medium text-green-100">SHARE YOUR SUCCESS</span>
             </div>
             <h2 className="text-3xl font-bold mb-3">Turn Your Story Into A National Playbook</h2>
-            <p className="text-lg text-green-50 mb-4">We make it super easy to share your proven strategies and create playbooks & courses. Your content won't be shared with local agents within 50 miles, but over a million agents nationwide will see it — which could lead to substantial income. Agents want to learn for agents in the market not outdated coaching. </p>
+            <p className="text-green-50 mb-4 text-base">We make it super easy to share your proven strategies and create playbooks & courses. Your content won't be shared with local agents within 50 miles, but over a million agents nationwide will see it — which could lead to substantial income. Agents want to learn for agents in the market not outdated coaching. </p>
             <div className="flex items-center gap-6 text-sm">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-green-300 rounded-full"></div>
