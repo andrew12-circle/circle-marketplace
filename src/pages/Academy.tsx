@@ -327,7 +327,7 @@ const AcademyContent = () => {
             <div className="flex items-center gap-6 text-sm">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-green-300 rounded-full"></div>
-                <span>70% revenue share</span>
+                <span>Earn passive income</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-green-300 rounded-full"></div>
