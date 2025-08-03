@@ -143,11 +143,12 @@ export const AIConciergeBanner = () => {
     }
   };
 
-  // Animated placeholder text effect
+  // Animated placeholder text effect with cleanup
   useEffect(() => {
     let currentQuestionIndex = 0;
     let currentCharIndex = 0;
     let isDeleting = false;
+    let timeoutId: NodeJS.Timeout;
     
     const typeEffect = () => {
       const currentQuestion = placeholderQuestions[currentQuestionIndex];
@@ -159,7 +160,7 @@ export const AIConciergeBanner = () => {
         if (currentCharIndex === 0) {
           isDeleting = false;
           currentQuestionIndex = (currentQuestionIndex + 1) % placeholderQuestions.length;
-          setTimeout(typeEffect, 500); // Pause before typing next question
+          timeoutId = setTimeout(typeEffect, 500);
           return;
         }
       } else {
@@ -167,18 +168,22 @@ export const AIConciergeBanner = () => {
         currentCharIndex++;
         
         if (currentCharIndex === currentQuestion.length) {
-          setTimeout(() => {
+          timeoutId = setTimeout(() => {
             isDeleting = true;
             typeEffect();
-          }, 2000); // Pause when finished typing
+          }, 2000);
           return;
         }
       }
       
-      setTimeout(typeEffect, isDeleting ? 50 : 100);
+      timeoutId = setTimeout(typeEffect, isDeleting ? 50 : 100);
     };
     
     typeEffect();
+    
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
   }, []);
 
 

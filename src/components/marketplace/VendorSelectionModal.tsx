@@ -64,12 +64,10 @@ export const VendorSelectionModal = ({
 
   useEffect(() => {
     if (isOpen) {
-      console.log('VendorSelectionModal: Modal opened, loading vendors...');
-      setVendors([]); // Reset vendors to ensure clean state
+      setVendors([]);
       setFilteredVendors([]);
       loadVendors();
     } else {
-      console.log('VendorSelectionModal: Modal closed, resetting state...');
       setSearchQuery("");
       setSelectedVendor(null);
       setShowConfirmation(false);
@@ -83,27 +81,20 @@ export const VendorSelectionModal = ({
   }, [searchQuery, vendors]);
 
   const loadVendors = async () => {
-    console.log('VendorSelectionModal: Starting to load vendors...');
     setIsLoading(true);
     try {
       const { data, error } = await supabase
         .from('vendors')
         .select('id, name, description, logo_url, location, rating, review_count, is_verified, co_marketing_agents, campaigns_funded, service_states, vendor_type')
         .eq('is_active', true)
-        .order('sort_order', { ascending: true }) // Higher sort_order = higher priority
+        .order('sort_order', { ascending: true })
         .order('rating', { ascending: false })
-        .limit(20); // Limit initial results for faster loading
+        .limit(15);
 
-      console.log('VendorSelectionModal: Supabase response:', { data, error, dataLength: data?.length });
-
-      if (error) {
-        console.error('VendorSelectionModal: Supabase error details:', error);
-        throw error;
-      }
+      if (error) throw error;
       setVendors(data || []);
-      console.log('VendorSelectionModal: Vendors set successfully, count:', (data || []).length);
     } catch (error) {
-      console.error('VendorSelectionModal: Error loading vendors:', error);
+      console.error('Error loading vendors:', error);
       toast({
         title: "Error",
         description: "Failed to load vendors. Please try again.",
@@ -111,29 +102,20 @@ export const VendorSelectionModal = ({
       });
     } finally {
       setIsLoading(false);
-      console.log('VendorSelectionModal: Loading complete');
     }
   };
 
   const filterVendors = () => {
     let filtered = vendors;
-    console.log('VendorSelectionModal: Filtering vendors...', { 
-      totalVendors: vendors.length, 
-      searchQuery, 
-      userLocation: location?.state 
-    });
 
-    // Filter by location if available - but don't filter out ALL vendors
+    // Filter by location if available
     if (location?.state) {
       const locationFiltered = filtered.filter(vendor => 
         vendor.service_states?.includes(location.state) ||
         vendor.location?.toLowerCase().includes(location.state.toLowerCase())
       );
-      // Only apply location filter if we still have vendors, otherwise show all
       if (locationFiltered.length > 0) {
         filtered = locationFiltered;
-      } else {
-        console.log('VendorSelectionModal: No vendors found for location, showing all vendors');
       }
     }
 
@@ -149,10 +131,6 @@ export const VendorSelectionModal = ({
       );
     }
 
-    console.log('VendorSelectionModal: Filtering complete', { 
-      filteredCount: filtered.length,
-      originalCount: vendors.length 
-    });
     setFilteredVendors(filtered);
   };
 

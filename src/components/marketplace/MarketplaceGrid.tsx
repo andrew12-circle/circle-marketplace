@@ -289,58 +289,43 @@ export const MarketplaceGrid = () => {
       setLoading(true);
       setError(null);
       
-      console.log('Loading marketplace data...');
-      
-      // Create abort controller for request timeout
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
-      
-      // Load vendors from the correct table
-      const vendorsResponse = await supabase
-        .from('vendors')
-        .select('*')
-        .order('sort_order', { ascending: true })
-        .order('rating', { ascending: false })
-        .limit(50);
+      // Load vendors and services with optimized queries
+      const [vendorsResponse, servicesResponse] = await Promise.all([
+        supabase
+          .from('vendors')
+          .select('*')
+          .eq('is_active', true)
+          .order('sort_order', { ascending: true })
+          .order('rating', { ascending: false })
+          .limit(15),
+        supabase
+          .from('services')
+          .select('*')
+          .order('sort_order', { ascending: true })
+          .order('created_at', { ascending: false })
+          .limit(30)
+      ]);
 
-      console.log('Vendors response:', vendorsResponse);
-      console.log('Vendors data:', vendorsResponse.data);
-      console.log('Vendors error:', vendorsResponse.error);
+      if (vendorsResponse.error) throw vendorsResponse.error;
+      if (servicesResponse.error) throw servicesResponse.error;
 
-      // Load services without vendor join for now, then get vendors separately
-      const servicesResponse = await supabase
-        .from('services')
-        .select('*')
-        .order('sort_order', { ascending: true })
-        .order('created_at', { ascending: false })
-        .limit(100);
-
-      console.log('Services response:', servicesResponse);
-      console.log('Services data:', servicesResponse.data);
-      console.log('Services error:', servicesResponse.error);
-
-      clearTimeout(timeoutId);
-
-      if (vendorsResponse.error) {
-        console.error('Vendors error:', vendorsResponse.error);
-        throw vendorsResponse.error;
-      }
-      if (servicesResponse.error) {
-        console.error('Services error:', servicesResponse.error);
-        throw servicesResponse.error;
-      }
-
-      // Convert the database response to match our interface
-      const formattedServices = (servicesResponse.data || []).map(service => ({
-        ...service,
-        discount_percentage: service.discount_percentage ? String(service.discount_percentage) : undefined,
-        vendor: {
-          name: 'Service Provider',
-          rating: 4.5,
-          review_count: 0,
-          is_verified: true
+      // Convert and deduplicate services to prevent duplicate key errors
+      const uniqueServices = new Map();
+      (servicesResponse.data || []).forEach(service => {
+        if (!uniqueServices.has(service.id)) {
+          uniqueServices.set(service.id, {
+            ...service,
+            discount_percentage: service.discount_percentage ? String(service.discount_percentage) : undefined,
+            vendor: {
+              name: 'Service Provider',
+              rating: 4.5,
+              review_count: 0,
+              is_verified: true
+            }
+          });
         }
-      }));
+      });
+      const formattedServices = Array.from(uniqueServices.values());
       
       // Format vendors data using vendors table
       const formattedVendors = (vendorsResponse.data || []).map(vendor => ({
@@ -365,8 +350,6 @@ export const MarketplaceGrid = () => {
         vendor_type: vendor.vendor_type || 'company',
         local_representatives: []
       }));
-      
-      console.log(`Loaded ${formattedServices.length} services and ${formattedVendors.length} vendors`);
       
       setServices(formattedServices);
       setVendors(formattedVendors);
@@ -409,7 +392,6 @@ export const MarketplaceGrid = () => {
         variant: "destructive",
       });
     } finally {
-      console.log('Setting loading to false');
       setLoading(false);
     }
   }, [CIRCUIT_BREAKER_CONFIG.failureThreshold, CIRCUIT_BREAKER_CONFIG.timeout, circuitBreakerState.isOpen, circuitBreakerState.nextAttempt, toast]);
