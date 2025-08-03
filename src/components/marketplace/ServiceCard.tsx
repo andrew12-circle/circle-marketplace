@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -560,11 +560,11 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
           // Handle vendor selection logic here
           console.log('Selected vendor:', vendor);
         }}
-        service={{
+        service={useMemo(() => ({
           title: service.title,
           co_pay_price: service.co_pay_price,
           max_vendor_split_percentage: service.max_vendor_split_percentage,
-        }}
+        }), [service.title, service.co_pay_price, service.max_vendor_split_percentage])}
       />
 
       <PricingChoiceModal

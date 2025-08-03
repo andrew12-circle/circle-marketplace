@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Search, MapPin, Star, Users, TrendingUp, Building, Plus, CheckCircle } from "lucide-react";
 import confirmationImage from "@/assets/confirmation-image.png";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "@/hooks/useLocation";
@@ -59,36 +59,54 @@ export const VendorSelectionModal = ({
   const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null);
   const [showFunnelModal, setShowFunnelModal] = useState(false);
   const [funnelVendor, setFunnelVendor] = useState<Vendor | null>(null);
+  const [hasLoadedVendors, setHasLoadedVendors] = useState(false);
   const { toast } = useToast();
   const { location } = useLocation();
+  const mountedRef = useRef(true);
+
+  // Cleanup function to prevent state updates on unmounted component
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
 
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && !hasLoadedVendors) {
       console.log('VendorSelectionModal: Modal opened, loading vendors...');
-      setVendors([]); // Reset vendors to ensure clean state
+      setVendors([]);
       setFilteredVendors([]);
+      setHasLoadedVendors(true);
       loadVendors();
-    } else {
+    } else if (!isOpen) {
       console.log('VendorSelectionModal: Modal closed, resetting state...');
       setSearchQuery("");
       setSelectedVendor(null);
       setShowConfirmation(false);
       setShowFunnelModal(false);
       setFunnelVendor(null);
+      setHasLoadedVendors(false);
       // Clear vendors when modal closes to prevent memory leaks
       setVendors([]);
       setFilteredVendors([]);
     }
-  }, [isOpen]);
+  }, [isOpen, hasLoadedVendors]);
 
   useEffect(() => {
-    // Only filter vendors when modal is open
+    // Only filter vendors when modal is open and we have vendors
     if (isOpen && vendors.length > 0) {
-      filterVendors();
+      const timeoutId = setTimeout(() => {
+        filterVendors();
+      }, 100); // Debounce filtering to prevent excessive calls
+      
+      return () => clearTimeout(timeoutId);
     }
   }, [searchQuery, vendors, isOpen]);
 
   const loadVendors = async () => {
+    if (!mountedRef.current) return;
+    
     console.log('VendorSelectionModal: Starting to load vendors...');
     setIsLoading(true);
     try {
@@ -106,8 +124,12 @@ export const VendorSelectionModal = ({
         console.error('VendorSelectionModal: Supabase error details:', error);
         throw error;
       }
-      setVendors(data || []);
-      console.log('VendorSelectionModal: Vendors set successfully, count:', (data || []).length);
+      
+      // Only update state if component is still mounted
+      if (mountedRef.current) {
+        setVendors(data || []);
+        console.log('VendorSelectionModal: Vendors set successfully, count:', (data || []).length);
+      }
     } catch (error) {
       console.error('VendorSelectionModal: Error loading vendors:', error);
       toast({
@@ -116,8 +138,10 @@ export const VendorSelectionModal = ({
         variant: "destructive",
       });
     } finally {
-      setIsLoading(false);
-      console.log('VendorSelectionModal: Loading complete');
+      if (mountedRef.current) {
+        setIsLoading(false);
+        console.log('VendorSelectionModal: Loading complete');
+      }
     }
   };
 
