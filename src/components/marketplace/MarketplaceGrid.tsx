@@ -409,6 +409,17 @@ export const MarketplaceGrid = () => {
     ).length;
   }, [vendors, location?.state]);
 
+  // Memoize category and tag calculations
+  const availableCategories = useMemo(() => 
+    Array.from(new Set(services.map(service => service.category).filter(Boolean))), 
+    [services]
+  );
+  
+  const availableTags = useMemo(() => 
+    Array.from(new Set(services.flatMap(service => service.tags || []))), 
+    [services]
+  );
+
   // Get categories based on view mode
   const getCategories = () => {
     switch (viewMode) {
@@ -627,17 +638,11 @@ export const MarketplaceGrid = () => {
 
            {/* Enhanced Search Component */}
           <div className="space-y-6">
-            <EnhancedSearch
-              onSearchChange={setSearchFilters}
-              availableCategories={useMemo(() => 
-                Array.from(new Set(services.map(service => service.category).filter(Boolean))), 
-                [services]
-              )}
-              availableTags={useMemo(() => 
-                Array.from(new Set(services.flatMap(service => service.tags || []))), 
-                [services]
-              )}
-            />
+             <EnhancedSearch
+               onSearchChange={setSearchFilters}
+               availableCategories={availableCategories}
+               availableTags={availableTags}
+             />
             
             <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
             </div>
