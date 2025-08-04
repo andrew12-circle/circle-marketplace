@@ -77,14 +77,13 @@ const RESPAServiceManager = () => {
       filtered = filtered.filter(service => {
         switch (filterStatus) {
           case 'evaluated':
-            return service.is_respa_regulated !== null && service.respa_risk_level !== null;
+            return service.max_split_percentage !== null && service.max_split_percentage !== undefined;
           case 'pending':
-            return service.is_respa_regulated === null || service.respa_risk_level === null;
+            return service.max_split_percentage === null || service.max_split_percentage === undefined;
           case 'high-risk':
-            return service.respa_risk_level === 'high' || 
-                   (service.respa_risk_level === null && determineVendorRisk({ name: service.title, description: service.description }) === 'high');
-          case 'regulated':
-            return service.is_respa_regulated === true;
+            return service.respa_risk_level === 'high';
+          case 'no-split-limit':
+            return service.max_split_percentage === null || service.max_split_percentage === undefined;
           default:
             return true;
         }
@@ -249,10 +248,10 @@ const RESPAServiceManager = () => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <AlertTriangle className="w-5 h-5" />
-          RESPA Service Management
+          RESPA Split Limit Management
         </CardTitle>
         <CardDescription>
-          Manage RESPA compliance settings for all services in the marketplace
+          Set maximum split percentages for services when settlement service providers split bills (all services are RESPA regulated when splits occur)
         </CardDescription>
         
         {/* Stats Cards */}
@@ -297,7 +296,7 @@ const RESPAServiceManager = () => {
               <SelectItem value="all">All Services</SelectItem>
               <SelectItem value="pending">Pending Review</SelectItem>
               <SelectItem value="evaluated">Evaluated</SelectItem>
-              <SelectItem value="regulated">RESPA Regulated</SelectItem>
+              <SelectItem value="no-split-limit">No Split Limit Set</SelectItem>
               <SelectItem value="high-risk">High Risk</SelectItem>
             </SelectContent>
           </Select>
@@ -359,7 +358,7 @@ const RESPAServiceManager = () => {
                 <TableHead>Service</TableHead>
                 <TableHead>Category</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>RESPA Regulated</TableHead>
+                <TableHead>Split Allowed</TableHead>
                 <TableHead>Risk Level</TableHead>
                 <TableHead>Max Split %</TableHead>
               </TableRow>
