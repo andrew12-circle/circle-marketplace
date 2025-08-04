@@ -23,6 +23,13 @@ interface CoPayRequest {
   compliance_notes?: string | null;
   requires_documentation?: boolean;
   marketing_campaign_details?: any;
+  payment_duration_months?: number;
+  payment_start_date?: string;
+  payment_end_date?: string;
+  auto_renewal?: boolean;
+  contract_terms?: any;
+  vendor_max_percentage?: number;
+  vendor_duration_limit_months?: number;
   created_at: string;
   expires_at: string;
   agent_profile?: {
@@ -44,6 +51,8 @@ export const CoPayRequestsManager = () => {
   const [selectedRequest, setSelectedRequest] = useState<CoPayRequest | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [editingSplitPercentage, setEditingSplitPercentage] = useState<number>(0);
+  const [editingDuration, setEditingDuration] = useState<number>(12);
+  const [editingAutoRenewal, setEditingAutoRenewal] = useState<boolean>(false);
   const [vendorNotes, setVendorNotes] = useState('');
   const [processingId, setProcessingId] = useState<string | null>(null);
   const { toast } = useToast();
@@ -114,9 +123,13 @@ export const CoPayRequestsManager = () => {
     }
   };
 
-  const handleRequestAction = async (requestId: string, action: 'approved' | 'denied', splitPercentage?: number) => {
+  const handleRequestAction = async (requestId: string, action: 'approved' | 'denied', splitPercentage?: number, duration?: number, autoRenewal?: boolean) => {
     try {
       setProcessingId(requestId);
+      
+      const startDate = new Date();
+      const endDate = new Date();
+      endDate.setMonth(startDate.getMonth() + (duration || 12));
       
       const updates: any = {
         status: action,
@@ -124,8 +137,16 @@ export const CoPayRequestsManager = () => {
         vendor_notes: vendorNotes || null
       };
 
-      if (action === 'approved' && splitPercentage) {
-        updates.requested_split_percentage = splitPercentage;
+      if (action === 'approved') {
+        if (splitPercentage) {
+          updates.requested_split_percentage = splitPercentage;
+        }
+        updates.payment_duration_months = duration || 12;
+        updates.payment_start_date = startDate.toISOString().split('T')[0];
+        updates.payment_end_date = endDate.toISOString().split('T')[0];
+        updates.auto_renewal = autoRenewal || false;
+        updates.vendor_max_percentage = splitPercentage;
+        updates.vendor_duration_limit_months = duration;
       }
 
       const { error } = await supabase
@@ -135,10 +156,30 @@ export const CoPayRequestsManager = () => {
 
       if (error) throw error;
 
+      // If approved, create a payment schedule
+      if (action === 'approved' && selectedRequest) {
+        const { error: scheduleError } = await supabase
+          .from('copay_payment_schedules')
+          .insert({
+            co_pay_request_id: requestId,
+            agent_id: selectedRequest.agent_id,
+            vendor_id: selectedRequest.agent_profile?.business_name, // This should be the vendor's ID
+            payment_percentage: splitPercentage || selectedRequest.requested_split_percentage,
+            start_date: startDate.toISOString().split('T')[0],
+            end_date: endDate.toISOString().split('T')[0],
+            auto_renewal: autoRenewal || false,
+            renewal_notice_days: 30
+          });
+
+        if (scheduleError) {
+          console.error('Error creating payment schedule:', scheduleError);
+        }
+      }
+
       toast({
         title: action === 'approved' ? "Request Approved! ✅" : "Request Denied",
         description: action === 'approved' 
-          ? `Co-pay request approved with ${splitPercentage || 'original'}% split. Now pending compliance review.`
+          ? `Co-pay request approved with ${splitPercentage || 'original'}% split for ${duration || 12} months. ${autoRenewal ? 'Auto-renewal enabled.' : 'No auto-renewal.'}`
           : "Co-pay request has been denied",
         variant: action === 'approved' ? "default" : "destructive"
       });
@@ -162,6 +203,8 @@ export const CoPayRequestsManager = () => {
   const openRequestDetail = (request: CoPayRequest) => {
     setSelectedRequest(request);
     setEditingSplitPercentage(request.requested_split_percentage);
+    setEditingDuration(request.payment_duration_months || 12);
+    setEditingAutoRenewal(request.auto_renewal || false);
     setVendorNotes(request.vendor_notes || '');
     setIsDetailModalOpen(true);
   };
@@ -348,25 +391,89 @@ export const CoPayRequestsManager = () => {
               </div>
 
               {/* Split Percentage Editor */}
-              <div>
-                <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                  <Edit3 className="w-4 h-4" />
-                  Split Percentage
-                </label>
-                <div className="flex items-center gap-2 mt-1">
-                  <Input
-                    type="number"
-                    min="0"
-                    max="100"
-                    value={editingSplitPercentage}
-                    onChange={(e) => setEditingSplitPercentage(parseInt(e.target.value) || 0)}
-                    className="w-24"
-                  />
-                  <span className="text-gray-600">%</span>
-                  <span className="text-sm text-gray-500 ml-2">
-                    (Originally requested: {selectedRequest.requested_split_percentage}%)
-                  </span>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                    <Edit3 className="w-4 h-4" />
+                    Split Percentage
+                  </label>
+                  <div className="flex items-center gap-2 mt-1">
+                    <Input
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={editingSplitPercentage}
+                      onChange={(e) => setEditingSplitPercentage(parseInt(e.target.value) || 0)}
+                      className="w-24"
+                    />
+                    <span className="text-gray-600">%</span>
+                  </div>
+                  <div className="text-xs text-gray-500 mt-1">
+                    Originally requested: {selectedRequest.requested_split_percentage}%
+                  </div>
                 </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                    <Calendar className="w-4 h-4" />
+                    Contract Duration
+                  </label>
+                  <div className="flex items-center gap-2 mt-1">
+                    <Input
+                      type="number"
+                      min="1"
+                      max="60"
+                      value={editingDuration}
+                      onChange={(e) => setEditingDuration(parseInt(e.target.value) || 12)}
+                      className="w-24"
+                    />
+                    <span className="text-gray-600">months</span>
+                  </div>
+                  <div className="text-xs text-gray-500 mt-1">
+                    Coverage period for this agreement
+                  </div>
+                </div>
+              </div>
+
+              {/* Auto Renewal Settings */}
+              <div className="p-4 bg-amber-50 rounded-lg border border-amber-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="font-medium text-gray-900 flex items-center gap-2">
+                      <AlertTriangle className="w-4 h-4 text-amber-600" />
+                      Contract Protection
+                    </h4>
+                    <p className="text-sm text-gray-600 mt-1">
+                      If payment coverage ends before the agent's contract expires, they'll be responsible for the full cost.
+                    </p>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="autoRenewal"
+                      checked={editingAutoRenewal}
+                      onChange={(e) => setEditingAutoRenewal(e.target.checked)}
+                      className="rounded border-gray-300"
+                    />
+                    <label htmlFor="autoRenewal" className="text-sm font-medium">
+                      Auto-renewal
+                    </label>
+                  </div>
+                </div>
+                {editingAutoRenewal && (
+                  <div className="mt-3 p-3 bg-green-50 rounded border border-green-200">
+                    <p className="text-sm text-green-700">
+                      ✅ You'll be notified 30 days before expiration to approve renewal
+                    </p>
+                  </div>
+                )}
+                {!editingAutoRenewal && (
+                  <div className="mt-3 p-3 bg-red-50 rounded border border-red-200">
+                    <p className="text-sm text-red-700">
+                      ⚠️ Coverage will end after {editingDuration} months. Agent will receive notification to arrange alternative payment.
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* Agent Notes */}
@@ -408,11 +515,11 @@ export const CoPayRequestsManager = () => {
               {processingId === selectedRequest?.id ? 'Processing...' : 'Deny Request'}
             </Button>
             <Button 
-              onClick={() => selectedRequest && handleRequestAction(selectedRequest.id, 'approved', editingSplitPercentage)}
+              onClick={() => selectedRequest && handleRequestAction(selectedRequest.id, 'approved', editingSplitPercentage, editingDuration, editingAutoRenewal)}
               disabled={processingId !== null}
               className="bg-green-600 hover:bg-green-700"
             >
-              {processingId === selectedRequest?.id ? 'Processing...' : 'Approve Request'}
+              {processingId === selectedRequest?.id ? 'Processing...' : `Approve for ${editingDuration} months`}
             </Button>
           </DialogFooter>
         </DialogContent>

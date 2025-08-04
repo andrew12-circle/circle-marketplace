@@ -510,23 +510,31 @@ export type Database = {
           agent_notes: string | null
           agent_signature_date: string | null
           agreement_template_version: string | null
+          auto_renewal: boolean | null
           comarketing_agreement_url: string | null
           compliance_notes: string | null
           compliance_reviewed_at: string | null
           compliance_reviewed_by: string | null
           compliance_status: string | null
+          contract_terms: Json | null
           created_at: string
           expires_at: string
           id: string
           ip_address: unknown | null
           marketing_campaign_details: Json | null
+          payment_duration_months: number | null
+          payment_end_date: string | null
+          payment_start_date: string | null
+          renewal_notification_sent: boolean | null
           requested_split_percentage: number
           requires_documentation: boolean | null
           service_id: string | null
           status: string
           updated_at: string
           user_agent: string | null
+          vendor_duration_limit_months: number | null
           vendor_id: string | null
+          vendor_max_percentage: number | null
           vendor_notes: string | null
           vendor_signature_date: string | null
         }
@@ -535,23 +543,31 @@ export type Database = {
           agent_notes?: string | null
           agent_signature_date?: string | null
           agreement_template_version?: string | null
+          auto_renewal?: boolean | null
           comarketing_agreement_url?: string | null
           compliance_notes?: string | null
           compliance_reviewed_at?: string | null
           compliance_reviewed_by?: string | null
           compliance_status?: string | null
+          contract_terms?: Json | null
           created_at?: string
           expires_at?: string
           id?: string
           ip_address?: unknown | null
           marketing_campaign_details?: Json | null
+          payment_duration_months?: number | null
+          payment_end_date?: string | null
+          payment_start_date?: string | null
+          renewal_notification_sent?: boolean | null
           requested_split_percentage: number
           requires_documentation?: boolean | null
           service_id?: string | null
           status?: string
           updated_at?: string
           user_agent?: string | null
+          vendor_duration_limit_months?: number | null
           vendor_id?: string | null
+          vendor_max_percentage?: number | null
           vendor_notes?: string | null
           vendor_signature_date?: string | null
         }
@@ -560,23 +576,31 @@ export type Database = {
           agent_notes?: string | null
           agent_signature_date?: string | null
           agreement_template_version?: string | null
+          auto_renewal?: boolean | null
           comarketing_agreement_url?: string | null
           compliance_notes?: string | null
           compliance_reviewed_at?: string | null
           compliance_reviewed_by?: string | null
           compliance_status?: string | null
+          contract_terms?: Json | null
           created_at?: string
           expires_at?: string
           id?: string
           ip_address?: unknown | null
           marketing_campaign_details?: Json | null
+          payment_duration_months?: number | null
+          payment_end_date?: string | null
+          payment_start_date?: string | null
+          renewal_notification_sent?: boolean | null
           requested_split_percentage?: number
           requires_documentation?: boolean | null
           service_id?: string | null
           status?: string
           updated_at?: string
           user_agent?: string | null
+          vendor_duration_limit_months?: number | null
           vendor_id?: string | null
+          vendor_max_percentage?: number | null
           vendor_notes?: string | null
           vendor_signature_date?: string | null
         }
@@ -1323,6 +1347,65 @@ export type Database = {
           weekly_summary?: boolean | null
         }
         Relationships: []
+      }
+      copay_payment_schedules: {
+        Row: {
+          agent_id: string
+          auto_renewal: boolean | null
+          co_pay_request_id: string
+          created_at: string | null
+          end_date: string
+          id: string
+          next_renewal_date: string | null
+          payment_percentage: number
+          renewal_notice_days: number | null
+          start_date: string
+          status: string
+          total_amount_covered: number | null
+          updated_at: string | null
+          vendor_id: string
+        }
+        Insert: {
+          agent_id: string
+          auto_renewal?: boolean | null
+          co_pay_request_id: string
+          created_at?: string | null
+          end_date: string
+          id?: string
+          next_renewal_date?: string | null
+          payment_percentage: number
+          renewal_notice_days?: number | null
+          start_date: string
+          status?: string
+          total_amount_covered?: number | null
+          updated_at?: string | null
+          vendor_id: string
+        }
+        Update: {
+          agent_id?: string
+          auto_renewal?: boolean | null
+          co_pay_request_id?: string
+          created_at?: string | null
+          end_date?: string
+          id?: string
+          next_renewal_date?: string | null
+          payment_percentage?: number
+          renewal_notice_days?: number | null
+          start_date?: string
+          status?: string
+          total_amount_covered?: number | null
+          updated_at?: string | null
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "copay_payment_schedules_co_pay_request_id_fkey"
+            columns: ["co_pay_request_id"]
+            isOneToOne: false
+            referencedRelation: "co_pay_requests"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       copay_payments: {
         Row: {
@@ -3846,6 +3929,10 @@ export type Database = {
       check_and_update_lockout: {
         Args: { p_identifier: string; p_attempt_type: string }
         Returns: Json
+      }
+      check_expiring_payment_schedules: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       check_security_operation_rate_limit: {
         Args: Record<PropertyKey, never>

@@ -19,6 +19,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useVendorActivityTracking } from '@/hooks/useVendorActivityTracking';
 import { CoPayRequestsManager } from '@/components/vendor/CoPayRequestsManager';
 import { VendorCoPaySettings } from '@/components/vendor/VendorCoPaySettings';
+import { PaymentScheduleManager } from '@/components/vendor/PaymentScheduleManager';
 
 interface VendorService {
   id: string;
@@ -619,6 +620,7 @@ export const VendorDashboard = () => {
           {/* Co-Pay Requests Tab */}
           <TabsContent value="copay" className="space-y-6">
             <VendorCoPaySettings vendorId={vendorId || ''} />
+            <PaymentScheduleManager />
             <CoPayRequestsManager />
           </TabsContent>
 
