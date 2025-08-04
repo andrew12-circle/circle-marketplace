@@ -99,10 +99,7 @@ export default function AdminDashboard() {
     try {
       let query = supabase
         .from('profiles')
-        .select(`
-          *,
-          auth_users:user_id (email)
-        `, { count: 'exact' });
+        .select('*', { count: 'exact' });
 
       // Apply filters
       if (userFilter === 'admins') {
