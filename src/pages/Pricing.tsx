@@ -206,16 +206,16 @@ export const Pricing = () => {
               
               {[
                 { feature: "Marketplace Access", starter: "✓", pro: "✓" },
-                { feature: "Circle Points", starter: "100 to start", pro: "500 per agent/month" },
-                { feature: "Academy Courses", starter: "Basic", pro: "Premium" },
-                { feature: "Marketing Automation", starter: "✗", pro: "✓" },
-                { feature: "Lead Generation Tools", starter: "✗", pro: "✓" },
-                { feature: "CRM Integration", starter: "✗", pro: "✓" },
-                { feature: "Analytics & Reporting", starter: "Basic", pro: "Advanced + Team Dashboard" },
-                { feature: "1-on-1 Coaching", starter: "✗", pro: "✓" },
+                { feature: "Circle Points", starter: "None", pro: "100 to start + 500/month" },
+                { feature: "Circle Coverage", starter: "✗", pro: "✓" },
+                { feature: "Pro Pricing (Avg. 20% off)", starter: "✗", pro: "✓" },
+                { feature: "CoPay Access (60% avg. discount)", starter: "✗", pro: "✓" },
+                { feature: "Circle Academy Access", starter: "Limited", pro: "Full Library" },
+                { feature: "Create & Sell Playbooks", starter: "✗", pro: "✓" },
+                { feature: "Earn Creator Revenue", starter: "✗", pro: "✓" },
+                { feature: "Analytics & Reporting", starter: "✗", pro: "Advanced" },
                 { feature: "Team Management", starter: "✗", pro: "✓" },
-                { feature: "Priority Support", starter: "✗", pro: "✓" },
-                { feature: "Custom Branding", starter: "✗", pro: "✓" }
+                { feature: "Priority Support", starter: "✗", pro: "✓" }
               ].map((item, index) => (
                 <div key={index} className="bg-white rounded-lg border p-4">
                   <h4 className="font-medium mb-3">{item.feature}</h4>
@@ -261,17 +261,11 @@ export const Pricing = () => {
                 <div className="bg-gray-50 p-4 border-r border-b">
                   <span className="font-medium text-sm">Circle Points</span>
                 </div>
-                <div className="p-4 border-r border-b text-center text-sm">100 to start</div>
-                <div className="p-4 border-b text-center text-sm bg-blue-50">500 per agent/month</div>
+                <div className="p-4 border-r border-b text-center text-sm">None</div>
+                <div className="p-4 border-b text-center text-sm bg-blue-50">100 to start + 500/month</div>
 
                 <div className="bg-gray-50 p-4 border-r border-b">
-                  <span className="font-medium text-sm">Academy Courses</span>
-                </div>
-                <div className="p-4 border-r border-b text-center text-sm">Basic</div>
-                <div className="p-4 border-b text-center text-sm bg-blue-50">Premium</div>
-
-                <div className="bg-gray-50 p-4 border-r border-b">
-                  <span className="font-medium text-sm">Marketing Automation</span>
+                  <span className="font-medium text-sm">Circle Coverage</span>
                 </div>
                 <div className="p-4 border-r border-b text-center">
                   <X className="w-5 h-5 text-gray-400 mx-auto" />
@@ -281,7 +275,7 @@ export const Pricing = () => {
                 </div>
 
                 <div className="bg-gray-50 p-4 border-r border-b">
-                  <span className="font-medium text-sm">Lead Generation Tools</span>
+                  <span className="font-medium text-sm">Pro Pricing (Avg. 20% off)</span>
                 </div>
                 <div className="p-4 border-r border-b text-center">
                   <X className="w-5 h-5 text-gray-400 mx-auto" />
@@ -291,7 +285,33 @@ export const Pricing = () => {
                 </div>
 
                 <div className="bg-gray-50 p-4 border-r border-b">
-                  <span className="font-medium text-sm">CRM Integration</span>
+                  <span className="font-medium text-sm">CoPay Access (60% avg. discount)</span>
+                </div>
+                <div className="p-4 border-r border-b text-center">
+                  <X className="w-5 h-5 text-gray-400 mx-auto" />
+                </div>
+                <div className="p-4 border-b text-center bg-blue-50">
+                  <Check className="w-5 h-5 text-green-600 mx-auto" />
+                </div>
+
+                <div className="bg-gray-50 p-4 border-r border-b">
+                  <span className="font-medium text-sm">Circle Academy Access</span>
+                </div>
+                <div className="p-4 border-r border-b text-center text-sm">Limited</div>
+                <div className="p-4 border-b text-center text-sm bg-blue-50">Full Library</div>
+
+                <div className="bg-gray-50 p-4 border-r border-b">
+                  <span className="font-medium text-sm">Create & Sell Playbooks</span>
+                </div>
+                <div className="p-4 border-r border-b text-center">
+                  <X className="w-5 h-5 text-gray-400 mx-auto" />
+                </div>
+                <div className="p-4 border-b text-center bg-blue-50">
+                  <Check className="w-5 h-5 text-green-600 mx-auto" />
+                </div>
+
+                <div className="bg-gray-50 p-4 border-r border-b">
+                  <span className="font-medium text-sm">Earn Creator Revenue</span>
                 </div>
                 <div className="p-4 border-r border-b text-center">
                   <X className="w-5 h-5 text-gray-400 mx-auto" />
@@ -303,18 +323,10 @@ export const Pricing = () => {
                 <div className="bg-gray-50 p-4 border-r border-b">
                   <span className="font-medium text-sm">Analytics & Reporting</span>
                 </div>
-                <div className="p-4 border-r border-b text-center text-sm">Basic</div>
-                <div className="p-4 border-b text-center text-sm bg-blue-50">Advanced + Team Dashboard</div>
-
-                <div className="bg-gray-50 p-4 border-r border-b">
-                  <span className="font-medium text-sm">1-on-1 Coaching</span>
-                </div>
                 <div className="p-4 border-r border-b text-center">
                   <X className="w-5 h-5 text-gray-400 mx-auto" />
                 </div>
-                <div className="p-4 border-b text-center bg-blue-50">
-                  <Check className="w-5 h-5 text-green-600 mx-auto" />
-                </div>
+                <div className="p-4 border-b text-center text-sm bg-blue-50">Advanced</div>
 
                 <div className="bg-gray-50 p-4 border-r border-b">
                   <span className="font-medium text-sm">Team Management</span>
@@ -326,18 +338,8 @@ export const Pricing = () => {
                   <Check className="w-5 h-5 text-green-600 mx-auto" />
                 </div>
 
-                <div className="bg-gray-50 p-4 border-r border-b">
-                  <span className="font-medium text-sm">Priority Support</span>
-                </div>
-                <div className="p-4 border-r border-b text-center">
-                  <X className="w-5 h-5 text-gray-400 mx-auto" />
-                </div>
-                <div className="p-4 border-b text-center bg-blue-50">
-                  <Check className="w-5 h-5 text-green-600 mx-auto" />
-                </div>
-
                 <div className="bg-gray-50 p-4 border-r">
-                  <span className="font-medium text-sm">Custom Branding</span>
+                  <span className="font-medium text-sm">Priority Support</span>
                 </div>
                 <div className="p-4 border-r text-center">
                   <X className="w-5 h-5 text-gray-400 mx-auto" />
