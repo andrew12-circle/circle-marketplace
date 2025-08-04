@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
-import { Users, Shield, Star, AlertTriangle, ArrowLeft } from 'lucide-react';
+import { Users, Shield, Star, AlertTriangle, ArrowLeft, RefreshCw, ChevronDown, Key, Trash2 } from 'lucide-react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { SecureAdminGuard } from '@/components/admin/SecureAdminGuard';
@@ -40,6 +43,7 @@ import { Zap, Upload, Building, Youtube, DollarSign, BarChart3, Coins, Shield as
 interface UserProfile {
   id: string;
   user_id: string;
+  email?: string;
   display_name: string | null;
   business_name: string | null;
   is_creator: boolean | null;
@@ -55,8 +59,18 @@ export default function AdminDashboard() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [users, setUsers] = useState<UserProfile[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<UserProfile[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(true);
   const [securityWarnings, setSecurityWarnings] = useState<string[]>([]);
+  
+  // Enhanced user management state
+  const [userSearchTerm, setUserSearchTerm] = useState('');
+  const [userFilter, setUserFilter] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalUsers, setTotalUsers] = useState(0);
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+  const USERS_PER_PAGE = 20;
   
   const {
     loading: operationLoading,
@@ -73,8 +87,183 @@ export default function AdminDashboard() {
       return;
     }
 
-    fetchUsers();
-  }, [user, isAdmin, loading]);
+    loadUsers();
+  }, [user, isAdmin, loading, currentPage, userSearchTerm, userFilter]);
+
+  useEffect(() => {
+    filterUsers();
+  }, [users, userSearchTerm, userFilter, currentPage]);
+
+  const loadUsers = async () => {
+    setLoadingUsers(true);
+    try {
+      let query = supabase
+        .from('profiles')
+        .select(`
+          *,
+          auth_users:user_id (email)
+        `, { count: 'exact' });
+
+      // Apply filters
+      if (userFilter === 'admins') {
+        query = query.eq('is_admin', true);
+      } else if (userFilter === 'creators') {
+        query = query.eq('is_creator', true);
+      } else if (userFilter === 'vendors') {
+        query = query.eq('vendor_enabled', true);
+      } else if (userFilter === 'recent') {
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        query = query.gte('created_at', sevenDaysAgo.toISOString());
+      }
+
+      // Apply search
+      if (userSearchTerm) {
+        query = query.or(`display_name.ilike.%${userSearchTerm}%,business_name.ilike.%${userSearchTerm}%,user_id.eq.${userSearchTerm}`);
+      }
+
+      const { data, error, count } = await query
+        .order('created_at', { ascending: false })
+        .range((currentPage - 1) * USERS_PER_PAGE, currentPage * USERS_PER_PAGE - 1);
+
+      if (error) throw error;
+      
+      setUsers(data || []);
+      setTotalUsers(count || 0);
+      setTotalPages(Math.ceil((count || 0) / USERS_PER_PAGE));
+      
+    } catch (error) {
+      console.error('Error loading users:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load users',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
+
+  const filterUsers = () => {
+    let filtered = users;
+    
+    if (userSearchTerm) {
+      filtered = filtered.filter(user => 
+        user.display_name?.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
+        user.business_name?.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
+        user.email?.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
+        user.user_id.includes(userSearchTerm)
+      );
+    }
+    
+    setFilteredUsers(filtered);
+  };
+
+  const handleResetPassword = async (userId: string, email: string) => {
+    try {
+      const { error } = await supabase.auth.admin.generateLink({
+        type: 'recovery',
+        email: email,
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: 'Password Reset',
+        description: `Password reset email sent to ${email}`,
+      });
+    } catch (error) {
+      console.error('Error resetting password:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to reset password',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleSetPassword = async (userId: string) => {
+    const newPassword = prompt('Enter new password:');
+    if (!newPassword) return;
+
+    try {
+      const { error } = await supabase.auth.admin.updateUserById(userId, {
+        password: newPassword
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: 'Password Updated',
+        description: 'User password has been updated successfully',
+      });
+    } catch (error) {
+      console.error('Error setting password:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to set password',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleDeleteUser = async (userId: string) => {
+    if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase.auth.admin.deleteUser(userId);
+
+      if (error) throw error;
+
+      // Remove from local state
+      setUsers(users.filter(user => user.user_id !== userId));
+      setFilteredUsers(filteredUsers.filter(user => user.user_id !== userId));
+
+      toast({
+        title: 'User Deleted',
+        description: 'User has been successfully deleted',
+      });
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to delete user',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (!confirm(`Are you sure you want to delete ${selectedUsers.length} users? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      for (const userId of selectedUsers) {
+        const { error } = await supabase.auth.admin.deleteUser(userId);
+        if (error) throw error;
+      }
+
+      // Remove from local state
+      setUsers(users.filter(user => !selectedUsers.includes(user.user_id)));
+      setFilteredUsers(filteredUsers.filter(user => !selectedUsers.includes(user.user_id)));
+      setSelectedUsers([]);
+
+      toast({
+        title: 'Bulk Delete Complete',
+        description: `Successfully deleted ${selectedUsers.length} users`,
+      });
+    } catch (error) {
+      console.error('Error in bulk delete:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to delete some users',
+        variant: 'destructive',
+      });
+    }
+  };
 
   const fetchUsers = async () => {
     try {
@@ -257,15 +446,75 @@ export default function AdminDashboard() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Users className="h-5 w-5" />
-                User Management ({users.length} users)
+                Advanced User Management ({users.length} loaded)
               </CardTitle>
+              <CardDescription>
+                Manage user accounts, permissions, and authentication
+              </CardDescription>
             </CardHeader>
             <CardContent>
+              {/* Search and Filters */}
+              <div className="flex flex-col md:flex-row gap-4 mb-6">
+                <div className="flex-1">
+                  <Input
+                    placeholder="Search users by email, name, or ID..."
+                    value={userSearchTerm}
+                    onChange={(e) => setUserSearchTerm(e.target.value)}
+                    className="w-full"
+                  />
+                </div>
+                <Select value={userFilter} onValueChange={setUserFilter}>
+                  <SelectTrigger className="w-48">
+                    <SelectValue placeholder="Filter users" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Users</SelectItem>
+                    <SelectItem value="admins">Admins Only</SelectItem>
+                    <SelectItem value="creators">Creators Only</SelectItem>
+                    <SelectItem value="vendors">Vendors Only</SelectItem>
+                    <SelectItem value="recent">Recent (7 days)</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button onClick={loadUsers} disabled={loadingUsers} variant="outline">
+                  <RefreshCw className={`h-4 w-4 mr-2 ${loadingUsers ? 'animate-spin' : ''}`} />
+                  Refresh
+                </Button>
+              </div>
+
+              {/* Pagination Controls */}
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">
+                    Page {currentPage} of {totalPages} ({totalUsers} total users)
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                    disabled={currentPage === 1 || loadingUsers}
+                  >
+                    Previous
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                    disabled={currentPage === totalPages || loadingUsers}
+                  >
+                    Next
+                  </Button>
+                </div>
+              </div>
+
               {loadingUsers ? (
-                <p>Loading users...</p>
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                </div>
               ) : (
                 <div className="space-y-4">
-                  {users.map((user) => (
+                  {filteredUsers.map((user) => (
                     <div
                       key={user.id}
                       className="flex items-center justify-between p-4 border rounded-lg"
@@ -275,6 +524,9 @@ export default function AdminDashboard() {
                           <h3 className="font-semibold">
                             {user.display_name || user.business_name || 'Unnamed User'}
                           </h3>
+                          <span className="text-sm text-muted-foreground">
+                            {user.email || user.id}
+                          </span>
                           {user.is_admin && (
                             <Badge variant="destructive">Admin</Badge>
                           )}
@@ -298,7 +550,8 @@ export default function AdminDashboard() {
                         </p>
                       </div>
 
-                      <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-2">
+                        {/* Role Toggles */}
                         <div className="flex items-center gap-2">
                           <label className="text-sm font-medium">Admin</label>
                           <Switch
@@ -327,9 +580,56 @@ export default function AdminDashboard() {
                             />
                           </div>
                         )}
+
+                        {/* Action Buttons */}
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="outline" size="sm">
+                              Actions
+                              <ChevronDown className="h-4 w-4 ml-1" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleResetPassword(user.user_id, user.email || '')}>
+                              <RefreshCw className="h-4 w-4 mr-2" />
+                              Reset Password
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleSetPassword(user.user_id)}>
+                              <Key className="h-4 w-4 mr-2" />
+                              Set New Password
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem 
+                              onClick={() => handleDeleteUser(user.user_id)}
+                              className="text-destructive"
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Delete User
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     </div>
                   ))}
+                </div>
+              )}
+
+              {/* Bulk Actions */}
+              {selectedUsers.length > 0 && (
+                <div className="mt-6 p-4 bg-muted rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">
+                      {selectedUsers.length} users selected
+                    </span>
+                    <div className="flex gap-2">
+                      <Button size="sm" variant="outline" onClick={() => setSelectedUsers([])}>
+                        Clear Selection
+                      </Button>
+                      <Button size="sm" variant="destructive" onClick={handleBulkDelete}>
+                        Delete Selected
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               )}
             </CardContent>
