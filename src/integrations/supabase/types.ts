@@ -2264,6 +2264,7 @@ export type Database = {
           business_name: string | null
           circle_points: number | null
           city: string | null
+          copay_allowed: boolean | null
           created_at: string
           creator_bio: string | null
           creator_joined_at: string | null
@@ -2307,6 +2308,7 @@ export type Database = {
           business_name?: string | null
           circle_points?: number | null
           city?: string | null
+          copay_allowed?: boolean | null
           created_at?: string
           creator_bio?: string | null
           creator_joined_at?: string | null
@@ -2350,6 +2352,7 @@ export type Database = {
           business_name?: string | null
           circle_points?: number | null
           city?: string | null
+          copay_allowed?: boolean | null
           created_at?: string
           creator_bio?: string | null
           creator_joined_at?: string | null
@@ -2926,6 +2929,7 @@ export type Database = {
           co_pay_allowed: boolean | null
           co_pay_price: string | null
           compliance_checklist: Json | null
+          copay_allowed: boolean | null
           created_at: string | null
           description: string | null
           direct_purchase_enabled: boolean | null
@@ -2967,6 +2971,7 @@ export type Database = {
           co_pay_allowed?: boolean | null
           co_pay_price?: string | null
           compliance_checklist?: Json | null
+          copay_allowed?: boolean | null
           created_at?: string | null
           description?: string | null
           direct_purchase_enabled?: boolean | null
@@ -3008,6 +3013,7 @@ export type Database = {
           co_pay_allowed?: boolean | null
           co_pay_price?: string | null
           compliance_checklist?: Json | null
+          copay_allowed?: boolean | null
           created_at?: string | null
           description?: string | null
           direct_purchase_enabled?: boolean | null
