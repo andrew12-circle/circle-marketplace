@@ -36,7 +36,7 @@ serve(async (req) => {
 
     console.log(`Processing charge ${charge_id} for $${amount_to_charge}`);
 
-    // Create payment intent
+    // Create payment intent with Stripe Radar
     const paymentIntent = await stripe.paymentIntents.create({
       amount: Math.round(amount_to_charge * 100), // Convert to cents
       currency: 'usd',
@@ -49,11 +49,46 @@ serve(async (req) => {
       metadata: {
         vendor_id: vendor_id,
         charge_id: charge_id,
-        points_charged: points_charged.toString()
+        points_charged: points_charged.toString(),
+        fraud_monitoring: 'enabled'
+      },
+      // Enable enhanced Radar monitoring
+      radar_options: {
+        session: `point_charge_${charge_id}`
       }
     });
 
     console.log(`Payment intent created: ${paymentIntent.id}, status: ${paymentIntent.status}`);
+
+    // Check for fraud signals and log them
+    if (paymentIntent.latest_charge) {
+      const charge = await stripe.charges.retrieve(paymentIntent.latest_charge);
+      const outcome = charge.outcome;
+      
+      if (outcome) {
+        const riskScore = outcome.risk_score || 0;
+        const riskLevel = outcome.risk_level || 'normal';
+        
+        console.log(`Risk assessment - Score: ${riskScore}, Level: ${riskLevel}, Type: ${outcome.type}`);
+        
+        // Log high-risk transactions
+        if (riskScore >= 50 || outcome.type === 'manual_review') {
+          await supabase.from('fraud_monitoring_logs').insert({
+            transaction_id: paymentIntent.id,
+            stripe_payment_intent_id: paymentIntent.id,
+            stripe_charge_id: charge.id,
+            risk_score: riskScore,
+            risk_level: riskLevel,
+            outcome_type: outcome.type,
+            outcome_reason: outcome.reason,
+            amount_cents: paymentIntent.amount,
+            currency: paymentIntent.currency,
+            metadata: paymentIntent.metadata,
+            requires_action: paymentIntent.status === 'requires_action'
+          });
+        }
+      }
+    }
 
     // Update charge record
     const { error: updateError } = await supabase

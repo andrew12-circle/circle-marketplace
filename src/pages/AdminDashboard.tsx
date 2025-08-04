@@ -37,6 +37,7 @@ import VendorPointAllocationPanel from '@/components/admin/VendorPointAllocation
 import AntiScrapingSystem from '@/components/security/AntiScrapingSystem';
 import { CreatorPayoutDashboard } from '@/components/admin/CreatorPayoutDashboard';
 import { ImageVectorizationPanel } from '@/components/admin/ImageVectorizationPanel';
+import { FraudMonitoringDashboard } from '@/components/admin/FraudMonitoringDashboard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Zap, Upload, Building, Youtube, DollarSign, BarChart3, Coins, Shield as ShieldIcon, Users2, Send, BookOpen } from 'lucide-react';
 
@@ -539,6 +540,13 @@ export default function AdminDashboard() {
                   <ShieldIcon className="h-4 w-4" />
                   <span className="hidden sm:inline">RESPA</span>
                 </TabsTrigger>
+                <TabsTrigger 
+                  value="fraud" 
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-md data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm"
+                >
+                  <AlertTriangle className="h-4 w-4" />
+                  <span className="hidden sm:inline">Fraud</span>
+                </TabsTrigger>
               </TabsList>
             </div>
 
@@ -905,6 +913,10 @@ export default function AdminDashboard() {
           <RESPAServiceManager />
           <RESPAComplianceManager />
           <RESPADocumentationViewer />
+        </TabsContent>
+
+        <TabsContent value="fraud" className="space-y-6">
+          <FraudMonitoringDashboard />
         </TabsContent>
 
         <TabsContent value="calculator" className="space-y-6">

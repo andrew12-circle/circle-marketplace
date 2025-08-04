@@ -1900,6 +1900,119 @@ export type Database = {
         }
         Relationships: []
       }
+      fraud_alerts: {
+        Row: {
+          acknowledged: boolean | null
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          alert_data: Json | null
+          alert_message: string
+          alert_type: string
+          created_at: string
+          fraud_log_id: string | null
+          id: string
+          severity: string
+        }
+        Insert: {
+          acknowledged?: boolean | null
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          alert_data?: Json | null
+          alert_message: string
+          alert_type: string
+          created_at?: string
+          fraud_log_id?: string | null
+          id?: string
+          severity: string
+        }
+        Update: {
+          acknowledged?: boolean | null
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          alert_data?: Json | null
+          alert_message?: string
+          alert_type?: string
+          created_at?: string
+          fraud_log_id?: string | null
+          id?: string
+          severity?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fraud_alerts_fraud_log_id_fkey"
+            columns: ["fraud_log_id"]
+            isOneToOne: false
+            referencedRelation: "fraud_monitoring_logs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fraud_monitoring_logs: {
+        Row: {
+          amount_cents: number | null
+          billing_details: Json | null
+          created_at: string
+          currency: string | null
+          customer_email: string | null
+          fraud_details: Json | null
+          id: string
+          metadata: Json | null
+          outcome_reason: string | null
+          outcome_type: string | null
+          payment_method_details: Json | null
+          radar_rules_triggered: Json | null
+          requires_action: boolean | null
+          risk_level: string | null
+          risk_score: number | null
+          stripe_charge_id: string | null
+          stripe_payment_intent_id: string | null
+          transaction_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount_cents?: number | null
+          billing_details?: Json | null
+          created_at?: string
+          currency?: string | null
+          customer_email?: string | null
+          fraud_details?: Json | null
+          id?: string
+          metadata?: Json | null
+          outcome_reason?: string | null
+          outcome_type?: string | null
+          payment_method_details?: Json | null
+          radar_rules_triggered?: Json | null
+          requires_action?: boolean | null
+          risk_level?: string | null
+          risk_score?: number | null
+          stripe_charge_id?: string | null
+          stripe_payment_intent_id?: string | null
+          transaction_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount_cents?: number | null
+          billing_details?: Json | null
+          created_at?: string
+          currency?: string | null
+          customer_email?: string | null
+          fraud_details?: Json | null
+          id?: string
+          metadata?: Json | null
+          outcome_reason?: string | null
+          outcome_type?: string | null
+          payment_method_details?: Json | null
+          radar_rules_triggered?: Json | null
+          requires_action?: boolean | null
+          risk_level?: string | null
+          risk_score?: number | null
+          stripe_charge_id?: string | null
+          stripe_payment_intent_id?: string | null
+          transaction_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       image_processing_log: {
         Row: {
           created_at: string
@@ -3153,6 +3266,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      stripe_radar_events: {
+        Row: {
+          charge_id: string | null
+          created_at: string
+          customer_id: string | null
+          event_data: Json
+          event_type: string
+          id: string
+          payment_intent_id: string | null
+          processed: boolean | null
+          processed_at: string | null
+          stripe_event_id: string
+        }
+        Insert: {
+          charge_id?: string | null
+          created_at?: string
+          customer_id?: string | null
+          event_data?: Json
+          event_type: string
+          id?: string
+          payment_intent_id?: string | null
+          processed?: boolean | null
+          processed_at?: string | null
+          stripe_event_id: string
+        }
+        Update: {
+          charge_id?: string | null
+          created_at?: string
+          customer_id?: string | null
+          event_data?: Json
+          event_type?: string
+          id?: string
+          payment_intent_id?: string | null
+          processed?: boolean | null
+          processed_at?: string | null
+          stripe_event_id?: string
+        }
+        Relationships: []
       }
       subscribers: {
         Row: {
