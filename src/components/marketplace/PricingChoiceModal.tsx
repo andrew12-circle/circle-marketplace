@@ -14,7 +14,7 @@ interface PricingChoiceModalProps {
     title: string;
     pro_price?: string;
     retail_price?: string;
-    max_vendor_split_percentage?: number;
+    max_split_percentage_ssp?: number;
     price_duration?: string;
     requires_quote?: boolean;
   };
@@ -38,8 +38,8 @@ export const PricingChoiceModal = ({
 
   const proPrice = service.pro_price ? parseFloat(service.pro_price.replace(/[^\d.]/g, '')) : 0;
   const retailPrice = service.retail_price ? parseFloat(service.retail_price.replace(/[^\d.]/g, '')) : 0;
-  const coPayPrice = retailPrice && service.max_vendor_split_percentage 
-    ? retailPrice * (1 - (service.max_vendor_split_percentage / 100))
+  const coPayPrice = retailPrice && service.max_split_percentage_ssp 
+    ? retailPrice * (1 - (service.max_split_percentage_ssp / 100))
     : 0;
 
   // Load agent points and RESPA compliance when modal opens
@@ -272,7 +272,7 @@ export const PricingChoiceModal = ({
                 </span>
               </div>
               <p className="text-sm text-muted-foreground">
-                Get connected with a vendor who will help cover {service.max_vendor_split_percentage}% of the cost.
+                Get connected with a vendor who will help cover {service.max_split_percentage_ssp}% of the cost.
               </p>
               <Button 
                 className="w-full bg-green-600 hover:bg-green-700 text-white" 

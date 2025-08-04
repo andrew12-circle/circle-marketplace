@@ -41,7 +41,6 @@ interface Service {
   direct_purchase_enabled?: boolean;
   // Co-pay related fields
   copay_allowed?: boolean;
-  max_vendor_split_percentage?: number;
   max_split_percentage_ssp?: number;
   max_split_percentage_non_ssp?: number;
   estimated_agent_split_percentage?: number;
@@ -562,7 +561,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
         service={{
           title: service.title,
           co_pay_price: service.co_pay_price,
-          max_vendor_split_percentage: service.max_vendor_split_percentage,
+          max_split_percentage_ssp: service.max_split_percentage_ssp,
         }}
       />
 
@@ -574,7 +573,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
           title: service.title,
           pro_price: service.pro_price,
           retail_price: service.retail_price,
-          max_vendor_split_percentage: service.max_vendor_split_percentage,
+          max_split_percentage_ssp: service.max_split_percentage_ssp,
           price_duration: service.price_duration,
           requires_quote: service.requires_quote,
         }}

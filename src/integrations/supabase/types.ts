@@ -2945,7 +2945,6 @@ export type Database = {
           max_split_percentage: number | null
           max_split_percentage_non_ssp: number | null
           max_split_percentage_ssp: number | null
-          max_vendor_split_percentage: number | null
           original_image_url: string | null
           price_duration: string | null
           pricing_tiers: Json | null
@@ -2987,7 +2986,6 @@ export type Database = {
           max_split_percentage?: number | null
           max_split_percentage_non_ssp?: number | null
           max_split_percentage_ssp?: number | null
-          max_vendor_split_percentage?: number | null
           original_image_url?: string | null
           price_duration?: string | null
           pricing_tiers?: Json | null
@@ -3029,7 +3027,6 @@ export type Database = {
           max_split_percentage?: number | null
           max_split_percentage_non_ssp?: number | null
           max_split_percentage_ssp?: number | null
-          max_vendor_split_percentage?: number | null
           original_image_url?: string | null
           price_duration?: string | null
           pricing_tiers?: Json | null

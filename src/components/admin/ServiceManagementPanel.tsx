@@ -58,7 +58,6 @@ interface Service {
   price_duration?: string;
   co_pay_price?: string;
   copay_allowed?: boolean; // Database field name
-  max_vendor_split_percentage?: number;
   max_split_percentage?: number;
   max_split_percentage_ssp?: number;
   max_split_percentage_non_ssp?: number;
@@ -329,7 +328,6 @@ export const ServiceManagementPanel = () => {
         requires_quote: editForm.requires_quote || false,
         copay_allowed: editForm.copay_allowed || false, // Use database field name
         direct_purchase_enabled: editForm.direct_purchase_enabled || false,
-        max_vendor_split_percentage: editForm.max_vendor_split_percentage || null,
         max_split_percentage: editForm.max_split_percentage || null,
         max_split_percentage_ssp: editForm.max_split_percentage_ssp || null,
         max_split_percentage_non_ssp: editForm.max_split_percentage_non_ssp || null,
@@ -636,18 +634,7 @@ export const ServiceManagementPanel = () => {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">Max Vendor Split %</label>
-                        <Input
-                          type="number"
-                          min="0"
-                          max="100"
-                          value={editForm.max_vendor_split_percentage || ''}
-                          onChange={(e) => setEditForm({ ...editForm, max_vendor_split_percentage: Number(e.target.value) })}
-                          placeholder="0-100"
-                        />
-                      </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                       <div className="space-y-2">
                         <label className="text-sm font-medium">Max Split % (RESPA)</label>
                         <Input
