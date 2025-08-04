@@ -2,6 +2,7 @@ import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
+import { Sentry } from '@/lib/sentry';
 
 interface Props {
   children: ReactNode;
@@ -28,6 +29,16 @@ export class ErrorBoundary extends Component<Props, State> {
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error(`Error in ${this.props.section || 'application'}:`, error);
     console.error('Error info:', errorInfo);
+    
+    // Send error to Sentry with additional context
+    Sentry.withScope((scope) => {
+      scope.setTag('errorBoundary', true);
+      scope.setTag('section', this.props.section || 'unknown');
+      scope.setExtra('errorInfo', {
+        componentStack: errorInfo.componentStack
+      });
+      Sentry.captureException(error);
+    });
     
     if (this.props.onError) {
       this.props.onError(error, errorInfo);
