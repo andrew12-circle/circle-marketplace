@@ -626,6 +626,15 @@ export default function AdminDashboard() {
                           />
                         </div>
 
+                        <div className="flex items-center gap-2">
+                          <label className="text-sm font-medium">Pro</label>
+                          <Switch
+                            checked={user.is_pro || false}
+                            disabled={operationLoading}
+                            onCheckedChange={() => handleToggleProStatus(user.user_id, user.is_pro || false)}
+                          />
+                        </div>
+
                         {user.is_creator && (
                           <div className="flex items-center gap-2">
                             <label className="text-sm font-medium">Verified</label>
@@ -636,15 +645,6 @@ export default function AdminDashboard() {
                             />
                           </div>
                         )}
-
-                        <div className="flex items-center gap-2">
-                          <label className="text-sm font-medium">Pro</label>
-                          <Switch
-                            checked={user.is_pro || false}
-                            disabled={operationLoading}
-                            onCheckedChange={() => handleToggleProStatus(user.user_id, user.is_pro || false)}
-                          />
-                        </div>
 
                         {/* Action Buttons */}
                         <DropdownMenu>
