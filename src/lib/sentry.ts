@@ -2,7 +2,7 @@ import * as Sentry from "@sentry/react";
 
 export const initSentry = () => {
   // Get DSN from Supabase secrets (will be undefined in development without DSN)
-  const sentryDsn = import.meta.env.VITE_SENTRY_DSN || process.env.SENTRY_DSN;
+  const sentryDsn = import.meta.env.VITE_SENTRY_DSN;
   
   if (!sentryDsn) {
     console.warn("Sentry DSN not configured. Error tracking disabled.");
