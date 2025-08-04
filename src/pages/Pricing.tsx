@@ -7,30 +7,36 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import circleLogo from "@/assets/circle-logo.png";
-
 export const Pricing = () => {
   const [loading, setLoading] = useState<string | null>(null);
-  const { toast } = useToast();
-  const { user } = useAuth();
-
+  const {
+    toast
+  } = useToast();
+  const {
+    user
+  } = useAuth();
   const handleSubscription = async (plan: "pro") => {
     try {
       setLoading(plan);
-      
-      const { data: { session } } = await supabase.auth.getSession();
-      
+      const {
+        data: {
+          session
+        }
+      } = await supabase.auth.getSession();
       if (!session) {
         // Redirect to auth page for a smoother user experience
         window.location.href = '/auth';
         return;
       }
-
-      const { data, error } = await supabase.functions.invoke('create-subscription-checkout', {
-        body: { plan },
+      const {
+        data,
+        error
+      } = await supabase.functions.invoke('create-subscription-checkout', {
+        body: {
+          plan
+        }
       });
-
       if (error) throw error;
-
       if (data?.url) {
         // Open Stripe checkout in a new tab
         window.open(data.url, '_blank');
@@ -40,15 +46,13 @@ export const Pricing = () => {
       toast({
         title: "Error",
         description: "Failed to start subscription process. Please try again.",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setLoading(null);
     }
   };
-
-  return (
-    <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/50">
         <div className="container mx-auto px-4 py-4">
@@ -57,25 +61,21 @@ export const Pricing = () => {
               <img src={circleLogo} alt="Circle Logo" className="w-10 h-10" />
             </Link>
             <div className="flex items-center gap-4">
-              {user ? (
-                <>
+              {user ? <>
                   <Link to="/" className="text-sm text-muted-foreground hover:text-foreground">
                     Marketplace
                   </Link>
                   <Button asChild className="bg-gradient-to-r from-circle-primary to-circle-primary-light text-white">
                     <Link to="/profile-settings">Profile</Link>
                   </Button>
-                </>
-              ) : (
-                <>
+                </> : <>
                   <Link to="/auth" className="text-sm text-muted-foreground hover:text-foreground">
                     Login
                   </Link>
                   <Button asChild className="bg-gradient-to-r from-circle-primary to-circle-primary-light text-white">
                     <Link to="/auth">Join Free & Explore</Link>
                   </Button>
-                </>
-              )}
+                </>}
             </div>
           </div>
         </div>
@@ -117,21 +117,11 @@ export const Pricing = () => {
                 <h3 className="text-xl font-semibold mb-2">Circle Starter</h3>
                 <div className="text-3xl font-bold mb-4">$0<span className="text-sm font-normal text-muted-foreground">/month</span></div>
                 <p className="text-sm text-muted-foreground mb-6">Agents exploring the marketplace</p>
-                {user ? (
-                  <Button 
-                    className="w-full bg-teal-600 hover:bg-teal-700 text-white"
-                    asChild
-                  >
+                {user ? <Button className="w-full bg-teal-600 hover:bg-teal-700 text-white" asChild>
                     <Link to="/">Go to Marketplace</Link>
-                  </Button>
-                ) : (
-                  <Button 
-                    className="w-full bg-teal-600 hover:bg-teal-700 text-white"
-                    asChild
-                  >
+                  </Button> : <Button className="w-full bg-teal-600 hover:bg-teal-700 text-white" asChild>
                     <Link to="/auth">Create Free Account</Link>
-                  </Button>
-                )}
+                  </Button>}
               </div>
 
               {/* Circle Pro - Most Popular */}
@@ -142,11 +132,7 @@ export const Pricing = () => {
                 <h3 className="text-xl font-semibold mb-2">Circle Pro</h3>
                 <div className="text-3xl font-bold mb-4">$97<span className="text-sm font-normal text-muted-foreground">/agent/month</span></div>
                 <p className="text-sm text-muted-foreground mb-6">Per agent pricing that scales with your team</p>
-                <Button 
-                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
-                  onClick={() => handleSubscription("pro")}
-                  disabled={loading === "pro"}
-                >
+                <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white" onClick={() => handleSubscription("pro")} disabled={loading === "pro"}>
                   {loading === "pro" ? "Loading..." : "Start Your Free Trial"}
                 </Button>
               </div>
@@ -163,21 +149,11 @@ export const Pricing = () => {
                   <h3 className="text-xl font-semibold mb-2">Circle Starter</h3>
                   <div className="text-3xl font-bold mb-4">$0<span className="text-sm font-normal text-muted-foreground">/month</span></div>
                   <p className="text-sm text-muted-foreground mb-6">Agents exploring the marketplace</p>
-                  {user ? (
-                    <Button 
-                      className="w-full bg-teal-600 hover:bg-teal-700 text-white"
-                      asChild
-                    >
+                  {user ? <Button className="w-full bg-teal-600 hover:bg-teal-700 text-white" asChild>
                       <Link to="/">Go to Marketplace</Link>
-                    </Button>
-                  ) : (
-                    <Button 
-                      className="w-full bg-teal-600 hover:bg-teal-700 text-white"
-                      asChild
-                    >
+                    </Button> : <Button className="w-full bg-teal-600 hover:bg-teal-700 text-white" asChild>
                       <Link to="/auth">Create Free Account</Link>
-                    </Button>
-                  )}
+                    </Button>}
                 </div>
 
                 {/* Circle Pro - Most Popular */}
@@ -188,11 +164,7 @@ export const Pricing = () => {
                   <h3 className="text-xl font-semibold mb-2">Circle Pro</h3>
                   <div className="text-3xl font-bold mb-4">$97<span className="text-sm font-normal text-muted-foreground">/agent/month</span></div>
                   <p className="text-sm text-muted-foreground mb-6">Per agent pricing that scales with your team</p>
-                  <Button 
-                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
-                    onClick={() => handleSubscription("pro")}
-                    disabled={loading === "pro"}
-                  >
+                  <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white" onClick={() => handleSubscription("pro")} disabled={loading === "pro"}>
                     {loading === "pro" ? "Loading..." : "Start Your Free Trial"}
                   </Button>
                 </div>
@@ -204,20 +176,51 @@ export const Pricing = () => {
             <div className="md:hidden space-y-4">
               <h3 className="text-xl font-bold text-center mb-6">Feature Comparison</h3>
               
-              {[
-                { feature: "Marketplace Access", starter: "✓", pro: "✓" },
-                { feature: "Circle Points", starter: "None", pro: "100 to start + 500/month" },
-                { feature: "Circle Coverage", starter: "✗", pro: "✓" },
-                { feature: "Pro Pricing (Avg. 20% off)", starter: "✗", pro: "✓" },
-                { feature: "CoPay Access (60% avg. discount)", starter: "✗", pro: "✓" },
-                { feature: "Circle Academy Access", starter: "Limited", pro: "Full Library" },
-                { feature: "Create & Sell Playbooks", starter: "✗", pro: "✓" },
-                { feature: "Earn Creator Revenue", starter: "✗", pro: "✓" },
-                { feature: "Analytics & Reporting", starter: "✗", pro: "Advanced" },
-                { feature: "Team Management", starter: "✗", pro: "✓" },
-                { feature: "Priority Support", starter: "✗", pro: "✓" }
-              ].map((item, index) => (
-                <div key={index} className="bg-white rounded-lg border p-4">
+              {[{
+              feature: "Marketplace Access",
+              starter: "✓",
+              pro: "✓"
+            }, {
+              feature: "Circle Points",
+              starter: "None",
+              pro: "100 to start + 500/month"
+            }, {
+              feature: "Circle Coverage",
+              starter: "✗",
+              pro: "✓"
+            }, {
+              feature: "Pro Pricing (Avg. 20% off)",
+              starter: "✗",
+              pro: "✓"
+            }, {
+              feature: "CoPay Access (60% avg. discount)",
+              starter: "✗",
+              pro: "✓"
+            }, {
+              feature: "Circle Academy Access",
+              starter: "Limited",
+              pro: "Full Library"
+            }, {
+              feature: "Create & Sell Playbooks",
+              starter: "✗",
+              pro: "✓"
+            }, {
+              feature: "Earn Creator Revenue",
+              starter: "✗",
+              pro: "✓"
+            }, {
+              feature: "Analytics & Reporting",
+              starter: "✗",
+              pro: "Advanced"
+            }, {
+              feature: "Team Management",
+              starter: "✗",
+              pro: "✓"
+            }, {
+              feature: "Priority Support",
+              starter: "✗",
+              pro: "✓"
+            }].map((item, index) => <div key={index} className="bg-white rounded-lg border p-4">
                   <h4 className="font-medium mb-3">{item.feature}</h4>
                   <div className="grid grid-cols-2 gap-2 text-sm">
                     <div className="text-center">
@@ -233,8 +236,7 @@ export const Pricing = () => {
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                </div>)}
             </div>
 
             {/* Desktop: Features Comparison Table */}
@@ -262,7 +264,7 @@ export const Pricing = () => {
                   <span className="font-medium text-sm">Circle Points</span>
                 </div>
                 <div className="p-4 border-r border-b text-center text-sm">None</div>
-                <div className="p-4 border-b text-center text-sm bg-blue-50">100 to start + 500/month</div>
+                <div className="p-4 border-b text-center text-sm bg-blue-50">100 Points</div>
 
                 <div className="bg-gray-50 p-4 border-r border-b">
                   <span className="font-medium text-sm">Circle Coverage</span>
@@ -352,6 +354,5 @@ export const Pricing = () => {
           </div>
         </div>
       </section>
-    </div>
-  );
+    </div>;
 };
