@@ -215,42 +215,50 @@ export const MarketplaceGrid = () => {
     }
   };
   const loadData = useCallback(async () => {
+    const abortController = new AbortController();
+    const timeout = setTimeout(() => abortController.abort(), 15000); // 15 second timeout
+    
     try {
       setLoading(true);
       setError(null);
       console.log('Loading marketplace data...');
 
-      // Load vendors from the correct table
-      const vendorsResponse = await supabase.from('vendors').select('*').order('sort_order', {
-        ascending: true
-      }).order('rating', {
-        ascending: false
-      }).limit(50);
-      console.log('Vendors response:', vendorsResponse);
-      console.log('Vendors data:', vendorsResponse.data);
-      console.log('Vendors error:', vendorsResponse.error);
+      // Load data with timeout and error handling
+      const [vendorsResponse, servicesResponse] = await Promise.allSettled([
+        supabase.from('vendors')
+          .select('*')
+          .order('sort_order', { ascending: true })
+          .order('rating', { ascending: false })
+          .limit(50)
+          .abortSignal(abortController.signal),
+        supabase.from('services')
+          .select('*')
+          .order('sort_order', { ascending: true })
+          .order('created_at', { ascending: false })
+          .limit(100)
+          .abortSignal(abortController.signal)
+      ]);
 
-      // Load services without vendor join for now, then get vendors separately
-      const servicesResponse = await supabase.from('services').select('*').order('sort_order', {
-        ascending: true
-      }).order('created_at', {
-        ascending: false
-      }).limit(100);
-      console.log('Services response:', servicesResponse);
-      console.log('Services data:', servicesResponse.data);
-      console.log('Services error:', servicesResponse.error);
-      console.log('Services data length:', servicesResponse.data?.length);
-      if (vendorsResponse.error) {
-        console.error('Vendors error:', vendorsResponse.error);
-        throw vendorsResponse.error;
+      clearTimeout(timeout);
+
+      // Handle vendors response
+      let vendors = [];
+      if (vendorsResponse.status === 'fulfilled' && !vendorsResponse.value.error) {
+        vendors = vendorsResponse.value.data || [];
+      } else {
+        console.error('Vendors loading failed:', vendorsResponse);
       }
-      if (servicesResponse.error) {
-        console.error('Services error:', servicesResponse.error);
-        throw servicesResponse.error;
+
+      // Handle services response  
+      let services = [];
+      if (servicesResponse.status === 'fulfilled' && !servicesResponse.value.error) {
+        services = servicesResponse.value.data || [];
+      } else {
+        console.error('Services loading failed:', servicesResponse);
       }
 
       // Convert the database response to match our interface
-      const formattedServices = (servicesResponse.data || []).map(service => ({
+      const formattedServices = services.map(service => ({
         ...service,
         discount_percentage: service.discount_percentage ? String(service.discount_percentage) : undefined,
         vendor: {
@@ -262,7 +270,7 @@ export const MarketplaceGrid = () => {
       }));
 
       // Format vendors data using vendors table
-      const formattedVendors = (vendorsResponse.data || []).map(vendor => ({
+      const formattedVendors = vendors.map(vendor => ({
         ...vendor,
         id: vendor.id,
         name: vendor.name || 'Unknown Vendor',
@@ -284,22 +292,30 @@ export const MarketplaceGrid = () => {
         vendor_type: vendor.vendor_type || 'company',
         local_representatives: []
       }));
+      
       console.log(`Loaded ${formattedServices.length} services and ${formattedVendors.length} vendors`);
-      console.log('Formatted services:', formattedServices);
-      console.log('Setting services state...');
       setServices(formattedServices);
       setVendors(formattedVendors);
-      console.log('Services and vendors state set successfully');
     } catch (error) {
+      clearTimeout(timeout);
       console.error('Marketplace data loading error:', error);
-      setError(`Failed to load marketplace data: ${error.message || 'Unknown error'}`);
-      toast({
-        title: "Error loading data",
-        description: `Failed to load marketplace data: ${error.message || 'Please try again.'}`,
-        variant: "destructive"
-      });
+      
+      if (error.name === 'AbortError') {
+        setError('Loading timed out. Please try again.');
+        toast({
+          title: "Loading timeout",
+          description: "The page took too long to load. Please refresh and try again.",
+          variant: "destructive"
+        });
+      } else {
+        setError(`Failed to load marketplace data: ${error.message || 'Unknown error'}`);
+        toast({
+          title: "Error loading data", 
+          description: `Failed to load marketplace data: ${error.message || 'Please try again.'}`,
+          variant: "destructive"
+        });
+      }
     } finally {
-      console.log('Setting loading to false');
       setLoading(false);
     }
   }, [toast]);
