@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,7 +20,8 @@ import {
   MapPin,
   Phone,
   Mail,
-  Star
+  Star,
+  ArrowLeft
 } from "lucide-react";
 import { toast } from "sonner";
 import { VendorProfileEditor } from "@/components/marketplace/VendorProfileEditor";
@@ -64,6 +66,7 @@ interface DashboardStats {
 }
 
 export const VendorAnalyticsDashboard = () => {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [vendorData, setVendorData] = useState<VendorData | null>(null);
   const [stats, setStats] = useState<DashboardStats>({
@@ -258,11 +261,20 @@ export const VendorAnalyticsDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
+      {/* Header with Back Button */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <div className="flex items-center space-x-4">
+              <Button 
+                variant="ghost" 
+                onClick={() => navigate(-1)}
+                className="hover:bg-gray-100 mr-2"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back
+              </Button>
+              
               {vendorData.logo_url ? (
                 <img 
                   src={vendorData.logo_url} 
