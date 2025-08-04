@@ -131,12 +131,15 @@ export const EnhancedVendorCard = ({ vendor, onConnect, onViewProfile }: Enhance
               src={vendor.logo_url} 
               alt={vendor.name}
               className="w-full h-full object-cover"
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+                e.currentTarget.parentElement?.querySelector('.fallback-bg')?.classList.remove('hidden');
+              }}
             />
-          ) : (
-            <div className="w-full h-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
-              <Building className="w-16 h-16 text-muted-foreground" />
-            </div>
-          )}
+          ) : null}
+          <div className={`${vendor.logo_url ? 'hidden' : ''} fallback-bg w-full h-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center`}>
+            <Building className="w-16 h-16 text-muted-foreground" />
+          </div>
           
           {/* Overlays */}
           <div className="absolute top-3 left-3">
