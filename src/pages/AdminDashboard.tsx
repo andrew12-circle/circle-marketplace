@@ -158,22 +158,22 @@ export default function AdminDashboard() {
 
   const handleResetPassword = async (userId: string, email: string) => {
     try {
-      const { error } = await supabase.auth.admin.generateLink({
-        type: 'recovery',
-        email: email,
+      const { data, error } = await supabase.functions.invoke('admin-reset-password', {
+        body: { email }
       });
 
       if (error) throw error;
+      if (data.error) throw new Error(data.error);
 
       toast({
         title: 'Password Reset',
-        description: `Password reset email sent to ${email}`,
+        description: data.message,
       });
     } catch (error) {
       console.error('Error resetting password:', error);
       toast({
         title: 'Error',
-        description: 'Failed to reset password',
+        description: error instanceof Error ? error.message : 'Failed to reset password',
         variant: 'destructive',
       });
     }
@@ -184,21 +184,22 @@ export default function AdminDashboard() {
     if (!newPassword) return;
 
     try {
-      const { error } = await supabase.auth.admin.updateUserById(userId, {
-        password: newPassword
+      const { data, error } = await supabase.functions.invoke('admin-set-password', {
+        body: { userId, password: newPassword }
       });
 
       if (error) throw error;
+      if (data.error) throw new Error(data.error);
 
       toast({
         title: 'Password Updated',
-        description: 'User password has been updated successfully',
+        description: data.message,
       });
     } catch (error) {
       console.error('Error setting password:', error);
       toast({
         title: 'Error',
-        description: 'Failed to set password',
+        description: error instanceof Error ? error.message : 'Failed to set password',
         variant: 'destructive',
       });
     }
@@ -210,9 +211,12 @@ export default function AdminDashboard() {
     }
 
     try {
-      const { error } = await supabase.auth.admin.deleteUser(userId);
+      const { data, error } = await supabase.functions.invoke('admin-delete-user', {
+        body: { userId }
+      });
 
       if (error) throw error;
+      if (data.error) throw new Error(data.error);
 
       // Remove from local state
       setUsers(users.filter(user => user.user_id !== userId));
@@ -226,7 +230,7 @@ export default function AdminDashboard() {
       console.error('Error deleting user:', error);
       toast({
         title: 'Error',
-        description: 'Failed to delete user',
+        description: error instanceof Error ? error.message : 'Failed to delete user',
         variant: 'destructive',
       });
     }
@@ -238,25 +242,44 @@ export default function AdminDashboard() {
     }
 
     try {
+      const errors = [];
+      
       for (const userId of selectedUsers) {
-        const { error } = await supabase.auth.admin.deleteUser(userId);
-        if (error) throw error;
+        try {
+          const { data, error } = await supabase.functions.invoke('admin-delete-user', {
+            body: { userId }
+          });
+          
+          if (error) throw error;
+          if (data.error) throw new Error(data.error);
+        } catch (error) {
+          errors.push(`Failed to delete user ${userId}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
       }
 
-      // Remove from local state
+      // Remove from local state (only successful deletions)
       setUsers(users.filter(user => !selectedUsers.includes(user.user_id)));
       setFilteredUsers(filteredUsers.filter(user => !selectedUsers.includes(user.user_id)));
       setSelectedUsers([]);
 
-      toast({
-        title: 'Bulk Delete Complete',
-        description: `Successfully deleted ${selectedUsers.length} users`,
-      });
+      if (errors.length > 0) {
+        toast({
+          title: 'Partial Success',
+          description: `${selectedUsers.length - errors.length} users deleted successfully. ${errors.length} failed.`,
+          variant: 'destructive',
+        });
+        console.error('Bulk delete errors:', errors);
+      } else {
+        toast({
+          title: 'Bulk Delete Complete',
+          description: `Successfully deleted ${selectedUsers.length} users`,
+        });
+      }
     } catch (error) {
       console.error('Error in bulk delete:', error);
       toast({
         title: 'Error',
-        description: 'Failed to delete some users',
+        description: 'Failed to delete users',
         variant: 'destructive',
       });
     }
