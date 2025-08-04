@@ -246,7 +246,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
               const fillPercentage = isPartialStar ? (rating <= 4.9 ? 50 : (rating % 1) * 100) : 0;
               
               return (
-                <div key={i} className="relative h-4 w-4">
+                <div key={`star-${service.id}-${i}`} className="relative h-4 w-4">
                   <Star className="h-4 w-4 text-gray-300 absolute" />
                   {isFullStar && (
                     <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 absolute" />
