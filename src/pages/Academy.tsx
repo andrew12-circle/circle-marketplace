@@ -449,14 +449,14 @@ const AcademyContent = () => {
       </div>
 
       {/* Category Icons */}
-      <div className="flex gap-8 mb-16">
+      <div className="flex flex-wrap md:flex-nowrap gap-4 md:gap-8 mb-16 overflow-x-auto md:overflow-x-visible">
         {categories.map(category => {
         const Icon = category.icon;
-        return <button key={category.id} onClick={() => setActiveView(category.id)} className="flex flex-col items-center gap-2 p-4 rounded-lg hover:bg-gray-50 transition-colors group">
-              <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center group-hover:bg-gray-200 transition-colors">
-                <Icon className="w-6 h-6 text-gray-700" />
+        return <button key={category.id} onClick={() => setActiveView(category.id)} className="flex flex-col items-center gap-2 p-3 md:p-4 rounded-lg hover:bg-gray-50 transition-colors group shrink-0">
+              <div className="w-10 h-10 md:w-12 md:h-12 bg-gray-100 rounded-lg flex items-center justify-center group-hover:bg-gray-200 transition-colors">
+                <Icon className="w-5 h-5 md:w-6 md:h-6 text-gray-700" />
               </div>
-              <span className="text-sm text-gray-700 font-medium">{category.label}</span>
+              <span className="text-xs md:text-sm text-gray-700 font-medium text-center whitespace-nowrap">{category.label}</span>
             </button>;
       })}
       </div>
