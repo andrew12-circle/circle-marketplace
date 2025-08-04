@@ -42,6 +42,8 @@ interface Service {
   // Co-pay related fields
   copay_allowed?: boolean;
   max_vendor_split_percentage?: number;
+  max_split_percentage_ssp?: number;
+  max_split_percentage_non_ssp?: number;
   estimated_agent_split_percentage?: number;
   respa_category?: string;
   respa_notes?: string;
@@ -114,7 +116,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
     e.stopPropagation();
     
     // If pro member and co-pay is available, show choice modal
-    if (isProMember && service.copay_allowed && service.retail_price && service.max_vendor_split_percentage && service.pro_price) {
+    if (isProMember && service.copay_allowed && service.retail_price && service.max_split_percentage_ssp && service.pro_price) {
       setIsPricingChoiceModalOpen(true);
       return;
     }
@@ -323,7 +325,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                 </div>
               )}
               
-              {service.copay_allowed && service.retail_price && service.max_vendor_split_percentage && (
+              {service.copay_allowed && service.retail_price && service.max_split_percentage_ssp && (
                 <div className="space-y-1">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1">
@@ -358,18 +360,18 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                              </div>
                            </div>
                          </TooltipContent>
-                      </Tooltip>
+                       </Tooltip>
                     </div>
                     <span className="text-lg font-bold text-green-600">
                       {formatPrice(
-                        extractNumericPrice(service.retail_price) * (1 - (service.max_vendor_split_percentage / 100)), 
+                        extractNumericPrice(service.retail_price) * (1 - (service.max_split_percentage_ssp / 100)), 
                         service.price_duration || 'mo'
                       )}
                     </span>
                   </div>
                   <div className="flex justify-end">
                      <Badge className="bg-green-600 text-white text-xs">
-                       {service.max_vendor_split_percentage}% vendor support
+                       {service.max_split_percentage_ssp}% vendor support
                      </Badge>
                   </div>
                 </div>

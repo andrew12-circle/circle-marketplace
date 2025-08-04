@@ -60,6 +60,8 @@ interface Service {
   copay_allowed?: boolean; // Database field name
   max_vendor_split_percentage?: number;
   max_split_percentage?: number;
+  max_split_percentage_ssp?: number;
+  max_split_percentage_non_ssp?: number;
   estimated_roi?: number;
   duration?: string;
   tags?: string[];
@@ -305,14 +307,14 @@ export const ServiceManagementPanel = () => {
     if (!selectedService) return;
 
     try {
-      // Auto-calculate co_pay_price based on pro_price and max_vendor_split_percentage
-      let calculatedCoPayPrice = null;
-      if (editForm.pro_price && editForm.max_vendor_split_percentage) {
-        const proPrice = parseFloat(editForm.pro_price.replace(/[^\d.]/g, ''));
-        const splitPercentage = editForm.max_vendor_split_percentage;
-        const coPayAmount = proPrice * (1 - (splitPercentage / 100));
-        calculatedCoPayPrice = coPayAmount.toFixed(2);
-      }
+        // Auto-calculate co_pay_price based on pro_price and SSP split percentage
+        let calculatedCoPayPrice = null;
+        if (editForm.pro_price && editForm.max_split_percentage_ssp) {
+          const proPrice = parseFloat(editForm.pro_price.replace(/[^\d.]/g, ''));
+          const splitPercentage = editForm.max_split_percentage_ssp;
+          const coPayAmount = proPrice * (1 - (splitPercentage / 100));
+          calculatedCoPayPrice = coPayAmount.toFixed(2);
+        }
 
       // Prepare update data with direct field mapping
       const updateData = {
@@ -329,6 +331,8 @@ export const ServiceManagementPanel = () => {
         direct_purchase_enabled: editForm.direct_purchase_enabled || false,
         max_vendor_split_percentage: editForm.max_vendor_split_percentage || null,
         max_split_percentage: editForm.max_split_percentage || null,
+        max_split_percentage_ssp: editForm.max_split_percentage_ssp || null,
+        max_split_percentage_non_ssp: editForm.max_split_percentage_non_ssp || null,
         co_pay_price: calculatedCoPayPrice
       };
 
@@ -632,7 +636,7 @@ export const ServiceManagementPanel = () => {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                       <div className="space-y-2">
                         <label className="text-sm font-medium">Max Vendor Split %</label>
                         <Input
@@ -652,6 +656,28 @@ export const ServiceManagementPanel = () => {
                           max="100"
                           value={editForm.max_split_percentage || ''}
                           onChange={(e) => setEditForm({ ...editForm, max_split_percentage: Number(e.target.value) })}
+                          placeholder="0-100"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">SSP Split %</label>
+                        <Input
+                          type="number"
+                          min="0"
+                          max="100"
+                          value={editForm.max_split_percentage_ssp || ''}
+                          onChange={(e) => setEditForm({ ...editForm, max_split_percentage_ssp: Number(e.target.value) })}
+                          placeholder="0-100"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Non-SSP Split %</label>
+                        <Input
+                          type="number"
+                          min="0"
+                          max="100"
+                          value={editForm.max_split_percentage_non_ssp || ''}
+                          onChange={(e) => setEditForm({ ...editForm, max_split_percentage_non_ssp: Number(e.target.value) })}
                           placeholder="0-100"
                         />
                       </div>
