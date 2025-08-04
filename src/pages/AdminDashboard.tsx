@@ -16,6 +16,7 @@ import { YouTubeChannelImportPanel } from '@/components/admin/YouTubeChannelImpo
 import SecurityMonitoringPanel from '@/components/admin/SecurityMonitoringPanel';
 import { RESPAComplianceManager } from '@/components/admin/RESPAComplianceManager';
 import RESPADocumentationViewer from '@/components/admin/RESPADocumentationViewer';
+import RESPAServiceManager from '@/components/admin/RESPAServiceManager';
 import { AdvancedSplitCalculator } from '@/components/admin/AdvancedSplitCalculator';
 import { SecurityEventMonitor } from '@/components/security/SecurityEventMonitor';
 import { SecurityAuditLog } from '@/components/security/SecurityAuditLog';
@@ -390,6 +391,7 @@ export default function AdminDashboard() {
         </TabsContent>
 
         <TabsContent value="respa" className="space-y-6">
+          <RESPAServiceManager />
           <RESPAComplianceManager />
           <RESPADocumentationViewer />
         </TabsContent>
