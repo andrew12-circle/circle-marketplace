@@ -580,7 +580,7 @@ export const MarketplaceGrid = () => {
 
           {/* Grid - Mobile Responsive */}
           {viewMode === "services" ? <div className="mobile-grid gap-4 sm:gap-6">
-              {filteredServices.map(service => <ServiceCard key={service.id} service={service} onSave={handleSaveService} onViewDetails={handleViewServiceDetails} isSaved={savedServiceIds.includes(service.id)} />)}
+              {filteredServices.map(service => <ServiceCard key={`service-${service.id}`} service={service} onSave={handleSaveService} onViewDetails={handleViewServiceDetails} isSaved={savedServiceIds.includes(service.id)} />)}
             </div> : viewMode === "products" ? selectedProductCategory ? <div>
                 <div className="mb-6 flex items-center gap-4">
                   <Button variant="outline" onClick={handleBackToProducts}>
@@ -591,7 +591,7 @@ export const MarketplaceGrid = () => {
                   </h2>
                 </div>
                 <div className="mobile-grid gap-4 sm:gap-6">
-                  {getServicesForProduct(selectedProductCategory).map(service => <ServiceCard key={service.id} service={service} onSave={handleSaveService} onViewDetails={handleViewServiceDetails} isSaved={savedServiceIds.includes(service.id)} />)}
+                  {getServicesForProduct(selectedProductCategory).map(service => <ServiceCard key={`product-${selectedProductCategory}-${service.id}`} service={service} onSave={handleSaveService} onViewDetails={handleViewServiceDetails} isSaved={savedServiceIds.includes(service.id)} />)}
                 </div>
               </div> : <div className="mobile-grid gap-4 sm:gap-6">
                 {filteredProducts.map(product => {
