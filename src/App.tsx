@@ -13,10 +13,12 @@ import RequestLogger from "@/components/security/RequestLogger";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: 3,
-      retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      gcTime: 10 * 60 * 1000, // 10 minutes (renamed from cacheTime)
+      retry: 1, // Reduced retries to prevent excessive requests
+      retryDelay: 1000,
+      staleTime: 2 * 60 * 1000, // 2 minutes - shorter for fresh data
+      gcTime: 5 * 60 * 1000, // 5 minutes cache
+      refetchOnWindowFocus: false, // Prevent auto-refetch on focus
+      refetchOnMount: false, // Prevent auto-refetch on mount
     },
   },
 });

@@ -20,6 +20,7 @@ import { Link } from "react-router-dom";
 import { CategoryMegaMenu } from "./CategoryMegaMenu";
 import { EnhancedSearch, SearchFilters } from "./EnhancedSearch";
 import { VendorCallToAction } from "./VendorCallToAction";
+import { cacheManager } from "@/utils/cacheManager";
 interface FilterState {
   category: string;
   priceRange: number[];
@@ -215,13 +216,24 @@ export const MarketplaceGrid = () => {
     }
   };
   const loadData = useCallback(async () => {
+    // Check cache first
+    const cacheKey = 'marketplace-data';
+    const cachedData = cacheManager.get(cacheKey);
+    if (cachedData) {
+      console.log('Loading marketplace data from cache...');
+      setServices(cachedData.services);
+      setVendors(cachedData.vendors);
+      setLoading(false);
+      return;
+    }
+
     const abortController = new AbortController();
     const timeout = setTimeout(() => abortController.abort(), 15000); // 15 second timeout
     
     try {
       setLoading(true);
       setError(null);
-      console.log('Loading marketplace data...');
+      console.log('Loading marketplace data from database...');
 
       // Load data with timeout and error handling
       const [vendorsResponse, servicesResponse] = await Promise.allSettled([
@@ -296,6 +308,12 @@ export const MarketplaceGrid = () => {
       console.log(`Loaded ${formattedServices.length} services and ${formattedVendors.length} vendors`);
       setServices(formattedServices);
       setVendors(formattedVendors);
+      
+      // Cache the data
+      cacheManager.set(cacheKey, {
+        services: formattedServices,
+        vendors: formattedVendors
+      });
     } catch (error) {
       clearTimeout(timeout);
       console.error('Marketplace data loading error:', error);
@@ -319,9 +337,15 @@ export const MarketplaceGrid = () => {
       setLoading(false);
     }
   }, [toast]);
+
+  // Prevent multiple simultaneous loads
+  const [isLoadingRef, setIsLoadingRef] = useState(false);
+  
   useEffect(() => {
-    loadData();
-  }, []);
+    if (isLoadingRef) return; // Prevent duplicate loads
+    setIsLoadingRef(true);
+    loadData().finally(() => setIsLoadingRef(false));
+  }, [loadData]);
   useEffect(() => {
     if (profile?.user_id) {
       loadSavedServices();
