@@ -5,8 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Users, Shield, Star, AlertTriangle } from 'lucide-react';
-import { Navigate } from 'react-router-dom';
+import { Users, Shield, Star, AlertTriangle, ArrowLeft } from 'lucide-react';
+import { Navigate, useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 import { SecureAdminGuard } from '@/components/admin/SecureAdminGuard';
 import { useSecureAdminOperations } from '@/hooks/useSecureAdminOperations';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -53,6 +54,7 @@ interface UserProfile {
 export default function AdminDashboard() {
   const { user, profile, loading } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(true);
   const [securityWarnings, setSecurityWarnings] = useState<string[]>([]);
@@ -158,6 +160,16 @@ export default function AdminDashboard() {
     <SecureAdminGuard requireElevatedPrivileges={true}>
       <div className="container mx-auto py-8 px-4">
         <div className="mb-8">
+          <div className="flex items-center gap-4 mb-4">
+            <Button
+              variant="outline"
+              onClick={() => navigate(-1)}
+              className="flex items-center gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back
+            </Button>
+          </div>
           <h1 className="text-3xl font-bold flex items-center gap-2">
             <Shield className="h-8 w-8" />
             Secure Admin Dashboard
