@@ -26,7 +26,7 @@ interface Service {
   vendor_id: string;
   vendor: {
     id: string;
-    business_name: string;
+    name: string;
   };
 }
 
@@ -117,7 +117,7 @@ export const RESPAComplianceManager = () => {
           max_split_percentage,
           compliance_checklist,
           vendor_id,
-          vendor:vendors(id, business_name)
+          vendor:vendors(id, name)
         `)
         .order('title');
 
@@ -132,7 +132,7 @@ export const RESPAComplianceManager = () => {
         typeof service.vendor === 'object' && 
         !Array.isArray(service.vendor) &&
         service.vendor.id && 
-        service.vendor.business_name
+        service.vendor.name
       ) as unknown as Service[];
       
       setServices(validServices);
@@ -160,7 +160,7 @@ export const RESPAComplianceManager = () => {
       filtered = filtered.filter(service => 
         service.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         service.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        service.vendor.business_name.toLowerCase().includes(searchTerm.toLowerCase())
+        service.vendor.name.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
@@ -452,7 +452,7 @@ const ServiceComplianceCard = ({
         <div className="flex items-center justify-between">
           <div className="flex-1">
             <CardTitle className="text-lg">{service.title}</CardTitle>
-            <p className="text-sm text-muted-foreground">{service.vendor.business_name}</p>
+            <p className="text-sm text-muted-foreground">{service.vendor.name}</p>
           </div>
           <div className="flex items-center gap-2">
             {getRiskBadge(currentRisk as 'high' | 'medium' | 'low')}
