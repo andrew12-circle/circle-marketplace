@@ -222,7 +222,7 @@ export const MarketplaceGrid = () => {
   const optimizedMarketplace = useOptimizedMarketplace({
     category: filters.category,
     featured: filters.featured,
-    locationFilter: filters.locationFilter
+    verified: filters.verified
   });
 
   const loadData = useCallback(async () => {

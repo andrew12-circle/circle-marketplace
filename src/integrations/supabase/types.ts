@@ -4279,6 +4279,10 @@ export type Database = {
         }
         Returns: Json
       }
+      refresh_vendor_analytics: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       secure_profile_update: {
         Args: { target_user_id: string; update_data: Json }
         Returns: Json

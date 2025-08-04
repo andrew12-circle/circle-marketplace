@@ -1,7 +1,7 @@
-// 3. API ABSTRACTION LAYER - Decouple heavy operations from components
+// 2. API-BASED ABSTRACTIONS: Decouple heavy operations from components
 import { supabase } from '@/integrations/supabase/client';
 import { cacheManager } from '@/utils/cacheManager';
-import { PerformanceOptimizer } from '@/utils/performanceOptimizer';
+import { PerformanceOptimizer, withErrorRecovery } from '@/utils/performanceOptimizer';
 
 export interface Service {
   id: string;
@@ -13,6 +13,8 @@ export interface Service {
   co_pay_price?: string;
   image_url?: string;
   is_featured: boolean;
+  is_top_pick?: boolean;
+  tags?: string[];
   vendor?: {
     name: string;
     rating: number;
@@ -30,7 +32,14 @@ export interface Vendor {
   review_count: number;
   is_verified: boolean;
   co_marketing_agents: number;
+  campaigns_funded: number;
   service_states?: string[];
+  mls_areas?: string[];
+  service_radius_miles?: number;
+  license_states?: string[];
+  latitude?: number;
+  longitude?: number;
+  vendor_type?: string;
 }
 
 export interface MarketplaceQueryOptions {
