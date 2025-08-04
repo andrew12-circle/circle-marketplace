@@ -22,6 +22,11 @@ interface Service {
   respa_risk_level?: string;
   max_split_percentage?: number;
   vendor_id?: string;
+  vendor?: {
+    business_name?: string;
+    display_name?: string;
+    specialties?: string[];
+  };
 }
 
 const RESPAServiceManager = () => {
@@ -44,13 +49,31 @@ const RESPAServiceManager = () => {
 
   const loadServices = async () => {
     try {
-      const { data, error } = await supabase
+      // First get services
+      const { data: servicesData, error: servicesError } = await supabase
         .from('services')
         .select('id, title, category, description, is_respa_regulated, respa_risk_level, max_split_percentage, vendor_id')
         .order('title');
 
-      if (error) throw error;
-      setServices(data || []);
+      if (servicesError) throw servicesError;
+
+      // Then get vendor profiles for these services
+      const vendorIds = [...new Set(servicesData?.map(s => s.vendor_id).filter(Boolean))];
+      const { data: vendorsData, error: vendorsError } = await supabase
+        .from('profiles')
+        .select('user_id, business_name, display_name, specialties')
+        .in('user_id', vendorIds);
+
+      if (vendorsError) throw vendorsError;
+
+      // Merge the data
+      const vendorMap = new Map(vendorsData?.map(v => [v.user_id, v]) || []);
+      const servicesWithVendors = servicesData?.map(service => ({
+        ...service,
+        vendor: service.vendor_id ? vendorMap.get(service.vendor_id) : undefined
+      })) || [];
+
+      setServices(servicesWithVendors);
     } catch (error) {
       console.error('Error loading services:', error);
       toast({
@@ -228,6 +251,22 @@ const RESPAServiceManager = () => {
     }
   };
 
+  const getVendorTypeBadge = (service: Service) => {
+    const specialties = service.vendor?.specialties || [];
+    const isSSP = specialties.some(s => 
+      s.toLowerCase().includes('settlement') || 
+      s.toLowerCase().includes('title') ||
+      s.toLowerCase().includes('escrow') ||
+      s.toLowerCase().includes('closing')
+    );
+    
+    if (isSSP) {
+      return <Badge variant="destructive" className="text-xs">SSP</Badge>;
+    } else {
+      return <Badge variant="outline" className="text-xs">Non-SSP</Badge>;
+    }
+  };
+
   const getComplianceStats = () => {
     const total = services.length;
     const evaluated = services.filter(s => s.respa_risk_level !== null).length;
@@ -357,6 +396,7 @@ const RESPAServiceManager = () => {
                 </TableHead>
                 <TableHead>Service</TableHead>
                 <TableHead>Category</TableHead>
+                <TableHead>Vendor Type</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Split Allowed</TableHead>
                 <TableHead>Risk Level</TableHead>
@@ -390,6 +430,9 @@ const RESPAServiceManager = () => {
                   </TableCell>
                   <TableCell>
                     <div className="text-sm font-medium">{service.category}</div>
+                  </TableCell>
+                  <TableCell>
+                    {getVendorTypeBadge(service)}
                   </TableCell>
                   <TableCell>
                     {getStatusBadge(service)}
