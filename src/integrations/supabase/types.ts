@@ -2276,6 +2276,7 @@ export type Database = {
           invited_as_creator: boolean | null
           is_admin: boolean | null
           is_creator: boolean | null
+          is_pro: boolean | null
           is_pro_member: boolean | null
           is_settlement_service_provider: boolean | null
           latitude: number | null
@@ -2318,6 +2319,7 @@ export type Database = {
           invited_as_creator?: boolean | null
           is_admin?: boolean | null
           is_creator?: boolean | null
+          is_pro?: boolean | null
           is_pro_member?: boolean | null
           is_settlement_service_provider?: boolean | null
           latitude?: number | null
@@ -2360,6 +2362,7 @@ export type Database = {
           invited_as_creator?: boolean | null
           is_admin?: boolean | null
           is_creator?: boolean | null
+          is_pro?: boolean | null
           is_pro_member?: boolean | null
           is_settlement_service_provider?: boolean | null
           latitude?: number | null
