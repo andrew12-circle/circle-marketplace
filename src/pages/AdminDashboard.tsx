@@ -14,14 +14,12 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ContentPromotionPanel } from '@/components/admin/ContentPromotionPanel';
 import { YouTubeImportPanel } from '@/components/admin/YouTubeImportPanel';
 import { YouTubeChannelImportPanel } from '@/components/admin/YouTubeChannelImportPanel';
-import SecurityMonitoringPanel from '@/components/admin/SecurityMonitoringPanel';
+
 import { RESPAComplianceManager } from '@/components/admin/RESPAComplianceManager';
 import RESPADocumentationViewer from '@/components/admin/RESPADocumentationViewer';
 import VendorSSPManager from '@/components/admin/VendorSSPManager';
 import RESPAServiceManager from '@/components/admin/RESPAServiceManager';
 import { AdvancedSplitCalculator } from '@/components/admin/AdvancedSplitCalculator';
-import { SecurityEventMonitor } from '@/components/security/SecurityEventMonitor';
-import { SecurityAuditLog } from '@/components/security/SecurityAuditLog';
 import { ServiceImportPanel } from '@/components/admin/ServiceImportPanel';
 import { ServiceManagementPanel } from '@/components/admin/ServiceManagementPanel';
 import { VendorImportPanel } from '@/components/admin/VendorImportPanel';
@@ -336,10 +334,6 @@ export default function AdminDashboard() {
               )}
             </CardContent>
           </Card>
-          
-          <SecurityMonitoringPanel />
-          <SecurityEventMonitor />
-          <SecurityAuditLog />
         </TabsContent>
 
         <TabsContent value="vectorization" className="space-y-6">
