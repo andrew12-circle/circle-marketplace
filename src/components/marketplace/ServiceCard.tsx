@@ -40,7 +40,7 @@ interface Service {
   // Direct purchase feature - vendor controlled
   direct_purchase_enabled?: boolean;
   // Co-pay related fields
-  co_pay_allowed?: boolean;
+  copay_allowed?: boolean;
   max_vendor_split_percentage?: number;
   estimated_agent_split_percentage?: number;
   respa_category?: string;
@@ -114,7 +114,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
     e.stopPropagation();
     
     // If pro member and co-pay is available, show choice modal
-    if (isProMember && service.co_pay_allowed && service.retail_price && service.max_vendor_split_percentage && service.pro_price) {
+    if (isProMember && service.copay_allowed && service.retail_price && service.max_vendor_split_percentage && service.pro_price) {
       setIsPricingChoiceModalOpen(true);
       return;
     }
@@ -323,7 +323,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                 </div>
               )}
               
-              {service.co_pay_allowed && service.retail_price && service.max_vendor_split_percentage && (
+              {service.copay_allowed && service.retail_price && service.max_vendor_split_percentage && (
                 <div className="space-y-1">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1">

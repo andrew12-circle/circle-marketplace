@@ -57,8 +57,7 @@ interface Service {
   pro_price?: string;
   price_duration?: string;
   co_pay_price?: string;
-  co_pay_allowed: boolean;
-  copay_allowed?: boolean; // Database field (no underscore)
+  copay_allowed?: boolean; // Database field name
   max_vendor_split_percentage?: number;
   max_split_percentage?: number;
   estimated_roi?: number;
@@ -306,16 +305,22 @@ export const ServiceManagementPanel = () => {
     if (!selectedService) return;
 
     try {
-      // Prepare update data with correct field mappings
+      // Prepare update data with direct field mapping
       const updateData = {
-        ...editForm,
-        // Map co_pay_allowed to the correct database fields
-        copay_allowed: editForm.co_pay_allowed, // Database uses copay_allowed (no underscore)
-        max_vendor_split_percentage: editForm.max_vendor_split_percentage || 0
+        title: editForm.title,
+        description: editForm.description,
+        category: editForm.category,
+        duration: editForm.duration,
+        estimated_roi: editForm.estimated_roi || null,
+        sort_order: editForm.sort_order || null,
+        is_featured: editForm.is_featured || false,
+        is_top_pick: editForm.is_top_pick || false,
+        requires_quote: editForm.requires_quote || false,
+        copay_allowed: editForm.copay_allowed || false, // Use database field name
+        direct_purchase_enabled: editForm.direct_purchase_enabled || false,
+        max_vendor_split_percentage: editForm.max_vendor_split_percentage || null,
+        max_split_percentage: editForm.max_split_percentage || null
       };
-      
-      // Remove the old field name to avoid confusion
-      delete updateData.co_pay_allowed;
 
       console.log('Updating service with data:', updateData);
 
@@ -329,10 +334,26 @@ export const ServiceManagementPanel = () => {
         throw error;
       }
 
-      // Update local state
-      const updatedService = { ...selectedService, ...editForm };
-      setSelectedService(updatedService);
-      setServices(services.map(s => s.id === selectedService.id ? updatedService : s));
+      // Fetch updated service to get latest data
+      const { data: updatedServiceData, error: fetchError } = await supabase
+        .from('services')
+        .select(`
+          *,
+          vendors (name, logo_url),
+          service_providers (name, logo_url)
+        `)
+        .eq('id', selectedService.id)
+        .single();
+
+      if (fetchError) {
+        console.error('Fetch error:', fetchError);
+        throw fetchError;
+      }
+
+      // Update local state with fresh data
+      setSelectedService(updatedServiceData);
+      setServices(services.map(s => s.id === selectedService.id ? updatedServiceData : s));
+      setEditForm(updatedServiceData);
       setIsEditingDetails(false);
       
       toast({
@@ -584,8 +605,8 @@ export const ServiceManagementPanel = () => {
                       </div>
                       <div className="flex items-center space-x-2">
                         <Switch
-                          checked={editForm.co_pay_allowed || false}
-                          onCheckedChange={(checked) => setEditForm({ ...editForm, co_pay_allowed: checked })}
+                          checked={editForm.copay_allowed || false}
+                          onCheckedChange={(checked) => setEditForm({ ...editForm, copay_allowed: checked })}
                         />
                         <label className="text-sm font-medium">Co-Pay Allowed</label>
                       </div>
