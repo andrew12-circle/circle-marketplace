@@ -53,12 +53,12 @@ serve(async (req) => {
     
     switch (plan) {
       case "solo":
-        priceAmount = 4700; // $47.00 in cents
+        priceAmount = 9700; // $97.00 in cents
         planName = "Circle Pro (Solo)";
         subscriptionTier = "Solo";
         break;
       case "team":
-        priceAmount = 9700; // $97.00 in cents
+        priceAmount = 14700; // $147.00 in cents
         planName = "Circle Pro (Team)";
         subscriptionTier = "Team";
         break;
