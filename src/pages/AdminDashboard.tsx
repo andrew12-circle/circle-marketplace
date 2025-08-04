@@ -17,6 +17,7 @@ import { YouTubeChannelImportPanel } from '@/components/admin/YouTubeChannelImpo
 import SecurityMonitoringPanel from '@/components/admin/SecurityMonitoringPanel';
 import { RESPAComplianceManager } from '@/components/admin/RESPAComplianceManager';
 import RESPADocumentationViewer from '@/components/admin/RESPADocumentationViewer';
+import VendorSSPManager from '@/components/admin/VendorSSPManager';
 import RESPAServiceManager from '@/components/admin/RESPAServiceManager';
 import { AdvancedSplitCalculator } from '@/components/admin/AdvancedSplitCalculator';
 import { SecurityEventMonitor } from '@/components/security/SecurityEventMonitor';
@@ -24,17 +25,17 @@ import { SecurityAuditLog } from '@/components/security/SecurityAuditLog';
 import { ServiceImportPanel } from '@/components/admin/ServiceImportPanel';
 import { ServiceManagementPanel } from '@/components/admin/ServiceManagementPanel';
 import { VendorImportPanel } from '@/components/admin/VendorImportPanel';
+import { VendorManagementPanel } from '@/components/admin/VendorManagementPanel';
 import { VendorBudgetManager } from '@/components/admin/VendorBudgetManager';
 import { VendorRESPAManager } from '@/components/admin/VendorRESPAManager';
 import { VendorSortOrderManager } from '@/components/admin/VendorSortOrderManager';
-import { VendorManagementPanel } from '@/components/admin/VendorManagementPanel';
-import { ImageVectorizationPanel } from '@/components/admin/ImageVectorizationPanel';
 import { VendorActivityAnalytics } from '@/components/admin/VendorActivityAnalytics';
 import { VendorInvitationPanel } from '@/components/admin/VendorInvitationPanel';
 import { AgentInvitationPanel } from '@/components/admin/AgentInvitationPanel';
 import VendorPointAllocationPanel from '@/components/admin/VendorPointAllocationPanel';
 import AntiScrapingSystem from '@/components/security/AntiScrapingSystem';
 import { CreatorPayoutDashboard } from '@/components/admin/CreatorPayoutDashboard';
+import { ImageVectorizationPanel } from '@/components/admin/ImageVectorizationPanel';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Zap, Upload, Building, Youtube, DollarSign, BarChart3, Coins, Shield as ShieldIcon, Users2, Send, BookOpen } from 'lucide-react';
 
@@ -369,6 +370,7 @@ export default function AdminDashboard() {
         </TabsContent>
 
         <TabsContent value="vendors" className="space-y-6">
+          <VendorSSPManager />
           <VendorInvitationPanel />
           <VendorManagementPanel />
           <VendorSortOrderManager />
