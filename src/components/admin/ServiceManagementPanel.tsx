@@ -305,6 +305,15 @@ export const ServiceManagementPanel = () => {
     if (!selectedService) return;
 
     try {
+      // Auto-calculate co_pay_price based on pro_price and max_vendor_split_percentage
+      let calculatedCoPayPrice = null;
+      if (editForm.pro_price && editForm.max_vendor_split_percentage) {
+        const proPrice = parseFloat(editForm.pro_price.replace(/[^\d.]/g, ''));
+        const splitPercentage = editForm.max_vendor_split_percentage;
+        const coPayAmount = proPrice * (1 - (splitPercentage / 100));
+        calculatedCoPayPrice = coPayAmount.toFixed(2);
+      }
+
       // Prepare update data with direct field mapping
       const updateData = {
         title: editForm.title,
@@ -319,7 +328,8 @@ export const ServiceManagementPanel = () => {
         copay_allowed: editForm.copay_allowed || false, // Use database field name
         direct_purchase_enabled: editForm.direct_purchase_enabled || false,
         max_vendor_split_percentage: editForm.max_vendor_split_percentage || null,
-        max_split_percentage: editForm.max_split_percentage || null
+        max_split_percentage: editForm.max_split_percentage || null,
+        co_pay_price: calculatedCoPayPrice
       };
 
       console.log('Updating service with data:', updateData);
