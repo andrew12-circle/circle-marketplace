@@ -3926,6 +3926,10 @@ export type Database = {
         Args: { content_uuid: string }
         Returns: undefined
       }
+      increment_failed_attempts: {
+        Args: { p_identifier: string; p_attempt_type?: string }
+        Returns: undefined
+      }
       increment_video_views: {
         Args: { video_uuid: string }
         Returns: undefined
