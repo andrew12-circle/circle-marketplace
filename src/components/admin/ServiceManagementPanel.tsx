@@ -58,6 +58,9 @@ interface Service {
   price_duration?: string;
   co_pay_price?: string;
   co_pay_allowed: boolean;
+  copay_allowed?: boolean; // Database field (no underscore)
+  max_vendor_split_percentage?: number;
+  max_split_percentage?: number;
   estimated_roi?: number;
   duration?: string;
   tags?: string[];
@@ -303,22 +306,38 @@ export const ServiceManagementPanel = () => {
     if (!selectedService) return;
 
     try {
+      // Prepare update data with correct field mappings
+      const updateData = {
+        ...editForm,
+        // Map co_pay_allowed to the correct database fields
+        copay_allowed: editForm.co_pay_allowed, // Database uses copay_allowed (no underscore)
+        max_vendor_split_percentage: editForm.max_vendor_split_percentage || 0
+      };
+      
+      // Remove the old field name to avoid confusion
+      delete updateData.co_pay_allowed;
+
+      console.log('Updating service with data:', updateData);
+
       const { error } = await supabase
         .from('services')
-        .update(editForm)
+        .update(updateData)
         .eq('id', selectedService.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Update error:', error);
+        throw error;
+      }
 
       // Update local state
       const updatedService = { ...selectedService, ...editForm };
       setSelectedService(updatedService);
       setServices(services.map(s => s.id === selectedService.id ? updatedService : s));
       setIsEditingDetails(false);
-
+      
       toast({
-        title: 'Success',
-        description: 'Service updated successfully',
+        title: "Success",
+        description: "Service updated successfully",
       });
     } catch (error) {
       console.error('Error updating service:', error);
@@ -541,7 +560,7 @@ export const ServiceManagementPanel = () => {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                       <div className="flex items-center space-x-2">
                         <Switch
                           checked={editForm.is_featured || false}
@@ -565,6 +584,13 @@ export const ServiceManagementPanel = () => {
                       </div>
                       <div className="flex items-center space-x-2">
                         <Switch
+                          checked={editForm.co_pay_allowed || false}
+                          onCheckedChange={(checked) => setEditForm({ ...editForm, co_pay_allowed: checked })}
+                        />
+                        <label className="text-sm font-medium">Co-Pay Allowed</label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Switch
                           checked={editForm.direct_purchase_enabled || false}
                           onCheckedChange={(checked) => setEditForm({ ...editForm, direct_purchase_enabled: checked })}
                         />
@@ -572,6 +598,31 @@ export const ServiceManagementPanel = () => {
                           <ShoppingCart className="h-3 w-3 text-green-600" />
                           <label className="text-sm font-medium">Direct Purchase</label>
                         </div>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Max Vendor Split %</label>
+                        <Input
+                          type="number"
+                          min="0"
+                          max="100"
+                          value={editForm.max_vendor_split_percentage || ''}
+                          onChange={(e) => setEditForm({ ...editForm, max_vendor_split_percentage: Number(e.target.value) })}
+                          placeholder="0-100"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Max Split % (RESPA)</label>
+                        <Input
+                          type="number"
+                          min="0"
+                          max="100"
+                          value={editForm.max_split_percentage || ''}
+                          onChange={(e) => setEditForm({ ...editForm, max_split_percentage: Number(e.target.value) })}
+                          placeholder="0-100"
+                        />
                       </div>
                     </div>
 
