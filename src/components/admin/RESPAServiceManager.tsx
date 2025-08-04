@@ -21,8 +21,6 @@ interface Service {
   is_respa_regulated?: boolean;
   respa_risk_level?: string;
   max_split_percentage?: number;
-  max_split_percentage_ssp?: number;
-  max_split_percentage_non_ssp?: number;
   vendor_id?: string;
   vendor?: {
     business_name?: string;
@@ -54,7 +52,7 @@ const RESPAServiceManager = () => {
       // First get services
       const { data: servicesData, error: servicesError } = await supabase
         .from('services')
-        .select('id, title, category, description, is_respa_regulated, respa_risk_level, max_split_percentage, max_split_percentage_ssp, max_split_percentage_non_ssp, vendor_id')
+        .select('id, title, category, description, is_respa_regulated, respa_risk_level, max_split_percentage, vendor_id')
         .order('title');
 
       if (servicesError) throw servicesError;
@@ -102,14 +100,11 @@ const RESPAServiceManager = () => {
       filtered = filtered.filter(service => {
         switch (filterStatus) {
           case 'evaluated':
-            return (service.max_split_percentage_ssp !== null && service.max_split_percentage_ssp !== undefined) &&
-                   (service.max_split_percentage_non_ssp !== null && service.max_split_percentage_non_ssp !== undefined);
+            return service.max_split_percentage !== null && service.max_split_percentage !== undefined;
           case 'pending':
-            return (service.max_split_percentage_ssp === null || service.max_split_percentage_ssp === undefined) ||
-                   (service.max_split_percentage_non_ssp === null || service.max_split_percentage_non_ssp === undefined);
+            return service.max_split_percentage === null || service.max_split_percentage === undefined;
           case 'no-split-limit':
-            return (service.max_split_percentage_ssp === null || service.max_split_percentage_ssp === undefined) &&
-                   (service.max_split_percentage_non_ssp === null || service.max_split_percentage_non_ssp === undefined);
+            return service.max_split_percentage === null || service.max_split_percentage === undefined;
           default:
             return true;
         }
@@ -240,13 +235,10 @@ const RESPAServiceManager = () => {
   };
 
   const getStatusBadge = (service: Service) => {
-    const hasSspSplit = service.max_split_percentage_ssp !== null && service.max_split_percentage_ssp !== undefined;
-    const hasNonSspSplit = service.max_split_percentage_non_ssp !== null && service.max_split_percentage_non_ssp !== undefined;
+    const hasSplit = service.max_split_percentage !== null && service.max_split_percentage !== undefined;
     
-    if (hasSspSplit && hasNonSspSplit) {
-      return <Badge variant="default" className="bg-green-100 text-green-800">Split Limits Set</Badge>;
-    } else if (hasSspSplit || hasNonSspSplit) {
-      return <Badge variant="outline" className="border-orange-300 text-orange-700">Partially Set</Badge>;
+    if (hasSplit) {
+      return <Badge variant="default" className="bg-green-100 text-green-800">Split Limit Set</Badge>;
     } else {
       return <Badge variant="secondary">Pending Setup</Badge>;
     }
@@ -382,8 +374,7 @@ const RESPAServiceManager = () => {
                 <TableHead>Service</TableHead>
                 <TableHead>Category</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Max Split % SSP</TableHead>
-                <TableHead>Max Split % Non-SSP</TableHead>
+                <TableHead>Max Split %</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -422,26 +413,10 @@ const RESPAServiceManager = () => {
                       type="number"
                       min="0"
                       max="100"
-                      value={service.max_split_percentage_ssp || ''}
+                      value={service.max_split_percentage || ''}
                       onChange={(e) => 
                         updateService(service.id, { 
-                          max_split_percentage_ssp: parseInt(e.target.value) || 0 
-                        })
-                      }
-                      className="w-20"
-                      disabled={saving}
-                      placeholder="0-100"
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Input
-                      type="number"
-                      min="0"
-                      max="100"
-                      value={service.max_split_percentage_non_ssp || ''}
-                      onChange={(e) => 
-                        updateService(service.id, { 
-                          max_split_percentage_non_ssp: parseInt(e.target.value) || 100 
+                          max_split_percentage: parseInt(e.target.value) || 0 
                         })
                       }
                       className="w-20"
