@@ -79,6 +79,9 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
   const { formatPrice } = useCurrency();
   const isProMember = profile?.is_pro_member || false;
 
+  // Debug logging
+  console.log('ServiceCard Debug - Service:', service.title, 'Image URL:', service.image_url);
+
   // Safe price extraction with validation
   const extractNumericPrice = (priceString: string): number => {
     const validation = extractAndValidatePrice(priceString, 'retail');
@@ -221,8 +224,11 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
           alt={service.title}
           className="w-full h-full object-contain object-center transition-transform duration-300 group-hover:scale-105"
           onError={(e) => {
-            console.log('Image load error for:', service.image_url);
+            console.log('Image load error for service:', service.title, 'URL:', service.image_url);
             e.currentTarget.src = "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=400&h=300&fit=crop&crop=center";
+          }}
+          onLoad={() => {
+            console.log('Image loaded successfully for:', service.title, 'URL:', service.image_url);
           }}
         />
       </div>
