@@ -236,10 +236,10 @@ export const VendorAnalyticsDashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-background via-secondary/5 to-accent/10 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading your dashboard...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <div className="text-lg text-muted-foreground">Loading your co-marketing dashboard...</div>
         </div>
       </div>
     );
@@ -247,10 +247,10 @@ export const VendorAnalyticsDashboard = () => {
 
   if (!vendorData) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Vendor Profile Not Found</h1>
-          <p className="text-gray-600 mb-6">You don't appear to be registered as a vendor or your vendor profile is not activated.</p>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-950 dark:via-slate-900 dark:to-blue-950 flex items-center justify-center">
+        <div className="text-center bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg rounded-2xl p-8 shadow-2xl border border-slate-200/20 dark:border-slate-700/20">
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">Vendor Profile Not Found</h1>
+          <p className="text-slate-600 dark:text-slate-400 mb-6">You don't appear to be registered as a vendor or your vendor profile is not activated.</p>
           <Button onClick={() => window.location.href = '/vendor-registration'}>
             Register as Vendor
           </Button>
@@ -260,127 +260,172 @@ export const VendorAnalyticsDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-950 dark:via-slate-900 dark:to-blue-950">
       {/* Header with Back Button */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div className="flex items-center space-x-4">
+      <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg border-b border-slate-200/20 dark:border-slate-700/20 sticky top-0 z-50">
+        <div className="container mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
               <Button 
                 variant="ghost" 
                 onClick={() => navigate(-1)}
-                className="hover:bg-gray-100 mr-2"
+                className="hover:bg-slate-100 dark:hover:bg-slate-800"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back
               </Button>
-              
-              {vendorData.logo_url ? (
-                <img 
-                  src={vendorData.logo_url} 
-                  alt={vendorData.name}
-                  className="w-12 h-12 rounded-lg object-cover border border-gray-200"
-                />
-              ) : (
-                <div className="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center">
-                  <Building className="w-6 h-6 text-blue-600" />
-                </div>
-              )}
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">{vendorData.name}</h1>
-                <div className="flex items-center space-x-2 mt-1">
-                  {vendorData.is_verified && (
-                    <Badge className="bg-green-100 text-green-800 border-green-200">
-                      Verified
-                    </Badge>
-                  )}
-                  {vendorData.nmls_id && (
-                    <Badge variant="outline" className="text-blue-600 border-blue-200">
-                      NMLS #{vendorData.nmls_id}
-                    </Badge>
-                  )}
-                  {vendorData.location && (
-                    <span className="text-sm text-gray-500 flex items-center">
-                      <MapPin className="w-3 h-3 mr-1" />
-                      {vendorData.location}
-                    </span>
-                  )}
+              <div className="h-8 w-px bg-slate-200 dark:bg-slate-700" />
+              <div className="flex items-center gap-3">
+                {vendorData.logo_url ? (
+                  <img 
+                    src={vendorData.logo_url} 
+                    alt={vendorData.name}
+                    className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-lg"
+                  />
+                ) : (
+                  <div className="h-10 w-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
+                    <Building className="w-5 h-5 text-white" />
+                  </div>
+                )}
+                <div>
+                  <h1 className="text-xl font-semibold text-slate-900 dark:text-white">{vendorData.name}</h1>
+                  <p className="text-sm text-slate-600 dark:text-slate-400">Co-Marketing Dashboard</p>
                 </div>
               </div>
             </div>
-            <div className="flex space-x-3">
-              <Button variant="outline">
+            <div className="flex items-center gap-3">
+              <Button variant="outline" size="sm">
                 <Settings className="w-4 h-4 mr-2" />
                 Settings
               </Button>
-              <Button onClick={() => setIsEditingProfile(true)}>
+              <Button onClick={() => setIsEditingProfile(true)} size="sm">
                 <Edit className="w-4 h-4 mr-2" />
                 Edit Profile
-              </Button>
-              <Button 
-                onClick={() => setShowCardPreview(!showCardPreview)}
-                variant={showCardPreview ? "default" : "outline"}
-              >
-                {showCardPreview ? "Hide Preview" : "Preview Card"}
               </Button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card>
+      <div className="container mx-auto px-6 py-8 space-y-8">
+        {/* Welcome Section */}
+        <div className="bg-gradient-to-r from-emerald-600 via-blue-600 to-purple-600 rounded-2xl p-8 text-white relative overflow-hidden">
+          <div className="absolute inset-0 bg-black/10"></div>
+          <div className="relative z-10">
+            <div className="flex items-center justify-between">
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <Building className="w-6 h-6" />
+                  <span className="text-lg font-medium">Co-Marketing Analytics</span>
+                </div>
+                <h2 className="text-3xl font-bold">Partnership Performance</h2>
+                <p className="text-lg text-white/90 max-w-2xl">
+                  Track your co-marketing campaigns, monitor agent partnerships, and analyze your marketplace presence.
+                </p>
+                <div className="flex items-center gap-3 mt-6">
+                  {vendorData.is_verified && (
+                    <Badge className="bg-white/20 text-white border-white/30 backdrop-blur-sm">
+                      Verified Vendor
+                    </Badge>
+                  )}
+                  {vendorData.nmls_id && (
+                    <Badge className="bg-white/20 text-white border-white/30 backdrop-blur-sm">
+                      NMLS #{vendorData.nmls_id}
+                    </Badge>
+                  )}
+                  {vendorData.location && (
+                    <div className="flex items-center gap-2 text-white/90">
+                      <MapPin className="w-4 h-4" />
+                      <span className="text-sm">{vendorData.location}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="hidden lg:flex items-center">
+                <div className="text-right space-y-2">
+                  <div className="text-2xl font-bold">${stats.campaignSpend.toLocaleString()}</div>
+                  <div className="text-white/80">Total Campaign Investment</div>
+                  <div className="flex items-center gap-2 text-green-300">
+                    <TrendingUp className="w-4 h-4" />
+                    <span className="text-sm">{vendorData.campaigns_funded} campaigns active</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Key Metrics */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900 hover:shadow-xl transition-all duration-300">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Partnered Agents</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium text-blue-700 dark:text-blue-300">Partnered Agents</CardTitle>
+              <Users className="h-5 w-5 text-blue-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{vendorData.co_marketing_agents}</div>
-              <p className="text-xs text-muted-foreground">
-                Active partnerships
-              </p>
+              <div className="text-3xl font-bold text-blue-800 dark:text-blue-200">{vendorData.co_marketing_agents}</div>
+              <div className="flex items-center gap-2 mt-2">
+                <div className="flex items-center text-blue-600 dark:text-blue-400">
+                  <TrendingUp className="w-3 h-3 mr-1" />
+                  <span className="text-xs font-medium">Active</span>
+                </div>
+                <span className="text-xs text-blue-600/70 dark:text-blue-400/70">partnerships</span>
+              </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-950 dark:to-emerald-900 hover:shadow-xl transition-all duration-300">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Campaign Spend</CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium text-emerald-700 dark:text-emerald-300">Campaign Spend</CardTitle>
+              <DollarSign className="h-5 w-5 text-emerald-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">${stats.campaignSpend.toLocaleString()}</div>
-              <p className="text-xs text-muted-foreground">
-                {vendorData.campaigns_funded} campaigns funded
-              </p>
+              <div className="text-3xl font-bold text-emerald-800 dark:text-emerald-200">
+                ${stats.campaignSpend.toLocaleString()}
+              </div>
+              <div className="flex items-center gap-2 mt-2">
+                <div className="flex items-center text-emerald-600 dark:text-emerald-400">
+                  <TrendingUp className="w-3 h-3 mr-1" />
+                  <span className="text-xs font-medium">{vendorData.campaigns_funded}</span>
+                </div>
+                <span className="text-xs text-emerald-600/70 dark:text-emerald-400/70">campaigns funded</span>
+              </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950 dark:to-purple-900 hover:shadow-xl transition-all duration-300">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Profile Views</CardTitle>
-              <Eye className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium text-purple-700 dark:text-purple-300">Profile Views</CardTitle>
+              <Eye className="h-5 w-5 text-purple-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.totalViews}</div>
-              <p className="text-xs text-muted-foreground">
-                +{stats.recentViews} last 30 days
-              </p>
+              <div className="text-3xl font-bold text-purple-800 dark:text-purple-200">
+                {stats.totalViews.toLocaleString()}
+              </div>
+              <div className="flex items-center gap-2 mt-2">
+                <div className="flex items-center text-purple-600 dark:text-purple-400">
+                  <TrendingUp className="w-3 h-3 mr-1" />
+                  <span className="text-xs font-medium">+{stats.recentViews}</span>
+                </div>
+                <span className="text-xs text-purple-600/70 dark:text-purple-400/70">last 30 days</span>
+              </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-950 dark:to-orange-900 hover:shadow-xl transition-all duration-300">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Consultations</CardTitle>
-              <Calendar className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium text-orange-700 dark:text-orange-300">Consultations</CardTitle>
+              <Calendar className="h-5 w-5 text-orange-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.consultationBookings}</div>
-              <p className="text-xs text-muted-foreground">
-                {stats.conversionRate}% conversion rate
-              </p>
+              <div className="text-3xl font-bold text-orange-800 dark:text-orange-200">{stats.consultationBookings}</div>
+              <div className="flex items-center gap-2 mt-2">
+                <div className="flex items-center text-orange-600 dark:text-orange-400">
+                  <TrendingUp className="w-3 h-3 mr-1" />
+                  <span className="text-xs font-medium">{stats.conversionRate}%</span>
+                </div>
+                <span className="text-xs text-orange-600/70 dark:text-orange-400/70">conversion rate</span>
+              </div>
             </CardContent>
           </Card>
         </div>
