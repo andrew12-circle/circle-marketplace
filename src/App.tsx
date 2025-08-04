@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { CartProvider } from "@/contexts/CartContext";
 import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 import { CSRFProvider } from "@/components/common/CSRFProtection";
 import { SecurityHeaders } from "@/components/common/SecurityHeaders";
@@ -11,6 +12,7 @@ import { EnhancedSecurityHeaders } from "@/components/security/EnhancedSecurityH
 import { SecurityStatusIndicator } from "@/components/security/SecurityEnhancementSystem";
 import RequestLogger from "@/components/security/RequestLogger";
 import Index from "./pages/Index";
+import { Marketplace } from "./pages/Marketplace";
 import { Auth } from "./pages/Auth";
 import { OrderHistory } from "./pages/OrderHistory";
 import { PaymentSuccess } from "./pages/PaymentSuccess";
@@ -51,6 +53,7 @@ const App = () => {
         <TooltipProvider>
           <CSRFProvider>
             <AuthProvider>
+              <CartProvider>
               <Toaster />
               <Sonner />
               <div className="fixed top-4 right-4 z-50">
@@ -61,9 +64,10 @@ const App = () => {
                  <EnhancedSecurityHeaders />
                  <RequestLogger />
                  <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/academy" element={<Academy />} />
-                <Route path="/command-center" element={<CommandCenter />} />
+                 <Route path="/" element={<Index />} />
+                 <Route path="/marketplace" element={<Marketplace />} />
+                 <Route path="/academy" element={<Academy />} />
+                 <Route path="/command-center" element={<CommandCenter />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/orders" element={<OrderHistory />} />
                 <Route path="/pricing" element={<Pricing />} />
@@ -95,7 +99,8 @@ const App = () => {
                 {/* Catch-all route MUST be last */}
                 <Route path="*" element={<NotFound />} />
                 </Routes>
-              </BrowserRouter>
+               </BrowserRouter>
+              </CartProvider>
             </AuthProvider>
           </CSRFProvider>
         </TooltipProvider>
