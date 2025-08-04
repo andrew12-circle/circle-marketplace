@@ -64,12 +64,10 @@ export const VendorSelectionModal = ({
 
   useEffect(() => {
     if (isOpen) {
-      console.log('VendorSelectionModal: Modal opened, loading vendors...');
       setVendors([]); // Reset vendors to ensure clean state
       setFilteredVendors([]);
       loadVendors();
     } else {
-      console.log('VendorSelectionModal: Modal closed, resetting state...');
       setSearchQuery("");
       setSelectedVendor(null);
       setShowConfirmation(false);
@@ -83,7 +81,6 @@ export const VendorSelectionModal = ({
   }, [searchQuery, vendors]);
 
   const loadVendors = async () => {
-    console.log('VendorSelectionModal: Starting to load vendors...');
     setIsLoading(true);
     try {
       const { data, error } = await supabase
@@ -94,16 +91,12 @@ export const VendorSelectionModal = ({
         .order('rating', { ascending: false })
         .limit(20); // Limit initial results for faster loading
 
-      console.log('VendorSelectionModal: Supabase response:', { data, error, dataLength: data?.length });
-
       if (error) {
-        console.error('VendorSelectionModal: Supabase error details:', error);
         throw error;
       }
       setVendors(data || []);
-      console.log('VendorSelectionModal: Vendors set successfully, count:', (data || []).length);
     } catch (error) {
-      console.error('VendorSelectionModal: Error loading vendors:', error);
+      console.error('Error loading vendors:', error);
       toast({
         title: "Error",
         description: "Failed to load vendors. Please try again.",
@@ -111,17 +104,11 @@ export const VendorSelectionModal = ({
       });
     } finally {
       setIsLoading(false);
-      console.log('VendorSelectionModal: Loading complete');
     }
   };
 
   const filterVendors = () => {
     let filtered = vendors;
-    console.log('VendorSelectionModal: Filtering vendors...', { 
-      totalVendors: vendors.length, 
-      searchQuery, 
-      userLocation: location?.state 
-    });
 
     // Filter by location if available - but don't filter out ALL vendors
     if (location?.state) {
@@ -132,27 +119,22 @@ export const VendorSelectionModal = ({
       // Only apply location filter if we still have vendors, otherwise show all
       if (locationFiltered.length > 0) {
         filtered = locationFiltered;
-      } else {
-        console.log('VendorSelectionModal: No vendors found for location, showing all vendors');
       }
     }
 
     // Apply search filter
     if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
       filtered = filtered.filter(vendor =>
-        vendor.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        vendor.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        vendor.location?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        vendor.name.toLowerCase().includes(query) ||
+        vendor.description?.toLowerCase().includes(query) ||
+        vendor.location?.toLowerCase().includes(query) ||
         vendor.service_states?.some(state => 
-          state.toLowerCase().includes(searchQuery.toLowerCase())
+          state.toLowerCase().includes(query)
         )
       );
     }
 
-    console.log('VendorSelectionModal: Filtering complete', { 
-      filteredCount: filtered.length,
-      originalCount: vendors.length 
-    });
     setFilteredVendors(filtered);
   };
 
@@ -163,10 +145,9 @@ export const VendorSelectionModal = ({
     try {
       setIsSelectingVendor(true);
       
-      // Get current user
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-      if (userError || !user) {
-        console.error('Authentication error:', userError);
+      // Get current user - use cached session
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) {
         toast({
           title: "Authentication Error",
           description: "Please log in to send co-pay requests.",
@@ -175,74 +156,74 @@ export const VendorSelectionModal = ({
         return;
       }
       
-      // Immediately show success state for better UX
+      // Generate temporary ID for immediate UI feedback
+      const tempId = `temp-${Date.now()}`;
+      
+      // Immediately add to cart with temporary ID
+      const cartItem = {
+        id: tempId,
+        type: 'co-pay-request',
+        vendor: vendor,
+        service: {
+          title: service.title,
+          image_url: service.image_url,
+          co_pay_price: service.co_pay_price,
+          retail_price: service.retail_price,
+          pro_price: service.pro_price
+        },
+        status: 'pending-approval',
+        requestedSplit: service.max_split_percentage_ssp || 50,
+        createdAt: new Date().toISOString()
+      };
+
+      // Dispatch custom event to add to cart immediately
+      const addToCartEvent = new CustomEvent('addCoPayToCart', { 
+        detail: cartItem 
+      });
+      window.dispatchEvent(addToCartEvent);
+
+      // Show immediate success feedback
       setSelectedVendor(vendor);
       setShowConfirmation(true);
       onVendorSelect(vendor);
       
-      // Show success feedback immediately
       toast({
-        title: "Request Sent!",
-        description: `Co-pay request sent to ${vendor.name}`,
+        title: "Added to Cart!",
+        description: `Co-pay request for ${vendor.name} added to cart`,
       });
 
-      // Create co-pay request in database in background
-      const coPayRequestPromise = supabase
-        .from('co_pay_requests')
-        .insert({
-          agent_id: user.id,
-          vendor_id: vendor.id,
-          service_id: null,
-          requested_split_percentage: service.max_split_percentage_ssp || 50,
-          status: 'pending',
-          agent_notes: `Co-pay request for "${service.title}" service`
-        })
-        .select('id')
-        .single();
-
-      // Handle database operation in background
-      try {
-        const { data: coPayRequest, error } = await coPayRequestPromise;
-
+      // Create database record in background (non-blocking)
+      Promise.resolve(
+        supabase
+          .from('co_pay_requests')
+          .insert({
+            agent_id: session.user.id,
+            vendor_id: vendor.id,
+            service_id: null,
+            requested_split_percentage: service.max_split_percentage_ssp || 50,
+            status: 'pending',
+            agent_notes: `Co-pay request for "${service.title}" service`
+          })
+          .select('id')
+          .single()
+      ).then(({ data: coPayRequest, error }) => {
         if (error) {
-          console.error('Error creating co-pay request:', error);
-          // Revert UI state if database operation fails
-          setShowConfirmation(false);
-          setSelectedVendor(null);
-          toast({
-            title: "Error",
-            description: "Failed to create co-pay request. Please try again.",
-            variant: "destructive",
-          });
+          console.error('Background: Error creating co-pay request:', error);
           return;
         }
         
-        // Add to cart context with the actual request data
-        const cartItem = {
-          id: coPayRequest.id,
-          type: 'co-pay-request',
-          vendor: vendor,
-          service: {
-            title: service.title,
-            image_url: service.image_url,
-            co_pay_price: service.co_pay_price,
-            retail_price: service.retail_price,
-            pro_price: service.pro_price
-          },
-          status: 'pending-approval',
-          requestedSplit: service.max_split_percentage_ssp || 50,
-          createdAt: new Date().toISOString()
-        };
-
-        // Dispatch custom event to add to cart
-        const addToCartEvent = new CustomEvent('addCoPayToCart', { 
-          detail: cartItem 
+        // Update cart item with real ID
+        const updateCartEvent = new CustomEvent('updateCoPayRequestId', {
+          detail: {
+            tempId: tempId,
+            realId: coPayRequest.id
+          }
         });
-        window.dispatchEvent(addToCartEvent);
-      } catch (backgroundError) {
-        console.error('Background database error:', backgroundError);
-        // Don't disrupt user experience, just log the error
-      }
+        window.dispatchEvent(updateCartEvent);
+      }).catch(error => {
+        console.error('Background: Database error:', error);
+      });
+
     } catch (error) {
       console.error('Error in vendor selection:', error);
       toast({
