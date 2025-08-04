@@ -57,13 +57,38 @@ serve(async (req) => {
       throw templateError;
     }
 
+    // Calculate costs and percentages
+    const servicePrice = parseFloat(coPayRequest.service?.retail_price?.replace(/[^0-9.]/g, '') || '100');
+    const totalCost = servicePrice;
+    const vendorPercentage = coPayRequest.requested_split_percentage || 0;
+    const agentPercentage = 100 - vendorPercentage;
+    const vendorContribution = (totalCost * vendorPercentage / 100).toFixed(2);
+    const agentContribution = (totalCost * agentPercentage / 100).toFixed(2);
+    
+    // Generate campaign dates
+    const campaignStartDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 1 week from now
+    const campaignEndDate = new Date(campaignStartDate.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 days later
+    
     // Generate the agreement content with dynamic values
     const agreementContent = template.template_content
       .replace(/\{\{agent_name\}\}/g, coPayRequest.agent?.display_name || 'Agent')
       .replace(/\{\{agent_email\}\}/g, coPayRequest.agent?.email || '')
+      .replace(/\{\{agent_brokerage\}\}/g, coPayRequest.agent?.business_name || 'Independent')
+      .replace(/\{\{agent_license\}\}/g, 'License Pending')
       .replace(/\{\{vendor_name\}\}/g, coPayRequest.vendor?.business_name || coPayRequest.vendor?.display_name || 'Vendor')
+      .replace(/\{\{vendor_contact\}\}/g, coPayRequest.vendor?.display_name || 'Contact')
       .replace(/\{\{vendor_email\}\}/g, coPayRequest.vendor?.email || '')
+      .replace(/\{\{vendor_business_type\}\}/g, 'Professional Services')
       .replace(/\{\{service_title\}\}/g, coPayRequest.service?.title || 'Service')
+      .replace(/\{\{total_cost\}\}/g, totalCost.toFixed(2))
+      .replace(/\{\{vendor_contribution\}\}/g, vendorContribution)
+      .replace(/\{\{vendor_percentage\}\}/g, vendorPercentage.toString())
+      .replace(/\{\{agent_contribution\}\}/g, agentContribution)
+      .replace(/\{\{agent_percentage\}\}/g, agentPercentage.toString())
+      .replace(/\{\{campaign_start_date\}\}/g, campaignStartDate.toLocaleDateString())
+      .replace(/\{\{campaign_end_date\}\}/g, campaignEndDate.toLocaleDateString())
+      .replace(/\{\{agreement_date\}\}/g, new Date().toLocaleDateString())
+      .replace(/\{\{state\}\}/g, coPayRequest.agent?.state || coPayRequest.vendor?.state || 'State')
       .replace(/\{\{split_percentage\}\}/g, coPayRequest.requested_split_percentage?.toString() || '0')
       .replace(/\{\{request_date\}\}/g, new Date(coPayRequest.created_at).toLocaleDateString());
 
