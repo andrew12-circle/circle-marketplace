@@ -56,3 +56,9 @@ verify_jwt = false
 
 [functions.stripe-radar-webhook]
 verify_jwt = false
+
+[functions.background-job-processor]
+verify_jwt = false
+
+[functions.analytics-optimizer]
+verify_jwt = false
