@@ -388,19 +388,21 @@ const AcademyContent = () => {
         </div>
         
         {/* AI Curator Banner */}
-        <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-4 mb-6">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <Brain className="w-5 h-5 text-blue-600" />
-            </div>
-            <div className="flex-1">
-              <h3 className="font-semibold text-blue-900">Get Your Personalized Learning Path</h3>
-              <p className="text-sm text-blue-700">Tell us where you are and where you want to be. Our AI will curate the exact content you need from our entire library.</p>
+        <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-3 md:p-4 mb-4 md:mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-3">
+            <div className="flex items-center gap-3 flex-1">
+              <div className="p-2 bg-blue-100 rounded-lg shrink-0">
+                <Brain className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-semibold text-blue-900 text-sm sm:text-base">Get Your Personalized Learning Path</h3>
+                <p className="text-xs sm:text-sm text-blue-700 mt-1">Tell us where you are and where you want to be. Our AI will curate the exact content you need.</p>
+              </div>
             </div>
             <Button 
               onClick={() => setIsAICuratorOpen(true)}
               size="sm"
-              className="bg-blue-600 hover:bg-blue-700 text-white"
+              className="bg-blue-600 hover:bg-blue-700 text-white w-full sm:w-auto mt-2 sm:mt-0 shrink-0"
             >
               Get Started
             </Button>
