@@ -4254,6 +4254,10 @@ export type Database = {
         }
         Returns: Json
       }
+      process_background_job: {
+        Args: { job_id: string }
+        Returns: Json
+      }
       process_real_time_charge: {
         Args: {
           p_allocation_id: string

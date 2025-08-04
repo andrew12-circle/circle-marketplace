@@ -22,6 +22,8 @@ import { EnhancedSearch, SearchFilters } from "./EnhancedSearch";
 import { VendorCallToAction } from "./VendorCallToAction";
 import { cacheManager } from "@/utils/cacheManager";
 import { useStableLoading } from "@/hooks/useStableState";
+import { useOptimizedMarketplace } from "@/hooks/useOptimizedMarketplace";
+import { marketplaceAPI } from "@/services/marketplaceAPI";
 interface FilterState {
   category: string;
   priceRange: number[];
@@ -216,128 +218,48 @@ export const MarketplaceGrid = () => {
       console.error('Error loading saved services:', error);
     }
   };
-  const loadData = useCallback(async () => {
-    // Check cache first
-    const cacheKey = 'marketplace-data';
-    const cachedData = cacheManager.get(cacheKey);
-    if (cachedData) {
-      console.log('Loading marketplace data from cache...');
-      setServices(cachedData.services);
-      setVendors(cachedData.vendors);
-      setLoadingStable(false);
-      return;
-    }
+  // Replace heavy data loading with optimized API
+  const optimizedMarketplace = useOptimizedMarketplace({
+    category: filters.category,
+    featured: filters.featured,
+    locationFilter: filters.locationFilter
+  });
 
-    const abortController = new AbortController();
-    const timeout = setTimeout(() => abortController.abort(), 15000); // 15 second timeout
-    
+  const loadData = useCallback(async () => {
     try {
       setLoadingStable(true);
       setError(null);
-      console.log('Loading marketplace data from database...');
-
-      // Load data with timeout and error handling
-      const [vendorsResponse, servicesResponse] = await Promise.allSettled([
-        supabase.from('vendors')
-          .select('*')
-          .order('sort_order', { ascending: true })
-          .order('rating', { ascending: false })
-          .limit(50)
-          .abortSignal(abortController.signal),
-        supabase.from('services')
-          .select('*')
-          .order('sort_order', { ascending: true })
-          .order('created_at', { ascending: false })
-          .limit(100)
-          .abortSignal(abortController.signal)
-      ]);
-
-      clearTimeout(timeout);
-
-      // Handle vendors response
-      let vendors = [];
-      if (vendorsResponse.status === 'fulfilled' && !vendorsResponse.value.error) {
-        vendors = vendorsResponse.value.data || [];
-      } else {
-        console.error('Vendors loading failed:', vendorsResponse);
-      }
-
-      // Handle services response  
-      let services = [];
-      if (servicesResponse.status === 'fulfilled' && !servicesResponse.value.error) {
-        services = servicesResponse.value.data || [];
-      } else {
-        console.error('Services loading failed:', servicesResponse);
-      }
-
-      // Convert the database response to match our interface
-      const formattedServices = services.map(service => ({
-        ...service,
-        discount_percentage: service.discount_percentage ? String(service.discount_percentage) : undefined,
-        vendor: {
-          name: 'Service Provider',
-          rating: 4.5,
-          review_count: 0,
-          is_verified: true
-        }
-      }));
-
-      // Format vendors data using vendors table
-      const formattedVendors = vendors.map(vendor => ({
-        ...vendor,
-        id: vendor.id,
-        name: vendor.name || 'Unknown Vendor',
-        description: vendor.description || '',
-        logo_url: vendor.logo_url,
-        website_url: vendor.website_url,
-        location: vendor.location,
-        rating: vendor.rating || 0,
-        review_count: vendor.review_count || 0,
-        is_verified: vendor.is_verified || false,
-        co_marketing_agents: vendor.co_marketing_agents || 0,
-        campaigns_funded: vendor.campaigns_funded || 0,
-        service_states: vendor.service_states || [],
-        mls_areas: vendor.mls_areas || [],
-        service_radius_miles: vendor.service_radius_miles,
-        license_states: vendor.license_states || [],
-        latitude: vendor.latitude,
-        longitude: vendor.longitude,
-        vendor_type: vendor.vendor_type || 'company',
-        local_representatives: []
-      }));
       
-      console.log(`Loaded ${formattedServices.length} services and ${formattedVendors.length} vendors`);
-      setServices(formattedServices);
-      setVendors(formattedVendors);
+      // Use the optimized marketplace hook data - let the hook handle the loading
+      // This is now managed by the optimized hook itself
       
-      // Cache the data
-      cacheManager.set(cacheKey, {
-        services: formattedServices,
-        vendors: formattedVendors
-      });
     } catch (error) {
-      clearTimeout(timeout);
       console.error('Marketplace data loading error:', error);
-      
-      if (error.name === 'AbortError') {
-        setError('Loading timed out. Please try again.');
-        toast({
-          title: "Loading timeout",
-          description: "The page took too long to load. Please refresh and try again.",
-          variant: "destructive"
-        });
-      } else {
-        setError(`Failed to load marketplace data: ${error.message || 'Unknown error'}`);
-        toast({
-          title: "Error loading data", 
-          description: `Failed to load marketplace data: ${error.message || 'Please try again.'}`,
-          variant: "destructive"
-        });
-      }
+      setError(`Failed to load marketplace data: ${error.message || 'Unknown error'}`);
+      toast({
+        title: "Error loading data", 
+        description: `Failed to load marketplace data: ${error.message || 'Please try again.'}`,
+        variant: "destructive"
+      });
     } finally {
       setLoadingStable(false);
     }
   }, [toast]);
+
+  // Update local state when optimized data changes
+  useEffect(() => {
+    if (optimizedMarketplace.services.length > 0 || optimizedMarketplace.vendors.length > 0) {
+      setServices(optimizedMarketplace.services);
+      setVendors(optimizedMarketplace.vendors);
+      setLoadingStable(false);
+    }
+    if (optimizedMarketplace.loading) {
+      setLoadingStable(true);
+    }
+    if (optimizedMarketplace.error) {
+      setError(optimizedMarketplace.error);
+    }
+  }, [optimizedMarketplace.services, optimizedMarketplace.vendors, optimizedMarketplace.loading, optimizedMarketplace.error]);
 
   // Prevent multiple simultaneous loads
   const [isLoadingRef, setIsLoadingRef] = useState(false);

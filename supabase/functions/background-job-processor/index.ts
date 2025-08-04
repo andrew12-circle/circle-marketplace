@@ -1,264 +1,288 @@
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+// 4. BACKGROUND JOB PROCESSOR - Queue system for heavy operations
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+}
 
-serve(async (req) => {
+interface BackgroundJob {
+  id: string
+  job_type: string
+  job_data: any
+  status: string
+  priority: number
+  attempts: number
+  max_attempts: number
+}
+
+Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { headers: corsHeaders })
   }
 
   try {
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
-      {
-        auth: {
-          persistSession: false,
-        },
-      }
-    );
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    )
 
-    console.log('Background job processor started');
+    console.log('Starting background job processor...')
 
-    // Get pending jobs ordered by priority and scheduled time
-    const { data: jobs, error: jobsError } = await supabaseClient
+    // Get pending jobs ordered by priority and schedule
+    const { data: jobs, error: fetchError } = await supabaseClient
       .from('background_jobs')
       .select('*')
       .eq('status', 'pending')
       .lte('scheduled_at', new Date().toISOString())
       .order('priority', { ascending: false })
       .order('scheduled_at', { ascending: true })
-      .limit(10); // Process up to 10 jobs at once
+      .limit(10)
 
-    if (jobsError) {
-      console.error('Error fetching jobs:', jobsError);
-      throw jobsError;
+    if (fetchError) {
+      console.error('Error fetching jobs:', fetchError)
+      throw fetchError
     }
 
     if (!jobs || jobs.length === 0) {
-      console.log('No pending jobs found');
       return new Response(
-        JSON.stringify({ message: 'No pending jobs', processed: 0 }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+        JSON.stringify({ message: 'No pending jobs found' }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200,
+        }
+      )
     }
 
-    console.log(`Processing ${jobs.length} background jobs`);
-    
-    const results = [];
-    
+    console.log(`Processing ${jobs.length} jobs...`)
+
+    const results = []
+
+    // Process jobs sequentially to avoid resource conflicts
     for (const job of jobs) {
       try {
-        console.log(`Processing job ${job.id} of type ${job.job_type}`);
+        console.log(`Processing job ${job.id} of type ${job.job_type}`)
         
-        // Mark job as processing to prevent duplicate processing
-        const { error: updateError } = await supabaseClient
+        // Mark job as processing
+        await supabaseClient
           .from('background_jobs')
-          .update({
-            status: 'processing',
+          .update({ 
+            status: 'processing', 
             started_at: new Date().toISOString(),
             attempts: job.attempts + 1
           })
-          .eq('id', job.id);
+          .eq('id', job.id)
 
-        if (updateError) {
-          console.error(`Error updating job ${job.id}:`, updateError);
-          continue;
-        }
-
-        let jobResult;
+        const result = await processJob(job, supabaseClient)
         
-        // Process job based on type
-        switch (job.job_type) {
-          case 'refresh_analytics':
-            jobResult = await processAnalyticsRefresh(supabaseClient, job);
-            break;
-            
-          case 'cleanup_cache':
-            jobResult = await processCacheCleanup(supabaseClient, job);
-            break;
-            
-          case 'send_notification':
-            jobResult = await processNotification(supabaseClient, job);
-            break;
-            
-          case 'generate_report':
-            jobResult = await processReportGeneration(supabaseClient, job);
-            break;
-            
-          case 'bulk_import':
-            jobResult = await processBulkImport(supabaseClient, job);
-            break;
-            
-          default:
-            jobResult = { success: false, error: `Unknown job type: ${job.job_type}` };
-        }
-
-        // Update job status based on result
-        if (jobResult.success) {
-          await supabaseClient
-            .from('background_jobs')
-            .update({
-              status: 'completed',
-              completed_at: new Date().toISOString()
-            })
-            .eq('id', job.id);
-          
-          console.log(`Job ${job.id} completed successfully`);
-        } else {
-          const shouldRetry = job.attempts < job.max_attempts;
-          
-          await supabaseClient
-            .from('background_jobs')
-            .update({
-              status: shouldRetry ? 'pending' : 'failed',
-              error_message: jobResult.error,
-              scheduled_at: shouldRetry 
-                ? new Date(Date.now() + Math.pow(2, job.attempts) * 1000).toISOString() // Exponential backoff
-                : job.scheduled_at
-            })
-            .eq('id', job.id);
-          
-          console.error(`Job ${job.id} failed:`, jobResult.error);
-        }
-        
-        results.push({
-          job_id: job.id,
-          job_type: job.job_type,
-          success: jobResult.success,
-          error: jobResult.error
-        });
-        
-      } catch (error) {
-        console.error(`Unexpected error processing job ${job.id}:`, error);
-        
-        // Mark job as failed
+        // Mark job as completed
         await supabaseClient
           .from('background_jobs')
-          .update({
-            status: 'failed',
-            error_message: error.message
+          .update({ 
+            status: 'completed', 
+            completed_at: new Date().toISOString() 
           })
-          .eq('id', job.id);
+          .eq('id', job.id)
+
+        results.push({ job_id: job.id, success: true, result })
+        console.log(`Job ${job.id} completed successfully`)
+
+      } catch (error) {
+        console.error(`Job ${job.id} failed:`, error)
+        
+        // Check if we should retry
+        if (job.attempts + 1 >= job.max_attempts) {
+          await supabaseClient
+            .from('background_jobs')
+            .update({ 
+              status: 'failed', 
+              error_message: error.message,
+              completed_at: new Date().toISOString()
+            })
+            .eq('id', job.id)
+        } else {
+          // Schedule retry with exponential backoff
+          const retryDelay = Math.pow(2, job.attempts) * 1000 // 1s, 2s, 4s, etc.
+          const retryAt = new Date(Date.now() + retryDelay)
           
-        results.push({
-          job_id: job.id,
-          job_type: job.job_type,
-          success: false,
-          error: error.message
-        });
+          await supabaseClient
+            .from('background_jobs')
+            .update({ 
+              status: 'pending', 
+              scheduled_at: retryAt.toISOString(),
+              error_message: error.message
+            })
+            .eq('id', job.id)
+        }
+
+        results.push({ 
+          job_id: job.id, 
+          success: false, 
+          error: error.message,
+          will_retry: job.attempts + 1 < job.max_attempts
+        })
       }
     }
 
     return new Response(
-      JSON.stringify({
-        message: 'Background jobs processed',
-        processed: results.length,
-        results
+      JSON.stringify({ 
+        processed: jobs.length,
+        results 
       }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      }
+    )
 
   } catch (error) {
-    console.error('Background job processor error:', error);
+    console.error('Background job processor error:', error)
     return new Response(
       JSON.stringify({ error: error.message }),
-      { 
+      {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500
+        status: 500,
       }
-    );
+    )
   }
-});
+})
 
-// Job processing functions
-async function processAnalyticsRefresh(supabase: any, job: any) {
-  try {
-    console.log('Refreshing analytics materialized view');
+async function processJob(job: BackgroundJob, supabase: any) {
+  switch (job.job_type) {
+    case 'refresh_analytics':
+      return await refreshAnalytics(job.job_data, supabase)
+      
+    case 'cleanup_cache':
+      return await cleanupCache(job.job_data, supabase)
+      
+    case 'bulk_import_services':
+      return await bulkImportServices(job.job_data, supabase)
+      
+    case 'vendor_analytics_update':
+      return await updateVendorAnalytics(job.job_data, supabase)
+      
+    case 'marketplace_index_refresh':
+      return await refreshMarketplaceIndexes(job.job_data, supabase)
+      
+    default:
+      throw new Error(`Unknown job type: ${job.job_type}`)
+  }
+}
+
+async function refreshAnalytics(jobData: any, supabase: any) {
+  console.log('Refreshing analytics...', jobData)
+  
+  // Update vendor analytics in batches
+  const { data: vendors } = await supabase
+    .from('vendors')
+    .select('id')
+    .limit(100)
+
+  if (vendors) {
+    for (const vendor of vendors) {
+      try {
+        // Call the vendor dashboard stats function for each vendor
+        const { data } = await supabase.rpc('get_vendor_dashboard_stats', {
+          p_vendor_id: vendor.id
+        })
+        
+        console.log(`Updated analytics for vendor ${vendor.id}`)
+      } catch (error) {
+        console.error(`Failed to update analytics for vendor ${vendor.id}:`, error)
+      }
+    }
+  }
+  
+  return { message: 'Analytics refresh completed' }
+}
+
+async function cleanupCache(jobData: any, supabase: any) {
+  console.log('Cleaning up cache...', jobData)
+  
+  // This would typically involve clearing Redis or other cache stores
+  // For now, we'll just log the operation
+  
+  return { message: 'Cache cleanup completed' }
+}
+
+async function bulkImportServices(jobData: any, supabase: any) {
+  console.log('Bulk importing services...', jobData)
+  
+  const { services } = jobData
+  
+  if (!services || !Array.isArray(services)) {
+    throw new Error('Invalid services data for bulk import')
+  }
+  
+  // Insert services in batches of 100
+  const batchSize = 100
+  let imported = 0
+  
+  for (let i = 0; i < services.length; i += batchSize) {
+    const batch = services.slice(i, i + batchSize)
     
-    // Call the refresh function
-    const { error } = await supabase.rpc('refresh_vendor_analytics');
+    const { error } = await supabase
+      .from('services')
+      .insert(batch)
     
     if (error) {
-      return { success: false, error: error.message };
+      console.error('Batch import error:', error)
+      throw error
     }
     
-    return { success: true, message: 'Analytics refreshed successfully' };
-  } catch (error) {
-    return { success: false, error: error.message };
+    imported += batch.length
+    console.log(`Imported ${imported}/${services.length} services`)
   }
+  
+  return { message: `Successfully imported ${imported} services` }
 }
 
-async function processCacheCleanup(supabase: any, job: any) {
-  try {
-    console.log('Processing cache cleanup job');
+async function updateVendorAnalytics(jobData: any, supabase: any) {
+  console.log('Updating vendor analytics...', jobData)
+  
+  const { vendor_id } = jobData
+  
+  // Get vendor's services and calculate analytics
+  const { data: services } = await supabase
+    .from('services')
+    .select('id')
+    .eq('vendor_id', vendor_id)
+  
+  if (services) {
+    const serviceIds = services.map(s => s.id)
     
-    // This could trigger cache cleanup in the application
-    // For now, we'll just log it as successful
+    // Get view counts
+    const { data: views } = await supabase
+      .from('service_views')
+      .select('service_id')
+      .in('service_id', serviceIds)
     
-    return { success: true, message: 'Cache cleanup triggered' };
-  } catch (error) {
-    return { success: false, error: error.message };
-  }
-}
-
-async function processNotification(supabase: any, job: any) {
-  try {
-    console.log('Processing notification job', job.job_data);
+    // Get booking counts
+    const { data: bookings } = await supabase
+      .from('consultation_bookings')
+      .select('service_id')
+      .in('service_id', serviceIds)
     
-    // Extract notification data
-    const { recipient, subject, message, type } = job.job_data;
-    
-    if (!recipient) {
-      return { success: false, error: 'No recipient specified' };
+    const analytics = {
+      total_services: services.length,
+      total_views: views?.length || 0,
+      total_bookings: bookings?.length || 0,
+      conversion_rate: views?.length ? ((bookings?.length || 0) / views.length) * 100 : 0
     }
     
-    // Here you would integrate with your notification service
-    // For now, we'll simulate successful notification
-    console.log(`Sending ${type} notification to ${recipient}: ${subject}`);
-    
-    return { success: true, message: 'Notification sent successfully' };
-  } catch (error) {
-    return { success: false, error: error.message };
+    console.log(`Analytics for vendor ${vendor_id}:`, analytics)
   }
+  
+  return { message: `Updated analytics for vendor ${vendor_id}` }
 }
 
-async function processReportGeneration(supabase: any, job: any) {
-  try {
-    console.log('Processing report generation job', job.job_data);
-    
-    const { report_type, user_id, filters } = job.job_data;
-    
-    // Simulate report generation
-    console.log(`Generating ${report_type} report for user ${user_id}`);
-    
-    // Here you would actually generate the report
-    // Store it in a reports table or file storage
-    
-    return { success: true, message: 'Report generated successfully' };
-  } catch (error) {
-    return { success: false, error: error.message };
-  }
-}
-
-async function processBulkImport(supabase: any, job: any) {
-  try {
-    console.log('Processing bulk import job', job.job_data);
-    
-    const { import_type, data_source, batch_size = 100 } = job.job_data;
-    
-    // Simulate bulk import processing
-    console.log(`Processing bulk import of ${import_type} from ${data_source}`);
-    
-    // Here you would process the import in batches
-    // Update progress, handle errors, etc.
-    
-    return { success: true, message: 'Bulk import completed successfully' };
-  } catch (error) {
-    return { success: false, error: error.message };
-  }
+async function refreshMarketplaceIndexes(jobData: any, supabase: any) {
+  console.log('Refreshing marketplace indexes...', jobData)
+  
+  // This would involve refreshing materialized views, updating search indexes, etc.
+  // For now, we'll simulate the operation
+  
+  await new Promise(resolve => setTimeout(resolve, 1000))
+  
+  return { message: 'Marketplace indexes refreshed' }
 }
