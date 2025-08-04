@@ -9,6 +9,8 @@ interface UseOptimizedMarketplaceOptions {
   category?: string;
   featured?: boolean;
   locationFilter?: boolean;
+  limit?: number;
+  location?: string;
 }
 
 interface MarketplaceService {
@@ -54,7 +56,7 @@ interface MarketplaceVendor {
   latitude?: number;
   longitude?: number;
   vendor_type?: string;
-  local_representatives?: any;
+  local_representatives?: any[];
 }
 
 interface CachedMarketplaceData {
@@ -153,7 +155,7 @@ export const useOptimizedMarketplace = (filters: UseOptimizedMarketplaceOptions 
             mls_areas: vendor.mls_areas || [],
             license_states: vendor.license_states || [],
             vendor_type: vendor.vendor_type || 'company',
-            local_representatives: vendor.local_representatives || []
+            local_representatives: (vendor as any).local_representatives || []
           }));
 
           return {
@@ -193,7 +195,7 @@ export const useOptimizedMarketplace = (filters: UseOptimizedMarketplaceOptions 
 
     try {
       const results = await debouncedSearch(searchTerm, filters);
-      return results || [];
+      return Array.isArray(results) ? results : [];
     } catch (err) {
       console.error('Search error:', err);
       return [];
@@ -252,6 +254,14 @@ export const useOptimizedMarketplace = (filters: UseOptimizedMarketplaceOptions 
     loadMarketplaceData();
   }, [loadMarketplaceData]);
 
+  const clearCache = useCallback(() => {
+    cacheManager.clear();
+  }, []);
+
+  const refresh = useCallback(async () => {
+    await loadMarketplaceData();
+  }, [loadMarketplaceData]);
+
   useEffect(() => {
     loadMarketplaceData();
   }, [loadMarketplaceData]);
@@ -261,11 +271,13 @@ export const useOptimizedMarketplace = (filters: UseOptimizedMarketplaceOptions 
     vendors: data?.vendors || [],
     categories: data?.categories || [],
     loading,
-    error,
+    error: error || '',
     search,
     getFilteredServices,
     prefetchServiceDetails,
     invalidateCache,
+    clearCache,
+    refresh,
     refetch: loadMarketplaceData
   };
 };

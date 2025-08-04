@@ -273,8 +273,8 @@ class MarketplaceAPI {
   private async calculateVendorAnalytics(vendorId: string) {
     const [servicesResponse, viewsResponse, bookingsResponse] = await Promise.all([
       supabase.from('services').select('id').eq('vendor_id', vendorId),
-      supabase.from('service_views').select('service_id').eq('vendor_id', vendorId),
-      supabase.from('consultation_bookings').select('service_id').eq('vendor_id', vendorId)
+      supabase.from('service_views').select('service_id'),
+      supabase.from('consultation_bookings').select('service_id')
     ]);
 
     return {
