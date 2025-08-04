@@ -482,7 +482,7 @@ const AcademyContent = () => {
       <div className="bg-gray-900 text-white p-6 rounded-lg flex items-center justify-between">
         <div>
           <h3 className="text-lg font-bold mb-1">Everything Agents Wish They Knew Sooner.</h3>
-          <p className="text-sm text-gray-300">$47/month, Full access. Courses & coaching and reporting.</p>
+          <p className="text-sm text-gray-300">$97/agent/month, Full access. Courses & coaching and reporting.</p>
         </div>
         <Button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium">
           Try It Free

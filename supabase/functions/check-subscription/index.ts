@@ -108,19 +108,8 @@ serve(async (req) => {
         endDate: subscriptionEnd 
       });
       
-      // Determine subscription tier from metadata or price
-      subscriptionTier = subscription.metadata?.subscription_tier;
-      if (!subscriptionTier) {
-        // Fallback: determine from price amount
-        const priceId = subscription.items.data[0].price.id;
-        const price = await stripe.prices.retrieve(priceId);
-        const amount = price.unit_amount || 0;
-        if (amount <= 5000) {
-          subscriptionTier = "Solo";
-        } else {
-          subscriptionTier = "Team";
-        }
-      }
+      // Determine subscription tier from metadata or default to Pro
+      subscriptionTier = subscription.metadata?.subscription_tier || "Pro";
       logStep("Determined subscription tier", { subscriptionTier });
     } else {
       logStep("No active or trialing subscription found");
