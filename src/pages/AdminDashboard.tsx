@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
-import { Users, Shield, Star, AlertTriangle, ArrowLeft, RefreshCw, ChevronDown, Key, Trash2 } from 'lucide-react';
+import { Users, Shield, Star, AlertTriangle, ArrowLeft, RefreshCw, ChevronDown, Key, Trash2, Activity, TrendingUp, Globe, Lock } from 'lucide-react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { SecureAdminGuard } from '@/components/admin/SecureAdminGuard';
@@ -397,31 +397,51 @@ export default function AdminDashboard() {
 
   return (
     <SecureAdminGuard requireElevatedPrivileges={true}>
-      <div className="container mx-auto py-8 px-4">
-        <div className="mb-8">
-          <div className="flex items-center gap-4 mb-4">
-            <Button
-              variant="outline"
-              onClick={() => navigate(-1)}
-              className="flex items-center gap-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back
-            </Button>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
+        {/* Professional Header */}
+        <div className="bg-white border-b border-slate-200 shadow-sm">
+          <div className="container mx-auto px-6 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <Button
+                  variant="ghost"
+                  onClick={() => navigate(-1)}
+                  className="flex items-center gap-2 text-slate-600 hover:text-slate-900"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  Back
+                </Button>
+                <div className="h-6 w-px bg-slate-300" />
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+                    <Shield className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <h1 className="text-xl font-semibold text-slate-900">Admin Console</h1>
+                    <p className="text-sm text-slate-500">Enterprise Management Portal</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 border border-emerald-200 rounded-full">
+                  <div className="h-2 w-2 bg-emerald-500 rounded-full animate-pulse" />
+                  <span className="text-sm font-medium text-emerald-700">System Operational</span>
+                </div>
+                <Badge variant="outline" className="bg-slate-50 border-slate-300 text-slate-700">
+                  v2.4.1
+                </Badge>
+              </div>
+            </div>
           </div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <Shield className="h-8 w-8" />
-            Secure Admin Dashboard
-          </h1>
-          <p className="text-muted-foreground mt-2">
-            Manage users, content, and system operations with enhanced security
-          </p>
-          
+        </div>
+
+        <div className="container mx-auto px-6 py-8">
           {securityWarnings.length > 0 && (
-            <Alert variant="destructive" className="mt-4">
+            <Alert variant="destructive" className="mb-8 border-red-200 bg-red-50">
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription>
-                <strong>Security Warnings:</strong>
+                <strong>Security Alerts Detected:</strong>
                 <ul className="list-disc list-inside mt-2">
                   {securityWarnings.map((warning, index) => (
                     <li key={index}>{warning}</li>
@@ -430,113 +450,175 @@ export default function AdminDashboard() {
               </AlertDescription>
             </Alert>
           )}
-        </div>
 
-      <Tabs defaultValue="users" className="w-full space-y-6">
-        <TabsList className="grid w-full grid-cols-12">
-          <TabsTrigger value="users" className="flex items-center gap-2">
-            <Users className="h-4 w-4" />
-            Users
-          </TabsTrigger>
-          <TabsTrigger value="creators" className="flex items-center gap-2">
-            <Users2 className="h-4 w-4" />
-            Creators
-          </TabsTrigger>
-          <TabsTrigger value="security" className="flex items-center gap-2">
-            <ShieldIcon className="h-4 w-4" />
-            Security
-          </TabsTrigger>
-          <TabsTrigger value="vectorization" className="flex items-center gap-2">
-            <Zap className="h-4 w-4" />
-            Images
-          </TabsTrigger>
-          <TabsTrigger value="content" className="flex items-center gap-2">
-            <Star className="h-4 w-4" />
-            Content
-          </TabsTrigger>
-          <TabsTrigger value="services" className="flex items-center gap-2">
-            <Upload className="h-4 w-4" />
-            Services
-          </TabsTrigger>
-          <TabsTrigger value="vendors" className="flex items-center gap-2">
-            <Building className="h-4 w-4" />
-            Vendors
-          </TabsTrigger>
-          <TabsTrigger value="points" className="flex items-center gap-2">
-            <Coins className="h-4 w-4" />
-            Points
-          </TabsTrigger>
-          <TabsTrigger value="analytics" className="flex items-center gap-2">
-            <BarChart3 className="h-4 w-4" />
-            Analytics
-          </TabsTrigger>
-          <TabsTrigger value="youtube" className="flex items-center gap-2">
-            <Youtube className="h-4 w-4" />
-            YouTube
-          </TabsTrigger>
-          <TabsTrigger value="agent-invites" className="flex items-center gap-2">
-            <BookOpen className="h-4 w-4" />
-            Agent Invites
-          </TabsTrigger>
-          <TabsTrigger value="respa" className="flex items-center gap-2">
-            <ShieldIcon className="h-4 w-4" />
-            RESPA
-          </TabsTrigger>
-          <TabsTrigger value="calculator" className="flex items-center gap-2">
-            <DollarSign className="h-4 w-4" />
-            Calculator
-          </TabsTrigger>
-        </TabsList>
+          {/* Modern Tab Navigation */}
+          <Tabs defaultValue="users" className="w-full space-y-8">
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-2">
+              <TabsList className="grid w-full grid-cols-6 lg:grid-cols-12 gap-1 bg-slate-50 p-1 rounded-lg">
+                <TabsTrigger 
+                  value="users" 
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-md data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm"
+                >
+                  <Users className="h-4 w-4" />
+                  <span className="hidden sm:inline">Users</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="creators" 
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-md data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm"
+                >
+                  <Users2 className="h-4 w-4" />
+                  <span className="hidden sm:inline">Creators</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="security" 
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-md data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm"
+                >
+                  <Lock className="h-4 w-4" />
+                  <span className="hidden sm:inline">Security</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="vectorization" 
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-md data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm"
+                >
+                  <Zap className="h-4 w-4" />
+                  <span className="hidden sm:inline">Images</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="content" 
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-md data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm"
+                >
+                  <Star className="h-4 w-4" />
+                  <span className="hidden sm:inline">Content</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="services" 
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-md data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm"
+                >
+                  <Upload className="h-4 w-4" />
+                  <span className="hidden sm:inline">Services</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="vendors" 
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-md data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm"
+                >
+                  <Building className="h-4 w-4" />
+                  <span className="hidden sm:inline">Vendors</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="points" 
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-md data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm"
+                >
+                  <Coins className="h-4 w-4" />
+                  <span className="hidden sm:inline">Points</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="analytics" 
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-md data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm"
+                >
+                  <BarChart3 className="h-4 w-4" />
+                  <span className="hidden sm:inline">Analytics</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="youtube" 
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-md data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm"
+                >
+                  <Youtube className="h-4 w-4" />
+                  <span className="hidden sm:inline">YouTube</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="agent-invites" 
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-md data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm"
+                >
+                  <BookOpen className="h-4 w-4" />
+                  <span className="hidden sm:inline">Invites</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="respa" 
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-md data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm"
+                >
+                  <ShieldIcon className="h-4 w-4" />
+                  <span className="hidden sm:inline">RESPA</span>
+                </TabsTrigger>
+              </TabsList>
+            </div>
 
         <TabsContent value="creators" className="space-y-6">
           <CreatorPayoutDashboard />
         </TabsContent>
 
-        <TabsContent value="users" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5" />
-                Advanced User Management ({users.length} loaded)
-              </CardTitle>
-              <CardDescription>
-                Manage user accounts, permissions, and authentication
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {/* Search and Filters */}
-              <div className="flex flex-col md:flex-row gap-4 mb-6">
-                <div className="flex-1">
-                  <Input
-                    placeholder="Search users by email, name, or ID..."
-                    value={userSearchTerm}
-                    onChange={(e) => setUserSearchTerm(e.target.value)}
-                    className="w-full"
-                  />
+        <TabsContent value="users" className="space-y-8">
+          <Card className="bg-white border-slate-200 shadow-sm">
+            <CardHeader className="bg-gradient-to-r from-slate-50 to-white border-b border-slate-100">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 bg-blue-50 rounded-lg flex items-center justify-center">
+                    <Users className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg font-semibold text-slate-900">
+                      User Management
+                    </CardTitle>
+                    <CardDescription className="text-sm text-slate-600">
+                      {totalUsers.toLocaleString()} registered users • {filteredUsers.length} shown
+                    </CardDescription>
+                  </div>
                 </div>
-                <Select value={userFilter} onValueChange={setUserFilter}>
-                  <SelectTrigger className="w-48">
-                    <SelectValue placeholder="Filter users" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Users</SelectItem>
-                    <SelectItem value="admins">Admins Only</SelectItem>
-                    <SelectItem value="creators">Creators Only</SelectItem>
-                    <SelectItem value="vendors">Vendors Only</SelectItem>
-                    <SelectItem value="recent">Recent (7 days)</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Button onClick={loadUsers} disabled={loadingUsers} variant="outline">
-                  <RefreshCw className={`h-4 w-4 mr-2 ${loadingUsers ? 'animate-spin' : ''}`} />
-                  Refresh
-                </Button>
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1 px-2 py-1 bg-blue-50 rounded-md">
+                    <Activity className="h-4 w-4 text-blue-600" />
+                    <span className="text-xs font-medium text-blue-700">Live</span>
+                  </div>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="p-6">
+              {/* Search and Filters - Professional Design */}
+              <div className="bg-slate-50 rounded-lg p-4 mb-6">
+                <div className="flex flex-col lg:flex-row gap-4">
+                  <div className="flex-1">
+                    <div className="relative">
+                      <Input
+                        placeholder="Search by name, email, or user ID..."
+                        value={userSearchTerm}
+                        onChange={(e) => setUserSearchTerm(e.target.value)}
+                        className="w-full pl-10 bg-white border-slate-200 focus:border-blue-400 focus:ring-blue-100"
+                      />
+                      <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                    </div>
+                  </div>
+                  <Select value={userFilter} onValueChange={setUserFilter}>
+                    <SelectTrigger className="w-48 bg-white border-slate-200">
+                      <SelectValue placeholder="Filter users" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white border-slate-200">
+                      <SelectItem value="all">All Users</SelectItem>
+                      <SelectItem value="admins">Administrators</SelectItem>
+                      <SelectItem value="creators">Content Creators</SelectItem>
+                      <SelectItem value="vendors">Service Vendors</SelectItem>
+                      <SelectItem value="recent">New Users (7 days)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Button 
+                    onClick={loadUsers} 
+                    disabled={loadingUsers} 
+                    variant="outline"
+                    className="bg-white hover:bg-slate-50 border-slate-200"
+                  >
+                    <RefreshCw className={`h-4 w-4 mr-2 ${loadingUsers ? 'animate-spin' : ''}`} />
+                    Refresh
+                  </Button>
+                </div>
               </div>
 
-              {/* Pagination Controls */}
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">
-                    Page {currentPage} of {totalPages} ({totalUsers} total users)
+              {/* Pagination - Professional Design */}
+              <div className="flex items-center justify-between mb-6 py-3 px-4 bg-slate-50 rounded-lg border">
+                <div className="flex items-center gap-4">
+                  <span className="text-sm font-medium text-slate-700">
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  <div className="h-4 w-px bg-slate-300" />
+                  <span className="text-sm text-slate-600">
+                    {totalUsers.toLocaleString()} total users
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -545,6 +627,7 @@ export default function AdminDashboard() {
                     size="sm"
                     onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                     disabled={currentPage === 1 || loadingUsers}
+                    className="bg-white"
                   >
                     Previous
                   </Button>
@@ -553,6 +636,7 @@ export default function AdminDashboard() {
                     size="sm"
                     onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                     disabled={currentPage === totalPages || loadingUsers}
+                    className="bg-white"
                   >
                     Next
                   </Button>
@@ -560,142 +644,196 @@ export default function AdminDashboard() {
               </div>
 
               {loadingUsers ? (
-                <div className="flex items-center justify-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                <div className="flex items-center justify-center py-16">
+                  <div className="flex flex-col items-center gap-3">
+                    <div className="animate-spin rounded-full h-8 w-8 border-2 border-blue-600 border-t-transparent"></div>
+                    <span className="text-sm font-medium text-slate-600">Loading users...</span>
+                  </div>
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {filteredUsers.map((user) => (
-                    <div
+                    <Card
                       key={user.id}
-                      className="flex items-center justify-between p-4 border rounded-lg"
+                      className="bg-white border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all duration-200"
                     >
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <h3 className="font-semibold">
-                            {user.display_name || user.business_name || 'Unnamed User'}
-                          </h3>
-                          <span className="text-sm text-muted-foreground">
-                            {user.email || user.id}
-                          </span>
-                          {user.is_admin && (
-                            <Badge variant="destructive">Admin</Badge>
-                          )}
-                          {user.is_creator && (
-                            <Badge variant="secondary">Creator</Badge>
-                          )}
-                          {user.creator_verified && (
-                            <Badge variant="default" className="flex items-center gap-1">
-                              <Star className="h-3 w-3" />
-                              Verified
-                            </Badge>
-                          )}
-                          {user.is_pro && (
-                            <Badge variant="outline" className="border-yellow-500 text-yellow-600">
-                              Pro Member
-                            </Badge>
-                          )}
-                        </div>
-                        <p className="text-sm text-muted-foreground">
-                          Joined: {new Date(user.created_at).toLocaleDateString()}
-                          {user.creator_joined_at && (
-                            <span className="ml-4">
-                              Creator since: {new Date(user.creator_joined_at).toLocaleDateString()}
-                            </span>
-                          )}
-                        </p>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        {/* Role Toggles */}
-                        <div className="flex items-center gap-2">
-                          <label className="text-sm font-medium">Admin</label>
-                          <Switch
-                            checked={user.is_admin || false}
-                            disabled={operationLoading}
-                            onCheckedChange={() => handleToggleAdminStatus(user.user_id, user.is_admin || false)}
-                          />
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                          <label className="text-sm font-medium">Creator</label>
-                          <Switch
-                            checked={user.is_creator || false}
-                            disabled={operationLoading}
-                            onCheckedChange={() => handleToggleCreatorStatus(user.user_id, user.is_creator || false)}
-                          />
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                          <label className="text-sm font-medium">Pro</label>
-                          <Switch
-                            checked={user.is_pro || false}
-                            disabled={operationLoading}
-                            onCheckedChange={() => handleToggleProStatus(user.user_id, user.is_pro || false)}
-                          />
-                        </div>
-
-                        {user.is_creator && (
-                          <div className="flex items-center gap-2">
-                            <label className="text-sm font-medium">Verified</label>
-                            <Switch
-                              checked={user.creator_verified || false}
-                              disabled={operationLoading}
-                              onCheckedChange={() => handleToggleVerificationStatus(user.user_id, user.creator_verified || false)}
-                            />
+                      <CardContent className="p-5">
+                        <div className="flex items-center justify-between">
+                          {/* User Info */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-3 mb-3">
+                              <div className="h-10 w-10 bg-gradient-to-br from-slate-100 to-slate-200 rounded-full flex items-center justify-center">
+                                <span className="text-sm font-semibold text-slate-700">
+                                  {(user.display_name || user.business_name || 'U').charAt(0).toUpperCase()}
+                                </span>
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <h3 className="font-semibold text-slate-900 truncate">
+                                  {user.display_name || user.business_name || 'Unnamed User'}
+                                </h3>
+                                <p className="text-sm text-slate-500 truncate">
+                                  {user.email || `ID: ${user.user_id.slice(0, 8)}...`}
+                                </p>
+                              </div>
+                            </div>
+                            
+                            {/* Status Badges */}
+                            <div className="flex items-center gap-2 mb-3">
+                              {user.is_admin && (
+                                <Badge className="bg-red-50 text-red-700 border-red-200 hover:bg-red-100">
+                                  <Shield className="h-3 w-3 mr-1" />
+                                  Administrator
+                                </Badge>
+                              )}
+                              {user.is_creator && (
+                                <Badge className="bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100">
+                                  <Star className="h-3 w-3 mr-1" />
+                                  Creator
+                                </Badge>
+                              )}
+                              {user.creator_verified && (
+                                <Badge className="bg-green-50 text-green-700 border-green-200 hover:bg-green-100">
+                                  <Star className="h-3 w-3 mr-1" />
+                                  Verified
+                                </Badge>
+                              )}
+                              {user.is_pro && (
+                                <Badge className="bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100">
+                                  <TrendingUp className="h-3 w-3 mr-1" />
+                                  Pro Member
+                                </Badge>
+                              )}
+                            </div>
+                            
+                            {/* Meta Info */}
+                            <div className="text-xs text-slate-500 space-x-4">
+                              <span>Joined {new Date(user.created_at).toLocaleDateString()}</span>
+                              {user.creator_joined_at && (
+                                <span>Creator since {new Date(user.creator_joined_at).toLocaleDateString()}</span>
+                              )}
+                            </div>
                           </div>
-                        )}
 
-                        {/* Action Buttons */}
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="outline" size="sm">
-                              Actions
-                              <ChevronDown className="h-4 w-4 ml-1" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => handleResetPassword(user.user_id, user.email || '')}>
-                              <RefreshCw className="h-4 w-4 mr-2" />
-                              Reset Password
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleSetPassword(user.user_id)}>
-                              <Key className="h-4 w-4 mr-2" />
-                              Set New Password
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem 
-                              onClick={() => handleDeleteUser(user.user_id)}
-                              className="text-destructive"
-                            >
-                              <Trash2 className="h-4 w-4 mr-2" />
-                              Delete User
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </div>
+                          {/* Controls */}
+                          <div className="flex items-center gap-6 ml-6">
+                            {/* Role Toggles */}
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="flex flex-col items-center gap-2">
+                                <label className="text-xs font-medium text-slate-600">Admin</label>
+                                <Switch
+                                  checked={user.is_admin || false}
+                                  disabled={operationLoading}
+                                  onCheckedChange={() => handleToggleAdminStatus(user.user_id, user.is_admin || false)}
+                                  className="data-[state=checked]:bg-red-600"
+                                />
+                              </div>
+                              
+                              <div className="flex flex-col items-center gap-2">
+                                <label className="text-xs font-medium text-slate-600">Creator</label>
+                                <Switch
+                                  checked={user.is_creator || false}
+                                  disabled={operationLoading}
+                                  onCheckedChange={() => handleToggleCreatorStatus(user.user_id, user.is_creator || false)}
+                                  className="data-[state=checked]:bg-purple-600"
+                                />
+                              </div>
+                              
+                              <div className="flex flex-col items-center gap-2">
+                                <label className="text-xs font-medium text-slate-600">Pro</label>
+                                <Switch
+                                  checked={user.is_pro || false}
+                                  disabled={operationLoading}
+                                  onCheckedChange={() => handleToggleProStatus(user.user_id, user.is_pro || false)}
+                                  className="data-[state=checked]:bg-amber-600"
+                                />
+                              </div>
+                              
+                              {user.is_creator && (
+                                <div className="flex flex-col items-center gap-2">
+                                  <label className="text-xs font-medium text-slate-600">Verified</label>
+                                  <Switch
+                                    checked={user.creator_verified || false}
+                                    disabled={operationLoading}
+                                    onCheckedChange={() => handleToggleVerificationStatus(user.user_id, user.creator_verified || false)}
+                                    className="data-[state=checked]:bg-green-600"
+                                  />
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Action Menu */}
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  className="bg-white hover:bg-slate-50 border-slate-200"
+                                >
+                                  Actions
+                                  <ChevronDown className="h-4 w-4 ml-1" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="bg-white border-slate-200 shadow-lg">
+                                <DropdownMenuItem onClick={() => handleResetPassword(user.user_id, user.email || '')}>
+                                  <RefreshCw className="h-4 w-4 mr-2" />
+                                  Reset Password
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleSetPassword(user.user_id)}>
+                                  <Key className="h-4 w-4 mr-2" />
+                                  Set New Password
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem 
+                                  onClick={() => handleDeleteUser(user.user_id)}
+                                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                >
+                                  <Trash2 className="h-4 w-4 mr-2" />
+                                  Delete User
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
                   ))}
                 </div>
               )}
 
               {/* Bulk Actions */}
               {selectedUsers.length > 0 && (
-                <div className="mt-6 p-4 bg-muted rounded-lg">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">
-                      {selectedUsers.length} users selected
-                    </span>
-                    <div className="flex gap-2">
-                      <Button size="sm" variant="outline" onClick={() => setSelectedUsers([])}>
-                        Clear Selection
-                      </Button>
-                      <Button size="sm" variant="destructive" onClick={handleBulkDelete}>
-                        Delete Selected
-                      </Button>
+                <Card className="mt-6 bg-blue-50 border-blue-200">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
+                          <span className="text-sm font-semibold text-blue-600">{selectedUsers.length}</span>
+                        </div>
+                        <span className="text-sm font-medium text-blue-900">
+                          {selectedUsers.length} users selected
+                        </span>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          onClick={() => setSelectedUsers([])}
+                          className="bg-white border-blue-200 text-blue-700 hover:bg-blue-50"
+                        >
+                          Clear Selection
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="destructive" 
+                          onClick={handleBulkDelete}
+                          className="bg-red-600 hover:bg-red-700"
+                        >
+                          Delete Selected
+                        </Button>
+                      </div>
                     </div>
-                  </div>
-                </div>
+                  </CardContent>
+                </Card>
               )}
             </CardContent>
           </Card>
@@ -773,6 +911,7 @@ export default function AdminDashboard() {
           <AdvancedSplitCalculator />
         </TabsContent>
       </Tabs>
+        </div>
       </div>
     </SecureAdminGuard>
   );
