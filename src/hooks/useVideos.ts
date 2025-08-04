@@ -1,6 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { cacheManager } from "@/utils/cacheManager";
+import { PerformanceOptimizer } from "@/utils/performanceOptimizer";
 
 interface Video {
   id: string;
@@ -13,6 +15,7 @@ interface Video {
   isPro?: boolean;
   views?: string;
   description?: string;
+  is_featured?: boolean;
 }
 
 interface UseVideosOptions {
@@ -26,8 +29,19 @@ export const useVideos = (options: UseVideosOptions = {}) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
+  const isMountedRef = useRef(true);
 
   const fetchVideos = async () => {
+    const cacheKey = `videos-${JSON.stringify(options)}`;
+    
+    // Check cache first
+    const cachedData = cacheManager.get(cacheKey);
+    if (cachedData && isMountedRef.current) {
+      setVideos(cachedData);
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
@@ -102,9 +116,13 @@ export const useVideos = (options: UseVideosOptions = {}) => {
         isPro: video.is_pro,
         views: video.total_plays > 0 ? `${Math.floor(video.total_plays / 1000)}K` : "0",
         description: video.description || undefined,
+        is_featured: video.is_featured || false,
       }));
 
-      setVideos(formattedVideos);
+      if (isMountedRef.current) {
+        setVideos(formattedVideos);
+        cacheManager.set(cacheKey, formattedVideos);
+      }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch videos';
       setError(errorMessage);
@@ -175,7 +193,13 @@ export const useVideos = (options: UseVideosOptions = {}) => {
   };
 
   useEffect(() => {
-    fetchVideos();
+    isMountedRef.current = true;
+    const debouncedFetch = PerformanceOptimizer.debounce(fetchVideos, 300);
+    debouncedFetch();
+    
+    return () => {
+      isMountedRef.current = false;
+    };
   }, [options.category, options.featured, options.limit]);
 
   return {

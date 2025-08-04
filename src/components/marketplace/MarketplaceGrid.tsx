@@ -21,6 +21,7 @@ import { CategoryMegaMenu } from "./CategoryMegaMenu";
 import { EnhancedSearch, SearchFilters } from "./EnhancedSearch";
 import { VendorCallToAction } from "./VendorCallToAction";
 import { cacheManager } from "@/utils/cacheManager";
+import { useStableLoading } from "@/hooks/useStableState";
 interface FilterState {
   category: string;
   priceRange: number[];
@@ -92,7 +93,7 @@ export const MarketplaceGrid = () => {
   } = useTranslation();
   const [services, setServices] = useState<Service[]>([]);
   const [vendors, setVendors] = useState<Vendor[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoadingStable] = useStableLoading(500);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>("services");
@@ -223,7 +224,7 @@ export const MarketplaceGrid = () => {
       console.log('Loading marketplace data from cache...');
       setServices(cachedData.services);
       setVendors(cachedData.vendors);
-      setLoading(false);
+      setLoadingStable(false);
       return;
     }
 
@@ -231,7 +232,7 @@ export const MarketplaceGrid = () => {
     const timeout = setTimeout(() => abortController.abort(), 15000); // 15 second timeout
     
     try {
-      setLoading(true);
+      setLoadingStable(true);
       setError(null);
       console.log('Loading marketplace data from database...');
 
@@ -334,7 +335,7 @@ export const MarketplaceGrid = () => {
         });
       }
     } finally {
-      setLoading(false);
+      setLoadingStable(false);
     }
   }, [toast]);
 

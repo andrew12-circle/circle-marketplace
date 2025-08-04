@@ -2,7 +2,7 @@
 class CacheManager {
   private cache = new Map<string, { data: any; timestamp: number; ttl: number }>();
   
-  set(key: string, data: any, ttlMs: number = 2 * 60 * 1000) { // 2 minute default TTL
+  set(key: string, data: any, ttlMs: number = 10 * 60 * 1000) { // 10 minute default TTL
     this.cache.set(key, {
       data: data,
       timestamp: Date.now(),

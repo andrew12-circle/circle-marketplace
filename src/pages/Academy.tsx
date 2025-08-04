@@ -221,29 +221,17 @@ const AcademyContent = () => {
     toast
   } = useToast();
 
-  // Fetch videos using the custom hook
+  // Fetch videos using optimized hook (reduced calls)
   const {
     videos: allVideos,
-    loading,
+    loading: videosLoading,
     incrementView
   } = useVideos();
-  const {
-    videos: featuredVideos
-  } = useVideos({
-    featured: true,
-    limit: 10
-  });
-  const {
-    videos: trendingVideos
-  } = useVideos({
-    limit: 10
-  });
-  const {
-    videos: shortsVideos
-  } = useVideos({
-    category: 'shorts',
-    limit: 15
-  });
+  
+  // Use memoized filtered videos instead of separate API calls
+  const featuredVideos = allVideos.filter(v => v.is_featured).slice(0, 10);
+  const trendingVideos = allVideos.slice(0, 10);
+  const shortsVideos = allVideos.filter(v => v.category === 'shorts').slice(0, 15);
 
   // Fetch channels using the custom hook
   const {
@@ -709,7 +697,7 @@ const AcademyContent = () => {
       </div>
 
       {/* Video Sections */}
-      {loading ? <div className="flex justify-center items-center py-12">
+      {videosLoading ? <div className="flex justify-center items-center py-12">
           <div className="text-muted-foreground">Loading videos...</div>
         </div> : <>
           <VideoSection title="🚀 Quick Wins (Shorts)" subtitle="Bite-sized tips you can implement today" videos={shortsVideos} onPlayVideo={handlePlayVideo} showSeeAll={true} onSeeAll={() => setActiveView('videos')} size="small" />
