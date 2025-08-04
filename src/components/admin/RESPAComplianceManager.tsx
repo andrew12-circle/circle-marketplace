@@ -262,12 +262,25 @@ export const RESPAComplianceManager = () => {
   const updateServiceCompliance = async (serviceId: string, updates: any) => {
     setSaving(true);
     try {
+      // Ensure we're sending all the fields that need to be updated
+      const updateData = {
+        is_respa_regulated: updates.is_respa_regulated,
+        respa_risk_level: updates.respa_risk_level,
+        max_split_percentage: updates.max_split_percentage,
+        respa_compliance_notes: updates.respa_compliance_notes
+      };
+
+      console.log('Updating service with data:', updateData);
+
       const { error } = await supabase
         .from('services')
-        .update(updates as any) // Use any to bypass type checking
+        .update(updateData)
         .eq('id', serviceId);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Update error:', error);
+        throw error;
+      }
 
       await loadServices();
       toast({
@@ -275,6 +288,7 @@ export const RESPAComplianceManager = () => {
         description: "Service compliance information updated successfully",
       });
     } catch (error) {
+      console.error('Failed to update service:', error);
       toast({
         title: "Error",
         description: "Failed to update service",
