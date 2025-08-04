@@ -377,7 +377,7 @@ const RESPAServiceManager = () => {
                 <TableHead>Service</TableHead>
                 <TableHead>Category</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Max Split %</TableHead>
+                <TableHead>Max Split % (SSP Only)</TableHead>
                 <TableHead className="w-64">RESPA Notes</TableHead>
               </TableRow>
             </TableHeader>
