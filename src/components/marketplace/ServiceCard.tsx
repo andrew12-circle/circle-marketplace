@@ -217,7 +217,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
       {/* Image - Fixed height */}
       <div className="relative h-48 overflow-hidden bg-white flex-shrink-0 p-4">
         <img
-          src={service.image_url || "/public/placeholder.svg"}
+          src={service.image_url || "/placeholder.svg"}
           alt={service.title}
           className="w-full h-full object-contain object-center transition-transform duration-300 group-hover:scale-105"
         />
