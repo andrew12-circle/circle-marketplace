@@ -140,7 +140,7 @@ export const Pricing = () => {
                   Most Popular
                 </Badge>
                 <h3 className="text-xl font-semibold mb-2">Circle Pro (Solo)</h3>
-                <div className="text-3xl font-bold mb-4">$47<span className="text-sm font-normal text-muted-foreground">/month</span></div>
+                <div className="text-3xl font-bold mb-4">$97<span className="text-sm font-normal text-muted-foreground">/month</span></div>
                 <p className="text-sm text-muted-foreground mb-6">Solo agents automating their marketing</p>
                 <Button 
                   className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
@@ -154,7 +154,7 @@ export const Pricing = () => {
               {/* Circle Pro (Team) */}
               <div className="bg-white rounded-lg border p-6 text-center">
                 <h3 className="text-xl font-semibold mb-2">Circle Pro (Team)</h3>
-                <div className="text-3xl font-bold mb-4">$97<span className="text-sm font-normal text-muted-foreground">/month</span></div>
+                <div className="text-3xl font-bold mb-4">$147<span className="text-sm font-normal text-muted-foreground">/month</span></div>
                 <p className="text-sm text-muted-foreground mb-6">Teams building a growth system</p>
                 <Button 
                   className="w-full bg-teal-600 hover:bg-teal-700 text-white"
@@ -200,7 +200,7 @@ export const Pricing = () => {
                     Most Popular
                   </Badge>
                   <h3 className="text-xl font-semibold mb-2">Circle Pro (Solo)</h3>
-                  <div className="text-3xl font-bold mb-4">$47<span className="text-sm font-normal text-muted-foreground">/month</span></div>
+                  <div className="text-3xl font-bold mb-4">$97<span className="text-sm font-normal text-muted-foreground">/month</span></div>
                   <p className="text-sm text-muted-foreground mb-6">Solo agents automating their marketing</p>
                   <Button 
                     className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
@@ -214,7 +214,7 @@ export const Pricing = () => {
                 {/* Circle Pro (Team) */}
                 <div className="bg-white rounded-lg border p-6 text-center">
                   <h3 className="text-xl font-semibold mb-2">Circle Pro (Team)</h3>
-                  <div className="text-3xl font-bold mb-4">$97<span className="text-sm font-normal text-muted-foreground">/month</span></div>
+                  <div className="text-3xl font-bold mb-4">$147<span className="text-sm font-normal text-muted-foreground">/month</span></div>
                   <p className="text-sm text-muted-foreground mb-6">Teams building a growth system</p>
                   <Button 
                     className="w-full bg-teal-600 hover:bg-teal-700 text-white"
