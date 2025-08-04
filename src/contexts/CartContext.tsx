@@ -111,22 +111,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       addToCart(cartItem);
     };
 
-    const handleUpdateCoPayRequestId = (event: CustomEvent) => {
-      const { tempId, realId } = event.detail;
-      setCartItems(prev => 
-        prev.map(item => 
-          item.id === tempId ? { ...item, id: realId } : item
-        )
-      );
-    };
-
     window.addEventListener('addCoPayToCart', handleAddCoPayToCart as EventListener);
-    window.addEventListener('updateCoPayRequestId', handleUpdateCoPayRequestId as EventListener);
-    
-    return () => {
-      window.removeEventListener('addCoPayToCart', handleAddCoPayToCart as EventListener);
-      window.removeEventListener('updateCoPayRequestId', handleUpdateCoPayRequestId as EventListener);
-    };
+    return () => window.removeEventListener('addCoPayToCart', handleAddCoPayToCart as EventListener);
   }, []);
 
   // Save cart to localStorage whenever it changes

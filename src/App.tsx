@@ -55,7 +55,6 @@ const queryClient = new QueryClient({
 });
 
 const App = () => {
-  console.log("🔄 App component rendering");
   return (
     <ErrorBoundary section="Application">
       <QueryClientProvider client={queryClient}>
@@ -96,6 +95,9 @@ const App = () => {
                   </Routes>
                   <Toaster />
                   <Sonner />
+                  <div className="fixed top-4 right-4 z-50">
+                    <SecurityStatusIndicator />
+                  </div>
                   <SecurityHeaders />
                   <EnhancedSecurityHeaders />
                   <RequestLogger />

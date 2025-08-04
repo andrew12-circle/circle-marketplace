@@ -320,39 +320,32 @@ export const MarketplaceGrid = () => {
       
       if (error.name === 'AbortError') {
         setError('Loading timed out. Please try again.');
-        // Use direct toast call to avoid dependency loop
-        if (toast) {
-          toast({
-            title: "Loading timeout",
-            description: "The page took too long to load. Please refresh and try again.",
-            variant: "destructive"
-          });
-        }
+        toast({
+          title: "Loading timeout",
+          description: "The page took too long to load. Please refresh and try again.",
+          variant: "destructive"
+        });
       } else {
         setError(`Failed to load marketplace data: ${error.message || 'Unknown error'}`);
-        // Use direct toast call to avoid dependency loop
-        if (toast) {
-          toast({
-            title: "Error loading data", 
-            description: `Failed to load marketplace data: ${error.message || 'Please try again.'}`,
-            variant: "destructive"
-          });
-        }
+        toast({
+          title: "Error loading data", 
+          description: `Failed to load marketplace data: ${error.message || 'Please try again.'}`,
+          variant: "destructive"
+        });
       }
     } finally {
       setLoading(false);
     }
-  }, []); // Remove toast dependency to prevent infinite loops
+  }, [toast]);
 
   // Prevent multiple simultaneous loads
   const [isLoadingRef, setIsLoadingRef] = useState(false);
   
   useEffect(() => {
-    console.log("🛒 MarketplaceGrid initial load triggered");
     if (isLoadingRef) return; // Prevent duplicate loads
     setIsLoadingRef(true);
     loadData().finally(() => setIsLoadingRef(false));
-  }, []); // Empty dependency array - only run on mount
+  }, [loadData]);
 
   // Listen for cache clear events
   useEffect(() => {
@@ -364,7 +357,7 @@ export const MarketplaceGrid = () => {
     
     window.addEventListener('clearCache', handleClearCache);
     return () => window.removeEventListener('clearCache', handleClearCache);
-  }, []); // Empty dependency array to prevent recreation
+  }, [loadData]);
   useEffect(() => {
     if (profile?.user_id) {
       loadSavedServices();
