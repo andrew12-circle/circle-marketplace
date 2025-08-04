@@ -21,6 +21,8 @@ interface Service {
   is_respa_regulated?: boolean;
   respa_risk_level?: string;
   max_split_percentage?: number;
+  max_split_percentage_ssp?: number;
+  max_split_percentage_non_ssp?: number;
   vendor_id?: string;
   vendor?: {
     business_name?: string;
@@ -52,7 +54,7 @@ const RESPAServiceManager = () => {
       // First get services
       const { data: servicesData, error: servicesError } = await supabase
         .from('services')
-        .select('id, title, category, description, is_respa_regulated, respa_risk_level, max_split_percentage, vendor_id')
+        .select('id, title, category, description, is_respa_regulated, respa_risk_level, max_split_percentage, max_split_percentage_ssp, max_split_percentage_non_ssp, vendor_id')
         .order('title');
 
       if (servicesError) throw servicesError;
