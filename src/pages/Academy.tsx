@@ -370,9 +370,9 @@ const AcademyContent = () => {
   const renderHomeView = () => <div className="flex-1 p-4 md:p-8 max-w-6xl">
       {/* Hero Section */}
       <div className="mb-12">
-        <div className="flex items-start justify-between mb-6">
-          <div>
-            <h1 className="text-6xl font-bold text-black mb-4">Academy.</h1>
+        <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-6 gap-4">
+          <div className="flex-1">
+            <h1 className="text-4xl md:text-6xl font-bold text-black mb-4">Academy.</h1>
             <p className="text-gray-600 max-w-2xl text-sm">
               Finally, we silenced the noise. Welcome to the Academy. A place you can take a 
               breath, learn, and actually move your career forward.
@@ -380,7 +380,7 @@ const AcademyContent = () => {
           </div>
           <Button 
             onClick={() => setIsAICuratorOpen(true)}
-            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-3 rounded-lg font-medium flex items-center gap-2"
+            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-3 rounded-lg font-medium flex items-center gap-2 w-full md:w-auto shrink-0"
           >
             <Brain className="w-5 h-5" />
             AI Content Curator
