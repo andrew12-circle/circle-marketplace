@@ -240,133 +240,114 @@ export const Pricing = () => {
             </div>
 
             {/* Desktop: Features Comparison Table */}
-            <div className="hidden md:block bg-card rounded-xl border shadow-sm overflow-hidden">
-              <div className="grid grid-cols-[2fr_1fr_1fr] gap-0">
+            <div className="hidden md:block bg-white rounded-lg border overflow-hidden">
+              <div className="grid grid-cols-[auto_1fr_1fr] gap-0">
                 {/* Header Row */}
-                <div className="bg-muted/50 p-6 border-r border-b">
-                  <span className="font-bold text-lg text-foreground">Features</span>
+                <div className="bg-gray-50 p-4 border-r border-b">
+                  <span className="font-semibold">Features</span>
                 </div>
-                <div className="p-6 border-r border-b text-center">
-                  <div className="font-bold text-lg text-foreground">Circle Starter</div>
-                  <div className="text-sm text-muted-foreground mt-1">Free</div>
+                <div className="p-4 border-r border-b text-center font-semibold">Circle Starter</div>
+                <div className="p-4 border-b text-center font-semibold bg-blue-50">Circle Pro</div>
+
+                {/* Core Features */}
+                <div className="bg-gray-50 p-4 border-r border-b">
+                  <span className="font-medium text-sm">Marketplace Access</span>
                 </div>
-                <div className="p-6 border-b text-center bg-gradient-to-br from-blue-50 to-purple-50 relative">
-                  <div className="font-bold text-lg text-foreground">Circle Pro</div>
-                  <div className="text-sm text-blue-600 font-semibold mt-1">$97/month</div>
-                  <Badge className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs">Popular</Badge>
+                <div className="p-4 border-r border-b text-center">
+                  <Check className="w-5 h-5 text-green-600 mx-auto" />
+                </div>
+                <div className="p-4 border-b text-center bg-blue-50">
+                  <Check className="w-5 h-5 text-green-600 mx-auto" />
                 </div>
 
-                {/* Features */}
-                <div className="bg-muted/30 p-4 border-r border-b">
-                  <span className="font-semibold text-foreground">Marketplace Access</span>
+                <div className="bg-gray-50 p-4 border-r border-b">
+                  <span className="font-medium text-sm">Circle Points</span>
                 </div>
-                <div className="p-4 border-r border-b text-center bg-card">
-                  <Check className="w-6 h-6 text-emerald-500 mx-auto" />
+                <div className="p-4 border-r border-b text-center text-sm">None</div>
+                <div className="p-4 border-b text-center text-sm bg-blue-50">100 Points</div>
+
+                <div className="bg-gray-50 p-4 border-r border-b">
+                  <span className="font-medium text-sm">Circle Coverage</span>
                 </div>
-                <div className="p-4 border-b text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50">
-                  <Check className="w-6 h-6 text-emerald-500 mx-auto" />
+                <div className="p-4 border-r border-b text-center">
+                  <X className="w-5 h-5 text-gray-400 mx-auto" />
+                </div>
+                <div className="p-4 border-b text-center bg-blue-50">
+                  <Check className="w-5 h-5 text-green-600 mx-auto" />
                 </div>
 
-                <div className="bg-muted/30 p-4 border-r border-b">
-                  <span className="font-semibold text-foreground">Circle Points</span>
+                <div className="bg-gray-50 p-4 border-r border-b">
+                  <span className="font-medium text-sm">Pro Pricing (Avg. 20% off)</span>
                 </div>
-                <div className="p-4 border-r border-b text-center bg-card">
-                  <span className="text-muted-foreground font-medium">None</span>
+                <div className="p-4 border-r border-b text-center">
+                  <X className="w-5 h-5 text-gray-400 mx-auto" />
                 </div>
-                <div className="p-4 border-b text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50">
-                  <span className="text-foreground font-semibold">100 to start + 500/month</span>
-                </div>
-
-                <div className="bg-muted/30 p-4 border-r border-b">
-                  <span className="font-semibold text-foreground">Circle Coverage</span>
-                </div>
-                <div className="p-4 border-r border-b text-center bg-card">
-                  <X className="w-6 h-6 text-muted-foreground mx-auto" />
-                </div>
-                <div className="p-4 border-b text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50">
-                  <Check className="w-6 h-6 text-emerald-500 mx-auto" />
+                <div className="p-4 border-b text-center bg-blue-50">
+                  <Check className="w-5 h-5 text-green-600 mx-auto" />
                 </div>
 
-                <div className="bg-muted/30 p-4 border-r border-b">
-                  <span className="font-semibold text-foreground">Pro Pricing</span>
-                  <div className="text-sm text-muted-foreground">(Avg. 20% off)</div>
+                <div className="bg-gray-50 p-4 border-r border-b">
+                  <span className="font-medium text-sm">CoPay Access (60% avg. discount)</span>
                 </div>
-                <div className="p-4 border-r border-b text-center bg-card">
-                  <X className="w-6 h-6 text-muted-foreground mx-auto" />
+                <div className="p-4 border-r border-b text-center">
+                  <X className="w-5 h-5 text-gray-400 mx-auto" />
                 </div>
-                <div className="p-4 border-b text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50">
-                  <Check className="w-6 h-6 text-emerald-500 mx-auto" />
-                </div>
-
-                <div className="bg-muted/30 p-4 border-r border-b">
-                  <span className="font-semibold text-foreground">CoPay Access</span>
-                  <div className="text-sm text-muted-foreground">(60% avg. discount)</div>
-                </div>
-                <div className="p-4 border-r border-b text-center bg-card">
-                  <X className="w-6 h-6 text-muted-foreground mx-auto" />
-                </div>
-                <div className="p-4 border-b text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50">
-                  <Check className="w-6 h-6 text-emerald-500 mx-auto" />
+                <div className="p-4 border-b text-center bg-blue-50">
+                  <Check className="w-5 h-5 text-green-600 mx-auto" />
                 </div>
 
-                <div className="bg-muted/30 p-4 border-r border-b">
-                  <span className="font-semibold text-foreground">Circle Academy Access</span>
+                <div className="bg-gray-50 p-4 border-r border-b">
+                  <span className="font-medium text-sm">Circle Academy Access</span>
                 </div>
-                <div className="p-4 border-r border-b text-center bg-card">
-                  <span className="text-muted-foreground font-medium">Limited</span>
+                <div className="p-4 border-r border-b text-center text-sm">Limited</div>
+                <div className="p-4 border-b text-center text-sm bg-blue-50">Full Library</div>
+
+                <div className="bg-gray-50 p-4 border-r border-b">
+                  <span className="font-medium text-sm">Create & Sell Playbooks</span>
                 </div>
-                <div className="p-4 border-b text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50">
-                  <span className="text-foreground font-semibold">Full Library</span>
+                <div className="p-4 border-r border-b text-center">
+                  <X className="w-5 h-5 text-gray-400 mx-auto" />
+                </div>
+                <div className="p-4 border-b text-center bg-blue-50">
+                  <Check className="w-5 h-5 text-green-600 mx-auto" />
                 </div>
 
-                <div className="bg-muted/30 p-4 border-r border-b">
-                  <span className="font-semibold text-foreground">Create & Sell Playbooks</span>
+                <div className="bg-gray-50 p-4 border-r border-b">
+                  <span className="font-medium text-sm">Earn Creator Revenue</span>
                 </div>
-                <div className="p-4 border-r border-b text-center bg-card">
-                  <X className="w-6 h-6 text-muted-foreground mx-auto" />
+                <div className="p-4 border-r border-b text-center">
+                  <X className="w-5 h-5 text-gray-400 mx-auto" />
                 </div>
-                <div className="p-4 border-b text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50">
-                  <Check className="w-6 h-6 text-emerald-500 mx-auto" />
-                </div>
-
-                <div className="bg-muted/30 p-4 border-r border-b">
-                  <span className="font-semibold text-foreground">Earn Creator Revenue</span>
-                </div>
-                <div className="p-4 border-r border-b text-center bg-card">
-                  <X className="w-6 h-6 text-muted-foreground mx-auto" />
-                </div>
-                <div className="p-4 border-b text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50">
-                  <Check className="w-6 h-6 text-emerald-500 mx-auto" />
+                <div className="p-4 border-b text-center bg-blue-50">
+                  <Check className="w-5 h-5 text-green-600 mx-auto" />
                 </div>
 
-                <div className="bg-muted/30 p-4 border-r border-b">
-                  <span className="font-semibold text-foreground">Analytics & Reporting</span>
+                <div className="bg-gray-50 p-4 border-r border-b">
+                  <span className="font-medium text-sm">Analytics & Reporting</span>
                 </div>
-                <div className="p-4 border-r border-b text-center bg-card">
-                  <X className="w-6 h-6 text-muted-foreground mx-auto" />
+                <div className="p-4 border-r border-b text-center">
+                  <X className="w-5 h-5 text-gray-400 mx-auto" />
                 </div>
-                <div className="p-4 border-b text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50">
-                  <span className="text-foreground font-semibold">Advanced</span>
+                <div className="p-4 border-b text-center text-sm bg-blue-50">Advanced</div>
+
+                <div className="bg-gray-50 p-4 border-r border-b">
+                  <span className="font-medium text-sm">Team Management</span>
+                </div>
+                <div className="p-4 border-r border-b text-center">
+                  <X className="w-5 h-5 text-gray-400 mx-auto" />
+                </div>
+                <div className="p-4 border-b text-center bg-blue-50">
+                  <Check className="w-5 h-5 text-green-600 mx-auto" />
                 </div>
 
-                <div className="bg-muted/30 p-4 border-r border-b">
-                  <span className="font-semibold text-foreground">Team Management</span>
+                <div className="bg-gray-50 p-4 border-r">
+                  <span className="font-medium text-sm">Priority Support</span>
                 </div>
-                <div className="p-4 border-r border-b text-center bg-card">
-                  <X className="w-6 h-6 text-muted-foreground mx-auto" />
+                <div className="p-4 border-r text-center">
+                  <X className="w-5 h-5 text-gray-400 mx-auto" />
                 </div>
-                <div className="p-4 border-b text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50">
-                  <Check className="w-6 h-6 text-emerald-500 mx-auto" />
-                </div>
-
-                <div className="bg-muted/30 p-4 border-r rounded-bl-xl">
-                  <span className="font-semibold text-foreground">Priority Support</span>
-                </div>
-                <div className="p-4 border-r text-center bg-card">
-                  <X className="w-6 h-6 text-muted-foreground mx-auto" />
-                </div>
-                <div className="p-4 text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50 rounded-br-xl">
-                  <Check className="w-6 h-6 text-emerald-500 mx-auto" />
+                <div className="p-4 text-center bg-blue-50">
+                  <Check className="w-5 h-5 text-green-600 mx-auto" />
                 </div>
               </div>
             </div>
