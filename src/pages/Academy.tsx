@@ -411,7 +411,7 @@ const AcademyContent = () => {
       </div>
 
       {/* Creator Opportunity Banner */}
-      <div className="mb-12 bg-gradient-to-r from-green-600 to-emerald-600 rounded-2xl p-6 sm:p-8 text-white">
+      <div className="hidden md:block mb-12 bg-gradient-to-r from-green-600 to-emerald-600 rounded-2xl p-6 sm:p-8 text-white">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-4">
