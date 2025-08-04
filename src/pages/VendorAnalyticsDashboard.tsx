@@ -28,6 +28,8 @@ import { VendorProfileEditor } from "@/components/marketplace/VendorProfileEdito
 import { VendorFunnelEditor } from "@/components/marketplace/VendorFunnelEditor";
 import { VendorAnalytics } from "@/components/marketplace/VendorAnalytics";
 import { VendorCardPreview } from "@/components/marketplace/VendorCardPreview";
+import { CoPayRequestsManager } from "@/components/vendor/CoPayRequestsManager";
+import { PaymentScheduleManager } from "@/components/vendor/PaymentScheduleManager";
 
 interface VendorData {
   id: string;
@@ -434,6 +436,8 @@ export const VendorAnalyticsDashboard = () => {
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList>
             <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="copay-requests">Co-Pay Requests</TabsTrigger>
+            <TabsTrigger value="partnerships">Active Partnerships</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="profile">Edit Profile</TabsTrigger>
             <TabsTrigger value="funnel">Edit Funnel</TabsTrigger>
@@ -536,6 +540,14 @@ export const VendorAnalyticsDashboard = () => {
                 </CardContent>
               </Card>
             )}
+          </TabsContent>
+
+          <TabsContent value="copay-requests">
+            <CoPayRequestsManager />
+          </TabsContent>
+
+          <TabsContent value="partnerships">
+            <PaymentScheduleManager />
           </TabsContent>
 
           <TabsContent value="analytics">
