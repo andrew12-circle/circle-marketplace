@@ -13,9 +13,10 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { cacheManager } from "@/utils/cacheManager";
 
 import { supabase } from "@/integrations/supabase/client";
-import { User, Settings, ShoppingBag, Crown, LogOut, Loader2, Heart, BarChart3, Shield, Building2, DollarSign, Store, Briefcase, Package, Brain, Command } from "lucide-react";
+import { User, Settings, ShoppingBag, Crown, LogOut, Loader2, Heart, BarChart3, Shield, Building2, DollarSign, Store, Briefcase, Package, Brain, Command, RotateCcw } from "lucide-react";
 import { CustomerPortalButton } from "@/components/marketplace/CustomerPortalButton";
 
 
@@ -66,6 +67,16 @@ export const UserMenu = () => {
       });
     }
     setIsSigningOut(false);
+  };
+
+  const handleClearCache = () => {
+    cacheManager.clear();
+    // Force reload marketplace data by dispatching a custom event
+    window.dispatchEvent(new CustomEvent('clearCache'));
+    toast({
+      title: "Cache cleared",
+      description: "Marketplace data cache has been cleared successfully.",
+    });
   };
 
   if (!user) {
@@ -251,6 +262,14 @@ export const UserMenu = () => {
             <Settings className="mr-2 h-4 w-4" />
             <span>Settings</span>
           </Link>
+        </DropdownMenuItem>
+        
+        <DropdownMenuItem 
+          onClick={handleClearCache}
+          className="flex items-center"
+        >
+          <RotateCcw className="mr-2 h-4 w-4" />
+          <span>Clear Cache</span>
         </DropdownMenuItem>
         
         <DropdownMenuSeparator />

@@ -346,6 +346,18 @@ export const MarketplaceGrid = () => {
     setIsLoadingRef(true);
     loadData().finally(() => setIsLoadingRef(false));
   }, [loadData]);
+
+  // Listen for cache clear events
+  useEffect(() => {
+    const handleClearCache = () => {
+      console.log('Cache clear event received, reloading data...');
+      setIsLoadingRef(true);
+      loadData().finally(() => setIsLoadingRef(false));
+    };
+    
+    window.addEventListener('clearCache', handleClearCache);
+    return () => window.removeEventListener('clearCache', handleClearCache);
+  }, [loadData]);
   useEffect(() => {
     if (profile?.user_id) {
       loadSavedServices();
