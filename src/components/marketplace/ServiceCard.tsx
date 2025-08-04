@@ -217,9 +217,13 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
       {/* Image - Fixed height */}
       <div className="relative h-48 overflow-hidden bg-white flex-shrink-0 p-4">
         <img
-          src={service.image_url || "/placeholder.svg"}
+          src={service.image_url || "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=400&h=300&fit=crop&crop=center"}
           alt={service.title}
           className="w-full h-full object-contain object-center transition-transform duration-300 group-hover:scale-105"
+          onError={(e) => {
+            console.log('Image load error for:', service.image_url);
+            e.currentTarget.src = "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=400&h=300&fit=crop&crop=center";
+          }}
         />
       </div>
 
