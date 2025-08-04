@@ -255,10 +255,6 @@ export default function AdminDashboard() {
         </TabsContent>
 
         <TabsContent value="users" className="space-y-6">
-          <SecurityMonitoringPanel />
-          <SecurityEventMonitor />
-          <SecurityAuditLog />
-
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -340,6 +336,10 @@ export default function AdminDashboard() {
               )}
             </CardContent>
           </Card>
+          
+          <SecurityMonitoringPanel />
+          <SecurityEventMonitor />
+          <SecurityAuditLog />
         </TabsContent>
 
         <TabsContent value="vectorization" className="space-y-6">
