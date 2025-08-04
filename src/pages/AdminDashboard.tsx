@@ -51,6 +51,7 @@ interface UserProfile {
   creator_joined_at: string | null;
   specialties: string[] | null;
   is_admin: boolean | null;
+  subscription_status?: string | null;
   created_at: string;
 }
 
@@ -557,6 +558,11 @@ export default function AdminDashboard() {
                             <Badge variant="default" className="flex items-center gap-1">
                               <Star className="h-3 w-3" />
                               Verified
+                            </Badge>
+                          )}
+                          {user.subscription_status === 'active' && (
+                            <Badge variant="outline" className="border-yellow-500 text-yellow-600">
+                              Pro Member
                             </Badge>
                           )}
                         </div>
