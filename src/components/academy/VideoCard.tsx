@@ -51,9 +51,6 @@ export const VideoCard = ({
             src={video.thumbnail || "/placeholder.svg"} 
             alt={video.title}
             className="w-full h-full object-cover"
-            onError={(e) => {
-              e.currentTarget.src = "/placeholder.svg";
-            }}
           />
           
           {/* Play overlay */}

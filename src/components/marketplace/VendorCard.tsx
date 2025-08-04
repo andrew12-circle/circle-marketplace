@@ -65,16 +65,13 @@ export const VendorCard = ({ vendor, onAddToWallet, onRequestCoMarketing, onNavi
       <CardContent className="p-4 flex-1 mobile-card-content">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-          {vendor.imageUrl && (
-            <img 
-              src={vendor.imageUrl} 
-              alt={vendor.company}
-              className="w-12 h-12 rounded-lg object-cover"
-              onError={(e) => {
-                e.currentTarget.src = "/placeholder.svg";
-              }}
-            />
-          )}
+            {vendor.imageUrl && (
+              <img 
+                src={vendor.imageUrl} 
+                alt={vendor.company}
+                className="w-12 h-12 rounded-lg object-cover"
+              />
+            )}
             <div>
               <h3 className="font-semibold text-sm mobile-title">{vendor.company}</h3>
               <p className="text-xs text-muted-foreground mobile-body">{vendor.category}</p>

@@ -215,32 +215,12 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
       </Button>
 
       {/* Image - Fixed height */}
-      <div className="relative h-48 overflow-hidden bg-muted flex-shrink-0 p-4">
+      <div className="relative h-48 overflow-hidden bg-white flex-shrink-0 p-4">
         <img
-          src={service.image_url || "/placeholder.svg"}
+          src={service.image_url || "/public/placeholder.svg"}
           alt={service.title}
           className="w-full h-full object-contain object-center transition-transform duration-300 group-hover:scale-105"
-          onError={(e) => {
-            console.log('Image failed to load:', service.image_url);
-            const img = e.currentTarget;
-            const fallback = img.nextElementSibling as HTMLElement;
-            img.style.display = 'none';
-            if (fallback) fallback.style.display = 'flex';
-          }}
         />
-        <div 
-          className="w-full h-full absolute inset-0 flex items-center justify-center text-muted-foreground"
-          style={{ display: 'none' }}
-        >
-          <div className="text-center">
-            <div className="w-16 h-16 mx-auto mb-2 bg-muted-foreground/10 rounded-lg flex items-center justify-center">
-              <span className="text-2xl font-bold text-muted-foreground/50">
-                {service.title.charAt(0)}
-              </span>
-            </div>
-            <p className="text-sm font-medium">{service.title}</p>
-          </div>
-        </div>
       </div>
 
       <CardContent className="p-4 flex flex-col flex-grow mobile-card-content">
