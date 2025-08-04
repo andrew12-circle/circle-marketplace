@@ -52,15 +52,10 @@ serve(async (req) => {
     let subscriptionTier: string;
     
     switch (plan) {
-      case "solo":
-        priceAmount = 9700; // $97.00 in cents
-        planName = "Circle Pro (Solo)";
-        subscriptionTier = "Solo";
-        break;
-      case "team":
-        priceAmount = 14700; // $147.00 in cents
-        planName = "Circle Pro (Team)";
-        subscriptionTier = "Team";
+      case "pro":
+        priceAmount = 9700; // $97.00 in cents per agent
+        planName = "Circle Pro";
+        subscriptionTier = "Pro";
         break;
       default:
         throw new Error("Invalid plan selected");

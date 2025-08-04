@@ -13,7 +13,7 @@ export const Pricing = () => {
   const { toast } = useToast();
   const { user } = useAuth();
 
-  const handleSubscription = async (plan: "solo" | "team") => {
+  const handleSubscription = async (plan: "pro") => {
     try {
       setLoading(plan);
       
@@ -134,43 +134,29 @@ export const Pricing = () => {
                 )}
               </div>
 
-              {/* Circle Pro (Solo) - Most Popular */}
+              {/* Circle Pro - Most Popular */}
               <div className="bg-gradient-to-b from-blue-50 to-purple-50 rounded-lg border-2 border-blue-200 p-6 text-center relative">
                 <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white">
                   Most Popular
                 </Badge>
-                <h3 className="text-xl font-semibold mb-2">Circle Pro (Solo)</h3>
-                <div className="text-3xl font-bold mb-4">$97<span className="text-sm font-normal text-muted-foreground">/month</span></div>
-                <p className="text-sm text-muted-foreground mb-6">Solo agents automating their marketing</p>
+                <h3 className="text-xl font-semibold mb-2">Circle Pro</h3>
+                <div className="text-3xl font-bold mb-4">$97<span className="text-sm font-normal text-muted-foreground">/agent/month</span></div>
+                <p className="text-sm text-muted-foreground mb-6">Per agent pricing that scales with your team</p>
                 <Button 
                   className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
-                  onClick={() => handleSubscription("solo")}
-                  disabled={loading === "solo"}
+                  onClick={() => handleSubscription("pro")}
+                  disabled={loading === "pro"}
                 >
-                  {loading === "solo" ? "Loading..." : "Start Your Free Trial"}
-                </Button>
-              </div>
-
-              {/* Circle Pro (Team) */}
-              <div className="bg-white rounded-lg border p-6 text-center">
-                <h3 className="text-xl font-semibold mb-2">Circle Pro (Team)</h3>
-                <div className="text-3xl font-bold mb-4">$147<span className="text-sm font-normal text-muted-foreground">/month</span></div>
-                <p className="text-sm text-muted-foreground mb-6">Teams building a growth system</p>
-                <Button 
-                  className="w-full bg-teal-600 hover:bg-teal-700 text-white"
-                  onClick={() => handleSubscription("team")}
-                  disabled={loading === "team"}
-                >
-                  {loading === "team" ? "Loading..." : "Start Your Free Trial"}
+                  {loading === "pro" ? "Loading..." : "Start Your Free Trial"}
                 </Button>
               </div>
             </div>
 
             {/* Desktop: Grid Layout */}
             <div className="hidden md:block">
-              <div className="grid grid-cols-[auto_1fr_1fr_1fr] gap-0 mb-8">
+              <div className="grid grid-cols-[auto_1fr_1fr] gap-0 mb-8">
                 <div></div> {/* Empty space to align with Features column */}
-                <div className="grid grid-cols-3 gap-6 col-span-3">
+                <div className="grid grid-cols-2 gap-6 col-span-2">
                 
                 {/* Circle Starter */}
                 <div className="bg-white rounded-lg border p-6 text-center">
@@ -194,34 +180,20 @@ export const Pricing = () => {
                   )}
                 </div>
 
-                {/* Circle Pro (Solo) - Most Popular */}
+                {/* Circle Pro - Most Popular */}
                 <div className="bg-gradient-to-b from-blue-50 to-purple-50 rounded-lg border-2 border-blue-200 p-6 text-center relative">
                   <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white">
                     Most Popular
                   </Badge>
-                  <h3 className="text-xl font-semibold mb-2">Circle Pro (Solo)</h3>
-                  <div className="text-3xl font-bold mb-4">$97<span className="text-sm font-normal text-muted-foreground">/month</span></div>
-                  <p className="text-sm text-muted-foreground mb-6">Solo agents automating their marketing</p>
+                  <h3 className="text-xl font-semibold mb-2">Circle Pro</h3>
+                  <div className="text-3xl font-bold mb-4">$97<span className="text-sm font-normal text-muted-foreground">/agent/month</span></div>
+                  <p className="text-sm text-muted-foreground mb-6">Per agent pricing that scales with your team</p>
                   <Button 
                     className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
-                    onClick={() => handleSubscription("solo")}
-                    disabled={loading === "solo"}
+                    onClick={() => handleSubscription("pro")}
+                    disabled={loading === "pro"}
                   >
-                    {loading === "solo" ? "Loading..." : "Start Your Free Trial"}
-                  </Button>
-                </div>
-
-                {/* Circle Pro (Team) */}
-                <div className="bg-white rounded-lg border p-6 text-center">
-                  <h3 className="text-xl font-semibold mb-2">Circle Pro (Team)</h3>
-                  <div className="text-3xl font-bold mb-4">$147<span className="text-sm font-normal text-muted-foreground">/month</span></div>
-                  <p className="text-sm text-muted-foreground mb-6">Teams building a growth system</p>
-                  <Button 
-                    className="w-full bg-teal-600 hover:bg-teal-700 text-white"
-                    onClick={() => handleSubscription("team")}
-                    disabled={loading === "team"}
-                  >
-                    {loading === "team" ? "Loading..." : "Start Your Free Trial"}
+                    {loading === "pro" ? "Loading..." : "Start Your Free Trial"}
                   </Button>
                 </div>
                </div>
@@ -233,21 +205,21 @@ export const Pricing = () => {
               <h3 className="text-xl font-bold text-center mb-6">Feature Comparison</h3>
               
               {[
-                { feature: "Marketplace Access", starter: "✓", solo: "✓", team: "✓" },
-                { feature: "Circle Points", starter: "100 to start", solo: "500 monthly", team: "1000 monthly" },
-                { feature: "Academy Courses", starter: "Basic", solo: "Premium", team: "Premium + Team" },
-                { feature: "Marketing Automation", starter: "✗", solo: "✓", team: "✓" },
-                { feature: "Lead Generation Tools", starter: "✗", solo: "✓", team: "✓" },
-                { feature: "CRM Integration", starter: "✗", solo: "✓", team: "✓" },
-                { feature: "Analytics & Reporting", starter: "Basic", solo: "Advanced", team: "Team Dashboard" },
-                { feature: "1-on-1 Coaching", starter: "✗", solo: "✓", team: "✓" },
-                { feature: "Team Management", starter: "✗", solo: "✗", team: "✓" },
-                { feature: "Priority Support", starter: "✗", solo: "✓", team: "✓" },
-                { feature: "Custom Branding", starter: "✗", solo: "✗", team: "✓" }
+                { feature: "Marketplace Access", starter: "✓", pro: "✓" },
+                { feature: "Circle Points", starter: "100 to start", pro: "500 per agent/month" },
+                { feature: "Academy Courses", starter: "Basic", pro: "Premium" },
+                { feature: "Marketing Automation", starter: "✗", pro: "✓" },
+                { feature: "Lead Generation Tools", starter: "✗", pro: "✓" },
+                { feature: "CRM Integration", starter: "✗", pro: "✓" },
+                { feature: "Analytics & Reporting", starter: "Basic", pro: "Advanced + Team Dashboard" },
+                { feature: "1-on-1 Coaching", starter: "✗", pro: "✓" },
+                { feature: "Team Management", starter: "✗", pro: "✓" },
+                { feature: "Priority Support", starter: "✗", pro: "✓" },
+                { feature: "Custom Branding", starter: "✗", pro: "✓" }
               ].map((item, index) => (
                 <div key={index} className="bg-white rounded-lg border p-4">
                   <h4 className="font-medium mb-3">{item.feature}</h4>
-                  <div className="grid grid-cols-3 gap-2 text-sm">
+                  <div className="grid grid-cols-2 gap-2 text-sm">
                     <div className="text-center">
                       <div className="text-xs text-muted-foreground mb-1">Starter</div>
                       <div className={item.starter === "✓" ? "text-green-600" : item.starter === "✗" ? "text-gray-400" : ""}>
@@ -255,15 +227,9 @@ export const Pricing = () => {
                       </div>
                     </div>
                     <div className="text-center bg-blue-50 rounded p-2">
-                      <div className="text-xs text-muted-foreground mb-1">Pro (Solo)</div>
-                      <div className={item.solo === "✓" ? "text-green-600" : item.solo === "✗" ? "text-gray-400" : ""}>
-                        {item.solo}
-                      </div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-xs text-muted-foreground mb-1">Pro (Team)</div>
-                      <div className={item.team === "✓" ? "text-green-600" : item.team === "✗" ? "text-gray-400" : ""}>
-                        {item.team}
+                      <div className="text-xs text-muted-foreground mb-1">Pro</div>
+                      <div className={item.pro === "✓" ? "text-green-600" : item.pro === "✗" ? "text-gray-400" : ""}>
+                        {item.pro}
                       </div>
                     </div>
                   </div>
@@ -273,14 +239,13 @@ export const Pricing = () => {
 
             {/* Desktop: Features Comparison Table */}
             <div className="hidden md:block bg-white rounded-lg border overflow-hidden">
-              <div className="grid grid-cols-[auto_1fr_1fr_1fr] gap-0">
+              <div className="grid grid-cols-[auto_1fr_1fr] gap-0">
                 {/* Header Row */}
                 <div className="bg-gray-50 p-4 border-r border-b">
                   <span className="font-semibold">Features</span>
                 </div>
                 <div className="p-4 border-r border-b text-center font-semibold">Circle Starter</div>
-                <div className="p-4 border-r border-b text-center font-semibold bg-blue-50">Circle Pro (Solo)</div>
-                <div className="p-4 border-b text-center font-semibold">Circle Pro (Team)</div>
+                <div className="p-4 border-b text-center font-semibold bg-blue-50">Circle Pro</div>
 
                 {/* Core Features */}
                 <div className="bg-gray-50 p-4 border-r border-b">
@@ -289,10 +254,7 @@ export const Pricing = () => {
                 <div className="p-4 border-r border-b text-center">
                   <Check className="w-5 h-5 text-green-600 mx-auto" />
                 </div>
-                <div className="p-4 border-r border-b text-center bg-blue-50">
-                  <Check className="w-5 h-5 text-green-600 mx-auto" />
-                </div>
-                <div className="p-4 border-b text-center">
+                <div className="p-4 border-b text-center bg-blue-50">
                   <Check className="w-5 h-5 text-green-600 mx-auto" />
                 </div>
 
@@ -300,15 +262,13 @@ export const Pricing = () => {
                   <span className="font-medium text-sm">Circle Points</span>
                 </div>
                 <div className="p-4 border-r border-b text-center text-sm">100 to start</div>
-                <div className="p-4 border-r border-b text-center text-sm bg-blue-50">500 monthly</div>
-                <div className="p-4 border-b text-center text-sm">1000 monthly</div>
+                <div className="p-4 border-b text-center text-sm bg-blue-50">500 per agent/month</div>
 
                 <div className="bg-gray-50 p-4 border-r border-b">
                   <span className="font-medium text-sm">Academy Courses</span>
                 </div>
                 <div className="p-4 border-r border-b text-center text-sm">Basic</div>
-                <div className="p-4 border-r border-b text-center text-sm bg-blue-50">Premium</div>
-                <div className="p-4 border-b text-center text-sm">Premium + Team</div>
+                <div className="p-4 border-b text-center text-sm bg-blue-50">Premium</div>
 
                 <div className="bg-gray-50 p-4 border-r border-b">
                   <span className="font-medium text-sm">Marketing Automation</span>
@@ -316,10 +276,7 @@ export const Pricing = () => {
                 <div className="p-4 border-r border-b text-center">
                   <X className="w-5 h-5 text-gray-400 mx-auto" />
                 </div>
-                <div className="p-4 border-r border-b text-center bg-blue-50">
-                  <Check className="w-5 h-5 text-green-600 mx-auto" />
-                </div>
-                <div className="p-4 border-b text-center">
+                <div className="p-4 border-b text-center bg-blue-50">
                   <Check className="w-5 h-5 text-green-600 mx-auto" />
                 </div>
 
@@ -329,10 +286,7 @@ export const Pricing = () => {
                 <div className="p-4 border-r border-b text-center">
                   <X className="w-5 h-5 text-gray-400 mx-auto" />
                 </div>
-                <div className="p-4 border-r border-b text-center bg-blue-50">
-                  <Check className="w-5 h-5 text-green-600 mx-auto" />
-                </div>
-                <div className="p-4 border-b text-center">
+                <div className="p-4 border-b text-center bg-blue-50">
                   <Check className="w-5 h-5 text-green-600 mx-auto" />
                 </div>
 
@@ -342,10 +296,7 @@ export const Pricing = () => {
                 <div className="p-4 border-r border-b text-center">
                   <X className="w-5 h-5 text-gray-400 mx-auto" />
                 </div>
-                <div className="p-4 border-r border-b text-center bg-blue-50">
-                  <Check className="w-5 h-5 text-green-600 mx-auto" />
-                </div>
-                <div className="p-4 border-b text-center">
+                <div className="p-4 border-b text-center bg-blue-50">
                   <Check className="w-5 h-5 text-green-600 mx-auto" />
                 </div>
 
@@ -353,8 +304,7 @@ export const Pricing = () => {
                   <span className="font-medium text-sm">Analytics & Reporting</span>
                 </div>
                 <div className="p-4 border-r border-b text-center text-sm">Basic</div>
-                <div className="p-4 border-r border-b text-center text-sm bg-blue-50">Advanced</div>
-                <div className="p-4 border-b text-center text-sm">Team Dashboard</div>
+                <div className="p-4 border-b text-center text-sm bg-blue-50">Advanced + Team Dashboard</div>
 
                 <div className="bg-gray-50 p-4 border-r border-b">
                   <span className="font-medium text-sm">1-on-1 Coaching</span>
@@ -362,10 +312,7 @@ export const Pricing = () => {
                 <div className="p-4 border-r border-b text-center">
                   <X className="w-5 h-5 text-gray-400 mx-auto" />
                 </div>
-                <div className="p-4 border-r border-b text-center bg-blue-50">
-                  <Check className="w-5 h-5 text-green-600 mx-auto" />
-                </div>
-                <div className="p-4 border-b text-center">
+                <div className="p-4 border-b text-center bg-blue-50">
                   <Check className="w-5 h-5 text-green-600 mx-auto" />
                 </div>
 
@@ -375,10 +322,7 @@ export const Pricing = () => {
                 <div className="p-4 border-r border-b text-center">
                   <X className="w-5 h-5 text-gray-400 mx-auto" />
                 </div>
-                <div className="p-4 border-r border-b text-center bg-blue-50">
-                  <X className="w-5 h-5 text-gray-400 mx-auto" />
-                </div>
-                <div className="p-4 border-b text-center">
+                <div className="p-4 border-b text-center bg-blue-50">
                   <Check className="w-5 h-5 text-green-600 mx-auto" />
                 </div>
 
@@ -388,10 +332,7 @@ export const Pricing = () => {
                 <div className="p-4 border-r border-b text-center">
                   <X className="w-5 h-5 text-gray-400 mx-auto" />
                 </div>
-                <div className="p-4 border-r border-b text-center bg-blue-50">
-                  <Check className="w-5 h-5 text-green-600 mx-auto" />
-                </div>
-                <div className="p-4 border-b text-center">
+                <div className="p-4 border-b text-center bg-blue-50">
                   <Check className="w-5 h-5 text-green-600 mx-auto" />
                 </div>
 
@@ -401,10 +342,7 @@ export const Pricing = () => {
                 <div className="p-4 border-r text-center">
                   <X className="w-5 h-5 text-gray-400 mx-auto" />
                 </div>
-                <div className="p-4 border-r text-center bg-blue-50">
-                  <X className="w-5 h-5 text-gray-400 mx-auto" />
-                </div>
-                <div className="p-4 text-center">
+                <div className="p-4 text-center bg-blue-50">
                   <Check className="w-5 h-5 text-green-600 mx-auto" />
                 </div>
               </div>
