@@ -79,9 +79,6 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
   const { formatPrice } = useCurrency();
   const isProMember = profile?.is_pro_member || false;
 
-  // Debug logging
-  console.log('ServiceCard Debug - Service:', service.title, 'Image URL:', service.image_url);
-
   // Safe price extraction with validation
   const extractNumericPrice = (priceString: string): number => {
     const validation = extractAndValidatePrice(priceString, 'retail');
@@ -220,16 +217,9 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
       {/* Image - Fixed height */}
       <div className="relative h-48 overflow-hidden bg-white flex-shrink-0 p-4">
         <img
-          src={service.image_url || "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=400&h=300&fit=crop&crop=center"}
+          src={service.image_url || "/public/placeholder.svg"}
           alt={service.title}
           className="w-full h-full object-contain object-center transition-transform duration-300 group-hover:scale-105"
-          onError={(e) => {
-            console.log('Image load error for service:', service.title, 'URL:', service.image_url);
-            e.currentTarget.src = "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=400&h=300&fit=crop&crop=center";
-          }}
-          onLoad={() => {
-            console.log('Image loaded successfully for:', service.title, 'URL:', service.image_url);
-          }}
         />
       </div>
 
@@ -256,7 +246,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
               const fillPercentage = isPartialStar ? (rating <= 4.9 ? 50 : (rating % 1) * 100) : 0;
               
               return (
-                <div key={`star-${service.id}-${i}`} className="relative h-4 w-4">
+                <div key={i} className="relative h-4 w-4">
                   <Star className="h-4 w-4 text-gray-300 absolute" />
                   {isFullStar && (
                     <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 absolute" />
