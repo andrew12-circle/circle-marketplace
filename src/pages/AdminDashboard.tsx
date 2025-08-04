@@ -51,7 +51,7 @@ interface UserProfile {
   creator_joined_at: string | null;
   specialties: string[] | null;
   is_admin: boolean | null;
-  subscription_status?: string | null;
+  is_pro?: boolean | null;
   created_at: string;
 }
 
@@ -357,6 +357,36 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleToggleProStatus = async (userId: string, currentStatus: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ is_pro: !currentStatus })
+        .eq('user_id', userId);
+
+      if (error) throw error;
+
+      // Update local state
+      setUsers(users.map(user => 
+        user.user_id === userId 
+          ? { ...user, is_pro: !currentStatus }
+          : user
+      ));
+
+      toast({
+        title: 'Pro Status Updated',
+        description: `User ${!currentStatus ? 'granted' : 'removed'} pro membership`,
+      });
+    } catch (error) {
+      console.error('Error updating pro status:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update pro status',
+        variant: 'destructive',
+      });
+    }
+  };
+
   if (loading) {
     return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
   }
@@ -560,7 +590,7 @@ export default function AdminDashboard() {
                               Verified
                             </Badge>
                           )}
-                          {user.subscription_status === 'active' && (
+                          {user.is_pro && (
                             <Badge variant="outline" className="border-yellow-500 text-yellow-600">
                               Pro Member
                             </Badge>
