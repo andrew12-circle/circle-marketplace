@@ -102,13 +102,14 @@ const RESPAServiceManager = () => {
       filtered = filtered.filter(service => {
         switch (filterStatus) {
           case 'evaluated':
-            return service.max_split_percentage !== null && service.max_split_percentage !== undefined;
+            return (service.max_split_percentage_ssp !== null && service.max_split_percentage_ssp !== undefined) &&
+                   (service.max_split_percentage_non_ssp !== null && service.max_split_percentage_non_ssp !== undefined);
           case 'pending':
-            return service.max_split_percentage === null || service.max_split_percentage === undefined;
-          case 'high-risk':
-            return service.respa_risk_level === 'high';
+            return (service.max_split_percentage_ssp === null || service.max_split_percentage_ssp === undefined) ||
+                   (service.max_split_percentage_non_ssp === null || service.max_split_percentage_non_ssp === undefined);
           case 'no-split-limit':
-            return service.max_split_percentage === null || service.max_split_percentage === undefined;
+            return (service.max_split_percentage_ssp === null || service.max_split_percentage_ssp === undefined) &&
+                   (service.max_split_percentage_non_ssp === null || service.max_split_percentage_non_ssp === undefined);
           default:
             return true;
         }
@@ -239,33 +240,15 @@ const RESPAServiceManager = () => {
   };
 
   const getStatusBadge = (service: Service) => {
-    if (service.is_respa_regulated === null || service.respa_risk_level === null) {
-      return <Badge variant="secondary">Pending Review</Badge>;
-    }
+    const hasSspSplit = service.max_split_percentage_ssp !== null && service.max_split_percentage_ssp !== undefined;
+    const hasNonSspSplit = service.max_split_percentage_non_ssp !== null && service.max_split_percentage_non_ssp !== undefined;
     
-    const riskLevel = service.respa_risk_level;
-    if (riskLevel === 'high') {
-      return <Badge variant="destructive">High Risk</Badge>;
-    } else if (riskLevel === 'medium') {
-      return <Badge variant="outline" className="border-orange-300 text-orange-700">Medium Risk</Badge>;
+    if (hasSspSplit && hasNonSspSplit) {
+      return <Badge variant="default" className="bg-green-100 text-green-800">Split Limits Set</Badge>;
+    } else if (hasSspSplit || hasNonSspSplit) {
+      return <Badge variant="outline" className="border-orange-300 text-orange-700">Partially Set</Badge>;
     } else {
-      return <Badge variant="default" className="bg-green-100 text-green-800">Low Risk</Badge>;
-    }
-  };
-
-  const getVendorTypeBadge = (service: Service) => {
-    const specialties = service.vendor?.specialties || [];
-    const isSSP = specialties.some(s => 
-      s.toLowerCase().includes('settlement') || 
-      s.toLowerCase().includes('title') ||
-      s.toLowerCase().includes('escrow') ||
-      s.toLowerCase().includes('closing')
-    );
-    
-    if (isSSP) {
-      return <Badge variant="destructive" className="text-xs">SSP</Badge>;
-    } else {
-      return <Badge variant="outline" className="text-xs">Non-SSP</Badge>;
+      return <Badge variant="secondary">Pending Setup</Badge>;
     }
   };
 
@@ -398,11 +381,9 @@ const RESPAServiceManager = () => {
                 </TableHead>
                 <TableHead>Service</TableHead>
                 <TableHead>Category</TableHead>
-                <TableHead>Vendor Type</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Split Allowed</TableHead>
-                <TableHead>Risk Level</TableHead>
-                <TableHead>Max Split %</TableHead>
+                <TableHead>Max Split % SSP</TableHead>
+                <TableHead>Max Split % Non-SSP</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -434,61 +415,38 @@ const RESPAServiceManager = () => {
                     <div className="text-sm font-medium">{service.category}</div>
                   </TableCell>
                   <TableCell>
-                    {getVendorTypeBadge(service)}
-                  </TableCell>
-                  <TableCell>
                     {getStatusBadge(service)}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center space-x-2">
-                      <Switch
-                        checked={service.is_respa_regulated === true}
-                        onCheckedChange={(checked) => 
-                          updateService(service.id, { is_respa_regulated: checked })
-                        }
-                        disabled={saving}
-                      />
-                      {service.is_respa_regulated === true ? (
-                        <CheckCircle className="w-4 h-4 text-green-500" />
-                      ) : service.is_respa_regulated === false ? (
-                        <XCircle className="w-4 h-4 text-gray-400" />
-                      ) : null}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Select
-                      value={service.respa_risk_level || ''}
-                      onValueChange={(value) => 
-                        updateService(service.id, { 
-                          respa_risk_level: value,
-                          max_split_percentage: value === 'high' ? 0 : (value === 'medium' ? 50 : 100)
-                        })
-                      }
-                      disabled={saving}
-                    >
-                      <SelectTrigger className="w-24">
-                        <SelectValue placeholder="-" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="low">Low</SelectItem>
-                        <SelectItem value="medium">Medium</SelectItem>
-                        <SelectItem value="high">High</SelectItem>
-                      </SelectContent>
-                    </Select>
                   </TableCell>
                   <TableCell>
                     <Input
                       type="number"
                       min="0"
                       max="100"
-                      value={service.max_split_percentage || ''}
+                      value={service.max_split_percentage_ssp || ''}
                       onChange={(e) => 
                         updateService(service.id, { 
-                          max_split_percentage: parseInt(e.target.value) || 0 
+                          max_split_percentage_ssp: parseInt(e.target.value) || 0 
                         })
                       }
                       className="w-20"
                       disabled={saving}
+                      placeholder="0-100"
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Input
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={service.max_split_percentage_non_ssp || ''}
+                      onChange={(e) => 
+                        updateService(service.id, { 
+                          max_split_percentage_non_ssp: parseInt(e.target.value) || 100 
+                        })
+                      }
+                      className="w-20"
+                      disabled={saving}
+                      placeholder="0-100"
                     />
                   </TableCell>
                 </TableRow>

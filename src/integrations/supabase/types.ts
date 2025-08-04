@@ -2933,6 +2933,8 @@ export type Database = {
           is_respa_regulated: boolean | null
           is_top_pick: boolean | null
           max_split_percentage: number | null
+          max_split_percentage_non_ssp: number | null
+          max_split_percentage_ssp: number | null
           max_vendor_split_percentage: number | null
           original_image_url: string | null
           price_duration: string | null
@@ -2972,6 +2974,8 @@ export type Database = {
           is_respa_regulated?: boolean | null
           is_top_pick?: boolean | null
           max_split_percentage?: number | null
+          max_split_percentage_non_ssp?: number | null
+          max_split_percentage_ssp?: number | null
           max_vendor_split_percentage?: number | null
           original_image_url?: string | null
           price_duration?: string | null
@@ -3011,6 +3015,8 @@ export type Database = {
           is_respa_regulated?: boolean | null
           is_top_pick?: boolean | null
           max_split_percentage?: number | null
+          max_split_percentage_non_ssp?: number | null
+          max_split_percentage_ssp?: number | null
           max_vendor_split_percentage?: number | null
           original_image_url?: string | null
           price_duration?: string | null
