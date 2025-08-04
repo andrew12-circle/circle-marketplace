@@ -367,7 +367,7 @@ const AcademyContent = () => {
     isNew: true,
     isDark: false
   }];
-  const renderHomeView = () => <div className="flex-1 p-8 max-w-6xl">
+  const renderHomeView = () => <div className="flex-1 p-4 md:p-8 max-w-6xl">
       {/* Hero Section */}
       <div className="mb-12">
         <div className="flex items-start justify-between mb-6">
