@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Textarea } from "@/components/ui/textarea";
 import { AlertTriangle, Search, CheckCircle, XCircle } from 'lucide-react';
 import { determineVendorRisk } from '../marketplace/RESPAComplianceSystem';
 
@@ -21,6 +22,8 @@ interface Service {
   is_respa_regulated?: boolean;
   respa_risk_level?: string;
   max_split_percentage?: number;
+  respa_compliance_notes?: string;
+  respa_notes?: string;
   vendor_id?: string;
   vendor?: {
     business_name?: string;
@@ -52,7 +55,7 @@ const RESPAServiceManager = () => {
       // First get services
       const { data: servicesData, error: servicesError } = await supabase
         .from('services')
-        .select('id, title, category, description, is_respa_regulated, respa_risk_level, max_split_percentage, vendor_id')
+        .select('id, title, category, description, is_respa_regulated, respa_risk_level, max_split_percentage, respa_compliance_notes, respa_notes, vendor_id')
         .order('title');
 
       if (servicesError) throw servicesError;
@@ -375,6 +378,7 @@ const RESPAServiceManager = () => {
                 <TableHead>Category</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Max Split %</TableHead>
+                <TableHead className="w-64">RESPA Notes</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -422,6 +426,19 @@ const RESPAServiceManager = () => {
                       className="w-20"
                       disabled={saving}
                       placeholder="0-100"
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Textarea
+                      value={service.respa_compliance_notes || service.respa_notes || ''}
+                      onChange={(e) => 
+                        updateService(service.id, { 
+                          respa_compliance_notes: e.target.value 
+                        })
+                      }
+                      className="min-h-20 max-h-32 resize-y"
+                      disabled={saving}
+                      placeholder="Add RESPA compliance notes..."
                     />
                   </TableCell>
                 </TableRow>
