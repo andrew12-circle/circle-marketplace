@@ -26,6 +26,7 @@ export const useOptimizedMarketplace = (options: UseOptimizedMarketplaceOptions 
       console.log('Loading optimized marketplace data...');
       const data = await marketplaceAPI.getMarketplaceData();
       
+      console.log('Raw data loaded:', { services: data.services.length, vendors: data.vendors.length, vendorsData: data.vendors });
       setServices(data.services);
       setVendors(data.vendors);
       

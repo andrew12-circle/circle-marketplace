@@ -514,16 +514,19 @@ export const MarketplaceGrid = () => {
           )}
 
           {viewMode === "vendors" && (
-            <div className="mobile-grid gap-4 sm:gap-6">
-              {filteredVendors.map(vendor => 
-                <EnhancedVendorCard 
-                  key={vendor.id} 
-                  vendor={vendor} 
-                  onConnect={handleConnectVendor} 
-                  onViewProfile={handleViewVendorProfile} 
-                />
-              )}
-            </div>
+            <>
+              {console.log('Vendors debug:', { totalVendors: vendors.length, filteredVendors: filteredVendors.length, filters, searchTerm })}
+              <div className="mobile-grid gap-4 sm:gap-6">
+                {filteredVendors.map(vendor => 
+                  <EnhancedVendorCard 
+                    key={vendor.id} 
+                    vendor={vendor} 
+                    onConnect={handleConnectVendor} 
+                    onViewProfile={handleViewVendorProfile} 
+                  />
+                )}
+              </div>
+            </>
           )}
 
           {viewMode === "products" && (
