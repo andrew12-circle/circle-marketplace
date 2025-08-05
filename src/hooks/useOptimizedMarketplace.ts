@@ -24,24 +24,42 @@ export const useOptimizedMarketplace = (options: UseOptimizedMarketplaceOptions 
       setError(null);
       
       console.log('Loading optimized marketplace data...');
-      const data = await marketplaceAPI.getMarketplaceData();
       
-      console.log('Raw data loaded:', { services: data.services.length, vendors: data.vendors.length, vendorsData: data.vendors });
+      // Add additional timeout at hook level
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Marketplace loading timeout after 15 seconds')), 15000);
+      });
+      
+      const dataPromise = marketplaceAPI.getMarketplaceData();
+      
+      const data = await Promise.race([dataPromise, timeoutPromise]) as any;
+      
+      console.log('Raw data loaded:', { 
+        services: data.services.length, 
+        vendors: data.vendors.length,
+        servicesWithNullVendor: data.services.filter((s: any) => !s.vendor_id).length
+      });
+      
       setServices(data.services);
       setVendors(data.vendors);
       
-      console.log(`Loaded ${data.services.length} services and ${data.vendors.length} vendors`);
+      console.log(`Successfully loaded ${data.services.length} services and ${data.vendors.length} vendors`);
       
     } catch (error) {
       console.error('Optimized marketplace loading error:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load marketplace data';
       setError(errorMessage);
       
+      // Show user-friendly error message
       toast({
-        title: "Error loading marketplace",
-        description: errorMessage,
+        title: "Unable to load marketplace",
+        description: "Please refresh the page to try again. If the problem persists, contact support.",
         variant: "destructive"
       });
+      
+      // Set empty arrays as fallback to prevent infinite loading
+      setServices([]);
+      setVendors([]);
     } finally {
       setLoadingStable(false);
     }

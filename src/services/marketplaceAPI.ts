@@ -75,20 +75,30 @@ class MarketplaceAPI {
 
       return withErrorRecovery(
         async () => {
-          // Direct database query as fallback to edge function
-          console.log('Fetching data directly from database...');
+          // Add timeout to prevent infinite loading
+          const timeoutPromise = new Promise((_, reject) => {
+            setTimeout(() => reject(new Error('Query timeout')), 10000); // 10 second timeout
+          });
+
+          console.log('Fetching data directly from database with timeout...');
           
-          // Fetch vendors directly
-          const { data: vendorsData, error: vendorsError } = await supabase
+          // Fetch vendors directly with timeout
+          const vendorsPromise = supabase
             .from('vendors')
             .select('*');
+          
+          const { data: vendorsData, error: vendorsError } = await Promise.race([
+            vendorsPromise,
+            timeoutPromise
+          ]) as any;
           
           if (vendorsError) {
             console.error('Error fetching vendors:', vendorsError);
           }
 
-          // Fetch services with vendor info and sort by sort_order
-          const { data: servicesData, error: servicesError } = await supabase
+          // Fetch services with OPTIONAL vendor info (LEFT JOIN behavior)
+          // This handles NULL vendor_id values gracefully
+          const servicesPromise = supabase
             .from('services')
             .select(`
               *,
@@ -103,19 +113,36 @@ class MarketplaceAPI {
             .order('is_featured', { ascending: false })
             .order('is_top_pick', { ascending: false });
 
+          const { data: servicesData, error: servicesError } = await Promise.race([
+            servicesPromise,
+            timeoutPromise
+          ]) as any;
+
           if (servicesError) {
             console.error('Error fetching services:', servicesError);
+            throw servicesError;
           }
 
+          // Process services to handle missing vendor data
+          const processedServices = (servicesData || []).map((service: any) => ({
+            ...service,
+            vendor: service.vendor || {
+              name: 'Circle Marketplace',
+              rating: 0,
+              review_count: 0,
+              is_verified: false
+            }
+          }));
+
           const result = {
-            services: servicesData || [],
+            services: processedServices,
             vendors: vendorsData || []
           };
 
           console.log('Direct DB fetch result:', { 
             services: result.services.length, 
             vendors: result.vendors.length,
-            vendorsData: result.vendors
+            servicesWithNullVendor: result.services.filter(s => !s.vendor_id).length
           });
 
           // Cache the result
