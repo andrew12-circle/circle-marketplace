@@ -25,7 +25,8 @@ export const useOptimizedImage = ({
   maxWidth = 800,
   maxHeight = 600
 }: UseOptimizedImageOptions): UseOptimizedImageReturn => {
-  const [optimizedUrl, setOptimizedUrl] = useState<string>(fallbackUrl);
+  // Start with original image URL for instant display
+  const [optimizedUrl, setOptimizedUrl] = useState<string>(imageUrl || fallbackUrl);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isFromCache, setIsFromCache] = useState(false);
@@ -36,18 +37,20 @@ export const useOptimizedImage = ({
       return;
     }
 
-    // If it's already a Supabase Storage URL, use it directly
+    // Always start with the original URL for instant display
+    setOptimizedUrl(imageUrl);
+
+    // If it's already a Supabase Storage URL, no need to optimize
     if (imageUrl.includes('supabase.co/storage/') || imageUrl.includes('ihzyuyfawapweamqzzlj.supabase.co')) {
-      setOptimizedUrl(imageUrl);
       return;
     }
 
     const processImage = async () => {
-      setIsLoading(true);
+      // Don't show loading since we already display the original image
       setError(null);
 
       try {
-        // Check cache first
+        // Check cache first - this is fast for pro users with pre-cached images
         const { data: cachedImage } = await supabase
           .from('image_cache')
           .select('cached_url')
@@ -59,17 +62,25 @@ export const useOptimizedImage = ({
           setOptimizedUrl(cachedImage.cached_url);
           setIsFromCache(true);
           
-          // Update last accessed
-          await supabase
+          // Update last accessed in background
+          supabase
             .from('image_cache')
             .update({ last_accessed: new Date().toISOString() })
             .eq('original_url', imageUrl)
-            .eq('image_type', imageType);
+            .eq('image_type', imageType)
+            .then(() => {});
           
           return;
         }
 
-        // Process image through edge function
+        // Only process if user is authenticated (avoid errors for non-auth users)
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          // Keep original URL for non-authenticated users
+          return;
+        }
+
+        // Process image through edge function for authenticated users
         const { data, error: functionError } = await supabase.functions.invoke('process-image', {
           body: {
             imageUrl,
@@ -81,22 +92,18 @@ export const useOptimizedImage = ({
         });
 
         if (functionError) {
-          throw new Error(functionError.message);
+          console.warn('Image optimization failed:', functionError.message);
+          return; // Keep original URL
         }
 
-        if (data.success) {
+        if (data?.success) {
           setOptimizedUrl(data.cachedUrl);
           setIsFromCache(data.fromCache || false);
-        } else {
-          throw new Error(data.error || 'Failed to process image');
         }
 
       } catch (err) {
-        console.error('Error optimizing image:', err);
-        setError(err instanceof Error ? err.message : 'Unknown error');
-        setOptimizedUrl(fallbackUrl);
-      } finally {
-        setIsLoading(false);
+        console.warn('Error optimizing image:', err);
+        // Keep original URL on error instead of fallback
       }
     };
 
