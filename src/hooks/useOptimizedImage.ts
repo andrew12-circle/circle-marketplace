@@ -25,7 +25,7 @@ export const useOptimizedImage = ({
   maxWidth = 800,
   maxHeight = 600
 }: UseOptimizedImageOptions): UseOptimizedImageReturn => {
-  const [optimizedUrl, setOptimizedUrl] = useState<string>(fallbackUrl);
+  const [optimizedUrl, setOptimizedUrl] = useState<string>(imageUrl); // Start with original URL
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isFromCache, setIsFromCache] = useState(false);
@@ -42,25 +42,28 @@ export const useOptimizedImage = ({
       return;
     }
 
+    // Set original URL immediately for fast display
+    setOptimizedUrl(imageUrl);
+
     const processImage = async () => {
       setIsLoading(true);
       setError(null);
 
       try {
         // Check cache first
-        const { data: cachedImage } = await supabase
+        const { data: cachedImage, error: cacheError } = await supabase
           .from('image_cache')
           .select('cached_url')
           .eq('original_url', imageUrl)
           .eq('image_type', imageType)
           .maybeSingle();
 
-        if (cachedImage) {
+        if (cachedImage && !cacheError) {
           setOptimizedUrl(cachedImage.cached_url);
           setIsFromCache(true);
           
-          // Update last accessed
-          await supabase
+          // Update last accessed in background
+          supabase
             .from('image_cache')
             .update({ last_accessed: new Date().toISOString() })
             .eq('original_url', imageUrl)
@@ -84,22 +87,24 @@ export const useOptimizedImage = ({
           throw new Error(functionError.message);
         }
 
-        if (data.success) {
+        if (data && data.success) {
           setOptimizedUrl(data.cachedUrl);
           setIsFromCache(data.fromCache || false);
         } else {
-          throw new Error(data.error || 'Failed to process image');
+          // Keep original URL if optimization fails
+          console.warn('Image optimization failed, using original URL:', data?.error);
         }
 
       } catch (err) {
-        console.error('Error optimizing image:', err);
-        setError(err instanceof Error ? err.message : 'Unknown error');
-        setOptimizedUrl(fallbackUrl);
+        console.warn('Image optimization failed, using original URL:', err);
+        setError(err instanceof Error ? err.message : 'Optimization failed');
+        // Keep original URL instead of fallback
       } finally {
         setIsLoading(false);
       }
     };
 
+    // Start optimization in background
     processImage();
   }, [imageUrl, imageType, contentId, fallbackUrl, maxWidth, maxHeight]);
 

@@ -54,11 +54,43 @@ serve(async (req) => {
       });
     }
 
-    // Download and process the image
+    // Ensure bucket exists before processing
+    const bucketName = getBucketForImageType(imageType);
+    await ensureBucketExists(supabase, bucketName);
+
+    // Download and process the image with retry logic
     console.log('Downloading image from:', imageUrl);
-    const imageResponse = await fetch(imageUrl);
-    if (!imageResponse.ok) {
-      throw new Error(`Failed to download image: ${imageResponse.statusText}`);
+    let imageResponse;
+    let retries = 3;
+    
+    while (retries > 0) {
+      try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+        
+        imageResponse = await fetch(imageUrl, { 
+          signal: controller.signal,
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (compatible; ImageProcessor/1.0)'
+          }
+        });
+        
+        clearTimeout(timeout);
+        
+        if (imageResponse.ok) break;
+        
+        if (imageResponse.status === 403 || imageResponse.status === 404) {
+          throw new Error(`Failed to download image: ${imageResponse.statusText}`);
+        }
+        
+      } catch (fetchError) {
+        retries--;
+        if (retries === 0) {
+          throw new Error(`Failed to download image after retries: ${fetchError.message}`);
+        }
+        console.warn(`Retry ${3 - retries}/3 failed:`, fetchError.message);
+        await new Promise(resolve => setTimeout(resolve, 1000 * (4 - retries))); // Exponential backoff
+      }
     }
 
     const imageBuffer = await imageResponse.arrayBuffer();
@@ -130,5 +162,27 @@ function getBucketForImageType(imageType: string): string {
     case 'cover': return 'channel-covers';
     case 'content': return 'content-images';
     default: return 'content-images';
+  }
+}
+
+async function ensureBucketExists(supabase: any, bucketName: string) {
+  try {
+    const { data: buckets } = await supabase.storage.listBuckets();
+    const bucketExists = buckets?.some((bucket: any) => bucket.name === bucketName);
+    
+    if (!bucketExists) {
+      console.log(`Creating bucket: ${bucketName}`);
+      const { error } = await supabase.storage.createBucket(bucketName, {
+        public: true,
+        allowedMimeTypes: ['image/*'],
+        fileSizeLimit: 10485760 // 10MB
+      });
+      
+      if (error && !error.message.includes('already exists')) {
+        console.error(`Failed to create bucket ${bucketName}:`, error);
+      }
+    }
+  } catch (error) {
+    console.error(`Error checking/creating bucket ${bucketName}:`, error);
   }
 }
