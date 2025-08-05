@@ -3432,6 +3432,311 @@ export type Database = {
         }
         Relationships: []
       }
+      support_agents: {
+        Row: {
+          agent_name: string
+          availability_status: string
+          average_rating: number | null
+          created_at: string
+          current_conversations: number | null
+          id: string
+          languages: string[] | null
+          last_active_at: string | null
+          max_conversations: number | null
+          specialties: string[] | null
+          timezone: string | null
+          total_conversations: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          agent_name: string
+          availability_status?: string
+          average_rating?: number | null
+          created_at?: string
+          current_conversations?: number | null
+          id?: string
+          languages?: string[] | null
+          last_active_at?: string | null
+          max_conversations?: number | null
+          specialties?: string[] | null
+          timezone?: string | null
+          total_conversations?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          agent_name?: string
+          availability_status?: string
+          average_rating?: number | null
+          created_at?: string
+          current_conversations?: number | null
+          id?: string
+          languages?: string[] | null
+          last_active_at?: string | null
+          max_conversations?: number | null
+          specialties?: string[] | null
+          timezone?: string | null
+          total_conversations?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      support_analytics: {
+        Row: {
+          ai_resolved_conversations: number | null
+          average_resolution_time_seconds: number | null
+          average_response_time_seconds: number | null
+          created_at: string
+          date: string
+          escalation_rate: number | null
+          human_resolved_conversations: number | null
+          id: string
+          satisfaction_average: number | null
+          total_conversations: number | null
+          total_zoom_meetings: number | null
+        }
+        Insert: {
+          ai_resolved_conversations?: number | null
+          average_resolution_time_seconds?: number | null
+          average_response_time_seconds?: number | null
+          created_at?: string
+          date: string
+          escalation_rate?: number | null
+          human_resolved_conversations?: number | null
+          id?: string
+          satisfaction_average?: number | null
+          total_conversations?: number | null
+          total_zoom_meetings?: number | null
+        }
+        Update: {
+          ai_resolved_conversations?: number | null
+          average_resolution_time_seconds?: number | null
+          average_response_time_seconds?: number | null
+          created_at?: string
+          date?: string
+          escalation_rate?: number | null
+          human_resolved_conversations?: number | null
+          id?: string
+          satisfaction_average?: number | null
+          total_conversations?: number | null
+          total_zoom_meetings?: number | null
+        }
+        Relationships: []
+      }
+      support_conversations: {
+        Row: {
+          agent_id: string | null
+          category: string | null
+          conversation_type: string
+          created_at: string
+          escalated_at: string | null
+          escalation_reason: string | null
+          id: string
+          metadata: Json | null
+          priority: string
+          resolution_summary: string | null
+          resolved_at: string | null
+          satisfaction_rating: number | null
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          agent_id?: string | null
+          category?: string | null
+          conversation_type?: string
+          created_at?: string
+          escalated_at?: string | null
+          escalation_reason?: string | null
+          id?: string
+          metadata?: Json | null
+          priority?: string
+          resolution_summary?: string | null
+          resolved_at?: string | null
+          satisfaction_rating?: number | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          agent_id?: string | null
+          category?: string | null
+          conversation_type?: string
+          created_at?: string
+          escalated_at?: string | null
+          escalation_reason?: string | null
+          id?: string
+          metadata?: Json | null
+          priority?: string
+          resolution_summary?: string | null
+          resolved_at?: string | null
+          satisfaction_rating?: number | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      support_escalations: {
+        Row: {
+          assigned_to: string | null
+          context_data: Json | null
+          conversation_id: string
+          created_at: string
+          escalated_by: string | null
+          escalated_from: string
+          escalation_priority: string
+          escalation_reason: string
+          id: string
+          resolution_notes: string | null
+          resolved_at: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          context_data?: Json | null
+          conversation_id: string
+          created_at?: string
+          escalated_by?: string | null
+          escalated_from: string
+          escalation_priority?: string
+          escalation_reason: string
+          id?: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          context_data?: Json | null
+          conversation_id?: string
+          created_at?: string
+          escalated_by?: string | null
+          escalated_from?: string
+          escalation_priority?: string
+          escalation_reason?: string
+          id?: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_escalations_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "support_agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_escalations_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "support_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      support_knowledge_base: {
+        Row: {
+          category: string
+          content: string
+          created_at: string
+          created_by: string | null
+          helpful_count: number | null
+          id: string
+          is_public: boolean | null
+          search_keywords: string[] | null
+          tags: string[] | null
+          title: string
+          updated_at: string
+          view_count: number | null
+        }
+        Insert: {
+          category: string
+          content: string
+          created_at?: string
+          created_by?: string | null
+          helpful_count?: number | null
+          id?: string
+          is_public?: boolean | null
+          search_keywords?: string[] | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+          view_count?: number | null
+        }
+        Update: {
+          category?: string
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          helpful_count?: number | null
+          id?: string
+          is_public?: boolean | null
+          search_keywords?: string[] | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          view_count?: number | null
+        }
+        Relationships: []
+      }
+      support_messages: {
+        Row: {
+          ai_confidence_score: number | null
+          attachments: Json | null
+          conversation_id: string
+          created_at: string
+          edited_at: string | null
+          id: string
+          is_escalation_trigger: boolean | null
+          message_content: string
+          message_type: string
+          metadata: Json | null
+          read_at: string | null
+          sender_id: string | null
+          sender_type: string
+        }
+        Insert: {
+          ai_confidence_score?: number | null
+          attachments?: Json | null
+          conversation_id: string
+          created_at?: string
+          edited_at?: string | null
+          id?: string
+          is_escalation_trigger?: boolean | null
+          message_content: string
+          message_type?: string
+          metadata?: Json | null
+          read_at?: string | null
+          sender_id?: string | null
+          sender_type: string
+        }
+        Update: {
+          ai_confidence_score?: number | null
+          attachments?: Json | null
+          conversation_id?: string
+          created_at?: string
+          edited_at?: string | null
+          id?: string
+          is_escalation_trigger?: boolean | null
+          message_content?: string
+          message_type?: string
+          metadata?: Json | null
+          read_at?: string | null
+          sender_id?: string | null
+          sender_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "support_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vendor_agent_activities: {
         Row: {
           activity_data: Json | null
@@ -3977,6 +4282,65 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      zoom_integrations: {
+        Row: {
+          attendee_id: string | null
+          conversation_id: string
+          created_at: string
+          duration_minutes: number | null
+          host_id: string | null
+          id: string
+          meeting_id: string
+          meeting_notes: string | null
+          meeting_status: string
+          meeting_url: string
+          passcode: string | null
+          recording_url: string | null
+          scheduled_at: string
+          updated_at: string
+        }
+        Insert: {
+          attendee_id?: string | null
+          conversation_id: string
+          created_at?: string
+          duration_minutes?: number | null
+          host_id?: string | null
+          id?: string
+          meeting_id: string
+          meeting_notes?: string | null
+          meeting_status?: string
+          meeting_url: string
+          passcode?: string | null
+          recording_url?: string | null
+          scheduled_at: string
+          updated_at?: string
+        }
+        Update: {
+          attendee_id?: string | null
+          conversation_id?: string
+          created_at?: string
+          duration_minutes?: number | null
+          host_id?: string | null
+          id?: string
+          meeting_id?: string
+          meeting_notes?: string | null
+          meeting_status?: string
+          meeting_url?: string
+          passcode?: string | null
+          recording_url?: string | null
+          scheduled_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zoom_integrations_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "support_conversations"
+            referencedColumns: ["id"]
           },
         ]
       }
