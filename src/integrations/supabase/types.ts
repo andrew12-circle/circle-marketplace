@@ -3435,6 +3435,42 @@ export type Database = {
           },
         ]
       }
+      vendor_analytics_cache: {
+        Row: {
+          avg_rating: number
+          conversion_rate: number
+          last_updated: string
+          total_bookings: number
+          total_reviews: number
+          total_services: number
+          total_views: number
+          vendor_id: string
+          vendor_name: string
+        }
+        Insert: {
+          avg_rating?: number
+          conversion_rate?: number
+          last_updated?: string
+          total_bookings?: number
+          total_reviews?: number
+          total_services?: number
+          total_views?: number
+          vendor_id: string
+          vendor_name: string
+        }
+        Update: {
+          avg_rating?: number
+          conversion_rate?: number
+          last_updated?: string
+          total_bookings?: number
+          total_reviews?: number
+          total_services?: number
+          total_views?: number
+          vendor_id?: string
+          vendor_name?: string
+        }
+        Relationships: []
+      }
       vendor_availability: {
         Row: {
           availability_message: string | null
@@ -4280,6 +4316,10 @@ export type Database = {
         Returns: Json
       }
       refresh_vendor_analytics: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      refresh_vendor_analytics_cache: {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
