@@ -11,6 +11,7 @@ import { SecurityHeaders } from "@/components/common/SecurityHeaders";
 import { EnhancedSecurityHeaders } from "@/components/security/EnhancedSecurityHeaders";
 import { SecurityStatusIndicator } from "@/components/security/SecurityEnhancementSystem";
 import RequestLogger from "@/components/security/RequestLogger";
+import { HelpWidget } from "@/components/support/HelpWidget";
 
 // Import pages
 import Index from "@/pages/Index";
@@ -50,6 +51,7 @@ const App = () => {
                   </Routes>
                   <Toaster />
                   <Sonner />
+                  <HelpWidget />
                   <SecurityHeaders />
                   <EnhancedSecurityHeaders />
                   <RequestLogger />
