@@ -5,7 +5,6 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { useAuth } from "@/contexts/AuthContext";
 import { useCurrency } from "@/hooks/useCurrency";
 import { Star, TrendingUp, MapPin, Award, Info } from "lucide-react";
-import { OptimizedImage } from "@/components/common/OptimizedImage";
 
 interface VendorCardProps {
   vendor: {
@@ -67,14 +66,10 @@ export const VendorCard = ({ vendor, onAddToWallet, onRequestCoMarketing, onNavi
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             {vendor.imageUrl && (
-              <OptimizedImage
-                src={vendor.imageUrl}
+              <img 
+                src={vendor.imageUrl} 
                 alt={vendor.company}
-                imageType="avatar"
-                contentId={vendor.id}
                 className="w-12 h-12 rounded-lg object-cover"
-                width={48}
-                height={48}
               />
             )}
             <div>

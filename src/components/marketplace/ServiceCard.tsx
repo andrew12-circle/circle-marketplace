@@ -19,7 +19,6 @@ import { ServiceFunnelModal } from "./ServiceFunnelModal";
 import { VendorSelectionModal } from "./VendorSelectionModal";
 import { PricingChoiceModal } from "./PricingChoiceModal";
 import { DirectPurchaseModal } from "./DirectPurchaseModal";
-import { OptimizedImage } from "@/components/common/OptimizedImage";
 
 interface Service {
   id: string;
@@ -217,14 +216,10 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
 
       {/* Image - Fixed height */}
       <div className="relative h-48 overflow-hidden bg-white flex-shrink-0 p-4">
-        <OptimizedImage
-          src={service.image_url || "/placeholder.svg"}
+        <img
+          src={service.image_url || "/public/placeholder.svg"}
           alt={service.title}
-          imageType="content"
-          contentId={service.id}
           className="w-full h-full object-contain object-center transition-transform duration-300 group-hover:scale-105"
-          width={400}
-          height={225}
         />
       </div>
 
@@ -289,8 +284,8 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
         <div className="h-8 mb-3">
           {service.tags && service.tags.length > 0 && (
             <div className="flex flex-wrap gap-1">
-              {service.tags.slice(0, 3).map((tag, index) => (
-                <Badge key={`${service.id}-${tag}-${index}`} variant="outline" className="text-xs">
+              {service.tags.slice(0, 3).map((tag) => (
+                <Badge key={tag} variant="outline" className="text-xs">
                   {tag}
                 </Badge>
               ))}
@@ -366,9 +361,12 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                          </TooltipContent>
                        </Tooltip>
                     </div>
-                     <span className="text-lg font-bold text-green-600">
-                       {formatPrice(service.co_pay_price || service.retail_price, service.price_duration || 'mo')}
-                     </span>
+                    <span className="text-lg font-bold text-green-600">
+                      {formatPrice(
+                        extractNumericPrice(service.retail_price) * (1 - (service.max_split_percentage_ssp / 100)), 
+                        service.price_duration || 'mo'
+                      )}
+                    </span>
                   </div>
                   <div className="flex justify-end">
                      <Badge className="bg-green-600 text-white text-xs">

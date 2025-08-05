@@ -413,9 +413,9 @@ export const SavedItems = () => {
               Start saving services from the marketplace to compare them here
             </p>
             <Button asChild>
-              <Link to="/">
+              <a href="/">
                 Browse Marketplace <ArrowRight className="w-4 h-4 ml-2" />
-              </Link>
+              </a>
             </Button>
           </CardContent>
         </Card>

@@ -5,7 +5,6 @@ import { EnhancedVendorCard } from "./EnhancedVendorCard";
 import { MarketplaceFilters } from "./MarketplaceFilters";
 import { CampaignServicesHeader } from "./CampaignServicesHeader";
 import { CircleProBanner } from "./CircleProBanner";
-import { MarketplaceErrorBoundary } from "./MarketplaceErrorBoundary";
 import { ServiceDetailsModal } from "./ServiceDetailsModal";
 import { AIConciergeBanner } from "./AIConciergeBanner";
 import { AddProductModal } from "./AddProductModal";
@@ -21,10 +20,6 @@ import { Link } from "react-router-dom";
 import { CategoryMegaMenu } from "./CategoryMegaMenu";
 import { EnhancedSearch, SearchFilters } from "./EnhancedSearch";
 import { VendorCallToAction } from "./VendorCallToAction";
-import { useOptimizedMarketplace } from "@/hooks/useOptimizedMarketplace";
-import { BackgroundJobManager } from "@/components/common/BackgroundJobManager";
-import { Service as APIService, Vendor as APIVendor } from "@/services/marketplaceAPI";
-import { marketplaceAPI } from "@/services/marketplaceAPI";
 interface FilterState {
   category: string;
   priceRange: number[];
@@ -91,18 +86,13 @@ interface LocalRepresentative {
 }
 type ViewMode = "services" | "products" | "vendors";
 export const MarketplaceGrid = () => {
-  const { t } = useTranslation();
-  
-  // Use optimized marketplace hook instead of direct state management
   const {
-    services,
-    vendors,
-    loading,
-    error,
-    refetch: loadData,
-    refreshAnalytics,
-    trackView
-  } = useOptimizedMarketplace({ autoRefresh: true, refreshInterval: 10 * 60 * 1000 });
+    t
+  } = useTranslation();
+  const [services, setServices] = useState<Service[]>([]);
+  const [vendors, setVendors] = useState<Vendor[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>("services");
   const [selectedProductCategory, setSelectedProductCategory] = useState<string | null>(null);
@@ -224,9 +214,98 @@ export const MarketplaceGrid = () => {
       console.error('Error loading saved services:', error);
     }
   };
-  // Data loading is now handled by useOptimizedMarketplace hook
+  const loadData = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      console.log('Loading marketplace data...');
 
-  // Loading logic is now handled by useOptimizedMarketplace hook
+      // Load vendors from the correct table
+      const vendorsResponse = await supabase.from('vendors').select('*').order('sort_order', {
+        ascending: true
+      }).order('rating', {
+        ascending: false
+      }).limit(50);
+      console.log('Vendors response:', vendorsResponse);
+      console.log('Vendors data:', vendorsResponse.data);
+      console.log('Vendors error:', vendorsResponse.error);
+
+      // Load services without vendor join for now, then get vendors separately
+      const servicesResponse = await supabase.from('services').select('*').order('sort_order', {
+        ascending: true
+      }).order('created_at', {
+        ascending: false
+      }).limit(100);
+      console.log('Services response:', servicesResponse);
+      console.log('Services data:', servicesResponse.data);
+      console.log('Services error:', servicesResponse.error);
+      console.log('Services data length:', servicesResponse.data?.length);
+      if (vendorsResponse.error) {
+        console.error('Vendors error:', vendorsResponse.error);
+        throw vendorsResponse.error;
+      }
+      if (servicesResponse.error) {
+        console.error('Services error:', servicesResponse.error);
+        throw servicesResponse.error;
+      }
+
+      // Convert the database response to match our interface
+      const formattedServices = (servicesResponse.data || []).map(service => ({
+        ...service,
+        discount_percentage: service.discount_percentage ? String(service.discount_percentage) : undefined,
+        vendor: {
+          name: 'Service Provider',
+          rating: 4.5,
+          review_count: 0,
+          is_verified: true
+        }
+      }));
+
+      // Format vendors data using vendors table
+      const formattedVendors = (vendorsResponse.data || []).map(vendor => ({
+        ...vendor,
+        id: vendor.id,
+        name: vendor.name || 'Unknown Vendor',
+        description: vendor.description || '',
+        logo_url: vendor.logo_url,
+        website_url: vendor.website_url,
+        location: vendor.location,
+        rating: vendor.rating || 0,
+        review_count: vendor.review_count || 0,
+        is_verified: vendor.is_verified || false,
+        co_marketing_agents: vendor.co_marketing_agents || 0,
+        campaigns_funded: vendor.campaigns_funded || 0,
+        service_states: vendor.service_states || [],
+        mls_areas: vendor.mls_areas || [],
+        service_radius_miles: vendor.service_radius_miles,
+        license_states: vendor.license_states || [],
+        latitude: vendor.latitude,
+        longitude: vendor.longitude,
+        vendor_type: vendor.vendor_type || 'company',
+        local_representatives: []
+      }));
+      console.log(`Loaded ${formattedServices.length} services and ${formattedVendors.length} vendors`);
+      console.log('Formatted services:', formattedServices);
+      console.log('Setting services state...');
+      setServices(formattedServices);
+      setVendors(formattedVendors);
+      console.log('Services and vendors state set successfully');
+    } catch (error) {
+      console.error('Marketplace data loading error:', error);
+      setError(`Failed to load marketplace data: ${error.message || 'Unknown error'}`);
+      toast({
+        title: "Error loading data",
+        description: `Failed to load marketplace data: ${error.message || 'Please try again.'}`,
+        variant: "destructive"
+      });
+    } finally {
+      console.log('Setting loading to false');
+      setLoading(false);
+    }
+  }, [toast]);
+  useEffect(() => {
+    loadData();
+  }, []);
   useEffect(() => {
     if (profile?.user_id) {
       loadSavedServices();
@@ -453,7 +532,7 @@ export const MarketplaceGrid = () => {
         </div>
       </div>;
   }
-  return <MarketplaceErrorBoundary>
+  return <>
       <div className="min-h-screen bg-background">
         <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
           {/* Hero Section */}
@@ -500,118 +579,70 @@ export const MarketplaceGrid = () => {
 
 
           {/* Grid - Mobile Responsive */}
-          {viewMode === "services" && (
-            <div className="mobile-grid gap-4 sm:gap-6">
-              {filteredServices.map(service => 
-                <ServiceCard 
-                  key={`service-${service.id}`} 
-                  service={service} 
-                  onSave={handleSaveService} 
-                  onViewDetails={handleViewServiceDetails} 
-                  isSaved={savedServiceIds.includes(service.id)} 
-                />
-              )}
-            </div>
-          )}
-
-          {viewMode === "vendors" && (
-            <>
-              {console.log('Vendors debug:', { totalVendors: vendors.length, filteredVendors: filteredVendors.length, filters, searchTerm })}
-              <div className="mobile-grid gap-4 sm:gap-6">
-                {filteredVendors.map(vendor => 
-                  <EnhancedVendorCard 
-                    key={vendor.id} 
-                    vendor={vendor} 
-                    onConnect={handleConnectVendor} 
-                    onViewProfile={handleViewVendorProfile} 
-                  />
-                )}
-              </div>
-            </>
-          )}
-
-          {viewMode === "products" && (
-            <>
-              {selectedProductCategory ? (
-                <div>
-                  <div className="mb-6 flex items-center gap-4">
-                    <Button variant="outline" onClick={handleBackToProducts}>
-                      ← Back to Products
-                    </Button>
-                    <h2 className="text-2xl font-bold">
-                      {PRODUCT_CATEGORIES.find(p => p.id === selectedProductCategory)?.name}
-                    </h2>
-                  </div>
-                  <div className="mobile-grid gap-4 sm:gap-6">
-                    {getServicesForProduct(selectedProductCategory).map(service => 
-                      <ServiceCard 
-                        key={`product-${selectedProductCategory}-${service.id}`} 
-                        service={service} 
-                        onSave={handleSaveService} 
-                        onViewDetails={handleViewServiceDetails} 
-                        isSaved={savedServiceIds.includes(service.id)} 
-                      />
-                    )}
-                  </div>
+          {viewMode === "services" ? <div className="mobile-grid gap-4 sm:gap-6">
+              {filteredServices.map(service => <ServiceCard key={`service-${service.id}`} service={service} onSave={handleSaveService} onViewDetails={handleViewServiceDetails} isSaved={savedServiceIds.includes(service.id)} />)}
+            </div> : viewMode === "products" ? selectedProductCategory ? <div>
+                <div className="mb-6 flex items-center gap-4">
+                  <Button variant="outline" onClick={handleBackToProducts}>
+                    ← Back to Products
+                  </Button>
+                  <h2 className="text-2xl font-bold">
+                    {PRODUCT_CATEGORIES.find(p => p.id === selectedProductCategory)?.name}
+                  </h2>
                 </div>
-              ) : (
                 <div className="mobile-grid gap-4 sm:gap-6">
-                  {filteredProducts.map(product => {
-                    const IconComponent = product.icon;
-                    return (
-                      <div 
-                        key={product.id} 
-                        className="group relative overflow-hidden bg-white rounded-xl border border-gray-200 hover:border-gray-300 cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1" 
-                        onClick={() => handleSelectProduct(product.id)}
-                      >
-                        {/* Background Gradient */}
-                        <div className={`absolute inset-0 bg-gradient-to-br ${product.gradient} opacity-5 group-hover:opacity-10 transition-opacity duration-300`} />
-                        
-                        {/* Content */}
-                        <div className="relative p-6">
-                          {/* Icon and Header */}
-                          <div className="flex items-start justify-between mb-4">
-                            <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${product.gradient} flex items-center justify-center shadow-lg`}>
-                              <IconComponent className="w-6 h-6 text-white" />
-                            </div>
-                            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                              <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-gray-600 transform group-hover:translate-x-1 transition-all duration-300" />
-                            </div>
+                  {getServicesForProduct(selectedProductCategory).map(service => <ServiceCard key={`product-${selectedProductCategory}-${service.id}`} service={service} onSave={handleSaveService} onViewDetails={handleViewServiceDetails} isSaved={savedServiceIds.includes(service.id)} />)}
+                </div>
+              </div> : <div className="mobile-grid gap-4 sm:gap-6">
+                {filteredProducts.map(product => {
+            const IconComponent = product.icon;
+            return <div key={product.id} className="group relative overflow-hidden bg-white rounded-xl border border-gray-200 hover:border-gray-300 cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1" onClick={() => handleSelectProduct(product.id)}>
+                      {/* Background Gradient */}
+                      <div className={`absolute inset-0 bg-gradient-to-br ${product.gradient} opacity-5 group-hover:opacity-10 transition-opacity duration-300`} />
+                      
+                      {/* Content */}
+                      <div className="relative p-6">
+                        {/* Icon and Header */}
+                        <div className="flex items-start justify-between mb-4">
+                          <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${product.gradient} flex items-center justify-center shadow-lg`}>
+                            <IconComponent className="w-6 h-6 text-white" />
                           </div>
-
-                          {/* Title */}
-                          <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-gray-800 transition-colors duration-300">
-                            {product.name}
-                          </h3>
-
-                          {/* Description */}
-                          <p className="text-gray-600 text-sm leading-relaxed mb-6 line-clamp-2">
-                            {product.description}
-                          </p>
-
-                          {/* Footer */}
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <div className={`w-2 h-2 rounded-full bg-gradient-to-r ${product.gradient}`} />
-                              <span className="text-sm font-medium text-gray-700">
-                                {getServicesForProduct(product.id).length} providers
-                              </span>
-                            </div>
-                            <Button variant="ghost" size="sm" className={`${product.color} hover:bg-gray-50 font-medium opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0`}>
-                              Explore →
-                            </Button>
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-gray-600 transform group-hover:translate-x-1 transition-all duration-300" />
                           </div>
                         </div>
 
-                        {/* Hover Effect Overlay */}
-                        <div className="absolute inset-0 ring-1 ring-gray-200 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        {/* Title */}
+                        <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-gray-800 transition-colors duration-300">
+                          {product.name}
+                        </h3>
+
+                        {/* Description */}
+                        <p className="text-gray-600 text-sm leading-relaxed mb-6 line-clamp-2">
+                          {product.description}
+                        </p>
+
+                        {/* Footer */}
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <div className={`w-2 h-2 rounded-full bg-gradient-to-r ${product.gradient}`} />
+                            <span className="text-sm font-medium text-gray-700">
+                              {getServicesForProduct(product.id).length} providers
+                            </span>
+                          </div>
+                          <Button variant="ghost" size="sm" className={`${product.color} hover:bg-gray-50 font-medium opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0`}>
+                            Explore →
+                          </Button>
+                        </div>
                       </div>
-                    );
-                  })}
-                </div>
-              )}
-            </>
-          )}
+
+                      {/* Hover Effect Overlay */}
+                      <div className="absolute inset-0 ring-1 ring-gray-200 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    </div>;
+          })}
+              </div> : <div className="mobile-grid gap-4 sm:gap-6">
+              {filteredVendors.map(vendor => <EnhancedVendorCard key={vendor.id} vendor={vendor} onConnect={handleConnectVendor} onViewProfile={handleViewVendorProfile} />)}
+            </div>}
 
           {/* Empty State */}
           {(viewMode === "services" && filteredServices.length === 0 || viewMode === "vendors" && filteredVendors.length === 0 || viewMode === "products" && !selectedProductCategory && filteredProducts.length === 0 || viewMode === "products" && selectedProductCategory && getServicesForProduct(selectedProductCategory).length === 0) && <div className="text-center py-12">
@@ -648,5 +679,5 @@ export const MarketplaceGrid = () => {
 
       {/* Add Product Modal */}
       <AddProductModal open={isAddProductModalOpen} onOpenChange={setIsAddProductModalOpen} onProductAdded={loadData} />
-    </MarketplaceErrorBoundary>;
+    </>;
 };

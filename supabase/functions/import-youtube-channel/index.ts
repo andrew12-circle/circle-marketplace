@@ -132,39 +132,6 @@ serve(async (req) => {
         // Determine category based on video tags or title
         const category = determineCategory(video.snippet.tags, video.snippet.title);
 
-        // Get optimized thumbnail - try to cache it first
-        let thumbnailUrl = video.snippet.thumbnails?.maxresdefault?.url || 
-                         video.snippet.thumbnails?.high?.url || 
-                         video.snippet.thumbnails?.medium?.url ||
-                         video.snippet.thumbnails?.default?.url;
-
-        // Try to cache the YouTube thumbnail
-        try {
-          const thumbnailResponse = await fetch(`${supabaseUrl}/functions/v1/cache-youtube-thumbnail`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${supabaseServiceKey}`
-            },
-            body: JSON.stringify({
-              videoId: video.id,
-              videoTitle: video.snippet.title,
-              channelTitle: channel.snippet.title
-            })
-          });
-
-          if (thumbnailResponse.ok) {
-            const thumbnailData = await thumbnailResponse.json();
-            if (thumbnailData.success) {
-              thumbnailUrl = thumbnailData.cachedUrl;
-              console.log(`Cached thumbnail for video ${video.id}`);
-            }
-          }
-        } catch (error) {
-          console.log(`Failed to cache thumbnail for video ${video.id}:`, error);
-          // Continue with original thumbnail URL
-        }
-
         videosToInsert.push({
           creator_id: userId,
           content_type: 'video',
@@ -172,7 +139,7 @@ serve(async (req) => {
           description: video.snippet.description || 'Imported from YouTube',
           category: category,
           duration: duration,
-          cover_image_url: thumbnailUrl,
+          cover_image_url: video.snippet.thumbnails?.high?.url || video.snippet.thumbnails?.default?.url,
           content_url: `https://www.youtube.com/watch?v=${video.id}`,
           tags: video.snippet.tags || [],
           is_pro: false,

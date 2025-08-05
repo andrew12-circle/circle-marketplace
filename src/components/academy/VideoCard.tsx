@@ -2,7 +2,6 @@ import { Play, Clock, Star } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { OptimizedImage } from "@/components/common/OptimizedImage";
 
 interface Video {
   id: string;
@@ -48,14 +47,10 @@ export const VideoCard = ({
       <div className="relative h-full">
         {/* Thumbnail */}
         <div className="relative h-2/3 bg-gray-100 overflow-hidden">
-          <OptimizedImage
-            src={video.thumbnail || "/placeholder.svg"}
+          <img 
+            src={video.thumbnail || "/placeholder.svg"} 
             alt={video.title}
-            imageType="thumbnail"
-            contentId={video.id}
             className="w-full h-full object-cover"
-            width={400}
-            height={225}
           />
           
           {/* Play overlay */}

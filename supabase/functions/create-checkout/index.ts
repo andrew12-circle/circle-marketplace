@@ -68,7 +68,7 @@ serve(async (req) => {
       }
     }
 
-    // Create checkout session with enhanced fraud monitoring
+    // Create checkout session
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : user?.email || "guest@circle.com",
@@ -79,14 +79,7 @@ serve(async (req) => {
       metadata: {
         user_id: user?.id || "guest",
         item_count: items.length.toString(),
-        fraud_monitoring: "enabled"
       },
-      // Enable enhanced Radar monitoring
-      payment_intent_data: {
-        radar_options: {
-          session: `checkout_${user?.id || "guest"}_${Date.now()}`
-        }
-      }
     });
 
     // Optional: Store order in database

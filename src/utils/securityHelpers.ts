@@ -1,5 +1,4 @@
 import { supabase } from "@/integrations/supabase/client";
-import { IPAddressHelper } from './ipAddressHelper';
 
 // Enhanced authentication helper with proper error handling
 export const authenticateUser = async (authHeader: string | null) => {
@@ -73,22 +72,18 @@ export const logSecurityEvent = async (
   request?: Request
 ) => {
   try {
-    const rawIP = request?.headers.get('x-forwarded-for') || 
+    const clientIP = request?.headers.get('x-forwarded-for') || 
                     request?.headers.get('x-real-ip') || 
                     'unknown';
     
     const userAgent = request?.headers.get('user-agent') || 'unknown';
-    const clientIP = IPAddressHelper.safeIPForDB(rawIP);
 
     await supabase
       .from('security_events')
       .insert({
         event_type: eventType,
         user_id: userId,
-        event_data: {
-          ...eventData,
-          ip_address: clientIP // Store IP in event_data as well for consistency
-        },
+        event_data: eventData,
         ip_address: clientIP,
         user_agent: userAgent
       });

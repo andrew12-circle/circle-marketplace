@@ -36,8 +36,8 @@ export const useCurrency = () => {
         const formattedAmount = new Intl.NumberFormat(i18n.language === 'fr' ? 'fr-CA' : 'en-US', {
           style: 'currency',
           currency: currency,
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 0
         }).format(numAmount);
         
         // If we have a duration parameter and no existing suffix, use the duration
@@ -73,8 +73,8 @@ export const useCurrency = () => {
     const formattedAmount = new Intl.NumberFormat(i18n.language === 'fr' ? 'fr-CA' : 'en-US', {
       style: 'currency',
       currency: currency,
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
     }).format(numAmount);
 
     // Add duration suffix if provided

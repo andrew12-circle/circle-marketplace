@@ -1,14 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Check, X } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import circleLogo from "@/assets/circle-logo.png";
 export const Pricing = () => {
-  const navigate = useNavigate();
   const [loading, setLoading] = useState<string | null>(null);
   const {
     toast
@@ -26,7 +25,7 @@ export const Pricing = () => {
       } = await supabase.auth.getSession();
       if (!session) {
         // Redirect to auth page for a smoother user experience
-        navigate('/auth');
+        window.location.href = '/auth';
         return;
       }
       const {

@@ -53,28 +53,7 @@ export const useServiceAnalytics = () => {
       setLoading(true);
       setError(null);
 
-      // First, try to get data from optimized materialized view
-      const { data: cachedAnalytics, error: cacheError } = await supabase
-        .from('vendor_service_analytics')
-        .select('*')
-        .eq('vendor_id', user.id)
-        .maybeSingle();
-
-      if (!cacheError && cachedAnalytics) {
-        // Use cached analytics if available
-        setAnalytics({
-          total_services: cachedAnalytics.total_services || 0,
-          total_views: cachedAnalytics.total_views || 0,
-          total_bookings: cachedAnalytics.total_bookings || 0,
-          conversion_rate: cachedAnalytics.conversion_rate || 0,
-          monthly_revenue: cachedAnalytics.total_bookings * 150, // Mock calculation
-          services: [] // Detailed service analytics would need separate query
-        });
-        setLoading(false);
-        return;
-      }
-
-      // Fallback to detailed analytics calculation
+      // Get vendor's services
       const { data: services, error: servicesError } = await supabase
         .from('services')
         .select('*')

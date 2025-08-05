@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -40,7 +39,6 @@ interface ImportResult {
 }
 
 export const BulkContentImporter = () => {
-  const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
   const [importType, setImportType] = useState<string>('');
@@ -962,7 +960,7 @@ export const BulkContentImporter = () => {
                 Import More Content
               </Button>
               <Button 
-                onClick={() => navigate('/creator-dashboard')} 
+                onClick={() => window.location.href = '/creator-dashboard'} 
                 className="flex-1"
               >
                 Go to Dashboard

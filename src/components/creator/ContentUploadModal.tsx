@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -31,7 +30,6 @@ export const ContentUploadModal = ({
   contentType = 'video',
   onUploadComplete 
 }: ContentUploadModalProps) => {
-  const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -160,7 +158,7 @@ export const ContentUploadModal = ({
         variant: 'destructive'
       });
       onClose();
-      navigate('/creator-payment-setup');
+      window.location.href = '/creator-payment-setup';
       return;
     }
 
@@ -317,7 +315,7 @@ export const ContentUploadModal = ({
             <Button 
               onClick={() => {
                 onClose();
-                navigate('/creator-payment-setup');
+                window.location.href = '/creator-payment-setup';
               }}
               className="gap-2"
             >

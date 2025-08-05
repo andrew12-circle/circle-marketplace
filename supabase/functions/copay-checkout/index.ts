@@ -69,7 +69,7 @@ serve(async (req) => {
       };
     });
 
-    // Create checkout session with enhanced fraud monitoring
+    // Create checkout session
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : userData.user.email,
@@ -81,14 +81,7 @@ serve(async (req) => {
         user_id: userData.user.id,
         copay_requests: JSON.stringify(coPayDiscounts.map((d: any) => d.requestId)),
         total_savings: totalDiscounts.toString(),
-        fraud_monitoring: "enabled"
       },
-      // Enable enhanced Radar monitoring for co-pay transactions
-      payment_intent_data: {
-        radar_options: {
-          session: `copay_${userData.user.id}_${Date.now()}`
-        }
-      }
     });
 
     // Create payment records for co-pay requests
