@@ -12,256 +12,139 @@ serve(async (req) => {
   }
 
   try {
-    const supabaseClient = createClient(
+    const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
-      {
-        auth: { persistSession: false },
-      }
+      { auth: { persistSession: false } }
     );
 
     const { action, vendor_id } = await req.json();
 
-    console.log(`Analytics optimizer called with action: ${action}`);
-
-    let result;
-
     switch (action) {
-      case 'refresh_vendor_analytics':
-        result = await refreshVendorAnalytics(supabaseClient, vendor_id);
-        break;
+      case 'get_cached_analytics':
+        // Get cached analytics for better performance
+        const { data: cachedAnalytics, error: cacheError } = await supabaseAdmin
+          .from('vendor_analytics_cache')
+          .select('*')
+          .eq('vendor_id', vendor_id)
+          .single();
 
-      case 'get_optimized_analytics':
-        result = await getOptimizedAnalytics(supabaseClient, vendor_id);
-        break;
+        if (cacheError && cacheError.code !== 'PGRST116') {
+          throw cacheError;
+        }
 
-      case 'cleanup_old_data':
-        result = await cleanupOldAnalyticsData(supabaseClient);
-        break;
+        if (cachedAnalytics) {
+          return new Response(JSON.stringify(cachedAnalytics), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 200,
+          });
+        }
 
-      case 'aggregate_monthly_stats':
-        result = await aggregateMonthlyStats(supabaseClient);
-        break;
+        // If no cache, fall back to regular query
+        const { data: liveData, error: liveError } = await supabaseAdmin.rpc(
+          'get_vendor_dashboard_stats',
+          { p_vendor_id: vendor_id }
+        );
+
+        if (liveError) throw liveError;
+
+        return new Response(JSON.stringify(liveData), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200,
+        });
+
+      case 'refresh_all_analytics':
+        // Queue background job to refresh analytics
+        const { error: jobError } = await supabaseAdmin
+          .from('background_jobs')
+          .insert({
+            job_type: 'refresh_analytics',
+            job_data: {},
+            priority: 3
+          });
+
+        if (jobError) throw jobError;
+
+        return new Response(JSON.stringify({ message: 'Analytics refresh queued' }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200,
+        });
+
+      case 'get_marketplace_data':
+        // Optimized marketplace data loading with limits and indexes
+        const [vendorsResponse, servicesResponse] = await Promise.allSettled([
+          supabaseAdmin
+            .from('vendors')
+            .select(`
+              id, name, description, logo_url, website_url, location,
+              rating, review_count, is_verified, co_marketing_agents,
+              campaigns_funded, service_states, mls_areas, 
+              service_radius_miles, license_states, latitude, longitude,
+              vendor_type, local_representatives
+            `)
+            .order('sort_order', { ascending: true })
+            .order('rating', { ascending: false })
+            .limit(50), // Limit for performance
+
+          supabaseAdmin
+            .from('services')
+            .select(`
+              id, title, description, category, discount_percentage,
+              retail_price, pro_price, co_pay_price, image_url, tags,
+              is_featured, is_top_pick, estimated_roi, duration,
+              requires_quote, vendor_id
+            `)
+            .order('sort_order', { ascending: true })
+            .order('created_at', { ascending: false })
+            .limit(100) // Limit for performance
+        ]);
+
+        let vendors = [];
+        let services = [];
+
+        if (vendorsResponse.status === 'fulfilled' && !vendorsResponse.value.error) {
+          vendors = vendorsResponse.value.data || [];
+        } else {
+          console.error('Vendors loading failed:', vendorsResponse);
+        }
+
+        if (servicesResponse.status === 'fulfilled' && !servicesResponse.value.error) {
+          services = servicesResponse.value.data || [];
+        } else {
+          console.error('Services loading failed:', servicesResponse);
+        }
+
+        // Format and add vendor info to services
+        const formattedServices = services.map(service => ({
+          ...service,
+          discount_percentage: service.discount_percentage ? String(service.discount_percentage) : undefined,
+          vendor: {
+            name: 'Service Provider',
+            rating: 4.5,
+            review_count: 0,
+            is_verified: true
+          }
+        }));
+
+        return new Response(JSON.stringify({
+          services: formattedServices,
+          vendors: vendors,
+          cached: false,
+          timestamp: new Date().toISOString()
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200,
+        });
 
       default:
-        throw new Error(`Unknown action: ${action}`);
+        throw new Error('Invalid action');
     }
-
-    return new Response(
-      JSON.stringify(result),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
 
   } catch (error) {
     console.error('Analytics optimizer error:', error);
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500
-      }
-    );
+    return new Response(JSON.stringify({ error: error.message }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: 500,
+    });
   }
 });
-
-async function refreshVendorAnalytics(supabase: any, vendorId?: string) {
-  console.log('Refreshing vendor analytics materialized view');
-  
-  try {
-    // Refresh the materialized view
-    const { error } = await supabase.rpc('refresh_vendor_analytics');
-    
-    if (error) {
-      throw error;
-    }
-
-    // If specific vendor requested, return their updated analytics
-    if (vendorId) {
-      const { data: analytics, error: analyticsError } = await supabase
-        .from('vendor_service_analytics')
-        .select('*')
-        .eq('vendor_id', vendorId)
-        .single();
-
-      if (analyticsError) {
-        console.warn('Could not fetch specific vendor analytics:', analyticsError);
-      }
-
-      return {
-        success: true,
-        message: 'Analytics refreshed successfully',
-        vendor_analytics: analytics
-      };
-    }
-
-    return {
-      success: true,
-      message: 'Vendor analytics materialized view refreshed successfully'
-    };
-
-  } catch (error) {
-    console.error('Error refreshing vendor analytics:', error);
-    return {
-      success: false,
-      error: error.message
-    };
-  }
-}
-
-async function getOptimizedAnalytics(supabase: any, vendorId: string) {
-  console.log(`Getting optimized analytics for vendor: ${vendorId}`);
-  
-  try {
-    // Get from materialized view first (fastest)
-    const { data: quickStats, error: quickError } = await supabase
-      .from('vendor_service_analytics')
-      .select('*')
-      .eq('vendor_id', vendorId)
-      .single();
-
-    if (quickError && quickError.code !== 'PGRST116') {
-      throw quickError;
-    }
-
-    // Get detailed service analytics using optimized queries
-    const { data: serviceDetails, error: serviceError } = await supabase
-      .from('services')
-      .select(`
-        id,
-        title,
-        category,
-        service_views!service_views_service_id_fkey(count),
-        consultation_bookings!consultation_bookings_service_id_fkey(count)
-      `)
-      .eq('vendor_id', vendorId)
-      .limit(20); // Limit for performance
-
-    if (serviceError) {
-      console.warn('Could not fetch detailed service analytics:', serviceError);
-    }
-
-    // Get recent activity (last 30 days) with indexed query
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-    const { data: recentActivity, error: activityError } = await supabase
-      .from('vendor_agent_activities')
-      .select('activity_type, created_at')
-      .eq('vendor_id', vendorId)
-      .gte('created_at', thirtyDaysAgo.toISOString())
-      .order('created_at', { ascending: false })
-      .limit(100);
-
-    if (activityError) {
-      console.warn('Could not fetch recent activity:', activityError);
-    }
-
-    return {
-      success: true,
-      data: {
-        overview: quickStats,
-        services: serviceDetails || [],
-        recent_activity: recentActivity || [],
-        last_updated: new Date().toISOString()
-      }
-    };
-
-  } catch (error) {
-    console.error('Error getting optimized analytics:', error);
-    return {
-      success: false,
-      error: error.message
-    };
-  }
-}
-
-async function cleanupOldAnalyticsData(supabase: any) {
-  console.log('Cleaning up old analytics data');
-  
-  try {
-    const sixMonthsAgo = new Date();
-    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-
-    // Clean up old service views (keep last 6 months)
-    const { error: viewsError } = await supabase
-      .from('service_views')
-      .delete()
-      .lt('viewed_at', sixMonthsAgo.toISOString());
-
-    if (viewsError) {
-      console.warn('Error cleaning up service views:', viewsError);
-    }
-
-    // Clean up old vendor activities (keep last 6 months)
-    const { error: activitiesError } = await supabase
-      .from('vendor_agent_activities')
-      .delete()
-      .lt('created_at', sixMonthsAgo.toISOString());
-
-    if (activitiesError) {
-      console.warn('Error cleaning up vendor activities:', activitiesError);
-    }
-
-    // Clean up old engagement events (keep last 6 months)
-    const { error: engagementError } = await supabase
-      .from('content_engagement_events')
-      .delete()
-      .lt('created_at', sixMonthsAgo.toISOString());
-
-    if (engagementError) {
-      console.warn('Error cleaning up engagement events:', engagementError);
-    }
-
-    return {
-      success: true,
-      message: 'Analytics data cleanup completed'
-    };
-
-  } catch (error) {
-    console.error('Error during analytics cleanup:', error);
-    return {
-      success: false,
-      error: error.message
-    };
-  }
-}
-
-async function aggregateMonthlyStats(supabase: any) {
-  console.log('Aggregating monthly statistics');
-  
-  try {
-    const currentMonth = new Date().toISOString().substring(0, 7); // YYYY-MM format
-    
-    // Aggregate vendor performance for current month
-    const { data: monthlyVendorStats, error: vendorStatsError } = await supabase
-      .rpc('get_monthly_vendor_performance', { target_month: currentMonth });
-
-    if (vendorStatsError) {
-      console.warn('Error aggregating vendor stats:', vendorStatsError);
-    }
-
-    // Aggregate content performance for current month
-    const { data: monthlyContentStats, error: contentStatsError } = await supabase
-      .rpc('get_monthly_content_performance', { target_month: currentMonth });
-
-    if (contentStatsError) {
-      console.warn('Error aggregating content stats:', contentStatsError);
-    }
-
-    return {
-      success: true,
-      message: 'Monthly statistics aggregation completed',
-      data: {
-        vendor_stats: monthlyVendorStats,
-        content_stats: monthlyContentStats
-      }
-    };
-
-  } catch (error) {
-    console.error('Error aggregating monthly stats:', error);
-    return {
-      success: false,
-      error: error.message
-    };
-  }
-}

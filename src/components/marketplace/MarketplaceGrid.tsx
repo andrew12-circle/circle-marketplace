@@ -20,8 +20,9 @@ import { Link } from "react-router-dom";
 import { CategoryMegaMenu } from "./CategoryMegaMenu";
 import { EnhancedSearch, SearchFilters } from "./EnhancedSearch";
 import { VendorCallToAction } from "./VendorCallToAction";
-import { cacheManager } from "@/utils/cacheManager";
-import { useStableLoading } from "@/hooks/useStableState";
+import { useOptimizedMarketplace } from "@/hooks/useOptimizedMarketplace";
+import { BackgroundJobManager } from "@/components/common/BackgroundJobManager";
+import { Service as APIService, Vendor as APIVendor } from "@/services/marketplaceAPI";
 import { marketplaceAPI } from "@/services/marketplaceAPI";
 interface FilterState {
   category: string;
@@ -90,10 +91,17 @@ interface LocalRepresentative {
 type ViewMode = "services" | "products" | "vendors";
 export const MarketplaceGrid = () => {
   const { t } = useTranslation();
-  const [services, setServices] = useState<Service[]>([]);
-  const [vendors, setVendors] = useState<Vendor[]>([]);
-  const [loading, setLoadingStable] = useStableLoading(500);
-  const [error, setError] = useState<string | null>(null);
+  
+  // Use optimized marketplace hook instead of direct state management
+  const {
+    services,
+    vendors,
+    loading,
+    error,
+    refetch: loadData,
+    refreshAnalytics,
+    trackView
+  } = useOptimizedMarketplace({ autoRefresh: true, refreshInterval: 10 * 60 * 1000 });
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>("services");
   const [selectedProductCategory, setSelectedProductCategory] = useState<string | null>(null);
@@ -215,63 +223,9 @@ export const MarketplaceGrid = () => {
       console.error('Error loading saved services:', error);
     }
   };
-  const loadData = useCallback(async () => {
-    // Use optimized API instead of direct database calls
-    try {
-      setLoadingStable(true);
-      setError(null);
-      console.log('Loading marketplace data via optimized API...');
+  // Data loading is now handled by useOptimizedMarketplace hook
 
-      const [servicesData, vendorsData] = await Promise.allSettled([
-        marketplaceAPI.getServices({ limit: 100 }),
-        marketplaceAPI.getVendors({ limit: 50 })
-      ]);
-
-      if (servicesData.status === 'fulfilled') {
-        setServices(servicesData.value);
-      } else {
-        console.error('Services loading failed:', servicesData.reason);
-      }
-
-      if (vendorsData.status === 'fulfilled') {
-        setVendors(vendorsData.value);
-      } else {
-        console.error('Vendors loading failed:', vendorsData.reason);
-      }
-
-    } catch (error) {
-      console.error('Marketplace data loading error:', error);
-      setError(`Failed to load marketplace data: ${error.message || 'Unknown error'}`);
-      toast({
-        title: "Error loading data", 
-        description: `Failed to load marketplace data: ${error.message || 'Please try again.'}`,
-        variant: "destructive"
-      });
-    } finally {
-      setLoadingStable(false);
-    }
-  }, [toast]);
-
-  // Prevent multiple simultaneous loads
-  const [isLoadingRef, setIsLoadingRef] = useState(false);
-  
-  useEffect(() => {
-    if (isLoadingRef) return; // Prevent duplicate loads
-    setIsLoadingRef(true);
-    loadData().finally(() => setIsLoadingRef(false));
-  }, [loadData]);
-
-  // Listen for cache clear events
-  useEffect(() => {
-    const handleClearCache = () => {
-      console.log('Cache clear event received, reloading data...');
-      setIsLoadingRef(true);
-      loadData().finally(() => setIsLoadingRef(false));
-    };
-    
-    window.addEventListener('clearCache', handleClearCache);
-    return () => window.removeEventListener('clearCache', handleClearCache);
-  }, [loadData]);
+  // Loading logic is now handled by useOptimizedMarketplace hook
   useEffect(() => {
     if (profile?.user_id) {
       loadSavedServices();
