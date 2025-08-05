@@ -75,17 +75,45 @@ class MarketplaceAPI {
 
       return withErrorRecovery(
         async () => {
-          // Use the optimized edge function
-          const { data, error } = await supabase.functions.invoke('analytics-optimizer', {
-            body: { action: 'get_marketplace_data' }
-          });
+          // Direct database query as fallback to edge function
+          console.log('Fetching data directly from database...');
+          
+          // Fetch vendors directly
+          const { data: vendorsData, error: vendorsError } = await supabase
+            .from('vendors')
+            .select('*');
+          
+          if (vendorsError) {
+            console.error('Error fetching vendors:', vendorsError);
+          }
 
-          if (error) throw error;
+          // Fetch services with vendor info
+          const { data: servicesData, error: servicesError } = await supabase
+            .from('services')
+            .select(`
+              *,
+              vendor:vendor_id (
+                name,
+                rating,
+                review_count,
+                is_verified
+              )
+            `);
+
+          if (servicesError) {
+            console.error('Error fetching services:', servicesError);
+          }
 
           const result = {
-            services: data.services || [],
-            vendors: data.vendors || []
+            services: servicesData || [],
+            vendors: vendorsData || []
           };
+
+          console.log('Direct DB fetch result:', { 
+            services: result.services.length, 
+            vendors: result.vendors.length,
+            vendorsData: result.vendors
+          });
 
           // Cache the result
           cacheManager.set(cacheKey, result, 5 * 60 * 1000); // 5 minutes cache
