@@ -19,6 +19,7 @@ import { ServiceFunnelModal } from "./ServiceFunnelModal";
 import { VendorSelectionModal } from "./VendorSelectionModal";
 import { PricingChoiceModal } from "./PricingChoiceModal";
 import { DirectPurchaseModal } from "./DirectPurchaseModal";
+import { OptimizedImage } from "@/components/common/OptimizedImage";
 
 interface Service {
   id: string;
@@ -216,10 +217,14 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
 
       {/* Image - Fixed height */}
       <div className="relative h-48 overflow-hidden bg-white flex-shrink-0 p-4">
-        <img
-          src={service.image_url || "/public/placeholder.svg"}
+        <OptimizedImage
+          src={service.image_url || "/placeholder.svg"}
           alt={service.title}
+          imageType="content"
+          contentId={service.id}
           className="w-full h-full object-contain object-center transition-transform duration-300 group-hover:scale-105"
+          width={400}
+          height={225}
         />
       </div>
 
