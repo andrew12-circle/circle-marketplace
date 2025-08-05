@@ -2061,6 +2061,48 @@ export type Database = {
         }
         Relationships: []
       }
+      image_cache: {
+        Row: {
+          cached_url: string
+          content_id: string | null
+          created_at: string | null
+          file_size: number | null
+          format: string | null
+          height: number | null
+          id: string
+          image_type: string
+          last_accessed: string | null
+          original_url: string
+          width: number | null
+        }
+        Insert: {
+          cached_url: string
+          content_id?: string | null
+          created_at?: string | null
+          file_size?: number | null
+          format?: string | null
+          height?: number | null
+          id?: string
+          image_type: string
+          last_accessed?: string | null
+          original_url: string
+          width?: number | null
+        }
+        Update: {
+          cached_url?: string
+          content_id?: string | null
+          created_at?: string | null
+          file_size?: number | null
+          format?: string | null
+          height?: number | null
+          id?: string
+          image_type?: string
+          last_accessed?: string | null
+          original_url?: string
+          width?: number | null
+        }
+        Relationships: []
+      }
       image_processing_log: {
         Row: {
           created_at: string
