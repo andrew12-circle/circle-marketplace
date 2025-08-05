@@ -25,7 +25,7 @@ export const useOptimizedImage = ({
   maxWidth = 800,
   maxHeight = 600
 }: UseOptimizedImageOptions): UseOptimizedImageReturn => {
-  const [optimizedUrl, setOptimizedUrl] = useState<string>(imageUrl); // Start with original URL
+  const [optimizedUrl, setOptimizedUrl] = useState<string>(fallbackUrl);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isFromCache, setIsFromCache] = useState(false);
@@ -42,28 +42,25 @@ export const useOptimizedImage = ({
       return;
     }
 
-    // Always start with original URL for immediate display
-    setOptimizedUrl(imageUrl);
-
     const processImage = async () => {
       setIsLoading(true);
       setError(null);
 
       try {
         // Check cache first
-        const { data: cachedImage, error: cacheError } = await supabase
+        const { data: cachedImage } = await supabase
           .from('image_cache')
           .select('cached_url')
           .eq('original_url', imageUrl)
           .eq('image_type', imageType)
           .maybeSingle();
 
-        if (cachedImage && !cacheError) {
+        if (cachedImage) {
           setOptimizedUrl(cachedImage.cached_url);
           setIsFromCache(true);
           
-          // Update last accessed in background
-          supabase
+          // Update last accessed
+          await supabase
             .from('image_cache')
             .update({ last_accessed: new Date().toISOString() })
             .eq('original_url', imageUrl)
@@ -72,38 +69,37 @@ export const useOptimizedImage = ({
           return;
         }
 
-        // Only try to process image if user has access (ignore failures for unauthenticated users)
-        try {
-          const { data, error: functionError } = await supabase.functions.invoke('process-image', {
-            body: {
-              imageUrl,
-              imageType,
-              contentId,
-              maxWidth,
-              maxHeight
-            }
-          });
-
-          if (!functionError && data && data.success) {
-            setOptimizedUrl(data.cachedUrl);
-            setIsFromCache(data.fromCache || false);
+        // Process image through edge function
+        const { data, error: functionError } = await supabase.functions.invoke('process-image', {
+          body: {
+            imageUrl,
+            imageType,
+            contentId,
+            maxWidth,
+            maxHeight
           }
-          // If function fails, silently continue with original URL
-        } catch (functionErr) {
-          // Silently fail for edge function errors (keeps original URL)
-          console.debug('Image optimization unavailable, using original URL');
+        });
+
+        if (functionError) {
+          throw new Error(functionError.message);
+        }
+
+        if (data.success) {
+          setOptimizedUrl(data.cachedUrl);
+          setIsFromCache(data.fromCache || false);
+        } else {
+          throw new Error(data.error || 'Failed to process image');
         }
 
       } catch (err) {
-        console.debug('Image optimization failed, using original URL:', err);
-        setError(err instanceof Error ? err.message : 'Optimization failed');
-        // Keep original URL
+        console.error('Error optimizing image:', err);
+        setError(err instanceof Error ? err.message : 'Unknown error');
+        setOptimizedUrl(fallbackUrl);
       } finally {
         setIsLoading(false);
       }
     };
 
-    // Start optimization in background
     processImage();
   }, [imageUrl, imageType, contentId, fallbackUrl, maxWidth, maxHeight]);
 

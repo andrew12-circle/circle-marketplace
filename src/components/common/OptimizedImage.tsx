@@ -52,17 +52,22 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     onError?.();
   };
 
-  // Always show the image immediately, no skeleton delay
-  if (!imageLoaded && !imageError) {
+  // Show skeleton while optimizing or loading
+  if (isOptimizing || (!imageLoaded && !imageError)) {
     return (
-      <img
-        src={optimizedUrl}
-        alt={alt}
-        className={cn('w-full h-full object-cover opacity-0 transition-opacity duration-300', className)}
-        loading={loading}
-        onLoad={handleImageLoad}
-        onError={handleImageError}
-      />
+      <div className={cn('relative overflow-hidden', className)}>
+        <Skeleton className="w-full h-full absolute inset-0" />
+        {!isOptimizing && (
+          <img
+            src={optimizedUrl}
+            alt={alt}
+            className={cn('w-full h-full object-cover opacity-0', className)}
+            loading={loading}
+            onLoad={handleImageLoad}
+            onError={handleImageError}
+          />
+        )}
+      </div>
     );
   }
 
