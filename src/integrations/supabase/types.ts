@@ -4580,6 +4580,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      clean_ip_address: {
+        Args: { input_ip: string }
+        Returns: unknown
+      }
       cleanup_old_security_events: {
         Args: Record<PropertyKey, never>
         Returns: undefined
@@ -4618,6 +4622,46 @@ export type Database = {
           display_verified: boolean
           platform_bio: string
           youtube_channel_id: string
+        }[]
+      }
+      get_optimized_marketplace_data: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          service_id: string
+          service_title: string
+          service_description: string
+          service_category: string
+          service_discount_percentage: string
+          service_retail_price: string
+          service_pro_price: string
+          service_co_pay_price: string
+          service_image_url: string
+          service_tags: string[]
+          service_is_featured: boolean
+          service_is_top_pick: boolean
+          service_estimated_roi: number
+          service_duration: string
+          service_requires_quote: boolean
+          service_sort_order: number
+          vendor_id: string
+          vendor_name: string
+          vendor_rating: number
+          vendor_review_count: number
+          vendor_is_verified: boolean
+          vendor_description: string
+          vendor_logo_url: string
+          vendor_website_url: string
+          vendor_location: string
+          vendor_co_marketing_agents: number
+          vendor_campaigns_funded: number
+          vendor_service_states: string[]
+          vendor_mls_areas: string[]
+          vendor_service_radius_miles: number
+          vendor_license_states: string[]
+          vendor_latitude: number
+          vendor_longitude: number
+          vendor_type: string
+          vendor_local_representatives: Json
         }[]
       }
       get_public_profile: {

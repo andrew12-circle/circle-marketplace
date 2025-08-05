@@ -5,6 +5,7 @@ import { EnhancedVendorCard } from "./EnhancedVendorCard";
 import { MarketplaceFilters } from "./MarketplaceFilters";
 import { CampaignServicesHeader } from "./CampaignServicesHeader";
 import { CircleProBanner } from "./CircleProBanner";
+import { MarketplaceErrorBoundary } from "./MarketplaceErrorBoundary";
 import { ServiceDetailsModal } from "./ServiceDetailsModal";
 import { AIConciergeBanner } from "./AIConciergeBanner";
 import { AddProductModal } from "./AddProductModal";
@@ -452,7 +453,7 @@ export const MarketplaceGrid = () => {
         </div>
       </div>;
   }
-  return <>
+  return <MarketplaceErrorBoundary>
       <div className="min-h-screen bg-background">
         <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
           {/* Hero Section */}
@@ -647,5 +648,5 @@ export const MarketplaceGrid = () => {
 
       {/* Add Product Modal */}
       <AddProductModal open={isAddProductModalOpen} onOpenChange={setIsAddProductModalOpen} onProductAdded={loadData} />
-    </>;
+    </MarketplaceErrorBoundary>;
 };

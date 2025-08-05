@@ -25,9 +25,9 @@ export const useOptimizedMarketplace = (options: UseOptimizedMarketplaceOptions 
       
       console.log('Loading optimized marketplace data...');
       
-      // Add additional timeout at hook level
+      // Add additional timeout at hook level with longer duration
       const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Marketplace loading timeout after 15 seconds')), 15000);
+        setTimeout(() => reject(new Error('Marketplace loading timeout after 45 seconds')), 45000);
       });
       
       const dataPromise = marketplaceAPI.getMarketplaceData();

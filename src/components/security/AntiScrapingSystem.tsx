@@ -10,6 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import { Shield, AlertTriangle, Ban, Eye, Activity, Clock } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { IPAddressHelper } from '@/utils/ipAddressHelper';
 
 interface BlockedIP {
   id: string;
@@ -115,10 +116,16 @@ const AntiScrapingSystem: React.FC = () => {
   const blockIP = async (ipAddress: string, reason: string, permanent = false) => {
     setLoading(true);
     try {
+      // Clean and validate IP address before sending
+      const cleanedIP = IPAddressHelper.cleanIPAddress(ipAddress);
+      if (!cleanedIP) {
+        throw new Error('Invalid IP address format');
+      }
+
       const { error } = await supabase.functions.invoke('detect-scraping', {
         body: {
           action: 'block_ip',
-          ip_address: ipAddress,
+          ip_address: cleanedIP,
           reason,
           permanent
         }

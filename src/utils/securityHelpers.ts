@@ -72,18 +72,22 @@ export const logSecurityEvent = async (
   request?: Request
 ) => {
   try {
-    const clientIP = request?.headers.get('x-forwarded-for') || 
+    const rawIP = request?.headers.get('x-forwarded-for') || 
                     request?.headers.get('x-real-ip') || 
                     'unknown';
     
     const userAgent = request?.headers.get('user-agent') || 'unknown';
+    const clientIP = IPAddressHelper.safeIPForDB(rawIP);
 
     await supabase
       .from('security_events')
       .insert({
         event_type: eventType,
         user_id: userId,
-        event_data: eventData,
+        event_data: {
+          ...eventData,
+          ip_address: clientIP // Store IP in event_data as well for consistency
+        },
         ip_address: clientIP,
         user_agent: userAgent
       });

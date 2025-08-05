@@ -59,9 +59,9 @@ class MarketplaceAPI {
     return MarketplaceAPI.instance;
   }
 
-  // Optimized marketplace data loading with caching and API abstraction
+  // Optimized marketplace data loading using database function
   async getMarketplaceData(): Promise<{ services: Service[]; vendors: Vendor[] }> {
-    const cacheKey = 'marketplace-data-optimized';
+    const cacheKey = 'marketplace-data-optimized-v2';
     
     return PerformanceOptimizer.deduplicateRequest(cacheKey, async () => {
       // Check cache first
@@ -71,89 +71,159 @@ class MarketplaceAPI {
         return cachedData;
       }
 
-      console.log('Loading marketplace data from API...');
+      console.log('Loading marketplace data using optimized database function...');
 
       return withErrorRecovery(
         async () => {
-          // Add timeout to prevent infinite loading
+          // Use optimized database function with longer timeout
           const timeoutPromise = new Promise((_, reject) => {
-            setTimeout(() => reject(new Error('Query timeout')), 10000); // 10 second timeout
+            setTimeout(() => reject(new Error('Database query timeout after 30 seconds')), 30000);
           });
 
-          console.log('Fetching data directly from database with timeout...');
+          console.log('Calling optimized marketplace function...');
           
-          // Fetch vendors directly with timeout
-          const vendorsPromise = supabase
-            .from('vendors')
-            .select('*');
-          
-          const { data: vendorsData, error: vendorsError } = await Promise.race([
-            vendorsPromise,
+          // Call the optimized database function
+          const { data: marketplaceData, error: marketplaceError } = await Promise.race([
+            supabase.rpc('get_optimized_marketplace_data'),
             timeoutPromise
           ]) as any;
           
-          if (vendorsError) {
-            console.error('Error fetching vendors:', vendorsError);
+          if (marketplaceError) {
+            console.error('Error calling marketplace function:', marketplaceError);
+            // Fallback to direct queries with shorter timeout
+            return this.getFallbackMarketplaceData();
           }
 
-          // Fetch services with OPTIONAL vendor info (LEFT JOIN behavior)
-          // This handles NULL vendor_id values gracefully
-          const servicesPromise = supabase
-            .from('services')
-            .select(`
-              *,
-              vendor:vendor_id (
-                name,
-                rating,
-                review_count,
-                is_verified
-              )
-            `)
-            .order('sort_order', { ascending: true })
-            .order('is_featured', { ascending: false })
-            .order('is_top_pick', { ascending: false });
-
-          const { data: servicesData, error: servicesError } = await Promise.race([
-            servicesPromise,
-            timeoutPromise
-          ]) as any;
-
-          if (servicesError) {
-            console.error('Error fetching services:', servicesError);
-            throw servicesError;
-          }
-
-          // Process services to handle missing vendor data
-          const processedServices = (servicesData || []).map((service: any) => ({
-            ...service,
-            vendor: service.vendor || {
-              name: 'Circle Marketplace',
-              rating: 0,
-              review_count: 0,
-              is_verified: false
+          // Process the optimized data
+          const services = (marketplaceData || []).map((row: any) => ({
+            id: row.service_id,
+            title: row.service_title,
+            description: row.service_description,
+            category: row.service_category,
+            discount_percentage: row.service_discount_percentage,
+            retail_price: row.service_retail_price,
+            pro_price: row.service_pro_price,
+            co_pay_price: row.service_co_pay_price,
+            image_url: row.service_image_url,
+            tags: row.service_tags,
+            is_featured: row.service_is_featured,
+            is_top_pick: row.service_is_top_pick,
+            estimated_roi: row.service_estimated_roi,
+            duration: row.service_duration,
+            requires_quote: row.service_requires_quote,
+            vendor: {
+              name: row.vendor_name,
+              rating: row.vendor_rating,
+              review_count: row.vendor_review_count,
+              is_verified: row.vendor_is_verified
             }
           }));
 
-          const result = {
-            services: processedServices,
-            vendors: vendorsData || []
-          };
-
-          console.log('Direct DB fetch result:', { 
-            services: result.services.length, 
-            vendors: result.vendors.length,
-            servicesWithNullVendor: result.services.filter(s => !s.vendor_id).length
+          // Get unique vendors from the service data
+          const vendorMap = new Map();
+          marketplaceData?.forEach((row: any) => {
+            if (row.vendor_id && !vendorMap.has(row.vendor_id)) {
+              vendorMap.set(row.vendor_id, {
+                id: row.vendor_id,
+                name: row.vendor_name,
+                description: row.vendor_description,
+                logo_url: row.vendor_logo_url,
+                website_url: row.vendor_website_url,
+                location: row.vendor_location,
+                rating: row.vendor_rating,
+                review_count: row.vendor_review_count,
+                is_verified: row.vendor_is_verified,
+                co_marketing_agents: row.vendor_co_marketing_agents,
+                campaigns_funded: row.vendor_campaigns_funded,
+                service_states: row.vendor_service_states,
+                mls_areas: row.vendor_mls_areas,
+                service_radius_miles: row.vendor_service_radius_miles,
+                license_states: row.vendor_license_states,
+                latitude: row.vendor_latitude,
+                longitude: row.vendor_longitude,
+                vendor_type: row.vendor_type,
+                local_representatives: row.vendor_local_representatives
+              });
+            }
           });
 
-          // Cache the result
-          cacheManager.set(cacheKey, result, 5 * 60 * 1000); // 5 minutes cache
+          const vendors = Array.from(vendorMap.values());
+
+          const result = { services, vendors };
+
+          console.log('Optimized DB function result:', { 
+            services: result.services.length, 
+            vendors: result.vendors.length,
+            servicesWithNullVendor: result.services.filter(s => !s.vendor.name || s.vendor.name === 'Circle Marketplace').length
+          });
+
+          // Cache the result for 10 minutes
+          cacheManager.set(cacheKey, result, 10 * 60 * 1000);
           
           return result;
         },
         { services: [], vendors: [] }, // Fallback
-        2 // Max retries
+        1 // Max retries
       );
     });
+  }
+
+  // Fallback method for direct queries
+  private async getFallbackMarketplaceData(): Promise<{ services: Service[]; vendors: Vendor[] }> {
+    console.log('Using fallback marketplace data loading...');
+    
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Fallback query timeout')), 15000);
+    });
+
+    // Fetch vendors with pagination
+    const { data: vendorsData, error: vendorsError } = await Promise.race([
+      supabase.from('vendors').select('*').limit(100),
+      timeoutPromise
+    ]) as any;
+    
+    if (vendorsError) {
+      console.error('Error fetching vendors in fallback:', vendorsError);
+    }
+
+    // Fetch services with basic vendor info
+    const { data: servicesData, error: servicesError } = await Promise.race([
+      supabase
+        .from('services')
+        .select(`
+          *,
+          vendor:vendor_id (
+            name,
+            rating,
+            review_count,
+            is_verified
+          )
+        `)
+        .order('sort_order', { ascending: true })
+        .limit(100),
+      timeoutPromise
+    ]) as any;
+
+    if (servicesError) {
+      console.error('Error fetching services in fallback:', servicesError);
+      throw servicesError;
+    }
+
+    // Process services to handle missing vendor data
+    const processedServices = (servicesData || []).map((service: any) => ({
+      ...service,
+      vendor: service.vendor || {
+        name: 'Circle Marketplace',
+        rating: 0,
+        review_count: 0,
+        is_verified: false
+      }
+    }));
+
+    return {
+      services: processedServices,
+      vendors: vendorsData || []
+    };
   }
 
   // Optimized vendor analytics with caching
