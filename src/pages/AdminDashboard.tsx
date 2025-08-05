@@ -915,9 +915,17 @@ export default function AdminDashboard() {
           <RESPADocumentationViewer />
         </TabsContent>
 
-        <TabsContent value="fraud" className="space-y-6">
-          <FraudMonitoringDashboard />
-        </TabsContent>
+          <TabsContent value="fraud" className="space-y-6">
+            <FraudMonitoringDashboard />
+          </TabsContent>
+          
+          <TabsContent value="marketplace" className="space-y-6">
+            <div>Marketplace Analytics Coming Soon</div>
+          </TabsContent>
+          
+          <TabsContent value="jobs" className="space-y-6">
+            <div>Background Jobs Coming Soon</div>
+          </TabsContent>
 
         <TabsContent value="calculator" className="space-y-6">
           <AdvancedSplitCalculator />

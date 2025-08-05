@@ -22,7 +22,6 @@ import { EnhancedSearch, SearchFilters } from "./EnhancedSearch";
 import { VendorCallToAction } from "./VendorCallToAction";
 import { cacheManager } from "@/utils/cacheManager";
 import { useStableLoading } from "@/hooks/useStableState";
-import { useOptimizedMarketplace } from "@/hooks/useOptimizedMarketplace";
 import { marketplaceAPI } from "@/services/marketplaceAPI";
 interface FilterState {
   category: string;
@@ -90,9 +89,7 @@ interface LocalRepresentative {
 }
 type ViewMode = "services" | "products" | "vendors";
 export const MarketplaceGrid = () => {
-  const {
-    t
-  } = useTranslation();
+  const { t } = useTranslation();
   const [services, setServices] = useState<Service[]>([]);
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [loading, setLoadingStable] = useStableLoading(500);
@@ -218,21 +215,30 @@ export const MarketplaceGrid = () => {
       console.error('Error loading saved services:', error);
     }
   };
-  // Replace heavy data loading with optimized API
-  const optimizedMarketplace = useOptimizedMarketplace({
-    category: filters.category,
-    featured: filters.featured,
-    verified: filters.verified
-  });
-
   const loadData = useCallback(async () => {
+    // Use optimized API instead of direct database calls
     try {
       setLoadingStable(true);
       setError(null);
-      
-      // Use the optimized marketplace hook data - let the hook handle the loading
-      // This is now managed by the optimized hook itself
-      
+      console.log('Loading marketplace data via optimized API...');
+
+      const [servicesData, vendorsData] = await Promise.allSettled([
+        marketplaceAPI.getServices({ limit: 100 }),
+        marketplaceAPI.getVendors({ limit: 50 })
+      ]);
+
+      if (servicesData.status === 'fulfilled') {
+        setServices(servicesData.value);
+      } else {
+        console.error('Services loading failed:', servicesData.reason);
+      }
+
+      if (vendorsData.status === 'fulfilled') {
+        setVendors(vendorsData.value);
+      } else {
+        console.error('Vendors loading failed:', vendorsData.reason);
+      }
+
     } catch (error) {
       console.error('Marketplace data loading error:', error);
       setError(`Failed to load marketplace data: ${error.message || 'Unknown error'}`);
@@ -245,21 +251,6 @@ export const MarketplaceGrid = () => {
       setLoadingStable(false);
     }
   }, [toast]);
-
-  // Update local state when optimized data changes
-  useEffect(() => {
-    if (optimizedMarketplace.services.length > 0 || optimizedMarketplace.vendors.length > 0) {
-      setServices(optimizedMarketplace.services);
-      setVendors(optimizedMarketplace.vendors);
-      setLoadingStable(false);
-    }
-    if (optimizedMarketplace.loading) {
-      setLoadingStable(true);
-    }
-    if (optimizedMarketplace.error) {
-      setError(optimizedMarketplace.error);
-    }
-  }, [optimizedMarketplace.services, optimizedMarketplace.vendors, optimizedMarketplace.loading, optimizedMarketplace.error]);
 
   // Prevent multiple simultaneous loads
   const [isLoadingRef, setIsLoadingRef] = useState(false);
