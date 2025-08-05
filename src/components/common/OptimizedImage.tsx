@@ -52,20 +52,6 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     onError?.();
   };
 
-  // Always show the image immediately - no skeletons for instant loading
-  if (!imageLoaded && !imageError) {
-    return (
-      <img
-        src={optimizedUrl}
-        alt={alt}
-        className={cn('w-full h-full object-cover', className)}
-        loading={loading}
-        onLoad={handleImageLoad}
-        onError={handleImageError}
-      />
-    );
-  }
-
   // Show fallback if there's an error
   if (imageError || optimizationError) {
     return (
@@ -78,6 +64,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     );
   }
 
+  // Always show the optimized image - instant loading, no skeleton
   return (
     <img
       src={optimizedUrl}
