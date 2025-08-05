@@ -366,12 +366,9 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                          </TooltipContent>
                        </Tooltip>
                     </div>
-                    <span className="text-lg font-bold text-green-600">
-                      {formatPrice(
-                        extractNumericPrice(service.retail_price) * (1 - (service.max_split_percentage_ssp / 100)), 
-                        service.price_duration || 'mo'
-                      )}
-                    </span>
+                     <span className="text-lg font-bold text-green-600">
+                       {formatPrice(service.co_pay_price || service.retail_price, service.price_duration || 'mo')}
+                     </span>
                   </div>
                   <div className="flex justify-end">
                      <Badge className="bg-green-600 text-white text-xs">
