@@ -499,70 +499,115 @@ export const MarketplaceGrid = () => {
 
 
           {/* Grid - Mobile Responsive */}
-          {viewMode === "services" ? <div className="mobile-grid gap-4 sm:gap-6">
-              {filteredServices.map(service => <ServiceCard key={`service-${service.id}`} service={service} onSave={handleSaveService} onViewDetails={handleViewServiceDetails} isSaved={savedServiceIds.includes(service.id)} />)}
-            </div> : viewMode === "products" ? selectedProductCategory ? <div>
-                <div className="mb-6 flex items-center gap-4">
-                  <Button variant="outline" onClick={handleBackToProducts}>
-                    ← Back to Products
-                  </Button>
-                  <h2 className="text-2xl font-bold">
-                    {PRODUCT_CATEGORIES.find(p => p.id === selectedProductCategory)?.name}
-                  </h2>
+          {viewMode === "services" && (
+            <div className="mobile-grid gap-4 sm:gap-6">
+              {filteredServices.map(service => 
+                <ServiceCard 
+                  key={`service-${service.id}`} 
+                  service={service} 
+                  onSave={handleSaveService} 
+                  onViewDetails={handleViewServiceDetails} 
+                  isSaved={savedServiceIds.includes(service.id)} 
+                />
+              )}
+            </div>
+          )}
+
+          {viewMode === "vendors" && (
+            <div className="mobile-grid gap-4 sm:gap-6">
+              {filteredVendors.map(vendor => 
+                <EnhancedVendorCard 
+                  key={vendor.id} 
+                  vendor={vendor} 
+                  onConnect={handleConnectVendor} 
+                  onViewProfile={handleViewVendorProfile} 
+                />
+              )}
+            </div>
+          )}
+
+          {viewMode === "products" && (
+            <>
+              {selectedProductCategory ? (
+                <div>
+                  <div className="mb-6 flex items-center gap-4">
+                    <Button variant="outline" onClick={handleBackToProducts}>
+                      ← Back to Products
+                    </Button>
+                    <h2 className="text-2xl font-bold">
+                      {PRODUCT_CATEGORIES.find(p => p.id === selectedProductCategory)?.name}
+                    </h2>
+                  </div>
+                  <div className="mobile-grid gap-4 sm:gap-6">
+                    {getServicesForProduct(selectedProductCategory).map(service => 
+                      <ServiceCard 
+                        key={`product-${selectedProductCategory}-${service.id}`} 
+                        service={service} 
+                        onSave={handleSaveService} 
+                        onViewDetails={handleViewServiceDetails} 
+                        isSaved={savedServiceIds.includes(service.id)} 
+                      />
+                    )}
+                  </div>
                 </div>
+              ) : (
                 <div className="mobile-grid gap-4 sm:gap-6">
-                  {getServicesForProduct(selectedProductCategory).map(service => <ServiceCard key={`product-${selectedProductCategory}-${service.id}`} service={service} onSave={handleSaveService} onViewDetails={handleViewServiceDetails} isSaved={savedServiceIds.includes(service.id)} />)}
-                </div>
-              </div> : <div className="mobile-grid gap-4 sm:gap-6">
-                {filteredProducts.map(product => {
-            const IconComponent = product.icon;
-            return <div key={product.id} className="group relative overflow-hidden bg-white rounded-xl border border-gray-200 hover:border-gray-300 cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1" onClick={() => handleSelectProduct(product.id)}>
-                      {/* Background Gradient */}
-                      <div className={`absolute inset-0 bg-gradient-to-br ${product.gradient} opacity-5 group-hover:opacity-10 transition-opacity duration-300`} />
-                      
-                      {/* Content */}
-                      <div className="relative p-6">
-                        {/* Icon and Header */}
-                        <div className="flex items-start justify-between mb-4">
-                          <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${product.gradient} flex items-center justify-center shadow-lg`}>
-                            <IconComponent className="w-6 h-6 text-white" />
+                  {filteredProducts.map(product => {
+                    const IconComponent = product.icon;
+                    return (
+                      <div 
+                        key={product.id} 
+                        className="group relative overflow-hidden bg-white rounded-xl border border-gray-200 hover:border-gray-300 cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1" 
+                        onClick={() => handleSelectProduct(product.id)}
+                      >
+                        {/* Background Gradient */}
+                        <div className={`absolute inset-0 bg-gradient-to-br ${product.gradient} opacity-5 group-hover:opacity-10 transition-opacity duration-300`} />
+                        
+                        {/* Content */}
+                        <div className="relative p-6">
+                          {/* Icon and Header */}
+                          <div className="flex items-start justify-between mb-4">
+                            <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${product.gradient} flex items-center justify-center shadow-lg`}>
+                              <IconComponent className="w-6 h-6 text-white" />
+                            </div>
+                            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                              <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-gray-600 transform group-hover:translate-x-1 transition-all duration-300" />
+                            </div>
                           </div>
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                            <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-gray-600 transform group-hover:translate-x-1 transition-all duration-300" />
+
+                          {/* Title */}
+                          <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-gray-800 transition-colors duration-300">
+                            {product.name}
+                          </h3>
+
+                          {/* Description */}
+                          <p className="text-gray-600 text-sm leading-relaxed mb-6 line-clamp-2">
+                            {product.description}
+                          </p>
+
+                          {/* Footer */}
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <div className={`w-2 h-2 rounded-full bg-gradient-to-r ${product.gradient}`} />
+                              <span className="text-sm font-medium text-gray-700">
+                                {getServicesForProduct(product.id).length} providers
+                              </span>
+                            </div>
+                            <Button variant="ghost" size="sm" className={`${product.color} hover:bg-gray-50 font-medium opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0`}>
+                              Explore →
+                            </Button>
                           </div>
                         </div>
 
-                        {/* Title */}
-                        <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-gray-800 transition-colors duration-300">
-                          {product.name}
-                        </h3>
-
-                        {/* Description */}
-                        <p className="text-gray-600 text-sm leading-relaxed mb-6 line-clamp-2">
-                          {product.description}
-                        </p>
-
-                        {/* Footer */}
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <div className={`w-2 h-2 rounded-full bg-gradient-to-r ${product.gradient}`} />
-                            <span className="text-sm font-medium text-gray-700">
-                              {getServicesForProduct(product.id).length} providers
-                            </span>
-                          </div>
-                          <Button variant="ghost" size="sm" className={`${product.color} hover:bg-gray-50 font-medium opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0`}>
-                            Explore →
-                          </Button>
-                        </div>
+                        {/* Hover Effect Overlay */}
+                        <div className="absolute inset-0 ring-1 ring-gray-200 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                       </div>
-
-                      {/* Hover Effect Overlay */}
-                      <div className="absolute inset-0 ring-1 ring-gray-200 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    </div>;
-          })}
-              </div> : <div className="mobile-grid gap-4 sm:gap-6">
-              {filteredVendors.map(vendor => <EnhancedVendorCard key={vendor.id} vendor={vendor} onConnect={handleConnectVendor} onViewProfile={handleViewVendorProfile} />)}
-            </div>}
+                    );
+                  })}
+                </div>
+              )}
+            </>
+          )}
 
           {/* Empty State */}
           {(viewMode === "services" && filteredServices.length === 0 || viewMode === "vendors" && filteredVendors.length === 0 || viewMode === "products" && !selectedProductCategory && filteredProducts.length === 0 || viewMode === "products" && selectedProductCategory && getServicesForProduct(selectedProductCategory).length === 0) && <div className="text-center py-12">
