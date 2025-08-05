@@ -32,7 +32,8 @@ export const CampaignServicesHeader = () => {
             
             <Button
               onClick={handleAskCircleAI}
-              className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2 h-10 px-4"
+              variant="default"
+              className="flex items-center gap-2 h-10 px-4"
             >
               <MessageCircle className="w-4 h-4" />
               Ask Circle AI
@@ -40,7 +41,8 @@ export const CampaignServicesHeader = () => {
             
             <Button
               onClick={handleInviteVendor}
-              className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2 h-10 px-4"
+              variant="secondary"
+              className="flex items-center gap-2 h-10 px-4"
             >
               <UserPlus className="w-4 h-4" />
               Invite Your Vendor
