@@ -87,7 +87,7 @@ class MarketplaceAPI {
             console.error('Error fetching vendors:', vendorsError);
           }
 
-          // Fetch services with vendor info
+          // Fetch services with vendor info and sort by sort_order
           const { data: servicesData, error: servicesError } = await supabase
             .from('services')
             .select(`
@@ -98,7 +98,10 @@ class MarketplaceAPI {
                 review_count,
                 is_verified
               )
-            `);
+            `)
+            .order('sort_order', { ascending: true })
+            .order('is_featured', { ascending: false })
+            .order('is_top_pick', { ascending: false });
 
           if (servicesError) {
             console.error('Error fetching services:', servicesError);
