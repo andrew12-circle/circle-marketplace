@@ -64,10 +64,10 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     );
   }
 
-  // Always show the optimized image - instant loading, no skeleton
+  // Always show the image - start with optimized URL, no loading states
   return (
     <img
-      src={optimizedUrl}
+      src={optimizedUrl || src || fallbackSrc}
       alt={alt}
       className={cn('w-full h-full object-cover transition-opacity duration-300', className)}
       loading={loading}
