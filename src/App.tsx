@@ -18,6 +18,16 @@ import Index from "@/pages/Index";
 import Auth from "@/pages/Auth";
 import { Academy } from "@/pages/Academy";
 import { Marketplace } from "@/pages/Marketplace";
+import AdminDashboard from "@/pages/AdminDashboard";
+import { VendorDashboard } from "@/pages/VendorDashboard";
+import { VendorAnalyticsDashboard } from "@/pages/VendorAnalyticsDashboard";
+import { CreatorDashboard } from "@/pages/CreatorDashboard";
+import AIDashboard from "@/pages/AIDashboard";
+import AnalyticsDashboard from "@/pages/AnalyticsDashboard";
+import SecurityDashboard from "@/pages/SecurityDashboard";
+import SupportDashboard from "@/pages/SupportDashboard";
+import AdvancedFeaturesDashboard from "@/pages/AdvancedFeaturesDashboard";
+import { AdminAccounting } from "@/pages/AdminAccounting";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -47,6 +57,28 @@ const App = () => {
                     <Route path="/auth" element={<Auth />} />
                     <Route path="/academy" element={<Academy />} />
                     <Route path="/marketplace" element={<Marketplace />} />
+                    
+                    {/* Admin Dashboard Routes */}
+                    <Route path="/admin" element={<AdminDashboard />} />
+                    <Route path="/admin-dashboard" element={<AdminDashboard />} />
+                    <Route path="/admin-accounting" element={<AdminAccounting />} />
+                    
+                    {/* Vendor Dashboard Routes */}
+                    <Route path="/vendor-dashboard" element={<VendorDashboard />} />
+                    <Route path="/vendor-analytics" element={<VendorAnalyticsDashboard />} />
+                    
+                    {/* Creator Dashboard */}
+                    <Route path="/creator-dashboard" element={<CreatorDashboard />} />
+                    
+                    {/* Analytics & AI Dashboards */}
+                    <Route path="/ai-dashboard" element={<AIDashboard />} />
+                    <Route path="/analytics-dashboard" element={<AnalyticsDashboard />} />
+                    
+                    {/* System Dashboards */}
+                    <Route path="/security-dashboard" element={<SecurityDashboard />} />
+                    <Route path="/support-dashboard" element={<SupportDashboard />} />
+                    <Route path="/advanced-features" element={<AdvancedFeaturesDashboard />} />
+                    
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                   <Toaster />
