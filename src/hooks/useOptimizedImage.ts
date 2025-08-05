@@ -42,7 +42,7 @@ export const useOptimizedImage = ({
       return;
     }
 
-    // Set original URL immediately for fast display
+    // Always start with original URL for immediate display
     setOptimizedUrl(imageUrl);
 
     const processImage = async () => {
@@ -72,33 +72,32 @@ export const useOptimizedImage = ({
           return;
         }
 
-        // Process image through edge function
-        const { data, error: functionError } = await supabase.functions.invoke('process-image', {
-          body: {
-            imageUrl,
-            imageType,
-            contentId,
-            maxWidth,
-            maxHeight
+        // Only try to process image if user has access (ignore failures for unauthenticated users)
+        try {
+          const { data, error: functionError } = await supabase.functions.invoke('process-image', {
+            body: {
+              imageUrl,
+              imageType,
+              contentId,
+              maxWidth,
+              maxHeight
+            }
+          });
+
+          if (!functionError && data && data.success) {
+            setOptimizedUrl(data.cachedUrl);
+            setIsFromCache(data.fromCache || false);
           }
-        });
-
-        if (functionError) {
-          throw new Error(functionError.message);
-        }
-
-        if (data && data.success) {
-          setOptimizedUrl(data.cachedUrl);
-          setIsFromCache(data.fromCache || false);
-        } else {
-          // Keep original URL if optimization fails
-          console.warn('Image optimization failed, using original URL:', data?.error);
+          // If function fails, silently continue with original URL
+        } catch (functionErr) {
+          // Silently fail for edge function errors (keeps original URL)
+          console.debug('Image optimization unavailable, using original URL');
         }
 
       } catch (err) {
-        console.warn('Image optimization failed, using original URL:', err);
+        console.debug('Image optimization failed, using original URL:', err);
         setError(err instanceof Error ? err.message : 'Optimization failed');
-        // Keep original URL instead of fallback
+        // Keep original URL
       } finally {
         setIsLoading(false);
       }
