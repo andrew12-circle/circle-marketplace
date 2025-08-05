@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { IPAddressHelper } from './ipAddressHelper';
 
 // Enhanced authentication helper with proper error handling
 export const authenticateUser = async (authHeader: string | null) => {
