@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -41,6 +41,7 @@ interface KPIData {
 
 const CommandCenter = () => {
   console.log("CommandCenter component is rendering - DEBUG");
+  const navigate = useNavigate();
   const { user, profile } = useAuth();
   const { toast } = useToast();
   const [deals, setDeals] = useState<Deal[]>([]);
@@ -372,7 +373,7 @@ const CommandCenter = () => {
               Now, let's put it to work. Go to your AI Concierge Dashboard to see personalized 
               recommendations, market predictions, and partner scorecards generated from your performance data.
             </p>
-            <Button size="lg" className="gap-2" onClick={() => window.location.href = '/ai-dashboard'}>
+            <Button size="lg" className="gap-2" onClick={() => navigate('/ai-dashboard')}>
               <Brain className="w-5 h-5" />
               Take Me to My AI Concierge
               <ArrowRight className="w-5 h-5" />

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -396,6 +397,7 @@ const CreatorWelcome = ({ onNext }: any) => (
 );
 
 export const CreatorOnboarding = () => {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(0);
@@ -503,7 +505,7 @@ export const CreatorOnboarding = () => {
       });
 
       // Redirect to payment setup page
-      window.location.href = '/creator-payment-setup';
+      navigate('/creator-payment-setup');
 
     } catch (error) {
       console.error('Onboarding error:', error);

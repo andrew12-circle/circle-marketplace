@@ -253,7 +253,7 @@ export const VendorAnalyticsDashboard = () => {
         <div className="text-center bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg rounded-2xl p-8 shadow-2xl border border-slate-200/20 dark:border-slate-700/20">
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">Vendor Profile Not Found</h1>
           <p className="text-slate-600 dark:text-slate-400 mb-6">You don't appear to be registered as a vendor or your vendor profile is not activated.</p>
-          <Button onClick={() => window.location.href = '/vendor-registration'}>
+          <Button onClick={() => navigate('/vendor-registration')}>
             Register as Vendor
           </Button>
         </div>
