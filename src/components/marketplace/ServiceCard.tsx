@@ -89,6 +89,28 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
     return validation.sanitizedPrice;
   };
 
+  // Calculate dynamic discount percentage
+  const calculateDiscountPercentage = (): number | null => {
+    if (!service.retail_price) return null;
+    
+    const retailPrice = extractNumericPrice(service.retail_price);
+    
+    // If co-pay is available, calculate discount from retail to co-pay
+    if (service.copay_allowed && service.pro_price && service.max_split_percentage_ssp) {
+      const proPrice = extractNumericPrice(service.pro_price);
+      const coPayPrice = proPrice * (1 - (service.max_split_percentage_ssp / 100));
+      return Math.round(((retailPrice - coPayPrice) / retailPrice) * 100);
+    }
+    
+    // Otherwise, calculate discount from retail to pro price
+    if (service.pro_price) {
+      const proPrice = extractNumericPrice(service.pro_price);
+      return Math.round(((retailPrice - proPrice) / retailPrice) * 100);
+    }
+    
+    return null;
+  };
+
   const handleSave = (e: React.MouseEvent) => {
     e.stopPropagation();
     onSave?.(service.id);
@@ -460,10 +482,10 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                       </div>
                     </TooltipContent>
                   </Tooltip>
-                  {service.discount_percentage && (
+                  {calculateDiscountPercentage() && (
                     <div className="flex justify-end">
                        <Badge className="bg-destructive text-destructive-foreground text-xs hover:bg-green-600 hover:text-white transition-colors">
-                         {service.discount_percentage?.replace('%', '')}% OFF
+                         {calculateDiscountPercentage()}% OFF
                        </Badge>
                     </div>
                   )}
