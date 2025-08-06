@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
+import { cacheManager } from "./utils/cacheManager";
 import "./index.css";
 import "./i18n";
 
@@ -47,6 +48,9 @@ const queryClient = new QueryClient({
     },
   },
 });
+
+// Clear cache if version mismatch
+cacheManager.checkAndClearCache();
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

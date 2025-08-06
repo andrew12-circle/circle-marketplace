@@ -12,51 +12,54 @@ interface LogLevel {
 
 class Logger {
   private isDevelopment = import.meta.env.DEV;
+  
+  // Force disable in production for performance
+  private isEnabled = this.isDevelopment && import.meta.env.MODE !== 'production';
 
   log(...args: any[]): void {
-    if (this.isDevelopment) {
+    if (this.isEnabled) {
       console.log(...args);
     }
   }
 
   warn(...args: any[]): void {
-    if (this.isDevelopment) {
+    if (this.isEnabled) {
       console.warn(...args);
     }
   }
 
   error(...args: any[]): void {
-    if (this.isDevelopment) {
+    if (this.isEnabled) {
       console.error(...args);
     }
   }
 
   info(...args: any[]): void {
-    if (this.isDevelopment) {
+    if (this.isEnabled) {
       console.info(...args);
     }
   }
 
   group(label: string): void {
-    if (this.isDevelopment) {
+    if (this.isEnabled) {
       console.group(label);
     }
   }
 
   groupEnd(): void {
-    if (this.isDevelopment) {
+    if (this.isEnabled) {
       console.groupEnd();
     }
   }
 
   time(label: string): void {
-    if (this.isDevelopment) {
+    if (this.isEnabled) {
       console.time(label);
     }
   }
 
   timeEnd(label: string): void {
-    if (this.isDevelopment) {
+    if (this.isEnabled) {
       console.timeEnd(label);
     }
   }
