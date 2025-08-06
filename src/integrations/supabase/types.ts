@@ -161,6 +161,133 @@ export type Database = {
         }
         Relationships: []
       }
+      agent_relationships: {
+        Row: {
+          agent_a_id: string
+          agent_b_id: string
+          created_at: string
+          id: string
+          relationship_type: string
+          transaction_id: string | null
+        }
+        Insert: {
+          agent_a_id: string
+          agent_b_id: string
+          created_at?: string
+          id?: string
+          relationship_type: string
+          transaction_id?: string | null
+        }
+        Update: {
+          agent_a_id?: string
+          agent_b_id?: string
+          created_at?: string
+          id?: string
+          relationship_type?: string
+          transaction_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_relationships_agent_a_id_fkey"
+            columns: ["agent_a_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_relationships_agent_b_id_fkey"
+            columns: ["agent_b_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_relationships_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agents: {
+        Row: {
+          address: string | null
+          bio: string | null
+          brokerage: string | null
+          city: string | null
+          created_at: string
+          email: string
+          first_name: string
+          id: string
+          is_active: boolean | null
+          last_name: string
+          nmls_id: string | null
+          phone: string | null
+          photo_url: string | null
+          social_facebook: string | null
+          social_instagram: string | null
+          social_linkedin: string | null
+          social_youtube: string | null
+          social_zillow: string | null
+          state: string | null
+          updated_at: string
+          user_id: string | null
+          years_active: number | null
+          zip_code: string | null
+        }
+        Insert: {
+          address?: string | null
+          bio?: string | null
+          brokerage?: string | null
+          city?: string | null
+          created_at?: string
+          email: string
+          first_name: string
+          id?: string
+          is_active?: boolean | null
+          last_name: string
+          nmls_id?: string | null
+          phone?: string | null
+          photo_url?: string | null
+          social_facebook?: string | null
+          social_instagram?: string | null
+          social_linkedin?: string | null
+          social_youtube?: string | null
+          social_zillow?: string | null
+          state?: string | null
+          updated_at?: string
+          user_id?: string | null
+          years_active?: number | null
+          zip_code?: string | null
+        }
+        Update: {
+          address?: string | null
+          bio?: string | null
+          brokerage?: string | null
+          city?: string | null
+          created_at?: string
+          email?: string
+          first_name?: string
+          id?: string
+          is_active?: boolean | null
+          last_name?: string
+          nmls_id?: string | null
+          phone?: string | null
+          photo_url?: string | null
+          social_facebook?: string | null
+          social_instagram?: string | null
+          social_linkedin?: string | null
+          social_youtube?: string | null
+          social_zillow?: string | null
+          state?: string | null
+          updated_at?: string
+          user_id?: string | null
+          years_active?: number | null
+          zip_code?: string | null
+        }
+        Relationships: []
+      }
       agreement_signatures: {
         Row: {
           agreement_template_id: string | null
@@ -301,6 +428,54 @@ export type Database = {
           checksum?: string
           created_at?: string
           id?: string
+        }
+        Relationships: []
+      }
+      background_jobs: {
+        Row: {
+          attempts: number
+          completed_at: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          job_data: Json
+          job_type: string
+          max_attempts: number
+          priority: number
+          scheduled_at: string
+          started_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          attempts?: number
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          job_data?: Json
+          job_type: string
+          max_attempts?: number
+          priority?: number
+          scheduled_at?: string
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          attempts?: number
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          job_data?: Json
+          job_type?: string
+          max_attempts?: number
+          priority?: number
+          scheduled_at?: string
+          started_at?: string | null
+          status?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -510,23 +685,31 @@ export type Database = {
           agent_notes: string | null
           agent_signature_date: string | null
           agreement_template_version: string | null
+          auto_renewal: boolean | null
           comarketing_agreement_url: string | null
           compliance_notes: string | null
           compliance_reviewed_at: string | null
           compliance_reviewed_by: string | null
           compliance_status: string | null
+          contract_terms: Json | null
           created_at: string
           expires_at: string
           id: string
           ip_address: unknown | null
           marketing_campaign_details: Json | null
+          payment_duration_months: number | null
+          payment_end_date: string | null
+          payment_start_date: string | null
+          renewal_notification_sent: boolean | null
           requested_split_percentage: number
           requires_documentation: boolean | null
           service_id: string | null
           status: string
           updated_at: string
           user_agent: string | null
+          vendor_duration_limit_months: number | null
           vendor_id: string | null
+          vendor_max_percentage: number | null
           vendor_notes: string | null
           vendor_signature_date: string | null
         }
@@ -535,23 +718,31 @@ export type Database = {
           agent_notes?: string | null
           agent_signature_date?: string | null
           agreement_template_version?: string | null
+          auto_renewal?: boolean | null
           comarketing_agreement_url?: string | null
           compliance_notes?: string | null
           compliance_reviewed_at?: string | null
           compliance_reviewed_by?: string | null
           compliance_status?: string | null
+          contract_terms?: Json | null
           created_at?: string
           expires_at?: string
           id?: string
           ip_address?: unknown | null
           marketing_campaign_details?: Json | null
+          payment_duration_months?: number | null
+          payment_end_date?: string | null
+          payment_start_date?: string | null
+          renewal_notification_sent?: boolean | null
           requested_split_percentage: number
           requires_documentation?: boolean | null
           service_id?: string | null
           status?: string
           updated_at?: string
           user_agent?: string | null
+          vendor_duration_limit_months?: number | null
           vendor_id?: string | null
+          vendor_max_percentage?: number | null
           vendor_notes?: string | null
           vendor_signature_date?: string | null
         }
@@ -560,23 +751,31 @@ export type Database = {
           agent_notes?: string | null
           agent_signature_date?: string | null
           agreement_template_version?: string | null
+          auto_renewal?: boolean | null
           comarketing_agreement_url?: string | null
           compliance_notes?: string | null
           compliance_reviewed_at?: string | null
           compliance_reviewed_by?: string | null
           compliance_status?: string | null
+          contract_terms?: Json | null
           created_at?: string
           expires_at?: string
           id?: string
           ip_address?: unknown | null
           marketing_campaign_details?: Json | null
+          payment_duration_months?: number | null
+          payment_end_date?: string | null
+          payment_start_date?: string | null
+          renewal_notification_sent?: boolean | null
           requested_split_percentage?: number
           requires_documentation?: boolean | null
           service_id?: string | null
           status?: string
           updated_at?: string
           user_agent?: string | null
+          vendor_duration_limit_months?: number | null
           vendor_id?: string | null
+          vendor_max_percentage?: number | null
           vendor_notes?: string | null
           vendor_signature_date?: string | null
         }
@@ -1324,6 +1523,65 @@ export type Database = {
         }
         Relationships: []
       }
+      copay_payment_schedules: {
+        Row: {
+          agent_id: string
+          auto_renewal: boolean | null
+          co_pay_request_id: string
+          created_at: string | null
+          end_date: string
+          id: string
+          next_renewal_date: string | null
+          payment_percentage: number
+          renewal_notice_days: number | null
+          start_date: string
+          status: string
+          total_amount_covered: number | null
+          updated_at: string | null
+          vendor_id: string
+        }
+        Insert: {
+          agent_id: string
+          auto_renewal?: boolean | null
+          co_pay_request_id: string
+          created_at?: string | null
+          end_date: string
+          id?: string
+          next_renewal_date?: string | null
+          payment_percentage: number
+          renewal_notice_days?: number | null
+          start_date: string
+          status?: string
+          total_amount_covered?: number | null
+          updated_at?: string | null
+          vendor_id: string
+        }
+        Update: {
+          agent_id?: string
+          auto_renewal?: boolean | null
+          co_pay_request_id?: string
+          created_at?: string | null
+          end_date?: string
+          id?: string
+          next_renewal_date?: string | null
+          payment_percentage?: number
+          renewal_notice_days?: number | null
+          start_date?: string
+          status?: string
+          total_amount_covered?: number | null
+          updated_at?: string | null
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "copay_payment_schedules_co_pay_request_id_fkey"
+            columns: ["co_pay_request_id"]
+            isOneToOne: false
+            referencedRelation: "co_pay_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       copay_payments: {
         Row: {
           agent_amount: number
@@ -1751,6 +2009,48 @@ export type Database = {
         }
         Relationships: []
       }
+      deals: {
+        Row: {
+          address: string
+          close_date: string | null
+          created_at: string
+          id: string
+          lender_name: string | null
+          role: string
+          sale_price: number | null
+          status: string
+          title_company: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          address: string
+          close_date?: string | null
+          created_at?: string
+          id?: string
+          lender_name?: string | null
+          role: string
+          sale_price?: number | null
+          status?: string
+          title_company?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          address?: string
+          close_date?: string | null
+          created_at?: string
+          id?: string
+          lender_name?: string | null
+          role?: string
+          sale_price?: number | null
+          status?: string
+          title_company?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       failed_login_attempts: {
         Row: {
           attempt_type: string
@@ -1817,6 +2117,161 @@ export type Database = {
         }
         Relationships: []
       }
+      fraud_alerts: {
+        Row: {
+          acknowledged: boolean | null
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          alert_data: Json | null
+          alert_message: string
+          alert_type: string
+          created_at: string
+          fraud_log_id: string | null
+          id: string
+          severity: string
+        }
+        Insert: {
+          acknowledged?: boolean | null
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          alert_data?: Json | null
+          alert_message: string
+          alert_type: string
+          created_at?: string
+          fraud_log_id?: string | null
+          id?: string
+          severity: string
+        }
+        Update: {
+          acknowledged?: boolean | null
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          alert_data?: Json | null
+          alert_message?: string
+          alert_type?: string
+          created_at?: string
+          fraud_log_id?: string | null
+          id?: string
+          severity?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fraud_alerts_fraud_log_id_fkey"
+            columns: ["fraud_log_id"]
+            isOneToOne: false
+            referencedRelation: "fraud_monitoring_logs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fraud_monitoring_logs: {
+        Row: {
+          amount_cents: number | null
+          billing_details: Json | null
+          created_at: string
+          currency: string | null
+          customer_email: string | null
+          fraud_details: Json | null
+          id: string
+          metadata: Json | null
+          outcome_reason: string | null
+          outcome_type: string | null
+          payment_method_details: Json | null
+          radar_rules_triggered: Json | null
+          requires_action: boolean | null
+          risk_level: string | null
+          risk_score: number | null
+          stripe_charge_id: string | null
+          stripe_payment_intent_id: string | null
+          transaction_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount_cents?: number | null
+          billing_details?: Json | null
+          created_at?: string
+          currency?: string | null
+          customer_email?: string | null
+          fraud_details?: Json | null
+          id?: string
+          metadata?: Json | null
+          outcome_reason?: string | null
+          outcome_type?: string | null
+          payment_method_details?: Json | null
+          radar_rules_triggered?: Json | null
+          requires_action?: boolean | null
+          risk_level?: string | null
+          risk_score?: number | null
+          stripe_charge_id?: string | null
+          stripe_payment_intent_id?: string | null
+          transaction_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount_cents?: number | null
+          billing_details?: Json | null
+          created_at?: string
+          currency?: string | null
+          customer_email?: string | null
+          fraud_details?: Json | null
+          id?: string
+          metadata?: Json | null
+          outcome_reason?: string | null
+          outcome_type?: string | null
+          payment_method_details?: Json | null
+          radar_rules_triggered?: Json | null
+          requires_action?: boolean | null
+          risk_level?: string | null
+          risk_score?: number | null
+          stripe_charge_id?: string | null
+          stripe_payment_intent_id?: string | null
+          transaction_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      image_cache: {
+        Row: {
+          cached_url: string
+          content_id: string | null
+          created_at: string | null
+          file_size: number | null
+          format: string | null
+          height: number | null
+          id: string
+          image_type: string
+          last_accessed: string | null
+          original_url: string
+          width: number | null
+        }
+        Insert: {
+          cached_url: string
+          content_id?: string | null
+          created_at?: string | null
+          file_size?: number | null
+          format?: string | null
+          height?: number | null
+          id?: string
+          image_type: string
+          last_accessed?: string | null
+          original_url: string
+          width?: number | null
+        }
+        Update: {
+          cached_url?: string
+          content_id?: string | null
+          created_at?: string | null
+          file_size?: number | null
+          format?: string | null
+          height?: number | null
+          id?: string
+          image_type?: string
+          last_accessed?: string | null
+          original_url?: string
+          width?: number | null
+        }
+        Relationships: []
+      }
       image_processing_log: {
         Row: {
           created_at: string
@@ -1857,6 +2312,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      lenders: {
+        Row: {
+          company: string | null
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          phone: string | null
+        }
+        Insert: {
+          company?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          phone?: string | null
+        }
+        Update: {
+          company?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          phone?: string | null
+        }
+        Relationships: []
       }
       login_attempts: {
         Row: {
@@ -3071,6 +3553,45 @@ export type Database = {
           },
         ]
       }
+      stripe_radar_events: {
+        Row: {
+          charge_id: string | null
+          created_at: string
+          customer_id: string | null
+          event_data: Json
+          event_type: string
+          id: string
+          payment_intent_id: string | null
+          processed: boolean | null
+          processed_at: string | null
+          stripe_event_id: string
+        }
+        Insert: {
+          charge_id?: string | null
+          created_at?: string
+          customer_id?: string | null
+          event_data?: Json
+          event_type: string
+          id?: string
+          payment_intent_id?: string | null
+          processed?: boolean | null
+          processed_at?: string | null
+          stripe_event_id: string
+        }
+        Update: {
+          charge_id?: string | null
+          created_at?: string
+          customer_id?: string | null
+          event_data?: Json
+          event_type?: string
+          id?: string
+          payment_intent_id?: string | null
+          processed?: boolean | null
+          processed_at?: string | null
+          stripe_event_id?: string
+        }
+        Relationships: []
+      }
       subscribers: {
         Row: {
           created_at: string
@@ -3106,6 +3627,438 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      support_agents: {
+        Row: {
+          agent_name: string
+          availability_status: string
+          average_rating: number | null
+          created_at: string
+          current_conversations: number | null
+          id: string
+          languages: string[] | null
+          last_active_at: string | null
+          max_conversations: number | null
+          specialties: string[] | null
+          timezone: string | null
+          total_conversations: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          agent_name: string
+          availability_status?: string
+          average_rating?: number | null
+          created_at?: string
+          current_conversations?: number | null
+          id?: string
+          languages?: string[] | null
+          last_active_at?: string | null
+          max_conversations?: number | null
+          specialties?: string[] | null
+          timezone?: string | null
+          total_conversations?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          agent_name?: string
+          availability_status?: string
+          average_rating?: number | null
+          created_at?: string
+          current_conversations?: number | null
+          id?: string
+          languages?: string[] | null
+          last_active_at?: string | null
+          max_conversations?: number | null
+          specialties?: string[] | null
+          timezone?: string | null
+          total_conversations?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      support_analytics: {
+        Row: {
+          ai_resolved_conversations: number | null
+          average_resolution_time_seconds: number | null
+          average_response_time_seconds: number | null
+          created_at: string
+          date: string
+          escalation_rate: number | null
+          human_resolved_conversations: number | null
+          id: string
+          satisfaction_average: number | null
+          total_conversations: number | null
+          total_zoom_meetings: number | null
+        }
+        Insert: {
+          ai_resolved_conversations?: number | null
+          average_resolution_time_seconds?: number | null
+          average_response_time_seconds?: number | null
+          created_at?: string
+          date: string
+          escalation_rate?: number | null
+          human_resolved_conversations?: number | null
+          id?: string
+          satisfaction_average?: number | null
+          total_conversations?: number | null
+          total_zoom_meetings?: number | null
+        }
+        Update: {
+          ai_resolved_conversations?: number | null
+          average_resolution_time_seconds?: number | null
+          average_response_time_seconds?: number | null
+          created_at?: string
+          date?: string
+          escalation_rate?: number | null
+          human_resolved_conversations?: number | null
+          id?: string
+          satisfaction_average?: number | null
+          total_conversations?: number | null
+          total_zoom_meetings?: number | null
+        }
+        Relationships: []
+      }
+      support_conversations: {
+        Row: {
+          agent_id: string | null
+          category: string | null
+          conversation_type: string
+          created_at: string
+          escalated_at: string | null
+          escalation_reason: string | null
+          id: string
+          metadata: Json | null
+          priority: string
+          resolution_summary: string | null
+          resolved_at: string | null
+          satisfaction_rating: number | null
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          agent_id?: string | null
+          category?: string | null
+          conversation_type?: string
+          created_at?: string
+          escalated_at?: string | null
+          escalation_reason?: string | null
+          id?: string
+          metadata?: Json | null
+          priority?: string
+          resolution_summary?: string | null
+          resolved_at?: string | null
+          satisfaction_rating?: number | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          agent_id?: string | null
+          category?: string | null
+          conversation_type?: string
+          created_at?: string
+          escalated_at?: string | null
+          escalation_reason?: string | null
+          id?: string
+          metadata?: Json | null
+          priority?: string
+          resolution_summary?: string | null
+          resolved_at?: string | null
+          satisfaction_rating?: number | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      support_escalations: {
+        Row: {
+          assigned_to: string | null
+          context_data: Json | null
+          conversation_id: string
+          created_at: string
+          escalated_by: string | null
+          escalated_from: string
+          escalation_priority: string
+          escalation_reason: string
+          id: string
+          resolution_notes: string | null
+          resolved_at: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          context_data?: Json | null
+          conversation_id: string
+          created_at?: string
+          escalated_by?: string | null
+          escalated_from: string
+          escalation_priority?: string
+          escalation_reason: string
+          id?: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          context_data?: Json | null
+          conversation_id?: string
+          created_at?: string
+          escalated_by?: string | null
+          escalated_from?: string
+          escalation_priority?: string
+          escalation_reason?: string
+          id?: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_escalations_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "support_agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_escalations_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "support_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      support_knowledge_base: {
+        Row: {
+          category: string
+          content: string
+          created_at: string
+          created_by: string | null
+          helpful_count: number | null
+          id: string
+          is_public: boolean | null
+          search_keywords: string[] | null
+          tags: string[] | null
+          title: string
+          updated_at: string
+          view_count: number | null
+        }
+        Insert: {
+          category: string
+          content: string
+          created_at?: string
+          created_by?: string | null
+          helpful_count?: number | null
+          id?: string
+          is_public?: boolean | null
+          search_keywords?: string[] | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+          view_count?: number | null
+        }
+        Update: {
+          category?: string
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          helpful_count?: number | null
+          id?: string
+          is_public?: boolean | null
+          search_keywords?: string[] | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          view_count?: number | null
+        }
+        Relationships: []
+      }
+      support_messages: {
+        Row: {
+          ai_confidence_score: number | null
+          attachments: Json | null
+          conversation_id: string
+          created_at: string
+          edited_at: string | null
+          id: string
+          is_escalation_trigger: boolean | null
+          message_content: string
+          message_type: string
+          metadata: Json | null
+          read_at: string | null
+          sender_id: string | null
+          sender_type: string
+        }
+        Insert: {
+          ai_confidence_score?: number | null
+          attachments?: Json | null
+          conversation_id: string
+          created_at?: string
+          edited_at?: string | null
+          id?: string
+          is_escalation_trigger?: boolean | null
+          message_content: string
+          message_type?: string
+          metadata?: Json | null
+          read_at?: string | null
+          sender_id?: string | null
+          sender_type: string
+        }
+        Update: {
+          ai_confidence_score?: number | null
+          attachments?: Json | null
+          conversation_id?: string
+          created_at?: string
+          edited_at?: string | null
+          id?: string
+          is_escalation_trigger?: boolean | null
+          message_content?: string
+          message_type?: string
+          metadata?: Json | null
+          read_at?: string | null
+          sender_id?: string | null
+          sender_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "support_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      title_companies: {
+        Row: {
+          address: string | null
+          contact_name: string | null
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          phone: string | null
+        }
+        Insert: {
+          address?: string | null
+          contact_name?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          phone?: string | null
+        }
+        Update: {
+          address?: string | null
+          contact_name?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          phone?: string | null
+        }
+        Relationships: []
+      }
+      transactions: {
+        Row: {
+          agent_id: string
+          city: string | null
+          close_date: string
+          commission_amount: number | null
+          commission_percentage: number | null
+          created_at: string
+          id: string
+          latitude: number | null
+          lender_id: string | null
+          listing_id: string | null
+          loan_type: string | null
+          longitude: number | null
+          mls_number: string | null
+          notes: string | null
+          price: number
+          property_address: string
+          property_type: string
+          side: string
+          state: string | null
+          title_company_id: string | null
+          updated_at: string
+          zip_code: string | null
+        }
+        Insert: {
+          agent_id: string
+          city?: string | null
+          close_date: string
+          commission_amount?: number | null
+          commission_percentage?: number | null
+          created_at?: string
+          id?: string
+          latitude?: number | null
+          lender_id?: string | null
+          listing_id?: string | null
+          loan_type?: string | null
+          longitude?: number | null
+          mls_number?: string | null
+          notes?: string | null
+          price: number
+          property_address: string
+          property_type: string
+          side: string
+          state?: string | null
+          title_company_id?: string | null
+          updated_at?: string
+          zip_code?: string | null
+        }
+        Update: {
+          agent_id?: string
+          city?: string | null
+          close_date?: string
+          commission_amount?: number | null
+          commission_percentage?: number | null
+          created_at?: string
+          id?: string
+          latitude?: number | null
+          lender_id?: string | null
+          listing_id?: string | null
+          loan_type?: string | null
+          longitude?: number | null
+          mls_number?: string | null
+          notes?: string | null
+          price?: number
+          property_address?: string
+          property_type?: string
+          side?: string
+          state?: string | null
+          title_company_id?: string | null
+          updated_at?: string
+          zip_code?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_lender_id_fkey"
+            columns: ["lender_id"]
+            isOneToOne: false
+            referencedRelation: "lenders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_title_company_id_fkey"
+            columns: ["title_company_id"]
+            isOneToOne: false
+            referencedRelation: "title_companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       vendor_agent_activities: {
         Row: {
@@ -3151,6 +4104,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      vendor_analytics_cache: {
+        Row: {
+          avg_rating: number
+          conversion_rate: number
+          last_updated: string
+          total_bookings: number
+          total_reviews: number
+          total_services: number
+          total_views: number
+          vendor_id: string
+          vendor_name: string
+        }
+        Insert: {
+          avg_rating?: number
+          conversion_rate?: number
+          last_updated?: string
+          total_bookings?: number
+          total_reviews?: number
+          total_services?: number
+          total_views?: number
+          vendor_id: string
+          vendor_name: string
+        }
+        Update: {
+          avg_rating?: number
+          conversion_rate?: number
+          last_updated?: string
+          total_bookings?: number
+          total_reviews?: number
+          total_services?: number
+          total_views?: number
+          vendor_id?: string
+          vendor_name?: string
+        }
+        Relationships: []
       }
       vendor_availability: {
         Row: {
@@ -3619,6 +4608,65 @@ export type Database = {
           },
         ]
       }
+      zoom_integrations: {
+        Row: {
+          attendee_id: string | null
+          conversation_id: string
+          created_at: string
+          duration_minutes: number | null
+          host_id: string | null
+          id: string
+          meeting_id: string
+          meeting_notes: string | null
+          meeting_status: string
+          meeting_url: string
+          passcode: string | null
+          recording_url: string | null
+          scheduled_at: string
+          updated_at: string
+        }
+        Insert: {
+          attendee_id?: string | null
+          conversation_id: string
+          created_at?: string
+          duration_minutes?: number | null
+          host_id?: string | null
+          id?: string
+          meeting_id: string
+          meeting_notes?: string | null
+          meeting_status?: string
+          meeting_url: string
+          passcode?: string | null
+          recording_url?: string | null
+          scheduled_at: string
+          updated_at?: string
+        }
+        Update: {
+          attendee_id?: string | null
+          conversation_id?: string
+          created_at?: string
+          duration_minutes?: number | null
+          host_id?: string | null
+          id?: string
+          meeting_id?: string
+          meeting_notes?: string | null
+          meeting_status?: string
+          meeting_url?: string
+          passcode?: string | null
+          recording_url?: string | null
+          scheduled_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zoom_integrations_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "support_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       vendor_service_analytics: {
@@ -3847,9 +4895,17 @@ export type Database = {
         Args: { p_identifier: string; p_attempt_type: string }
         Returns: Json
       }
+      check_expiring_payment_schedules: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       check_security_operation_rate_limit: {
         Args: Record<PropertyKey, never>
         Returns: boolean
+      }
+      clean_ip_address: {
+        Args: { input_ip: string }
+        Returns: unknown
       }
       cleanup_old_security_events: {
         Args: Record<PropertyKey, never>
@@ -3889,6 +4945,46 @@ export type Database = {
           display_verified: boolean
           platform_bio: string
           youtube_channel_id: string
+        }[]
+      }
+      get_optimized_marketplace_data: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          service_id: string
+          service_title: string
+          service_description: string
+          service_category: string
+          service_discount_percentage: string
+          service_retail_price: string
+          service_pro_price: string
+          service_co_pay_price: string
+          service_image_url: string
+          service_tags: string[]
+          service_is_featured: boolean
+          service_is_top_pick: boolean
+          service_estimated_roi: number
+          service_duration: string
+          service_requires_quote: boolean
+          service_sort_order: number
+          vendor_id: string
+          vendor_name: string
+          vendor_rating: number
+          vendor_review_count: number
+          vendor_is_verified: boolean
+          vendor_description: string
+          vendor_logo_url: string
+          vendor_website_url: string
+          vendor_location: string
+          vendor_co_marketing_agents: number
+          vendor_campaigns_funded: number
+          vendor_service_states: string[]
+          vendor_mls_areas: string[]
+          vendor_service_radius_miles: number
+          vendor_license_states: string[]
+          vendor_latitude: number
+          vendor_longitude: number
+          vendor_type: string
+          vendor_local_representatives: Json
         }[]
       }
       get_public_profile: {
@@ -3967,6 +5063,10 @@ export type Database = {
         }
         Returns: Json
       }
+      process_background_job: {
+        Args: { job_id: string }
+        Returns: Json
+      }
       process_real_time_charge: {
         Args: {
           p_allocation_id: string
@@ -3987,6 +5087,14 @@ export type Database = {
           p_order_id?: string
         }
         Returns: Json
+      }
+      refresh_vendor_analytics: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      refresh_vendor_analytics_cache: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       secure_profile_update: {
         Args: { target_user_id: string; update_data: Json }
