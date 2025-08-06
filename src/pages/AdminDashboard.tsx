@@ -36,9 +36,9 @@ import { AgentInvitationPanel } from '@/components/admin/AgentInvitationPanel';
 import VendorPointAllocationPanel from '@/components/admin/VendorPointAllocationPanel';
 import AntiScrapingSystem from '@/components/security/AntiScrapingSystem';
 import { CreatorPayoutDashboard } from '@/components/admin/CreatorPayoutDashboard';
-import { ImageVectorizationPanel } from '@/components/admin/ImageVectorizationPanel';
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Zap, Upload, Building, Youtube, DollarSign, BarChart3, Coins, Shield as ShieldIcon, Users2, Send, BookOpen } from 'lucide-react';
+import { Upload, Building, Youtube, DollarSign, BarChart3, Coins, Shield as ShieldIcon, Users2, Send, BookOpen } from 'lucide-react';
 
 interface UserProfile {
   id: string;
@@ -477,13 +477,6 @@ export default function AdminDashboard() {
                   <span className="hidden sm:inline">Security</span>
                 </TabsTrigger>
                 <TabsTrigger 
-                  value="vectorization" 
-                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-md data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm"
-                >
-                  <Zap className="h-4 w-4" />
-                  <span className="hidden sm:inline">Images</span>
-                </TabsTrigger>
-                <TabsTrigger 
                   value="content" 
                   className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-md data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm"
                 >
@@ -839,19 +832,6 @@ export default function AdminDashboard() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="vectorization" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Zap className="h-5 w-5" />
-                Image Vectorization
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ImageVectorizationPanel />
-            </CardContent>
-          </Card>
-        </TabsContent>
 
         <TabsContent value="content" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
