@@ -42,6 +42,7 @@ interface Service {
   // Co-pay related fields
   copay_allowed?: boolean;
   max_split_percentage_ssp?: number;
+  max_split_percentage?: number; // Added the missing RESPA limit field
   max_split_percentage_non_ssp?: number;
   estimated_agent_split_percentage?: number;
   respa_category?: string;
