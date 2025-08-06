@@ -3433,6 +3433,7 @@ export type Database = {
           pricing_tiers: Json | null
           pro_price: string | null
           rating: number | null
+          regulatory_findings: string | null
           requires_quote: boolean | null
           respa_category: string | null
           respa_compliance_notes: string | null
@@ -3441,6 +3442,7 @@ export type Database = {
           retail_price: string | null
           service_provider_id: string | null
           sort_order: number | null
+          supporting_documents: Json | null
           tags: string[] | null
           title: string
           updated_at: string | null
@@ -3475,6 +3477,7 @@ export type Database = {
           pricing_tiers?: Json | null
           pro_price?: string | null
           rating?: number | null
+          regulatory_findings?: string | null
           requires_quote?: boolean | null
           respa_category?: string | null
           respa_compliance_notes?: string | null
@@ -3483,6 +3486,7 @@ export type Database = {
           retail_price?: string | null
           service_provider_id?: string | null
           sort_order?: number | null
+          supporting_documents?: Json | null
           tags?: string[] | null
           title: string
           updated_at?: string | null
@@ -3517,6 +3521,7 @@ export type Database = {
           pricing_tiers?: Json | null
           pro_price?: string | null
           rating?: number | null
+          regulatory_findings?: string | null
           requires_quote?: boolean | null
           respa_category?: string | null
           respa_compliance_notes?: string | null
@@ -3525,6 +3530,7 @@ export type Database = {
           retail_price?: string | null
           service_provider_id?: string | null
           sort_order?: number | null
+          supporting_documents?: Json | null
           tags?: string[] | null
           title?: string
           updated_at?: string | null

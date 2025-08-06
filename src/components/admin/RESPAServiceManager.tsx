@@ -11,8 +11,16 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
-import { AlertTriangle, Search, CheckCircle, XCircle } from 'lucide-react';
+import { AlertTriangle, Search, CheckCircle, XCircle, ChevronDown, ChevronRight } from 'lucide-react';
 import { determineVendorRisk } from '../marketplace/RESPAComplianceSystem';
+import RESPADocumentUpload from './RESPADocumentUpload';
+
+interface DocumentInfo {
+  name: string;
+  path: string;
+  size: number;
+  uploadedAt: string;
+}
 
 interface Service {
   id: string;
@@ -25,6 +33,8 @@ interface Service {
   max_split_percentage_ssp?: number;
   respa_compliance_notes?: string;
   respa_notes?: string;
+  regulatory_findings?: string;
+  supporting_documents?: DocumentInfo[];
   vendor_id?: string;
   vendor?: {
     business_name?: string;
@@ -41,6 +51,7 @@ const RESPAServiceManager = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
+  const [expandedRows, setExpandedRows] = useState<string[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -56,7 +67,7 @@ const RESPAServiceManager = () => {
       // First get services
       const { data: servicesData, error: servicesError } = await supabase
         .from('services')
-        .select('id, title, category, description, is_respa_regulated, respa_risk_level, max_split_percentage, max_split_percentage_ssp, respa_compliance_notes, respa_notes, vendor_id')
+        .select('id, title, category, description, is_respa_regulated, respa_risk_level, max_split_percentage, max_split_percentage_ssp, respa_compliance_notes, respa_notes, regulatory_findings, supporting_documents, vendor_id')
         .order('title');
 
       if (servicesError) throw servicesError;
@@ -74,10 +85,11 @@ const RESPAServiceManager = () => {
       const vendorMap = new Map(vendorsData?.map(v => [v.user_id, v]) || []);
       const servicesWithVendors = servicesData?.map(service => ({
         ...service,
+        supporting_documents: (service.supporting_documents as any) || [],
         vendor: service.vendor_id ? vendorMap.get(service.vendor_id) : undefined
       })) || [];
 
-      setServices(servicesWithVendors);
+      setServices(servicesWithVendors as Service[]);
     } catch (error) {
       console.error('Error loading services:', error);
       toast({
@@ -121,9 +133,15 @@ const RESPAServiceManager = () => {
   const updateService = async (serviceId: string, updates: Partial<Service>) => {
     setSaving(true);
     try {
+      // Convert updates to match database schema
+      const dbUpdates: any = { ...updates };
+      if (updates.supporting_documents) {
+        dbUpdates.supporting_documents = updates.supporting_documents;
+      }
+      
       const { error } = await supabase
         .from('services')
-        .update(updates)
+        .update(dbUpdates)
         .eq('id', serviceId);
 
       if (error) throw error;
@@ -160,9 +178,15 @@ const RESPAServiceManager = () => {
 
     setSaving(true);
     try {
+      // Convert updates to match database schema
+      const dbUpdates: any = { ...updates };
+      if (updates.supporting_documents) {
+        dbUpdates.supporting_documents = updates.supporting_documents;
+      }
+      
       const { error } = await supabase
         .from('services')
-        .update(updates)
+        .update(dbUpdates)
         .in('id', selectedServices);
 
       if (error) throw error;
@@ -378,77 +402,151 @@ const RESPAServiceManager = () => {
                     }}
                   />
                 </TableHead>
+                <TableHead className="w-12"></TableHead>
                 <TableHead>Service</TableHead>
                 <TableHead>Category</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Max Split % (Admin & Marketplace)</TableHead>
-                <TableHead className="w-64">RESPA Notes</TableHead>
+                <TableHead className="w-64">Quick Notes</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredServices.map((service) => (
-                <TableRow key={service.id}>
-                  <TableCell>
-                    <Checkbox
-                      checked={selectedServices.includes(service.id)}
-                      onCheckedChange={(checked) => {
-                        if (checked) {
-                          setSelectedServices(prev => [...prev, service.id]);
-                        } else {
-                          setSelectedServices(prev => prev.filter(id => id !== service.id));
-                        }
-                      }}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <div>
-                      <div className="font-medium">{service.title}</div>
-                      {service.description && (
-                        <div className="text-sm text-gray-500 max-w-xs truncate">
-                          {service.description}
+              {filteredServices.map((service) => {
+                const isExpanded = expandedRows.includes(service.id);
+                
+                return (
+                  <React.Fragment key={service.id}>
+                    {/* Main Row */}
+                    <TableRow>
+                      <TableCell>
+                        <Checkbox
+                          checked={selectedServices.includes(service.id)}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              setSelectedServices(prev => [...prev, service.id]);
+                            } else {
+                              setSelectedServices(prev => prev.filter(id => id !== service.id));
+                            }
+                          }}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setExpandedRows(prev => 
+                              isExpanded 
+                                ? prev.filter(id => id !== service.id)
+                                : [...prev, service.id]
+                            );
+                          }}
+                          className="h-6 w-6 p-0"
+                        >
+                          {isExpanded ? (
+                            <ChevronDown className="w-4 h-4" />
+                          ) : (
+                            <ChevronRight className="w-4 h-4" />
+                          )}
+                        </Button>
+                      </TableCell>
+                      <TableCell>
+                        <div>
+                          <div className="font-medium">{service.title}</div>
+                          {service.description && (
+                            <div className="text-sm text-gray-500 max-w-xs truncate">
+                              {service.description}
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="text-sm font-medium">{service.category}</div>
-                  </TableCell>
-                  <TableCell>
-                    {getStatusBadge(service)}
-                  </TableCell>
-                  <TableCell>
-                    <Input
-                      type="number"
-                      min="0"
-                      max="100"
-                      value={service.max_split_percentage || ''}
-                      onChange={(e) => {
-                        const percentage = parseInt(e.target.value) || 0;
-                        updateService(service.id, { 
-                          max_split_percentage: percentage,
-                          max_split_percentage_ssp: percentage
-                        });
-                      }}
-                      className="w-20"
-                      disabled={saving}
-                      placeholder="0-100"
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Textarea
-                      value={service.respa_compliance_notes || service.respa_notes || ''}
-                      onChange={(e) => 
-                        updateService(service.id, { 
-                          respa_compliance_notes: e.target.value 
-                        })
-                      }
-                      className="min-h-20 max-h-32 resize-y"
-                      disabled={saving}
-                      placeholder="Add RESPA compliance notes..."
-                    />
-                  </TableCell>
-                </TableRow>
-              ))}
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm font-medium">{service.category}</div>
+                      </TableCell>
+                      <TableCell>
+                        {getStatusBadge(service)}
+                      </TableCell>
+                      <TableCell>
+                        <Input
+                          type="number"
+                          min="0"
+                          max="100"
+                          value={service.max_split_percentage || ''}
+                          onChange={(e) => {
+                            const percentage = parseInt(e.target.value) || 0;
+                            updateService(service.id, { 
+                              max_split_percentage: percentage,
+                              max_split_percentage_ssp: percentage
+                            });
+                          }}
+                          className="w-20"
+                          disabled={saving}
+                          placeholder="0-100"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Textarea
+                          value={service.respa_compliance_notes || service.respa_notes || ''}
+                          onChange={(e) => 
+                            updateService(service.id, { 
+                              respa_compliance_notes: e.target.value 
+                            })
+                          }
+                          className="min-h-16 max-h-20 resize-y text-xs"
+                          disabled={saving}
+                          placeholder="Quick notes..."
+                        />
+                      </TableCell>
+                    </TableRow>
+                    
+                    {/* Expanded Row */}
+                    {isExpanded && (
+                      <TableRow>
+                        <TableCell colSpan={7} className="bg-muted/30 p-6">
+                          <div className="space-y-6">
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                              {/* Regulatory Findings Section */}
+                              <div className="space-y-3">
+                                <h4 className="font-semibold text-sm flex items-center gap-2">
+                                  <AlertTriangle className="w-4 h-4" />
+                                  Regulatory Findings & Decision Rationale
+                                </h4>
+                                <Textarea
+                                  value={service.regulatory_findings || ''}
+                                  onChange={(e) => 
+                                    updateService(service.id, { 
+                                      regulatory_findings: e.target.value 
+                                    })
+                                  }
+                                  className="min-h-32 resize-y"
+                                  disabled={saving}
+                                  placeholder="Document your regulatory research, risk assessment findings, legal analysis, and rationale for the split percentage decision. This will be critical if questioned by regulators..."
+                                />
+                                <div className="text-xs text-muted-foreground">
+                                  This field stores your comprehensive regulatory analysis to justify the split percentage if audited.
+                                </div>
+                              </div>
+                              
+                              {/* Document Storage Section */}
+                              <div className="space-y-3">
+                                <h4 className="font-semibold text-sm">Supporting Documentation</h4>
+                                <RESPADocumentUpload
+                                  serviceId={service.id}
+                                  serviceTitle={service.title}
+                                  documents={service.supporting_documents || []}
+                                  onDocumentsUpdate={(documents) => {
+                                    updateService(service.id, { supporting_documents: documents });
+                                  }}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </React.Fragment>
+                );
+              })}
             </TableBody>
           </Table>
         </div>
