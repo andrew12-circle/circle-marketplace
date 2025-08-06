@@ -234,23 +234,33 @@ export const ProfileSettings = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/50">
-        <div className="container mx-auto px-4 py-4">
+    <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background">
+      {/* Modern Header with Glass Effect */}
+      <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
+        <div className="container mx-auto px-6 py-6">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
-                <ArrowLeft className="w-4 h-4" />
+            <div className="flex items-center gap-6">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => navigate("/")}
+                className="rounded-full hover:bg-primary/10 transition-colors"
+              >
+                <ArrowLeft className="w-5 h-5" />
               </Button>
-              <div>
-                <h1 className="text-xl font-semibold">Profile Settings</h1>
-                <p className="text-sm text-muted-foreground">Manage your account and preferences</p>
+              <div className="space-y-1">
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                  Profile Settings
+                </h1>
+                <p className="text-muted-foreground">Personalize your Circle experience</p>
               </div>
             </div>
             {profile.is_pro_member && (
-              <Badge variant="secondary" className="bg-circle-accent text-foreground">
-                <Crown className="w-3 h-3 mr-1" />
+              <Badge 
+                variant="secondary" 
+                className="bg-gradient-to-r from-primary/20 to-primary/10 text-primary border-primary/20 px-4 py-2"
+              >
+                <Crown className="w-4 h-4 mr-2" />
                 Pro Member
               </Badge>
             )}
@@ -258,112 +268,154 @@ export const ProfileSettings = () => {
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-8 max-w-2xl">
-        <div className="space-y-8">
-          {/* Avatar Section */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Profile Picture</CardTitle>
-              <CardDescription>Update your avatar image</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center gap-6">
-                <Avatar className="w-20 h-20">
-                  <AvatarImage src={profile.avatar_url || ""} />
-                  <AvatarFallback className="text-lg">
-                    <User className="w-8 h-8" />
-                  </AvatarFallback>
-                </Avatar>
-                <div className="space-y-2">
-                  <Label htmlFor="avatar-upload" className="cursor-pointer">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      disabled={uploadingAvatar}
-                      className="cursor-pointer"
-                      asChild
-                    >
-                      <span>
-                        <Upload className="w-4 h-4 mr-2" />
-                        {uploadingAvatar ? "Uploading..." : "Upload new picture"}
-                      </span>
-                    </Button>
-                  </Label>
-                  <input
-                    id="avatar-upload"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleAvatarUpload}
-                    className="hidden"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Recommended: Square image, at least 200x200px
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Profile Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Profile Information</CardTitle>
-              <CardDescription>Update your personal and business details</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="display_name">Display Name</Label>
-                    <Input
-                      id="display_name"
-                      value={formData.display_name}
-                      onChange={(e) => handleInputChange("display_name", e.target.value)}
-                      placeholder="Your display name"
+      {/* Enhanced Main Content */}
+      <main className="container mx-auto px-6 py-12 max-w-4xl">
+        <div className="grid gap-8 lg:grid-cols-3">
+          {/* Sidebar Navigation */}
+          <div className="lg:col-span-1 space-y-4">
+            <Card className="border-0 shadow-lg bg-gradient-to-br from-card/50 to-card/30 backdrop-blur-sm">
+              <CardContent className="p-6">
+                <div className="flex flex-col items-center text-center space-y-4">
+                  <div className="relative">
+                    <Avatar className="w-24 h-24 ring-4 ring-primary/20 ring-offset-4 ring-offset-background">
+                      <AvatarImage src={profile.avatar_url || ""} className="object-cover" />
+                      <AvatarFallback className="text-xl bg-gradient-to-br from-primary/20 to-primary/10">
+                        <User className="w-10 h-10" />
+                      </AvatarFallback>
+                    </Avatar>
+                    <Label htmlFor="avatar-upload" className="absolute -bottom-2 -right-2 cursor-pointer">
+                      <Button
+                        type="button"
+                        size="icon"
+                        variant="secondary"
+                        disabled={uploadingAvatar}
+                        className="rounded-full h-8 w-8 shadow-lg hover:shadow-xl transition-shadow"
+                        asChild
+                      >
+                        <span>
+                          <Upload className="w-4 h-4" />
+                        </span>
+                      </Button>
+                    </Label>
+                    <input
+                      id="avatar-upload"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleAvatarUpload}
+                      className="hidden"
                     />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg">{formData.display_name || "Your Name"}</h3>
+                    <p className="text-muted-foreground text-sm">{user.email}</p>
+                  </div>
+                  {uploadingAvatar && (
+                    <p className="text-xs text-primary">Uploading new photo...</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Quick Stats */}
+            <Card className="border-0 shadow-lg bg-gradient-to-br from-card/50 to-card/30 backdrop-blur-sm">
+              <CardContent className="p-6 space-y-4">
+                <h4 className="font-semibold">Account Overview</h4>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">Circle Points</span>
+                    <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
+                      {profile.circle_points}
+                    </Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">Membership</span>
+                    <Badge 
+                      variant={profile.is_pro_member ? "default" : "secondary"}
+                      className={profile.is_pro_member ? "bg-primary" : ""}
+                    >
+                      {profile.is_pro_member ? "Pro" : "Free"}
+                    </Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">Vendor Status</span>
+                    <Badge 
+                      variant={vendorData.vendor_enabled ? "default" : "secondary"}
+                      className={vendorData.vendor_enabled ? "bg-green-600" : ""}
+                    >
+                      {vendorData.vendor_enabled ? "Active" : "Inactive"}
+                    </Badge>
+                  </div>
+                </div>
+                {!profile.is_pro_member && (
+                  <Button asChild size="sm" className="w-full mt-4">
+                    <Link to="/pricing">Upgrade to Pro</Link>
+                  </Button>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Main Settings Panel */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* Personal Information */}
+            <Card className="border-0 shadow-lg bg-gradient-to-br from-card/50 to-card/30 backdrop-blur-sm">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-2">
+                  <User className="w-5 h-5 text-primary" />
+                  Personal Information
+                </CardTitle>
+                <CardDescription>Your basic profile and contact details</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div className="grid gap-6 md:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="display_name" className="text-sm font-medium">Display Name</Label>
+                      <Input
+                        id="display_name"
+                        value={formData.display_name}
+                        onChange={(e) => handleInputChange("display_name", e.target.value)}
+                        placeholder="Your display name"
+                        className="bg-background/50 border-border/50 focus:bg-background"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="phone" className="text-sm font-medium">Phone Number</Label>
+                      <Input
+                        id="phone"
+                        value={formData.phone}
+                        onChange={(e) => handleInputChange("phone", e.target.value)}
+                        placeholder="+1 (555) 123-4567"
+                        className="bg-background/50 border-border/50 focus:bg-background"
+                      />
+                    </div>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="bio">Bio</Label>
+                    <Label htmlFor="bio" className="text-sm font-medium">Bio</Label>
                     <Textarea
                       id="bio"
                       value={formData.bio}
                       onChange={(e) => handleInputChange("bio", e.target.value)}
                       placeholder="Tell us about yourself..."
                       rows={3}
-                    />
-                  </div>
-                </div>
-
-                <Separator />
-
-                <div className="grid gap-4">
-                  <h3 className="text-lg font-medium">Business Information</h3>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="business_name">Business Name</Label>
-                    <Input
-                      id="business_name"
-                      value={formData.business_name}
-                      onChange={(e) => handleInputChange("business_name", e.target.value)}
-                      placeholder="Your business or company name"
+                      className="bg-background/50 border-border/50 focus:bg-background resize-none"
                     />
                   </div>
 
-                  <div className="grid md:grid-cols-2 gap-4">
+                  <div className="grid gap-6 md:grid-cols-2">
                     <div className="space-y-2">
-                      <Label htmlFor="phone">Phone Number</Label>
+                      <Label htmlFor="location" className="text-sm font-medium">Location</Label>
                       <Input
-                        id="phone"
-                        value={formData.phone}
-                        onChange={(e) => handleInputChange("phone", e.target.value)}
-                        placeholder="+1 (555) 123-4567"
+                        id="location"
+                        value={formData.location}
+                        onChange={(e) => handleInputChange("location", e.target.value)}
+                        placeholder="City, State"
+                        className="bg-background/50 border-border/50 focus:bg-background"
                       />
                     </div>
-
                     <div className="space-y-2">
-                      <Label htmlFor="years_experience">Years of Experience</Label>
+                      <Label htmlFor="years_experience" className="text-sm font-medium">Experience (Years)</Label>
                       <Input
                         id="years_experience"
                         type="number"
@@ -372,124 +424,92 @@ export const ProfileSettings = () => {
                         placeholder="0"
                         min="0"
                         max="50"
+                        className="bg-background/50 border-border/50 focus:bg-background"
                       />
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="location">Location</Label>
-                    <Input
-                      id="location"
-                      value={formData.location}
-                      onChange={(e) => handleInputChange("location", e.target.value)}
-                      placeholder="City, State"
-                    />
+                  <div className="flex gap-3 pt-4">
+                    <Button type="submit" disabled={loading} className="flex-1">
+                      {loading ? "Saving..." : "Save Changes"}
+                    </Button>
+                    <Button type="button" variant="outline" onClick={() => navigate("/")} className="px-8">
+                      Cancel
+                    </Button>
                   </div>
+                </form>
+              </CardContent>
+            </Card>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="website_url">Website</Label>
-                    <Input
-                      id="website_url"
-                      type="url"
-                      value={formData.website_url}
-                      onChange={(e) => handleInputChange("website_url", e.target.value)}
-                      placeholder="https://yourwebsite.com"
-                    />
-                  </div>
+            {/* Business Information */}
+            <Card className="border-0 shadow-lg bg-gradient-to-br from-card/50 to-card/30 backdrop-blur-sm">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-2">
+                  <Building className="w-5 h-5 text-primary" />
+                  Business Details
+                </CardTitle>
+                <CardDescription>Professional and business information</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="business_name" className="text-sm font-medium">Business Name</Label>
+                  <Input
+                    id="business_name"
+                    value={formData.business_name}
+                    onChange={(e) => handleInputChange("business_name", e.target.value)}
+                    placeholder="Your business or company name"
+                    className="bg-background/50 border-border/50 focus:bg-background"
+                  />
                 </div>
+                <div className="space-y-2">
+                  <Label htmlFor="website_url" className="text-sm font-medium">Website</Label>
+                  <Input
+                    id="website_url"
+                    type="url"
+                    value={formData.website_url}
+                    onChange={(e) => handleInputChange("website_url", e.target.value)}
+                    placeholder="https://yourwebsite.com"
+                    className="bg-background/50 border-border/50 focus:bg-background"
+                  />
+                </div>
+              </CardContent>
+            </Card>
 
-                <div className="flex gap-4 pt-4">
-                  <Button type="submit" disabled={loading}>
-                    {loading ? "Saving..." : "Save Changes"}
-                  </Button>
-                  <Button type="button" variant="outline" onClick={() => navigate("/")}>
-                    Cancel
-                  </Button>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
-
-          {/* Account Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Account Information</CardTitle>
-              <CardDescription>Your account details and membership status</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid gap-4">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <p className="font-medium">Email</p>
-                    <p className="text-sm text-muted-foreground">{user.email}</p>
-                  </div>
-                </div>
-                
-                <Separator />
-                
-                <div className="flex justify-between items-center">
-                  <div>
-                    <p className="font-medium">Circle Points</p>
-                    <p className="text-sm text-muted-foreground">{profile.circle_points} points available</p>
-                  </div>
-                </div>
-
-                <div className="flex justify-between items-center">
-                  <div>
-                    <p className="font-medium">Membership Status</p>
+            {/* Vendor Access */}
+            <Card className="border-0 shadow-lg bg-gradient-to-br from-card/50 to-card/30 backdrop-blur-sm">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-2">
+                  <Store className="w-5 h-5 text-primary" />
+                  Vendor Dashboard
+                </CardTitle>
+                <CardDescription>
+                  Enable vendor features to list services and access co-marketing opportunities
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="flex items-center justify-between p-4 rounded-lg bg-muted/30 border border-border/50">
+                  <div className="space-y-1">
+                    <p className="font-medium">Vendor Access</p>
                     <p className="text-sm text-muted-foreground">
-                      {profile.is_pro_member ? "Circle Pro Member" : "Free Member"}
+                      Access vendor dashboard and marketplace features
                     </p>
                   </div>
-                  {!profile.is_pro_member && (
-                    <Button asChild variant="outline">
-                      <Link to="/pricing">Upgrade to Pro</Link>
-                    </Button>
-                  )}
+                  <Switch
+                    checked={vendorData.vendor_enabled}
+                    onCheckedChange={handleVendorToggle}
+                    disabled={vendorLoading}
+                  />
                 </div>
-              </div>
-            </CardContent>
-          </Card>
 
-          {/* Vendor Access Control */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Building className="w-5 h-5" />
-                Vendor Dashboard Access
-              </CardTitle>
-              <CardDescription>
-                Enable vendor features to list services or access co-marketing opportunities
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <p className="font-medium">Enable Vendor Access</p>
-                  <p className="text-sm text-muted-foreground">
-                    Access vendor dashboard to manage services and partnerships
-                  </p>
-                </div>
-                <Switch
-                  checked={vendorData.vendor_enabled}
-                  onCheckedChange={handleVendorToggle}
-                  disabled={vendorLoading}
-                />
-              </div>
-
-              {vendorData.vendor_enabled && (
-                <>
-                  <Separator />
-                  <div className="space-y-4">
-                    <h4 className="font-medium">Vendor Configuration</h4>
-                    
+                {vendorData.vendor_enabled && (
+                  <div className="space-y-6 pt-4 border-t border-border/50">
                     <div className="space-y-2">
-                      <Label htmlFor="vendor_type">Vendor Type</Label>
+                      <Label htmlFor="vendor_type" className="text-sm font-medium">Vendor Type</Label>
                       <Select
                         value={vendorData.vendor_type}
                         onValueChange={(value) => handleVendorChange("vendor_type", value)}
                       >
-                        <SelectTrigger>
+                        <SelectTrigger className="bg-background/50 border-border/50">
                           <SelectValue placeholder="Select vendor type" />
                         </SelectTrigger>
                         <SelectContent>
@@ -515,23 +535,25 @@ export const ProfileSettings = () => {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="vendor_company_name">Company Name</Label>
+                      <Label htmlFor="vendor_company_name" className="text-sm font-medium">Company Name</Label>
                       <Input
                         id="vendor_company_name"
                         value={vendorData.vendor_company_name}
                         onChange={(e) => handleVendorChange("vendor_company_name", e.target.value)}
                         placeholder="Your company or business name"
+                        className="bg-background/50 border-border/50 focus:bg-background"
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="vendor_description">Company Description</Label>
+                      <Label htmlFor="vendor_description" className="text-sm font-medium">Company Description</Label>
                       <Textarea
                         id="vendor_description"
                         value={vendorData.vendor_description}
                         onChange={(e) => handleVendorChange("vendor_description", e.target.value)}
                         placeholder="Describe your business and what you offer..."
                         rows={3}
+                        className="bg-background/50 border-border/50 focus:bg-background resize-none"
                       />
                     </div>
 
@@ -543,10 +565,10 @@ export const ProfileSettings = () => {
                       {vendorLoading ? "Saving..." : "Save Vendor Details"}
                     </Button>
                   </div>
-                </>
-              )}
-            </CardContent>
-          </Card>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </main>
     </div>
