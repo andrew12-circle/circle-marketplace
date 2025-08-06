@@ -3424,6 +3424,7 @@ export type Database = {
           is_featured: boolean | null
           is_respa_regulated: boolean | null
           is_top_pick: boolean | null
+          is_verified: boolean | null
           max_split_percentage: number | null
           max_split_percentage_non_ssp: number | null
           max_split_percentage_ssp: number | null
@@ -3465,6 +3466,7 @@ export type Database = {
           is_featured?: boolean | null
           is_respa_regulated?: boolean | null
           is_top_pick?: boolean | null
+          is_verified?: boolean | null
           max_split_percentage?: number | null
           max_split_percentage_non_ssp?: number | null
           max_split_percentage_ssp?: number | null
@@ -3506,6 +3508,7 @@ export type Database = {
           is_featured?: boolean | null
           is_respa_regulated?: boolean | null
           is_top_pick?: boolean | null
+          is_verified?: boolean | null
           max_split_percentage?: number | null
           max_split_percentage_non_ssp?: number | null
           max_split_percentage_ssp?: number | null

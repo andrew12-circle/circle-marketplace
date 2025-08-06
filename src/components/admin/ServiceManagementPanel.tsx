@@ -68,6 +68,7 @@ interface Service {
   requires_quote: boolean;
   is_featured: boolean;
   is_top_pick: boolean;
+  is_verified?: boolean;
   direct_purchase_enabled?: boolean;
   vendor_id?: string;
   service_provider_id?: string;
@@ -325,6 +326,7 @@ export const ServiceManagementPanel = () => {
         sort_order: editForm.sort_order || null,
         is_featured: editForm.is_featured || false,
         is_top_pick: editForm.is_top_pick || false,
+        is_verified: editForm.is_verified || false,
         requires_quote: editForm.requires_quote || false,
         copay_allowed: editForm.copay_allowed || false, // Use database field name
         direct_purchase_enabled: editForm.direct_purchase_enabled || false,
@@ -377,6 +379,42 @@ export const ServiceManagementPanel = () => {
       toast({
         title: 'Error',
         description: 'Failed to update service',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleVerificationToggle = async (serviceId: string, currentStatus: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('services')
+        .update({ is_verified: !currentStatus })
+        .eq('id', serviceId);
+
+      if (error) throw error;
+
+      // Update local state
+      setServices(services.map(service => 
+        service.id === serviceId 
+          ? { ...service, is_verified: !currentStatus }
+          : service
+      ));
+
+      if (selectedService?.id === serviceId) {
+        const updatedService = { ...selectedService, is_verified: !currentStatus };
+        setSelectedService(updatedService);
+        setEditForm(updatedService);
+      }
+
+      toast({
+        title: 'Success',
+        description: `Service ${!currentStatus ? 'verified' : 'unverified'} successfully`,
+      });
+    } catch (error) {
+      console.error('Error updating verification:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update verification status',
         variant: 'destructive',
       });
     }
@@ -444,52 +482,67 @@ export const ServiceManagementPanel = () => {
                   onClick={() => handleServiceSelect(service)}
                 >
                   <CardContent className="p-4">
-                    <div className="flex items-start gap-3">
-                      {service.image_url ? (
-                        <img
-                          src={service.image_url}
-                          alt={service.title}
-                          className="w-12 h-12 rounded-lg object-cover"
-                        />
-                      ) : (
-                        <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center">
-                          <Package className="h-6 w-6 text-muted-foreground" />
-                        </div>
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold truncate">{service.title}</h3>
-                        <div className="flex items-center gap-1 mt-1">
-                          <Badge variant="outline" className="text-xs">
-                            {service.category}
-                          </Badge>
-                          {service.is_featured && (
-                            <Badge variant="default" className="text-xs">
-                              <Star className="h-3 w-3 mr-1" />
-                              Featured
+                      <div className="flex items-start gap-3">
+                        {service.image_url ? (
+                          <img
+                            src={service.image_url}
+                            alt={service.title}
+                            className="w-12 h-12 rounded-lg object-cover"
+                          />
+                        ) : (
+                          <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center">
+                            <Package className="h-6 w-6 text-muted-foreground" />
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between">
+                            <h3 className="font-semibold truncate">{service.title}</h3>
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs text-muted-foreground">Verified</span>
+                              <Switch
+                                checked={service.is_verified || false}
+                                onCheckedChange={() => handleVerificationToggle(service.id, service.is_verified || false)}
+                                onClick={(e) => e.stopPropagation()}
+                              />
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1 mt-1">
+                            <Badge variant="outline" className="text-xs">
+                              {service.category}
                             </Badge>
-                          )}
-                          {service.is_top_pick && (
-                            <Badge variant="secondary" className="text-xs">
-                              Top Pick
-                            </Badge>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
-                          {service.retail_price && (
-                            <span className="flex items-center gap-1">
-                              <DollarSign className="h-3 w-3" />
-                              {service.retail_price}
-                            </span>
-                          )}
-                          {service.vendors?.name && (
-                            <span className="flex items-center gap-1">
-                              <Building className="h-3 w-3" />
-                              {service.vendors.name}
-                            </span>
-                          )}
+                            {service.is_verified && (
+                              <Badge variant="default" className="text-xs">
+                                Verified
+                              </Badge>
+                            )}
+                            {service.is_featured && (
+                              <Badge variant="secondary" className="text-xs">
+                                <Star className="h-3 w-3 mr-1" />
+                                Featured
+                              </Badge>
+                            )}
+                            {service.is_top_pick && (
+                              <Badge variant="outline" className="text-xs">
+                                Top Pick
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                            {service.retail_price && (
+                              <span className="flex items-center gap-1">
+                                <DollarSign className="h-3 w-3" />
+                                {service.retail_price}
+                              </span>
+                            )}
+                            {service.vendors?.name && (
+                              <span className="flex items-center gap-1">
+                                <Building className="h-3 w-3" />
+                                {service.vendors.name}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
                   </CardContent>
                 </Card>
               ))}
@@ -593,46 +646,53 @@ export const ServiceManagementPanel = () => {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-                      <div className="flex items-center space-x-2">
-                        <Switch
-                          checked={editForm.is_featured || false}
-                          onCheckedChange={(checked) => setEditForm({ ...editForm, is_featured: checked })}
-                        />
-                        <label className="text-sm font-medium">Featured</label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Switch
-                          checked={editForm.is_top_pick || false}
-                          onCheckedChange={(checked) => setEditForm({ ...editForm, is_top_pick: checked })}
-                        />
-                        <label className="text-sm font-medium">Top Pick</label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Switch
-                          checked={editForm.requires_quote || false}
-                          onCheckedChange={(checked) => setEditForm({ ...editForm, requires_quote: checked })}
-                        />
-                        <label className="text-sm font-medium">Requires Quote</label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Switch
-                          checked={editForm.copay_allowed || false}
-                          onCheckedChange={(checked) => setEditForm({ ...editForm, copay_allowed: checked })}
-                        />
-                        <label className="text-sm font-medium">Co-Pay Allowed</label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Switch
-                          checked={editForm.direct_purchase_enabled || false}
-                          onCheckedChange={(checked) => setEditForm({ ...editForm, direct_purchase_enabled: checked })}
-                        />
-                        <div className="flex items-center gap-1">
-                          <ShoppingCart className="h-3 w-3 text-green-600" />
-                          <label className="text-sm font-medium">Direct Purchase</label>
-                        </div>
-                      </div>
-                    </div>
+                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+                     <div className="flex items-center space-x-2">
+                       <Switch
+                         checked={editForm.is_verified || false}
+                         onCheckedChange={(checked) => setEditForm({ ...editForm, is_verified: checked })}
+                       />
+                       <label className="text-sm font-medium">Verified</label>
+                     </div>
+                     <div className="flex items-center space-x-2">
+                       <Switch
+                         checked={editForm.is_featured || false}
+                         onCheckedChange={(checked) => setEditForm({ ...editForm, is_featured: checked })}
+                       />
+                       <label className="text-sm font-medium">Featured</label>
+                     </div>
+                     <div className="flex items-center space-x-2">
+                       <Switch
+                         checked={editForm.is_top_pick || false}
+                         onCheckedChange={(checked) => setEditForm({ ...editForm, is_top_pick: checked })}
+                       />
+                       <label className="text-sm font-medium">Top Pick</label>
+                     </div>
+                     <div className="flex items-center space-x-2">
+                       <Switch
+                         checked={editForm.requires_quote || false}
+                         onCheckedChange={(checked) => setEditForm({ ...editForm, requires_quote: checked })}
+                       />
+                       <label className="text-sm font-medium">Requires Quote</label>
+                     </div>
+                     <div className="flex items-center space-x-2">
+                       <Switch
+                         checked={editForm.copay_allowed || false}
+                         onCheckedChange={(checked) => setEditForm({ ...editForm, copay_allowed: checked })}
+                       />
+                       <label className="text-sm font-medium">Co-Pay Allowed</label>
+                     </div>
+                     <div className="flex items-center space-x-2">
+                       <Switch
+                         checked={editForm.direct_purchase_enabled || false}
+                         onCheckedChange={(checked) => setEditForm({ ...editForm, direct_purchase_enabled: checked })}
+                       />
+                       <div className="flex items-center gap-1">
+                         <ShoppingCart className="h-3 w-3 text-green-600" />
+                         <label className="text-sm font-medium">Direct Purchase</label>
+                       </div>
+                     </div>
+                   </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                       <div className="space-y-2">
