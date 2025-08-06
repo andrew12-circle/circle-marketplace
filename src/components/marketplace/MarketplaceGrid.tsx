@@ -20,6 +20,7 @@ import { Link } from "react-router-dom";
 import { CategoryMegaMenu } from "./CategoryMegaMenu";
 import { EnhancedSearch, SearchFilters } from "./EnhancedSearch";
 import { VendorCallToAction } from "./VendorCallToAction";
+import { useMarketplaceData, useSavedServices, type Service, type Vendor } from "@/hooks/useMarketplaceData";
 interface FilterState {
   category: string;
   priceRange: number[];
@@ -28,50 +29,7 @@ interface FilterState {
   coPayEligible: boolean;
   locationFilter: boolean;
 }
-interface Service {
-  id: string;
-  title: string;
-  description: string;
-  category: string;
-  discount_percentage?: string;
-  retail_price?: string;
-  pro_price?: string;
-  co_pay_price?: string;
-  image_url?: string;
-  tags?: string[];
-  is_featured: boolean;
-  is_top_pick: boolean;
-  estimated_roi?: number;
-  duration?: string;
-  requires_quote?: boolean;
-  vendor: {
-    name: string;
-    rating: number;
-    review_count: number;
-    is_verified: boolean;
-  };
-}
-interface Vendor {
-  id: string;
-  name: string;
-  description: string;
-  logo_url?: string;
-  website_url?: string;
-  location?: string;
-  rating: number;
-  review_count: number;
-  is_verified: boolean;
-  co_marketing_agents: number;
-  campaigns_funded: number;
-  service_states?: string[];
-  mls_areas?: string[];
-  service_radius_miles?: number;
-  license_states?: string[];
-  latitude?: number;
-  longitude?: number;
-  vendor_type?: string;
-  local_representatives?: any; // JSON data from database
-}
+// Interface types are now imported from the hook
 interface LocalRepresentative {
   id: string;
   name: string;
@@ -86,13 +44,14 @@ interface LocalRepresentative {
 }
 type ViewMode = "services" | "products" | "vendors";
 export const MarketplaceGrid = () => {
-  const {
-    t
-  } = useTranslation();
-  const [services, setServices] = useState<Service[]>([]);
-  const [vendors, setVendors] = useState<Vendor[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { t } = useTranslation();
+  
+  // Use optimized hooks for data fetching
+  const { data: marketplaceData, isLoading, error } = useMarketplaceData();
+  const { data: savedServiceIds = [] } = useSavedServices();
+  
+  const services = marketplaceData?.services || [];
+  const vendors = marketplaceData?.vendors || [];
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>("services");
   const [selectedProductCategory, setSelectedProductCategory] = useState<string | null>(null);
@@ -179,7 +138,7 @@ export const MarketplaceGrid = () => {
     gradient: 'from-gray-500 to-gray-600',
     color: 'text-gray-600'
   }];
-  const [savedServiceIds, setSavedServiceIds] = useState<string[]>([]);
+  const [localSavedServiceIds, setLocalSavedServiceIds] = useState<string[]>([]);
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
   const [isAddProductModalOpen, setIsAddProductModalOpen] = useState(false);
@@ -201,116 +160,8 @@ export const MarketplaceGrid = () => {
   const {
     location
   } = useLocation();
-  const loadSavedServices = async () => {
-    if (!profile?.user_id) return;
-    try {
-      const {
-        data,
-        error
-      } = await supabase.from('saved_services').select('service_id').eq('user_id', profile.user_id);
-      if (error) throw error;
-      setSavedServiceIds(data?.map(item => item.service_id) || []);
-    } catch (error) {
-      console.error('Error loading saved services:', error);
-    }
-  };
-  const loadData = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      console.log('Loading marketplace data...');
-
-      // Load vendors from the correct table
-      const vendorsResponse = await supabase.from('vendors').select('*').order('sort_order', {
-        ascending: true
-      }).order('rating', {
-        ascending: false
-      }).limit(50);
-      console.log('Vendors response:', vendorsResponse);
-      console.log('Vendors data:', vendorsResponse.data);
-      console.log('Vendors error:', vendorsResponse.error);
-
-      // Load services without vendor join for now, then get vendors separately
-      const servicesResponse = await supabase.from('services').select('*').order('sort_order', {
-        ascending: true
-      }).order('created_at', {
-        ascending: false
-      }).limit(100);
-      console.log('Services response:', servicesResponse);
-      console.log('Services data:', servicesResponse.data);
-      console.log('Services error:', servicesResponse.error);
-      console.log('Services data length:', servicesResponse.data?.length);
-      if (vendorsResponse.error) {
-        console.error('Vendors error:', vendorsResponse.error);
-        throw vendorsResponse.error;
-      }
-      if (servicesResponse.error) {
-        console.error('Services error:', servicesResponse.error);
-        throw servicesResponse.error;
-      }
-
-      // Convert the database response to match our interface
-      const formattedServices = (servicesResponse.data || []).map(service => ({
-        ...service,
-        discount_percentage: service.discount_percentage ? String(service.discount_percentage) : undefined,
-        vendor: {
-          name: 'Service Provider',
-          rating: 4.5,
-          review_count: 0,
-          is_verified: true
-        }
-      }));
-
-      // Format vendors data using vendors table
-      const formattedVendors = (vendorsResponse.data || []).map(vendor => ({
-        ...vendor,
-        id: vendor.id,
-        name: vendor.name || 'Unknown Vendor',
-        description: vendor.description || '',
-        logo_url: vendor.logo_url,
-        website_url: vendor.website_url,
-        location: vendor.location,
-        rating: vendor.rating || 0,
-        review_count: vendor.review_count || 0,
-        is_verified: vendor.is_verified || false,
-        co_marketing_agents: vendor.co_marketing_agents || 0,
-        campaigns_funded: vendor.campaigns_funded || 0,
-        service_states: vendor.service_states || [],
-        mls_areas: vendor.mls_areas || [],
-        service_radius_miles: vendor.service_radius_miles,
-        license_states: vendor.license_states || [],
-        latitude: vendor.latitude,
-        longitude: vendor.longitude,
-        vendor_type: vendor.vendor_type || 'company',
-        local_representatives: []
-      }));
-      console.log(`Loaded ${formattedServices.length} services and ${formattedVendors.length} vendors`);
-      console.log('Formatted services:', formattedServices);
-      console.log('Setting services state...');
-      setServices(formattedServices);
-      setVendors(formattedVendors);
-      console.log('Services and vendors state set successfully');
-    } catch (error) {
-      console.error('Marketplace data loading error:', error);
-      setError(`Failed to load marketplace data: ${error.message || 'Unknown error'}`);
-      toast({
-        title: "Error loading data",
-        description: `Failed to load marketplace data: ${error.message || 'Please try again.'}`,
-        variant: "destructive"
-      });
-    } finally {
-      console.log('Setting loading to false');
-      setLoading(false);
-    }
-  }, [toast]);
-  useEffect(() => {
-    loadData();
-  }, []);
-  useEffect(() => {
-    if (profile?.user_id) {
-      loadSavedServices();
-    }
-  }, [profile?.user_id]);
+  // Combine saved services from hook and local state
+  const allSavedServiceIds = [...savedServiceIds, ...localSavedServiceIds];
 
   // Helper function to extract numeric price from strings like "$150" or "150"
   const extractNumericPrice = (priceString: string | null | undefined): number => {
@@ -410,7 +261,7 @@ export const MarketplaceGrid = () => {
         if (error) throw error;
 
         // Update local state
-        setSavedServiceIds(prev => prev.filter(id => id !== serviceId));
+        setLocalSavedServiceIds(prev => prev.filter(id => id !== serviceId));
         toast({
           title: "Removed from saved",
           description: "Service removed from your saved list"
@@ -427,7 +278,7 @@ export const MarketplaceGrid = () => {
         if (error) throw error;
 
         // Update local state
-        setSavedServiceIds(prev => [...prev, serviceId]);
+        setLocalSavedServiceIds(prev => [...prev, serviceId]);
         toast({
           title: "Saved successfully",
           description: "Service added to your saved list"
@@ -520,7 +371,7 @@ export const MarketplaceGrid = () => {
       return keywords.some(keyword => title.includes(keyword) || description.includes(keyword) || category.includes(keyword) || tags.some(tag => tag.includes(keyword)));
     });
   };
-  if (loading) {
+  if (isLoading) {
     return <div className="min-h-screen bg-background">
         <div className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-center h-64">
@@ -580,7 +431,7 @@ export const MarketplaceGrid = () => {
 
           {/* Grid - Mobile Responsive */}
           {viewMode === "services" ? <div className="mobile-grid gap-4 sm:gap-6">
-              {filteredServices.map(service => <ServiceCard key={`service-${service.id}`} service={service} onSave={handleSaveService} onViewDetails={handleViewServiceDetails} isSaved={savedServiceIds.includes(service.id)} />)}
+              {filteredServices.map(service => <ServiceCard key={`service-${service.id}`} service={service} onSave={handleSaveService} onViewDetails={handleViewServiceDetails} isSaved={allSavedServiceIds.includes(service.id)} />)}
             </div> : viewMode === "products" ? selectedProductCategory ? <div>
                 <div className="mb-6 flex items-center gap-4">
                   <Button variant="outline" onClick={handleBackToProducts}>
@@ -591,7 +442,7 @@ export const MarketplaceGrid = () => {
                   </h2>
                 </div>
                 <div className="mobile-grid gap-4 sm:gap-6">
-                  {getServicesForProduct(selectedProductCategory).map(service => <ServiceCard key={`product-${selectedProductCategory}-${service.id}`} service={service} onSave={handleSaveService} onViewDetails={handleViewServiceDetails} isSaved={savedServiceIds.includes(service.id)} />)}
+                  {getServicesForProduct(selectedProductCategory).map(service => <ServiceCard key={`product-${selectedProductCategory}-${service.id}`} service={service} onSave={handleSaveService} onViewDetails={handleViewServiceDetails} isSaved={allSavedServiceIds.includes(service.id)} />)}
                 </div>
               </div> : <div className="mobile-grid gap-4 sm:gap-6">
                 {filteredProducts.map(product => {
@@ -678,6 +529,6 @@ export const MarketplaceGrid = () => {
       {selectedService && <ServiceDetailsModal service={selectedService} isOpen={isServiceModalOpen} onClose={handleCloseServiceModal} />}
 
       {/* Add Product Modal */}
-      <AddProductModal open={isAddProductModalOpen} onOpenChange={setIsAddProductModalOpen} onProductAdded={loadData} />
+      <AddProductModal open={isAddProductModalOpen} onOpenChange={setIsAddProductModalOpen} onProductAdded={() => {}} />
     </>;
 };

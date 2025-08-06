@@ -36,7 +36,17 @@ import { BuyerProtection } from "./pages/legal/BuyerProtection";
 import { SellerAgreement } from "./pages/legal/SellerAgreement";
 import { ProhibitedItems } from "./pages/legal/ProhibitedItems";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 2 * 60 * 1000, // 2 minutes
+      gcTime: 5 * 60 * 1000, // 5 minutes
+      refetchOnWindowFocus: false,
+      retry: 2,
+      networkMode: 'online',
+    },
+  },
+});
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
