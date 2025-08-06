@@ -247,10 +247,12 @@ export const useMarketplaceData = () => {
   const query = useQuery({
     queryKey: QUERY_KEYS.marketplaceCombined,
     queryFn: fetchCombinedMarketplaceData,
-    staleTime: 2 * 60 * 1000, // 2 minutes
-    gcTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000, // 5 minutes for navigation stability
+    gcTime: 15 * 60 * 1000, // 15 minutes cache
     refetchOnWindowFocus: false,
+    refetchOnMount: false, // Prevent refetch on navigation
     retry: 2,
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 
   // Handle errors with toast
@@ -285,9 +287,10 @@ export const useServices = () => {
       // Fallback to individual fetch only if combined data isn't available
       return fetchServices();
     },
-    staleTime: 2 * 60 * 1000,
-    gcTime: 5 * 60 * 1000,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 15 * 60 * 1000, // 15 minutes cache
     refetchOnWindowFocus: false,
+    refetchOnMount: false, // Stable navigation
     retry: 2,
   });
 
@@ -322,9 +325,10 @@ export const useVendors = () => {
       // Fallback to individual fetch only if combined data isn't available
       return fetchVendors();
     },
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 15 * 60 * 1000, // 15 minutes cache
     refetchOnWindowFocus: false,
+    refetchOnMount: false, // Stable navigation
     retry: 2,
   });
 

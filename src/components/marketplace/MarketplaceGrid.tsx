@@ -22,6 +22,7 @@ import { EnhancedSearch, SearchFilters } from "./EnhancedSearch";
 import { VendorCallToAction } from "./VendorCallToAction";
 import { useMarketplaceData, useSavedServices, type Service, type Vendor } from "@/hooks/useMarketplaceData";
 import { useMarketplaceFilters } from "@/hooks/useMarketplaceFilters";
+import { useNavigationOptimization } from "@/hooks/useNavigationOptimization";
 import { logger } from "@/utils/logger";
 interface FilterState {
   category: string;
@@ -48,12 +49,13 @@ type ViewMode = "services" | "products" | "vendors";
 export const MarketplaceGrid = () => {
   const { t } = useTranslation();
   
-  // Use optimized hooks for data fetching
+  // Use optimized hooks for data fetching and navigation
   const { data: marketplaceData, isLoading, error } = useMarketplaceData();
   const { data: savedServiceIds = [] } = useSavedServices();
+  const { optimizeMarketplaceData } = useNavigationOptimization();
   
-  const services = marketplaceData?.services || [];
-  const vendors = marketplaceData?.vendors || [];
+  const services = (marketplaceData as { services: Service[]; vendors: Vendor[] })?.services || [];
+  const vendors = (marketplaceData as { services: Service[]; vendors: Vendor[] })?.vendors || [];
   
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>("services");
@@ -320,7 +322,24 @@ export const MarketplaceGrid = () => {
       return keywords.some(keyword => title.includes(keyword) || description.includes(keyword) || category.includes(keyword) || tags.some(tag => tag.includes(keyword)));
     });
   };
-  // Removed loading screen - data should be cached and load instantly
+  // Show minimal loading for initial load only
+  if (isLoading && !marketplaceData) {
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
+          <div className="animate-pulse space-y-6">
+            <div className="h-16 bg-gray-200 rounded-lg"></div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="h-64 bg-gray-200 rounded-lg"></div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return <>
       <div className="min-h-screen bg-background">
         <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">

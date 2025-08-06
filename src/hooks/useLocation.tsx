@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { requestDeduplicator } from '@/utils/requestDeduplicator';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface LocationData {
   city: string | null;
@@ -12,11 +15,62 @@ interface LocationData {
   } | null;
 }
 
+// Query keys for location data
+const LOCATION_QUERY_KEYS = {
+  userLocation: (userId: string) => ['location', 'user', userId],
+} as const;
+
+/**
+ * Fetch user location from profile with caching and deduplication
+ */
+const fetchUserLocation = async (userId: string): Promise<LocationData | null> => {
+  if (!userId) return null;
+  
+  return requestDeduplicator.dedupRequest(
+    `user-location-${userId}`,
+    async () => {
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('city, state, zip_code')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (error) throw error;
+
+      if (profile && profile.state) {
+        return {
+          city: profile.city,
+          state: profile.state,
+          zip_code: profile.zip_code,
+          coordinates: null
+        };
+      }
+      
+      return null;
+    }
+  );
+};
+
 export const useLocation = () => {
-  const [location, setLocation] = useState<LocationData | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { user } = useAuth();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
+
+  // Use React Query for location data with caching
+  const { 
+    data: location, 
+    isLoading: loading, 
+    error 
+  } = useQuery({
+    queryKey: LOCATION_QUERY_KEYS.userLocation(user?.id || ''),
+    queryFn: () => fetchUserLocation(user?.id || ''),
+    enabled: !!user?.id,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 30 * 60 * 1000, // 30 minutes
+    refetchOnWindowFocus: false,
+    refetchOnMount: false, // Prevent excessive refetching
+  });
 
   const getLocationFromCoords = async (latitude: number, longitude: number) => {
     try {
@@ -44,12 +98,15 @@ export const useLocation = () => {
   };
 
   const getCurrentLocation = async () => {
-    setLoading(true);
-    setError(null);
+    setIsGettingLocation(true);
 
     if (!navigator.geolocation) {
-      setError('Geolocation is not supported by this browser');
-      setLoading(false);
+      toast({
+        variant: "destructive",
+        title: "Location not supported",
+        description: "Geolocation is not supported by this browser",
+      });
+      setIsGettingLocation(false);
       return;
     }
 
@@ -65,11 +122,8 @@ export const useLocation = () => {
       const { latitude, longitude } = position.coords;
       const locationData = await getLocationFromCoords(latitude, longitude);
       
-      setLocation(locationData);
-      
-      // Update user profile with location
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
+      // Update user profile with location and invalidate cache
+      if (user?.id) {
         await supabase
           .from('profiles')
           .update({
@@ -79,6 +133,12 @@ export const useLocation = () => {
             location: `${locationData.city}, ${locationData.state}`
           })
           .eq('user_id', user.id);
+        
+        // Invalidate and refetch location data
+        queryClient.setQueryData(
+          LOCATION_QUERY_KEYS.userLocation(user.id),
+          locationData
+        );
       }
 
       toast({
@@ -90,14 +150,14 @@ export const useLocation = () => {
       const errorMessage = err instanceof GeolocationPositionError 
         ? `Location access denied: ${err.message}`
         : 'Failed to get location';
-      setError(errorMessage);
+      
       toast({
         variant: "destructive",
         title: "Location access failed",
         description: "Please enable location services or enter your location manually",
       });
     } finally {
-      setLoading(false);
+      setIsGettingLocation(false);
     }
   };
 
@@ -109,11 +169,8 @@ export const useLocation = () => {
       coordinates: null
     };
 
-    setLocation(locationData);
-
-    // Update user profile
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
+    // Update user profile and cache
+    if (user?.id) {
       await supabase
         .from('profiles')
         .update({
@@ -123,6 +180,12 @@ export const useLocation = () => {
           location: `${city}, ${state}`
         })
         .eq('user_id', user.id);
+      
+      // Update cache immediately
+      queryClient.setQueryData(
+        LOCATION_QUERY_KEYS.userLocation(user.id),
+        locationData
+      );
     }
 
     toast({
@@ -131,35 +194,10 @@ export const useLocation = () => {
     });
   };
 
-  // Load location from profile on mount
-  useEffect(() => {
-    const loadUserLocation = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('city, state, zip_code')
-          .eq('user_id', user.id)
-          .maybeSingle();
-
-        if (profile && profile.state) {
-          setLocation({
-            city: profile.city,
-            state: profile.state,
-            zip_code: profile.zip_code,
-            coordinates: null
-          });
-        }
-      }
-    };
-
-    loadUserLocation();
-  }, []);
-
   return {
     location,
-    loading,
-    error,
+    loading: loading || isGettingLocation,
+    error: error?.message || null,
     getCurrentLocation,
     updateLocationManually
   };
