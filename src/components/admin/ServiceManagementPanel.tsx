@@ -534,10 +534,10 @@ export const ServiceManagementPanel = () => {
                                 {service.retail_price}
                               </span>
                             )}
-                            {service.vendors?.name && (
+                            {(service.vendors?.name || service.service_providers?.name) && (
                               <span className="flex items-center gap-1">
                                 <Building className="h-3 w-3" />
-                                {service.vendors.name}
+                                {service.vendors?.name || service.service_providers?.name || 'Unknown Vendor'}
                               </span>
                             )}
                           </div>
