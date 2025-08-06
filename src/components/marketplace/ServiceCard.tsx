@@ -98,7 +98,12 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
     // If co-pay is available, calculate discount from retail to co-pay
     if (service.copay_allowed && service.pro_price && service.max_split_percentage_ssp) {
       const proPrice = extractNumericPrice(service.pro_price);
-      const coPayPrice = proPrice * (1 - (service.max_split_percentage_ssp / 100));
+      // Use the RESPA limit (max_split_percentage) instead of the full vendor support percentage
+      const actualSplitPercentage = Math.min(
+        service.max_split_percentage_ssp, 
+        service.max_split_percentage || 0
+      );
+      const coPayPrice = proPrice * (1 - (actualSplitPercentage / 100));
       return Math.round(((retailPrice - coPayPrice) / retailPrice) * 100);
     }
     
@@ -380,14 +385,17 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                     </div>
                     <span className="text-lg font-bold text-green-600">
                       {formatPrice(
-                        extractNumericPrice(service.pro_price) * (1 - (service.max_split_percentage_ssp / 100)), 
+                        extractNumericPrice(service.pro_price) * (1 - (Math.min(
+                          service.max_split_percentage_ssp, 
+                          service.max_split_percentage || 0
+                        ) / 100)), 
                         service.price_duration || 'mo'
                       )}
                     </span>
                   </div>
                   <div className="flex justify-end">
                      <Badge className="bg-green-600 text-white text-xs">
-                       {service.max_split_percentage_ssp}% vendor support
+                       {Math.min(service.max_split_percentage_ssp, service.max_split_percentage || 0)}% vendor support
                      </Badge>
                   </div>
                 </div>
@@ -586,7 +594,10 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
           title: service.title,
           pro_price: service.pro_price,
           retail_price: service.retail_price,
-          max_split_percentage_ssp: service.max_split_percentage_ssp,
+          max_split_percentage_ssp: Math.min(
+            service.max_split_percentage_ssp || 0, 
+            service.max_split_percentage || 0
+          ),
           price_duration: service.price_duration,
           requires_quote: service.requires_quote,
         }}
