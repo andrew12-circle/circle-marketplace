@@ -38,8 +38,8 @@ export const PricingChoiceModal = ({
 
   const proPrice = service.pro_price ? parseFloat(service.pro_price.replace(/[^\d.]/g, '')) : 0;
   const retailPrice = service.retail_price ? parseFloat(service.retail_price.replace(/[^\d.]/g, '')) : 0;
-  const coPayPrice = retailPrice && service.max_split_percentage_ssp 
-    ? retailPrice * (1 - (service.max_split_percentage_ssp / 100))
+  const coPayPrice = proPrice && service.max_split_percentage_ssp 
+    ? proPrice * (1 - (service.max_split_percentage_ssp / 100))
     : 0;
 
   // Load agent points and RESPA compliance when modal opens

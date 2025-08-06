@@ -324,7 +324,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                 </div>
               )}
               
-              {service.copay_allowed && service.retail_price && service.max_split_percentage_ssp && (
+              {service.copay_allowed && service.pro_price && service.max_split_percentage_ssp && (
                 <div className="space-y-1">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1">
@@ -363,7 +363,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                     </div>
                     <span className="text-lg font-bold text-green-600">
                       {formatPrice(
-                        extractNumericPrice(service.retail_price) * (1 - (service.max_split_percentage_ssp / 100)), 
+                        extractNumericPrice(service.pro_price) * (1 - (service.max_split_percentage_ssp / 100)), 
                         service.price_duration || 'mo'
                       )}
                     </span>

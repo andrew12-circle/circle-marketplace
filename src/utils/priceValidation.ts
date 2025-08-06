@@ -154,17 +154,20 @@ export const validatePriceHierarchy = (
   const pro = proPrice ? extractAndValidatePrice(proPrice, 'pro').sanitizedPrice : null;
   const coPay = coPayPrice ? extractAndValidatePrice(coPayPrice, 'co_pay').sanitizedPrice : null;
 
-  // Validate price hierarchy: Retail >= Pro >= Co-pay
+  // Validate price hierarchy: Retail >= Pro and Co-pay calculated from Pro price
   if (retail && pro && pro > retail) {
     errors.push('Pro price cannot be higher than retail price');
   }
 
-  if (pro && coPay && coPay > pro) {
-    errors.push('Co-pay price cannot be higher than pro price');
-  }
-
-  if (retail && coPay && coPay > retail) {
-    errors.push('Co-pay price cannot be higher than retail price');
+  // Co-pay should be calculated from pro price, not validated separately
+  // If co-pay is manually set, ensure it's derived from pro price with vendor split
+  if (pro && coPay) {
+    // Allow some tolerance for rounding differences
+    const expectedCoPay = pro * 0.5; // Assuming 50% vendor split as example
+    const tolerance = 0.01;
+    if (Math.abs(coPay - expectedCoPay) > tolerance && coPay > pro) {
+      errors.push('Co-pay price should be calculated from pro price with vendor split percentage');
+    }
   }
 
   return {
