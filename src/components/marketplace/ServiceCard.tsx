@@ -317,11 +317,11 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1">
                       <span className="text-sm font-medium text-green-600">Your Co-Pay:</span>
-                      <Tooltip delayDuration={200}>
+                      <Tooltip delayDuration={0} open={undefined}>
                         <TooltipTrigger asChild>
-                          <div className="w-3 h-3 rounded-full bg-green-600 flex items-center justify-center cursor-help">
+                          <button className="w-3 h-3 rounded-full bg-green-600 flex items-center justify-center cursor-help hover:bg-green-700 transition-colors">
                             <span className="text-xs text-white">i</span>
-                          </div>
+                          </button>
                         </TooltipTrigger>
                         <TooltipContent 
                           className="p-0 border-0 bg-transparent w-auto max-w-[320px] sm:max-w-[400px] md:max-w-[480px] z-[70]" 
@@ -413,54 +413,54 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
               
               {service.co_pay_price && (
                 <div className="space-y-1">
-                  <div className="flex items-center justify-between p-2 bg-green-50 rounded-lg border border-green-200 opacity-75 cursor-pointer">
-                    <div className="flex items-center gap-1">
-                      <Lock className="w-3 h-3 text-green-600" />
-                      <span className="text-sm font-medium text-green-600">Your Co-Pay:</span>
-                      <Tooltip delayDuration={200}>
-                        <TooltipTrigger asChild>
-                          <div className="w-3 h-3 rounded-full bg-green-600 flex items-center justify-center cursor-help">
+                  <Tooltip delayDuration={0} open={undefined}>
+                    <TooltipTrigger asChild>
+                      <div className="flex items-center justify-between p-2 bg-green-50 rounded-lg border border-green-200 opacity-75 cursor-pointer hover:opacity-100 transition-opacity">
+                        <div className="flex items-center gap-1">
+                          <Lock className="w-3 h-3 text-green-600" />
+                          <span className="text-sm font-medium text-green-600">Your Co-Pay:</span>
+                          <button className="w-3 h-3 rounded-full bg-green-600 flex items-center justify-center cursor-help hover:bg-green-700 transition-colors">
                             <span className="text-xs text-white">i</span>
-                          </div>
-                        </TooltipTrigger>
-                        <TooltipContent 
-                          className="p-0 border-0 bg-transparent w-auto max-w-[320px] sm:max-w-[400px] md:max-w-[480px] z-[70]" 
-                          side="top"
-                          align="center"
-                          sideOffset={10}
-                        >
-                          <div 
-                            className="relative bg-gradient-to-br from-yellow-400 via-yellow-500 to-yellow-600 rounded-lg p-3 sm:p-4 shadow-lg mx-auto cursor-pointer"
-                            onClick={handleUpgradeClick}
-                          >
-                            {/* Card design elements */}
-                            <div className="absolute top-2 left-2 w-4 h-4 sm:w-6 sm:h-6 border border-yellow-700/30 rounded-sm"></div>
-                            <div className="absolute top-2 right-2 text-yellow-800 font-bold text-sm sm:text-lg">PRO</div>
-                            
-                            {/* Main content */}
-                            <div className="mt-4 sm:mt-6">
-                              <h3 className="text-yellow-900 font-bold text-sm sm:text-lg mb-1">Circle COVERAGE</h3>
-                              <h4 className="text-yellow-800 font-semibold text-xs sm:text-base mb-2 sm:mb-3">Compliant Advertising Partnerships</h4>
-                              <p className="text-yellow-900 text-xs sm:text-sm leading-relaxed mb-2 sm:mb-3">
-                                Find lenders and title companies & more interested in sharing the cost of public advertising campaigns. Each party pays their proportional share and receives proportional benefit in all advertising materials.
-                              </p>
-                              
-                              <p className="text-yellow-900 text-xs leading-relaxed mb-2 sm:mb-3">
-                                This feature facilitates introductions for RESPA-compliant marketing partnerships only. Federal law prohibits cost-sharing arrangements for lead generation tools or business platforms.
-                              </p>
-                              
-                              <button className="text-yellow-800 text-xs sm:text-sm font-medium hover:text-yellow-900 underline">
-                                Learn more
-                              </button>
-                            </div>
-                          </div>
-                        </TooltipContent>
-                      </Tooltip>
-                    </div>
-                    <span className="text-lg font-bold text-green-600">
-                      {formatPrice(extractNumericPrice(service.co_pay_price), service.price_duration || 'mo')}
-                    </span>
-                  </div>
+                          </button>
+                        </div>
+                        <span className="text-lg font-bold text-green-600">
+                          {formatPrice(extractNumericPrice(service.co_pay_price), service.price_duration || 'mo')}
+                        </span>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent 
+                      className="p-0 border-0 bg-transparent w-auto max-w-[320px] sm:max-w-[400px] md:max-w-[480px] z-[70]" 
+                      side="top"
+                      align="center"
+                      sideOffset={10}
+                    >
+                      <div 
+                        className="relative bg-gradient-to-br from-yellow-400 via-yellow-500 to-yellow-600 rounded-lg p-3 sm:p-4 shadow-lg mx-auto cursor-pointer"
+                        onClick={handleUpgradeClick}
+                      >
+                        {/* Card design elements */}
+                        <div className="absolute top-2 left-2 w-4 h-4 sm:w-6 sm:h-6 border border-yellow-700/30 rounded-sm"></div>
+                        <div className="absolute top-2 right-2 text-yellow-800 font-bold text-sm sm:text-lg">PRO</div>
+                        
+                        {/* Main content */}
+                        <div className="mt-4 sm:mt-6">
+                          <h3 className="text-yellow-900 font-bold text-sm sm:text-lg mb-1">Circle COVERAGE</h3>
+                          <h4 className="text-yellow-800 font-semibold text-xs sm:text-base mb-2 sm:mb-3">Compliant Advertising Partnerships</h4>
+                          <p className="text-yellow-900 text-xs sm:text-sm leading-relaxed mb-2 sm:mb-3">
+                            Find lenders and title companies & more interested in sharing the cost of public advertising campaigns. Each party pays their proportional share and receives proportional benefit in all advertising materials.
+                          </p>
+                          
+                          <p className="text-yellow-900 text-xs leading-relaxed mb-2 sm:mb-3">
+                            This feature facilitates introductions for RESPA-compliant marketing partnerships only. Federal law prohibits cost-sharing arrangements for lead generation tools or business platforms.
+                          </p>
+                          
+                          <button className="text-yellow-800 text-xs sm:text-sm font-medium hover:text-yellow-900 underline">
+                            Learn more
+                          </button>
+                        </div>
+                      </div>
+                    </TooltipContent>
+                  </Tooltip>
                 </div>
               )}
             </>
