@@ -61,16 +61,14 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
     
     const retailPrice = extractNumericPrice(service.retail_price);
     
-    // If co-pay is available, calculate discount from retail to co-pay
+    // If co-pay is available, calculate discount from retail to co-pay price
     if (service.copay_allowed && service.pro_price && service.respa_split_limit) {
       const proPrice = extractNumericPrice(service.pro_price);
-      // Agent pays the remaining percentage after vendor contribution
-      const agentPayPercentage = 100 - service.respa_split_limit;
-      const coPayPrice = proPrice * (agentPayPercentage / 100);
+      const coPayPrice = proPrice * (1 - (service.respa_split_limit / 100));
       return Math.round(((retailPrice - coPayPrice) / retailPrice) * 100);
     }
     
-    // Otherwise, calculate discount from retail to pro price
+    // Otherwise, calculate discount from retail to pro price  
     if (service.pro_price) {
       const proPrice = extractNumericPrice(service.pro_price);
       return Math.round(((retailPrice - proPrice) / retailPrice) * 100);
