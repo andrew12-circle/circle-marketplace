@@ -19,42 +19,9 @@ import { ServiceFunnelModal } from "./ServiceFunnelModal";
 import { VendorSelectionModal } from "./VendorSelectionModal";
 import { PricingChoiceModal } from "./PricingChoiceModal";
 import { DirectPurchaseModal } from "./DirectPurchaseModal";
+import { Service } from "@/hooks/useMarketplaceData";
 
-interface Service {
-  id: string;
-  title: string;
-  description: string;
-  category: string;
-  discount_percentage?: string;
-  retail_price?: string;
-  pro_price?: string;
-  co_pay_price?: string;
-  price_duration?: string;
-  image_url?: string;
-  tags?: string[];
-  is_featured: boolean;
-  is_top_pick: boolean;
-  estimated_roi?: number;
-  duration?: string;
-  requires_quote?: boolean;
-  // Direct purchase feature - vendor controlled
-  direct_purchase_enabled?: boolean;
-  // Co-pay related fields
-  copay_allowed?: boolean;
-  max_split_percentage_ssp?: number;
-  max_split_percentage?: number; // Added the missing RESPA limit field
-  max_split_percentage_non_ssp?: number;
-  estimated_agent_split_percentage?: number;
-  respa_category?: string;
-  respa_notes?: string;
-  vendor: {
-    id?: string;
-    name: string;
-    rating: number;
-    review_count: number;
-    is_verified: boolean;
-  } | null;
-}
+// Service interface is now imported from useMarketplaceData hook
 
 interface ServiceCardProps {
   service: Service;

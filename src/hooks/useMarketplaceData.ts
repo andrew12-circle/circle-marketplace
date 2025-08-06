@@ -21,6 +21,7 @@ export interface Service {
   retail_price?: string;
   pro_price?: string;
   co_pay_price?: string;
+  price_duration?: string; // Added missing field
   image_url?: string;
   tags?: string[];
   is_featured: boolean;
@@ -28,7 +29,18 @@ export interface Service {
   estimated_roi?: number;
   duration?: string;
   requires_quote?: boolean;
+  // Direct purchase feature - vendor controlled
+  direct_purchase_enabled?: boolean;
+  // Co-pay and RESPA related fields
+  copay_allowed?: boolean;
+  max_split_percentage_ssp?: number;
+  max_split_percentage?: number; // RESPA limit
+  max_split_percentage_non_ssp?: number;
+  estimated_agent_split_percentage?: number;
+  respa_category?: string;
+  respa_notes?: string;
   vendor: {
+    id?: string; // Added missing id field
     name: string;
     rating: number;
     review_count: number;
