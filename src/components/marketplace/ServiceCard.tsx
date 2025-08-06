@@ -420,24 +420,33 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
               )}
               
               {service.pro_price && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div className="flex items-center justify-between p-2 bg-circle-primary/5 rounded-lg border border-circle-primary/20 opacity-75 cursor-pointer">
-                      <div className="flex items-center gap-1">
-                        <Lock className="w-3 h-3 text-circle-primary" />
-                        <span className="text-sm font-medium text-circle-primary">Circle Pro Price:</span>
-                        <Crown className="w-4 h-4 text-circle-primary" />
+                <div className="space-y-1">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="flex items-center justify-between p-2 bg-circle-primary/5 rounded-lg border border-circle-primary/20 opacity-75 cursor-pointer">
+                        <div className="flex items-center gap-1">
+                          <Lock className="w-3 h-3 text-circle-primary" />
+                          <span className="text-sm font-medium text-circle-primary">Circle Pro Price:</span>
+                          <Crown className="w-4 h-4 text-circle-primary" />
+                        </div>
+                        <span className="text-lg font-bold text-circle-primary">
+                          {formatPrice(extractNumericPrice(service.pro_price), service.price_duration || 'mo')}
+                        </span>
                       </div>
-                      <span className="text-lg font-bold text-circle-primary">
-                        {formatPrice(extractNumericPrice(service.pro_price), service.price_duration || 'mo')}
-                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent className="w-48 p-3 cursor-pointer" onClick={handleUpgradeClick}>
+                      <p className="text-sm leading-relaxed">Join Circle Pro membership to unlock this price</p>
+                      <p className="text-xs text-muted-foreground mt-1">Click to upgrade →</p>
+                    </TooltipContent>
+                  </Tooltip>
+                  {calculateDiscountPercentage() && (
+                    <div className="flex justify-end">
+                       <Badge className="bg-destructive text-destructive-foreground text-xs hover:bg-green-600 hover:text-white transition-colors">
+                         {calculateDiscountPercentage()}% OFF
+                       </Badge>
                     </div>
-                  </TooltipTrigger>
-                  <TooltipContent className="w-48 p-3 cursor-pointer" onClick={handleUpgradeClick}>
-                    <p className="text-sm leading-relaxed">Join Circle Pro membership to unlock this price</p>
-                    <p className="text-xs text-muted-foreground mt-1">Click to upgrade →</p>
-                  </TooltipContent>
-                </Tooltip>
+                  )}
+                </div>
               )}
               
               {service.co_pay_price && (
