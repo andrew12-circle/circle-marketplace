@@ -3408,7 +3408,6 @@ export type Database = {
       services: {
         Row: {
           category: string | null
-          co_pay_allowed: boolean | null
           co_pay_price: string | null
           compliance_checklist: Json | null
           copay_allowed: boolean | null
@@ -3452,7 +3451,6 @@ export type Database = {
         }
         Insert: {
           category?: string | null
-          co_pay_allowed?: boolean | null
           co_pay_price?: string | null
           compliance_checklist?: Json | null
           copay_allowed?: boolean | null
@@ -3496,7 +3494,6 @@ export type Database = {
         }
         Update: {
           category?: string | null
-          co_pay_allowed?: boolean | null
           co_pay_price?: string | null
           compliance_checklist?: Json | null
           copay_allowed?: boolean | null
@@ -4975,6 +4972,7 @@ export type Database = {
           service_duration: string
           service_requires_quote: boolean
           service_sort_order: number
+          service_copay_allowed: boolean
           vendor_id: string
           vendor_name: string
           vendor_rating: number
