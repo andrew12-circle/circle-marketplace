@@ -398,14 +398,6 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                 </div>
               )}
               
-              {/* Show discount badge for pro members */}
-              {service.discount_percentage && (
-                <div className="flex justify-end">
-                   <Badge className="bg-destructive text-destructive-foreground text-xs hover:bg-green-600 hover:text-white transition-colors">
-                     {service.discount_percentage?.replace('%', '')}% OFF
-                   </Badge>
-                </div>
-              )}
             </>
           ) : (
             <>
@@ -439,13 +431,6 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                       <p className="text-xs text-muted-foreground mt-1">Click to upgrade →</p>
                     </TooltipContent>
                   </Tooltip>
-                  {calculateDiscountPercentage() && (
-                    <div className="flex justify-end">
-                       <Badge className="bg-destructive text-destructive-foreground text-xs hover:bg-green-600 hover:text-white transition-colors">
-                         {calculateDiscountPercentage()}% OFF
-                       </Badge>
-                    </div>
-                  )}
                 </div>
               )}
               
@@ -491,18 +476,20 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                       </div>
                     </TooltipContent>
                   </Tooltip>
-                  {calculateDiscountPercentage() && (
-                    <div className="flex justify-end">
-                       <Badge className="bg-destructive text-destructive-foreground text-xs hover:bg-green-600 hover:text-white transition-colors">
-                         {calculateDiscountPercentage()}% OFF
-                       </Badge>
-                    </div>
-                  )}
                 </div>
               )}
             </>
           )}
         </div>
+
+        {/* Single discount badge for both Pro and Non-Pro views */}
+        {calculateDiscountPercentage() && (
+          <div className="flex justify-end mb-3">
+             <Badge className="bg-destructive text-destructive-foreground text-xs hover:bg-green-600 hover:text-white transition-colors">
+               {calculateDiscountPercentage()}% OFF
+             </Badge>
+          </div>
+        )}
 
         {/* ROI and Duration - Fixed height */}
         <div className="h-4 mb-4">
