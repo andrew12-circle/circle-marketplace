@@ -1,43 +1,32 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
-import { NavigationTabs } from "@/components/NavigationTabs";
-import { UserMenu } from "@/components/UserMenu";
-import { LanguageSwitcher } from "@/components/LanguageSwitcher";
-import { LocationSwitcher } from "@/components/LocationSwitcher";
 import { LegalFooter } from "@/components/LegalFooter";
 import { RealtorView } from "@/components/command-center/RealtorView";
 import { SSPView } from "@/components/command-center/SSPView";
-import { User, Search } from "lucide-react";
+import { User, Search, ArrowLeft } from "lucide-react";
 
 const CommandCenter = () => {
   const { user, profile } = useAuth();
+  const navigate = useNavigate();
   const [activeView, setActiveView] = useState<'realtor' | 'ssp'>('realtor');
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <h1 className="text-2xl font-bold text-primary">Circle</h1>
-              <NavigationTabs />
-            </div>
-            <div className="flex items-center space-x-4">
-              <LanguageSwitcher />
-              <LocationSwitcher />
-              <UserMenu />
-            </div>
-          </div>
-        </div>
-      </header>
-
       <div className="container mx-auto px-4 py-8">
-        {/* Page Header */}
+        {/* Back Button & Page Header */}
         <div className="mb-8">
+          <Button 
+            variant="ghost" 
+            onClick={() => navigate(-1)}
+            className="mb-4 -ml-2"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
           <h1 className="text-3xl font-bold mb-2">Command Center</h1>
           <p className="text-muted-foreground">
             Deep performance analytics and agent tracking system
