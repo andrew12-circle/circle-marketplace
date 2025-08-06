@@ -208,6 +208,15 @@ export const CreatorDashboard = () => {
     fetchCreatorData();
   };
 
+  const handleBackClick = () => {
+    // Try to go back in history, fallback to home page
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate('/');
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -228,7 +237,7 @@ export const CreatorDashboard = () => {
                 variant="ghost" 
                 size="sm" 
                 className="gap-2 hover:bg-primary/10 text-muted-foreground hover:text-primary mb-4"
-                onClick={() => navigate(-1)}
+                onClick={handleBackClick}
               >
                 <ArrowLeft className="w-4 h-4" />
                 Back
