@@ -320,7 +320,51 @@ export const MarketplaceGrid = () => {
       return keywords.some(keyword => title.includes(keyword) || description.includes(keyword) || category.includes(keyword) || tags.some(tag => tag.includes(keyword)));
     });
   };
-  // Removed loading screen - data should be cached and load instantly
+  // Debug logging
+  console.log('MarketplaceGrid Debug:', {
+    isLoading,
+    error,
+    servicesCount: services.length,
+    vendorsCount: vendors.length,
+    filteredServicesCount: filteredServices.length,
+    filteredVendorsCount: filteredVendors.length,
+    viewMode,
+    searchTerm,
+    filters
+  });
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+              <p className="mt-4 text-muted-foreground">Loading marketplace data...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <p className="text-destructive">Error loading marketplace data</p>
+              <p className="text-sm text-muted-foreground mt-2">{error.message}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return <>
       <div className="min-h-screen bg-background">
         <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
