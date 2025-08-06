@@ -318,20 +318,22 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1">
                       <span className="text-sm font-medium text-green-600">Your Co-Pay:</span>
-                      <Popover>
-                        <PopoverTrigger asChild>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
                           <div className="w-3 h-3 rounded-full bg-green-600 flex items-center justify-center cursor-help">
                             <span className="text-xs text-white">i</span>
                           </div>
-                        </PopoverTrigger>
-                        <PopoverContent 
-                          className="p-0 border-0 bg-transparent w-auto max-w-[320px] sm:max-w-[400px] md:max-w-[480px]" 
+                        </TooltipTrigger>
+                        <TooltipContent 
+                          className="p-0 border-0 bg-transparent w-auto max-w-[320px] sm:max-w-[400px] md:max-w-[480px] z-[70]" 
                           side="top"
                           align="center"
                           sideOffset={10}
-                          onClick={handleUpgradeClick}
                         >
-                          <div className="relative bg-gradient-to-br from-yellow-400 via-yellow-500 to-yellow-600 rounded-lg p-3 sm:p-4 shadow-lg mx-auto cursor-pointer">
+                          <div 
+                            className="relative bg-gradient-to-br from-yellow-400 via-yellow-500 to-yellow-600 rounded-lg p-3 sm:p-4 shadow-lg mx-auto cursor-pointer"
+                            onClick={handleUpgradeClick}
+                          >
                             {/* Card design elements */}
                             <div className="absolute top-2 left-2 w-4 h-4 sm:w-6 sm:h-6 border border-yellow-700/30 rounded-sm"></div>
                             <div className="absolute top-2 right-2 text-yellow-800 font-bold text-sm sm:text-lg">PRO</div>
@@ -353,8 +355,8 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                               </button>
                             </div>
                           </div>
-                        </PopoverContent>
-                      </Popover>
+                        </TooltipContent>
+                      </Tooltip>
                     </div>
                     <span className="text-lg font-bold text-green-600">
                       {formatPrice(
