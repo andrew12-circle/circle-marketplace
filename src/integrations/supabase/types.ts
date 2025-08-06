@@ -3416,7 +3416,6 @@ export type Database = {
           direct_purchase_enabled: boolean | null
           discount_percentage: string | null
           duration: string | null
-          estimated_agent_split_percentage: number | null
           estimated_roi: number | null
           id: string
           image_url: string | null
@@ -3434,9 +3433,7 @@ export type Database = {
           rating: number | null
           regulatory_findings: string | null
           requires_quote: boolean | null
-          respa_category: string | null
           respa_compliance_notes: string | null
-          respa_notes: string | null
           respa_risk_level: string | null
           retail_price: string | null
           service_provider_id: string | null
@@ -3459,7 +3456,6 @@ export type Database = {
           direct_purchase_enabled?: boolean | null
           discount_percentage?: string | null
           duration?: string | null
-          estimated_agent_split_percentage?: number | null
           estimated_roi?: number | null
           id?: string
           image_url?: string | null
@@ -3477,9 +3473,7 @@ export type Database = {
           rating?: number | null
           regulatory_findings?: string | null
           requires_quote?: boolean | null
-          respa_category?: string | null
           respa_compliance_notes?: string | null
-          respa_notes?: string | null
           respa_risk_level?: string | null
           retail_price?: string | null
           service_provider_id?: string | null
@@ -3502,7 +3496,6 @@ export type Database = {
           direct_purchase_enabled?: boolean | null
           discount_percentage?: string | null
           duration?: string | null
-          estimated_agent_split_percentage?: number | null
           estimated_roi?: number | null
           id?: string
           image_url?: string | null
@@ -3520,9 +3513,7 @@ export type Database = {
           rating?: number | null
           regulatory_findings?: string | null
           requires_quote?: boolean | null
-          respa_category?: string | null
           respa_compliance_notes?: string | null
-          respa_notes?: string | null
           respa_risk_level?: string | null
           retail_price?: string | null
           service_provider_id?: string | null
