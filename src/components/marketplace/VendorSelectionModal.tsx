@@ -33,6 +33,7 @@ interface VendorSelectionModalProps {
   onClose: () => void;
   onVendorSelect: (vendor: Vendor) => void;
   service: {
+    id: string;
     title: string;
     co_pay_price?: string;
     retail_price?: string;
@@ -192,7 +193,7 @@ export const VendorSelectionModal = ({
         .insert({
           agent_id: user.id,
           vendor_id: vendor.id,
-          service_id: null,
+          service_id: service.id,
           requested_split_percentage: service.max_split_percentage_ssp || 50,
           status: 'pending',
           agent_notes: `Co-pay request for "${service.title}" service`

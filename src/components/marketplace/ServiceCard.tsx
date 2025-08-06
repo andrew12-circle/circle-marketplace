@@ -559,6 +559,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
           console.log('Selected vendor:', vendor);
         }}
         service={{
+          id: service.id,
           title: service.title,
           co_pay_price: service.co_pay_price,
           max_split_percentage_ssp: service.max_split_percentage_ssp,
