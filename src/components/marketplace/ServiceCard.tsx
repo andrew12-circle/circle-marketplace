@@ -439,10 +439,10 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                       align="center"
                       sideOffset={15}
                     >
-                      <div 
-                        className="relative bg-gradient-to-br from-yellow-400 via-yellow-500 to-yellow-600 rounded-lg p-4 sm:p-6 shadow-xl mx-auto cursor-pointer"
-                        onClick={handleUpgradeClick}
-                      >
+                        <div 
+                          className="relative bg-gradient-to-br from-yellow-400 via-yellow-500 to-yellow-600 rounded-lg p-3 sm:p-4 shadow-xl mx-auto cursor-pointer max-w-[85%] w-auto"
+                          onClick={handleUpgradeClick}
+                        >
                         {/* Card design elements */}
                         <div className="absolute top-3 left-3 w-6 h-6 border border-yellow-700/30 rounded-sm"></div>
                         <div className="absolute top-3 right-3 text-yellow-800 font-bold text-lg">PRO</div>
