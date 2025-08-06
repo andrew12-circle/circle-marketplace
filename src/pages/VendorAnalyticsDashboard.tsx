@@ -28,6 +28,7 @@ import { VendorProfileEditor } from "@/components/marketplace/VendorProfileEdito
 import { VendorFunnelEditor } from "@/components/marketplace/VendorFunnelEditor";
 import { VendorAnalytics } from "@/components/marketplace/VendorAnalytics";
 import { VendorCardPreview } from "@/components/marketplace/VendorCardPreview";
+import { CoMarketingManager } from "@/components/vendor/CoMarketingManager";
 
 interface VendorData {
   id: string;
@@ -498,18 +499,18 @@ export const VendorAnalyticsDashboard = () => {
               Analytics
             </TabsTrigger>
             <TabsTrigger 
+              value="comarketing" 
+              className="data-[state=active]:bg-white dark:data-[state=active]:bg-slate-800 data-[state=active]:shadow-lg data-[state=active]:text-slate-900 dark:data-[state=active]:text-white text-slate-600 dark:text-slate-400 rounded-xl transition-all duration-300 font-medium"
+            >
+              <FileText className="w-4 h-4 mr-2" />
+              Co-Marketing
+            </TabsTrigger>
+            <TabsTrigger 
               value="profile" 
               className="data-[state=active]:bg-white dark:data-[state=active]:bg-slate-800 data-[state=active]:shadow-lg data-[state=active]:text-slate-900 dark:data-[state=active]:text-white text-slate-600 dark:text-slate-400 rounded-xl transition-all duration-300 font-medium"
             >
               <Edit className="w-4 h-4 mr-2" />
               Edit Profile
-            </TabsTrigger>
-            <TabsTrigger 
-              value="funnel" 
-              className="data-[state=active]:bg-white dark:data-[state=active]:bg-slate-800 data-[state=active]:shadow-lg data-[state=active]:text-slate-900 dark:data-[state=active]:text-white text-slate-600 dark:text-slate-400 rounded-xl transition-all duration-300 font-medium"
-            >
-              <FileText className="w-4 h-4 mr-2" />
-              Edit Funnel
             </TabsTrigger>
           </TabsList>
 
@@ -655,6 +656,12 @@ export const VendorAnalyticsDashboard = () => {
                   campaigns_funded: vendorData.campaigns_funded,
                 }}
               />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="comarketing" className="space-y-6">
+            <div className="rounded-xl border-0 shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm p-6">
+              <CoMarketingManager />
             </div>
           </TabsContent>
 
