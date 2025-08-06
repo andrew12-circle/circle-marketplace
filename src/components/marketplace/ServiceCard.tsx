@@ -265,8 +265,8 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
               {service.description}
             </p>
           </TooltipTrigger>
-          <TooltipContent className="max-w-xs p-3 text-sm bg-popover border border-border rounded-lg shadow-lg z-[60]">
-            <p className="text-popover-foreground">{service.description}</p>
+          <TooltipContent className="max-w-[280px] sm:max-w-xs md:max-w-sm p-3 text-sm bg-popover border border-border rounded-lg shadow-lg z-[60]">
+            <p className="text-popover-foreground break-words">{service.description}</p>
           </TooltipContent>
         </Tooltip>
 
