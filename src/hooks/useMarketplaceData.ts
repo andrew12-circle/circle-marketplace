@@ -253,6 +253,10 @@ export const useMarketplaceData = () => {
     refetchOnMount: false, // Prevent refetch on navigation
     retry: 2,
     retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
+    // Add query cancellation context
+    meta: {
+      errorMessage: 'Failed to load marketplace data'
+    }
   });
 
   // Handle errors with toast

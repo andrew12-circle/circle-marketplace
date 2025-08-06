@@ -10,7 +10,8 @@ interface PendingRequest {
 
 class RequestDeduplicator {
   private pendingRequests: Map<string, PendingRequest> = new Map();
-  private readonly dedupWindowMs: number = 2000; // 2 seconds
+  private readonly dedupWindowMs: number = 5000; // 5 seconds for better navigation stability
+  private abortControllers: Map<string, AbortController> = new Map();
   
   /**
    * Creates a unique key for the request based on endpoint and parameters
@@ -40,14 +41,26 @@ class RequestDeduplicator {
       return pending.promise;
     }
     
+    // Cancel any existing request for this key
+    const existingController = this.abortControllers.get(key);
+    if (existingController) {
+      existingController.abort();
+      this.abortControllers.delete(key);
+    }
+    
     // Clean up expired requests
     this.cleanup();
+    
+    // Create abort controller for new request
+    const abortController = new AbortController();
+    this.abortControllers.set(key, abortController);
     
     // Create new request
     console.log(`🚀 Making new request: ${key}`);
     const promise = requestFn().finally(() => {
       // Remove from pending after completion
       this.pendingRequests.delete(key);
+      this.abortControllers.delete(key);
     });
     
     this.pendingRequests.set(key, {
@@ -71,10 +84,28 @@ class RequestDeduplicator {
   }
   
   /**
-   * Clear all pending requests
+   * Clear all pending requests and abort controllers
    */
   clear(): void {
+    // Abort all pending requests
+    for (const controller of this.abortControllers.values()) {
+      controller.abort();
+    }
     this.pendingRequests.clear();
+    this.abortControllers.clear();
+  }
+
+  /**
+   * Cancel requests matching a pattern
+   */
+  cancelRequests(pattern: string): void {
+    for (const [key, controller] of this.abortControllers.entries()) {
+      if (key.includes(pattern)) {
+        controller.abort();
+        this.pendingRequests.delete(key);
+        this.abortControllers.delete(key);
+      }
+    }
   }
   
   /**

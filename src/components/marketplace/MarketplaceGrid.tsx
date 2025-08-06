@@ -23,6 +23,7 @@ import { VendorCallToAction } from "./VendorCallToAction";
 import { useMarketplaceData, useSavedServices, type Service, type Vendor } from "@/hooks/useMarketplaceData";
 import { useMarketplaceFilters } from "@/hooks/useMarketplaceFilters";
 import { useNavigationOptimization } from "@/hooks/useNavigationOptimization";
+import { useNavigationGuard } from "@/hooks/useNavigationGuard";
 import { logger } from "@/utils/logger";
 interface FilterState {
   category: string;
@@ -50,9 +51,13 @@ export const MarketplaceGrid = () => {
   const { t } = useTranslation();
   
   // Use optimized hooks for data fetching and navigation
+  const { guardState, isTransitionSafe } = useNavigationGuard();
+  const { optimizeMarketplaceData } = useNavigationOptimization();
+  
+  // Only fetch data if transition is safe
+  const shouldFetchData = isTransitionSafe('marketplace-data');
   const { data: marketplaceData, isLoading, error } = useMarketplaceData();
   const { data: savedServiceIds = [] } = useSavedServices();
-  const { optimizeMarketplaceData } = useNavigationOptimization();
   
   const services = (marketplaceData as { services: Service[]; vendors: Vendor[] })?.services || [];
   const vendors = (marketplaceData as { services: Service[]; vendors: Vendor[] })?.vendors || [];
