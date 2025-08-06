@@ -250,10 +250,10 @@ export const Pricing = () => {
                   <div className="font-bold text-lg text-foreground">Circle Starter</div>
                   <div className="text-sm text-muted-foreground mt-1">Free</div>
                 </div>
-                <div className="p-6 border-b text-center bg-gradient-to-br from-blue-50 to-purple-50 relative">
+                <div className="p-6 border-b text-center bg-gradient-to-br from-blue-50 to-purple-50 relative overflow-visible">
                   <div className="font-bold text-lg text-foreground">Circle Pro</div>
                   <div className="text-sm text-blue-600 font-semibold mt-1">$97/month</div>
-                  <Badge className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs">Popular</Badge>
+                  <Badge className="absolute -top-3 -right-3 bg-blue-600 text-white text-xs px-2 py-1 z-10">Popular</Badge>
                 </div>
 
                 {/* Features */}
