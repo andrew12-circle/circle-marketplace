@@ -94,55 +94,73 @@ export const VendorAnalyticsDashboard = () => {
 
   const fetchVendorData = async () => {
     try {
+      setLoading(true);
+      
       // First try to find vendor by user profile
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('user_id', user?.id)
         .single();
 
+      if (profileError) {
+        console.error('Error fetching profile:', profileError);
+        toast.error('Failed to load profile data');
+        setLoading(false);
+        return;
+      }
+
       if (!profile?.vendor_enabled) {
+        console.log('Vendor not enabled for user');
         setLoading(false);
         return;
       }
 
       // Try to find vendor through vendor_user_associations first
-      const { data: vendorAssociation } = await supabase
+      const { data: vendorAssociation, error: associationError } = await supabase
         .from('vendor_user_associations')
         .select(`
           vendor_id,
           vendors (*)
         `)
         .eq('user_id', user?.id)
-        .single();
+        .maybeSingle();
+
+      if (associationError) {
+        console.error('Error fetching vendor association:', associationError);
+      }
 
       if (vendorAssociation?.vendors) {
+        console.log('Found vendor via association:', vendorAssociation.vendors);
         setVendorData(vendorAssociation.vendors);
         setLoading(false);
         return;
       }
 
       // Fallback: Try to find vendor by email
-      const { data: vendor, error } = await supabase
+      const { data: vendor, error: vendorError } = await supabase
         .from('vendors')
         .select('*')
         .eq('contact_email', user?.email)
-        .single();
+        .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') {
-        console.error('Error fetching vendor data:', error);
+      if (vendorError && vendorError.code !== 'PGRST116') {
+        console.error('Error fetching vendor by email:', vendorError);
         toast.error('Failed to load vendor data');
         setLoading(false);
         return;
       }
 
       if (vendor) {
+        console.log('Found vendor by email:', vendor);
         setVendorData(vendor);
       } else {
-        setLoading(false);
+        console.log('No vendor found for user');
       }
+      
+      setLoading(false);
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Unexpected error in fetchVendorData:', error);
       toast.error('Failed to load vendor data');
       setLoading(false);
     }
