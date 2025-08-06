@@ -7,8 +7,10 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { requestDeduplicator } from '@/utils/requestDeduplicator';
 import { marketplaceCache } from '@/utils/marketplaceCache';
+import { performanceMonitor } from '@/utils/performanceMonitor';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { logger } from '@/utils/logger';
 
 export interface Service {
   id: string;
@@ -83,7 +85,8 @@ const fetchServices = async (): Promise<Service[]> => {
       const cached = marketplaceCache.get<Service[]>(cacheKey);
       if (cached) return cached;
       
-      console.log('🔄 Fetching services from Supabase...');
+      const startTime = performance.now();
+      logger.log('🔄 Fetching services from Supabase...');
       const { data, error } = await supabase
         .from('services')
         .select('*')
@@ -104,8 +107,12 @@ const fetchServices = async (): Promise<Service[]> => {
         }
       }));
       
+      const duration = performance.now() - startTime;
+      
       // Cache the result
       marketplaceCache.set(cacheKey, formattedServices);
+      performanceMonitor.track('fetch-services', duration, { serviceCount: formattedServices.length });
+      performanceMonitor.trackRequest('services', 'GET', duration, true, false, formattedServices.length);
       return formattedServices;
     }
   );
@@ -124,7 +131,8 @@ const fetchVendors = async (): Promise<Vendor[]> => {
       const cached = marketplaceCache.get<Vendor[]>(cacheKey);
       if (cached) return cached;
       
-      console.log('🔄 Fetching vendors from Supabase...');
+      const startTime = performance.now();
+      logger.log('🔄 Fetching vendors from Supabase...');
       const { data, error } = await supabase
         .from('vendors')
         .select('*')
@@ -157,8 +165,12 @@ const fetchVendors = async (): Promise<Vendor[]> => {
         local_representatives: []
       }));
       
+      const duration = performance.now() - startTime;
+      
       // Cache the result
       marketplaceCache.set(cacheKey, formattedVendors);
+      performanceMonitor.track('fetch-vendors', duration, { vendorCount: formattedVendors.length });
+      performanceMonitor.trackRequest('vendors', 'GET', duration, true, false, formattedVendors.length);
       return formattedVendors;
     }
   );
@@ -177,7 +189,8 @@ const fetchCombinedMarketplaceData = async (): Promise<MarketplaceData> => {
       const cached = marketplaceCache.get<MarketplaceData>(cacheKey);
       if (cached) return cached;
       
-      console.log('🔄 Fetching combined marketplace data...');
+      const startTime = performance.now();
+      logger.log('🔄 Fetching combined marketplace data...');
       
       // Use Promise.all for parallel fetching
       const [services, vendors] = await Promise.all([
@@ -186,9 +199,11 @@ const fetchCombinedMarketplaceData = async (): Promise<MarketplaceData> => {
       ]);
       
       const result = { services, vendors };
+      const duration = performance.now() - startTime;
       
       // Cache the combined result
       marketplaceCache.set(cacheKey, result);
+      performanceMonitor.track('fetch-combined-marketplace', duration, { serviceCount: services.length, vendorCount: vendors.length });
       return result;
     }
   );
@@ -240,7 +255,7 @@ export const useMarketplaceData = () => {
 
   // Handle errors with toast
   if (query.error) {
-    console.error('Marketplace data loading error:', query.error);
+    logger.error('Marketplace data loading error:', query.error);
     toast({
       title: "Error loading data",
       description: `Failed to load marketplace data: ${query.error.message || 'Please try again.'}`,
@@ -321,7 +336,7 @@ export const useSavedServices = () => {
 
   // Handle errors
   if (query.error) {
-    console.error('Error loading saved services:', query.error);
+    logger.error('Error loading saved services:', query.error);
   }
 
   return query;

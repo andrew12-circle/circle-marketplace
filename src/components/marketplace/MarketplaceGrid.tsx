@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { ServiceCard } from "./ServiceCard";
-import { EnhancedVendorCard } from "./EnhancedVendorCard";
+import { OptimizedServiceCard } from "./OptimizedServiceCard";
+import { OptimizedVendorCard } from "./OptimizedVendorCard";
 import { MarketplaceFilters } from "./MarketplaceFilters";
 import { CampaignServicesHeader } from "./CampaignServicesHeader";
 import { CircleProBanner } from "./CircleProBanner";
@@ -21,6 +21,8 @@ import { CategoryMegaMenu } from "./CategoryMegaMenu";
 import { EnhancedSearch, SearchFilters } from "./EnhancedSearch";
 import { VendorCallToAction } from "./VendorCallToAction";
 import { useMarketplaceData, useSavedServices, type Service, type Vendor } from "@/hooks/useMarketplaceData";
+import { useMarketplaceFilters } from "@/hooks/useMarketplaceFilters";
+import { logger } from "@/utils/logger";
 interface FilterState {
   category: string;
   priceRange: number[];
@@ -52,6 +54,7 @@ export const MarketplaceGrid = () => {
   
   const services = marketplaceData?.services || [];
   const vendors = marketplaceData?.vendors || [];
+  
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>("services");
   const [selectedProductCategory, setSelectedProductCategory] = useState<string | null>(null);
@@ -65,6 +68,26 @@ export const MarketplaceGrid = () => {
   });
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [sortBy, setSortBy] = useState<'featured' | 'rating' | 'price'>('featured');
+  const [filters, setFilters] = useState<FilterState>({
+    category: "all",
+    priceRange: [0, 2000],
+    verified: false,
+    featured: false,
+    coPayEligible: false,
+    locationFilter: false
+  });
+  const { toast } = useToast();
+  const { user, profile } = useAuth();
+  const { location } = useLocation();
+  
+  // Use optimized filtering hook
+  const { filteredServices, filteredVendors, categories, localVendorCount } = useMarketplaceFilters(
+    services,
+    vendors,
+    searchTerm,
+    filters,
+    location
+  );
 
   // Define product categories with enhanced styling
   const PRODUCT_CATEGORIES = [{
@@ -142,92 +165,18 @@ export const MarketplaceGrid = () => {
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
   const [isAddProductModalOpen, setIsAddProductModalOpen] = useState(false);
-  const [filters, setFilters] = useState<FilterState>({
-    category: "all",
-    priceRange: [0, 2000],
-    verified: false,
-    featured: false,
-    coPayEligible: false,
-    locationFilter: false
-  });
-  const {
-    toast
-  } = useToast();
-  const {
-    user,
-    profile
-  } = useAuth();
-  const {
-    location
-  } = useLocation();
   // Combine saved services from hook and local state
   const allSavedServiceIds = [...savedServiceIds, ...localSavedServiceIds];
-
-  // Helper function to extract numeric price from strings like "$150" or "150"
-  const extractNumericPrice = (priceString: string | null | undefined): number => {
-    if (!priceString) return 0;
-    // Remove currency symbols, commas, and other non-numeric characters except decimal points
-    const cleanedPrice = priceString.replace(/[^0-9.]/g, '');
-    return parseFloat(cleanedPrice) || 0;
-  };
-  const filteredServices = services.filter(service => {
-    const matchesSearch = service.title?.toLowerCase().includes(searchTerm.toLowerCase()) || service.description?.toLowerCase().includes(searchTerm.toLowerCase()) || service.vendor?.name?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = filters.category === "all" || service.category === filters.category;
-
-    // Fix price filtering to handle currency symbols
-    const priceValue = extractNumericPrice(service.retail_price);
-    const matchesPrice = priceValue >= filters.priceRange[0] && priceValue <= filters.priceRange[1];
-    const matchesVerified = !filters.verified || service.vendor?.is_verified;
-    const matchesFeatured = !filters.featured || service.is_featured;
-
-    // Co-pay eligibility filtering
-    let matchesCoPayEligible = true;
-    if (filters.coPayEligible) {
-      const category = service.category?.toLowerCase() || '';
-      const title = service.title?.toLowerCase() || '';
-      const tags = service.tags?.map(tag => tag.toLowerCase()) || [];
-
-      // Safe for co-pay (True advertising)
-      const safeKeywords = ['digital ads', 'facebook ads', 'google ads', 'display ads', 'retargeting', 'postcards', 'direct mail', 'flyers', 'door hangers', 'brochures', 'educational', 'seminar', 'workshop', 'market report', 'buyer education', 'joint advertising', 'co-branded', 'print advertising'];
-
-      // Never allow co-pay (Business tools/lead generation)
-      const restrictedKeywords = ['crm', 'lead capture', 'lead generation', 'funnel', 'drip email', 'follow-up', 'seo', 'landing page', 'chatbot', 'sms', 'automation', 'business card', 'sign', 'social media management', 'posting', 'content calendar', 'listing video', 'drone', 'agent video', 'testimonial', 'open house', 'appreciation', 'pop-by', 'gift', 'closing gift', 'referral', 'past client', 'database', 'strategy', 'coaching', 'consulting', 'accountability'];
-      const hasRestricted = restrictedKeywords.some(keyword => title.includes(keyword) || category.includes(keyword) || tags.some(tag => tag.includes(keyword)));
-      const hasSafe = safeKeywords.some(keyword => title.includes(keyword) || category.includes(keyword) || tags.some(tag => tag.includes(keyword)));
-
-      // Only show services that are eligible for co-pay (safe keywords and no restricted keywords)
-      matchesCoPayEligible = hasSafe && !hasRestricted;
-    }
-    return matchesSearch && matchesCategory && matchesPrice && matchesVerified && matchesFeatured && matchesCoPayEligible;
-  });
-  const filteredVendors = vendors.filter(vendor => {
-    // Skip null vendors
-    if (!vendor) return false;
-    const matchesSearch = vendor.name?.toLowerCase().includes(searchTerm.toLowerCase()) || vendor.description?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesVerified = !filters.verified || vendor.is_verified;
-
-    // Location-based filtering
-    let matchesLocation = true;
-    if (filters.locationFilter && location?.state) {
-      matchesLocation = vendor.license_states?.includes(location.state) || vendor.service_states?.includes(location.state) || false;
-    }
-    return matchesSearch && matchesVerified && matchesLocation;
-  });
-
-  // Count local vendors for the banner
-  const localVendorCount = location?.state ? vendors.filter(vendor => vendor && (vendor.license_states?.includes(location.state) || vendor.service_states?.includes(location.state))).length : 0;
 
   // Get categories based on view mode
   const getCategories = () => {
     switch (viewMode) {
       case 'services':
-        return Array.from(new Set(services.map(s => s.category).filter(category => category && category.trim() !== "")));
+        return categories;
       case 'vendors':
         return [];
-      // CategoryMegaMenu has its own vendor categories
       case 'products':
         return [];
-      // CategoryMegaMenu has its own product categories
       default:
         return [];
     }
@@ -285,7 +234,7 @@ export const MarketplaceGrid = () => {
         });
       }
     } catch (error) {
-      console.error('Error saving service:', error);
+      logger.error('Error saving service:', error);
       toast({
         title: "Error",
         description: "Failed to save service. Please try again.",
@@ -431,7 +380,7 @@ export const MarketplaceGrid = () => {
 
           {/* Grid - Mobile Responsive */}
           {viewMode === "services" ? <div className="mobile-grid gap-4 sm:gap-6">
-              {filteredServices.map(service => <ServiceCard key={`service-${service.id}`} service={service} onSave={handleSaveService} onViewDetails={handleViewServiceDetails} isSaved={allSavedServiceIds.includes(service.id)} />)}
+              {filteredServices.map(service => <OptimizedServiceCard key={`service-${service.id}`} service={service} onSave={handleSaveService} onViewDetails={handleViewServiceDetails} isSaved={allSavedServiceIds.includes(service.id)} />)}
             </div> : viewMode === "products" ? selectedProductCategory ? <div>
                 <div className="mb-6 flex items-center gap-4">
                   <Button variant="outline" onClick={handleBackToProducts}>
@@ -442,7 +391,7 @@ export const MarketplaceGrid = () => {
                   </h2>
                 </div>
                 <div className="mobile-grid gap-4 sm:gap-6">
-                  {getServicesForProduct(selectedProductCategory).map(service => <ServiceCard key={`product-${selectedProductCategory}-${service.id}`} service={service} onSave={handleSaveService} onViewDetails={handleViewServiceDetails} isSaved={allSavedServiceIds.includes(service.id)} />)}
+                  {getServicesForProduct(selectedProductCategory).map(service => <OptimizedServiceCard key={`product-${selectedProductCategory}-${service.id}`} service={service} onSave={handleSaveService} onViewDetails={handleViewServiceDetails} isSaved={allSavedServiceIds.includes(service.id)} />)}
                 </div>
               </div> : <div className="mobile-grid gap-4 sm:gap-6">
                 {filteredProducts.map(product => {
@@ -492,7 +441,7 @@ export const MarketplaceGrid = () => {
                     </div>;
           })}
               </div> : <div className="mobile-grid gap-4 sm:gap-6">
-              {filteredVendors.map(vendor => <EnhancedVendorCard key={vendor.id} vendor={vendor} onConnect={handleConnectVendor} onViewProfile={handleViewVendorProfile} />)}
+              {filteredVendors.map(vendor => <OptimizedVendorCard key={vendor.id} vendor={vendor} onConnect={handleConnectVendor} onViewProfile={handleViewVendorProfile} />)}
             </div>}
 
           {/* Empty State */}
