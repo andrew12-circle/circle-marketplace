@@ -325,25 +325,25 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                             <span className="text-xs text-white">i</span>
                           </div>
                         </TooltipTrigger>
-                         <TooltipContent className="w-80 p-0 border-0 bg-transparent cursor-pointer" onClick={handleUpgradeClick}>
-                           <div className="relative bg-gradient-to-br from-yellow-400 via-yellow-500 to-yellow-600 rounded-lg p-4 shadow-lg">
+                         <TooltipContent className="max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg p-0 border-0 bg-transparent cursor-pointer" onClick={handleUpgradeClick}>
+                           <div className="relative bg-gradient-to-br from-yellow-400 via-yellow-500 to-yellow-600 rounded-lg p-3 sm:p-4 shadow-lg mx-auto">
                              {/* Card design elements */}
-                             <div className="absolute top-2 left-2 w-6 h-6 border border-yellow-700/30 rounded-sm"></div>
-                             <div className="absolute top-2 right-2 text-yellow-800 font-bold text-lg">PRO</div>
+                             <div className="absolute top-2 left-2 w-4 h-4 sm:w-6 sm:h-6 border border-yellow-700/30 rounded-sm"></div>
+                             <div className="absolute top-2 right-2 text-yellow-800 font-bold text-sm sm:text-lg">PRO</div>
                              
                              {/* Main content */}
-                             <div className="mt-6">
-                               <h3 className="text-yellow-900 font-bold text-lg mb-1">Circle COVERAGE</h3>
-                               <h4 className="text-yellow-800 font-semibold text-base mb-3">Compliant Advertising Partnerships</h4>
-                               <p className="text-yellow-900 text-sm leading-relaxed mb-3">
+                             <div className="mt-4 sm:mt-6">
+                               <h3 className="text-yellow-900 font-bold text-sm sm:text-lg mb-1">Circle COVERAGE</h3>
+                               <h4 className="text-yellow-800 font-semibold text-xs sm:text-base mb-2 sm:mb-3">Compliant Advertising Partnerships</h4>
+                               <p className="text-yellow-900 text-xs sm:text-sm leading-relaxed mb-2 sm:mb-3">
                                  Find lenders and title companies & more interested in sharing the cost of public advertising campaigns. Each party pays their proportional share and receives proportional benefit in all advertising materials.
                                </p>
                                
-                               <p className="text-yellow-900 text-xs leading-relaxed mb-3">
+                               <p className="text-yellow-900 text-xs leading-relaxed mb-2 sm:mb-3">
                                  This feature facilitates introductions for RESPA-compliant marketing partnerships only. Federal law prohibits cost-sharing arrangements for lead generation tools or business platforms.
                                </p>
                                
-                               <button className="text-yellow-800 text-sm font-medium hover:text-yellow-900 underline">
+                               <button className="text-yellow-800 text-xs sm:text-sm font-medium hover:text-yellow-900 underline">
                                  Learn more
                                </button>
                              </div>
@@ -397,7 +397,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                         </span>
                       </div>
                     </TooltipTrigger>
-                    <TooltipContent className="w-48 p-3 cursor-pointer" onClick={handleUpgradeClick}>
+                    <TooltipContent className="w-40 sm:w-48 p-3 cursor-pointer" onClick={handleUpgradeClick}>
                       <p className="text-sm leading-relaxed">Join Circle Pro membership to unlock this price</p>
                       <p className="text-xs text-muted-foreground mt-1">Click to upgrade →</p>
                     </TooltipContent>
@@ -422,25 +422,25 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                         </span>
                       </div>
                     </TooltipTrigger>
-                    <TooltipContent className="w-80 p-0 border-0 bg-transparent cursor-pointer" onClick={handleUpgradeClick}>
-                      <div className="relative bg-gradient-to-br from-yellow-400 via-yellow-500 to-yellow-600 rounded-lg p-4 shadow-lg">
+                    <TooltipContent className="max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg p-0 border-0 bg-transparent cursor-pointer" onClick={handleUpgradeClick}>
+                      <div className="relative bg-gradient-to-br from-yellow-400 via-yellow-500 to-yellow-600 rounded-lg p-3 sm:p-4 shadow-lg mx-auto">
                         {/* Card design elements */}
-                        <div className="absolute top-2 left-2 w-6 h-6 border border-yellow-700/30 rounded-sm"></div>
-                        <div className="absolute top-2 right-2 text-yellow-800 font-bold text-lg">PRO</div>
+                        <div className="absolute top-2 left-2 w-4 h-4 sm:w-6 sm:h-6 border border-yellow-700/30 rounded-sm"></div>
+                        <div className="absolute top-2 right-2 text-yellow-800 font-bold text-sm sm:text-lg">PRO</div>
                         
                         {/* Main content */}
-                        <div className="mt-6">
-                          <h3 className="text-yellow-900 font-bold text-lg mb-1">Circle COVERAGE</h3>
-                          <h4 className="text-yellow-800 font-semibold text-base mb-3">Compliant Advertising Partnerships</h4>
-                          <p className="text-yellow-900 text-sm leading-relaxed mb-3">
+                        <div className="mt-4 sm:mt-6">
+                          <h3 className="text-yellow-900 font-bold text-sm sm:text-lg mb-1">Circle COVERAGE</h3>
+                          <h4 className="text-yellow-800 font-semibold text-xs sm:text-base mb-2 sm:mb-3">Compliant Advertising Partnerships</h4>
+                          <p className="text-yellow-900 text-xs sm:text-sm leading-relaxed mb-2 sm:mb-3">
                             Find lenders and title companies & more interested in sharing the cost of public advertising campaigns. Each party pays their proportional share and receives proportional benefit in all advertising materials.
                           </p>
                           
-                          <p className="text-yellow-900 text-xs leading-relaxed mb-3">
+                          <p className="text-yellow-900 text-xs leading-relaxed mb-2 sm:mb-3">
                             This feature facilitates introductions for RESPA-compliant marketing partnerships only. Federal law prohibits cost-sharing arrangements for lead generation tools or business platforms.
                           </p>
                           
-                          <button className="text-yellow-800 text-sm font-medium hover:text-yellow-900 underline">
+                          <button className="text-yellow-800 text-xs sm:text-sm font-medium hover:text-yellow-900 underline">
                             Learn more
                           </button>
                         </div>
