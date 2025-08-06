@@ -22,6 +22,7 @@ interface Service {
   is_respa_regulated?: boolean;
   respa_risk_level?: string;
   max_split_percentage?: number;
+  max_split_percentage_ssp?: number;
   respa_compliance_notes?: string;
   respa_notes?: string;
   vendor_id?: string;
@@ -55,7 +56,7 @@ const RESPAServiceManager = () => {
       // First get services
       const { data: servicesData, error: servicesError } = await supabase
         .from('services')
-        .select('id, title, category, description, is_respa_regulated, respa_risk_level, max_split_percentage, respa_compliance_notes, respa_notes, vendor_id')
+        .select('id, title, category, description, is_respa_regulated, respa_risk_level, max_split_percentage, max_split_percentage_ssp, respa_compliance_notes, respa_notes, vendor_id')
         .order('title');
 
       if (servicesError) throw servicesError;
@@ -199,11 +200,13 @@ const RESPAServiceManager = () => {
           });
           const isRegulated = riskLevel === 'high';
           
+          const percentage = riskLevel === 'high' ? 0 : (riskLevel === 'medium' ? 50 : 100);
           return {
             id: service.id,
             is_respa_regulated: isRegulated,
             respa_risk_level: riskLevel,
-            max_split_percentage: riskLevel === 'high' ? 0 : (riskLevel === 'medium' ? 50 : 100)
+            max_split_percentage: percentage,
+            max_split_percentage_ssp: percentage
           };
         });
 
@@ -213,7 +216,8 @@ const RESPAServiceManager = () => {
           .update({
             is_respa_regulated: update.is_respa_regulated,
             respa_risk_level: update.respa_risk_level,
-            max_split_percentage: update.max_split_percentage
+            max_split_percentage: update.max_split_percentage,
+            max_split_percentage_ssp: update.max_split_percentage_ssp
           })
           .eq('id', update.id);
 
@@ -270,7 +274,7 @@ const RESPAServiceManager = () => {
           RESPA Split Limit Management
         </CardTitle>
         <CardDescription>
-          Set maximum split percentages for services when settlement service providers split bills (all services are RESPA regulated when splits occur)
+          Set maximum split percentages for services. Changes here will update both admin limits AND marketplace display percentages.
         </CardDescription>
         
         {/* Stats Cards */}
@@ -333,7 +337,7 @@ const RESPAServiceManager = () => {
               <Button 
                 size="sm" 
                 variant="outline"
-                onClick={() => bulkUpdateSelected({ is_respa_regulated: true, respa_risk_level: 'high', max_split_percentage: 0 })}
+                onClick={() => bulkUpdateSelected({ is_respa_regulated: true, respa_risk_level: 'high', max_split_percentage: 0, max_split_percentage_ssp: 0 })}
                 disabled={saving}
               >
                 Mark as High Risk
@@ -341,7 +345,7 @@ const RESPAServiceManager = () => {
               <Button 
                 size="sm" 
                 variant="outline"
-                onClick={() => bulkUpdateSelected({ is_respa_regulated: false, respa_risk_level: 'low', max_split_percentage: 100 })}
+                onClick={() => bulkUpdateSelected({ is_respa_regulated: false, respa_risk_level: 'low', max_split_percentage: 100, max_split_percentage_ssp: 100 })}
                 disabled={saving}
               >
                 Mark as Low Risk
@@ -377,7 +381,7 @@ const RESPAServiceManager = () => {
                 <TableHead>Service</TableHead>
                 <TableHead>Category</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Max Split % (SSP Only)</TableHead>
+                <TableHead>Max Split % (Admin & Marketplace)</TableHead>
                 <TableHead className="w-64">RESPA Notes</TableHead>
               </TableRow>
             </TableHeader>
@@ -418,11 +422,13 @@ const RESPAServiceManager = () => {
                       min="0"
                       max="100"
                       value={service.max_split_percentage || ''}
-                      onChange={(e) => 
+                      onChange={(e) => {
+                        const percentage = parseInt(e.target.value) || 0;
                         updateService(service.id, { 
-                          max_split_percentage: parseInt(e.target.value) || 0 
-                        })
-                      }
+                          max_split_percentage: percentage,
+                          max_split_percentage_ssp: percentage
+                        });
+                      }}
                       className="w-20"
                       disabled={saving}
                       placeholder="0-100"
