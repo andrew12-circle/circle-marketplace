@@ -19,9 +19,11 @@ import {
   MapPin,
   Phone,
   Mail,
-  Star
+  Star,
+  ArrowLeft
 } from "lucide-react";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 import { VendorProfileEditor } from "@/components/marketplace/VendorProfileEditor";
 import { VendorFunnelEditor } from "@/components/marketplace/VendorFunnelEditor";
 import { VendorAnalytics } from "@/components/marketplace/VendorAnalytics";
@@ -65,6 +67,7 @@ interface DashboardStats {
 
 export const VendorAnalyticsDashboard = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [vendorData, setVendorData] = useState<VendorData | null>(null);
   const [stats, setStats] = useState<DashboardStats>({
     totalViews: 0,
@@ -281,6 +284,15 @@ export const VendorAnalyticsDashboard = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <div className="flex items-center space-x-4">
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => navigate(-1)}
+                className="mr-2"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back
+              </Button>
               {vendorData.logo_url ? (
                 <img 
                   src={vendorData.logo_url} 
