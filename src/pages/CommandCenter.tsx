@@ -57,6 +57,7 @@ interface VendorContribution {
 }
 
 const CommandCenter = () => {
+  console.log("CommandCenter component rendering");
   const { user, profile } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedLocation, setSelectedLocation] = useState("all");
