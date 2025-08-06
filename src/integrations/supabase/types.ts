@@ -3426,7 +3426,6 @@ export type Database = {
           max_split_percentage: number | null
           max_split_percentage_non_ssp: number | null
           max_split_percentage_ssp: number | null
-          original_image_url: string | null
           price_duration: string | null
           pricing_tiers: Json | null
           pro_price: string | null
@@ -3442,7 +3441,6 @@ export type Database = {
           tags: string[] | null
           title: string
           updated_at: string | null
-          vectorized_image_url: string | null
           vendor_id: string | null
           website_url: string | null
         }
@@ -3466,7 +3464,6 @@ export type Database = {
           max_split_percentage?: number | null
           max_split_percentage_non_ssp?: number | null
           max_split_percentage_ssp?: number | null
-          original_image_url?: string | null
           price_duration?: string | null
           pricing_tiers?: Json | null
           pro_price?: string | null
@@ -3482,7 +3479,6 @@ export type Database = {
           tags?: string[] | null
           title: string
           updated_at?: string | null
-          vectorized_image_url?: string | null
           vendor_id?: string | null
           website_url?: string | null
         }
@@ -3506,7 +3502,6 @@ export type Database = {
           max_split_percentage?: number | null
           max_split_percentage_non_ssp?: number | null
           max_split_percentage_ssp?: number | null
-          original_image_url?: string | null
           price_duration?: string | null
           pricing_tiers?: Json | null
           pro_price?: string | null
@@ -3522,7 +3517,6 @@ export type Database = {
           tags?: string[] | null
           title?: string
           updated_at?: string | null
-          vectorized_image_url?: string | null
           vendor_id?: string | null
           website_url?: string | null
         }
