@@ -273,17 +273,8 @@ export const Auth = () => {
   };
 
   return (
-    <div 
-      className="min-h-screen flex items-center justify-center p-4 relative"
-      style={{
-        backgroundImage: 'url(https://storage.googleapis.com/msgsndr/UjxJODh2Df0UKjTnKpcP/media/684d9db3fc74bd2e5ad2f00b.jpeg)',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat'
-      }}
-    >
-      {/* Overlay for better text readability */}
-      <div className="absolute inset-0 bg-black/50" />
+    <div className="min-h-screen flex items-center justify-center p-4">
+      {/* Background removed for better performance */}
       
       <Card className="w-full max-w-md relative z-10 bg-white/95 backdrop-blur-sm border-white/20">
         <CardHeader className="space-y-4">
