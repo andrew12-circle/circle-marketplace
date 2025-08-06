@@ -254,10 +254,18 @@ export const VendorAnalyticsDashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading your dashboard...</p>
+      <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-secondary/20">
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center space-y-4">
+            <div className="relative">
+              <div className="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin mx-auto"></div>
+              <div className="absolute inset-0 w-16 h-16 border-4 border-transparent border-t-accent/40 rounded-full animate-spin mx-auto"></div>
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-lg font-semibold text-foreground">Loading Dashboard</h3>
+              <p className="text-sm text-muted-foreground">Fetching your analytics data...</p>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -265,79 +273,104 @@ export const VendorAnalyticsDashboard = () => {
 
   if (!vendorData) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Vendor Profile Not Found</h1>
-          <p className="text-gray-600 mb-6">You don't appear to be registered as a vendor or your vendor profile is not activated.</p>
-          <Button onClick={() => window.location.href = '/vendor-registration'}>
-            Register as Vendor
-          </Button>
-        </div>
+      <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-secondary/20 flex items-center justify-center">
+        <Card className="max-w-md mx-auto border-0 shadow-xl bg-card/80 backdrop-blur-sm">
+          <CardHeader className="text-center space-y-4">
+            <div className="w-16 h-16 mx-auto bg-destructive/10 rounded-full flex items-center justify-center">
+              <Building className="w-8 h-8 text-destructive" />
+            </div>
+            <div>
+              <CardTitle className="text-xl text-foreground">Vendor Profile Not Found</CardTitle>
+              <p className="text-sm text-muted-foreground mt-2">
+                You don't appear to be registered as a vendor or your vendor profile is not activated.
+              </p>
+            </div>
+          </CardHeader>
+          <CardContent className="text-center">
+            <Button 
+              onClick={() => window.location.href = '/vendor-registration'}
+              className="w-full"
+            >
+              Register as Vendor
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200">
+    <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-secondary/20">
+      {/* Modern Header with Glass Effect */}
+      <div className="border-b border-border/50 bg-card/80 backdrop-blur-xl sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-6">
               <Button 
                 variant="ghost" 
                 size="sm"
                 onClick={() => navigate(-1)}
-                className="mr-2"
+                className="hover:bg-muted/50 transition-colors duration-200"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back
               </Button>
-              {vendorData.logo_url ? (
-                <img 
-                  src={vendorData.logo_url} 
-                  alt={vendorData.name}
-                  className="w-12 h-12 rounded-lg object-cover border border-gray-200"
-                />
-              ) : (
-                <div className="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center">
-                  <Building className="w-6 h-6 text-blue-600" />
-                </div>
-              )}
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">{vendorData.name}</h1>
-                <div className="flex items-center space-x-2 mt-1">
-                  {vendorData.is_verified && (
-                    <Badge className="bg-green-100 text-green-800 border-green-200">
-                      Verified
-                    </Badge>
-                  )}
-                  {vendorData.nmls_id && (
-                    <Badge variant="outline" className="text-blue-600 border-blue-200">
-                      NMLS #{vendorData.nmls_id}
-                    </Badge>
-                  )}
-                  {vendorData.location && (
-                    <span className="text-sm text-gray-500 flex items-center">
-                      <MapPin className="w-3 h-3 mr-1" />
-                      {vendorData.location}
-                    </span>
-                  )}
+              
+              <div className="flex items-center space-x-4">
+                {vendorData.logo_url ? (
+                  <div className="relative group">
+                    <img 
+                      src={vendorData.logo_url} 
+                      alt={vendorData.name}
+                      className="w-14 h-14 rounded-xl object-cover border-2 border-border shadow-lg group-hover:scale-105 transition-transform duration-200"
+                    />
+                    <div className="absolute inset-0 rounded-xl bg-gradient-to-tr from-primary/20 to-accent/20 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                  </div>
+                ) : (
+                  <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg">
+                    <Building className="w-7 h-7 text-primary-foreground" />
+                  </div>
+                )}
+                <div>
+                  <h1 className="text-2xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
+                    {vendorData.name}
+                  </h1>
+                  <div className="flex items-center space-x-3 mt-1">
+                    {vendorData.is_verified && (
+                      <Badge className="bg-gradient-to-r from-green-500 to-green-600 text-white border-0 shadow-sm">
+                        <Star className="w-3 h-3 mr-1" />
+                        Verified
+                      </Badge>
+                    )}
+                    {vendorData.nmls_id && (
+                      <Badge variant="outline" className="border-primary/30 text-primary bg-primary/5">
+                        NMLS #{vendorData.nmls_id}
+                      </Badge>
+                    )}
+                    {vendorData.location && (
+                      <span className="text-sm text-muted-foreground flex items-center">
+                        <MapPin className="w-3 h-3 mr-1" />
+                        {vendorData.location}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
+            
             <div className="flex space-x-3">
-              <Button variant="outline">
+              <Button variant="outline" className="hover:bg-muted/50 border-border/50">
                 <Settings className="w-4 h-4 mr-2" />
                 Settings
               </Button>
-              <Button onClick={() => setIsEditingProfile(true)}>
+              <Button onClick={() => setIsEditingProfile(true)} className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 border-0 shadow-lg">
                 <Edit className="w-4 h-4 mr-2" />
                 Edit Profile
               </Button>
               <Button 
                 onClick={() => setShowCardPreview(!showCardPreview)}
                 variant={showCardPreview ? "default" : "outline"}
+                className={showCardPreview ? "bg-gradient-to-r from-accent to-primary" : "hover:bg-muted/50"}
               >
                 {showCardPreview ? "Hide Preview" : "Preview Card"}
               </Button>
@@ -348,158 +381,200 @@ export const VendorAnalyticsDashboard = () => {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Stats Cards */}
+        {/* Enhanced Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Partnered Agents</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm hover:shadow-xl transition-all duration-300 group">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Partnered Agents</CardTitle>
+              <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500/10 to-blue-600/10 group-hover:from-blue-500/20 group-hover:to-blue-600/20 transition-colors duration-300">
+                <Users className="h-4 w-4 text-blue-600" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{vendorData.co_marketing_agents}</div>
-              <p className="text-xs text-muted-foreground">
+              <div className="text-3xl font-bold text-foreground">{vendorData.co_marketing_agents}</div>
+              <p className="text-xs text-muted-foreground mt-1">
                 Active partnerships
               </p>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Campaign Spend</CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm hover:shadow-xl transition-all duration-300 group">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Campaign Spend</CardTitle>
+              <div className="p-2 rounded-lg bg-gradient-to-br from-green-500/10 to-green-600/10 group-hover:from-green-500/20 group-hover:to-green-600/20 transition-colors duration-300">
+                <DollarSign className="h-4 w-4 text-green-600" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">${stats.campaignSpend.toLocaleString()}</div>
-              <p className="text-xs text-muted-foreground">
+              <div className="text-3xl font-bold text-foreground">${stats.campaignSpend.toLocaleString()}</div>
+              <p className="text-xs text-muted-foreground mt-1">
                 {vendorData.campaigns_funded} campaigns funded
               </p>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Profile Views</CardTitle>
-              <Eye className="h-4 w-4 text-muted-foreground" />
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm hover:shadow-xl transition-all duration-300 group">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Profile Views</CardTitle>
+              <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-purple-600/10 group-hover:from-purple-500/20 group-hover:to-purple-600/20 transition-colors duration-300">
+                <Eye className="h-4 w-4 text-purple-600" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.totalViews}</div>
-              <p className="text-xs text-muted-foreground">
+              <div className="text-3xl font-bold text-foreground">{stats.totalViews}</div>
+              <p className="text-xs text-muted-foreground mt-1">
                 +{stats.recentViews} last 30 days
               </p>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Consultations</CardTitle>
-              <Calendar className="h-4 w-4 text-muted-foreground" />
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm hover:shadow-xl transition-all duration-300 group">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Consultations</CardTitle>
+              <div className="p-2 rounded-lg bg-gradient-to-br from-orange-500/10 to-orange-600/10 group-hover:from-orange-500/20 group-hover:to-orange-600/20 transition-colors duration-300">
+                <Calendar className="h-4 w-4 text-orange-600" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.consultationBookings}</div>
-              <p className="text-xs text-muted-foreground">
+              <div className="text-3xl font-bold text-foreground">{stats.consultationBookings}</div>
+              <p className="text-xs text-muted-foreground mt-1">
                 {stats.conversionRate}% conversion rate
               </p>
             </CardContent>
           </Card>
         </div>
 
-        {/* Tabs */}
+        {/* Modern Tabs */}
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList>
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
-            <TabsTrigger value="profile">Edit Profile</TabsTrigger>
-            <TabsTrigger value="funnel">Edit Funnel</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:grid-cols-4 bg-muted/50 backdrop-blur-sm border border-border/50">
+            <TabsTrigger value="overview" className="data-[state=active]:bg-background data-[state=active]:shadow-sm">
+              <BarChart3 className="w-4 h-4 mr-2" />
+              Overview
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="data-[state=active]:bg-background data-[state=active]:shadow-sm">
+              <TrendingUp className="w-4 h-4 mr-2" />
+              Analytics
+            </TabsTrigger>
+            <TabsTrigger value="profile" className="data-[state=active]:bg-background data-[state=active]:shadow-sm">
+              <Edit className="w-4 h-4 mr-2" />
+              Edit Profile
+            </TabsTrigger>
+            <TabsTrigger value="funnel" className="data-[state=active]:bg-background data-[state=active]:shadow-sm">
+              <FileText className="w-4 h-4 mr-2" />
+              Edit Funnel
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
+              <Card className="border-0 shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
                 <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <BarChart3 className="w-5 h-5 mr-2" />
+                  <CardTitle className="flex items-center text-foreground">
+                    <div className="p-2 rounded-lg bg-gradient-to-br from-primary/10 to-accent/10 mr-3">
+                      <BarChart3 className="w-5 h-5 text-primary" />
+                    </div>
                     Performance Summary
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">Average Rating</span>
-                    <div className="flex items-center space-x-1">
-                      <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                      <span className="font-semibold">{vendorData.rating}/5.0</span>
+                <CardContent className="space-y-6">
+                  <div className="flex justify-between items-center p-3 rounded-lg bg-muted/30">
+                    <span className="text-sm font-medium text-muted-foreground">Average Rating</span>
+                    <div className="flex items-center space-x-2">
+                      <div className="flex items-center space-x-1">
+                        {[...Array(5)].map((_, i) => (
+                          <Star 
+                            key={i} 
+                            className={`w-4 h-4 ${i < Math.floor(vendorData.rating) ? 'text-yellow-400 fill-current' : 'text-muted-foreground'}`} 
+                          />
+                        ))}
+                      </div>
+                      <span className="font-semibold text-foreground">{vendorData.rating}/5.0</span>
                     </div>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">Total Reviews</span>
-                    <span className="font-semibold">{vendorData.review_count}</span>
+                  <div className="flex justify-between items-center p-3 rounded-lg bg-muted/30">
+                    <span className="text-sm font-medium text-muted-foreground">Total Reviews</span>
+                    <span className="font-semibold text-foreground">{vendorData.review_count}</span>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">Service Radius</span>
-                    <span className="font-semibold">{vendorData.service_radius_miles || 'N/A'} miles</span>
+                  <div className="flex justify-between items-center p-3 rounded-lg bg-muted/30">
+                    <span className="text-sm font-medium text-muted-foreground">Service Radius</span>
+                    <span className="font-semibold text-foreground">{vendorData.service_radius_miles || 'N/A'} miles</span>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">Monthly Views</span>
-                    <span className="font-semibold">{stats.monthlyViews}</span>
+                  <div className="flex justify-between items-center p-3 rounded-lg bg-muted/30">
+                    <span className="text-sm font-medium text-muted-foreground">Monthly Views</span>
+                    <span className="font-semibold text-foreground">{stats.monthlyViews}</span>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="border-0 shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
                 <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <FileText className="w-5 h-5 mr-2" />
+                  <CardTitle className="flex items-center text-foreground">
+                    <div className="p-2 rounded-lg bg-gradient-to-br from-accent/10 to-primary/10 mr-3">
+                      <FileText className="w-5 h-5 text-accent" />
+                    </div>
                     Quick Actions
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <Button variant="outline" className="w-full justify-start">
-                    <Edit className="w-4 h-4 mr-2" />
+                  <Button variant="outline" className="w-full justify-start hover:bg-muted/50 transition-colors duration-200">
+                    <Edit className="w-4 h-4 mr-3" />
                     Update Company Description
                   </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <Calendar className="w-4 h-4 mr-2" />
+                  <Button variant="outline" className="w-full justify-start hover:bg-muted/50 transition-colors duration-200">
+                    <Calendar className="w-4 h-4 mr-3" />
                     Manage Availability
                   </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <DollarSign className="w-4 h-4 mr-2" />
+                  <Button variant="outline" className="w-full justify-start hover:bg-muted/50 transition-colors duration-200">
+                    <DollarSign className="w-4 h-4 mr-3" />
                     Update Pricing
                   </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <Eye className="w-4 h-4 mr-2" />
+                  <Button variant="outline" className="w-full justify-start hover:bg-muted/50 transition-colors duration-200">
+                    <Eye className="w-4 h-4 mr-3" />
                     Preview Vendor Card
                   </Button>
                 </CardContent>
               </Card>
             </div>
 
-            {/* Contact Information */}
+            {/* Enhanced Contact Information */}
             {(vendorData.contact_email || vendorData.phone || vendorData.website_url) && (
-              <Card>
+              <Card className="border-0 shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
                 <CardHeader>
-                  <CardTitle>Contact Information</CardTitle>
+                  <CardTitle className="flex items-center text-foreground">
+                    <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500/10 to-blue-600/10 mr-3">
+                      <Building className="w-5 h-5 text-blue-600" />
+                    </div>
+                    Contact Information
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {vendorData.contact_email && (
-                      <div className="flex items-center space-x-2">
-                        <Mail className="w-4 h-4 text-gray-500" />
-                        <span className="text-sm">{vendorData.contact_email}</span>
+                      <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors duration-200">
+                        <div className="p-2 rounded-lg bg-gradient-to-br from-green-500/10 to-green-600/10">
+                          <Mail className="w-4 h-4 text-green-600" />
+                        </div>
+                        <span className="text-sm font-medium text-foreground">{vendorData.contact_email}</span>
                       </div>
                     )}
                     {vendorData.phone && (
-                      <div className="flex items-center space-x-2">
-                        <Phone className="w-4 h-4 text-gray-500" />
-                        <span className="text-sm">{vendorData.phone}</span>
+                      <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors duration-200">
+                        <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500/10 to-blue-600/10">
+                          <Phone className="w-4 h-4 text-blue-600" />
+                        </div>
+                        <span className="text-sm font-medium text-foreground">{vendorData.phone}</span>
                       </div>
                     )}
                     {vendorData.website_url && (
-                      <div className="flex items-center space-x-2">
-                        <Building className="w-4 h-4 text-gray-500" />
+                      <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors duration-200">
+                        <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/10 to-purple-600/10">
+                          <Building className="w-4 h-4 text-purple-600" />
+                        </div>
                         <a 
                           href={vendorData.website_url} 
                           target="_blank" 
                           rel="noopener noreferrer"
-                          className="text-sm text-blue-600 hover:underline"
+                          className="text-sm font-medium text-primary hover:text-primary/80 transition-colors duration-200"
                         >
                           {vendorData.website_url}
                         </a>
@@ -511,140 +586,101 @@ export const VendorAnalyticsDashboard = () => {
             )}
           </TabsContent>
 
-          <TabsContent value="analytics">
-            <VendorAnalytics 
-              data={{
-                totalViews: stats.totalViews,
-                consultationBookings: stats.consultationBookings,
-                campaignSpend: stats.campaignSpend,
-                recentViews: stats.recentViews,
-                monthlyViews: stats.monthlyViews,
-                conversionRate: stats.conversionRate,
-                partneredAgents: vendorData.co_marketing_agents,
-                campaignsFunded: vendorData.campaigns_funded
-              }}
-              vendorData={{
-                name: vendorData.name,
-                location: vendorData.location,
-                co_marketing_agents: vendorData.co_marketing_agents,
-                campaigns_funded: vendorData.campaigns_funded
-              }}
-            />
+          <TabsContent value="analytics" className="space-y-6">
+            <div className="rounded-xl border-0 shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm p-6">
+              <VendorAnalytics 
+                data={{
+                  totalViews: stats.totalViews,
+                  consultationBookings: stats.consultationBookings,
+                  campaignSpend: stats.campaignSpend,
+                  recentViews: stats.recentViews,
+                  monthlyViews: stats.monthlyViews,
+                  conversionRate: stats.conversionRate,
+                  partneredAgents: vendorData.co_marketing_agents,
+                  campaignsFunded: vendorData.campaigns_funded,
+                }}
+                vendorData={{
+                  name: vendorData.name,
+                  location: vendorData.location,
+                  co_marketing_agents: vendorData.co_marketing_agents,
+                  campaigns_funded: vendorData.campaigns_funded,
+                }}
+              />
+            </div>
           </TabsContent>
 
-          <TabsContent value="profile">
-            {isEditingProfile ? (
-              <VendorProfileEditor
-                vendorData={vendorData}
-                onSave={handleProfileSave}
-                onCancel={handleProfileCancel}
-              />
-            ) : (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Edit Vendor Profile</CardTitle>
-                  <p className="text-sm text-gray-600">
-                    Update your company information and how it appears to agents
-                  </p>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <p className="text-gray-600 mb-4">Click "Edit Profile" in the header or the button below to update your vendor information.</p>
-                    <Button onClick={() => setIsEditingProfile(true)}>
-                      <Edit className="w-4 h-4 mr-2" />
-                      Edit Profile
-                    </Button>
+          <TabsContent value="profile" className="space-y-6">
+            <div className="rounded-xl border-0 shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm p-6">
+              {isEditingProfile ? (
+                <VendorProfileEditor
+                  vendorData={vendorData}
+                  onSave={handleProfileSave}
+                  onCancel={handleProfileCancel}
+                />
+              ) : (
+                <div className="text-center py-12">
+                  <div className="w-16 h-16 mx-auto bg-gradient-to-br from-primary/10 to-accent/10 rounded-full flex items-center justify-center mb-4">
+                    <Edit className="w-8 h-8 text-primary" />
                   </div>
-                </CardContent>
-              </Card>
-            )}
+                  <h3 className="text-lg font-semibold text-foreground mb-2">Edit Your Profile</h3>
+                  <p className="text-muted-foreground mb-6">Update your vendor information and settings</p>
+                  <Button 
+                    onClick={() => setIsEditingProfile(true)}
+                    className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90"
+                  >
+                    <Edit className="w-4 h-4 mr-2" />
+                    Start Editing
+                  </Button>
+                </div>
+              )}
+            </div>
           </TabsContent>
 
-          <TabsContent value="funnel">
-            {isEditingFunnel ? (
-              <VendorFunnelEditor
-                vendorId={vendorData.id}
-                initialContent={funnelContent}
-                onSave={handleFunnelSave}
-                onCancel={handleFunnelCancel}
-              />
-            ) : (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Edit Funnel Page</CardTitle>
-                  <p className="text-sm text-gray-600">
-                    Customize your vendor funnel page that agents see when they click on your card
-                  </p>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <p className="text-gray-600 mb-4">
-                      Create and customize your vendor funnel page to showcase your services, testimonials, and convert more leads.
-                    </p>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="p-4 border border-gray-200 rounded-lg">
-                        <h4 className="font-medium text-gray-900 mb-2">What you can customize:</h4>
-                        <ul className="text-sm text-gray-600 space-y-1">
-                          <li>• Hero section with compelling headlines</li>
-                          <li>• Service benefits and value propositions</li>
-                          <li>• Pricing packages and offerings</li>
-                          <li>• Customer testimonials and reviews</li>
-                          <li>• Contact information and CTAs</li>
-                          <li>• Trust indicators and guarantees</li>
-                        </ul>
-                      </div>
-                      <div className="p-4 border border-gray-200 rounded-lg">
-                        <h4 className="font-medium text-gray-900 mb-2">Benefits of a custom funnel:</h4>
-                        <ul className="text-sm text-gray-600 space-y-1">
-                          <li>• Higher conversion rates</li>
-                          <li>• Professional brand presentation</li>
-                          <li>• Better lead qualification</li>
-                          <li>• Showcase your expertise</li>
-                          <li>• Build trust with social proof</li>
-                          <li>• Clear pricing communication</li>
-                        </ul>
-                      </div>
-                    </div>
-                   <Button onClick={() => setIsEditingFunnel(true)} className="mt-4">
-                      <Edit className="w-4 h-4 mr-2" />
-                      Start Editing Funnel
-                    </Button>
+          <TabsContent value="funnel" className="space-y-6">
+            <div className="rounded-xl border-0 shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm p-6">
+              {isEditingFunnel ? (
+                <VendorFunnelEditor
+                  vendorId={vendorData.id}
+                  initialContent={funnelContent}
+                  onSave={handleFunnelSave}
+                  onCancel={handleFunnelCancel}
+                />
+              ) : (
+                <div className="text-center py-12">
+                  <div className="w-16 h-16 mx-auto bg-gradient-to-br from-accent/10 to-primary/10 rounded-full flex items-center justify-center mb-4">
+                    <FileText className="w-8 h-8 text-accent" />
                   </div>
-                </CardContent>
-              </Card>
-            )}
+                  <h3 className="text-lg font-semibold text-foreground mb-2">Create Your Funnel</h3>
+                  <p className="text-muted-foreground mb-6">Design a custom landing page for your services</p>
+                  <Button 
+                    onClick={() => setIsEditingFunnel(true)}
+                    className="bg-gradient-to-r from-accent to-primary hover:from-accent/90 hover:to-primary/90"
+                  >
+                    <FileText className="w-4 h-4 mr-2" />
+                    Start Creating
+                  </Button>
+                </div>
+              )}
+            </div>
           </TabsContent>
         </Tabs>
 
-        {/* Card Preview Modal */}
+        {/* Enhanced Card Preview */}
         {showCardPreview && (
-          <div className="mt-6">
-            <Card>
+          <div className="mt-8 animate-fade-in">
+            <Card className="border-0 shadow-xl bg-gradient-to-br from-card to-card/50 backdrop-blur-sm">
               <CardHeader>
-                <CardTitle>Vendor Card Preview</CardTitle>
-                <p className="text-sm text-gray-600">
-                  This is how your vendor card will appear to customers in the marketplace.
-                </p>
+                <CardTitle className="flex items-center text-foreground">
+                  <div className="p-2 rounded-lg bg-gradient-to-br from-primary/10 to-accent/10 mr-3">
+                    <Eye className="w-5 h-5 text-primary" />
+                  </div>
+                  Vendor Card Preview
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                <VendorCardPreview
-                  vendorData={{
-                    name: vendorData?.name || "Your Company Name",
-                    description: vendorData?.description || "Your company description will appear here...",
-                    rating: vendorData?.rating || 0,
-                    reviewCount: vendorData?.review_count || 0,
-                    location: vendorData?.location || "Your Location",
-                    phone: vendorData?.phone || "Your Phone",
-                    contactEmail: vendorData?.contact_email || "your@email.com",
-                    websiteUrl: vendorData?.website_url,
-                    logoUrl: vendorData?.logo_url,
-                    isVerified: vendorData?.is_verified || false,
-                    coMarketingAgents: vendorData?.co_marketing_agents || 0,
-                    campaignsFunded: vendorData?.campaigns_funded || 0,
-                    vendorType: vendorData?.vendor_type || "company",
-                    specialties: vendorData?.license_states || []
-                  }}
-                />
+                <div className="max-w-md mx-auto">
+                  <VendorCardPreview vendorData={vendorData} />
+                </div>
               </CardContent>
             </Card>
           </div>
