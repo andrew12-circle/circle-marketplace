@@ -26,6 +26,7 @@ export interface Service {
   tags?: string[];
   is_featured: boolean;
   is_top_pick: boolean;
+  is_verified?: boolean;
   estimated_roi?: number;
   duration?: string;
   requires_quote?: boolean;
@@ -111,6 +112,7 @@ const fetchServices = async (): Promise<Service[]> => {
       const formattedServices = (data || []).map(service => ({
         ...service,
         discount_percentage: service.discount_percentage ? String(service.discount_percentage) : undefined,
+        is_verified: service.is_verified || false,
         vendor: {
           name: 'Service Provider',
           rating: 4.5,
