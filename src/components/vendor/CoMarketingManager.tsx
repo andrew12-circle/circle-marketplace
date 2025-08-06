@@ -80,103 +80,116 @@ export const CoMarketingManager = () => {
   }, [user]);
 
   const fetchCoMarketingData = async () => {
+    if (!user?.id) return;
+    
     try {
       setLoading(true);
 
-      // Fetch pending co-pay requests with agent and service info
+      // Fetch pending co-pay requests
       const { data: requests, error: requestsError } = await supabase
         .from('co_pay_requests')
         .select('*')
-        .eq('vendor_id', user?.id)
+        .eq('vendor_id', user.id)
         .in('compliance_status', ['pending_vendor', 'vendor_approved'])
         .order('created_at', { ascending: false });
 
-      if (requestsError) throw requestsError;
+      if (requestsError) {
+        console.error('Error fetching pending requests:', requestsError);
+        // Don't throw - continue with empty array
+        setPendingRequests([]);
+      } else {
+        // Get unique agent and service IDs to batch queries
+        const agentIds = [...new Set(requests?.map(req => req.agent_id) || [])];
+        const serviceIds = [...new Set(requests?.map(req => req.service_id) || [])];
 
-      // Get agent and service details for each request
-      const formattedRequests: CoPayRequest[] = [];
-      if (requests) {
-        for (const req of requests) {
-          // Get agent info
-          const { data: agentProfile } = await supabase
-            .from('profiles')
-            .select('display_name')
-            .eq('user_id', req.agent_id)
-            .single();
+        // Batch fetch profiles and services
+        const [profilesResult, servicesResult] = await Promise.all([
+          agentIds.length > 0 
+            ? supabase.from('profiles').select('user_id, display_name').in('user_id', agentIds)
+            : Promise.resolve({ data: [], error: null }),
+          serviceIds.length > 0
+            ? supabase.from('services').select('id, title, category').in('id', serviceIds)
+            : Promise.resolve({ data: [], error: null })
+        ]);
 
-          // Get service info
-          const { data: service } = await supabase
-            .from('services')
-            .select('title, category')
-            .eq('id', req.service_id)
-            .single();
+        // Create lookup maps
+        const profilesMap = new Map<string, any>();
+        const servicesMap = new Map<string, any>();
+        
+        profilesResult.data?.forEach(p => profilesMap.set(p.user_id, p));
+        servicesResult.data?.forEach(s => servicesMap.set(s.id, s));
 
-          formattedRequests.push({
-            ...req,
-            agent_name: agentProfile?.display_name || 'Unknown Agent',
-            agent_email: agentProfile?.display_name || 'Unknown Email', // Use display_name as fallback
-            service_title: service?.title || 'Unknown Service',
-            service_category: service?.category
-          });
-        }
+        // Format requests with joined data
+        const formattedRequests: CoPayRequest[] = (requests || []).map(req => ({
+          ...req,
+          agent_name: profilesMap.get(req.agent_id)?.display_name || 'Unknown Agent',
+          agent_email: profilesMap.get(req.agent_id)?.display_name || 'Unknown Email',
+          service_title: servicesMap.get(req.service_id)?.title || 'Unknown Service',
+          service_category: servicesMap.get(req.service_id)?.category
+        }));
+
+        setPendingRequests(formattedRequests);
       }
 
-      setPendingRequests(formattedRequests);
-
-      // Fetch active co-marketing ventures from payment schedules
-      // For now, we'll use approved co_pay_requests as a proxy for active ventures
+      // Fetch active co-marketing ventures
       const { data: approvedRequests, error: approvedError } = await supabase
         .from('co_pay_requests')
         .select('*')
-        .eq('vendor_id', user?.id)
+        .eq('vendor_id', user.id)
         .eq('compliance_status', 'final_approved')
         .order('created_at', { ascending: false });
 
-      if (approvedError) throw approvedError;
+      if (approvedError) {
+        console.error('Error fetching approved requests:', approvedError);
+        setActiveVentures([]);
+      } else {
+        // Get unique agent and service IDs for approved requests
+        const approvedAgentIds = [...new Set(approvedRequests?.map(req => req.agent_id) || [])];
+        const approvedServiceIds = [...new Set(approvedRequests?.map(req => req.service_id) || [])];
 
-      // Get agent and service details for each approved request
-      const formattedVentures: ActiveVenture[] = [];
-      if (approvedRequests) {
-        for (const req of approvedRequests) {
-          // Get agent info
-          const { data: agentProfile } = await supabase
-            .from('profiles')
-            .select('display_name')
-            .eq('user_id', req.agent_id)
-            .single();
+        // Batch fetch profiles and services for approved requests
+        const [approvedProfilesResult, approvedServicesResult] = await Promise.all([
+          approvedAgentIds.length > 0
+            ? supabase.from('profiles').select('user_id, display_name').in('user_id', approvedAgentIds)
+            : Promise.resolve({ data: [], error: null }),
+          approvedServiceIds.length > 0
+            ? supabase.from('services').select('id, title').in('id', approvedServiceIds)
+            : Promise.resolve({ data: [], error: null })
+        ]);
 
-          // Get service info
-          const { data: service } = await supabase
-            .from('services')
-            .select('title')
-            .eq('id', req.service_id)
-            .single();
+        // Create lookup maps for approved requests
+        const approvedProfilesMap = new Map<string, any>();
+        const approvedServicesMap = new Map<string, any>();
+        
+        approvedProfilesResult.data?.forEach(p => approvedProfilesMap.set(p.user_id, p));
+        approvedServicesResult.data?.forEach(s => approvedServicesMap.set(s.id, s));
 
-          // Calculate end date using 12 months as default
+        // Format active ventures
+        const formattedVentures: ActiveVenture[] = (approvedRequests || []).map(req => {
           const endDate = (() => {
             const end = new Date();
-            end.setMonth(end.getMonth() + 12); // Default to 12 months
+            end.setMonth(end.getMonth() + 12);
             return end.toISOString().split('T')[0];
           })();
 
-          formattedVentures.push({
+          return {
             id: req.id,
             agent_id: req.agent_id,
             service_id: req.service_id,
             payment_percentage: req.requested_split_percentage,
-            start_date: req.created_at.split('T')[0], // Use created_at as start date
+            start_date: req.created_at.split('T')[0],
             end_date: endDate,
             status: 'active',
-            total_amount_covered: 0, // This would need to be calculated based on actual transactions
-            auto_renewal: false, // Default to false
+            total_amount_covered: 0,
+            auto_renewal: false,
             co_pay_request_id: req.id,
-            agent_name: agentProfile?.display_name || 'Unknown Agent',
-            service_title: service?.title || 'Unknown Service'
-          });
-        }
-      }
+            agent_name: approvedProfilesMap.get(req.agent_id)?.display_name || 'Unknown Agent',
+            service_title: approvedServicesMap.get(req.service_id)?.title || 'Unknown Service'
+          };
+        });
 
-      setActiveVentures(formattedVentures);
+        setActiveVentures(formattedVentures);
+      }
 
     } catch (error) {
       console.error('Error fetching co-marketing data:', error);
