@@ -267,15 +267,6 @@ export const Pricing = () => {
                   <Check className="w-6 h-6 text-emerald-500 mx-auto" />
                 </div>
 
-                <div className="bg-muted/30 p-4 border-r border-b">
-                  <span className="font-semibold text-foreground">Circle Points</span>
-                </div>
-                <div className="p-4 border-r border-b text-center bg-card">
-                  <span className="text-muted-foreground font-medium">None</span>
-                </div>
-                <div className="p-4 border-b text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50">
-                  <span className="text-foreground font-semibold">100 to start + 500/month</span>
-                </div>
 
                 <div className="bg-muted/30 p-4 border-r border-b">
                   <span className="font-semibold text-foreground">Circle Coverage</span>
