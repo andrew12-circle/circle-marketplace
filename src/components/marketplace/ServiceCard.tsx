@@ -64,9 +64,9 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
     // If co-pay is available, calculate discount from retail to co-pay
     if (service.copay_allowed && service.pro_price && service.respa_split_limit) {
       const proPrice = extractNumericPrice(service.pro_price);
-      // Use the RESPA compliance split limit
-      const actualSplitPercentage = service.respa_split_limit;
-      const coPayPrice = proPrice * (1 - (actualSplitPercentage / 100));
+      // Agent pays the remaining percentage after vendor contribution
+      const agentPayPercentage = 100 - service.respa_split_limit;
+      const coPayPrice = proPrice * (agentPayPercentage / 100);
       return Math.round(((retailPrice - coPayPrice) / retailPrice) * 100);
     }
     
