@@ -320,18 +320,7 @@ export const MarketplaceGrid = () => {
       return keywords.some(keyword => title.includes(keyword) || description.includes(keyword) || category.includes(keyword) || tags.some(tag => tag.includes(keyword)));
     });
   };
-  if (isLoading) {
-    return <div className="min-h-screen bg-background">
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex items-center justify-center h-64">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-circle-primary mx-auto mb-4"></div>
-              <p className="text-muted-foreground">{t('loading')} marketplace...</p>
-            </div>
-          </div>
-        </div>
-      </div>;
-  }
+  // Removed loading screen - data should be cached and load instantly
   return <>
       <div className="min-h-screen bg-background">
         <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
