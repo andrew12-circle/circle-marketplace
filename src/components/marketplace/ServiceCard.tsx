@@ -60,18 +60,29 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
     if (!service.retail_price) return null;
     
     const retailPrice = extractNumericPrice(service.retail_price);
+    console.log('Debug discount calc:', {
+      retailPrice,
+      proPrice: service.pro_price,
+      copayAllowed: service.copay_allowed,
+      respaLimit: service.respa_split_limit,
+      extractedProPrice: service.pro_price ? extractNumericPrice(service.pro_price) : null
+    });
     
     // If co-pay is available, calculate discount from retail to co-pay price
     if (service.copay_allowed && service.pro_price && service.respa_split_limit) {
       const proPrice = extractNumericPrice(service.pro_price);
       const coPayPrice = proPrice * (1 - (service.respa_split_limit / 100));
-      return Math.round(((retailPrice - coPayPrice) / retailPrice) * 100);
+      const discount = Math.round(((retailPrice - coPayPrice) / retailPrice) * 100);
+      console.log('Co-pay discount calc:', { proPrice, coPayPrice, discount });
+      return discount;
     }
     
     // Otherwise, calculate discount from retail to pro price  
     if (service.pro_price) {
       const proPrice = extractNumericPrice(service.pro_price);
-      return Math.round(((retailPrice - proPrice) / retailPrice) * 100);
+      const discount = Math.round(((retailPrice - proPrice) / retailPrice) * 100);
+      console.log('Pro discount calc:', { proPrice, discount });
+      return discount;
     }
     
     return null;
