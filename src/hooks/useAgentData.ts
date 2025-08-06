@@ -46,6 +46,55 @@ export interface AgentStats {
   titleCompanies: Array<{ name: string; count: number; percentage: number }>;
 }
 
+// Mock data for demonstration - will be replaced with real data later
+const generateMockData = (timeRange: number) => {
+  // Mock agent data
+  const mockAgent: Agent = {
+    id: '1',
+    first_name: 'Sarah',
+    last_name: 'Johnson',
+    email: 'sarah.johnson@example.com',
+    phone: '(555) 123-4567',
+    photo_url: 'https://api.dicebear.com/7.x/initials/svg?seed=Sarah Johnson',
+    brokerage: 'Keller Williams Realty',
+    years_active: 8,
+    social_facebook: 'https://facebook.com/sarahjohnsonrealtor',
+    social_instagram: 'https://instagram.com/sarahjohnsonrealtor',
+    social_linkedin: 'https://linkedin.com/in/sarahjohnsonrealtor',
+    social_zillow: 'https://zillow.com/profile/sarahjohnson',
+  };
+
+  // Generate mock transactions
+  const mockTransactions: Transaction[] = [];
+  const propertyTypes: Array<'SFH' | 'TH' | 'Condo' | 'Commercial'> = ['SFH', 'TH', 'Condo', 'Commercial'];
+  const loanTypes: Array<'Conventional' | 'FHA' | 'VA' | 'Other' | 'Cash'> = ['Conventional', 'FHA', 'VA', 'Other', 'Cash'];
+  const sides: Array<'buyer' | 'seller'> = ['buyer', 'seller'];
+
+  for (let i = 0; i < 45; i++) {
+    const closeDate = new Date();
+    closeDate.setMonth(closeDate.getMonth() - Math.random() * timeRange);
+    
+    mockTransactions.push({
+      id: `transaction-${i}`,
+      property_address: `${Math.floor(Math.random() * 9999)} ${['Main St', 'Oak Ave', 'Pine Rd', 'Elm Dr', 'Maple Ln'][Math.floor(Math.random() * 5)]}`,
+      city: ['Franklin', 'Nashville', 'Brentwood', 'Cool Springs', 'Murfreesboro'][Math.floor(Math.random() * 5)],
+      state: 'TN',
+      zip_code: `${37000 + Math.floor(Math.random() * 999)}`,
+      latitude: 35.9250 + (Math.random() - 0.5) * 0.5,
+      longitude: -86.8689 + (Math.random() - 0.5) * 0.5,
+      close_date: closeDate.toISOString().split('T')[0],
+      price: Math.floor(Math.random() * 800000) + 200000,
+      side: sides[Math.floor(Math.random() * sides.length)],
+      property_type: propertyTypes[Math.floor(Math.random() * propertyTypes.length)],
+      loan_type: loanTypes[Math.floor(Math.random() * loanTypes.length)],
+      lender_name: ['First Heritage Mortgage', 'CMG Mortgage', 'Wells Fargo', 'Rocket Mortgage', 'SunTrust Bank'][Math.floor(Math.random() * 5)],
+      title_company_name: ['Universal Title', 'Champion Title', 'First American', 'Stewart Title', 'Old Republic'][Math.floor(Math.random() * 5)],
+    });
+  }
+
+  return { mockAgent, mockTransactions };
+};
+
 export const useAgentData = (timeRange: number = 12) => {
   const { user } = useAuth();
   const [agent, setAgent] = useState<Agent | null>(null);
@@ -55,78 +104,41 @@ export const useAgentData = (timeRange: number = 12) => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!user) return;
-    
-    fetchAgentData();
-  }, [user, timeRange]);
+    // Use mock data for now
+    setTimeout(() => {
+      const { mockAgent, mockTransactions } = generateMockData(timeRange);
+      setAgent(mockAgent);
+      setTransactions(mockTransactions);
+      calculateStats(mockTransactions);
+      setLoading(false);
+    }, 1000);
+  }, [timeRange]);
 
   const fetchAgentData = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      // Get agent profile
-      const { data: agentData, error: agentError } = await supabase
-        .from('agents')
-        .select('*')
-        .eq('user_id', user?.id)
-        .single();
-
-      if (agentError && agentError.code !== 'PGRST116') {
-        throw agentError;
-      }
-
-      setAgent(agentData);
-
-      if (!agentData) {
+      // This will be used when real data is available
+      if (!user) {
+        const { mockAgent, mockTransactions } = generateMockData(timeRange);
+        setAgent(mockAgent);
+        setTransactions(mockTransactions);
+        calculateStats(mockTransactions);
         setLoading(false);
         return;
       }
 
-      // Calculate date range
-      const endDate = new Date();
-      const startDate = new Date();
-      startDate.setMonth(startDate.getMonth() - timeRange);
+      // This would be the real implementation when data is available
+      const { mockAgent, mockTransactions } = generateMockData(timeRange);
+      setAgent(mockAgent);
+      setTransactions(mockTransactions);
+      calculateStats(mockTransactions);
+      setLoading(false);
+      return;
 
-      // Get transactions with related data
-      const { data: transactionData, error: transactionError } = await supabase
-        .from('transactions')
-        .select(`
-          *,
-          lenders(name),
-          title_companies(name)
-        `)
-        .eq('agent_id', agentData.id)
-        .gte('close_date', startDate.toISOString().split('T')[0])
-        .lte('close_date', endDate.toISOString().split('T')[0])
-        .order('close_date', { ascending: false });
-
-      if (transactionError) {
-        throw transactionError;
-      }
-
-      // Transform transaction data
-      const transformedTransactions: Transaction[] = (transactionData || []).map(t => ({
-        id: t.id,
-        property_address: t.property_address,
-        city: t.city,
-        state: t.state,
-        zip_code: t.zip_code,
-        latitude: t.latitude,
-        longitude: t.longitude,
-        close_date: t.close_date,
-        price: t.price,
-        side: t.side as 'buyer' | 'seller',
-        property_type: t.property_type as 'SFH' | 'TH' | 'Condo' | 'Commercial',
-        loan_type: t.loan_type as 'Conventional' | 'FHA' | 'VA' | 'Other' | 'Cash' | undefined,
-        lender_name: t.lenders?.name,
-        title_company_name: t.title_companies?.name,
-      }));
-
-      setTransactions(transformedTransactions);
-
-      // Calculate statistics
-      calculateStats(transformedTransactions);
+      // Real data implementation would be here
+      // For now, we'll continue using mock data
 
     } catch (err) {
       console.error('Error fetching agent data:', err);

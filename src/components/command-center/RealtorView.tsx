@@ -16,6 +16,8 @@ import { DealFlowChart } from './DealFlowChart';
 import { TransactionMap } from './TransactionMap';
 import { LenderTable } from './LenderTable';
 import { TitleCompanyTable } from './TitleCompanyTable';
+import { DealsTable } from './DealsTable';
+import { GeographicHeatMap } from './GeographicHeatMap';
 
 export const RealtorView = () => {
   const [timeRange, setTimeRange] = useState(12);
@@ -191,6 +193,12 @@ export const RealtorView = () => {
 
         {/* Map View */}
         <TransactionMap transactions={transactions} />
+
+        {/* Active Deals Pipeline */}
+        <DealsTable deals={[]} onDealUpdate={() => {}} />
+
+        {/* Geographic Analysis */}
+        <GeographicHeatMap deals={[]} />
 
         {/* Tables Section */}
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
