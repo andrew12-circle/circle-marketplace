@@ -107,8 +107,8 @@ export const SecurityProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     // Perform initial security check
     performSecurityCheck();
     
-    // Set up periodic security checks every 5 minutes
-    const securityInterval = setInterval(performSecurityCheck, 5 * 60 * 1000);
+    // Set up periodic security checks every 10 minutes (reduced frequency)
+    const securityInterval = setInterval(performSecurityCheck, 10 * 60 * 1000);
     
     // Set up auth state change monitoring
     const { data: { subscription } } = supabase.auth.onAuthStateChange(

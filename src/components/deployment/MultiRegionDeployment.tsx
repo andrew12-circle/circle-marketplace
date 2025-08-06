@@ -223,7 +223,7 @@ export default function MultiRegionDeployment() {
 
   useEffect(() => {
     fetchRegionData();
-    const interval = setInterval(fetchRegionData, 30000); // Refresh every 30 seconds
+    const interval = setInterval(fetchRegionData, 60000); // Refresh every 60 seconds (reduced frequency)
     return () => clearInterval(interval);
   }, []);
 

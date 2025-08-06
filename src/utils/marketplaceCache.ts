@@ -176,7 +176,12 @@ class MarketplaceCache {
 // Global cache instance
 export const marketplaceCache = new MarketplaceCache();
 
-// Auto cleanup every 5 minutes
-setInterval(() => {
+// Auto cleanup every 15 minutes (reduced frequency)
+const cleanupInterval = setInterval(() => {
   marketplaceCache.cleanup();
-}, 5 * 60 * 1000);
+}, 15 * 60 * 1000);
+
+// Cleanup on page unload
+if (typeof window !== 'undefined') {
+  window.addEventListener('beforeunload', () => clearInterval(cleanupInterval));
+}

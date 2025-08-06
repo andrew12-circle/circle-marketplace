@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -143,7 +143,9 @@ export const AIConciergeBanner = () => {
     }
   };
 
-  // Animated placeholder text effect
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Animated placeholder text effect with cleanup
   useEffect(() => {
     let currentQuestionIndex = 0;
     let currentCharIndex = 0;
@@ -159,7 +161,7 @@ export const AIConciergeBanner = () => {
         if (currentCharIndex === 0) {
           isDeleting = false;
           currentQuestionIndex = (currentQuestionIndex + 1) % placeholderQuestions.length;
-          setTimeout(typeEffect, 500); // Pause before typing next question
+          timeoutRef.current = setTimeout(typeEffect, 1000); // Reduced frequency
           return;
         }
       } else {
@@ -167,18 +169,24 @@ export const AIConciergeBanner = () => {
         currentCharIndex++;
         
         if (currentCharIndex === currentQuestion.length) {
-          setTimeout(() => {
+          timeoutRef.current = setTimeout(() => {
             isDeleting = true;
             typeEffect();
-          }, 2000); // Pause when finished typing
+          }, 3000); // Longer pause when finished
           return;
         }
       }
       
-      setTimeout(typeEffect, isDeleting ? 50 : 100);
+      timeoutRef.current = setTimeout(typeEffect, isDeleting ? 150 : 200); // Reduced frequency
     };
     
     typeEffect();
+    
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
   }, []);
 
 

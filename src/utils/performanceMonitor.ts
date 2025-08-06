@@ -198,9 +198,14 @@ class PerformanceMonitor {
 // Global performance monitor instance
 export const performanceMonitor = new PerformanceMonitor();
 
-// Auto-log summary every 5 minutes in development
+// Auto-log summary every 10 minutes in development (reduced frequency)
 if (process.env.NODE_ENV === 'development') {
-  setInterval(() => {
+  const interval = setInterval(() => {
     performanceMonitor.logSummary();
-  }, 5 * 60 * 1000);
+  }, 10 * 60 * 1000);
+  
+  // Cleanup on page unload
+  if (typeof window !== 'undefined') {
+    window.addEventListener('beforeunload', () => clearInterval(interval));
+  }
 }

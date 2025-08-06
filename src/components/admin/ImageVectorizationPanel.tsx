@@ -46,8 +46,8 @@ export const ImageVectorizationPanel = () => {
   useEffect(() => {
     fetchStatus();
     
-    // Set up polling for status updates
-    const interval = setInterval(fetchStatus, 10000);
+    // Set up polling for status updates (reduced frequency)
+    const interval = setInterval(fetchStatus, 30000);
     return () => clearInterval(interval);
   }, []);
 
