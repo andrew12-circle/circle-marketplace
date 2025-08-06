@@ -267,14 +267,24 @@ export const useMarketplaceData = () => {
 };
 
 /**
- * Hook for services only
+ * Hook for services only - optimized to use combined data
  */
 export const useServices = () => {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   
   const query = useQuery({
     queryKey: QUERY_KEYS.services,
-    queryFn: fetchServices,
+    queryFn: async () => {
+      // Check if combined data is already loaded
+      const combinedData = queryClient.getQueryData<MarketplaceData>(QUERY_KEYS.marketplaceCombined);
+      if (combinedData?.services) {
+        return combinedData.services;
+      }
+      
+      // Fallback to individual fetch only if combined data isn't available
+      return fetchServices();
+    },
     staleTime: 2 * 60 * 1000,
     gcTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
@@ -294,14 +304,24 @@ export const useServices = () => {
 };
 
 /**
- * Hook for vendors only
+ * Hook for vendors only - optimized to use combined data
  */
 export const useVendors = () => {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   
   const query = useQuery({
     queryKey: QUERY_KEYS.vendors,
-    queryFn: fetchVendors,
+    queryFn: async () => {
+      // Check if combined data is already loaded
+      const combinedData = queryClient.getQueryData<MarketplaceData>(QUERY_KEYS.marketplaceCombined);
+      if (combinedData?.vendors) {
+        return combinedData.vendors;
+      }
+      
+      // Fallback to individual fetch only if combined data isn't available
+      return fetchVendors();
+    },
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
     refetchOnWindowFocus: false,
