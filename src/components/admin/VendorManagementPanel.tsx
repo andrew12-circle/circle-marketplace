@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { 
   Building, 
@@ -13,7 +14,9 @@ import {
   MapPin, 
   Star,
   Users,
-  DollarSign
+  DollarSign,
+  Shield,
+  ShieldCheck
 } from 'lucide-react';
 import { VendorProfileEditor } from '@/components/marketplace/VendorProfileEditor';
 import { VendorFunnelEditor } from '@/components/marketplace/VendorFunnelEditor';
@@ -151,6 +154,38 @@ export const VendorManagementPanel = () => {
     setIsEditingFunnel(false);
   };
 
+  const handleVerificationToggle = async (vendorId: string, currentStatus: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('vendors')
+        .update({ is_verified: !currentStatus })
+        .eq('id', vendorId);
+
+      if (error) throw error;
+
+      // Update local state
+      setVendors(vendors.map(v => 
+        v.id === vendorId ? { ...v, is_verified: !currentStatus } : v
+      ));
+      
+      if (selectedVendor?.id === vendorId) {
+        setSelectedVendor({ ...selectedVendor, is_verified: !currentStatus });
+      }
+
+      toast({
+        title: 'Success',
+        description: `Vendor ${!currentStatus ? 'verified' : 'unverified'} successfully`,
+      });
+    } catch (error) {
+      console.error('Error updating verification status:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update verification status',
+        variant: 'destructive',
+      });
+    }
+  };
+
   if (loading) {
     return <p>Loading vendors...</p>;
   }
@@ -217,22 +252,38 @@ export const VendorManagementPanel = () => {
                           <Building className="h-6 w-6 text-muted-foreground" />
                         </div>
                       )}
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold truncate">{vendor.name}</h3>
-                        <div className="flex items-center gap-1 mt-1">
-                          {vendor.is_verified && (
-                            <Badge variant="default" className="text-xs">
-                              <Star className="h-3 w-3 mr-1" />
-                              Verified
-                            </Badge>
-                          )}
-                          {vendor.location && (
-                            <p className="text-xs text-muted-foreground flex items-center gap-1">
-                              <MapPin className="h-3 w-3" />
-                              {vendor.location}
-                            </p>
-                          )}
-                        </div>
+                       <div className="flex-1 min-w-0">
+                         <div className="flex items-center justify-between mb-1">
+                           <h3 className="font-semibold truncate">{vendor.name}</h3>
+                           <div className="flex items-center gap-2">
+                             <div className="flex items-center gap-1">
+                               {vendor.is_verified ? (
+                                 <ShieldCheck className="h-3 w-3 text-green-600" />
+                               ) : (
+                                 <Shield className="h-3 w-3 text-muted-foreground" />
+                               )}
+                                <Switch
+                                  checked={vendor.is_verified}
+                                  onCheckedChange={() => handleVerificationToggle(vendor.id, vendor.is_verified)}
+                                  className="scale-75"
+                                />
+                             </div>
+                           </div>
+                         </div>
+                         <div className="flex items-center gap-1 mt-1">
+                           {vendor.is_verified && (
+                             <Badge variant="default" className="text-xs bg-green-100 text-green-800 hover:bg-green-200">
+                               <ShieldCheck className="h-3 w-3 mr-1" />
+                               Verified
+                             </Badge>
+                           )}
+                           {vendor.location && (
+                             <p className="text-xs text-muted-foreground flex items-center gap-1">
+                               <MapPin className="h-3 w-3" />
+                               {vendor.location}
+                             </p>
+                           )}
+                         </div>
                         <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
                           <span className="flex items-center gap-1">
                             <Users className="h-3 w-3" />
@@ -309,20 +360,50 @@ export const VendorManagementPanel = () => {
                       </Button>
                     </div>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border rounded-lg">
-                      <div>
-                        <h4 className="font-medium">Company Information</h4>
-                        <p className="text-sm text-muted-foreground">Name: {selectedVendor.name}</p>
-                        <p className="text-sm text-muted-foreground">Location: {selectedVendor.location || 'Not set'}</p>
-                        <p className="text-sm text-muted-foreground">Type: {selectedVendor.vendor_type || 'company'}</p>
-                      </div>
-                      <div>
-                        <h4 className="font-medium">Contact Information</h4>
-                        <p className="text-sm text-muted-foreground">Email: {selectedVendor.contact_email || 'Not set'}</p>
-                        <p className="text-sm text-muted-foreground">Phone: {selectedVendor.phone || 'Not set'}</p>
-                        <p className="text-sm text-muted-foreground">Website: {selectedVendor.website_url || 'Not set'}</p>
-                      </div>
-                    </div>
+                     <div className="space-y-4">
+                       <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/20">
+                         <div className="flex items-center gap-3">
+                           {selectedVendor.is_verified ? (
+                             <ShieldCheck className="h-5 w-5 text-green-600" />
+                           ) : (
+                             <Shield className="h-5 w-5 text-muted-foreground" />
+                           )}
+                           <div>
+                             <h4 className="font-medium">Verification Status</h4>
+                             <p className="text-sm text-muted-foreground">
+                               {selectedVendor.is_verified ? 'This vendor is verified' : 'This vendor is not verified'}
+                             </p>
+                           </div>
+                         </div>
+                         <div className="flex items-center gap-2">
+                           <Badge 
+                             variant={selectedVendor.is_verified ? "default" : "secondary"}
+                             className={selectedVendor.is_verified ? "bg-green-100 text-green-800" : ""}
+                           >
+                             {selectedVendor.is_verified ? 'Verified' : 'Unverified'}
+                           </Badge>
+                           <Switch
+                             checked={selectedVendor.is_verified}
+                             onCheckedChange={() => handleVerificationToggle(selectedVendor.id, selectedVendor.is_verified)}
+                           />
+                         </div>
+                       </div>
+
+                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border rounded-lg">
+                         <div>
+                           <h4 className="font-medium">Company Information</h4>
+                           <p className="text-sm text-muted-foreground">Name: {selectedVendor.name}</p>
+                           <p className="text-sm text-muted-foreground">Location: {selectedVendor.location || 'Not set'}</p>
+                           <p className="text-sm text-muted-foreground">Type: {selectedVendor.vendor_type || 'company'}</p>
+                         </div>
+                         <div>
+                           <h4 className="font-medium">Contact Information</h4>
+                           <p className="text-sm text-muted-foreground">Email: {selectedVendor.contact_email || 'Not set'}</p>
+                           <p className="text-sm text-muted-foreground">Phone: {selectedVendor.phone || 'Not set'}</p>
+                           <p className="text-sm text-muted-foreground">Website: {selectedVendor.website_url || 'Not set'}</p>
+                         </div>
+                       </div>
+                     </div>
                   </div>
                 )}
               </TabsContent>
