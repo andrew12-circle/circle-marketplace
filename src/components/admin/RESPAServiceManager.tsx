@@ -107,8 +107,8 @@ const RESPAServiceManager = () => {
 
     if (searchTerm) {
       filtered = filtered.filter(service =>
-        service.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        service.category.toLowerCase().includes(searchTerm.toLowerCase())
+        service.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        service.category?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
