@@ -39,7 +39,7 @@ interface VendorSelectionModalProps {
     retail_price?: string;
     pro_price?: string;
     image_url?: string;
-    max_split_percentage_ssp?: number;
+    respa_split_limit?: number;
     requires_quote?: boolean;
   };
 }
@@ -194,7 +194,7 @@ export const VendorSelectionModal = ({
           agent_id: user.id,
           vendor_id: vendor.id,
           service_id: service.id,
-          requested_split_percentage: service.max_split_percentage_ssp || 50,
+          requested_split_percentage: service.respa_split_limit || 50,
           status: 'pending',
           agent_notes: `Co-pay request for "${service.title}" service`
         })
@@ -231,7 +231,7 @@ export const VendorSelectionModal = ({
             pro_price: service.pro_price
           },
           status: 'pending-approval',
-          requestedSplit: service.max_split_percentage_ssp || 50,
+          requestedSplit: service.respa_split_limit || 50,
           createdAt: new Date().toISOString()
         };
 
@@ -303,7 +303,7 @@ export const VendorSelectionModal = ({
           <div className="flex-1">
             <DialogTitle>Select Co-Pay Partner</DialogTitle>
             <p className="text-sm text-muted-foreground">
-              Choose a vendor to help with "{service.title}" - they'll cover {service.max_split_percentage_ssp}% of the cost
+              Choose a vendor to help with "{service.title}" - they'll cover {service.respa_split_limit}% of the cost
             </p>
             {location?.state && (
               <p className="text-xs text-muted-foreground">

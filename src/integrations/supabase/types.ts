@@ -3423,9 +3423,7 @@ export type Database = {
           is_respa_regulated: boolean | null
           is_top_pick: boolean | null
           is_verified: boolean | null
-          max_split_percentage: number | null
           max_split_percentage_non_ssp: number | null
-          max_split_percentage_ssp: number | null
           price_duration: string | null
           pricing_tiers: Json | null
           pro_price: string | null
@@ -3434,6 +3432,7 @@ export type Database = {
           requires_quote: boolean | null
           respa_compliance_notes: string | null
           respa_risk_level: string | null
+          respa_split_limit: number | null
           retail_price: string | null
           service_provider_id: string | null
           sort_order: number | null
@@ -3461,9 +3460,7 @@ export type Database = {
           is_respa_regulated?: boolean | null
           is_top_pick?: boolean | null
           is_verified?: boolean | null
-          max_split_percentage?: number | null
           max_split_percentage_non_ssp?: number | null
-          max_split_percentage_ssp?: number | null
           price_duration?: string | null
           pricing_tiers?: Json | null
           pro_price?: string | null
@@ -3472,6 +3469,7 @@ export type Database = {
           requires_quote?: boolean | null
           respa_compliance_notes?: string | null
           respa_risk_level?: string | null
+          respa_split_limit?: number | null
           retail_price?: string | null
           service_provider_id?: string | null
           sort_order?: number | null
@@ -3499,9 +3497,7 @@ export type Database = {
           is_respa_regulated?: boolean | null
           is_top_pick?: boolean | null
           is_verified?: boolean | null
-          max_split_percentage?: number | null
           max_split_percentage_non_ssp?: number | null
-          max_split_percentage_ssp?: number | null
           price_duration?: string | null
           pricing_tiers?: Json | null
           pro_price?: string | null
@@ -3510,6 +3506,7 @@ export type Database = {
           requires_quote?: boolean | null
           respa_compliance_notes?: string | null
           respa_risk_level?: string | null
+          respa_split_limit?: number | null
           retail_price?: string | null
           service_provider_id?: string | null
           sort_order?: number | null

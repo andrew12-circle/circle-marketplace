@@ -29,10 +29,9 @@ interface Service {
   description?: string;
   is_respa_regulated?: boolean;
   respa_risk_level?: string;
-  max_split_percentage?: number;
-  max_split_percentage_ssp?: number;
+  respa_split_limit?: number;
   respa_compliance_notes?: string;
-  respa_notes?: string;
+  
   regulatory_findings?: string;
   supporting_documents?: DocumentInfo[];
   vendor_id?: string;
@@ -67,7 +66,7 @@ const RESPAServiceManager = () => {
       // First get services
       const { data: servicesData, error: servicesError } = await supabase
         .from('services')
-        .select('id, title, category, description, is_respa_regulated, respa_risk_level, max_split_percentage, max_split_percentage_ssp, respa_compliance_notes, respa_notes, regulatory_findings, supporting_documents, vendor_id')
+        .select('id, title, category, description, is_respa_regulated, respa_risk_level, respa_split_limit, respa_compliance_notes, regulatory_findings, supporting_documents, vendor_id')
         .order('title');
 
       if (servicesError) throw servicesError;
@@ -116,11 +115,11 @@ const RESPAServiceManager = () => {
       filtered = filtered.filter(service => {
         switch (filterStatus) {
           case 'evaluated':
-            return service.max_split_percentage !== null && service.max_split_percentage !== undefined;
+            return service.respa_split_limit !== null && service.respa_split_limit !== undefined;
           case 'pending':
-            return service.max_split_percentage === null || service.max_split_percentage === undefined;
+            return service.respa_split_limit === null || service.respa_split_limit === undefined;
           case 'no-split-limit':
-            return service.max_split_percentage === null || service.max_split_percentage === undefined;
+            return service.respa_split_limit === null || service.respa_split_limit === undefined;
           default:
             return true;
         }
@@ -229,8 +228,7 @@ const RESPAServiceManager = () => {
             id: service.id,
             is_respa_regulated: isRegulated,
             respa_risk_level: riskLevel,
-            max_split_percentage: percentage,
-            max_split_percentage_ssp: percentage
+            respa_split_limit: percentage
           };
         });
 
@@ -240,8 +238,7 @@ const RESPAServiceManager = () => {
           .update({
             is_respa_regulated: update.is_respa_regulated,
             respa_risk_level: update.respa_risk_level,
-            max_split_percentage: update.max_split_percentage,
-            max_split_percentage_ssp: update.max_split_percentage_ssp
+            respa_split_limit: update.respa_split_limit
           })
           .eq('id', update.id);
 
@@ -266,7 +263,7 @@ const RESPAServiceManager = () => {
   };
 
   const getStatusBadge = (service: Service) => {
-    const hasSplit = service.max_split_percentage !== null && service.max_split_percentage !== undefined;
+    const hasSplit = service.respa_split_limit !== null && service.respa_split_limit !== undefined;
     
     if (hasSplit) {
       return <Badge variant="default" className="bg-green-100 text-green-800">Split Limit Set</Badge>;

@@ -58,8 +58,7 @@ interface Service {
   price_duration?: string;
   co_pay_price?: string;
   copay_allowed?: boolean; // Database field name
-  max_split_percentage?: number;
-  max_split_percentage_ssp?: number;
+  respa_split_limit?: number;
   max_split_percentage_non_ssp?: number;
   estimated_roi?: number;
   duration?: string;
@@ -309,9 +308,9 @@ export const ServiceManagementPanel = () => {
     try {
         // Auto-calculate co_pay_price based on pro_price and SSP split percentage
         let calculatedCoPayPrice = null;
-        if (editForm.pro_price && editForm.max_split_percentage_ssp) {
+        if (editForm.pro_price && editForm.respa_split_limit) {
           const proPrice = parseFloat(editForm.pro_price.replace(/[^\d.]/g, ''));
-          const splitPercentage = editForm.max_split_percentage_ssp;
+          const splitPercentage = editForm.respa_split_limit;
           const coPayAmount = proPrice * (1 - (splitPercentage / 100));
           calculatedCoPayPrice = coPayAmount.toFixed(2);
         }
@@ -330,8 +329,7 @@ export const ServiceManagementPanel = () => {
         requires_quote: editForm.requires_quote || false,
         copay_allowed: editForm.copay_allowed || false, // Use database field name
         direct_purchase_enabled: editForm.direct_purchase_enabled || false,
-        max_split_percentage: editForm.max_split_percentage || null,
-        max_split_percentage_ssp: editForm.max_split_percentage_ssp || null,
+        respa_split_limit: editForm.respa_split_limit || null,
         max_split_percentage_non_ssp: editForm.max_split_percentage_non_ssp || null,
         co_pay_price: calculatedCoPayPrice
       };
@@ -703,28 +701,17 @@ export const ServiceManagementPanel = () => {
                    </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">Max Split % (RESPA)</label>
-                        <Input
-                          type="number"
-                          min="0"
-                          max="100"
-                          value={editForm.max_split_percentage || ''}
-                          onChange={(e) => setEditForm({ ...editForm, max_split_percentage: Number(e.target.value) })}
-                          placeholder="0-100"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">SSP Split %</label>
-                        <Input
-                          type="number"
-                          min="0"
-                          max="100"
-                          value={editForm.max_split_percentage_ssp || ''}
-                          onChange={(e) => setEditForm({ ...editForm, max_split_percentage_ssp: Number(e.target.value) })}
-                          placeholder="0-100"
-                        />
-                      </div>
+                       <div className="space-y-2">
+                         <label className="text-sm font-medium">RESPA Split Limit %</label>
+                         <Input
+                           type="number"
+                           min="0"
+                           max="100"
+                           value={editForm.respa_split_limit || ''}
+                           onChange={(e) => setEditForm({ ...editForm, respa_split_limit: Number(e.target.value) })}
+                           placeholder="0-100"
+                         />
+                       </div>
                       <div className="space-y-2">
                         <label className="text-sm font-medium">Non-SSP Split %</label>
                         <Input

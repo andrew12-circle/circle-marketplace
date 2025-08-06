@@ -21,7 +21,7 @@ interface Service {
   is_respa_regulated: boolean | null;
   respa_risk_level: string | null;
   respa_compliance_notes: string | null;
-  max_split_percentage: number | null;
+  respa_split_limit: number | null;
   compliance_checklist: any;
   vendor_id: string;
   vendor: {
@@ -114,7 +114,7 @@ export const RESPAComplianceManager = () => {
           is_respa_regulated,
           respa_risk_level,
           respa_compliance_notes,
-          max_split_percentage,
+          respa_split_limit,
           compliance_checklist,
           vendor_id,
           vendor:vendors(id, name)
@@ -223,7 +223,7 @@ export const RESPAComplianceManager = () => {
           id: service.id,
           is_respa_regulated: risk === 'high',
           respa_risk_level: risk,
-          max_split_percentage: rule?.maxSplitPercentage || (risk === 'high' ? 0 : 100),
+          respa_split_limit: rule?.maxSplitPercentage || (risk === 'high' ? 0 : 100),
           compliance_checklist: checklist,
           respa_compliance_notes: `Auto-evaluated: ${checklist.notes}`
         };
@@ -234,7 +234,7 @@ export const RESPAComplianceManager = () => {
           .from('services')
           .update({
             respa_risk_level: update.respa_risk_level,
-            max_split_percentage: update.max_split_percentage,
+            respa_split_limit: update.respa_split_limit,
             compliance_checklist: update.compliance_checklist,
             respa_compliance_notes: update.respa_compliance_notes
           } as any) // Use any to bypass type checking temporarily
@@ -266,7 +266,7 @@ export const RESPAComplianceManager = () => {
       const updateData = {
         is_respa_regulated: updates.is_respa_regulated,
         respa_risk_level: updates.respa_risk_level,
-        max_split_percentage: updates.max_split_percentage,
+        respa_split_limit: updates.respa_split_limit,
         respa_compliance_notes: updates.respa_compliance_notes
       };
 
@@ -307,7 +307,7 @@ export const RESPAComplianceManager = () => {
       const currentRisk = (s.respa_risk_level || determineVendorRisk(riskData)) as string;
       return currentRisk === 'high';
     }).length;
-    const approved = services.filter(s => s.max_split_percentage && s.max_split_percentage > 0).length;
+    const approved = services.filter(s => s.respa_split_limit && s.respa_split_limit > 0).length;
 
     return { total, evaluated, highRisk, approved };
   };
@@ -450,7 +450,7 @@ const ServiceComplianceCard = ({
   const [formData, setFormData] = useState({
     is_respa_regulated: service.is_respa_regulated,
     respa_risk_level: service.respa_risk_level,
-    max_split_percentage: service.max_split_percentage || 0,
+    respa_split_limit: service.respa_split_limit || 0,
     respa_compliance_notes: service.respa_compliance_notes || ''
   });
 
@@ -475,9 +475,9 @@ const ServiceComplianceCard = ({
                 Pending Review
               </Badge>
             )}
-            {service.max_split_percentage !== null && (
+            {service.respa_split_limit !== null && (
               <Badge variant="secondary">
-                {service.max_split_percentage}% Split
+                {service.respa_split_limit}% Split
               </Badge>
             )}
           </div>
@@ -536,10 +536,10 @@ const ServiceComplianceCard = ({
               type="number"
               min="0"
               max="100"
-              value={formData.max_split_percentage}
+              value={formData.respa_split_limit}
               onChange={(e) => setFormData({
-                ...formData, 
-                max_split_percentage: parseInt(e.target.value) || 0
+                ...formData,
+                respa_split_limit: parseInt(e.target.value) || 0
               })}
             />
           </div>

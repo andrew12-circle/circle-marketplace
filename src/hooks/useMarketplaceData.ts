@@ -34,8 +34,7 @@ export interface Service {
   direct_purchase_enabled?: boolean;
   // Co-pay and RESPA related fields
   copay_allowed?: boolean;
-  max_split_percentage_ssp?: number;
-  max_split_percentage?: number; // RESPA limit
+  respa_split_limit?: number; // RESPA compliance split limit
   max_split_percentage_non_ssp?: number;
   estimated_agent_split_percentage?: number;
   respa_category?: string;

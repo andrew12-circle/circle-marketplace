@@ -62,13 +62,10 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
     const retailPrice = extractNumericPrice(service.retail_price);
     
     // If co-pay is available, calculate discount from retail to co-pay
-    if (service.copay_allowed && service.pro_price && service.max_split_percentage_ssp) {
+    if (service.copay_allowed && service.pro_price && service.respa_split_limit) {
       const proPrice = extractNumericPrice(service.pro_price);
-      // Use the RESPA limit (max_split_percentage) instead of the full vendor support percentage
-      const actualSplitPercentage = Math.min(
-        service.max_split_percentage_ssp, 
-        service.max_split_percentage || 0
-      );
+      // Use the RESPA compliance split limit
+      const actualSplitPercentage = service.respa_split_limit;
       const coPayPrice = proPrice * (1 - (actualSplitPercentage / 100));
       return Math.round(((retailPrice - coPayPrice) / retailPrice) * 100);
     }
@@ -108,7 +105,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
     e.stopPropagation();
     
     // If pro member and co-pay is available, show choice modal
-    if (isProMember && service.copay_allowed && service.retail_price && service.max_split_percentage_ssp && service.pro_price) {
+    if (isProMember && service.copay_allowed && service.retail_price && service.respa_split_limit && service.pro_price) {
       setIsPricingChoiceModalOpen(true);
       return;
     }
@@ -317,7 +314,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                 </div>
               )}
               
-              {service.copay_allowed && service.pro_price && service.max_split_percentage_ssp && (
+              {service.copay_allowed && service.pro_price && service.respa_split_limit && (
                 <div className="space-y-1">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1">
@@ -364,17 +361,14 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                     </div>
                     <span className="text-lg font-bold text-green-600">
                       {formatPrice(
-                        extractNumericPrice(service.pro_price) * (1 - (Math.min(
-                          service.max_split_percentage_ssp, 
-                          service.max_split_percentage || 0
-                        ) / 100)), 
+                        extractNumericPrice(service.pro_price) * (1 - (service.respa_split_limit / 100)), 
                         service.price_duration || 'mo'
                       )}
                     </span>
                   </div>
                   <div className="flex justify-end">
                      <Badge className="bg-green-600 text-white text-xs">
-                       {Math.min(service.max_split_percentage_ssp, service.max_split_percentage || 0)}% vendor support
+                       {service.respa_split_limit}% vendor support
                      </Badge>
                   </div>
                 </div>
@@ -569,7 +563,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
           id: service.id,
           title: service.title,
           co_pay_price: service.co_pay_price,
-          max_split_percentage_ssp: service.max_split_percentage_ssp,
+          respa_split_limit: service.respa_split_limit,
         }}
       />
 
@@ -581,10 +575,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
           title: service.title,
           pro_price: service.pro_price,
           retail_price: service.retail_price,
-          max_split_percentage_ssp: Math.min(
-            service.max_split_percentage_ssp || 0, 
-            service.max_split_percentage || 0
-          ),
+          respa_split_limit: service.respa_split_limit || 0,
           price_duration: service.price_duration,
           requires_quote: service.requires_quote,
         }}
