@@ -251,11 +251,6 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
           <h3 className="font-semibold text-foreground leading-tight mobile-title">
             {service.title.split(' - ').pop() || service.title.split(': ').pop() || service.title}
           </h3>
-          {service.vendor?.is_verified && (
-            <Badge variant="secondary" className="text-xs">
-              {t('verified')}
-            </Badge>
-          )}
         </div>
 
         {/* Rating - moved above pricing */}
@@ -555,7 +550,6 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
           </Button>
         </div>
       </CardContent>
-      
       
       <ServiceFunnelModal
         isOpen={isFunnelModalOpen}
