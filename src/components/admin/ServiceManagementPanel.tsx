@@ -534,6 +534,16 @@ export const ServiceManagementPanel = () => {
                                 {service.retail_price}
                               </span>
                             )}
+                            {(() => {
+                              console.log('Service vendor data:', { 
+                                serviceId: service.id, 
+                                vendorId: service.vendor_id,
+                                vendorName: service.vendors?.name,
+                                serviceProviderName: service.service_providers?.name,
+                                fullService: service
+                              });
+                              return null;
+                            })()}
                             {(service.vendors?.name || service.service_providers?.name) && (
                               <span className="flex items-center gap-1">
                                 <Building className="h-3 w-3" />
