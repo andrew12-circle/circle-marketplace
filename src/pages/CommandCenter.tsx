@@ -1,312 +1,153 @@
-import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
 import { 
-  Download, 
-  TrendingUp, 
-  MapPin, 
-  PieChart, 
-  BarChart3, 
-  Brain, 
-  ArrowRight, 
-  CheckCircle, 
-  AlertTriangle, 
-  Crown,
   Target,
   DollarSign,
   Users,
   Activity,
   Search,
-  Filter,
   Eye,
   MessageSquare,
   UserPlus,
+  Crown,
+  CheckCircle,
   Clock,
-  Zap
+  TrendingUp
 } from "lucide-react";
 import { NavigationTabs } from "@/components/NavigationTabs";
 import { UserMenu } from "@/components/UserMenu";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { LocationSwitcher } from "@/components/LocationSwitcher";
 import { LegalFooter } from "@/components/LegalFooter";
-import { useToast } from "@/hooks/use-toast";
 
-// Interfaces
+// Mock data interfaces
 interface Campaign {
   id: string;
   name: string;
   vendor: string;
   status: 'complete' | 'pending' | 'approved';
   points_used: number;
-  created_at: string;
 }
 
-interface VendorRelationship {
-  vendor_name: string;
-  campaigns_used: number;
-  total_points_contributed: number;
-  avg_response_time: string;
-}
-
-interface AgentData {
+interface Agent {
   id: string;
   name: string;
-  company: string;
   buyer_count: number;
   seller_count: number;
-  total_volume: number;
+  total_volume: string;
   points_redeemed: number;
   active_vendors: number;
   email: string;
   phone: string;
-  last_12mo_production: {
-    buyer_side: number;
-    seller_side: number;
-  };
-  campaign_history: Campaign[];
 }
 
-interface ActivityLog {
-  id: string;
-  type: 'points_earned' | 'campaign_launched' | 'proof_uploaded' | 'wallet_deposit';
-  message: string;
-  timestamp: string;
-  vendor?: string;
-  amount?: number;
+interface VendorContribution {
+  vendor_name: string;
+  campaigns_used: number;
+  total_points: number;
+  avg_response_time: string;
 }
 
 const CommandCenter = () => {
   const { user, profile } = useAuth();
-  const { toast } = useToast();
-  const [loading, setLoading] = useState(true);
-  
-  // Realtor-specific state
-  const [circlePoints, setCirclePoints] = useState(1250);
-  const [vendorsActivated, setVendorsActivated] = useState(5);
-  const [estimatedValue, setEstimatedValue] = useState(3100);
-  const [closingsTracked, setClosingsTracked] = useState(11);
-  const [walletBalance, setWalletBalance] = useState(520);
-  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
-  const [vendorRelationships, setVendorRelationships] = useState<VendorRelationship[]>([]);
-  const [activityLog, setActivityLog] = useState<ActivityLog[]>([]);
-  
-  // SSP-specific state
-  const [searchFilters, setSearchFilters] = useState({
-    location: '',
-    min_buyer_volume: '',
-    max_buyer_volume: '',
-    min_seller_volume: '',
-    max_seller_volume: '',
-    min_transaction_count: '',
-    active_vendors: ''
-  });
-  const [agentData, setAgentData] = useState<AgentData[]>([]);
-  const [selectedAgent, setSelectedAgent] = useState<AgentData | null>(null);
-  const [agentDetailOpen, setAgentDetailOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedLocation, setSelectedLocation] = useState("all");
+  const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
 
-  // Determine user role
-  const isRealtor = profile?.specialties?.includes('realtor') || profile?.specialties?.includes('real_estate');
-  const isSSP = profile?.specialties?.includes('ssp') || profile?.specialties?.includes('vendor');
-
-  useEffect(() => {
-    loadMockData();
-  }, [user?.id]);
-
-  const loadMockData = () => {
-    // Mock campaigns data
-    const mockCampaigns: Campaign[] = [
-      {
-        id: '1',
-        name: 'Buyer Video Ad',
-        vendor: '360 Branding',
-        status: 'complete',
-        points_used: 150,
-        created_at: '2024-01-15'
-      },
-      {
-        id: '2',
-        name: 'Listing Mailer',
-        vendor: 'Postcard Pro',
-        status: 'pending',
-        points_used: 110,
-        created_at: '2024-01-20'
-      },
-      {
-        id: '3',
-        name: 'Instagram Reels Campaign',
-        vendor: 'Agent Media Lab',
-        status: 'approved',
-        points_used: 200,
-        created_at: '2024-01-25'
-      }
-    ];
-
-    // Mock vendor relationships
-    const mockVendorRelationships: VendorRelationship[] = [
-      {
-        vendor_name: '360 Branding',
-        campaigns_used: 3,
-        total_points_contributed: 420,
-        avg_response_time: '2.4 days'
-      },
-      {
-        vendor_name: 'HOI Hub',
-        campaigns_used: 1,
-        total_points_contributed: 75,
-        avg_response_time: '1.2 days'
-      },
-      {
-        vendor_name: 'Postcard Pro',
-        campaigns_used: 2,
-        total_points_contributed: 185,
-        avg_response_time: '3.1 days'
-      }
-    ];
-
-    // Mock activity log
-    const mockActivityLog: ActivityLog[] = [
-      {
-        id: '1',
-        type: 'points_earned',
-        message: '360 Branding contributed $125 to your "Just Listed Postcard" campaign.',
-        timestamp: '2024-01-25T10:30:00Z',
-        vendor: '360 Branding',
-        amount: 125
-      },
-      {
-        id: '2',
-        type: 'campaign_launched',
-        message: 'You approved Instagram Reels campaign creative from Agent Media Lab.',
-        timestamp: '2024-01-24T14:15:00Z',
-        vendor: 'Agent Media Lab'
-      },
-      {
-        id: '3',
-        type: 'wallet_deposit',
-        message: 'Wallet deposit of $50 processed successfully.',
-        timestamp: '2024-01-23T09:45:00Z',
-        amount: 50
-      }
-    ];
-
-    // Mock agent data for SSP view
-    const mockAgentData: AgentData[] = [
-      {
-        id: '1',
-        name: 'Lauren James',
-        company: 'Keller Williams Realty',
-        buyer_count: 33,
-        seller_count: 14,
-        total_volume: 17800000,
-        points_redeemed: 1250,
-        active_vendors: 3,
-        email: 'lauren.james@kw.com',
-        phone: '(615) 555-0123',
-        last_12mo_production: {
-          buyer_side: 15200000,
-          seller_side: 2600000
-        },
-        campaign_history: mockCampaigns
-      },
-      {
-        id: '2',
-        name: 'Michael Rodriguez',
-        company: 'RE/MAX Elite',
-        buyer_count: 28,
-        seller_count: 19,
-        total_volume: 14200000,
-        points_redeemed: 980,
-        active_vendors: 2,
-        email: 'michael.r@remax.com',
-        phone: '(615) 555-0124',
-        last_12mo_production: {
-          buyer_side: 8400000,
-          seller_side: 5800000
-        },
-        campaign_history: []
-      }
-    ];
-
-    setCampaigns(mockCampaigns);
-    setVendorRelationships(mockVendorRelationships);
-    setActivityLog(mockActivityLog);
-    setAgentData(mockAgentData);
-    setLoading(false);
+  // Mock data
+  const realtorMetrics = {
+    circle_points: 1250,
+    vendors_activated: 5,
+    estimated_value: 3100,
+    closings_tracked: 11
   };
 
-  const handleAgentSelect = (agent: AgentData) => {
-    setSelectedAgent(agent);
-    setAgentDetailOpen(true);
+  const activityFeed = [
+    { id: 1, message: "360 Branding contributed $125 to your \"Just Listed Postcard\" campaign.", time: "2 hours ago", type: "contribution" },
+    { id: 2, message: "You approved Instagram Reels campaign creative from Agent Media Lab.", time: "4 hours ago", type: "approval" },
+    { id: 3, message: "Received $75 wallet deposit from Postcard Pro.", time: "1 day ago", type: "deposit" }
+  ];
+
+  const campaigns: Campaign[] = [
+    { id: "1", name: "Buyer Video Ad", vendor: "360 Branding", status: "complete", points_used: 150 },
+    { id: "2", name: "Listing Mailer", vendor: "Postcard Pro", status: "pending", points_used: 110 },
+    { id: "3", name: "Social Media Package", vendor: "Agent Media Lab", status: "approved", points_used: 200 }
+  ];
+
+  const vendorContributions: VendorContribution[] = [
+    { vendor_name: "360 Branding", campaigns_used: 3, total_points: 420, avg_response_time: "2.4 days" },
+    { vendor_name: "HOI Hub", campaigns_used: 1, total_points: 75, avg_response_time: "1.2 days" },
+    { vendor_name: "Agent Media Lab", campaigns_used: 2, total_points: 285, avg_response_time: "3.1 days" }
+  ];
+
+  const agents: Agent[] = [
+    {
+      id: "1",
+      name: "Lauren James",
+      buyer_count: 33,
+      seller_count: 14,
+      total_volume: "$17.8M",
+      points_redeemed: 1250,
+      active_vendors: 3,
+      email: "lauren@example.com",
+      phone: "(555) 123-4567"
+    },
+    {
+      id: "2", 
+      name: "Michael Chen",
+      buyer_count: 28,
+      seller_count: 19,
+      total_volume: "$21.2M",
+      points_redeemed: 1850,
+      active_vendors: 4,
+      email: "michael@example.com",
+      phone: "(555) 234-5678"
+    }
+  ];
+
+  // Default to realtor view since we have mock data for now
+  const isRealtor = true;
+  const isSSP = false;
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'complete':
+        return <CheckCircle className="h-4 w-4 text-green-500" />;
+      case 'pending':
+        return <Clock className="h-4 w-4 text-yellow-500" />;
+      case 'approved':
+        return <CheckCircle className="h-4 w-4 text-blue-500" />;
+      default:
+        return <Clock className="h-4 w-4 text-gray-500" />;
+    }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading your command center...</p>
-        </div>
-      </div>
-    );
-  }
-
-  const circleLogoUrl = "/lovable-uploads/97692497-6d98-46a8-b6fc-05cd68bdc160.png";
+  const filteredAgents = agents.filter(agent =>
+    agent.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    agent.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/50 sticky top-0 z-50">
-        <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4">
+      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
+        <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 sm:gap-3">
-              <img 
-                src={circleLogoUrl}
-                alt="Circle Logo" 
-                className="w-12 h-12 sm:w-16 sm:h-16 object-contain"
-                style={{ imageRendering: 'crisp-edges' }}
-              />
-            </div>
-            
-            <div className="hidden sm:flex flex-1 justify-center">
+            <div className="flex items-center space-x-4">
+              <h1 className="text-2xl font-bold text-primary">Circle</h1>
               <NavigationTabs />
             </div>
-            
-            <div className="sm:hidden flex-1 px-4">
-              <div className="flex bg-muted rounded-full p-1">
-                <Link to="/" className="flex-1 text-xs py-2 px-2 rounded-full font-medium transition-all text-center text-muted-foreground">
-                  Market
-                </Link>
-                <Link to="/command-center" className="flex-1 text-xs py-2 px-2 rounded-full font-medium transition-all text-center bg-background text-foreground shadow-sm">
-                  Command
-                </Link>
-                <Link to="/academy" className="flex-1 text-xs py-2 px-2 rounded-full font-medium transition-all text-center text-muted-foreground">
-                  Academy
-                </Link>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-2 sm:gap-4">
+            <div className="flex items-center space-x-4">
               <LanguageSwitcher />
               <LocationSwitcher />
-              
-              {user && profile && (
-                <Link to="/wallet" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm hover:bg-accent hover:text-accent-foreground rounded-md px-2 sm:px-3 py-1.5 sm:py-2 transition-colors cursor-pointer touch-target">
-                  <Crown className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-500" />
-                  <span className="font-medium">{profile.circle_points}</span>
-                  <span className="text-muted-foreground hidden sm:inline">Points</span>
-                </Link>
-              )}
-              
               <UserMenu />
             </div>
           </div>
@@ -314,91 +155,83 @@ const CommandCenter = () => {
       </header>
 
       <div className="container mx-auto px-4 py-8">
-        {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-foreground mb-2">
-            {isRealtor ? 'My Command Center' : isSSP ? 'Agent Lookup & Insights' : 'Command Center'}
+          <h1 className="text-3xl font-bold mb-2">
+            {isRealtor ? "My Command Center" : "Agent Lookup & Insights"}
           </h1>
-          <p className="text-muted-foreground text-lg">
+          <p className="text-muted-foreground">
             {isRealtor 
-              ? 'Your marketing campaigns, points, and vendor relationships at a glance.'
-              : isSSP 
-              ? 'Discover agents, track relationships, and manage your service partnerships.'
-              : 'Your business performance dashboard.'
+              ? "Monitor your campaigns, track points, and manage vendor relationships"
+              : "Discover agents, track contributions, and analyze market opportunities"
             }
           </p>
         </div>
 
-        {/* Realtor View */}
-        {isRealtor && (
-          <>
-            {/* Overview Header - Hero Metrics */}
-            <Card className="mb-8 bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">
-              <CardHeader className="pb-4">
-                <CardTitle className="text-xl">Overview</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                  <div className="text-center">
-                    <div className="flex items-center justify-center mb-2">
-                      <Target className="w-8 h-8 text-primary" />
-                    </div>
-                    <div className="text-3xl font-bold text-primary">{circlePoints.toLocaleString()}</div>
-                    <div className="text-sm text-muted-foreground">Circle Points</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="flex items-center justify-center mb-2">
-                      <Users className="w-8 h-8 text-primary" />
-                    </div>
-                    <div className="text-3xl font-bold text-primary">{vendorsActivated}</div>
-                    <div className="text-sm text-muted-foreground">Vendors Activated</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="flex items-center justify-center mb-2">
-                      <DollarSign className="w-8 h-8 text-primary" />
-                    </div>
-                    <div className="text-3xl font-bold text-primary">${estimatedValue.toLocaleString()}</div>
-                    <div className="text-sm text-muted-foreground">Estimated Value</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="flex items-center justify-center mb-2">
-                      <Activity className="w-8 h-8 text-primary" />
-                    </div>
-                    <div className="text-3xl font-bold text-primary">{closingsTracked}</div>
-                    <div className="text-sm text-muted-foreground">Closings Tracked</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+        {isRealtor ? (
+          // Realtor View
+          <div className="space-y-6">
+            {/* Overview Header */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-sm font-medium">Circle Points</CardTitle>
+                  <Target className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{realtorMetrics.circle_points}</div>
+                  <p className="text-xs text-muted-foreground">Real-time balance</p>
+                </CardContent>
+              </Card>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-sm font-medium">Vendors Activated</CardTitle>
+                  <Users className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{realtorMetrics.vendors_activated}</div>
+                  <p className="text-xs text-muted-foreground">This year</p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-sm font-medium">Estimated Value</CardTitle>
+                  <DollarSign className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">${realtorMetrics.estimated_value.toLocaleString()}</div>
+                  <p className="text-xs text-muted-foreground">Marketing support unlocked</p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-sm font-medium">Closings Tracked</CardTitle>
+                  <Activity className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{realtorMetrics.closings_tracked}</div>
+                  <p className="text-xs text-muted-foreground">Transactions this year</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Recent Activity Feed */}
-              <Card className="lg:col-span-2">
+              <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Clock className="w-5 h-5" />
-                    Recent Activity
-                  </CardTitle>
+                  <CardTitle>Recent Activity</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {activityLog.map((activity) => (
-                      <div key={activity.id} className="flex items-start gap-3 p-3 bg-muted/30 rounded-lg">
-                        <div className="mt-1">
-                          {activity.type === 'points_earned' && <CheckCircle className="w-4 h-4 text-green-500" />}
-                          {activity.type === 'campaign_launched' && <Zap className="w-4 h-4 text-blue-500" />}
-                          {activity.type === 'proof_uploaded' && <Eye className="w-4 h-4 text-purple-500" />}
-                          {activity.type === 'wallet_deposit' && <DollarSign className="w-4 h-4 text-green-500" />}
-                        </div>
+                    {activityFeed.map((activity) => (
+                      <div key={activity.id} className="flex items-start space-x-3 pb-3 border-b last:border-0">
+                        <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0" />
                         <div className="flex-1">
                           <p className="text-sm">{activity.message}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {new Date(activity.timestamp).toLocaleDateString()}
-                          </p>
+                          <p className="text-xs text-muted-foreground mt-1">{activity.time}</p>
                         </div>
-                        {activity.amount && (
-                          <Badge variant="secondary">${activity.amount}</Badge>
-                        )}
                       </div>
                     ))}
                   </div>
@@ -408,346 +241,260 @@ const CommandCenter = () => {
               {/* Marketing Wallet Tracker */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <DollarSign className="w-5 h-5" />
-                    Marketing Wallet
-                  </CardTitle>
+                  <CardTitle>Marketing Wallet</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-primary">${walletBalance}</div>
-                      <div className="text-sm text-muted-foreground">Current Balance</div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Current Balance</span>
+                      <span className="font-bold text-lg">${(realtorMetrics.circle_points * 0.5).toFixed(0)}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Points Redeemed</span>
+                      <span className="text-sm text-muted-foreground">847 pts</span>
                     </div>
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
-                        <span>Points Redeemed</span>
-                        <span className="font-medium">460 pts</span>
+                        <span>360 Branding</span>
+                        <span>$210</span>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span>Est. Impact</span>
-                        <span className="font-medium">12K reach</span>
+                        <span>Agent Media Lab</span>
+                        <span>$142</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span>Postcard Pro</span>
+                        <span>$85</span>
                       </div>
                     </div>
-                    <Button className="w-full" size="sm">
-                      <Link to="/wallet">View Full Wallet</Link>
-                    </Button>
                   </div>
                 </CardContent>
               </Card>
             </div>
 
             {/* Campaign Cards */}
-            <Card className="mb-8">
+            <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BarChart3 className="w-5 h-5" />
-                  Campaign Activity
-                </CardTitle>
+                <CardTitle>Active Campaigns</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Campaign Name</TableHead>
-                        <TableHead>Vendor</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Points Used</TableHead>
-                        <TableHead>Action</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {campaigns.map((campaign) => (
-                        <TableRow key={campaign.id}>
-                          <TableCell className="font-medium">{campaign.name}</TableCell>
-                          <TableCell>{campaign.vendor}</TableCell>
-                          <TableCell>
-                            <Badge 
-                              variant={
-                                campaign.status === 'complete' ? 'default' : 
-                                campaign.status === 'pending' ? 'secondary' : 'outline'
-                              }
-                            >
-                              {campaign.status === 'complete' ? '✅ Complete' : 
-                               campaign.status === 'pending' ? '🕓 Pending' : '✏️ Approved'}
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Campaign Name</TableHead>
+                      <TableHead>Vendor</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Points Used</TableHead>
+                      <TableHead>Action</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {campaigns.map((campaign) => (
+                      <TableRow key={campaign.id}>
+                        <TableCell className="font-medium">{campaign.name}</TableCell>
+                        <TableCell>{campaign.vendor}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center space-x-2">
+                            {getStatusIcon(campaign.status)}
+                            <Badge variant={campaign.status === 'complete' ? 'default' : 'secondary'}>
+                              {campaign.status}
                             </Badge>
-                          </TableCell>
-                          <TableCell>{campaign.points_used} pts</TableCell>
-                          <TableCell>
-                            <Button variant="outline" size="sm">
-                              {campaign.status === 'complete' ? 'View Proof' : 'Approve Creative'}
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>{campaign.points_used} pts</TableCell>
+                        <TableCell>
+                          <Button variant="outline" size="sm">
+                            {campaign.status === 'complete' ? 'View Proof' : 'Approve Creative'}
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               </CardContent>
             </Card>
 
             {/* Vendor Relationship Summary */}
-            <Card className="mb-8">
+            <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="w-5 h-5" />
-                  Vendor Relationships
-                </CardTitle>
+                <CardTitle>Vendor Relationships</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Vendor Name</TableHead>
-                        <TableHead>Campaigns Used</TableHead>
-                        <TableHead>Total Points Contributed</TableHead>
-                        <TableHead>Avg Response Time</TableHead>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Vendor Name</TableHead>
+                      <TableHead>Campaigns Used</TableHead>
+                      <TableHead>Total Points Contributed</TableHead>
+                      <TableHead>Avg Response Time</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {vendorContributions.map((vendor) => (
+                      <TableRow key={vendor.vendor_name}>
+                        <TableCell className="font-medium">{vendor.vendor_name}</TableCell>
+                        <TableCell>{vendor.campaigns_used}</TableCell>
+                        <TableCell>{vendor.total_points} pts</TableCell>
+                        <TableCell>{vendor.avg_response_time}</TableCell>
                       </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {vendorRelationships.map((vendor, index) => (
-                        <TableRow key={index}>
-                          <TableCell className="font-medium">{vendor.vendor_name}</TableCell>
-                          <TableCell>{vendor.campaigns_used}</TableCell>
-                          <TableCell>{vendor.total_points_contributed} pts</TableCell>
-                          <TableCell>{vendor.avg_response_time}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
+                    ))}
+                  </TableBody>
+                </Table>
               </CardContent>
             </Card>
-          </>
-        )}
-
-        {/* SSP View */}
-        {isSSP && (
-          <>
-            {/* Search Filters */}
-            <Card className="mb-6">
+          </div>
+        ) : (
+          // SSP View
+          <div className="space-y-6">
+            {/* Search Realtors */}
+            <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Search className="w-5 h-5" />
-                  Search Realtors
-                </CardTitle>
+                <CardTitle>Search Realtors</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                  <div>
-                    <label className="text-sm font-medium mb-1 block">Location</label>
+                <div className="flex flex-col md:flex-row gap-4">
+                  <div className="flex-1">
                     <Input
-                      placeholder="City, State"
-                      value={searchFilters.location}
-                      onChange={(e) => setSearchFilters({...searchFilters, location: e.target.value})}
+                      placeholder="Search by name or email..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-full"
                     />
                   </div>
-                  <div>
-                    <label className="text-sm font-medium mb-1 block">Min Buyer Volume</label>
-                    <Select onValueChange={(value) => setSearchFilters({...searchFilters, min_buyer_volume: value})}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Any" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="1m">$1M+</SelectItem>
-                        <SelectItem value="5m">$5M+</SelectItem>
-                        <SelectItem value="10m">$10M+</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium mb-1 block">Transaction Count</label>
-                    <Select onValueChange={(value) => setSearchFilters({...searchFilters, min_transaction_count: value})}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Any" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="10">10+</SelectItem>
-                        <SelectItem value="20">20+</SelectItem>
-                        <SelectItem value="50">50+</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium mb-1 block">Active Vendors</label>
-                    <Select onValueChange={(value) => setSearchFilters({...searchFilters, active_vendors: value})}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Any" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="1">1+</SelectItem>
-                        <SelectItem value="3">3+</SelectItem>
-                        <SelectItem value="5">5+</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="md:col-span-2 flex items-end gap-2">
-                    <Button className="flex-1">
-                      <Search className="w-4 h-4 mr-2" />
-                      Search
-                    </Button>
-                    <Button variant="outline">
-                      <Filter className="w-4 h-4" />
-                    </Button>
-                  </div>
+                  <Select value={selectedLocation} onValueChange={setSelectedLocation}>
+                    <SelectTrigger className="w-full md:w-48">
+                      <SelectValue placeholder="Location" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Locations</SelectItem>
+                      <SelectItem value="austin">Austin, TX</SelectItem>
+                      <SelectItem value="dallas">Dallas, TX</SelectItem>
+                      <SelectItem value="houston">Houston, TX</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </CardContent>
             </Card>
 
             {/* Agent Production Table */}
-            <Card className="mb-8">
+            <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="w-5 h-5" />
-                  Agent Production Summary
-                </CardTitle>
+                <CardTitle>Agent Production Overview</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Agent Name</TableHead>
-                        <TableHead>Company</TableHead>
-                        <TableHead>Buyer Count</TableHead>
-                        <TableHead>Seller Count</TableHead>
-                        <TableHead>Total Volume</TableHead>
-                        <TableHead>Points Redeemed</TableHead>
-                        <TableHead>Active Vendors</TableHead>
-                        <TableHead>Actions</TableHead>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Agent Name</TableHead>
+                      <TableHead>Buyer Count</TableHead>
+                      <TableHead>Seller Count</TableHead>
+                      <TableHead>Total Volume</TableHead>
+                      <TableHead>Points Redeemed</TableHead>
+                      <TableHead>Active Vendors</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredAgents.map((agent) => (
+                      <TableRow key={agent.id} className="cursor-pointer hover:bg-muted/50">
+                        <TableCell className="font-medium">{agent.name}</TableCell>
+                        <TableCell>{agent.buyer_count}</TableCell>
+                        <TableCell>{agent.seller_count}</TableCell>
+                        <TableCell>{agent.total_volume}</TableCell>
+                        <TableCell>{agent.points_redeemed} pts</TableCell>
+                        <TableCell>{agent.active_vendors}</TableCell>
+                        <TableCell>
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button variant="outline" size="sm" onClick={() => setSelectedAgent(agent)}>
+                                <Eye className="h-4 w-4 mr-2" />
+                                View Details
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-2xl">
+                              <DialogHeader>
+                                <DialogTitle>Agent Details: {agent.name}</DialogTitle>
+                              </DialogHeader>
+                              <div className="grid grid-cols-2 gap-4 py-4">
+                                <div>
+                                  <h4 className="font-semibold mb-2">Contact Information</h4>
+                                  <p className="text-sm">Email: {agent.email}</p>
+                                  <p className="text-sm">Phone: {agent.phone}</p>
+                                </div>
+                                <div>
+                                  <h4 className="font-semibold mb-2">Production (Last 12 Months)</h4>
+                                  <p className="text-sm">Buyer Transactions: {agent.buyer_count}</p>
+                                  <p className="text-sm">Seller Transactions: {agent.seller_count}</p>
+                                  <p className="text-sm">Total Volume: {agent.total_volume}</p>
+                                </div>
+                                <div>
+                                  <h4 className="font-semibold mb-2">Campaign Activity</h4>
+                                  <p className="text-sm">Points Redeemed: {agent.points_redeemed}</p>
+                                  <p className="text-sm">Active Vendors: {agent.active_vendors}</p>
+                                </div>
+                                <div>
+                                  <h4 className="font-semibold mb-2">Quick Actions</h4>
+                                  <div className="space-y-2">
+                                    <Button size="sm" className="w-full">
+                                      <UserPlus className="h-4 w-4 mr-2" />
+                                      Offer Coverage
+                                    </Button>
+                                    <Button variant="outline" size="sm" className="w-full">
+                                      <MessageSquare className="h-4 w-4 mr-2" />
+                                      Send Message
+                                    </Button>
+                                  </div>
+                                </div>
+                              </div>
+                            </DialogContent>
+                          </Dialog>
+                        </TableCell>
                       </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {agentData.map((agent) => (
-                        <TableRow key={agent.id} className="cursor-pointer hover:bg-muted/50">
-                          <TableCell className="font-medium">{agent.name}</TableCell>
-                          <TableCell className="text-sm text-muted-foreground">{agent.company}</TableCell>
-                          <TableCell>{agent.buyer_count}</TableCell>
-                          <TableCell>{agent.seller_count}</TableCell>
-                          <TableCell>${(agent.total_volume / 1000000).toFixed(1)}M</TableCell>
-                          <TableCell>{agent.points_redeemed.toLocaleString()} pts</TableCell>
-                          <TableCell>{agent.active_vendors}</TableCell>
-                          <TableCell>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleAgentSelect(agent)}
-                            >
-                              <Eye className="w-4 h-4 mr-1" />
-                              View Details
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
+                    ))}
+                  </TableBody>
+                </Table>
               </CardContent>
             </Card>
 
             {/* Vendor Contribution Summary */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <TrendingUp className="w-5 h-5" />
-                  Your Contribution Summary
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-primary">24</div>
-                    <div className="text-sm text-muted-foreground">Agents Supported</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-primary">$8,400</div>
-                    <div className="text-sm text-muted-foreground">Total Co-Pay Contribution</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-primary">4.8⭐</div>
-                    <div className="text-sm text-muted-foreground">Agent Feedback Rating</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-primary">320%</div>
-                    <div className="text-sm text-muted-foreground">Estimated ROI</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-sm font-medium">Agents Supported</CardTitle>
+                  <Users className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">47</div>
+                  <p className="text-xs text-muted-foreground">+12% from last month</p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-sm font-medium">Total Contribution</CardTitle>
+                  <DollarSign className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">$18,450</div>
+                  <p className="text-xs text-muted-foreground">This quarter</p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-sm font-medium">Avg Rating</CardTitle>
+                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">4.8</div>
+                  <p className="text-xs text-muted-foreground">Agent feedback</p>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
         )}
-
-        {/* Agent Detail Modal */}
-        <Dialog open={agentDetailOpen} onOpenChange={setAgentDetailOpen}>
-          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Agent Details - {selectedAgent?.name}</DialogTitle>
-            </DialogHeader>
-            {selectedAgent && (
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Contact Info */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-lg">Contact Information</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-2">
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Email:</span>
-                        <span>{selectedAgent.email}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Phone:</span>
-                        <span>{selectedAgent.phone}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Company:</span>
-                        <span>{selectedAgent.company}</span>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* Production Summary */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-lg">Last 12 Months Production</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-2">
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Buyer Side:</span>
-                        <span>${(selectedAgent.last_12mo_production.buyer_side / 1000000).toFixed(1)}M</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Seller Side:</span>
-                        <span>${(selectedAgent.last_12mo_production.seller_side / 1000000).toFixed(1)}M</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Total Volume:</span>
-                        <span className="font-medium">${(selectedAgent.total_volume / 1000000).toFixed(1)}M</span>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                {/* Quick Actions */}
-                <div className="flex gap-4">
-                  <Button className="flex-1">
-                    <UserPlus className="w-4 h-4 mr-2" />
-                    Offer Coverage
-                  </Button>
-                  <Button variant="outline" className="flex-1">
-                    <MessageSquare className="w-4 h-4 mr-2" />
-                    Send Message
-                  </Button>
-                </div>
-              </div>
-            )}
-          </DialogContent>
-        </Dialog>
       </div>
-      
+
       <LegalFooter />
     </div>
   );
