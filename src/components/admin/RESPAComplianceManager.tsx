@@ -531,16 +531,15 @@ const ServiceComplianceCard = ({
           </div>
 
           <div>
-            <Label>Maximum Split Percentage</Label>
-            <Input
-              type="number"
-              min="0"
-              max="100"
-              value={formData.max_split_percentage}
+            <Label>RESPA Compliance Guides & Notes</Label>
+            <Textarea
+              value={formData.respa_compliance_notes}
               onChange={(e) => setFormData({
                 ...formData, 
-                max_split_percentage: parseInt(e.target.value) || 0
+                respa_compliance_notes: e.target.value
               })}
+              placeholder="Enter RESPA compliance guidelines, regulatory requirements, and compliance notes for this service..."
+              className="min-h-[100px]"
             />
           </div>
 
