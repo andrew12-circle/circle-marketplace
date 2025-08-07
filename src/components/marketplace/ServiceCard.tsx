@@ -279,7 +279,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                 </Badge>
               ))}
               {service.tags.length > 3 && (
-                <span className="text-xs text-muted-foreground">
+                <span className="text-xs text-muted-foreground
                   +{service.tags.length - 3} more
                 </span>
               )}
@@ -430,7 +430,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                        className="p-0 border-0 bg-transparent w-auto max-w-[280px] z-[70]" 
                        side="left"
                        align="center"
-                       sideOffset={-20}
+                       sideOffset={0}
                        alignOffset={0}
                        avoidCollisions={true}
                        collisionBoundary={document.querySelector('.group')}
