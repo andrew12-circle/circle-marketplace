@@ -282,14 +282,13 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
               </h3>
             </div>
 
-            {/* Rating - moved above pricing */}
-            {service.vendor && (
+            {/* Service Rating - Updated to use service-specific ratings */}
+            {!ratingsLoading && (
               <div className="flex items-center gap-1 mb-3">
                 {[...Array(5)].map((_, i) => {
-                  const rating = service.vendor.rating;
-                  const isFullStar = i < Math.floor(rating);
-                  const isPartialStar = i === Math.floor(rating) && rating % 1 !== 0;
-                  const fillPercentage = isPartialStar ? (rating <= 4.9 ? 50 : (rating % 1) * 100) : 0;
+                  const isFullStar = i < Math.floor(averageRating);
+                  const isPartialStar = i === Math.floor(averageRating) && averageRating % 1 !== 0;
+                  const fillPercentage = isPartialStar ? (averageRating % 1) * 100 : 0;
                   
                   return (
                     <div key={i} className="relative h-4 w-4">
@@ -309,7 +308,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                   );
                 })}
                 <span className="text-sm text-muted-foreground ml-1">
-                  {ratingsLoading ? "..." : `${averageRating.toFixed(1)} (${totalReviews})`}
+                  {averageRating > 0 ? `${averageRating.toFixed(1)} (${totalReviews})` : "No reviews yet"}
                 </span>
               </div>
             )}
