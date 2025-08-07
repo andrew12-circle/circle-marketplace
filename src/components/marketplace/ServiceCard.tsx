@@ -426,16 +426,19 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                         </span>
                       </div>
                     </TooltipTrigger>
-                    <TooltipContent 
-                      className="p-0 border-0 bg-transparent w-auto max-w-[400px] sm:max-w-[500px] md:max-w-[600px] z-[70]" 
-                      side="top"
-                      align="center"
-                      sideOffset={15}
-                    >
-                        <div 
-                          className="relative bg-gradient-to-br from-yellow-400 via-yellow-500 to-yellow-600 rounded-lg p-3 sm:p-4 shadow-xl mx-auto cursor-pointer max-w-[85%] w-auto"
-                          onClick={handleUpgradeClick}
-                        >
+                     <TooltipContent 
+                       className="p-0 border-0 bg-transparent w-auto max-w-[280px] z-[70]" 
+                       side="top"
+                       align="center"
+                       sideOffset={8}
+                       alignOffset={-10}
+                       avoidCollisions={true}
+                       collisionBoundary={document.querySelector('.group')}
+                     >
+                         <div 
+                           className="relative bg-gradient-to-br from-yellow-400 via-yellow-500 to-yellow-600 rounded-lg p-3 shadow-lg cursor-pointer w-full"
+                           onClick={handleUpgradeClick}
+                         >
                         {/* Card design elements */}
                         <div className="absolute top-3 left-3 w-6 h-6 border border-yellow-700/30 rounded-sm"></div>
                         <div className="absolute top-3 right-3 text-yellow-800 font-bold text-lg">PRO</div>
