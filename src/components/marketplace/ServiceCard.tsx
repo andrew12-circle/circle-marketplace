@@ -60,29 +60,20 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
     if (!service.retail_price) return null;
     
     const retailPrice = extractNumericPrice(service.retail_price);
-    console.log('Debug discount calc:', {
-      retailPrice,
-      proPrice: service.pro_price,
-      copayAllowed: service.copay_allowed,
-      respaLimit: service.respa_split_limit,
-      extractedProPrice: service.pro_price ? extractNumericPrice(service.pro_price) : null
-    });
     
-    // If co-pay is available, calculate discount from retail to co-pay price
+    // If co-pay is available, calculate percentage customer pays (copay price / retail price)
     if (service.copay_allowed && service.pro_price && service.respa_split_limit) {
       const proPrice = extractNumericPrice(service.pro_price);
       const coPayPrice = proPrice * (1 - (service.respa_split_limit / 100));
-      const discount = Math.round(((retailPrice - coPayPrice) / retailPrice) * 100);
-      console.log('Co-pay discount calc:', { proPrice, coPayPrice, discount });
-      return discount;
+      const percentage = Math.round((coPayPrice / retailPrice) * 100);
+      return 100 - percentage; // Convert to discount percentage for display
     }
     
-    // Otherwise, calculate discount from retail to pro price  
+    // Otherwise, calculate percentage customer pays (pro price / retail price)
     if (service.pro_price) {
       const proPrice = extractNumericPrice(service.pro_price);
-      const discount = Math.round(((retailPrice - proPrice) / retailPrice) * 100);
-      console.log('Pro discount calc:', { proPrice, discount });
-      return discount;
+      const percentage = Math.round((proPrice / retailPrice) * 100);
+      return 100 - percentage; // Convert to discount percentage for display
     }
     
     return null;
