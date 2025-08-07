@@ -428,10 +428,10 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                     </TooltipTrigger>
                      <TooltipContent 
                        className="p-0 border-0 bg-transparent w-auto max-w-[280px] z-[70]" 
-                       side="top"
+                       side="left"
                        align="center"
-                       sideOffset={8}
-                       alignOffset={-10}
+                       sideOffset={-20}
+                       alignOffset={0}
                        avoidCollisions={true}
                        collisionBoundary={document.querySelector('.group')}
                      >
