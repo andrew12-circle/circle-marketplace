@@ -279,7 +279,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                 </Badge>
               ))}
               {service.tags.length > 3 && (
-                <span className="text-xs text-muted-foreground
+                <span className="text-xs text-muted-foreground">
                   +{service.tags.length - 3} more
                 </span>
               )}
@@ -378,7 +378,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
             <>
               {/* Non-Pro Member View: Show retail as main price, others as incentives */}
               {service.retail_price && (
-        <div className="flex items-center justify-between mt-4">
+                <div className="flex items-center justify-between mt-4">
                   <span className="text-sm text-muted-foreground">List Price:</span>
                   <span className="text-xl font-bold text-foreground">
                     {formatPrice(extractNumericPrice(service.retail_price), service.price_duration || 'mo')}
@@ -471,9 +471,9 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
         {/* Single discount badge for both Pro and Non-Pro views */}
         {calculateDiscountPercentage() && (
           <div className="flex justify-end mb-3">
-             <Badge className="bg-destructive text-destructive-foreground text-xs hover:bg-green-600 hover:text-white transition-colors">
-               {calculateDiscountPercentage()}% OFF
-             </Badge>
+            <Badge className="bg-destructive text-destructive-foreground text-xs hover:bg-green-600 hover:text-white transition-colors">
+              {calculateDiscountPercentage()}% OFF
+            </Badge>
           </div>
         )}
 
