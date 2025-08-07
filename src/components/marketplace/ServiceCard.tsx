@@ -520,10 +520,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                   variant="outline" 
                   size="sm"
                   className="flex-1 h-9"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setIsConsultationFlowOpen(true);
-                  }}
+                  onClick={handleAddToCart}
                 >
                   <ShoppingCart className="w-4 h-4 mr-1" />
                   Add to Cart
