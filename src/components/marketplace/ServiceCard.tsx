@@ -517,13 +517,15 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
             <div className="flex gap-2 mt-auto">
               {service.requires_quote ? (
                 <Button
-                  variant="outline" 
                   size="sm"
                   className="flex-1 h-9"
-                  onClick={handleAddToCart}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsConsultationFlowOpen(true);
+                  }}
                 >
-                  <ShoppingCart className="w-4 h-4 mr-1" />
-                  Add to Cart
+                  <Calendar className="w-4 h-4 mr-1" />
+                  Book Consultation
                 </Button>
               ) : (
                 <>

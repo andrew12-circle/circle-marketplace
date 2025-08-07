@@ -61,7 +61,29 @@ export const ConsultationBookingModal = ({
 
     setIsSubmitting(true);
     try {
-      // First, check if vendor has a calendar link
+      // First, check service-level consultation settings
+      const { data: serviceData, error: serviceError } = await supabase
+        .from('services')
+        .select('calendar_link, consultation_email, consultation_phone')
+        .eq('id', service.id)
+        .single();
+
+      if (serviceError) {
+        console.error('Error fetching service consultation info:', serviceError);
+      }
+
+      // Primary cascade: service calendar_link
+      if (serviceData?.calendar_link) {
+        window.open(serviceData.calendar_link, '_blank');
+        toast({
+          title: "Redirected to Service Calendar",
+          description: "Please complete your booking on the service provider's calendar page.",
+        });
+        onClose();
+        return;
+      }
+
+      // Secondary cascade: check vendor calendar as fallback
       const { data: vendorData, error: vendorError } = await supabase
         .from('vendors')
         .select(`
@@ -78,17 +100,15 @@ export const ConsultationBookingModal = ({
         console.error('Error fetching vendor info:', vendorError);
       }
 
-      // Check cascade: calendar_link -> email -> internal team
-      const calendarLink = vendorData?.vendor_availability && Array.isArray(vendorData.vendor_availability) 
+      const vendorCalendarLink = vendorData?.vendor_availability && Array.isArray(vendorData.vendor_availability) 
         ? vendorData.vendor_availability[0]?.calendar_link 
         : null;
-      const vendorEmail = vendorData?.individual_email || vendorData?.contact_email;
 
-      // If vendor has calendar link, redirect to it instead of booking internally
-      if (calendarLink) {
-        window.open(calendarLink, '_blank');
+      // If vendor has calendar link, redirect to it
+      if (vendorCalendarLink) {
+        window.open(vendorCalendarLink, '_blank');
         toast({
-          title: "Redirected to Calendar",
+          title: "Redirected to Vendor Calendar",
           description: "Please complete your booking on the vendor's calendar page.",
         });
         onClose();
@@ -115,7 +135,10 @@ export const ConsultationBookingModal = ({
 
       if (error) throw error;
 
-      // Send notification via cascade system
+      // Send notification via cascade system (service email -> vendor email -> internal team)
+      const serviceEmail = serviceData?.consultation_email;
+      const vendorEmail = vendorData?.individual_email || vendorData?.contact_email;
+      
       try {
         const notificationResponse = await supabase.functions.invoke('send-consultation-notification', {
           body: {

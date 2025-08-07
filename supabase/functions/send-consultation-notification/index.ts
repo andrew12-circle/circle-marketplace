@@ -228,27 +228,50 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log('Processing consultation notification for:', { bookingId, vendorName, serviceTitle });
 
-    // Cascade system: Use provided email or lookup vendor
-    let finalVendorEmail = providedVendorEmail;
+    // Service-level cascade system: Check service consultation email first
+    let finalEmail = providedVendorEmail;
     let finalVendorId = vendorId;
+    let notificationStrategy = 'internal_team';
 
-    if (!finalVendorEmail) {
-      // Fallback: lookup vendor by name
-      const { data: vendor, error: vendorError } = await supabase
-        .from('vendors')
-        .select('id, contact_email, individual_email, name')
-        .eq('name', vendorName)
+    // First: Check for service-level consultation email
+    if (serviceId) {
+      const { data: serviceData, error: serviceError } = await supabase
+        .from('services')
+        .select('consultation_email')
+        .eq('id', serviceId)
         .single();
 
-      if (!vendorError && vendor) {
-        finalVendorEmail = vendor.individual_email || vendor.contact_email;
-        finalVendorId = vendor.id;
+      if (!serviceError && serviceData?.consultation_email) {
+        finalEmail = serviceData.consultation_email;
+        notificationStrategy = 'service_email';
+        console.log(`Found service consultation email: ${finalEmail}`);
       }
     }
 
-    // Determine notification strategy
-    const notificationStrategy = finalVendorEmail ? 'vendor_email' : 'internal_team';
-    console.log(`Using notification strategy: ${notificationStrategy}`);
+    // Second: Fallback to vendor email if no service email
+    if (!finalEmail) {
+      if (!providedVendorEmail) {
+        // Lookup vendor by name
+        const { data: vendor, error: vendorError } = await supabase
+          .from('vendors')
+          .select('id, contact_email, individual_email, name')
+          .eq('name', vendorName)
+          .single();
+
+        if (!vendorError && vendor) {
+          finalEmail = vendor.individual_email || vendor.contact_email;
+          finalVendorId = vendor.id;
+          if (finalEmail) {
+            notificationStrategy = 'vendor_email';
+          }
+        }
+      } else {
+        finalEmail = providedVendorEmail;
+        notificationStrategy = 'vendor_email';
+      }
+    }
+
+    console.log(`Using notification strategy: ${notificationStrategy}, Email: ${finalEmail || 'internal team'}`);
 
     // Create notification record
     const { error: notificationError } = await supabase
@@ -259,7 +282,9 @@ const handler = async (req: Request): Promise<Response> => {
         notification_type: notificationStrategy,
         status: 'pending',
         notification_data: {
-          vendor_email: finalVendorEmail,
+          target_email: finalEmail,
+          vendor_email: notificationStrategy === 'vendor_email' ? finalEmail : null,
+          service_email: notificationStrategy === 'service_email' ? finalEmail : null,
           client_name: clientName,
           client_email: clientEmail,
           client_phone: clientPhone,
@@ -277,12 +302,33 @@ const handler = async (req: Request): Promise<Response> => {
       throw notificationError;
     }
 
-    if (notificationStrategy === 'vendor_email') {
+    if (notificationStrategy === 'service_email') {
+      // Send email directly to service provider
+      console.log(`📧 EMAIL WOULD BE SENT TO SERVICE: ${finalEmail}`);
+      console.log('Service email content:', {
+        subject: `New Consultation Request: ${serviceTitle}`,
+        to: finalEmail,
+        body: `
+          New consultation request from ${clientName}
+          
+          Service: ${serviceTitle}
+          Client: ${clientName} (${clientEmail})
+          ${clientPhone ? `Phone: ${clientPhone}` : ''}
+          
+          Scheduled: ${scheduledDate} at ${scheduledTime}
+          
+          ${projectDetails ? `Project Details: ${projectDetails}` : ''}
+          ${budgetRange ? `Budget Range: ${budgetRange}` : ''}
+          
+          Please contact the client directly to arrange the consultation.
+        `
+      });
+    } else if (notificationStrategy === 'vendor_email') {
       // Send email to vendor
-      console.log(`📧 EMAIL WOULD BE SENT TO VENDOR: ${finalVendorEmail}`);
+      console.log(`📧 EMAIL WOULD BE SENT TO VENDOR: ${finalEmail}`);
       console.log('Vendor email content:', {
         subject: `New Consultation Request: ${serviceTitle}`,
-        to: finalVendorEmail,
+        to: finalEmail,
         body: `
           New consultation request from ${clientName}
           

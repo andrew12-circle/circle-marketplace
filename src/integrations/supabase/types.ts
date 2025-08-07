@@ -3452,9 +3452,12 @@ export type Database = {
       }
       services: {
         Row: {
+          calendar_link: string | null
           category: string | null
           co_pay_price: string | null
           compliance_checklist: Json | null
+          consultation_email: string | null
+          consultation_phone: string | null
           copay_allowed: boolean | null
           created_at: string | null
           description: string | null
@@ -3490,9 +3493,12 @@ export type Database = {
           website_url: string | null
         }
         Insert: {
+          calendar_link?: string | null
           category?: string | null
           co_pay_price?: string | null
           compliance_checklist?: Json | null
+          consultation_email?: string | null
+          consultation_phone?: string | null
           copay_allowed?: boolean | null
           created_at?: string | null
           description?: string | null
@@ -3528,9 +3534,12 @@ export type Database = {
           website_url?: string | null
         }
         Update: {
+          calendar_link?: string | null
           category?: string | null
           co_pay_price?: string | null
           compliance_checklist?: Json | null
+          consultation_email?: string | null
+          consultation_phone?: string | null
           copay_allowed?: boolean | null
           created_at?: string | null
           description?: string | null
