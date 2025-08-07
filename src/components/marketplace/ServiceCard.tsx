@@ -317,7 +317,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                 <div className="space-y-1">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1">
-                      <span className="text-sm font-medium text-green-600">Your Co-Pay:</span>
+                      <span className="text-sm font-medium text-green-600">Potential Co-Pay:</span>
                       <Tooltip delayDuration={0}>
                         <TooltipTrigger asChild>
                           <button className="w-3 h-3 rounded-full bg-green-600 flex items-center justify-center cursor-help hover:bg-green-700 transition-colors">
@@ -416,7 +416,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                       <div className="flex items-center justify-between p-2 bg-green-50 rounded-lg border border-green-200 opacity-75 cursor-pointer hover:opacity-100 transition-opacity">
                         <div className="flex items-center gap-1">
                           <Lock className="w-3 h-3 text-green-600" />
-                          <span className="text-sm font-medium text-green-600">Your Co-Pay:</span>
+                          <span className="text-sm font-medium text-green-600">Potential Co-Pay:</span>
                           <button className="w-3 h-3 rounded-full bg-green-600 flex items-center justify-center cursor-help hover:bg-green-700 transition-colors">
                             <span className="text-xs text-white">i</span>
                           </button>
