@@ -310,6 +310,11 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                 <span className="text-sm text-muted-foreground ml-1">
                   {averageRating > 0 ? `${averageRating.toFixed(1)} (${totalReviews})` : "No reviews yet"}
                 </span>
+                {totalReviews > 0 && (
+                  <span className="text-xs text-muted-foreground ml-2">
+                    • Mixed sources
+                  </span>
+                )}
               </div>
             )}
 

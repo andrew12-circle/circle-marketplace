@@ -3372,31 +3372,43 @@ export type Database = {
       }
       service_reviews: {
         Row: {
+          admin_notes: string | null
           created_at: string
           id: string
           rating: number
           review: string | null
+          review_source: string
           service_id: string
+          source_url: string | null
           updated_at: string
           user_id: string
+          verified: boolean
         }
         Insert: {
+          admin_notes?: string | null
           created_at?: string
           id?: string
           rating: number
           review?: string | null
+          review_source?: string
           service_id: string
+          source_url?: string | null
           updated_at?: string
           user_id: string
+          verified?: boolean
         }
         Update: {
+          admin_notes?: string | null
           created_at?: string
           id?: string
           rating?: number
           review?: string | null
+          review_source?: string
           service_id?: string
+          source_url?: string | null
           updated_at?: string
           user_id?: string
+          verified?: boolean
         }
         Relationships: []
       }

@@ -29,6 +29,10 @@ interface ServiceReview {
   review: string;
   created_at: string;
   updated_at: string;
+  review_source: 'agent' | 'vendor_provided' | 'google_external' | 'admin_assigned';
+  verified: boolean;
+  source_url?: string;
+  admin_notes?: string;
   service_title?: string;
   user_display_name?: string;
   user_avatar_url?: string;
@@ -51,6 +55,7 @@ export const ServiceReviewsManager = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterRating, setFilterRating] = useState<string>("all");
   const [filterService, setFilterService] = useState<string>("all");
+  const [filterSource, setFilterSource] = useState<string>("all");
   const [services, setServices] = useState<Array<{ id: string; title: string }>>([]);
   const { toast } = useToast();
 
@@ -81,6 +86,10 @@ export const ServiceReviewsManager = () => {
         .from('service_reviews')
         .select(`
           *,
+          review_source,
+          verified,
+          source_url,
+          admin_notes,
           services!service_reviews_service_id_fkey(title),
           profiles!service_reviews_user_id_fkey(display_name, avatar_url)
         `)
@@ -90,6 +99,7 @@ export const ServiceReviewsManager = () => {
 
       const formattedReviews = reviewsData?.map((review: any) => ({
         ...review,
+        review_source: review.review_source as 'agent' | 'vendor_provided' | 'google_external' | 'admin_assigned',
         service_title: review.services?.title,
         user_display_name: review.profiles?.display_name,
         user_avatar_url: review.profiles?.avatar_url
@@ -155,8 +165,9 @@ export const ServiceReviewsManager = () => {
     
     const matchesRating = filterRating === "all" || review.rating.toString() === filterRating;
     const matchesService = filterService === "all" || review.service_id === filterService;
+    const matchesSource = filterSource === "all" || review.review_source === filterSource;
     
-    return matchesSearch && matchesRating && matchesService;
+    return matchesSearch && matchesRating && matchesService && matchesSource;
   });
 
   const StarRating = ({ rating }: { rating: number }) => (
@@ -277,6 +288,19 @@ export const ServiceReviewsManager = () => {
                 ))}
               </SelectContent>
             </Select>
+
+            <Select value={filterSource} onValueChange={setFilterSource}>
+              <SelectTrigger className="w-full sm:w-48">
+                <SelectValue placeholder="Source" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Sources</SelectItem>
+                <SelectItem value="agent">Agent Reviews</SelectItem>
+                <SelectItem value="vendor_provided">Vendor Reviews</SelectItem>
+                <SelectItem value="google_external">Google Reviews</SelectItem>
+                <SelectItem value="admin_assigned">Admin Reviews</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Reviews List */}
@@ -301,7 +325,20 @@ export const ServiceReviewsManager = () => {
                         <div className="flex-1 space-y-2">
                           <div className="flex items-center justify-between">
                             <div>
-                              <p className="font-medium">{review.user_display_name || 'Anonymous'}</p>
+                              <div className="flex items-center gap-2 mb-1">
+                                <p className="font-medium">{review.user_display_name || 'Anonymous'}</p>
+                                <Badge variant={review.review_source === 'agent' ? 'default' : 'secondary'}>
+                                  {review.review_source === 'agent' && '👤 Agent'}
+                                  {review.review_source === 'vendor_provided' && '🏢 Vendor'}
+                                  {review.review_source === 'google_external' && '🌐 Google'}
+                                  {review.review_source === 'admin_assigned' && '✓ Admin'}
+                                </Badge>
+                                {review.verified && (
+                                  <Badge variant="outline" className="text-green-600">
+                                    ✓ Verified
+                                  </Badge>
+                                )}
+                              </div>
                               <p className="text-sm text-muted-foreground">
                                 {review.service_title}
                               </p>
@@ -315,6 +352,23 @@ export const ServiceReviewsManager = () => {
                           </div>
                           
                           <p className="text-sm leading-relaxed">{review.review}</p>
+                          
+                          {review.source_url && (
+                            <a 
+                              href={review.source_url} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-xs text-primary hover:underline"
+                            >
+                              View original review
+                            </a>
+                          )}
+                          
+                          {review.admin_notes && (
+                            <div className="text-xs text-muted-foreground bg-muted p-2 rounded">
+                              <strong>Admin Notes:</strong> {review.admin_notes}
+                            </div>
+                          )}
                         </div>
                       </div>
                       

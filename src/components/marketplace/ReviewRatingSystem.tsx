@@ -17,6 +17,10 @@ interface Review {
   updated_at: string;
   user_id: string;
   service_id: string;
+  review_source: 'agent' | 'vendor_provided' | 'google_external' | 'admin_assigned';
+  verified: boolean;
+  source_url?: string;
+  admin_notes?: string;
   user_display_name?: string;
   user_avatar_url?: string;
 }
@@ -62,7 +66,7 @@ export const ReviewRatingSystem = ({
       // Load reviews using raw query to avoid type issues
       const { data: reviewsData, error } = await supabase
         .from('service_reviews')
-        .select('*')
+        .select('*, review_source, verified, source_url, admin_notes')
         .eq('service_id', serviceId)
         .order('created_at', { ascending: false });
 
@@ -85,9 +89,10 @@ export const ReviewRatingSystem = ({
         const userProfile = profilesData?.find(p => p.user_id === review.user_id);
         return {
           ...review,
+          review_source: review.review_source as 'agent' | 'vendor_provided' | 'google_external' | 'admin_assigned',
           user_display_name: userProfile?.display_name || 'Anonymous User',
           user_avatar_url: userProfile?.avatar_url
-        };
+        } as Review;
       });
 
       setReviews(reviewsWithUsers);
@@ -140,7 +145,9 @@ export const ReviewRatingSystem = ({
         service_id: serviceId,
         user_id: user.id,
         rating: newRating,
-        review: newReviewText.trim() || null
+        review: newReviewText.trim() || null,
+        review_source: 'agent' as const,
+        verified: false
       };
 
       let result;
@@ -218,6 +225,39 @@ export const ReviewRatingSystem = ({
         variant: "destructive"
       });
     }
+  };
+
+  // Helper component for review source badge
+  const ReviewSourceBadge = ({ review }: { review: Review }) => {
+    const getSourceInfo = () => {
+      switch (review.review_source) {
+        case 'agent':
+          return { label: 'Agent Review', color: 'bg-primary text-primary-foreground', icon: '👤' };
+        case 'vendor_provided':
+          return { label: 'Vendor Review', color: 'bg-secondary text-secondary-foreground', icon: '🏢' };
+        case 'google_external':
+          return { label: 'Google Review', color: 'bg-blue-500 text-white', icon: '🌐' };
+        case 'admin_assigned':
+          return { label: 'Verified Review', color: 'bg-green-500 text-white', icon: '✓' };
+        default:
+          return { label: 'Review', color: 'bg-muted text-muted-foreground', icon: '📝' };
+      }
+    };
+
+    const sourceInfo = getSourceInfo();
+
+    return (
+      <div className="flex items-center gap-1">
+        <span className={`text-xs px-2 py-1 rounded-full ${sourceInfo.color}`}>
+          {sourceInfo.icon} {sourceInfo.label}
+        </span>
+        {review.verified && (
+          <span className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-800">
+            ✓ Verified
+          </span>
+        )}
+      </div>
+    );
   };
 
   const StarRating = ({ rating, interactive = false, onRatingChange }: {
@@ -386,7 +426,10 @@ export const ReviewRatingSystem = ({
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-2">
                     <div>
-                      <div className="font-medium text-sm">{review.user_display_name}</div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <div className="font-medium text-sm">{review.user_display_name}</div>
+                        <ReviewSourceBadge review={review} />
+                      </div>
                       <StarRating rating={review.rating} />
                     </div>
                     <div className="text-xs text-muted-foreground">
@@ -396,6 +439,17 @@ export const ReviewRatingSystem = ({
                   
                   {review.review && (
                     <p className="text-sm mb-3">{review.review}</p>
+                  )}
+                  
+                  {review.source_url && (
+                    <a 
+                      href={review.source_url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-xs text-primary hover:underline"
+                    >
+                      View original review
+                    </a>
                   )}
                 </div>
               </div>
