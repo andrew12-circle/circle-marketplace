@@ -61,15 +61,14 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
     
     const retailPrice = extractNumericPrice(service.retail_price);
     
-    // If co-pay is available, calculate percentage customer pays (copay price / retail price)
-    if (service.copay_allowed && service.pro_price && service.respa_split_limit) {
-      const proPrice = extractNumericPrice(service.pro_price);
-      const coPayPrice = proPrice * (1 - (service.respa_split_limit / 100));
+    // If co-pay is allowed and co_pay_price exists, use co_pay_price
+    if (service.copay_allowed && service.co_pay_price) {
+      const coPayPrice = extractNumericPrice(service.co_pay_price);
       const percentage = Math.round((coPayPrice / retailPrice) * 100);
       return 100 - percentage; // Convert to discount percentage for display
     }
     
-    // Otherwise, calculate percentage customer pays (pro price / retail price)
+    // Otherwise, use pro_price if available
     if (service.pro_price) {
       const proPrice = extractNumericPrice(service.pro_price);
       const percentage = Math.round((proPrice / retailPrice) * 100);
