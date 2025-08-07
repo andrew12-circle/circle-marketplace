@@ -12,6 +12,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useServiceAnalytics } from "@/hooks/useServiceAnalytics";
 import { useCurrency } from "@/hooks/useCurrency";
+import { useServiceRatings } from "@/hooks/useServiceRatings";
 import { extractAndValidatePrice, validateCartPricing, safeFormatPrice } from "@/utils/priceValidation";
 import { supabase } from "@/integrations/supabase/client";
 import { ConsultationFlow } from "./ConsultationFlow";
@@ -46,6 +47,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
   const navigate = useNavigate();
   const { formatPrice } = useCurrency();
   const isProMember = profile?.is_pro_member || false;
+  const { averageRating, totalReviews, loading: ratingsLoading } = useServiceRatings(service.id);
 
   // Fetch service-specific disclaimer or fallback to default
   useEffect(() => {
@@ -307,7 +309,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                   );
                 })}
                 <span className="text-sm text-muted-foreground ml-1">
-                  {service.vendor.rating} ({service.vendor.review_count})
+                  {ratingsLoading ? "..." : `${averageRating.toFixed(1)} (${totalReviews})`}
                 </span>
               </div>
             )}

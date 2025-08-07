@@ -21,6 +21,7 @@ import { YouTubeChannelImportPanel } from '@/components/admin/YouTubeChannelImpo
 import { RESPAComplianceManager } from '@/components/admin/RESPAComplianceManager';
 import { RESPADisclaimerManager } from '@/components/admin/RESPADisclaimerManager';
 import { ServiceDisclaimerManager } from '@/components/admin/ServiceDisclaimerManager';
+import { ServiceReviewsManager } from '@/components/admin/ServiceReviewsManager';
 import RESPADocumentationViewer from '@/components/admin/RESPADocumentationViewer';
 import VendorSSPManager from '@/components/admin/VendorSSPManager';
 import RESPAServiceManager from '@/components/admin/RESPAServiceManager';
@@ -493,6 +494,13 @@ export default function AdminDashboard() {
                   <span className="hidden sm:inline">Services</span>
                 </TabsTrigger>
                 <TabsTrigger 
+                  value="reviews" 
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-md data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm"
+                >
+                  <Star className="h-4 w-4" />
+                  <span className="hidden sm:inline">Reviews</span>
+                </TabsTrigger>
+                <TabsTrigger 
                   value="vendors" 
                   className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-md data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm"
                 >
@@ -847,6 +855,10 @@ export default function AdminDashboard() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <ServiceImportPanel />
           </div>
+        </TabsContent>
+
+        <TabsContent value="reviews" className="space-y-6">
+          <ServiceReviewsManager />
         </TabsContent>
 
         <TabsContent value="vendors" className="space-y-6">
