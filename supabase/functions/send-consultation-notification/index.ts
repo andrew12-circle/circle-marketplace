@@ -155,8 +155,11 @@ const logSecurityEvent = async (eventType: string, userId: string | null, eventD
 
 interface ConsultationRequest {
   bookingId: string;
+  serviceId?: string;
   serviceTitle: string;
   vendorName: string;
+  vendorId?: string;
+  vendorEmail?: string;
   clientName: string;
   clientEmail: string;
   clientPhone?: string;
@@ -193,8 +196,11 @@ const handler = async (req: Request): Promise<Response> => {
     const requestBody = await req.json();
     const validatedData = validateInput(requestBody, {
       bookingId: { required: true, type: 'string', maxLength: 100 },
+      serviceId: { required: false, type: 'string', maxLength: 100 },
       serviceTitle: { required: true, type: 'string', maxLength: 200 },
       vendorName: { required: true, type: 'string', maxLength: 100 },
+      vendorId: { required: false, type: 'string', maxLength: 100 },
+      vendorEmail: { required: false, type: 'string', pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, maxLength: 100 },
       clientName: { required: true, type: 'string', maxLength: 100 },
       clientEmail: { required: true, type: 'string', pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, maxLength: 100 },
       clientPhone: { required: false, type: 'string', maxLength: 20 },
@@ -206,8 +212,11 @@ const handler = async (req: Request): Promise<Response> => {
 
     const { 
       bookingId, 
+      serviceId,
       serviceTitle, 
       vendorName, 
+      vendorId,
+      vendorEmail: providedVendorEmail,
       clientName, 
       clientEmail,
       clientPhone,
@@ -219,34 +228,38 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log('Processing consultation notification for:', { bookingId, vendorName, serviceTitle });
 
-    // Get vendor info and contact email
-    const { data: vendor, error: vendorError } = await supabase
-      .from('vendors')
-      .select('id, contact_email, individual_email, name')
-      .eq('name', vendorName)
-      .single();
+    // Cascade system: Use provided email or lookup vendor
+    let finalVendorEmail = providedVendorEmail;
+    let finalVendorId = vendorId;
 
-    if (vendorError || !vendor) {
-      console.error('Error finding vendor:', vendorError);
-      throw new Error(`Vendor not found: ${vendorName}`);
+    if (!finalVendorEmail) {
+      // Fallback: lookup vendor by name
+      const { data: vendor, error: vendorError } = await supabase
+        .from('vendors')
+        .select('id, contact_email, individual_email, name')
+        .eq('name', vendorName)
+        .single();
+
+      if (!vendorError && vendor) {
+        finalVendorEmail = vendor.individual_email || vendor.contact_email;
+        finalVendorId = vendor.id;
+      }
     }
 
-    const vendorEmail = vendor.individual_email || vendor.contact_email;
-    if (!vendorEmail) {
-      console.error('No email found for vendor:', vendorName);
-      throw new Error(`No contact email found for vendor: ${vendorName}`);
-    }
+    // Determine notification strategy
+    const notificationStrategy = finalVendorEmail ? 'vendor_email' : 'internal_team';
+    console.log(`Using notification strategy: ${notificationStrategy}`);
 
     // Create notification record
     const { error: notificationError } = await supabase
       .from('consultation_notifications')
       .insert({
         consultation_booking_id: bookingId,
-        vendor_id: vendor.id,
-        notification_type: 'email',
+        vendor_id: finalVendorId || null,
+        notification_type: notificationStrategy,
         status: 'pending',
         notification_data: {
-          vendor_email: vendorEmail,
+          vendor_email: finalVendorEmail,
           client_name: clientName,
           client_email: clientEmail,
           client_phone: clientPhone,
@@ -254,7 +267,8 @@ const handler = async (req: Request): Promise<Response> => {
           scheduled_date: scheduledDate,
           scheduled_time: scheduledTime,
           project_details: projectDetails,
-          budget_range: budgetRange
+          budget_range: budgetRange,
+          notification_strategy: notificationStrategy
         }
       });
 
@@ -263,27 +277,51 @@ const handler = async (req: Request): Promise<Response> => {
       throw notificationError;
     }
 
-    // In a real implementation, you would send the email here
-    // For now, we'll just simulate sending and mark as sent
-    console.log(`📧 EMAIL WOULD BE SENT TO: ${vendorEmail}`);
-    console.log('Email content:', {
-      subject: `New Consultation Request: ${serviceTitle}`,
-      to: vendorEmail,
-      body: `
-        New consultation request from ${clientName}
-        
-        Service: ${serviceTitle}
-        Client: ${clientName} (${clientEmail})
-        ${clientPhone ? `Phone: ${clientPhone}` : ''}
-        
-        Scheduled: ${scheduledDate} at ${scheduledTime}
-        
-        ${projectDetails ? `Project Details: ${projectDetails}` : ''}
-        ${budgetRange ? `Budget Range: ${budgetRange}` : ''}
-        
-        Please log in to your vendor dashboard to manage this consultation.
-      `
-    });
+    if (notificationStrategy === 'vendor_email') {
+      // Send email to vendor
+      console.log(`📧 EMAIL WOULD BE SENT TO VENDOR: ${finalVendorEmail}`);
+      console.log('Vendor email content:', {
+        subject: `New Consultation Request: ${serviceTitle}`,
+        to: finalVendorEmail,
+        body: `
+          New consultation request from ${clientName}
+          
+          Service: ${serviceTitle}
+          Client: ${clientName} (${clientEmail})
+          ${clientPhone ? `Phone: ${clientPhone}` : ''}
+          
+          Scheduled: ${scheduledDate} at ${scheduledTime}
+          
+          ${projectDetails ? `Project Details: ${projectDetails}` : ''}
+          ${budgetRange ? `Budget Range: ${budgetRange}` : ''}
+          
+          Please log in to your vendor dashboard to manage this consultation.
+        `
+      });
+    } else {
+      // Send notification to internal team
+      console.log(`🏢 INTERNAL TEAM NOTIFICATION WOULD BE SENT`);
+      console.log('Internal team email content:', {
+        subject: `URGENT: Manual Vendor Contact Needed - ${serviceTitle}`,
+        to: 'support@yourplatform.com', // Replace with your team email
+        body: `
+          Consultation booking requires manual vendor outreach:
+          
+          VENDOR: ${vendorName} (No email on file)
+          SERVICE: ${serviceTitle}
+          CLIENT: ${clientName} (${clientEmail})
+          ${clientPhone ? `CLIENT PHONE: ${clientPhone}` : ''}
+          
+          SCHEDULED: ${scheduledDate} at ${scheduledTime}
+          
+          ${projectDetails ? `PROJECT DETAILS: ${projectDetails}` : ''}
+          ${budgetRange ? `BUDGET RANGE: ${budgetRange}` : ''}
+          
+          ACTION REQUIRED: Contact vendor directly to arrange consultation.
+          Booking ID: ${bookingId}
+        `
+      });
+    }
 
     // Update notification status to sent
     await supabase
@@ -294,13 +332,14 @@ const handler = async (req: Request): Promise<Response> => {
       })
       .eq('consultation_booking_id', bookingId);
 
-    console.log('✅ Notification sent successfully');
+    console.log('✅ Notification sent successfully via', notificationStrategy);
 
     return new Response(
       JSON.stringify({ 
         success: true, 
         message: 'Notification sent successfully',
-        vendor_notified: vendorEmail
+        notification_strategy: notificationStrategy,
+        vendor_notified: finalVendorEmail || 'internal_team'
       }),
       {
         status: 200,

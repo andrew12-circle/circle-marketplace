@@ -61,6 +61,41 @@ export const ConsultationBookingModal = ({
 
     setIsSubmitting(true);
     try {
+      // First, check if vendor has a calendar link
+      const { data: vendorData, error: vendorError } = await supabase
+        .from('vendors')
+        .select(`
+          id,
+          name,
+          contact_email,
+          individual_email,
+          vendor_availability (calendar_link)
+        `)
+        .eq('name', service.vendor?.name || 'Direct Service')
+        .single();
+
+      if (vendorError) {
+        console.error('Error fetching vendor info:', vendorError);
+      }
+
+      // Check cascade: calendar_link -> email -> internal team
+      const calendarLink = vendorData?.vendor_availability && Array.isArray(vendorData.vendor_availability) 
+        ? vendorData.vendor_availability[0]?.calendar_link 
+        : null;
+      const vendorEmail = vendorData?.individual_email || vendorData?.contact_email;
+
+      // If vendor has calendar link, redirect to it instead of booking internally
+      if (calendarLink) {
+        window.open(calendarLink, '_blank');
+        toast({
+          title: "Redirected to Calendar",
+          description: "Please complete your booking on the vendor's calendar page.",
+        });
+        onClose();
+        return;
+      }
+
+      // Create internal booking record
       const { data: bookingData, error } = await supabase
         .from('consultation_bookings')
         .insert({
@@ -80,13 +115,16 @@ export const ConsultationBookingModal = ({
 
       if (error) throw error;
 
-      // Send notification to vendor
+      // Send notification via cascade system
       try {
         const notificationResponse = await supabase.functions.invoke('send-consultation-notification', {
           body: {
             bookingId: bookingData.id,
+            serviceId: service.id,
             serviceTitle: service.title,
             vendorName: service.vendor?.name || 'Direct Service',
+            vendorId: vendorData?.id,
+            vendorEmail: vendorEmail,
             clientName: data.client_name,
             clientEmail: data.client_email,
             clientPhone: data.client_phone,
@@ -108,7 +146,9 @@ export const ConsultationBookingModal = ({
 
       toast({
         title: "Consultation Booked!",
-        description: "We'll send you a confirmation email shortly. The service provider has been notified and will contact you soon.",
+        description: vendorEmail 
+          ? "We'll send you a confirmation email shortly. The service provider has been notified and will contact you soon."
+          : "We'll send you a confirmation email shortly. Our team will contact the vendor and get back to you within 24 hours.",
       });
 
       onBookingConfirmed(bookingData.id);
