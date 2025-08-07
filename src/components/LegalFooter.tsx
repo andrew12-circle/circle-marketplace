@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
@@ -163,7 +164,7 @@ export const LegalFooter = () => {
           </p>
           <p className="text-xs text-muted-foreground">
             <strong>User-Generated Content:</strong> Users are solely responsible for content they post. 
-            We reserve the right to remove content that violates our policies.
+            We may remove content that violates our policies.
           </p>
         </div>
         
