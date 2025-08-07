@@ -70,7 +70,7 @@ export const VendorSelectionModal = ({
       setFilteredVendors([]);
       loadVendors();
     } else {
-      
+      console.log('VendorSelectionModal: Modal closed, resetting state...');
       setSearchQuery("");
       setSelectedVendor(null);
       setShowConfirmation(false);
@@ -80,9 +80,8 @@ export const VendorSelectionModal = ({
   }, [isOpen]);
 
   useEffect(() => {
-    if (!isOpen) return;
     filterVendors();
-  }, [searchQuery, vendors, isOpen]);
+  }, [searchQuery, vendors]);
 
   const loadVendors = async () => {
     console.log('VendorSelectionModal: Starting to load vendors...');

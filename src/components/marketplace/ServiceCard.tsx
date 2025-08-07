@@ -49,44 +49,51 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
   const isProMember = profile?.is_pro_member || false;
   const { averageRating, totalReviews, loading: ratingsLoading } = useServiceRatings(service.id);
 
-  // Lazy-load disclaimer content on demand to avoid heavy per-card fetching
-  const ensureDisclaimerLoaded = async () => {
-    if (disclaimerContent) return;
-    try {
-      const { data: serviceData } = await supabase
-        .from('services')
-        .select(`
-          disclaimer_id,
-          respa_disclaimers (
-            id,
-            title,
-            content,
-            button_text,
-            button_url,
-            is_active
-          )
-        `)
-        .eq('id', service.id)
-        .maybeSingle();
+  // Fetch service-specific disclaimer or fallback to default
+  useEffect(() => {
+    const fetchDisclaimerContent = async () => {
+      try {
+        // First try to get service-specific disclaimer
+        const { data: serviceData } = await supabase
+          .from('services')
+          .select(`
+            disclaimer_id,
+            respa_disclaimers (
+              id,
+              title,
+              content,
+              button_text,
+              button_url,
+              is_active
+            )
+          `)
+          .eq('id', service.id)
+          .maybeSingle();
 
-      if (serviceData?.respa_disclaimers?.is_active) {
-        setDisclaimerContent(serviceData.respa_disclaimers);
-        return;
+        if (serviceData?.respa_disclaimers?.is_active) {
+          setDisclaimerContent(serviceData.respa_disclaimers);
+          return;
+        }
+
+        // Fallback to default disclaimer if no service-specific one
+        const { data: defaultData } = await supabase
+          .from('respa_disclaimers')
+          .select('*')
+          .eq('is_active', true)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (defaultData) {
+          setDisclaimerContent(defaultData);
+        }
+      } catch (error) {
+        console.error('Error fetching disclaimer:', error);
       }
+    };
 
-      const { data: defaultData } = await supabase
-        .from('respa_disclaimers')
-        .select('*')
-        .eq('is_active', true)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      if (defaultData) setDisclaimerContent(defaultData);
-    } catch (error: any) {
-      console.error('Error fetching disclaimer:', error);
-    }
-  };
+    fetchDisclaimerContent();
+  }, [service.id]);
 
   // Safe price extraction with validation
   const extractNumericPrice = (priceString: string): number => {
@@ -387,7 +394,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                             <TooltipTrigger asChild>
                               <button 
                                 className="w-3 h-3 rounded-full bg-green-600 flex items-center justify-center cursor-help hover:bg-green-700 transition-colors"
-                                onMouseEnter={() => { setShowOverlay(true); ensureDisclaimerLoaded(); }}
+                                onMouseEnter={() => setShowOverlay(true)}
                                 onMouseLeave={() => setShowOverlay(false)}
                               >
                                 <span className="text-xs text-white">i</span>
@@ -459,9 +466,8 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                               <span className="text-sm font-medium text-green-600">Potential Co-Pay:</span>
                               <button 
                                 className="w-3 h-3 rounded-full bg-green-600 flex items-center justify-center cursor-help hover:bg-green-700 transition-colors"
-                                 onMouseEnter={() => { setShowOverlay(true); ensureDisclaimerLoaded(); }
-                                 }
-                                  onMouseLeave={() => setShowOverlay(false)}
+                                onMouseEnter={() => setShowOverlay(true)}
+                                onMouseLeave={() => setShowOverlay(false)}
                               >
                                 <span className="text-xs text-white">i</span>
                               </button>
