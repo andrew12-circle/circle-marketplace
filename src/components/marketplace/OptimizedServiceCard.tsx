@@ -26,7 +26,9 @@ export const OptimizedServiceCard = memo<OptimizedServiceCardProps>(
       prevProps.service.id === nextProps.service.id &&
       prevProps.isSaved === nextProps.isSaved &&
       prevProps.service.title === nextProps.service.title &&
-      prevProps.service.retail_price === nextProps.service.retail_price
+      prevProps.service.retail_price === nextProps.service.retail_price &&
+      prevProps.service.is_verified === nextProps.service.is_verified &&
+      prevProps.service.pro_price === nextProps.service.pro_price
     );
   }
 );

@@ -111,18 +111,29 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
     
     const retailPrice = extractNumericPrice(service.retail_price);
     
-    // If co-pay is allowed and co_pay_price exists, use co_pay_price
-    if (service.copay_allowed && service.co_pay_price) {
-      const coPayPrice = extractNumericPrice(service.co_pay_price);
-      const percentage = Math.round((coPayPrice / retailPrice) * 100);
-      return 100 - percentage; // Convert to discount percentage for display
+    // Unverified: discount equals RESPA split limit off retail
+    if (!service.is_verified && service.respa_split_limit) {
+      return service.respa_split_limit;
     }
     
-    // Otherwise, use pro_price if available
-    if (service.pro_price) {
+    // Verified: prefer potential co-pay discount if available
+    if (service.copay_allowed && service.respa_split_limit) {
+      if (service.pro_price) {
+        const potential = extractNumericPrice(service.pro_price) * (1 - (service.respa_split_limit / 100));
+        const percentage = Math.round((potential / retailPrice) * 100);
+        return 100 - percentage;
+      } else if (service.co_pay_price) {
+        const coPayPrice = extractNumericPrice(service.co_pay_price);
+        const percentage = Math.round((coPayPrice / retailPrice) * 100);
+        return 100 - percentage;
+      }
+    }
+    
+    // Fallback: show Circle Pro discount only when verified
+    if (service.pro_price && service.is_verified) {
       const proPrice = extractNumericPrice(service.pro_price);
       const percentage = Math.round((proPrice / retailPrice) * 100);
-      return 100 - percentage; // Convert to discount percentage for display
+      return 100 - percentage;
     }
     
     return null;
@@ -154,7 +165,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
     e.stopPropagation();
     
     // If pro member and co-pay is available, show choice modal
-    if (isProMember && service.copay_allowed && service.retail_price && service.respa_split_limit && service.pro_price) {
+    if (isProMember && service.is_verified && service.copay_allowed && service.retail_price && service.respa_split_limit && service.pro_price) {
       setIsPricingChoiceModalOpen(true);
       return;
     }
@@ -167,7 +178,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
     // Determine price based on user's membership and available pricing
     let finalPrice = 0;
     
-    if (isProMember && service.pro_price) {
+    if (isProMember && service.is_verified && service.pro_price) {
       finalPrice = extractNumericPrice(service.pro_price);
     } else if (service.retail_price) {
       finalPrice = extractNumericPrice(service.retail_price);
@@ -362,7 +373,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                     </div>
                   )}
                   
-                  {service.pro_price && (
+                  {service.is_verified && service.pro_price && (
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-1">
                         <span className="text-sm font-medium text-circle-primary">Circle Pro Price:</span>
@@ -374,7 +385,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                     </div>
                   )}
                   
-                   {service.copay_allowed && service.pro_price && service.respa_split_limit && (
+                   {service.copay_allowed && service.respa_split_limit && ((service.is_verified && service.pro_price) || (!service.is_verified && service.retail_price)) && (
                     <div className="space-y-1">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-1">
@@ -393,7 +404,10 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                         </div>
                         <span className="text-lg font-bold text-green-600">
                           {formatPrice(
-                            extractNumericPrice(service.pro_price) * (1 - (service.respa_split_limit / 100)), 
+                            (service.is_verified 
+                              ? extractNumericPrice(service.pro_price!) 
+                              : extractNumericPrice(service.retail_price!)
+                            ) * (1 - (service.respa_split_limit / 100)), 
                             service.price_duration || 'mo'
                           )}
                         </span>
@@ -419,7 +433,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                     </div>
                   )}
                   
-                  {service.pro_price && (
+                  {service.is_verified && service.pro_price && (
                     <div className="space-y-1">
                       <Tooltip>
                         <TooltipTrigger asChild>
@@ -442,7 +456,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                     </div>
                   )}
                   
-                   {service.co_pay_price && (
+                   {service.copay_allowed && service.respa_split_limit && ((service.is_verified && service.pro_price) || (!service.is_verified && service.retail_price)) && (
                     <div className="space-y-1">
                       <Tooltip delayDuration={0}>
                         <TooltipTrigger asChild>
@@ -459,7 +473,13 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                               </button>
                             </div>
                             <span className="text-lg font-bold text-green-600">
-                              {formatPrice(extractNumericPrice(service.co_pay_price), service.price_duration || 'mo')}
+                              {formatPrice(
+                                (service.is_verified 
+                                  ? extractNumericPrice(service.pro_price!) 
+                                  : extractNumericPrice(service.retail_price!)
+                                ) * (1 - (service.respa_split_limit / 100)), 
+                                service.price_duration || 'mo'
+                              )}
                             </span>
                           </div>
                         </TooltipTrigger>
