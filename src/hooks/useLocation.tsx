@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { requestDeduplicator } from '@/utils/requestDeduplicator';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface LocationData {
@@ -21,34 +20,29 @@ const LOCATION_QUERY_KEYS = {
 } as const;
 
 /**
- * Fetch user location from profile with caching and deduplication
+ * Fetch user location from profile - simplified
  */
 const fetchUserLocation = async (userId: string): Promise<LocationData | null> => {
   if (!userId) return null;
   
-  return requestDeduplicator.dedupRequest(
-    `user-location-${userId}`,
-    async () => {
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('city, state, zip_code')
-        .eq('user_id', userId)
-        .maybeSingle();
+  const { data: profile, error } = await supabase
+    .from('profiles')
+    .select('city, state, zip_code')
+    .eq('user_id', userId)
+    .maybeSingle();
 
-      if (error) throw error;
+  if (error) throw error;
 
-      if (profile && profile.state) {
-        return {
-          city: profile.city,
-          state: profile.state,
-          zip_code: profile.zip_code,
-          coordinates: null
-        };
-      }
-      
-      return null;
-    }
-  );
+  if (profile && profile.state) {
+    return {
+      city: profile.city,
+      state: profile.state,
+      zip_code: profile.zip_code,
+      coordinates: null
+    };
+  }
+  
+  return null;
 };
 
 export const useLocation = () => {

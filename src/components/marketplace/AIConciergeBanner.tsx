@@ -80,26 +80,30 @@ export const AIConciergeBanner = () => {
     }
   ];
 
-  // Get context-aware AI recommendation on component mount
+  // Show demo recommendation without automatically calling AI
   useEffect(() => {
-    if (user && profile) {
-      getContextualRecommendation();
-    } else {
-      // Show generic demo recommendation for non-authenticated users
-      setAiRecommendation("🚀 Based on market data, real estate agents using professional photography see 118% more listing views and close deals 23% faster. Our AI can help you find the perfect services to boost your business!");
-    }
-  }, [user, profile]);
+    // Always show demo recommendation to avoid API calls
+    setAiRecommendation("🚀 Based on market data, real estate agents using professional photography see 118% more listing views and close deals 23% faster. Our AI can help you find the perfect services to boost your business!");
+  }, []);
 
   const getContextualRecommendation = async () => {
+    // Only trigger if user explicitly requests it
+    if (!user || !profile) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to get personalized AI recommendations.",
+        variant: "default"
+      });
+      return;
+    }
+
     try {
       setIsLoadingRecommendation(true);
-      
-      console.log('Requesting contextual AI recommendation for user:', user?.id);
       
       const { data, error } = await supabase.functions.invoke('enhanced-ai-recommendations', {
         body: {
           message: "Provide a personalized business recommendation based on my profile and current market trends",
-          userId: user?.id,
+          userId: user.id,
           context: {
             currentPage: "marketplace",
             timestamp: new Date().toISOString()
@@ -107,37 +111,27 @@ export const AIConciergeBanner = () => {
         }
       });
 
-      console.log('AI recommendation response:', { data, error });
-
       if (error) {
         console.error('Error getting AI recommendation:', error);
-        toast({
-          title: "AI Analysis Unavailable", 
-          description: "Using general insights for now. Please try again later.",
-          variant: "destructive"
-        });
-        // Fall back to static insights
+        // Silently fall back to static insight
         const randomInsight = businessInsights[Math.floor(Math.random() * businessInsights.length)];
         setCurrentInsight(randomInsight);
+        setAiRecommendation(null);
       } else if (data?.recommendation) {
         setAiRecommendation(data.recommendation);
-        console.log('Context-aware recommendation received:', data);
+        setCurrentInsight(null);
       } else {
-        console.warn('No recommendation received from AI service');
         // Fall back to static insights
         const randomInsight = businessInsights[Math.floor(Math.random() * businessInsights.length)];
         setCurrentInsight(randomInsight);
+        setAiRecommendation(null);
       }
     } catch (error) {
       console.error('Failed to get contextual recommendation:', error);
-      toast({
-        title: "Connection Error",
-        description: "Please check your connection and try again.",
-        variant: "destructive"
-      });
-      // Fall back to static insights
+      // Silently fall back to static insights
       const randomInsight = businessInsights[Math.floor(Math.random() * businessInsights.length)];
       setCurrentInsight(randomInsight);
+      setAiRecommendation(null);
     } finally {
       setIsLoadingRecommendation(false);
     }

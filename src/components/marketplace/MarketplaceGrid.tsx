@@ -22,8 +22,6 @@ import { EnhancedSearch, SearchFilters } from "./EnhancedSearch";
 import { VendorCallToAction } from "./VendorCallToAction";
 import { useMarketplaceData, useSavedServices, type Service, type Vendor } from "@/hooks/useMarketplaceData";
 import { useMarketplaceFilters } from "@/hooks/useMarketplaceFilters";
-import { useNavigationOptimization } from "@/hooks/useNavigationOptimization";
-import { useNavigationGuard } from "@/hooks/useNavigationGuard";
 import { logger } from "@/utils/logger";
 interface FilterState {
   category: string;
@@ -50,12 +48,7 @@ type ViewMode = "services" | "products" | "vendors";
 export const MarketplaceGrid = () => {
   const { t } = useTranslation();
   
-  // Use optimized hooks for data fetching and navigation
-  const { guardState, isTransitionSafe } = useNavigationGuard();
-  const { optimizeMarketplaceData } = useNavigationOptimization();
-  
-  // Only fetch data if transition is safe
-  const shouldFetchData = isTransitionSafe('marketplace-data');
+  // Simplified data fetching without navigation optimization
   const { data: marketplaceData, isLoading, error } = useMarketplaceData();
   const { data: savedServiceIds = [] } = useSavedServices();
   
