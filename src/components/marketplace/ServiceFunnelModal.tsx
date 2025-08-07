@@ -138,7 +138,7 @@ export const ServiceFunnelModal = ({
   onClose, 
   service
 }: ServiceFunnelModalProps) => {
-  const [selectedPackage, setSelectedPackage] = useState("standard");
+  const [selectedPackage, setSelectedPackage] = useState<string>("");
   const [quantity, setQuantity] = useState(1);
   const [isConsultationFlowOpen, setIsConsultationFlowOpen] = useState(false);
   const [vendorAvailability, setVendorAvailability] = useState<{
@@ -190,6 +190,15 @@ export const ServiceFunnelModal = ({
     ];
 
   const selectedPkg = packages.find(pkg => pkg.id === selectedPackage) || packages[1];
+
+  // Initialize selected package on component mount or when packages change
+  useEffect(() => {
+    if (packages.length > 0 && !selectedPackage) {
+      // Find popular package first, otherwise use the first one
+      const popularPackage = packages.find(pkg => pkg.popular);
+      setSelectedPackage(popularPackage?.id || packages[0].id);
+    }
+  }, [packages, selectedPackage]);
 
   // Fetch vendor availability on component mount
   useEffect(() => {
@@ -577,6 +586,73 @@ export const ServiceFunnelModal = ({
               </div>
             </div>
 
+            {/* Pricing Tiers Section - Only show if service has custom pricing tiers */}
+            {service.pricing_tiers?.length > 0 && (
+              <div>
+                <h2 className="text-2xl font-bold mb-4">Choose Your Package</h2>
+                <div className="space-y-4">
+                  {packages.map((pkg) => (
+                    <Card 
+                      key={pkg.id} 
+                      className={`p-4 cursor-pointer transition-all border-2 ${
+                        selectedPackage === pkg.id 
+                          ? 'border-primary bg-primary/5' 
+                          : 'border-border hover:border-primary/50'
+                      } ${pkg.popular ? 'ring-2 ring-primary/20' : ''}`}
+                      onClick={() => setSelectedPackage(pkg.id)}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <h3 className="font-semibold text-lg">{pkg.name}</h3>
+                            {pkg.popular && (
+                              <Badge className="bg-primary text-primary-foreground">
+                                <Crown className="w-3 h-3 mr-1" />
+                                Most Popular
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-sm text-muted-foreground mb-3">{pkg.description}</p>
+                          <div className="space-y-1 mb-3">
+                            {pkg.features.slice(0, 3).map((feature, idx) => (
+                              <div key={idx} className="flex items-center gap-2 text-sm">
+                                <CheckCircle className="w-3 h-3 text-green-500" />
+                                <span>{feature}</span>
+                              </div>
+                            ))}
+                            {pkg.features.length > 3 && (
+                              <div className="text-xs text-muted-foreground">
+                                +{pkg.features.length - 3} more features
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-2xl font-bold">${pkg.price}</span>
+                            {pkg.originalPrice && pkg.originalPrice > pkg.price && (
+                              <span className="text-sm text-muted-foreground line-through">
+                                ${pkg.originalPrice}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="ml-4">
+                          <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+                            selectedPackage === pkg.id 
+                              ? 'border-primary bg-primary' 
+                              : 'border-muted-foreground'
+                          }`}>
+                            {selectedPackage === pkg.id && (
+                              <CheckCircle className="w-4 h-4 text-white" />
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Urgency */}
             <div className="bg-red-50 border border-red-200 p-4 rounded-lg">
               <div className="flex items-center gap-2 mb-2">
@@ -596,28 +672,84 @@ export const ServiceFunnelModal = ({
               <Card className="p-6 space-y-4 border-2 border-primary">
                 <div className="text-center space-y-2">
                   <h3 className="text-xl font-bold">Ready to Transform Your Business?</h3>
-                  <p className="text-sm text-muted-foreground">Custom pricing based on your specific needs</p>
+                  {service.pricing_tiers?.length > 0 ? (
+                    <div className="space-y-2">
+                      <p className="text-sm text-muted-foreground">Selected Package: {selectedPkg?.name}</p>
+                      <div className="text-2xl font-bold text-primary">${selectedPkg?.price}</div>
+                      {selectedPkg?.originalPrice && selectedPkg.originalPrice > selectedPkg.price && (
+                        <p className="text-sm text-muted-foreground line-through">${selectedPkg.originalPrice}</p>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">Custom pricing based on your specific needs</p>
+                  )}
                 </div>
 
                 <div className="space-y-3">
-                  <Button 
-                    className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold" 
-                    size="lg"
-                    onClick={() => setIsConsultationFlowOpen(true)}
-                  >
-                    <Phone className="w-4 h-4 mr-2" />
-                    Schedule Free Consultation
-                  </Button>
-                  
-                  <Button 
-                    variant="outline" 
-                    className="w-full" 
-                    size="lg"
-                    onClick={() => setIsConsultationFlowOpen(true)}
-                  >
-                    <Mail className="w-4 h-4 mr-2" />
-                    Get Custom Quote
-                  </Button>
+                  {/* Show Add to Cart for services with pricing tiers, otherwise show consultation buttons */}
+                  {service.pricing_tiers?.length > 0 && !service.requires_quote ? (
+                    <>
+                      {/* Quantity Selector */}
+                      <div className="flex items-center justify-center gap-3">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                          disabled={quantity <= 1}
+                        >
+                          <Minus className="w-4 h-4" />
+                        </Button>
+                        <span className="w-12 text-center font-medium">Qty: {quantity}</span>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setQuantity(quantity + 1)}
+                        >
+                          <Plus className="w-4 h-4" />
+                        </Button>
+                      </div>
+                      
+                      <Button 
+                        className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold" 
+                        size="lg"
+                        onClick={handleAddToCart}
+                      >
+                        <ShoppingCart className="w-4 h-4 mr-2" />
+                        Add to Cart - ${(selectedPkg?.price || 0) * quantity}
+                      </Button>
+                      
+                      <Button 
+                        variant="outline" 
+                        className="w-full" 
+                        size="lg"
+                        onClick={() => setIsConsultationFlowOpen(true)}
+                      >
+                        <Phone className="w-4 h-4 mr-2" />
+                        Schedule Consultation
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button 
+                        className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold" 
+                        size="lg"
+                        onClick={() => setIsConsultationFlowOpen(true)}
+                      >
+                        <Phone className="w-4 h-4 mr-2" />
+                        Schedule Free Consultation
+                      </Button>
+                      
+                      <Button 
+                        variant="outline" 
+                        className="w-full" 
+                        size="lg"
+                        onClick={() => setIsConsultationFlowOpen(true)}
+                      >
+                        <Mail className="w-4 h-4 mr-2" />
+                        Get Custom Quote
+                      </Button>
+                    </>
+                  )}
                   
                   {service.website_url && (
                     <Button 
