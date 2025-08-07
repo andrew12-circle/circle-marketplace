@@ -18,14 +18,18 @@ export const useRESPADisclaimers = () => {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  const fetchDisclaimers = async () => {
+  const fetchDisclaimers = async (activeOnly: boolean = true) => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
+      let query = supabase
         .from('respa_disclaimers')
-        .select('*')
-        .eq('is_active', true)
-        .order('created_at', { ascending: false });
+        .select('*');
+      
+      if (activeOnly) {
+        query = query.eq('is_active', true);
+      }
+      
+      const { data, error } = await query.order('created_at', { ascending: false });
 
       if (error) throw error;
       setDisclaimers(data || []);
@@ -38,6 +42,32 @@ export const useRESPADisclaimers = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchServiceDisclaimer = async (serviceId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('services')
+        .select(`
+          disclaimer_id,
+          respa_disclaimers (
+            id,
+            title,
+            content,
+            button_text,
+            button_url,
+            is_active
+          )
+        `)
+        .eq('id', serviceId)
+        .maybeSingle();
+
+      if (error) throw error;
+      return data?.respa_disclaimers || null;
+    } catch (error) {
+      console.error('Error fetching service disclaimer:', error);
+      return null;
     }
   };
 
@@ -99,6 +129,7 @@ export const useRESPADisclaimers = () => {
     loading,
     updateDisclaimer,
     createDisclaimer,
+    fetchServiceDisclaimer,
     refetch: fetchDisclaimers
   };
 };

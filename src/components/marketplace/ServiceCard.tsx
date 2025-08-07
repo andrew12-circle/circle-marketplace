@@ -47,19 +47,43 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
   const { formatPrice } = useCurrency();
   const isProMember = profile?.is_pro_member || false;
 
-  // Fetch disclaimer content on component mount
+  // Fetch service-specific disclaimer or fallback to default
   useEffect(() => {
     const fetchDisclaimerContent = async () => {
       try {
-        const { data, error } = await supabase
+        // First try to get service-specific disclaimer
+        const { data: serviceData } = await supabase
+          .from('services')
+          .select(`
+            disclaimer_id,
+            respa_disclaimers (
+              id,
+              title,
+              content,
+              button_text,
+              button_url,
+              is_active
+            )
+          `)
+          .eq('id', service.id)
+          .maybeSingle();
+
+        if (serviceData?.respa_disclaimers?.is_active) {
+          setDisclaimerContent(serviceData.respa_disclaimers);
+          return;
+        }
+
+        // Fallback to default disclaimer if no service-specific one
+        const { data: defaultData } = await supabase
           .from('respa_disclaimers')
           .select('*')
           .eq('is_active', true)
+          .order('created_at', { ascending: false })
           .limit(1)
-          .single();
+          .maybeSingle();
 
-        if (!error && data) {
-          setDisclaimerContent(data);
+        if (defaultData) {
+          setDisclaimerContent(defaultData);
         }
       } catch (error) {
         console.error('Error fetching disclaimer:', error);
@@ -67,7 +91,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
     };
 
     fetchDisclaimerContent();
-  }, []);
+  }, [service.id]);
 
   // Safe price extraction with validation
   const extractNumericPrice = (priceString: string): number => {

@@ -3447,6 +3447,7 @@ export type Database = {
           created_at: string | null
           description: string | null
           direct_purchase_enabled: boolean | null
+          disclaimer_id: string | null
           discount_percentage: string | null
           duration: string | null
           estimated_roi: number | null
@@ -3484,6 +3485,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           direct_purchase_enabled?: boolean | null
+          disclaimer_id?: string | null
           discount_percentage?: string | null
           duration?: string | null
           estimated_roi?: number | null
@@ -3521,6 +3523,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           direct_purchase_enabled?: boolean | null
+          disclaimer_id?: string | null
           discount_percentage?: string | null
           duration?: string | null
           estimated_roi?: number | null
@@ -3551,6 +3554,13 @@ export type Database = {
           website_url?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "services_disclaimer_id_fkey"
+            columns: ["disclaimer_id"]
+            isOneToOne: false
+            referencedRelation: "respa_disclaimers"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "services_service_provider_id_fkey"
             columns: ["service_provider_id"]
