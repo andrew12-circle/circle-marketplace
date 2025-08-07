@@ -2915,6 +2915,39 @@ export type Database = {
         }
         Relationships: []
       }
+      respa_disclaimers: {
+        Row: {
+          button_text: string | null
+          button_url: string | null
+          content: string
+          created_at: string
+          id: string
+          is_active: boolean | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          button_text?: string | null
+          button_url?: string | null
+          content: string
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          button_text?: string | null
+          button_url?: string | null
+          content?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       revenue_tracking: {
         Row: {
           content_id: string | null

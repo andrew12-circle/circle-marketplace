@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -37,6 +37,8 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
   const [isVendorSelectionModalOpen, setIsVendorSelectionModalOpen] = useState(false);
   const [isPricingChoiceModalOpen, setIsPricingChoiceModalOpen] = useState(false);
   const [isDirectPurchaseModalOpen, setIsDirectPurchaseModalOpen] = useState(false);
+  const [disclaimerContent, setDisclaimerContent] = useState<any>(null);
+  const [showOverlay, setShowOverlay] = useState(false);
   const { toast } = useToast();
   const { addToCart } = useCart();
   const { profile, user } = useAuth();
@@ -44,6 +46,28 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
   const navigate = useNavigate();
   const { formatPrice } = useCurrency();
   const isProMember = profile?.is_pro_member || false;
+
+  // Fetch disclaimer content on component mount
+  useEffect(() => {
+    const fetchDisclaimerContent = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('respa_disclaimers')
+          .select('*')
+          .eq('is_active', true)
+          .limit(1)
+          .single();
+
+        if (!error && data) {
+          setDisclaimerContent(data);
+        }
+      } catch (error) {
+        console.error('Error fetching disclaimer:', error);
+      }
+    };
+
+    fetchDisclaimerContent();
+  }, []);
 
   // Safe price extraction with validation
   const extractNumericPrice = (priceString: string): number => {
@@ -167,506 +191,481 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
     navigate('/pricing');
   };
 
+  const handleOverlayClick = (e: React.MouseEvent) => {
+    if (disclaimerContent?.button_url) {
+      navigate(disclaimerContent.button_url);
+    }
+  };
+
   return (
     <TooltipProvider>
-    <Card 
-      className="group relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 bg-card border border-border/50 h-full flex flex-col cursor-pointer mobile-card touch-friendly"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      onClick={handleViewDetails}
-    >
-      {/* Top Badges */}
-      <div className="absolute top-3 left-3 z-10 flex gap-2">
-        {service.is_verified && (
-          <Badge className="bg-green-600 text-white text-xs font-medium">
-            Verified
-          </Badge>
-        )}
-        {service.is_featured && (
-          <Badge className="bg-circle-primary text-primary-foreground text-xs font-medium">
-            {t('featured')}
-          </Badge>
-        )}
-        {service.is_top_pick && (
-          <Badge className="bg-circle-accent text-foreground text-xs font-medium">
-            {t('topPick')}
-          </Badge>
-        )}
-      </div>
+      <div className="relative">
+        <Card 
+          className="group relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 bg-card border border-border/50 h-full flex flex-col cursor-pointer mobile-card touch-friendly"
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+          onClick={handleViewDetails}
+        >
+          {/* Top Badges */}
+          <div className="absolute top-3 left-3 z-10 flex gap-2">
+            {service.is_verified && (
+              <Badge className="bg-green-600 text-white text-xs font-medium">
+                Verified
+              </Badge>
+            )}
+            {service.is_featured && (
+              <Badge className="bg-circle-primary text-primary-foreground text-xs font-medium">
+                {t('featured')}
+              </Badge>
+            )}
+            {service.is_top_pick && (
+              <Badge className="bg-circle-accent text-foreground text-xs font-medium">
+                {t('topPick')}
+              </Badge>
+            )}
+          </div>
 
-      {/* Save Button */}
-      <Button
-        variant="ghost"
-        size="icon"
-        className="absolute top-3 right-3 z-10 h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background"
-        onClick={handleSave}
-      >
-        <Heart 
-          className={`h-4 w-4 transition-colors ${
-            isSaved ? "fill-red-500 text-red-500" : "text-muted-foreground"
-          }`} 
-        />
-      </Button>
+          {/* Save Button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute top-3 right-3 z-10 h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background"
+            onClick={handleSave}
+          >
+            <Heart 
+              className={`h-4 w-4 transition-colors ${
+                isSaved ? "fill-red-500 text-red-500" : "text-muted-foreground"
+              }`} 
+            />
+          </Button>
 
-      {/* Image - Fixed height */}
-      <div className="relative h-48 overflow-hidden bg-white flex-shrink-0 p-4">
-        <img
-          src={service.image_url || "/public/placeholder.svg"}
-          alt={service.title}
-          className="w-full h-full object-contain object-center transition-transform duration-300 group-hover:scale-105"
-        />
-      </div>
+          {/* Image - Fixed height */}
+          <div className="relative h-48 overflow-hidden bg-white flex-shrink-0 p-4">
+            <img
+              src={service.image_url || "/public/placeholder.svg"}
+              alt={service.title}
+              className="w-full h-full object-contain object-center transition-transform duration-300 group-hover:scale-105"
+            />
+          </div>
 
-      <CardContent className="p-4 flex flex-col flex-grow mobile-card-content">
-        {/* Title and Vendor Info - Fixed height */}
-        <div className="flex items-center gap-2 text-sm text-muted-foreground h-6 mb-3">
-          <h3 className="font-semibold text-foreground leading-tight mobile-title">
-            {service.title.split(' - ').pop() || service.title.split(': ').pop() || service.title}
-          </h3>
-        </div>
+          <CardContent className="p-4 flex flex-col flex-grow mobile-card-content">
+            {/* Title and Vendor Info - Fixed height */}
+            <div className="flex items-center gap-2 text-sm text-muted-foreground h-6 mb-3">
+              <h3 className="font-semibold text-foreground leading-tight mobile-title">
+                {service.title.split(' - ').pop() || service.title.split(': ').pop() || service.title}
+              </h3>
+            </div>
 
-        {/* Rating - moved above pricing */}
-        {service.vendor && (
-          <div className="flex items-center gap-1 mb-3">
-            {[...Array(5)].map((_, i) => {
-              const rating = service.vendor.rating;
-              const isFullStar = i < Math.floor(rating);
-              const isPartialStar = i === Math.floor(rating) && rating % 1 !== 0;
-              const fillPercentage = isPartialStar ? (rating <= 4.9 ? 50 : (rating % 1) * 100) : 0;
-              
-              return (
-                <div key={i} className="relative h-4 w-4">
-                  <Star className="h-4 w-4 text-gray-300 absolute" />
-                  {isFullStar && (
-                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 absolute" />
-                  )}
-                  {isPartialStar && (
-                    <div 
-                      className="overflow-hidden absolute"
-                      style={{ width: `${fillPercentage}%` }}
-                    >
-                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+            {/* Rating - moved above pricing */}
+            {service.vendor && (
+              <div className="flex items-center gap-1 mb-3">
+                {[...Array(5)].map((_, i) => {
+                  const rating = service.vendor.rating;
+                  const isFullStar = i < Math.floor(rating);
+                  const isPartialStar = i === Math.floor(rating) && rating % 1 !== 0;
+                  const fillPercentage = isPartialStar ? (rating <= 4.9 ? 50 : (rating % 1) * 100) : 0;
+                  
+                  return (
+                    <div key={i} className="relative h-4 w-4">
+                      <Star className="h-4 w-4 text-gray-300 absolute" />
+                      {isFullStar && (
+                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 absolute" />
+                      )}
+                      {isPartialStar && (
+                        <div 
+                          className="overflow-hidden absolute"
+                          style={{ width: `${fillPercentage}%` }}
+                        >
+                          <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                        </div>
+                      )}
                     </div>
+                  );
+                })}
+                <span className="text-sm text-muted-foreground ml-1">
+                  {service.vendor.rating} ({service.vendor.review_count})
+                </span>
+              </div>
+            )}
+
+            {/* Description - Fixed height */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <p className="text-sm text-muted-foreground line-clamp-2 h-10 mb-3 cursor-help">
+                  {service.description}
+                </p>
+              </TooltipTrigger>
+              <TooltipContent className="max-w-[280px] sm:max-w-xs md:max-w-sm p-3 text-sm bg-popover border border-border rounded-lg shadow-lg z-[60]">
+                <p className="text-popover-foreground break-words">{service.description}</p>
+              </TooltipContent>
+            </Tooltip>
+
+            {/* Tags - Fixed height */}
+            <div className="h-8 mb-3">
+              {service.tags && service.tags.length > 0 && (
+                <div className="flex flex-wrap gap-1">
+                  {service.tags.slice(0, 3).map((tag, index) => (
+                    <Badge key={`${service.id}-tag-${index}`} variant="outline" className="text-xs">
+                      {tag}
+                    </Badge>
+                  ))}
+                  {service.tags.length > 3 && (
+                    <span className="text-xs text-muted-foreground">
+                      +{service.tags.length - 3} more
+                    </span>
                   )}
                 </div>
-              );
-            })}
-            <span className="text-sm text-muted-foreground ml-1">
-              {service.vendor.rating} ({service.vendor.review_count})
-            </span>
-          </div>
-        )}
-
-        {/* Description - Fixed height */}
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <p className="text-sm text-muted-foreground line-clamp-2 h-10 mb-3 cursor-help">
-              {service.description}
-            </p>
-          </TooltipTrigger>
-          <TooltipContent className="max-w-[280px] sm:max-w-xs md:max-w-sm p-3 text-sm bg-popover border border-border rounded-lg shadow-lg z-[60]">
-            <p className="text-popover-foreground break-words">{service.description}</p>
-          </TooltipContent>
-        </Tooltip>
-
-        {/* Tags - Fixed height */}
-        <div className="h-8 mb-3">
-          {service.tags && service.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1">
-              {service.tags.slice(0, 3).map((tag, index) => (
-                <Badge key={`${service.id}-tag-${index}`} variant="outline" className="text-xs">
-                  {tag}
-                </Badge>
-              ))}
-              {service.tags.length > 3 && (
-                <span className="text-xs text-muted-foreground">
-                  +{service.tags.length - 3} more
-                </span>
               )}
             </div>
-          )}
-        </div>
 
-        {/* Pricing Structure - Flexible but consistent */}
-        <div className="space-y-2 mb-3 flex-grow">
-          {isProMember ? (
-            <>
-              {/* Pro Member View: Show retail with line-through, pro price as main */}
-              {service.retail_price && (
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Retail Price:</span>
-                  <span className="text-sm text-muted-foreground line-through">
-                    {formatPrice(extractNumericPrice(service.retail_price), service.price_duration || 'mo')}
-                  </span>
-                </div>
-              )}
-              
-              {service.pro_price && (
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1">
-                    <span className="text-sm font-medium text-circle-primary">Circle Pro Price:</span>
-                    <Crown className="w-4 h-4 text-circle-primary" />
-                  </div>
-                  <span className="text-xl font-bold text-circle-primary">
-                    {formatPrice(extractNumericPrice(service.pro_price), service.price_duration || 'mo')}
-                  </span>
-                </div>
-              )}
-              
-              {service.copay_allowed && service.pro_price && service.respa_split_limit && (
-                <div className="space-y-1">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1">
-                      <span className="text-sm font-medium text-green-600">Potential Co-Pay:</span>
-                      <Tooltip delayDuration={0}>
-                        <TooltipTrigger asChild>
-                          <button className="w-3 h-3 rounded-full bg-green-600 flex items-center justify-center cursor-help hover:bg-green-700 transition-colors">
-                            <span className="text-xs text-white">i</span>
-                          </button>
-                        </TooltipTrigger>
-                        <TooltipContent 
-                          className="p-0 border-0 bg-transparent w-auto max-w-[400px] sm:max-w-[500px] md:max-w-[600px] z-[70]" 
-                          side="top"
-                          align="center"
-                          sideOffset={15}
-                        >
-                          <div 
-                            className="relative bg-gradient-to-br from-yellow-400 via-yellow-500 to-yellow-600 rounded-lg p-4 sm:p-6 shadow-xl mx-auto cursor-pointer"
-                            onClick={handleUpgradeClick}
-                          >
-                            {/* Card design elements */}
-                            <div className="absolute top-3 left-3 w-6 h-6 border border-yellow-700/30 rounded-sm"></div>
-                            <div className="absolute top-3 right-3 text-yellow-800 font-bold text-lg">PRO</div>
-                            
-                            {/* Main content */}
-                            <div className="mt-8">
-                              <h3 className="text-yellow-900 font-bold text-xl mb-2">Circle COVERAGE</h3>
-                              <h4 className="text-yellow-800 font-semibold text-lg mb-4">Compliant Advertising Partnerships</h4>
-                              <p className="text-yellow-900 text-sm leading-relaxed mb-4">
-                                Find lenders and title companies & more interested in sharing the cost of public advertising campaigns. Each party pays their proportional share and receives proportional benefit in all advertising materials.
-                              </p>
-                              
-                              <p className="text-yellow-900 text-sm leading-relaxed mb-4">
-                                This feature facilitates introductions for RESPA-compliant marketing partnerships only. Federal law prohibits cost-sharing arrangements for lead generation tools or business platforms.
-                              </p>
-                              
-                              <button className="text-yellow-800 text-sm font-medium hover:text-yellow-900 underline">
-                                Learn more
+            {/* Pricing Structure - Flexible but consistent */}
+            <div className="space-y-2 mb-3 flex-grow">
+              {isProMember ? (
+                <>
+                  {/* Pro Member View: Show retail with line-through, pro price as main */}
+                  {service.retail_price && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-muted-foreground">Retail Price:</span>
+                      <span className="text-sm text-muted-foreground line-through">
+                        {formatPrice(extractNumericPrice(service.retail_price), service.price_duration || 'mo')}
+                      </span>
+                    </div>
+                  )}
+                  
+                  {service.pro_price && (
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1">
+                        <span className="text-sm font-medium text-circle-primary">Circle Pro Price:</span>
+                        <Crown className="w-4 h-4 text-circle-primary" />
+                      </div>
+                      <span className="text-xl font-bold text-circle-primary">
+                        {formatPrice(extractNumericPrice(service.pro_price), service.price_duration || 'mo')}
+                      </span>
+                    </div>
+                  )}
+                  
+                  {service.copay_allowed && service.pro_price && service.respa_split_limit && (
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1">
+                          <span className="text-sm font-medium text-green-600">Potential Co-Pay:</span>
+                          <Tooltip delayDuration={0}>
+                            <TooltipTrigger asChild>
+                              <button 
+                                className="w-3 h-3 rounded-full bg-green-600 flex items-center justify-center cursor-help hover:bg-green-700 transition-colors"
+                                onMouseEnter={() => setShowOverlay(true)}
+                                onMouseLeave={() => setShowOverlay(false)}
+                              >
+                                <span className="text-xs text-white">i</span>
                               </button>
+                            </TooltipTrigger>
+                          </Tooltip>
+                        </div>
+                        <span className="text-lg font-bold text-green-600">
+                          {formatPrice(
+                            extractNumericPrice(service.pro_price) * (1 - (service.respa_split_limit / 100)), 
+                            service.price_duration || 'mo'
+                          )}
+                        </span>
+                      </div>
+                      <div className="flex justify-end">
+                         <Badge className="bg-green-600 text-white text-xs">
+                           {service.respa_split_limit}% vendor support
+                         </Badge>
+                      </div>
+                    </div>
+                  )}
+                  
+                </>
+              ) : (
+                <>
+                  {/* Non-Pro Member View: Show retail as main price, others as incentives */}
+                  {service.retail_price && (
+                    <div className="flex items-center justify-between mt-4">
+                      <span className="text-sm text-muted-foreground">List Price:</span>
+                      <span className="text-xl font-bold text-foreground">
+                        {formatPrice(extractNumericPrice(service.retail_price), service.price_duration || 'mo')}
+                      </span>
+                    </div>
+                  )}
+                  
+                  {service.pro_price && (
+                    <div className="space-y-1">
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="flex items-center justify-between p-2 bg-circle-primary/5 rounded-lg border border-circle-primary/20 opacity-75 cursor-pointer">
+                            <div className="flex items-center gap-1">
+                              <Lock className="w-3 h-3 text-circle-primary" />
+                              <span className="text-sm font-medium text-circle-primary">Circle Pro Price:</span>
+                              <Crown className="w-4 h-4 text-circle-primary" />
                             </div>
+                            <span className="text-lg font-bold text-circle-primary">
+                              {formatPrice(extractNumericPrice(service.pro_price), service.price_duration || 'mo')}
+                            </span>
                           </div>
+                        </TooltipTrigger>
+                        <TooltipContent className="w-40 sm:w-48 p-3 cursor-pointer" onClick={handleUpgradeClick}>
+                          <p className="text-sm leading-relaxed">Join Circle Pro membership to unlock this price</p>
+                          <p className="text-xs text-muted-foreground mt-1">Click to upgrade →</p>
                         </TooltipContent>
                       </Tooltip>
                     </div>
-                    <span className="text-lg font-bold text-green-600">
-                      {formatPrice(
-                        extractNumericPrice(service.pro_price) * (1 - (service.respa_split_limit / 100)), 
-                        service.price_duration || 'mo'
-                      )}
-                    </span>
-                  </div>
-                  <div className="flex justify-end">
-                     <Badge className="bg-green-600 text-white text-xs">
-                       {service.respa_split_limit}% vendor support
-                     </Badge>
-                  </div>
-                </div>
-              )}
-              
-            </>
-          ) : (
-            <>
-              {/* Non-Pro Member View: Show retail as main price, others as incentives */}
-              {service.retail_price && (
-                <div className="flex items-center justify-between mt-4">
-                  <span className="text-sm text-muted-foreground">List Price:</span>
-                  <span className="text-xl font-bold text-foreground">
-                    {formatPrice(extractNumericPrice(service.retail_price), service.price_duration || 'mo')}
-                  </span>
-                </div>
-              )}
-              
-              {service.pro_price && (
-                <div className="space-y-1">
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div className="flex items-center justify-between p-2 bg-circle-primary/5 rounded-lg border border-circle-primary/20 opacity-75 cursor-pointer">
-                        <div className="flex items-center gap-1">
-                          <Lock className="w-3 h-3 text-circle-primary" />
-                          <span className="text-sm font-medium text-circle-primary">Circle Pro Price:</span>
-                          <Crown className="w-4 h-4 text-circle-primary" />
-                        </div>
-                        <span className="text-lg font-bold text-circle-primary">
-                          {formatPrice(extractNumericPrice(service.pro_price), service.price_duration || 'mo')}
-                        </span>
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent className="w-40 sm:w-48 p-3 cursor-pointer" onClick={handleUpgradeClick}>
-                      <p className="text-sm leading-relaxed">Join Circle Pro membership to unlock this price</p>
-                      <p className="text-xs text-muted-foreground mt-1">Click to upgrade →</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </div>
-              )}
-              
-              {service.co_pay_price && (
-                <div className="space-y-1">
-                  <Tooltip delayDuration={0}>
-                    <TooltipTrigger asChild>
-                      <div className="flex items-center justify-between p-2 bg-green-50 rounded-lg border border-green-200 opacity-75 cursor-pointer hover:opacity-100 transition-opacity">
-                        <div className="flex items-center gap-1">
-                          <Lock className="w-3 h-3 text-green-600" />
-                          <span className="text-sm font-medium text-green-600">Potential Co-Pay:</span>
-                          <button className="w-3 h-3 rounded-full bg-green-600 flex items-center justify-center cursor-help hover:bg-green-700 transition-colors">
-                            <span className="text-xs text-white">i</span>
-                          </button>
-                        </div>
-                        <span className="text-lg font-bold text-green-600">
-                          {formatPrice(extractNumericPrice(service.co_pay_price), service.price_duration || 'mo')}
-                        </span>
-                      </div>
-                    </TooltipTrigger>
-                     <TooltipContent 
-                       className="p-0 border-0 bg-transparent w-auto max-w-[280px] z-[70]" 
-                       side="left"
-                       align="center"
-                       sideOffset={0}
-                       alignOffset={0}
-                       avoidCollisions={true}
-                       collisionBoundary={document.querySelector('.group')}
-                     >
-                         <div 
-                           className="relative bg-gradient-to-br from-yellow-400 via-yellow-500 to-yellow-600 rounded-lg p-3 shadow-lg cursor-pointer w-full"
-                           onClick={handleUpgradeClick}
-                         >
-                        {/* Card design elements */}
-                        <div className="absolute top-3 left-3 w-6 h-6 border border-yellow-700/30 rounded-sm"></div>
-                        <div className="absolute top-3 right-3 text-yellow-800 font-bold text-lg">PRO</div>
-                        
-                        {/* Main content */}
-                        <div className="mt-8">
-                          <h3 className="text-yellow-900 font-bold text-xl mb-2">Circle COVERAGE</h3>
-                          <h4 className="text-yellow-800 font-semibold text-lg mb-4">Compliant Advertising Partnerships</h4>
-                          <p className="text-yellow-900 text-sm leading-relaxed mb-4">
-                            Find lenders and title companies & more interested in sharing the cost of public advertising campaigns. Each party pays their proportional share and receives proportional benefit in all advertising materials.
-                          </p>
-                          
-                          <p className="text-yellow-900 text-sm leading-relaxed mb-4">
-                            This feature facilitates introductions for RESPA-compliant marketing partnerships only. Federal law prohibits cost-sharing arrangements for lead generation tools or business platforms.
-                          </p>
-                          
-                          <button className="text-yellow-800 text-sm font-medium hover:text-yellow-900 underline">
-                            Learn more
-                          </button>
-                        </div>
-                      </div>
-                    </TooltipContent>
-                  </Tooltip>
-                </div>
-              )}
-            </>
-          )}
-        </div>
-
-        {/* Single discount badge for both Pro and Non-Pro views */}
-        {calculateDiscountPercentage() && (
-          <div className="flex justify-end mb-3">
-            <Badge className="bg-destructive text-destructive-foreground text-xs hover:bg-green-600 hover:text-white transition-colors">
-              {calculateDiscountPercentage()}% OFF
-            </Badge>
-          </div>
-        )}
-
-        {/* ROI and Duration - Fixed height */}
-        <div className="h-4 mb-4">
-          {(service.estimated_roi || service.duration) && (
-            <div className="flex items-center justify-between text-xs text-muted-foreground">
-              {service.estimated_roi && (
-                <span>Est. ROI: {service.estimated_roi}x</span>
-              )}
-              {service.duration && (
-                <span>{service.duration}</span>
+                  )}
+                  
+                  {service.co_pay_price && (
+                    <div className="space-y-1">
+                      <Tooltip delayDuration={0}>
+                        <TooltipTrigger asChild>
+                          <div 
+                            className="flex items-center justify-between p-2 bg-green-50 rounded-lg border border-green-200 opacity-75 cursor-pointer hover:opacity-100 transition-opacity"
+                            onMouseEnter={() => setShowOverlay(true)}
+                            onMouseLeave={() => setShowOverlay(false)}
+                          >
+                            <div className="flex items-center gap-1">
+                              <Lock className="w-3 h-3 text-green-600" />
+                              <span className="text-sm font-medium text-green-600">Potential Co-Pay:</span>
+                              <button className="w-3 h-3 rounded-full bg-green-600 flex items-center justify-center cursor-help hover:bg-green-700 transition-colors">
+                                <span className="text-xs text-white">i</span>
+                              </button>
+                            </div>
+                            <span className="text-lg font-bold text-green-600">
+                              {formatPrice(extractNumericPrice(service.co_pay_price), service.price_duration || 'mo')}
+                            </span>
+                          </div>
+                        </TooltipTrigger>
+                      </Tooltip>
+                    </div>
+                  )}
+                </>
               )}
             </div>
-          )}
-        </div>
 
-        {/* Action Buttons - Fixed at bottom */}
-        <div className="flex gap-2 mt-auto">
-          {service.requires_quote ? (
-            <Button
-              variant="outline" 
-              size="sm"
-              className="flex-1 h-9"
-              onClick={handleAddToCart}
-            >
-              <ShoppingCart className="w-4 h-4 mr-1" />
-              Add to Cart
-            </Button>
-          ) : (
-            <>
-              {/* Primary action - Consultation (traditional flow) */}
-              <Button
-                size="sm"
-                className="flex-1 h-9"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsConsultationFlowOpen(true);
-                }}
-              >
-                <Calendar className="w-4 h-4 mr-1" />
-                Book Consultation
-              </Button>
+            {/* Single discount badge for both Pro and Non-Pro views */}
+            {calculateDiscountPercentage() && (
+              <div className="flex justify-end mb-3">
+                <Badge className="bg-destructive text-destructive-foreground text-xs hover:bg-green-600 hover:text-white transition-colors">
+                  {calculateDiscountPercentage()}% OFF
+                </Badge>
+              </div>
+            )}
+
+            {/* ROI and Duration - Fixed height */}
+            <div className="h-4 mb-4">
+              {(service.estimated_roi || service.duration) && (
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                  {service.estimated_roi && (
+                    <span>Est. ROI: {service.estimated_roi}x</span>
+                  )}
+                  {service.duration && (
+                    <span>{service.duration}</span>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Action Buttons - Fixed at bottom */}
+            <div className="flex gap-2 mt-auto">
+              {service.requires_quote ? (
+                <Button
+                  variant="outline" 
+                  size="sm"
+                  className="flex-1 h-9"
+                  onClick={handleAddToCart}
+                >
+                  <ShoppingCart className="w-4 h-4 mr-1" />
+                  Add to Cart
+                </Button>
+              ) : (
+                <>
+                  {/* Primary action - Consultation (traditional flow) */}
+                  <Button
+                    size="sm"
+                    className="flex-1 h-9"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsConsultationFlowOpen(true);
+                    }}
+                  >
+                    <Calendar className="w-4 h-4 mr-1" />
+                    Book Consultation
+                  </Button>
+                  
+                  {/* Add to Cart Button */}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1 h-9"
+                    onClick={handleAddToCart}
+                  >
+                    <ShoppingCart className="w-4 h-4 mr-1" />
+                    Add to Cart
+                  </Button>
+                </>
+              )}
               
-              {/* Add to Cart Button */}
-              <Button
-                variant="outline"
+              <Button 
+                variant="outline" 
                 size="sm"
-                className="flex-1 h-9"
-                onClick={handleAddToCart}
+                className="h-9 px-3"
+                onClick={handleViewDetailsButton}
               >
-                <ShoppingCart className="w-4 h-4 mr-1" />
-                Add to Cart
+                <ArrowRight className="w-4 h-4" />
               </Button>
-            </>
+            </div>
+          </CardContent>
+          
+          {/* Full Card Overlay for Disclaimer */}
+          {showOverlay && disclaimerContent && (
+            <div 
+              className="absolute inset-0 bg-gradient-to-br from-yellow-400 via-yellow-500 to-yellow-600 rounded-lg shadow-xl z-50 flex flex-col p-4 cursor-pointer"
+              onClick={handleOverlayClick}
+              onMouseEnter={() => setShowOverlay(true)}
+              onMouseLeave={() => setShowOverlay(false)}
+            >
+              {/* Card design elements */}
+              <div className="absolute top-3 left-3 w-6 h-6 border border-yellow-700/30 rounded-sm"></div>
+              <div className="absolute top-3 right-3 text-yellow-800 font-bold text-lg">PRO</div>
+              
+              {/* Main content */}
+              <div className="flex-1 flex flex-col justify-center mt-8">
+                <h3 className="text-yellow-900 font-bold text-xl mb-2">{disclaimerContent.title}</h3>
+                <p className="text-yellow-900 text-sm leading-relaxed mb-4 flex-1 overflow-y-auto">
+                  {disclaimerContent.content}
+                </p>
+                
+                <button className="text-yellow-800 text-sm font-medium hover:text-yellow-900 underline self-start">
+                  {disclaimerContent.button_text}
+                </button>
+              </div>
+            </div>
           )}
-          
-          <Button 
-            variant="outline" 
-            size="sm"
-            className="h-9 px-3"
-            onClick={handleViewDetailsButton}
-          >
-            <ArrowRight className="w-4 h-4" />
-          </Button>
-        </div>
-      </CardContent>
-      
-      <ServiceFunnelModal
-        isOpen={isFunnelModalOpen}
-        onClose={() => {
-          console.log('ServiceFunnelModal onClose called');
-          setIsClosingModal(true);
-          setIsFunnelModalOpen(false);
-          // Clear the closing flag after a brief delay to prevent immediate reopening
-          setTimeout(() => setIsClosingModal(false), 100);
-        }}
-        service={service}
-      />
-      
-      <VendorSelectionModal
-        isOpen={isVendorSelectionModalOpen}
-        onClose={() => setIsVendorSelectionModalOpen(false)}
-        onVendorSelect={(vendor) => {
-          // Handle vendor selection logic here
-          console.log('Selected vendor:', vendor);
-        }}
-        service={{
-          id: service.id,
-          title: service.title,
-          co_pay_price: service.co_pay_price,
-          respa_split_limit: service.respa_split_limit,
-        }}
-      />
+        </Card>
+        
+        <ServiceFunnelModal
+          isOpen={isFunnelModalOpen}
+          onClose={() => {
+            console.log('ServiceFunnelModal onClose called');
+            setIsClosingModal(true);
+            setIsFunnelModalOpen(false);
+            // Clear the closing flag after a brief delay to prevent immediate reopening
+            setTimeout(() => setIsClosingModal(false), 100);
+          }}
+          service={service}
+        />
+        
+        <VendorSelectionModal
+          isOpen={isVendorSelectionModalOpen}
+          onClose={() => setIsVendorSelectionModalOpen(false)}
+          onVendorSelect={(vendor) => {
+            // Handle vendor selection logic here
+            console.log('Selected vendor:', vendor);
+          }}
+          service={{
+            id: service.id,
+            title: service.title,
+            co_pay_price: service.co_pay_price,
+            respa_split_limit: service.respa_split_limit,
+          }}
+        />
 
-      <PricingChoiceModal
-        isOpen={isPricingChoiceModalOpen}
-        onClose={() => setIsPricingChoiceModalOpen(false)}
-        service={{
-          id: service.id,
-          title: service.title,
-          pro_price: service.pro_price,
-          retail_price: service.retail_price,
-          respa_split_limit: service.respa_split_limit || 0,
-          price_duration: service.price_duration,
-          requires_quote: service.requires_quote,
-        }}
-        onChooseProPrice={() => {
-          setIsPricingChoiceModalOpen(false);
-          addDirectlyToCart();
-        }}
-        onChooseCoPay={() => {
-          setIsPricingChoiceModalOpen(false);
-          setIsVendorSelectionModalOpen(true);
-        }}
-        onChooseAgentPoints={async () => {
-          setIsPricingChoiceModalOpen(false);
-          
-          try {
-            // Call the agent points purchase edge function
-            const { data, error } = await supabase.functions.invoke('process-agent-points-purchase', {
-              body: {
-                service_id: service.id,
-                agent_id: user?.id,
-                vendor_id: service.vendor?.id,
-                total_amount: parseFloat(service.pro_price?.replace(/[^\d.]/g, '') || '0')
+        <PricingChoiceModal
+          isOpen={isPricingChoiceModalOpen}
+          onClose={() => setIsPricingChoiceModalOpen(false)}
+          service={{
+            id: service.id,
+            title: service.title,
+            pro_price: service.pro_price,
+            retail_price: service.retail_price,
+            respa_split_limit: service.respa_split_limit || 0,
+            price_duration: service.price_duration,
+            requires_quote: service.requires_quote,
+          }}
+          onChooseProPrice={() => {
+            setIsPricingChoiceModalOpen(false);
+            addDirectlyToCart();
+          }}
+          onChooseCoPay={() => {
+            setIsPricingChoiceModalOpen(false);
+            setIsVendorSelectionModalOpen(true);
+          }}
+          onChooseAgentPoints={async () => {
+            setIsPricingChoiceModalOpen(false);
+            
+            try {
+              // Call the agent points purchase edge function
+              const { data, error } = await supabase.functions.invoke('process-agent-points-purchase', {
+                body: {
+                  service_id: service.id,
+                  agent_id: user?.id,
+                  vendor_id: service.vendor?.id,
+                  total_amount: parseFloat(service.pro_price?.replace(/[^\d.]/g, '') || '0')
+                }
+              });
+
+              if (error) {
+                throw error;
               }
-            });
 
-            if (error) {
-              throw error;
-            }
-
-            if (data.success) {
+              if (data.success) {
+                toast({
+                  title: "Purchase Successful! 🎉",
+                  description: `Purchased ${service.title} using ${data.respa_compliance.respa_points_used + data.respa_compliance.non_respa_points_used} agent points`,
+                });
+                
+                // Show RESPA compliance details if relevant
+                if (data.respa_compliance.respa_points_used > 0) {
+                  toast({
+                    title: "RESPA Compliance Applied",
+                    description: `RESPA points: ${data.respa_compliance.respa_points_used}, Non-RESPA: ${data.respa_compliance.non_respa_points_used}`,
+                    variant: "default",
+                  });
+                }
+              } else {
+                throw new Error(data.error || 'Purchase failed');
+              }
+            } catch (error) {
+              console.error('Agent points purchase error:', error);
               toast({
-                title: "Purchase Successful! 🎉",
-                description: `Purchased ${service.title} using ${data.respa_compliance.respa_points_used + data.respa_compliance.non_respa_points_used} agent points`,
+                title: "Purchase Failed",
+                description: error.message || "Failed to complete purchase with agent points",
+                variant: "destructive",
               });
               
-              // Show RESPA compliance details if relevant
-              if (data.respa_compliance.respa_points_used > 0) {
-                toast({
-                  title: "RESPA Compliance Applied",
-                  description: `RESPA points: ${data.respa_compliance.respa_points_used}, Non-RESPA: ${data.respa_compliance.non_respa_points_used}`,
-                  variant: "default",
-                });
-              }
-            } else {
-              throw new Error(data.error || 'Purchase failed');
+              // Fallback: add to cart for manual processing
+              addToCart({
+                id: service.id,
+                title: service.title,
+                price: parseFloat(service.pro_price?.replace(/[^\d.]/g, '') || '0'),
+                image_url: service.image_url,
+                vendor: service.vendor?.name || 'Unknown Vendor',
+                type: 'service',
+                description: `Agent points purchase failed - ${error.message}`,
+              });
             }
-          } catch (error) {
-            console.error('Agent points purchase error:', error);
+          }}
+        />
+
+        <DirectPurchaseModal
+          isOpen={isDirectPurchaseModalOpen}
+          onClose={() => setIsDirectPurchaseModalOpen(false)}
+          service={service}
+          onPurchaseComplete={() => {
+            // After successful purchase, redirect to onboarding booking
             toast({
-              title: "Purchase Failed",
-              description: error.message || "Failed to complete purchase with agent points",
-              variant: "destructive",
+              title: "Purchase successful!",
+              description: "You'll now be redirected to book your onboarding session.",
             });
-            
-            // Fallback: add to cart for manual processing
-            addToCart({
-              id: service.id,
-              title: service.title,
-              price: parseFloat(service.pro_price?.replace(/[^\d.]/g, '') || '0'),
-              image_url: service.image_url,
-              vendor: service.vendor?.name || 'Unknown Vendor',
-              type: 'service',
-              description: `Agent points purchase failed - ${error.message}`,
-            });
-          }
-        }}
-      />
+            // Optional: Open consultation flow for onboarding booking
+            setIsConsultationFlowOpen(true);
+          }}
+        />
 
-      <DirectPurchaseModal
-        isOpen={isDirectPurchaseModalOpen}
-        onClose={() => setIsDirectPurchaseModalOpen(false)}
-        service={service}
-        onPurchaseComplete={() => {
-          // After successful purchase, redirect to onboarding booking
-          toast({
-            title: "Purchase successful!",
-            description: "You'll now be redirected to book your onboarding session.",
-          });
-          // Optional: Open consultation flow for onboarding booking
-          setIsConsultationFlowOpen(true);
-        }}
-      />
-
-      <ConsultationFlow
-        isOpen={isConsultationFlowOpen}
-        onClose={() => setIsConsultationFlowOpen(false)}
-        service={service}
-      />
-    </Card>
+        <ConsultationFlow
+          isOpen={isConsultationFlowOpen}
+          onClose={() => setIsConsultationFlowOpen(false)}
+          service={service}
+        />
+      </div>
     </TooltipProvider>
   );
 };
