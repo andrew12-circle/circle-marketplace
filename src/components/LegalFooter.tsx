@@ -134,10 +134,7 @@ export const LegalFooter = () => {
         {/* Marketplace Disclaimer */}
         <div className="mb-6">
           <p className="text-xs text-muted-foreground leading-relaxed">
-            <strong>Marketplace Disclaimer:</strong> CircleMarketplace.io is a venue for buyers and sellers. 
-            We are not responsible for the content, quality, or legality of items listed, the ability of sellers 
-            to sell items, or the ability of buyers to pay for items. We do not guarantee the accuracy or 
-            completeness of any listing.
+            <strong>Marketplace Disclaimer:</strong> CircleMarketplace.io is a venue for buyers and sellers. We are not responsible for the content, quality, legality, or accuracy of any vendor listing, nor the ability of sellers to fulfill services or buyers to pay for them. All vendor logos and public information displayed are used for informational and comparative purposes only, based on publicly available data. Pricing shown reflects standard published rates and estimated copay examples for illustrative purposes only and does not constitute offers, guarantees, or vendor commitments unless marked as Verified. Circle Network does not claim partnership or affiliation with any unverified vendors.
           </p>
         </div>
         
