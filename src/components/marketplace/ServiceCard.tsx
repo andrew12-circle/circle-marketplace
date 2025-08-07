@@ -363,11 +363,11 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
             <div className="space-y-2 mb-3 flex-grow">
               {isProMember ? (
                 <>
-                  {/* Pro Member View: Show retail with line-through, pro price as main */}
+                  {/* Pro Member View: Show retail with line-through only if verified, pro price as main */}
                   {service.retail_price && (
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-muted-foreground">Retail Price:</span>
-                      <span className="text-sm text-muted-foreground line-through">
+                      <span className={`text-sm text-muted-foreground ${service.is_verified ? 'line-through' : ''}`}>
                         {formatPrice(extractNumericPrice(service.retail_price), service.price_duration || 'mo')}
                       </span>
                     </div>
