@@ -436,15 +436,6 @@ export const ServiceFunnelModal = ({
                   <Building className="w-24 h-24 text-blue-400" />
                 </div>
               )}
-              <div className="absolute inset-0 flex items-center justify-center">
-                {service.image_url && (
-                  <img 
-                    src={service.image_url} 
-                    alt={service.title}
-                    className="w-full h-auto object-contain rounded-lg"
-                  />
-                )}
-              </div>
             </div>
 
             {/* Thumbnail Gallery */}
