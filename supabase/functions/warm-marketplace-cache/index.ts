@@ -22,7 +22,9 @@ Deno.serve(async (req) => {
     const { data: services, error: servicesError } = await supabase
       .from('services')
       .select('*')
-      .eq('is_active', true);
+      .order('sort_order', { ascending: true })
+      .order('created_at', { ascending: false })
+      .limit(100);
 
     if (servicesError) {
       console.error('Error fetching services:', servicesError);
@@ -33,7 +35,9 @@ Deno.serve(async (req) => {
     const { data: vendors, error: vendorsError } = await supabase
       .from('vendors')
       .select('*')
-      .eq('is_active', true);
+      .order('sort_order', { ascending: true })
+      .order('rating', { ascending: false })
+      .limit(50);
 
     if (vendorsError) {
       console.error('Error fetching vendors:', vendorsError);

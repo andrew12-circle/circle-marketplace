@@ -22,15 +22,22 @@ import { PricingChoiceModal } from "./PricingChoiceModal";
 import { DirectPurchaseModal } from "./DirectPurchaseModal";
 import { Service } from "@/hooks/useMarketplaceData";
 import { useActiveDisclaimer } from "@/hooks/useActiveDisclaimer";
+import { useServiceRatingFromBulk } from "@/hooks/useBulkServiceRatings";
+
+interface ServiceRatingStats {
+  averageRating: number;
+  totalReviews: number;
+}
 
 interface ServiceCardProps {
   service: Service;
   onSave?: (serviceId: string) => void;
   onViewDetails?: (serviceId: string) => void;
   isSaved?: boolean;
+  bulkRatings?: Map<string, ServiceRatingStats>;
 }
 
-export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }: ServiceCardProps) => {
+export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false, bulkRatings }: ServiceCardProps) => {
   const { t } = useTranslation();
   const [isHovered, setIsHovered] = useState(false);
   const [isClosingModal, setIsClosingModal] = useState(false);
@@ -48,7 +55,16 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
   const navigate = useNavigate();
   const { formatPrice } = useCurrency();
   const isProMember = profile?.is_pro_member || false;
-  const { averageRating, totalReviews, loading: ratingsLoading } = useServiceRatings(service.id);
+  
+  // Use bulk ratings data if available, otherwise fallback to individual fetch
+  const bulkRatingData = useServiceRatingFromBulk(service.id, bulkRatings);
+  const { averageRating: individualRating, totalReviews: individualReviews, loading: ratingsLoading } = useServiceRatings(service.id);
+  
+  // Prefer bulk data when available
+  const averageRating = bulkRatings ? bulkRatingData.averageRating : individualRating;
+  const totalReviews = bulkRatings ? bulkRatingData.totalReviews : individualReviews;
+  const shouldShowRating = !ratingsLoading || bulkRatings;
+  
   const { disclaimer: activeDisclaimer } = useActiveDisclaimer();
 
   const ensureDisclaimerLoaded = async () => {
@@ -284,8 +300,8 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
               </h3>
             </div>
 
-            {/* Service Rating - Updated to use service-specific ratings */}
-            {!ratingsLoading && (
+            {/* Service Rating - Updated to use bulk ratings when available */}
+            {shouldShowRating && (
               <div className="flex items-center gap-1 mb-3">
                 {[...Array(5)].map((_, i) => {
                   const isFullStar = i < Math.floor(averageRating);

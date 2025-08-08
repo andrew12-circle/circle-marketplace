@@ -2,21 +2,28 @@ import React, { memo } from "react";
 import { ServiceCard } from "./ServiceCard";
 import type { Service } from "@/hooks/useMarketplaceData";
 
+interface ServiceRatingStats {
+  averageRating: number;
+  totalReviews: number;
+}
+
 interface OptimizedServiceCardProps {
   service: Service;
   isSaved: boolean;
   onSave: (serviceId: string) => void;
   onViewDetails: (serviceId: string) => void;
+  bulkRatings?: Map<string, ServiceRatingStats>;
 }
 
 export const OptimizedServiceCard = memo<OptimizedServiceCardProps>(
-  ({ service, isSaved, onSave, onViewDetails }) => {
+  ({ service, isSaved, onSave, onViewDetails, bulkRatings }) => {
     return (
       <ServiceCard
         service={service}
         isSaved={isSaved}
         onSave={onSave}
         onViewDetails={onViewDetails}
+        bulkRatings={bulkRatings}
       />
     );
   },

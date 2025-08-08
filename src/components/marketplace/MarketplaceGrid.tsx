@@ -22,7 +22,9 @@ import { EnhancedSearch, SearchFilters } from "./EnhancedSearch";
 import { VendorCallToAction } from "./VendorCallToAction";
 import { useMarketplaceData, useSavedServices, type Service, type Vendor } from "@/hooks/useMarketplaceData";
 import { useMarketplaceFilters } from "@/hooks/useMarketplaceFilters";
+import { useBulkServiceRatings } from "@/hooks/useBulkServiceRatings";
 import { logger } from "@/utils/logger";
+
 interface FilterState {
   category: string;
   priceRange: number[];
@@ -88,6 +90,10 @@ export const MarketplaceGrid = () => {
     filters,
     location
   );
+
+  // Fetch bulk ratings for all visible services
+  const serviceIds = filteredServices.map(service => service.id);
+  const { data: bulkRatings } = useBulkServiceRatings(serviceIds);
 
   // Define product categories with enhanced styling
   const PRODUCT_CATEGORIES = [{
@@ -386,7 +392,7 @@ export const MarketplaceGrid = () => {
 
           {/* Grid - Mobile Responsive */}
           {viewMode === "services" ? <div className="mobile-grid gap-4 sm:gap-6">
-              {filteredServices.map((service, index) => <OptimizedServiceCard key={`service-${service.id}-${index}`} service={service} onSave={handleSaveService} onViewDetails={handleViewServiceDetails} isSaved={allSavedServiceIds.includes(service.id)} />)}
+              {filteredServices.map((service, index) => <OptimizedServiceCard key={`service-${service.id}-${index}`} service={service} onSave={handleSaveService} onViewDetails={handleViewServiceDetails} isSaved={allSavedServiceIds.includes(service.id)} bulkRatings={bulkRatings} />)}
             </div> : viewMode === "products" ? selectedProductCategory ? <div>
                 <div className="mb-6 flex items-center gap-4">
                   <Button variant="outline" onClick={handleBackToProducts}>
@@ -397,7 +403,7 @@ export const MarketplaceGrid = () => {
                   </h2>
                 </div>
                 <div className="mobile-grid gap-4 sm:gap-6">
-                  {getServicesForProduct(selectedProductCategory).map((service, index) => <OptimizedServiceCard key={`product-${selectedProductCategory}-${service.id}-${index}`} service={service} onSave={handleSaveService} onViewDetails={handleViewServiceDetails} isSaved={allSavedServiceIds.includes(service.id)} />)}
+                  {getServicesForProduct(selectedProductCategory).map((service, index) => <OptimizedServiceCard key={`product-${selectedProductCategory}-${service.id}-${index}`} service={service} onSave={handleSaveService} onViewDetails={handleViewServiceDetails} isSaved={allSavedServiceIds.includes(service.id)} bulkRatings={bulkRatings} />)}
                 </div>
               </div> : <div className="mobile-grid gap-4 sm:gap-6">
                 {filteredProducts.map(product => {
