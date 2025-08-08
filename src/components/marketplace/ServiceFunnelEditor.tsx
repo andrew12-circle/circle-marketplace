@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ServiceImageUpload } from './ServiceImageUpload';
 import { FunnelMediaUpload } from './FunnelMediaUpload';
 import { 
@@ -126,6 +127,10 @@ interface FunnelContent {
 
   customHtml?: string;
   useCustomHtml?: boolean;
+  // Rendering options
+  renderMode?: 'safe_html' | 'sandboxed_html' | 'external_iframe' | 'live_fetch';
+  externalUrl?: string;
+  allowSameOrigin?: boolean;
 }
 
 interface ServiceFunnelEditorProps {
@@ -450,7 +455,7 @@ export const ServiceFunnelEditor = ({ funnelContent, onChange }: ServiceFunnelEd
             </CardHeader>
             <CardContent className="flex-1">
               <div className="space-y-4">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between gap-4 flex-wrap">
                   <div className="flex items-center space-x-2">
                     <Switch
                       checked={funnelContent.useCustomHtml || false}
@@ -467,16 +472,56 @@ export const ServiceFunnelEditor = ({ funnelContent, onChange }: ServiceFunnelEd
                     />
                     <Label>Use custom HTML instead of visual editor</Label>
                   </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setCustomHtml(defaultHtmlTemplate);
-                      updateContent('customHtml', defaultHtmlTemplate);
-                    }}
-                  >
-                    Load Template
-                  </Button>
+                  <div className="flex items-center gap-3">
+                    <div className="min-w-[220px]">
+                      <Label className="text-xs">Render Mode</Label>
+                      <Select
+                        value={funnelContent.renderMode || (funnelContent.useCustomHtml ? 'sandboxed_html' : 'safe_html')}
+                        onValueChange={(v) => updateContent('renderMode', v)}
+                      >
+                        <SelectTrigger className="h-9">
+                          <SelectValue placeholder="Select mode" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="safe_html">Safe HTML (sanitized)</SelectItem>
+                          <SelectItem value="sandboxed_html">Sandboxed HTML (iframe)</SelectItem>
+                          <SelectItem value="external_iframe">External Iframe (URL)</SelectItem>
+                          <SelectItem value="live_fetch">Live Fetch via Proxy</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    {(funnelContent.renderMode === 'external_iframe' || funnelContent.renderMode === 'live_fetch') && (
+                      <div className="min-w-[280px]">
+                        <Label className="text-xs">External URL</Label>
+                        <Input
+                          value={funnelContent.externalUrl || ''}
+                          onChange={(e) => updateContent('externalUrl', e.target.value)}
+                          placeholder="https://example.com/funnel"
+                        />
+                      </div>
+                    )}
+                    {funnelContent.renderMode === 'external_iframe' && (
+                      <div className="flex items-center space-x-2">
+                        <Switch
+                          checked={!!funnelContent.allowSameOrigin}
+                          onCheckedChange={(checked) => updateContent('allowSameOrigin', checked)}
+                        />
+                        <Label className="whitespace-nowrap">Allow same-origin</Label>
+                      </div>
+                    )}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setCustomHtml(defaultHtmlTemplate);
+                        updateContent('customHtml', defaultHtmlTemplate);
+                        updateContent('useCustomHtml', true);
+                        updateContent('renderMode', 'sandboxed_html');
+                      }}
+                    >
+                      Load Template
+                    </Button>
+                  </div>
                 </div>
                 
                 {(funnelContent.useCustomHtml || false) && (

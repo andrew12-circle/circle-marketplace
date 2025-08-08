@@ -37,6 +37,7 @@ import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { ConsultationFlow } from "./ConsultationFlow";
 import { EnhancedProviderIntegration } from "./EnhancedProviderIntegration";
+import { FunnelRenderer } from "./FunnelRenderer";
 import { useProviderTracking } from "@/hooks/useProviderTracking";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -83,54 +84,58 @@ interface Service {
     is_verified: boolean;
     website_url?: string;
   } | null;
-  funnel_content?: {
-    headline?: string;
-    subHeadline?: string;
-    media?: Array<{
-      url: string;
-      type: 'image' | 'video';
-      title?: string;
-      description?: string;
-    }>;
-    benefits?: Array<{
-      title: string;
-      description: string;
-      icon?: string;
-    }>;
-    packages?: Array<{
-      id: string;
-      name: string;
-      price: number;
-      originalPrice?: number;
-      features: string[];
-      description: string;
-      popular?: boolean;
-      proOnly?: boolean;
-    }>;
-    testimonials?: Array<{
-      name: string;
-      title?: string;
-      content: string;
-      rating: number;
-      image?: string;
-    }>;
-    stats?: Array<{
-      value: string;
-      label: string;
-      icon?: string;
-    }>;
-    estimatedRoi?: number;
-    duration?: string;
-    callToAction?: {
-      title: string;
-      description: string;
-      buttonText: string;
-      buttonVariant?: 'default' | 'secondary' | 'outline';
+    funnel_content?: {
+      headline?: string;
+      subHeadline?: string;
+      media?: Array<{
+        url: string;
+        type: 'image' | 'video';
+        title?: string;
+        description?: string;
+      }>;
+      benefits?: Array<{
+        title: string;
+        description: string;
+        icon?: string;
+      }>;
+      packages?: Array<{
+        id: string;
+        name: string;
+        price: number;
+        originalPrice?: number;
+        features: string[];
+        description: string;
+        popular?: boolean;
+        proOnly?: boolean;
+      }>;
+      testimonials?: Array<{
+        name: string;
+        title?: string;
+        content: string;
+        rating: number;
+        image?: string;
+      }>;
+      stats?: Array<{
+        value: string;
+        label: string;
+        icon?: string;
+      }>;
+      estimatedRoi?: number;
+      duration?: string;
+      callToAction?: {
+        title: string;
+        description: string;
+        buttonText: string;
+        buttonVariant?: 'default' | 'secondary' | 'outline';
+      };
+      customHtml?: string;
+      useCustomHtml?: boolean;
+      // New rendering options
+      renderMode?: 'safe_html' | 'sandboxed_html' | 'external_iframe' | 'live_fetch';
+      externalUrl?: string;
+      allowSameOrigin?: boolean;
     };
-    customHtml?: string;
-    useCustomHtml?: boolean;
-  };
-}
+  }
 
 interface ServiceFunnelModalProps {
   isOpen: boolean;
@@ -342,8 +347,18 @@ export const ServiceFunnelModal = ({
     );
   };
 
-  // Check if we should render custom HTML
-  const shouldRenderCustomHtml = service.funnel_content?.useCustomHtml && service.funnel_content?.customHtml;
+  // Determine rendering mode for funnel content
+  const renderMode = service.funnel_content?.renderMode || (service.funnel_content?.useCustomHtml ? 'sandboxed_html' : undefined);
+  const canRender = (() => {
+    if (!renderMode) return false;
+    if (renderMode === 'external_iframe' || renderMode === 'live_fetch') {
+      return !!service.funnel_content?.externalUrl;
+    }
+    if (renderMode === 'safe_html' || renderMode === 'sandboxed_html') {
+      return !!service.funnel_content?.customHtml;
+    }
+    return false;
+  })();
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()} modal={true}>
@@ -352,28 +367,12 @@ export const ServiceFunnelModal = ({
           <span>Service Details</span>
         </DialogHeader>
         
-        {shouldRenderCustomHtml ? (
-          // Custom HTML Rendering
-          <div className="relative h-full">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute top-4 right-4 z-50 h-10 w-10 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                onClose();
-              }}
-            >
-              <X className="h-6 w-6" />
-            </Button>
-            <iframe
-              srcDoc={service.funnel_content.customHtml}
-              className="w-full h-[95vh] border-0"
-              title="Custom Service Funnel"
-              sandbox="allow-scripts allow-same-origin allow-forms"
-            />
-          </div>
+        {canRender ? (
+          <FunnelRenderer
+            funnelContent={service.funnel_content}
+            serviceTitle={service.title}
+            onClose={onClose}
+          />
         ) : (
           // Default Visual Funnel
           <>
