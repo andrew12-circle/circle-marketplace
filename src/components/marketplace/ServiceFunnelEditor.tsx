@@ -9,6 +9,7 @@ import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { ServiceImageUpload } from './ServiceImageUpload';
+import { FunnelMediaUpload } from './FunnelMediaUpload';
 import { 
   Star, 
   TrendingUp, 
@@ -137,6 +138,7 @@ export const ServiceFunnelEditor = ({ funnelContent, onChange }: ServiceFunnelEd
   const [showAgentView, setShowAgentView] = useState(false);
   const [editMode, setEditMode] = useState<'visual' | 'html'>('visual');
   const [customHtml, setCustomHtml] = useState(funnelContent.customHtml || '');
+  const [uploadedMediaUrls, setUploadedMediaUrls] = useState<string[]>([]);
 
   const updateContent = (path: string, value: any) => {
     const keys = path.split('.');
@@ -149,6 +151,18 @@ export const ServiceFunnelEditor = ({ funnelContent, onChange }: ServiceFunnelEd
     current[keys[keys.length - 1]] = value;
     
     onChange(newContent);
+  };
+
+  const handleMediaUploaded = (mediaUrls: string[]) => {
+    setUploadedMediaUrls(mediaUrls);
+    const mediaItems: MediaItem[] = mediaUrls.map((url, index) => ({
+      id: `media-${Date.now()}-${index}`,
+      type: url.toLowerCase().includes('.mp4') || url.toLowerCase().includes('.webm') ? 'video' : 'image',
+      url,
+      title: `Media ${index + 1}`,
+      description: ''
+    }));
+    updateContent('media', [...funnelContent.media, ...mediaItems]);
   };
 
   const defaultHtmlTemplate = `<!DOCTYPE html>
@@ -543,13 +557,14 @@ export const ServiceFunnelEditor = ({ funnelContent, onChange }: ServiceFunnelEd
             </CardHeader>
             <CardContent className="flex-1">
               <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full">
-                <TabsList className="grid w-full grid-cols-6">
+                <TabsList className="grid w-full grid-cols-7">
                   <TabsTrigger value="hero">Hero</TabsTrigger>
                   <TabsTrigger value="benefits">Benefits</TabsTrigger>
                   <TabsTrigger value="pricing">Pricing</TabsTrigger>
                   <TabsTrigger value="social">Social Proof</TabsTrigger>
                   <TabsTrigger value="trust">Trust & Contact</TabsTrigger>
                   <TabsTrigger value="cta">Call to Action</TabsTrigger>
+                  <TabsTrigger value="media">Media</TabsTrigger>
                 </TabsList>
                 
                 <TabsContent value="hero" className="space-y-4 mt-4">
@@ -1047,6 +1062,79 @@ export const ServiceFunnelEditor = ({ funnelContent, onChange }: ServiceFunnelEd
                         />
                       )}
                     </div>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="media" className="space-y-4 mt-4">
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="text-lg font-semibold">Media Library</h3>
+                        <p className="text-sm text-muted-foreground">Upload images and videos for your funnel</p>
+                      </div>
+                    </div>
+                    
+                    <FunnelMediaUpload
+                      onMediaUploaded={handleMediaUploaded}
+                      maxFiles={10}
+                      acceptedTypes={['image/*', 'video/*']}
+                    />
+                    
+                    {funnelContent.media.length > 0 && (
+                      <div className="space-y-3">
+                        <h4 className="font-medium">Uploaded Media</h4>
+                        <div className="grid grid-cols-2 gap-4">
+                          {funnelContent.media.map((item) => (
+                            <Card key={item.id} className="p-3">
+                              <div className="space-y-2">
+                                <div className="flex items-center gap-2">
+                                  {item.type === 'video' ? (
+                                    <Video className="w-4 h-4" />
+                                  ) : (
+                                    <ImageIcon className="w-4 h-4" />
+                                  )}
+                                  <span className="text-sm font-medium truncate">{item.title}</span>
+                                </div>
+                                {item.type === 'video' ? (
+                                  <video 
+                                    src={item.url} 
+                                    className="w-full h-20 object-cover rounded"
+                                    controls={false}
+                                  />
+                                ) : (
+                                  <img 
+                                    src={item.url} 
+                                    alt={item.title}
+                                    className="w-full h-20 object-cover rounded"
+                                  />
+                                )}
+                                <div className="flex gap-2">
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    className="flex-1"
+                                    onClick={() => window.open(item.url, '_blank')}
+                                  >
+                                    <ExternalLink className="w-3 h-3 mr-1" />
+                                    View
+                                  </Button>
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    onClick={() => {
+                                      const newMedia = funnelContent.media.filter(m => m.id !== item.id);
+                                      updateContent('media', newMedia);
+                                    }}
+                                  >
+                                    <X className="w-3 h-3" />
+                                  </Button>
+                                </div>
+                              </div>
+                            </Card>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </TabsContent>
               </Tabs>
