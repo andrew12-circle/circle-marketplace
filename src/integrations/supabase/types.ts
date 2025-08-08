@@ -3565,6 +3565,7 @@ export type Database = {
           discount_percentage: string | null
           duration: string | null
           estimated_roi: number | null
+          funnel_content: Json | null
           id: string
           image_url: string | null
           is_featured: boolean | null
@@ -3607,6 +3608,7 @@ export type Database = {
           discount_percentage?: string | null
           duration?: string | null
           estimated_roi?: number | null
+          funnel_content?: Json | null
           id?: string
           image_url?: string | null
           is_featured?: boolean | null
@@ -3649,6 +3651,7 @@ export type Database = {
           discount_percentage?: string | null
           duration?: string | null
           estimated_roi?: number | null
+          funnel_content?: Json | null
           id?: string
           image_url?: string | null
           is_featured?: boolean | null
