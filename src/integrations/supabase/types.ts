@@ -3478,6 +3478,7 @@ export type Database = {
           pro_price: string | null
           rating: number | null
           regulatory_findings: string | null
+          request_pricing: boolean | null
           requires_quote: boolean | null
           respa_compliance_notes: string | null
           respa_risk_level: string | null
@@ -3519,6 +3520,7 @@ export type Database = {
           pro_price?: string | null
           rating?: number | null
           regulatory_findings?: string | null
+          request_pricing?: boolean | null
           requires_quote?: boolean | null
           respa_compliance_notes?: string | null
           respa_risk_level?: string | null
@@ -3560,6 +3562,7 @@ export type Database = {
           pro_price?: string | null
           rating?: number | null
           regulatory_findings?: string | null
+          request_pricing?: boolean | null
           requires_quote?: boolean | null
           respa_compliance_notes?: string | null
           respa_risk_level?: string | null

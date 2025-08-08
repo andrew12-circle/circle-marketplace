@@ -40,6 +40,7 @@ interface PricingTier {
   buttonText: string;
   badge?: string;
   position: number;
+  requestPricing?: boolean; // New field for request pricing toggle
 }
 
 interface ServicePricingTiersEditorProps {
@@ -172,13 +173,19 @@ export const ServicePricingTiersEditor = ({ tiers, onChange }: ServicePricingTie
             <CardTitle className="text-xl font-bold">{tier.name}</CardTitle>
             <p className="text-sm text-muted-foreground">{tier.description}</p>
             <div className="mt-4">
-              <div className="flex items-baseline justify-center gap-1">
-                <span className="text-3xl font-bold">${tier.price}</span>
-                <span className="text-muted-foreground">
-                  /{tier.duration === 'mo' ? 'month' : tier.duration === 'yr' ? 'year' : 'one-time'}
-                </span>
-              </div>
-              {tier.originalPrice && (
+              {tier.requestPricing ? (
+                <div className="flex items-baseline justify-center gap-1">
+                  <span className="text-2xl font-semibold text-primary">Request Pricing</span>
+                </div>
+              ) : (
+                <div className="flex items-baseline justify-center gap-1">
+                  <span className="text-3xl font-bold">${tier.price}</span>
+                  <span className="text-muted-foreground">
+                    /{tier.duration === 'mo' ? 'month' : tier.duration === 'yr' ? 'year' : 'one-time'}
+                  </span>
+                </div>
+              )}
+              {tier.originalPrice && !tier.requestPricing && (
                 <div className="text-sm text-muted-foreground mt-1">
                   <span className="line-through">${tier.originalPrice}</span>
                   <span className="text-green-600 ml-2">
@@ -397,6 +404,14 @@ export const ServicePricingTiersEditor = ({ tiers, onChange }: ServicePricingTie
                           onCheckedChange={(checked) => updateTier(currentTier.id, 'isPopular', checked)}
                         />
                         <Label>Mark as Popular</Label>
+                      </div>
+                      
+                      <div className="flex items-center space-x-2">
+                        <Switch
+                          checked={currentTier.requestPricing || false}
+                          onCheckedChange={(checked) => updateTier(currentTier.id, 'requestPricing', checked)}
+                        />
+                        <Label>Request Pricing (Hide Price)</Label>
                       </div>
                     </div>
 

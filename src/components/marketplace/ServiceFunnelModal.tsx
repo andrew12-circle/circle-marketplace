@@ -72,6 +72,7 @@ interface Service {
     buttonText: string;
     badge?: string;
     position: number;
+    requestPricing?: boolean;
   }>;
   vendor: {
     name: string;
@@ -156,11 +157,12 @@ export const ServiceFunnelModal = ({
     service.pricing_tiers.map(tier => ({
       id: tier.id,
       name: tier.name,
-      price: parseFloat(tier.price || "100"),
+      price: tier.requestPricing ? 0 : parseFloat(tier.price || "100"),
       originalPrice: tier.originalPrice ? parseFloat(tier.originalPrice) : undefined,
       description: tier.description,
       features: tier.features?.map(f => f.text) || [],
-      popular: tier.isPopular
+      popular: tier.isPopular,
+      requestPricing: tier.requestPricing
     })) : [
       {
         id: "basic",
@@ -168,7 +170,8 @@ export const ServiceFunnelModal = ({
         price: parseFloat(service.retail_price || "100") * 0.75,
         originalPrice: parseFloat(service.retail_price || "100"),
         description: "Essential service features for getting started",
-        features: ["Core service delivery", "Email support", "Basic reporting"]
+        features: ["Core service delivery", "Email support", "Basic reporting"],
+        requestPricing: false
       },
       {
         id: "standard",
@@ -177,7 +180,8 @@ export const ServiceFunnelModal = ({
         originalPrice: parseFloat(service.retail_price || "100") * 1.33,
         description: "Complete solution for most needs",
         features: ["Everything in Basic", "Priority support", "Advanced reporting", "Custom consultation"],
-        popular: true
+        popular: true,
+        requestPricing: false
       },
       {
         id: "premium",
@@ -185,7 +189,8 @@ export const ServiceFunnelModal = ({
         price: parseFloat(service.retail_price || "100") * 1.5,
         originalPrice: parseFloat(service.retail_price || "100") * 2,
         description: "Full-service solution with dedicated support",
-        features: ["Everything in Standard", "Dedicated account manager", "24/7 support", "Custom integrations"]
+        features: ["Everything in Standard", "Dedicated account manager", "24/7 support", "Custom integrations"],
+        requestPricing: false
       }
     ];
 
@@ -627,11 +632,17 @@ export const ServiceFunnelModal = ({
                             )}
                           </div>
                           <div className="flex items-center gap-2">
-                            <span className="text-2xl font-bold">${pkg.price}</span>
-                            {pkg.originalPrice && pkg.originalPrice > pkg.price && (
-                              <span className="text-sm text-muted-foreground line-through">
-                                ${pkg.originalPrice}
-                              </span>
+                            {pkg.requestPricing ? (
+                              <span className="text-2xl font-bold text-primary">Request Pricing</span>
+                            ) : (
+                              <>
+                                <span className="text-2xl font-bold">${pkg.price}</span>
+                                {pkg.originalPrice && pkg.originalPrice > pkg.price && (
+                                  <span className="text-sm text-muted-foreground line-through">
+                                    ${pkg.originalPrice}
+                                  </span>
+                                )}
+                              </>
                             )}
                           </div>
                         </div>
@@ -675,9 +686,15 @@ export const ServiceFunnelModal = ({
                   {service.pricing_tiers?.length > 0 ? (
                     <div className="space-y-2">
                       <p className="text-sm text-muted-foreground">Selected Package: {selectedPkg?.name}</p>
-                      <div className="text-2xl font-bold text-primary">${selectedPkg?.price}</div>
-                      {selectedPkg?.originalPrice && selectedPkg.originalPrice > selectedPkg.price && (
-                        <p className="text-sm text-muted-foreground line-through">${selectedPkg.originalPrice}</p>
+                      {selectedPkg?.requestPricing ? (
+                        <div className="text-2xl font-bold text-primary">Request Pricing</div>
+                      ) : (
+                        <div className="space-y-1">
+                          <div className="text-2xl font-bold text-primary">${selectedPkg?.price}</div>
+                          {selectedPkg?.originalPrice && selectedPkg.originalPrice > selectedPkg.price && (
+                            <p className="text-sm text-muted-foreground line-through">${selectedPkg.originalPrice}</p>
+                          )}
+                        </div>
                       )}
                     </div>
                   ) : (
@@ -686,8 +703,8 @@ export const ServiceFunnelModal = ({
                 </div>
 
                 <div className="space-y-3">
-                  {/* Show Add to Cart for services with pricing tiers, otherwise show consultation buttons */}
-                  {service.pricing_tiers?.length > 0 && !service.requires_quote ? (
+                  {/* Show Add to Cart for services with pricing tiers that don't require pricing requests */}
+                  {service.pricing_tiers?.length > 0 && !service.requires_quote && !selectedPkg?.requestPricing ? (
                     <>
                       {/* Quantity Selector */}
                       <div className="flex items-center justify-center gap-3">
