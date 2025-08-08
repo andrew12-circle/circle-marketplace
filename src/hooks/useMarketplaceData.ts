@@ -83,10 +83,10 @@ export const QUERY_KEYS = {
 } as const;
 
 // Helper: timeout wrapper
-const withTimeout = async <T,>(promise: Promise<T>, ms = 12000, label?: string): Promise<T> => {
+const withTimeout = async <T,>(promise: PromiseLike<T>, ms = 12000, label?: string): Promise<T> => {
   let timer: number | undefined;
   return Promise.race<T>([
-    promise,
+    promise as Promise<T>,
     new Promise<T>((_, reject) => {
       timer = window.setTimeout(() => reject(new Error(`Request timed out${label ? `: ${label}` : ''}`)), ms);
     }),
@@ -101,13 +101,14 @@ const withTimeout = async <T,>(promise: Promise<T>, ms = 12000, label?: string):
 const fetchServices = async (): Promise<Service[]> => {
   const t0 = performance.now();
   logger.log('🔄 Fetching services from Supabase...');
-  const { data, error } = await withTimeout(
+  const { data, error } = await withTimeout<any>(
     supabase
       .from('services')
       .select('*')
       .order('sort_order', { ascending: true })
       .order('created_at', { ascending: false })
-      .limit(100),
+      .limit(100)
+      .then((res) => res),
     12000,
     'fetchServices'
   );
@@ -138,13 +139,14 @@ const fetchServices = async (): Promise<Service[]> => {
 const fetchVendors = async (): Promise<Vendor[]> => {
   const t0 = performance.now();
   logger.log('🔄 Fetching vendors from Supabase...');
-  const { data, error } = await withTimeout(
+  const { data, error } = await withTimeout<any>(
     supabase
       .from('vendors')
       .select('*')
       .order('sort_order', { ascending: true })
       .order('rating', { ascending: false })
-      .limit(50),
+      .limit(50)
+      .then((res) => res),
     12000,
     'fetchVendors'
   );
@@ -190,13 +192,14 @@ const fetchCombinedMarketplaceData = async (): Promise<MarketplaceData> => {
   // Try to get from database cache first
   try {
     const t0 = performance.now();
-    const { data: cacheData } = await withTimeout(
+    const { data: cacheData } = await withTimeout<any>(
       supabase
         .from('marketplace_cache')
         .select('cache_data')
         .eq('cache_key', 'marketplace_data')
         .gt('expires_at', new Date().toISOString())
-        .single(),
+        .maybeSingle()
+        .then((res) => res),
       4000,
       'marketplace_cache'
     );
