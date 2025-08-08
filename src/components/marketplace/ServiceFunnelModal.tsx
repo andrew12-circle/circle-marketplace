@@ -36,6 +36,8 @@ import { getRiskBadge, getComplianceAlert, determineServiceRisk } from "./RESPAC
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { ConsultationFlow } from "./ConsultationFlow";
+import { EnhancedProviderIntegration } from "./EnhancedProviderIntegration";
+import { useProviderTracking } from "@/hooks/useProviderTracking";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Service {
@@ -151,6 +153,7 @@ export const ServiceFunnelModal = ({
   const { profile } = useAuth();
   const isProMember = profile?.is_pro_member || false;
   const riskLevel = determineServiceRisk(service.title, service.description);
+  const { trackBooking, trackPurchase, trackOutboundClick } = useProviderTracking(service.id);
   
   // Use pricing tiers if available, otherwise fallback to default packages
   const packages = service.pricing_tiers?.length ? 
@@ -296,6 +299,15 @@ export const ServiceFunnelModal = ({
       requiresQuote: service.requires_quote,
       type: 'service'
     });
+    
+    // Track the purchase action
+    trackPurchase({
+      id: service.id,
+      package_type: selectedPkg.name,
+      amount: selectedPkg.price * quantity,
+      payment_method: 'cart'
+    });
+    
     onClose();
   };
 
