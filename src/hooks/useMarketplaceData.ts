@@ -103,14 +103,19 @@ const fetchServices = async (): Promise<Service[]> => {
   const t0 = performance.now();
   logger.log('🔄 Fetching services from Supabase...');
   
-  // Simplified query - use existing columns only
+  // First, get total count for monitoring
+  const { count: totalCount } = await supabase
+    .from('services')
+    .select('*', { count: 'exact', head: true });
+  
+  // Fetch services with increased limit to handle all available services
   const { data, error } = await withTimeout(
     supabase
       .from('services')
       .select('*')
       .order('sort_order', { ascending: true })
       .order('created_at', { ascending: false })
-      .limit(100),
+      .limit(200), // Increased from 100 to 200 to accommodate all services
     10000, // Reduced timeout
     'fetchServices'
   );
@@ -136,7 +141,16 @@ const fetchServices = async (): Promise<Service[]> => {
     },
   }));
 
-  logger.log(`✅ Fetched ${formattedServices.length} services in ${duration}ms`);
+  // Add monitoring for service count vs total available
+  const fetchedCount = formattedServices.length;
+  const total = totalCount || 0;
+  
+  if (total > fetchedCount) {
+    logger.log(`⚠️ WARNING: Fetched ${fetchedCount} services but ${total} total available. ${total - fetchedCount} services not shown.`);
+    console.warn(`Service fetch limitation: Showing ${fetchedCount} of ${total} total services. Consider increasing the limit or implementing pagination.`);
+  }
+  
+  logger.log(`✅ Fetched ${fetchedCount} of ${total} total services in ${duration}ms`);
   return formattedServices as unknown as Service[];
 };
 
