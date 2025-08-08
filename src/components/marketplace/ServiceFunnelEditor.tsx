@@ -543,10 +543,12 @@ export const ServiceFunnelEditor = ({ funnelContent, onChange }: ServiceFunnelEd
             </CardHeader>
             <CardContent className="flex-1">
               <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full">
-                <TabsList className="grid w-full grid-cols-4">
+                <TabsList className="grid w-full grid-cols-6">
                   <TabsTrigger value="hero">Hero</TabsTrigger>
                   <TabsTrigger value="benefits">Benefits</TabsTrigger>
                   <TabsTrigger value="pricing">Pricing</TabsTrigger>
+                  <TabsTrigger value="social">Social Proof</TabsTrigger>
+                  <TabsTrigger value="trust">Trust & Contact</TabsTrigger>
                   <TabsTrigger value="cta">Call to Action</TabsTrigger>
                 </TabsList>
                 
@@ -767,6 +769,237 @@ export const ServiceFunnelEditor = ({ funnelContent, onChange }: ServiceFunnelEd
                   </div>
                 </TabsContent>
 
+                <TabsContent value="social" className="space-y-4 mt-4">
+                  <div className="space-y-4">
+                    <div>
+                      <Label>Testimonials</Label>
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <Label className="text-sm">Customer Reviews</Label>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              const newTestimonial = {
+                                id: `testimonial-${Date.now()}`,
+                                name: 'John Doe',
+                                role: 'Business Owner',
+                                content: 'Great service!',
+                                rating: 5
+                              };
+                              updateContent('socialProof.testimonials', [...funnelContent.socialProof.testimonials, newTestimonial]);
+                            }}
+                          >
+                            <Plus className="w-4 h-4 mr-2" />
+                            Add Testimonial
+                          </Button>
+                        </div>
+                        {funnelContent.socialProof.testimonials.map((testimonial, index) => (
+                          <Card key={testimonial.id} className="p-3">
+                            <div className="space-y-2">
+                              <div className="flex items-center justify-between">
+                                <Label>Testimonial {index + 1}</Label>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    const newTestimonials = funnelContent.socialProof.testimonials.filter((_, i) => i !== index);
+                                    updateContent('socialProof.testimonials', newTestimonials);
+                                  }}
+                                >
+                                  <X className="w-4 h-4" />
+                                </Button>
+                              </div>
+                              <div className="grid grid-cols-2 gap-2">
+                                <Input
+                                  value={testimonial.name}
+                                  onChange={(e) => {
+                                    const newTestimonials = [...funnelContent.socialProof.testimonials];
+                                    newTestimonials[index].name = e.target.value;
+                                    updateContent('socialProof.testimonials', newTestimonials);
+                                  }}
+                                  placeholder="Customer name"
+                                />
+                                <Input
+                                  value={testimonial.role}
+                                  onChange={(e) => {
+                                    const newTestimonials = [...funnelContent.socialProof.testimonials];
+                                    newTestimonials[index].role = e.target.value;
+                                    updateContent('socialProof.testimonials', newTestimonials);
+                                  }}
+                                  placeholder="Customer role/title"
+                                />
+                              </div>
+                              <Textarea
+                                value={testimonial.content}
+                                onChange={(e) => {
+                                  const newTestimonials = [...funnelContent.socialProof.testimonials];
+                                  newTestimonials[index].content = e.target.value;
+                                  updateContent('socialProof.testimonials', newTestimonials);
+                                }}
+                                placeholder="Testimonial content"
+                                rows={2}
+                              />
+                              <Input
+                                type="number"
+                                min="1"
+                                max="5"
+                                value={testimonial.rating}
+                                onChange={(e) => {
+                                  const newTestimonials = [...funnelContent.socialProof.testimonials];
+                                  newTestimonials[index].rating = parseInt(e.target.value) || 5;
+                                  updateContent('socialProof.testimonials', newTestimonials);
+                                }}
+                                placeholder="Rating (1-5)"
+                              />
+                            </div>
+                          </Card>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <Separator />
+                    
+                    <div>
+                      <Label>Statistics</Label>
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <Label className="text-sm">Success Stats</Label>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              const newStat = {
+                                label: 'New Stat',
+                                value: '100+'
+                              };
+                              updateContent('socialProof.stats', [...funnelContent.socialProof.stats, newStat]);
+                            }}
+                          >
+                            <Plus className="w-4 h-4 mr-2" />
+                            Add Stat
+                          </Button>
+                        </div>
+                        {funnelContent.socialProof.stats.map((stat, index) => (
+                          <Card key={index} className="p-3">
+                            <div className="space-y-2">
+                              <div className="flex items-center justify-between">
+                                <Label>Stat {index + 1}</Label>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    const newStats = funnelContent.socialProof.stats.filter((_, i) => i !== index);
+                                    updateContent('socialProof.stats', newStats);
+                                  }}
+                                >
+                                  <X className="w-4 h-4" />
+                                </Button>
+                              </div>
+                              <div className="grid grid-cols-2 gap-2">
+                                <Input
+                                  value={stat.label}
+                                  onChange={(e) => {
+                                    const newStats = [...funnelContent.socialProof.stats];
+                                    newStats[index].label = e.target.value;
+                                    updateContent('socialProof.stats', newStats);
+                                  }}
+                                  placeholder="Stat label"
+                                />
+                                <Input
+                                  value={stat.value}
+                                  onChange={(e) => {
+                                    const newStats = [...funnelContent.socialProof.stats];
+                                    newStats[index].value = e.target.value;
+                                    updateContent('socialProof.stats', newStats);
+                                  }}
+                                  placeholder="Stat value"
+                                />
+                              </div>
+                            </div>
+                          </Card>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="trust" className="space-y-4 mt-4">
+                  <div className="space-y-4">
+                    <div>
+                      <Label>Trust Indicators</Label>
+                      <div className="space-y-3">
+                        <div>
+                          <Label htmlFor="guarantee">Money-Back Guarantee</Label>
+                          <Input
+                            id="guarantee"
+                            value={funnelContent.trustIndicators.guarantee}
+                            onChange={(e) => updateContent('trustIndicators.guarantee', e.target.value)}
+                            placeholder="30-day money-back guarantee"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="cancellation">Cancellation Policy</Label>
+                          <Input
+                            id="cancellation"
+                            value={funnelContent.trustIndicators.cancellation}
+                            onChange={(e) => updateContent('trustIndicators.cancellation', e.target.value)}
+                            placeholder="Cancel anytime, no questions asked"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="certification">Certifications</Label>
+                          <Input
+                            id="certification"
+                            value={funnelContent.trustIndicators.certification}
+                            onChange={(e) => updateContent('trustIndicators.certification', e.target.value)}
+                            placeholder="Certified by industry leaders"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <Separator />
+                    
+                    <div>
+                      <Label>Contact Information</Label>
+                      <div className="space-y-3">
+                        <div>
+                          <Label htmlFor="phone">Phone Number</Label>
+                          <Input
+                            id="phone"
+                            value={funnelContent.callToAction.contactInfo.phone}
+                            onChange={(e) => updateContent('callToAction.contactInfo.phone', e.target.value)}
+                            placeholder="+1 (555) 123-4567"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="email">Email Address</Label>
+                          <Input
+                            id="email"
+                            value={funnelContent.callToAction.contactInfo.email}
+                            onChange={(e) => updateContent('callToAction.contactInfo.email', e.target.value)}
+                            placeholder="contact@example.com"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="website">Website</Label>
+                          <Input
+                            id="website"
+                            value={funnelContent.callToAction.contactInfo.website}
+                            onChange={(e) => updateContent('callToAction.contactInfo.website', e.target.value)}
+                            placeholder="www.example.com"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </TabsContent>
+
                 <TabsContent value="cta" className="space-y-4 mt-4">
                   <div className="space-y-3">
                     <div>
@@ -943,6 +1176,98 @@ export const ServiceFunnelEditor = ({ funnelContent, onChange }: ServiceFunnelEd
                             </div>
                           </Card>
                         ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Testimonials Section */}
+                  {funnelContent.socialProof.testimonials.length > 0 && (
+                    <div className="space-y-4">
+                      <h2 className="text-xl font-semibold">What Our Clients Say</h2>
+                      <div className="space-y-3">
+                        {funnelContent.socialProof.testimonials.slice(0, 2).map((testimonial) => (
+                          <Card key={testimonial.id} className="p-4">
+                            <div className="space-y-2">
+                              <div className="flex items-center gap-1 mb-2">
+                                {[...Array(testimonial.rating)].map((_, i) => (
+                                  <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                                ))}
+                              </div>
+                              <p className="text-sm italic">"{testimonial.content}"</p>
+                              <div className="text-sm">
+                                <span className="font-medium">{testimonial.name}</span>
+                                <span className="text-muted-foreground">, {testimonial.role}</span>
+                              </div>
+                            </div>
+                          </Card>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Success Stats */}
+                  {funnelContent.socialProof.stats.length > 0 && (
+                    <div className="space-y-4">
+                      <h2 className="text-xl font-semibold">Proven Results</h2>
+                      <div className="grid grid-cols-2 gap-4">
+                        {funnelContent.socialProof.stats.slice(0, 4).map((stat, index) => (
+                          <div key={index} className="text-center p-3 bg-primary/5 rounded-lg">
+                            <div className="text-2xl font-bold text-primary">{stat.value}</div>
+                            <div className="text-sm text-muted-foreground">{stat.label}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Trust Indicators */}
+                  <div className="space-y-4">
+                    <h2 className="text-xl font-semibold">Our Guarantee</h2>
+                    <div className="space-y-3">
+                      {funnelContent.trustIndicators.guarantee && (
+                        <div className="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-950 rounded-lg">
+                          <Shield className="w-5 h-5 text-green-600" />
+                          <span className="text-sm">{funnelContent.trustIndicators.guarantee}</span>
+                        </div>
+                      )}
+                      {funnelContent.trustIndicators.cancellation && (
+                        <div className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-950 rounded-lg">
+                          <CheckCircle className="w-5 h-5 text-blue-600" />
+                          <span className="text-sm">{funnelContent.trustIndicators.cancellation}</span>
+                        </div>
+                      )}
+                      {funnelContent.trustIndicators.certification && (
+                        <div className="flex items-center gap-3 p-3 bg-purple-50 dark:bg-purple-950 rounded-lg">
+                          <Award className="w-5 h-5 text-purple-600" />
+                          <span className="text-sm">{funnelContent.trustIndicators.certification}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Contact Information */}
+                  {(funnelContent.callToAction.contactInfo.phone || funnelContent.callToAction.contactInfo.email || funnelContent.callToAction.contactInfo.website) && (
+                    <div className="space-y-4">
+                      <h2 className="text-xl font-semibold">Get In Touch</h2>
+                      <div className="space-y-2">
+                        {funnelContent.callToAction.contactInfo.phone && (
+                          <div className="flex items-center gap-3">
+                            <Phone className="w-4 h-4 text-muted-foreground" />
+                            <span className="text-sm">{funnelContent.callToAction.contactInfo.phone}</span>
+                          </div>
+                        )}
+                        {funnelContent.callToAction.contactInfo.email && (
+                          <div className="flex items-center gap-3">
+                            <Mail className="w-4 h-4 text-muted-foreground" />
+                            <span className="text-sm">{funnelContent.callToAction.contactInfo.email}</span>
+                          </div>
+                        )}
+                        {funnelContent.callToAction.contactInfo.website && (
+                          <div className="flex items-center gap-3">
+                            <Globe className="w-4 h-4 text-muted-foreground" />
+                            <span className="text-sm">{funnelContent.callToAction.contactInfo.website}</span>
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}
