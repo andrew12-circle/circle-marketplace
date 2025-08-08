@@ -419,7 +419,17 @@ export const ServiceManagementPanel = () => {
   };
 
   const handleFunnelSave = async () => {
-    if (!selectedService || !funnelContent) return;
+    if (!selectedService || !funnelContent) {
+      console.error('Missing required data:', { selectedService: !!selectedService, funnelContent: !!funnelContent });
+      toast({
+        title: 'Error',
+        description: 'Missing service or funnel content data',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
+    console.log('Saving funnel content:', funnelContent);
     
     try {
       const { error } = await supabase

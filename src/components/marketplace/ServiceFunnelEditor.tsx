@@ -472,8 +472,10 @@ export const ServiceFunnelEditor = ({ funnelContent, onChange }: ServiceFunnelEd
                     <Textarea
                       value={customHtml}
                       onChange={(e) => {
-                        setCustomHtml(e.target.value);
-                        updateContent('customHtml', e.target.value);
+                        const newValue = e.target.value;
+                        setCustomHtml(newValue);
+                        updateContent('customHtml', newValue);
+                        console.log('HTML updated:', newValue.length, 'characters');
                       }}
                       placeholder="Paste your HTML code here..."
                       rows={20}
