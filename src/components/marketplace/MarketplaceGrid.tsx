@@ -85,6 +85,19 @@ export const MarketplaceGrid = () => {
     coPayEligible: false,
     locationFilter: false
   });
+  
+  const handleEnhancedSearchChange = useCallback((sf: SearchFilters) => {
+    setSearchFilters(sf);
+    setSearchTerm(sf.query || "");
+    setFilters(prev => ({
+      ...prev,
+      category: sf.categories.length > 0 ? sf.categories[0] : "all",
+      priceRange: sf.priceRange,
+      featured: sf.features.includes("Featured Service"),
+      coPayEligible: sf.features.includes("Co-Pay Available"),
+    }));
+  }, []);
+  
   const { toast } = useToast();
   const { user, profile } = useAuth();
   const { location } = useLocation();
@@ -387,7 +400,7 @@ export const MarketplaceGrid = () => {
 
            {/* Enhanced Search Component */}
           <div className="space-y-6">
-            <EnhancedSearch onSearchChange={setSearchFilters} availableCategories={Array.from(new Set(services.map(service => service.category).filter(Boolean)))} availableTags={Array.from(new Set(services.flatMap(service => service.tags || [])))} />
+            <EnhancedSearch onSearchChange={handleEnhancedSearchChange} availableCategories={Array.from(new Set(services.map(service => service.category).filter(Boolean)))} availableTags={Array.from(new Set(services.flatMap(service => service.tags || [])))} />
             
             <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
             </div>
