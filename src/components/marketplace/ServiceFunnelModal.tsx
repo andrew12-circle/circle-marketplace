@@ -441,7 +441,7 @@ export const ServiceFunnelModal = ({
                   <img 
                     src={service.image_url} 
                     alt={service.title}
-                    className="w-full h-full object-cover rounded-lg"
+                    className="w-full h-auto object-contain rounded-lg"
                   />
                 )}
               </div>
