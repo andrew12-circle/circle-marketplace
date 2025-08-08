@@ -429,7 +429,7 @@ export const ServiceFunnelModal = ({
                 <img 
                   src={service.funnel_content?.media?.[0]?.url || service.image_url} 
                   alt={service.funnel_content?.headline || service.title}
-                  className="w-full h-full object-cover"
+                  className="w-full h-auto object-contain"
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
