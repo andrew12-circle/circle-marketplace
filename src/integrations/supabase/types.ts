@@ -4328,6 +4328,66 @@ export type Database = {
         }
         Relationships: []
       }
+      vendor_commissions: {
+        Row: {
+          commission_amount: number
+          commission_percentage: number | null
+          created_at: string
+          id: string
+          notes: string | null
+          payment_date: string | null
+          payment_reference: string | null
+          payment_status: string | null
+          sale_amount: number | null
+          transaction_id: string | null
+          updated_at: string
+          vendor_id: string
+        }
+        Insert: {
+          commission_amount: number
+          commission_percentage?: number | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          payment_date?: string | null
+          payment_reference?: string | null
+          payment_status?: string | null
+          sale_amount?: number | null
+          transaction_id?: string | null
+          updated_at?: string
+          vendor_id: string
+        }
+        Update: {
+          commission_amount?: number
+          commission_percentage?: number | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          payment_date?: string | null
+          payment_reference?: string | null
+          payment_status?: string | null
+          sale_amount?: number | null
+          transaction_id?: string | null
+          updated_at?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_commissions_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_commissions_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors_with_local_reps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vendor_copay_rules: {
         Row: {
           auto_approve_threshold: number | null
@@ -4479,9 +4539,16 @@ export type Database = {
         Row: {
           ad_budget_max: number | null
           ad_budget_min: number | null
+          agreement_documents: Json | null
+          agreement_notes: string | null
+          agreement_renewal_date: string | null
+          agreement_start_date: string | null
           budget_currency: string | null
           campaigns_funded: number | null
+          circle_commission_percentage: number | null
           co_marketing_agents: number | null
+          commission_notes: string | null
+          commission_type: string | null
           contact_email: string | null
           created_at: string
           description: string | null
@@ -4499,10 +4566,12 @@ export type Database = {
           location: string | null
           logo_url: string | null
           longitude: number | null
+          minimum_commission_amount: number | null
           mls_areas: string[] | null
           name: string
           nmls_id: string | null
           parent_vendor_id: string | null
+          payment_terms: string | null
           phone: string | null
           rating: number | null
           respa_risk_level: string | null
@@ -4518,9 +4587,16 @@ export type Database = {
         Insert: {
           ad_budget_max?: number | null
           ad_budget_min?: number | null
+          agreement_documents?: Json | null
+          agreement_notes?: string | null
+          agreement_renewal_date?: string | null
+          agreement_start_date?: string | null
           budget_currency?: string | null
           campaigns_funded?: number | null
+          circle_commission_percentage?: number | null
           co_marketing_agents?: number | null
+          commission_notes?: string | null
+          commission_type?: string | null
           contact_email?: string | null
           created_at?: string
           description?: string | null
@@ -4538,10 +4614,12 @@ export type Database = {
           location?: string | null
           logo_url?: string | null
           longitude?: number | null
+          minimum_commission_amount?: number | null
           mls_areas?: string[] | null
           name: string
           nmls_id?: string | null
           parent_vendor_id?: string | null
+          payment_terms?: string | null
           phone?: string | null
           rating?: number | null
           respa_risk_level?: string | null
@@ -4557,9 +4635,16 @@ export type Database = {
         Update: {
           ad_budget_max?: number | null
           ad_budget_min?: number | null
+          agreement_documents?: Json | null
+          agreement_notes?: string | null
+          agreement_renewal_date?: string | null
+          agreement_start_date?: string | null
           budget_currency?: string | null
           campaigns_funded?: number | null
+          circle_commission_percentage?: number | null
           co_marketing_agents?: number | null
+          commission_notes?: string | null
+          commission_type?: string | null
           contact_email?: string | null
           created_at?: string
           description?: string | null
@@ -4577,10 +4662,12 @@ export type Database = {
           location?: string | null
           logo_url?: string | null
           longitude?: number | null
+          minimum_commission_amount?: number | null
           mls_areas?: string[] | null
           name?: string
           nmls_id?: string | null
           parent_vendor_id?: string | null
+          payment_terms?: string | null
           phone?: string | null
           rating?: number | null
           respa_risk_level?: string | null
