@@ -153,7 +153,7 @@ export const ServiceFunnelModal = ({
   const { profile } = useAuth();
   const isProMember = profile?.is_pro_member || false;
   const riskLevel = determineServiceRisk(service.title, service.description);
-  const { trackBooking, trackPurchase, trackOutboundClick } = useProviderTracking(service.id);
+  const { trackBooking, trackPurchase, trackOutboundClick } = useProviderTracking(service.id, isOpen);
   
   // Use pricing tiers if available, otherwise fallback to default packages
   const packages = service.pricing_tiers?.length ? 

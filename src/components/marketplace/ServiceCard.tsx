@@ -604,17 +604,20 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false, b
           )}
         </Card>
         
-        <ServiceFunnelModal
-          isOpen={isFunnelModalOpen}
-          onClose={() => {
-            console.log('ServiceFunnelModal onClose called');
-            setIsClosingModal(true);
-            setIsFunnelModalOpen(false);
-            // Clear the closing flag after a brief delay to prevent immediate reopening
-            setTimeout(() => setIsClosingModal(false), 100);
-          }}
-          service={service}
-        />
+        {isFunnelModalOpen && (
+          <ServiceFunnelModal
+            isOpen={isFunnelModalOpen}
+            onClose={() => {
+              console.log('ServiceFunnelModal onClose called');
+              setIsClosingModal(true);
+              setIsFunnelModalOpen(false);
+              // Clear the closing flag after a brief delay to prevent immediate reopening
+              setTimeout(() => setIsClosingModal(false), 100);
+            }}
+            service={service}
+          />
+        )}
+        
         
         <VendorSelectionModal
           isOpen={isVendorSelectionModalOpen}

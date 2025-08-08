@@ -63,7 +63,7 @@ Deno.serve(async (req) => {
         cache_data: cacheData,
         expires_at: expiresAt,
         updated_at: new Date().toISOString()
-      });
+      }, { onConflict: 'cache_key' });
 
     if (cacheError) {
       console.error('Error storing cache:', cacheError);

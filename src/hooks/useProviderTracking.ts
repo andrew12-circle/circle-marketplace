@@ -20,14 +20,15 @@ interface TrackingMetrics {
   last_updated: string;
 }
 
-export const useProviderTracking = (serviceId: string) => {
+export const useProviderTracking = (serviceId: string, enabled: boolean = true) => {
   const [metrics, setMetrics] = useState<TrackingMetrics | null>(null);
   const [isTracking, setIsTracking] = useState(false);
   const { user } = useAuth();
 
   // Track an event
   const trackEvent = useCallback(async (event: Omit<TrackingEvent, 'service_id'>) => {
-    if (!serviceId) return;
+    if (!enabled) return false;
+    if (!serviceId) return false;
 
     try {
       // Use console logging for now until types are updated
@@ -54,7 +55,7 @@ export const useProviderTracking = (serviceId: string) => {
       console.error('Error tracking event:', error);
       return false;
     }
-  }, [serviceId, user?.id]);
+  }, [serviceId, user?.id, enabled]);
 
   // Load current metrics
   const loadMetrics = useCallback(async () => {
@@ -80,6 +81,7 @@ export const useProviderTracking = (serviceId: string) => {
 
   // Track page view automatically
   useEffect(() => {
+    if (!enabled) return;
     if (serviceId && !isTracking) {
       setIsTracking(true);
       trackEvent({
@@ -90,7 +92,7 @@ export const useProviderTracking = (serviceId: string) => {
       });
       loadMetrics();
     }
-  }, [serviceId, trackEvent, loadMetrics, isTracking]);
+  }, [serviceId, trackEvent, loadMetrics, isTracking, enabled]);
 
   // Track outbound link clicks
   const trackOutboundClick = useCallback(async (url: string, context?: string) => {
