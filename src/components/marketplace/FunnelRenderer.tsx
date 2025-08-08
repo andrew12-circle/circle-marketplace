@@ -61,7 +61,7 @@ export const FunnelRenderer = ({ funnelContent, serviceTitle, onClose }: FunnelR
   if (!mode) return null;
 
   return (
-    <div className="relative h-full">
+    <div className="relative h-[95vh] w-full">
       <Button
         variant="ghost"
         size="icon"
