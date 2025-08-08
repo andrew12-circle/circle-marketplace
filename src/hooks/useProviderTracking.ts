@@ -30,23 +30,24 @@ export const useProviderTracking = (serviceId: string) => {
     if (!serviceId) return;
 
     try {
-      const eventData = {
-        service_id: serviceId,
-        user_id: user?.id,
-        event_type: event.event_type,
-        event_data: {
-          ...event.event_data,
-          timestamp: new Date().toISOString(),
-          user_agent: navigator.userAgent,
-          referrer: document.referrer,
-          url: window.location.href
-        },
-        revenue_attributed: event.revenue_attributed || 0
-      };
-
+      // Use existing content_engagement_events table for tracking
       const { error } = await supabase
-        .from('service_tracking_events')
-        .insert(eventData);
+        .from('content_engagement_events')
+        .insert({
+          content_id: serviceId,
+          user_id: user?.id,
+          event_type: event.event_type,
+          creator_id: event.vendor_id || '00000000-0000-0000-0000-000000000001',
+          engagement_quality_score: 1.0,
+          revenue_attributed: event.revenue_attributed || 0,
+          event_data: {
+            ...event.event_data,
+            timestamp: new Date().toISOString(),
+            user_agent: navigator.userAgent,
+            referrer: document.referrer,
+            url: window.location.href
+          }
+        });
 
       if (error) {
         console.error('Error tracking event:', error);
@@ -70,22 +71,33 @@ export const useProviderTracking = (serviceId: string) => {
     if (!serviceId) return;
 
     try {
-      const { data, error } = await supabase.rpc('get_service_tracking_metrics', {
-        p_service_id: serviceId,
-        p_time_period: '30d'
-      });
+      // Use existing content_engagement_events for metrics
+      const { data, error } = await supabase
+        .from('content_engagement_events')
+        .select('*')
+        .eq('content_id', serviceId)
+        .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
 
       if (error) throw error;
 
-      setMetrics(data || {
-        total_views: 0,
-        total_clicks: 0,
-        total_bookings: 0,
-        total_purchases: 0,
-        conversion_rate: 0,
-        revenue_attributed: 0,
+      const events = data || [];
+      const views = events.filter(e => e.event_type === 'view').length;
+      const bookings = events.filter(e => e.event_type === 'booking').length;
+      const purchases = events.filter(e => e.event_type === 'purchase').length;
+      const clicks = events.filter(e => e.event_type === 'click').length;
+      const revenue = events.reduce((sum, e) => sum + (e.revenue_attributed || 0), 0);
+
+      const metrics: TrackingMetrics = {
+        total_views: views,
+        total_clicks: clicks,
+        total_bookings: bookings,
+        total_purchases: purchases,
+        conversion_rate: views > 0 ? ((bookings + purchases) / views) * 100 : 0,
+        revenue_attributed: revenue,
         last_updated: new Date().toISOString()
-      });
+      };
+
+      setMetrics(metrics);
     } catch (error) {
       console.error('Error loading metrics:', error);
     }

@@ -3199,6 +3199,48 @@ export type Database = {
         }
         Relationships: []
       }
+      service_integrations: {
+        Row: {
+          api_connected: boolean
+          booking_system: string
+          created_at: string
+          id: string
+          integration_config: Json | null
+          last_sync: string | null
+          payment_integration: string
+          service_id: string
+          tracking_active: boolean
+          updated_at: string
+          webhook_configured: boolean
+        }
+        Insert: {
+          api_connected?: boolean
+          booking_system?: string
+          created_at?: string
+          id?: string
+          integration_config?: Json | null
+          last_sync?: string | null
+          payment_integration?: string
+          service_id: string
+          tracking_active?: boolean
+          updated_at?: string
+          webhook_configured?: boolean
+        }
+        Update: {
+          api_connected?: boolean
+          booking_system?: string
+          created_at?: string
+          id?: string
+          integration_config?: Json | null
+          last_sync?: string | null
+          payment_integration?: string
+          service_id?: string
+          tracking_active?: boolean
+          updated_at?: string
+          webhook_configured?: boolean
+        }
+        Relationships: []
+      }
       service_provider_availability: {
         Row: {
           availability_message: string | null
@@ -3436,6 +3478,36 @@ export type Database = {
           updated_at?: string
           user_id?: string
           verified?: boolean
+        }
+        Relationships: []
+      }
+      service_tracking_events: {
+        Row: {
+          created_at: string
+          event_data: Json | null
+          event_type: string
+          id: string
+          revenue_attributed: number | null
+          service_id: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_data?: Json | null
+          event_type: string
+          id?: string
+          revenue_attributed?: number | null
+          service_id: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_data?: Json | null
+          event_type?: string
+          id?: string
+          revenue_attributed?: number | null
+          service_id?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -5101,6 +5173,10 @@ export type Database = {
           average_rating: number
           total_reviews: number
         }[]
+      }
+      get_service_tracking_metrics: {
+        Args: { p_service_id: string; p_time_period?: string }
+        Returns: Json
       }
       get_user_admin_status: {
         Args: Record<PropertyKey, never>
