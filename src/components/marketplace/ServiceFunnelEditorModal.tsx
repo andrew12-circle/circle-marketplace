@@ -78,6 +78,9 @@ interface FunnelContent {
     enabled: boolean;
     message: string;
   };
+
+  customHtml?: string;
+  useCustomHtml?: boolean;
 }
 
 interface PricingFeature {

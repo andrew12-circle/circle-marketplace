@@ -127,6 +127,8 @@ interface Service {
       buttonText: string;
       buttonVariant?: 'default' | 'secondary' | 'outline';
     };
+    customHtml?: string;
+    useCustomHtml?: boolean;
   };
 }
 
@@ -340,6 +342,9 @@ export const ServiceFunnelModal = ({
     );
   };
 
+  // Check if we should render custom HTML
+  const shouldRenderCustomHtml = service.funnel_content?.useCustomHtml && service.funnel_content?.customHtml;
+
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()} modal={true}>
       <DialogContent className="max-w-7xl max-h-[95vh] overflow-y-auto p-0">
@@ -347,6 +352,31 @@ export const ServiceFunnelModal = ({
           <span>Service Details</span>
         </DialogHeader>
         
+        {shouldRenderCustomHtml ? (
+          // Custom HTML Rendering
+          <div className="relative h-full">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute top-4 right-4 z-50 h-10 w-10 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onClose();
+              }}
+            >
+              <X className="h-6 w-6" />
+            </Button>
+            <iframe
+              srcDoc={service.funnel_content.customHtml}
+              className="w-full h-[95vh] border-0"
+              title="Custom Service Funnel"
+              sandbox="allow-scripts allow-same-origin allow-forms"
+            />
+          </div>
+        ) : (
+          // Default Visual Funnel
+          <>
         {/* Hero Section */}
         <div className="relative bg-gradient-to-r from-blue-600 to-purple-600 text-white p-8">
           {/* Close Button */}
@@ -1188,6 +1218,8 @@ export const ServiceFunnelModal = ({
             </Tabs>
           </div>
         </div>
+        </>
+        )}
       </DialogContent>
       
       {/* Consultation Flow Modal */}
