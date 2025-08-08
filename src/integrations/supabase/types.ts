@@ -2397,6 +2397,33 @@ export type Database = {
         }
         Relationships: []
       }
+      marketplace_cache: {
+        Row: {
+          cache_data: Json
+          cache_key: string
+          created_at: string
+          expires_at: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          cache_data: Json
+          cache_key: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          cache_data?: Json
+          cache_key?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       monthly_platform_revenue: {
         Row: {
           average_creator_payout: number | null
@@ -4961,6 +4988,10 @@ export type Database = {
       clean_ip_address: {
         Args: { input_ip: string }
         Returns: unknown
+      }
+      cleanup_expired_cache: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       cleanup_old_security_events: {
         Args: Record<PropertyKey, never>

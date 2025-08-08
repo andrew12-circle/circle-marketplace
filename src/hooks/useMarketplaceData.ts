@@ -151,10 +151,27 @@ const fetchVendors = async (): Promise<Vendor[]> => {
 };
 
 /**
- * Fetch combined marketplace data - simplified
+ * Fetch combined marketplace data with database cache integration
  */
 const fetchCombinedMarketplaceData = async (): Promise<MarketplaceData> => {
   logger.log('🔄 Fetching combined marketplace data...');
+  
+  // Try to get from database cache first
+  try {
+    const { data: cacheData } = await supabase
+      .from('marketplace_cache')
+      .select('cache_data')
+      .eq('cache_key', 'marketplace_data')
+      .gt('expires_at', new Date().toISOString())
+      .single();
+    
+    if (cacheData?.cache_data && typeof cacheData.cache_data === 'object') {
+      logger.log('✅ Retrieved marketplace data from database cache');
+      return cacheData.cache_data as unknown as MarketplaceData;
+    }
+  } catch (error) {
+    logger.log('No valid database cache found, fetching fresh data...');
+  }
   
   // Use Promise.all for parallel fetching
   const [services, vendors] = await Promise.all([
@@ -162,7 +179,16 @@ const fetchCombinedMarketplaceData = async (): Promise<MarketplaceData> => {
     fetchVendors()
   ]);
   
-  return { services, vendors };
+  const data = { services, vendors };
+  
+  // Warm the cache in background
+  try {
+    await supabase.functions.invoke('warm-marketplace-cache');
+  } catch (error) {
+    logger.log('Cache warming failed:', error);
+  }
+  
+  return data;
 };
 
 /**
