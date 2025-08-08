@@ -21,7 +21,9 @@ import {
   X,
   Plus,
   Trash2,
-  Shield
+  Shield,
+  DollarSign,
+  FileText
 } from "lucide-react";
 
 interface VendorProfileEditorProps {
@@ -50,6 +52,17 @@ interface VendorProfileEditorProps {
     individual_email?: string;
     individual_phone?: string;
     individual_license_number?: string;
+    // Commission tracking fields
+    circle_commission_percentage?: number;
+    commission_type?: string;
+    minimum_commission_amount?: number;
+    commission_notes?: string;
+    // Agreement management fields
+    agreement_notes?: string;
+    agreement_documents?: any;
+    agreement_start_date?: string;
+    agreement_renewal_date?: string;
+    payment_terms?: string;
   };
   onSave: (updatedData: any) => void;
   onCancel: () => void;
@@ -84,7 +97,18 @@ export const VendorProfileEditor = ({ vendorData, onSave, onCancel }: VendorProf
     individual_title: vendorData.individual_title || '',
     individual_email: vendorData.individual_email || '',
     individual_phone: vendorData.individual_phone || '',
-    individual_license_number: vendorData.individual_license_number || ''
+    individual_license_number: vendorData.individual_license_number || '',
+    // Commission tracking fields
+    circle_commission_percentage: vendorData.circle_commission_percentage || 0,
+    commission_type: vendorData.commission_type || 'percentage',
+    minimum_commission_amount: vendorData.minimum_commission_amount || 0,
+    commission_notes: vendorData.commission_notes || '',
+    // Agreement management fields
+    agreement_notes: vendorData.agreement_notes || '',
+    agreement_documents: vendorData.agreement_documents || {},
+    agreement_start_date: vendorData.agreement_start_date || '',
+    agreement_renewal_date: vendorData.agreement_renewal_date || '',
+    payment_terms: vendorData.payment_terms || ''
   });
   
   const [newServiceState, setNewServiceState] = useState('');
@@ -536,6 +560,179 @@ export const VendorProfileEditor = ({ vendorData, onSave, onCancel }: VendorProf
           </CardContent>
         </Card>
       )}
+
+      {/* Commission Tracking */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <DollarSign className="w-5 h-5 mr-2" />
+            Commission Tracking
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <Label htmlFor="circle_commission_percentage">Circle Commission % *</Label>
+              <Input
+                id="circle_commission_percentage"
+                type="number"
+                min="0"
+                max="100"
+                step="0.01"
+                value={formData.circle_commission_percentage}
+                onChange={(e) => handleInputChange('circle_commission_percentage', parseFloat(e.target.value) || 0)}
+                placeholder="5.00"
+              />
+              <p className="text-sm text-muted-foreground mt-1">
+                Percentage Circle Network earns on sales
+              </p>
+            </div>
+            <div>
+              <Label htmlFor="commission_type">Commission Type</Label>
+              <Select 
+                value={formData.commission_type} 
+                onValueChange={(value) => handleInputChange('commission_type', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select commission type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="percentage">Percentage</SelectItem>
+                  <SelectItem value="flat_rate">Flat Rate</SelectItem>
+                  <SelectItem value="tiered">Tiered</SelectItem>
+                  <SelectItem value="custom">Custom</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="minimum_commission_amount">Minimum Commission ($)</Label>
+              <Input
+                id="minimum_commission_amount"
+                type="number"
+                min="0"
+                step="0.01"
+                value={formData.minimum_commission_amount}
+                onChange={(e) => handleInputChange('minimum_commission_amount', parseFloat(e.target.value) || 0)}
+                placeholder="0.00"
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label htmlFor="commission_notes">Commission Notes</Label>
+            <Textarea
+              id="commission_notes"
+              value={formData.commission_notes}
+              onChange={(e) => handleInputChange('commission_notes', e.target.value)}
+              placeholder="Additional commission structure details..."
+              rows={3}
+            />
+          </div>
+
+          {/* Commission Summary */}
+          <div className="bg-muted p-4 rounded-lg">
+            <h4 className="font-medium mb-2">Commission Summary</h4>
+            <div className="text-sm text-muted-foreground">
+              <p>Commission Rate: {formData.circle_commission_percentage}% ({formData.commission_type})</p>
+              {formData.minimum_commission_amount > 0 && (
+                <p>Minimum Commission: ${formData.minimum_commission_amount}</p>
+              )}
+              <p>Current Ranking Impact: {
+                formData.circle_commission_percentage >= 15 ? 'Top Priority (Rank 1)' :
+                formData.circle_commission_percentage >= 10 ? 'High Priority (Rank 2)' :
+                formData.circle_commission_percentage >= 5 ? 'Medium Priority (Rank 3)' :
+                formData.circle_commission_percentage >= 2 ? 'Standard Priority (Rank 4)' :
+                'Low Priority (Rank 5)'
+              }</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Agreement Management */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <FileText className="w-5 h-5 mr-2" />
+            Agreement Management
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="agreement_start_date">Agreement Start Date</Label>
+              <Input
+                id="agreement_start_date"
+                type="date"
+                value={formData.agreement_start_date}
+                onChange={(e) => handleInputChange('agreement_start_date', e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="agreement_renewal_date">Agreement Renewal Date</Label>
+              <Input
+                id="agreement_renewal_date"
+                type="date"
+                value={formData.agreement_renewal_date}
+                onChange={(e) => handleInputChange('agreement_renewal_date', e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label htmlFor="payment_terms">Payment Terms</Label>
+            <Input
+              id="payment_terms"
+              value={formData.payment_terms}
+              onChange={(e) => handleInputChange('payment_terms', e.target.value)}
+              placeholder="e.g., Net 30, Bi-weekly, Monthly on 15th"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="agreement_notes">Agreement Notes</Label>
+            <Textarea
+              id="agreement_notes"
+              value={formData.agreement_notes}
+              onChange={(e) => handleInputChange('agreement_notes', e.target.value)}
+              placeholder="General notes about the vendor agreement, passwords, document links, etc."
+              rows={4}
+            />
+          </div>
+
+          {/* Document Links Section */}
+          <div>
+            <Label>Agreement Documents & Links</Label>
+            <div className="space-y-2 mt-2">
+              <Input
+                placeholder="Document name or description"
+                value={formData.agreement_documents?.name || ''}
+                onChange={(e) => handleInputChange('agreement_documents', { 
+                  ...formData.agreement_documents, 
+                  name: e.target.value 
+                })}
+              />
+              <Input
+                placeholder="Document URL or file path"
+                value={formData.agreement_documents?.url || ''}
+                onChange={(e) => handleInputChange('agreement_documents', { 
+                  ...formData.agreement_documents, 
+                  url: e.target.value 
+                })}
+              />
+              <Input
+                placeholder="Password or access details (if needed)"
+                type="password"
+                value={formData.agreement_documents?.password || ''}
+                onChange={(e) => handleInputChange('agreement_documents', { 
+                  ...formData.agreement_documents, 
+                  password: e.target.value 
+                })}
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Action Buttons */}
       <div className="flex justify-end space-x-3 pt-6 border-t">
