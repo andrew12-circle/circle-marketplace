@@ -436,10 +436,14 @@ export const ServiceFunnelModal = ({
                   <Building className="w-24 h-24 text-blue-400" />
                 </div>
               )}
-              <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                <Button className="bg-red-600 hover:bg-red-700 text-white rounded-full p-4">
-                  <div className="w-0 h-0 border-t-[12px] border-t-transparent border-l-[20px] border-l-white border-b-[12px] border-b-transparent ml-1"></div>
-                </Button>
+              <div className="absolute inset-0 flex items-center justify-center">
+                {service.image_url && (
+                  <img 
+                    src={service.image_url} 
+                    alt={service.title}
+                    className="w-full h-full object-cover rounded-lg"
+                  />
+                )}
               </div>
             </div>
 
