@@ -4,6 +4,7 @@
  */
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useRef, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
@@ -96,33 +97,38 @@ const withTimeout = async <T,>(promise: PromiseLike<T>, ms = 12000, label?: stri
 };
 
 /**
- * Fetch services - with timeout and perf tracking
+ * Fetch services - optimized with better query and error handling
  */
 const fetchServices = async (): Promise<Service[]> => {
   const t0 = performance.now();
   logger.log('🔄 Fetching services from Supabase...');
-  const { data, error } = await withTimeout<any>(
+  
+  // Simplified query - use existing columns only
+  const { data, error } = await withTimeout(
     supabase
       .from('services')
       .select('*')
       .order('sort_order', { ascending: true })
       .order('created_at', { ascending: false })
-      .limit(100)
-      .then((res) => res),
-    12000,
+      .limit(100),
+    10000, // Reduced timeout
     'fetchServices'
   );
 
   const duration = performance.now() - t0;
   performanceMonitor.trackRequest('/services', 'SELECT', duration, !error, false);
 
-  if (error) throw error;
+  if (error) {
+    logger.error('Services query error:', error);
+    throw new Error(`Failed to fetch services: ${error.message}`);
+  }
 
-  const formattedServices = (data || []).map((service) => ({
+  const formattedServices = (data || []).map((service: any) => ({
     ...service,
     discount_percentage: service.discount_percentage ? String(service.discount_percentage) : undefined,
     is_verified: service.is_verified || false,
     vendor: {
+      id: service.vendor_id,
       name: 'Service Provider',
       rating: 4.5,
       review_count: 0,
@@ -130,33 +136,38 @@ const fetchServices = async (): Promise<Service[]> => {
     },
   }));
 
+  logger.log(`✅ Fetched ${formattedServices.length} services in ${duration}ms`);
   return formattedServices as unknown as Service[];
 };
 
 /**
- * Fetch vendors - with timeout and perf tracking
+ * Fetch vendors - optimized with better query and error handling
  */
 const fetchVendors = async (): Promise<Vendor[]> => {
   const t0 = performance.now();
   logger.log('🔄 Fetching vendors from Supabase...');
-  const { data, error } = await withTimeout<any>(
+  
+  // Simplified query - use existing columns only
+  const { data, error } = await withTimeout(
     supabase
       .from('vendors')
       .select('*')
       .order('sort_order', { ascending: true })
       .order('rating', { ascending: false })
-      .limit(50)
-      .then((res) => res),
-    12000,
+      .limit(50),
+    8000, // Reduced timeout
     'fetchVendors'
   );
 
   const duration = performance.now() - t0;
   performanceMonitor.trackRequest('/vendors', 'SELECT', duration, !error, false);
 
-  if (error) throw error;
+  if (error) {
+    logger.error('Vendors query error:', error);
+    throw new Error(`Failed to fetch vendors: ${error.message}`);
+  }
 
-  const formattedVendors = (data || []).map((vendor) => ({
+  const formattedVendors = (data || []).map((vendor: any) => ({
     ...vendor,
     id: vendor.id,
     name: vendor.name || 'Unknown Vendor',
@@ -179,28 +190,28 @@ const fetchVendors = async (): Promise<Vendor[]> => {
     local_representatives: [],
   }));
 
+  logger.log(`✅ Fetched ${formattedVendors.length} vendors in ${duration}ms`);
   return formattedVendors as unknown as Vendor[];
 };
 
 /**
- * Fetch combined marketplace data with database cache integration + timeout
+ * Fetch combined marketplace data with database cache integration, circuit breaker, and timeout
  */
 const fetchCombinedMarketplaceData = async (): Promise<MarketplaceData> => {
   const overallStart = performance.now();
   logger.log('🔄 Fetching combined marketplace data...');
 
-  // Try to get from database cache first
+  // Try to get from database cache first with circuit breaker
   try {
     const t0 = performance.now();
-    const { data: cacheData } = await withTimeout<any>(
+    const { data: cacheData } = await withTimeout(
       supabase
         .from('marketplace_cache')
         .select('cache_data')
         .eq('cache_key', 'marketplace_data')
         .gt('expires_at', new Date().toISOString())
-        .maybeSingle()
-        .then((res) => res),
-      4000,
+        .maybeSingle(),
+      6000, // Increased timeout for database cache
       'marketplace_cache'
     );
     performanceMonitor.trackRequest('/marketplace_cache', 'SELECT', performance.now() - t0, true, true);
@@ -210,29 +221,46 @@ const fetchCombinedMarketplaceData = async (): Promise<MarketplaceData> => {
       return cacheData.cache_data as unknown as MarketplaceData;
     }
   } catch (error) {
-    logger.log('No valid database cache found, fetching fresh data...');
+    logger.log('No valid database cache found, fetching fresh data...', error);
+    // Continue to fresh data fetch - don't fail completely
   }
 
-  // Use Promise.all for parallel fetching with timeouts
-  const [services, vendors] = await Promise.all([fetchServices(), fetchVendors()]);
-
-  const data = { services, vendors };
-
-  // Warm the cache in background (don't block)
+  // Use Promise.all for parallel fetching with enhanced error handling
   try {
-    const t1 = performance.now();
-    await withTimeout(supabase.functions.invoke('warm-marketplace-cache'), 4000, 'warm-marketplace-cache');
-    performanceMonitor.trackRequest('/functions/warm-marketplace-cache', 'INVOKE', performance.now() - t1, true, false);
+    const [services, vendors] = await Promise.all([
+      fetchServices().catch(error => {
+        logger.error('Services fetch failed:', error);
+        throw new Error(`Services fetch failed: ${error.message}`);
+      }),
+      fetchVendors().catch(error => {
+        logger.error('Vendors fetch failed:', error);
+        throw new Error(`Vendors fetch failed: ${error.message}`);
+      })
+    ]);
+
+    const data = { services, vendors };
+
+    // Warm the cache in background (don't block) - reduced timeout
+    setTimeout(async () => {
+      try {
+        const t1 = performance.now();
+        await withTimeout(supabase.functions.invoke('warm-marketplace-cache'), 3000, 'warm-marketplace-cache');
+        performanceMonitor.trackRequest('/functions/warm-marketplace-cache', 'INVOKE', performance.now() - t1, true, false);
+      } catch (error) {
+        logger.log('Cache warming failed (background):', error);
+      }
+    }, 100);
+
+    performanceMonitor.track('fetchCombinedMarketplaceData', performance.now() - overallStart, {
+      services: services.length,
+      vendors: vendors.length,
+    });
+
+    return data;
   } catch (error) {
-    logger.log('Cache warming failed:', error);
+    logger.error('Failed to fetch marketplace data:', error);
+    throw new Error(`Marketplace data fetch failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
-
-  performanceMonitor.track('fetchCombinedMarketplaceData', performance.now() - overallStart, {
-    services: services.length,
-    vendors: vendors.length,
-  });
-
-  return data;
 };
 
 /**
@@ -258,25 +286,40 @@ export const useMarketplaceData = () => {
   const query = useQuery({
     queryKey: QUERY_KEYS.marketplaceCombined,
     queryFn: fetchCombinedMarketplaceData,
-    staleTime: 2 * 60 * 1000, // 2 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes cache
+    staleTime: 5 * 60 * 1000, // 5 minutes - longer cache
+    gcTime: 15 * 60 * 1000, // 15 minutes cache
     refetchOnWindowFocus: false,
-    retry: 1,
-    retryDelay: 1000,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    retry: (failureCount, error) => {
+      // Circuit breaker pattern - don't retry timeouts
+      if (error.message.includes('timed out')) return false;
+      return failureCount < 2;
+    },
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
     meta: {
       errorMessage: 'Failed to load marketplace data'
     }
   });
 
-  // Handle errors with toast
-  if (query.error) {
-    logger.error('Marketplace data loading error:', query.error);
-    toast({
-      title: "Error loading data",
-      description: `Failed to load marketplace data: ${query.error.message || 'Please try again.'}`,
-      variant: "destructive"
-    });
-  }
+  // Stable error handling - only show toast once per error
+  const errorShown = useRef(false);
+  useEffect(() => {
+    if (query.error && !errorShown.current) {
+      logger.error('Marketplace data loading error:', query.error);
+      toast({
+        title: "Error loading data",
+        description: `Failed to load marketplace data: ${query.error.message || 'Please try again.'}`,
+        variant: "destructive"
+      });
+      errorShown.current = true;
+    }
+    
+    // Reset error flag when query succeeds
+    if (!query.error) {
+      errorShown.current = false;
+    }
+  }, [query.error, toast]);
 
   return query;
 };
@@ -363,18 +406,30 @@ export const useVendors = () => {
 export const useSavedServices = () => {
   const { profile } = useAuth();
   
+  // Stable user ID reference to prevent unnecessary re-queries
+  const stableUserId = useMemo(() => profile?.user_id || '', [profile?.user_id]);
+  
   const query = useQuery({
-    queryKey: QUERY_KEYS.savedServices(profile?.user_id || ''),
-    queryFn: () => fetchSavedServices(profile?.user_id || ''),
-    enabled: !!profile?.user_id,
-    staleTime: 1 * 60 * 1000,
-    gcTime: 3 * 60 * 1000,
+    queryKey: QUERY_KEYS.savedServices(stableUserId),
+    queryFn: () => fetchSavedServices(stableUserId),
+    enabled: !!stableUserId,
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    gcTime: 5 * 60 * 1000, // 5 minutes cache
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   });
 
-  // Handle errors
-  if (query.error) {
-    logger.error('Error loading saved services:', query.error);
-  }
+  // Stable error handling
+  const errorShown = useRef(false);
+  useEffect(() => {
+    if (query.error && !errorShown.current) {
+      logger.error('Error loading saved services:', query.error);
+      errorShown.current = true;
+    }
+    if (!query.error) {
+      errorShown.current = false;
+    }
+  }, [query.error]);
 
   return query;
 };

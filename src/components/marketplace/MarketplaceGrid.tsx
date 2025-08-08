@@ -50,12 +50,19 @@ type ViewMode = "services" | "products" | "vendors";
 export const MarketplaceGrid = () => {
   const { t } = useTranslation();
   
-  // Simplified data fetching without navigation optimization
+  // Optimized data fetching with memoization
   const { data: marketplaceData, isLoading, error } = useMarketplaceData();
   const { data: savedServiceIds = [] } = useSavedServices();
   
-  const services = (marketplaceData as { services: Service[]; vendors: Vendor[] })?.services || [];
-  const vendors = (marketplaceData as { services: Service[]; vendors: Vendor[] })?.vendors || [];
+  // Memoize extracted data to prevent unnecessary re-renders
+  const services = useMemo(() => 
+    (marketplaceData as { services: Service[]; vendors: Vendor[] })?.services || [], 
+    [marketplaceData]
+  );
+  const vendors = useMemo(() => 
+    (marketplaceData as { services: Service[]; vendors: Vendor[] })?.vendors || [], 
+    [marketplaceData]
+  );
   
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>("services");
@@ -82,17 +89,30 @@ export const MarketplaceGrid = () => {
   const { user, profile } = useAuth();
   const { location } = useLocation();
   
-  // Use optimized filtering hook
+  // Use optimized filtering hook with memoized inputs
+  const memoizedFilters = useMemo(() => filters, [
+    filters.category,
+    filters.priceRange[0],
+    filters.priceRange[1],
+    filters.verified,
+    filters.featured,
+    filters.coPayEligible,
+    filters.locationFilter
+  ]);
+  
   const { filteredServices, filteredVendors, categories, localVendorCount } = useMarketplaceFilters(
     services,
     vendors,
     searchTerm,
-    filters,
+    memoizedFilters,
     location
   );
 
-  // Fetch bulk ratings for all visible services
-  const serviceIds = filteredServices.map(service => service.id);
+  // Memoize service IDs to prevent unnecessary re-fetching of ratings
+  const serviceIds = useMemo(() => 
+    filteredServices.map(service => service.id), 
+    [filteredServices]
+  );
   const { data: bulkRatings } = useBulkServiceRatings(serviceIds);
 
   // Define product categories with enhanced styling
@@ -194,7 +214,7 @@ export const MarketplaceGrid = () => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) || product.description.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesSearch;
   });
-  const handleSaveService = async (serviceId: string) => {
+  const handleSaveService = useCallback(async (serviceId: string) => {
     if (!profile?.user_id) {
       toast({
         title: "Please sign in",
@@ -247,14 +267,14 @@ export const MarketplaceGrid = () => {
         variant: "destructive"
       });
     }
-  };
-  const handleViewServiceDetails = (serviceId: string) => {
+  }, [profile?.user_id, toast]);
+  const handleViewServiceDetails = useCallback((serviceId: string) => {
     const service = services.find(s => s.id === serviceId);
     if (service) {
       setSelectedService(service);
       setIsServiceModalOpen(true);
     }
-  };
+  }, [services]);
   const handleCloseServiceModal = () => {
     setIsServiceModalOpen(false);
     setSelectedService(null);
