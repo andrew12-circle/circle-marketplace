@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -139,6 +139,19 @@ export const ServiceFunnelEditor = ({ funnelContent, onChange }: ServiceFunnelEd
   const [editMode, setEditMode] = useState<'visual' | 'html'>('visual');
   const [customHtml, setCustomHtml] = useState(funnelContent.customHtml || '');
   const [uploadedMediaUrls, setUploadedMediaUrls] = useState<string[]>([]);
+
+  // Auto-enable custom HTML mode if there's existing custom HTML content
+  useEffect(() => {
+    if (funnelContent.customHtml && funnelContent.customHtml.trim().length > 0 && !funnelContent.useCustomHtml) {
+      console.log('Auto-enabling custom HTML mode due to existing content');
+      updateContent('useCustomHtml', true);
+    }
+  }, [funnelContent.customHtml]);
+
+  // Keep local customHtml state in sync with funnelContent
+  useEffect(() => {
+    setCustomHtml(funnelContent.customHtml || '');
+  }, [funnelContent.customHtml]);
 
   const updateContent = (path: string, value: any) => {
     const keys = path.split('.');
@@ -474,8 +487,11 @@ export const ServiceFunnelEditor = ({ funnelContent, onChange }: ServiceFunnelEd
                       onChange={(e) => {
                         const newValue = e.target.value;
                         setCustomHtml(newValue);
+                        // Update both customHtml and useCustomHtml
                         updateContent('customHtml', newValue);
+                        updateContent('useCustomHtml', true);
                         console.log('HTML updated:', newValue.length, 'characters');
+                        console.log('useCustomHtml set to true');
                       }}
                       placeholder="Paste your HTML code here..."
                       rows={20}
