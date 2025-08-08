@@ -40,7 +40,8 @@ import {
   ExternalLink,
   ShoppingCart,
   Eye,
-  Code
+  Code,
+  Verified
 } from 'lucide-react';
 import { ServiceFunnelModal } from './ServiceFunnelModal';
 
@@ -847,28 +848,51 @@ export const ServiceFunnelEditor = ({ funnelContent, onChange }: ServiceFunnelEd
             </CardHeader>
             <CardContent className="flex-1">
               <div className={`border rounded-lg overflow-hidden bg-background ${showAgentView ? 'max-w-sm mx-auto' : ''}`}>
-                <div className="space-y-6 p-6">
-                  {/* Hero Section Preview */}
-                  <div className="text-center space-y-4 bg-primary/10 p-6 rounded-lg">
-                    <h1 className="text-2xl font-bold">{funnelContent.headline || 'Your Headline'}</h1>
-                    <p className="text-lg text-muted-foreground">{funnelContent.subheadline || 'Your subheadline'}</p>
-                    <p className="text-sm">{funnelContent.heroDescription || 'Your description'}</p>
-                    <div className="flex justify-center gap-4 text-sm">
-                      <Badge variant="outline">ROI: {funnelContent.estimatedRoi || 0}%</Badge>
-                      <Badge variant="outline">{funnelContent.duration || 'Duration'}</Badge>
+                {/* Hero Section - Full Width */}
+                <div className="relative bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6">
+                  <div className="absolute inset-0 bg-black/20"></div>
+                  <div className="relative space-y-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Badge className="bg-green-500 text-white">
+                        <Verified className="w-3 h-3 mr-1" />
+                        Top Rated Pro
+                      </Badge>
+                      <Badge className="bg-orange-500 text-white">
+                        <Trophy className="w-3 h-3 mr-1" />
+                        Premium Provider
+                      </Badge>
+                    </div>
+                    <h1 className="text-2xl font-bold leading-tight">
+                      {funnelContent.headline || 'Transform Your Business Today'}
+                    </h1>
+                    <p className="text-lg text-blue-100">
+                      {funnelContent.subheadline || 'Professional service that delivers real results'}
+                    </p>
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-1">
+                        {[...Array(5)].map((_, i) => (
+                          <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                        ))}
+                      </div>
+                      <span className="text-sm">4.9 (150+ reviews)</span>
                     </div>
                   </div>
+                </div>
 
-                  {/* Benefits Preview */}
+                {/* Main Content */}
+                <div className="p-6 space-y-6">
+                  {/* Benefits Section */}
                   {funnelContent.whyChooseUs.benefits.length > 0 && (
-                    <div className="space-y-3">
-                      <h2 className="text-xl font-semibold">{funnelContent.whyChooseUs.title}</h2>
-                      <div className="grid gap-3">
+                    <div className="space-y-4">
+                      <h2 className="text-xl font-semibold">Why Choose Us?</h2>
+                      <div className="space-y-3">
                         {funnelContent.whyChooseUs.benefits.slice(0, 3).map((benefit, index) => (
-                          <div key={index} className="flex items-start gap-3 p-3 border rounded-lg">
-                            <Star className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                          <div key={index} className="flex items-center gap-3">
+                            <div className="bg-green-500 rounded-full p-1">
+                              <TrendingUp className="w-4 h-4 text-white" />
+                            </div>
                             <div>
-                              <h3 className="font-medium">{benefit.title}</h3>
+                              <span className="font-medium">{benefit.title}</span>
                               <p className="text-sm text-muted-foreground">{benefit.description}</p>
                             </div>
                           </div>
@@ -877,18 +901,45 @@ export const ServiceFunnelEditor = ({ funnelContent, onChange }: ServiceFunnelEd
                     </div>
                   )}
 
-                  {/* Pricing Preview */}
+                  {/* Pricing Packages */}
                   {funnelContent.packages.length > 0 && (
-                    <div className="space-y-3">
+                    <div className="space-y-4">
                       <h2 className="text-xl font-semibold">Choose Your Package</h2>
-                      <div className="grid gap-3">
-                        {funnelContent.packages.slice(0, 2).map((pkg) => (
-                          <Card key={pkg.id} className={`p-4 ${pkg.popular ? 'border-primary shadow-md' : ''}`}>
-                            {pkg.popular && <Badge className="mb-2">Most Popular</Badge>}
-                            <div className="space-y-2">
-                              <h3 className="font-semibold">{pkg.name}</h3>
-                              <p className="text-2xl font-bold">${pkg.price}</p>
-                              <p className="text-sm text-muted-foreground">{pkg.description}</p>
+                      <div className="grid gap-4">
+                        {funnelContent.packages.map((pkg) => (
+                          <Card key={pkg.id} className={`p-4 relative ${pkg.popular ? 'border-primary shadow-lg' : ''}`}>
+                            {pkg.popular && (
+                              <Badge className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-primary">
+                                Most Popular
+                              </Badge>
+                            )}
+                            <div className="space-y-3">
+                              <div className="flex justify-between items-start">
+                                <div>
+                                  <h3 className="font-semibold text-lg">{pkg.name}</h3>
+                                  <p className="text-sm text-muted-foreground">{pkg.description}</p>
+                                </div>
+                                <div className="text-right">
+                                  <div className="text-2xl font-bold">${pkg.price}</div>
+                                  {pkg.originalPrice && (
+                                    <div className="text-sm text-muted-foreground line-through">${pkg.originalPrice}</div>
+                                  )}
+                                </div>
+                              </div>
+                              <ul className="space-y-1">
+                                {pkg.features.slice(0, 3).map((feature, index) => (
+                                  <li key={index} className="flex items-center gap-2 text-sm">
+                                    <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
+                                    {feature}
+                                  </li>
+                                ))}
+                              </ul>
+                              <Button 
+                                className={`w-full ${pkg.popular ? 'bg-primary hover:bg-primary/90' : 'variant-outline'}`}
+                              >
+                                <ShoppingCart className="w-4 h-4 mr-2" />
+                                Get Started
+                              </Button>
                             </div>
                           </Card>
                         ))}
@@ -896,11 +947,13 @@ export const ServiceFunnelEditor = ({ funnelContent, onChange }: ServiceFunnelEd
                     </div>
                   )}
 
-                  {/* CTA Preview */}
-                  <div className="text-center space-y-3 bg-primary/5 p-6 rounded-lg">
-                    <h2 className="text-xl font-semibold">{funnelContent.callToAction.primaryHeadline}</h2>
-                    <p className="text-muted-foreground">{funnelContent.callToAction.primaryDescription}</p>
-                    <Button className="w-full">{funnelContent.callToAction.primaryButtonText}</Button>
+                  {/* Final CTA */}
+                  <div className="text-center space-y-4 bg-primary/5 p-6 rounded-lg">
+                    <h2 className="text-xl font-semibold">{funnelContent.callToAction.primaryHeadline || 'Ready to Get Started?'}</h2>
+                    <p className="text-muted-foreground">{funnelContent.callToAction.primaryDescription || 'Join thousands of satisfied customers'}</p>
+                    <Button size="lg" className="w-full">
+                      {funnelContent.callToAction.primaryButtonText || 'Start Your Journey Today'}
+                    </Button>
                     {funnelContent.urgency.enabled && (
                       <p className="text-sm text-destructive font-medium">{funnelContent.urgency.message}</p>
                     )}
