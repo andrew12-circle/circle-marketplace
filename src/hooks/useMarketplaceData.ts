@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { logger } from '@/utils/logger';
+import { performanceMonitor } from '@/utils/performanceMonitor';
 
 export interface Service {
   id: string;
@@ -81,21 +82,42 @@ export const QUERY_KEYS = {
   savedServices: (userId: string) => ['marketplace', 'savedServices', userId],
 } as const;
 
+// Helper: timeout wrapper
+const withTimeout = async <T,>(promise: Promise<T>, ms = 12000, label?: string): Promise<T> => {
+  let timer: number | undefined;
+  return Promise.race<T>([
+    promise,
+    new Promise<T>((_, reject) => {
+      timer = window.setTimeout(() => reject(new Error(`Request timed out${label ? `: ${label}` : ''}`)), ms);
+    }),
+  ]).finally(() => {
+    if (timer) window.clearTimeout(timer);
+  });
+};
+
 /**
- * Fetch services - simplified without deduplication
+ * Fetch services - with timeout and perf tracking
  */
 const fetchServices = async (): Promise<Service[]> => {
+  const t0 = performance.now();
   logger.log('🔄 Fetching services from Supabase...');
-  const { data, error } = await supabase
-    .from('services')
-    .select('*')
-    .order('sort_order', { ascending: true })
-    .order('created_at', { ascending: false })
-    .limit(100);
-  
+  const { data, error } = await withTimeout(
+    supabase
+      .from('services')
+      .select('*')
+      .order('sort_order', { ascending: true })
+      .order('created_at', { ascending: false })
+      .limit(100),
+    12000,
+    'fetchServices'
+  );
+
+  const duration = performance.now() - t0;
+  performanceMonitor.trackRequest('/services', 'SELECT', duration, !error, false);
+
   if (error) throw error;
-  
-  const formattedServices = (data || []).map(service => ({
+
+  const formattedServices = (data || []).map((service) => ({
     ...service,
     discount_percentage: service.discount_percentage ? String(service.discount_percentage) : undefined,
     is_verified: service.is_verified || false,
@@ -103,28 +125,36 @@ const fetchServices = async (): Promise<Service[]> => {
       name: 'Service Provider',
       rating: 4.5,
       review_count: 0,
-      is_verified: true
-    }
+      is_verified: true,
+    },
   }));
-  
-  return formattedServices;
+
+  return formattedServices as unknown as Service[];
 };
 
 /**
- * Fetch vendors - simplified without deduplication
+ * Fetch vendors - with timeout and perf tracking
  */
 const fetchVendors = async (): Promise<Vendor[]> => {
+  const t0 = performance.now();
   logger.log('🔄 Fetching vendors from Supabase...');
-  const { data, error } = await supabase
-    .from('vendors')
-    .select('*')
-    .order('sort_order', { ascending: true })
-    .order('rating', { ascending: false })
-    .limit(50);
-  
+  const { data, error } = await withTimeout(
+    supabase
+      .from('vendors')
+      .select('*')
+      .order('sort_order', { ascending: true })
+      .order('rating', { ascending: false })
+      .limit(50),
+    12000,
+    'fetchVendors'
+  );
+
+  const duration = performance.now() - t0;
+  performanceMonitor.trackRequest('/vendors', 'SELECT', duration, !error, false);
+
   if (error) throw error;
-  
-  const formattedVendors = (data || []).map(vendor => ({
+
+  const formattedVendors = (data || []).map((vendor) => ({
     ...vendor,
     id: vendor.id,
     name: vendor.name || 'Unknown Vendor',
@@ -144,27 +174,34 @@ const fetchVendors = async (): Promise<Vendor[]> => {
     latitude: vendor.latitude,
     longitude: vendor.longitude,
     vendor_type: vendor.vendor_type || 'company',
-    local_representatives: []
+    local_representatives: [],
   }));
-  
-  return formattedVendors;
+
+  return formattedVendors as unknown as Vendor[];
 };
 
 /**
- * Fetch combined marketplace data with database cache integration
+ * Fetch combined marketplace data with database cache integration + timeout
  */
 const fetchCombinedMarketplaceData = async (): Promise<MarketplaceData> => {
+  const overallStart = performance.now();
   logger.log('🔄 Fetching combined marketplace data...');
-  
+
   // Try to get from database cache first
   try {
-    const { data: cacheData } = await supabase
-      .from('marketplace_cache')
-      .select('cache_data')
-      .eq('cache_key', 'marketplace_data')
-      .gt('expires_at', new Date().toISOString())
-      .single();
-    
+    const t0 = performance.now();
+    const { data: cacheData } = await withTimeout(
+      supabase
+        .from('marketplace_cache')
+        .select('cache_data')
+        .eq('cache_key', 'marketplace_data')
+        .gt('expires_at', new Date().toISOString())
+        .single(),
+      4000,
+      'marketplace_cache'
+    );
+    performanceMonitor.trackRequest('/marketplace_cache', 'SELECT', performance.now() - t0, true, true);
+
     if (cacheData?.cache_data && typeof cacheData.cache_data === 'object') {
       logger.log('✅ Retrieved marketplace data from database cache');
       return cacheData.cache_data as unknown as MarketplaceData;
@@ -172,22 +209,26 @@ const fetchCombinedMarketplaceData = async (): Promise<MarketplaceData> => {
   } catch (error) {
     logger.log('No valid database cache found, fetching fresh data...');
   }
-  
-  // Use Promise.all for parallel fetching
-  const [services, vendors] = await Promise.all([
-    fetchServices(),
-    fetchVendors()
-  ]);
-  
+
+  // Use Promise.all for parallel fetching with timeouts
+  const [services, vendors] = await Promise.all([fetchServices(), fetchVendors()]);
+
   const data = { services, vendors };
-  
-  // Warm the cache in background
+
+  // Warm the cache in background (don't block)
   try {
-    await supabase.functions.invoke('warm-marketplace-cache');
+    const t1 = performance.now();
+    await withTimeout(supabase.functions.invoke('warm-marketplace-cache'), 4000, 'warm-marketplace-cache');
+    performanceMonitor.trackRequest('/functions/warm-marketplace-cache', 'INVOKE', performance.now() - t1, true, false);
   } catch (error) {
     logger.log('Cache warming failed:', error);
   }
-  
+
+  performanceMonitor.track('fetchCombinedMarketplaceData', performance.now() - overallStart, {
+    services: services.length,
+    vendors: vendors.length,
+  });
+
   return data;
 };
 

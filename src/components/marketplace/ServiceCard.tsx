@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +21,7 @@ import { VendorSelectionModal } from "./VendorSelectionModal";
 import { PricingChoiceModal } from "./PricingChoiceModal";
 import { DirectPurchaseModal } from "./DirectPurchaseModal";
 import { Service } from "@/hooks/useMarketplaceData";
+import { useActiveDisclaimer } from "@/hooks/useActiveDisclaimer";
 
 interface ServiceCardProps {
   service: Service;
@@ -48,52 +49,42 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
   const { formatPrice } = useCurrency();
   const isProMember = profile?.is_pro_member || false;
   const { averageRating, totalReviews, loading: ratingsLoading } = useServiceRatings(service.id);
+  const { disclaimer: activeDisclaimer } = useActiveDisclaimer();
 
-  // Fetch service-specific disclaimer or fallback to default
-  useEffect(() => {
-    const fetchDisclaimerContent = async () => {
-      try {
-        // First try to get service-specific disclaimer
-        const { data: serviceData } = await supabase
-          .from('services')
-          .select(`
-            disclaimer_id,
-            respa_disclaimers (
-              id,
-              title,
-              content,
-              button_text,
-              button_url,
-              is_active
-            )
-          `)
-          .eq('id', service.id)
-          .maybeSingle();
+  const ensureDisclaimerLoaded = async () => {
+    if (disclaimerContent) return;
 
-        if (serviceData?.respa_disclaimers?.is_active) {
-          setDisclaimerContent(serviceData.respa_disclaimers);
-          return;
-        }
+    try {
+      // Try service-specific disclaimer first
+      const { data: serviceData, error: svcErr } = await supabase
+        .from('services')
+        .select(`
+          disclaimer_id,
+          respa_disclaimers (
+            id,
+            title,
+            content,
+            button_text,
+            button_url,
+            is_active
+          )
+        `)
+        .eq('id', service.id)
+        .maybeSingle();
 
-        // Fallback to default disclaimer if no service-specific one
-        const { data: defaultData } = await supabase
-          .from('respa_disclaimers')
-          .select('*')
-          .eq('is_active', true)
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .maybeSingle();
-
-        if (defaultData) {
-          setDisclaimerContent(defaultData);
-        }
-      } catch (error) {
-        console.error('Error fetching disclaimer:', error);
+      if (!svcErr && serviceData?.respa_disclaimers?.is_active) {
+        setDisclaimerContent(serviceData.respa_disclaimers);
+        return;
       }
-    };
 
-    fetchDisclaimerContent();
-  }, [service.id]);
+      // Fallback to the cached active disclaimer (shared)
+      if (activeDisclaimer) {
+        setDisclaimerContent(activeDisclaimer);
+      }
+    } catch (error) {
+      console.error('Error loading disclaimer (lazy):', error);
+    }
+  };
 
   // Safe price extraction with validation
   const extractNumericPrice = (priceString: string): number => {
@@ -394,7 +385,10 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                             <TooltipTrigger asChild>
                               <button 
                                 className="w-3 h-3 rounded-full bg-green-600 flex items-center justify-center cursor-help hover:bg-green-700 transition-colors"
-                                onMouseEnter={() => setShowOverlay(true)}
+                                onMouseEnter={() => {
+                                  setShowOverlay(true);
+                                  ensureDisclaimerLoaded();
+                                }}
                                 onMouseLeave={() => setShowOverlay(false)}
                               >
                                 <span className="text-xs text-white">i</span>
@@ -466,7 +460,10 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false }:
                               <span className="text-sm font-medium text-green-600">Potential Co-Pay:</span>
                               <button 
                                 className="w-3 h-3 rounded-full bg-green-600 flex items-center justify-center cursor-help hover:bg-green-700 transition-colors"
-                                onMouseEnter={() => setShowOverlay(true)}
+                                onMouseEnter={() => {
+                                  setShowOverlay(true);
+                                  ensureDisclaimerLoaded();
+                                }}
                                 onMouseLeave={() => setShowOverlay(false)}
                               >
                                 <span className="text-xs text-white">i</span>

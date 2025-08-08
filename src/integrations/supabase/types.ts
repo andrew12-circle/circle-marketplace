@@ -5094,6 +5094,14 @@ export type Database = {
           total_reviews: number
         }[]
       }
+      get_service_ratings_bulk: {
+        Args: { p_service_ids: string[] }
+        Returns: {
+          service_id: string
+          average_rating: number
+          total_reviews: number
+        }[]
+      }
       get_user_admin_status: {
         Args: Record<PropertyKey, never>
         Returns: boolean
