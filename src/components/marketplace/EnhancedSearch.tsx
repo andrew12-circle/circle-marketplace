@@ -8,6 +8,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/compon
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
+import { useServicePriceRange } from "@/hooks/useServicePriceRange";
+import { logger } from "@/utils/logger";
 
 interface EnhancedSearchProps {
   onSearchChange: (filters: SearchFilters) => void;
@@ -37,14 +39,27 @@ export const EnhancedSearch = ({
   availableCategories, 
   availableTags 
 }: EnhancedSearchProps) => {
+  const { min: minPrice, max: maxPrice, isLoading: priceRangeLoading } = useServicePriceRange();
+  
   const [filters, setFilters] = useState<SearchFilters>({
     query: "",
     categories: [],
     tags: [],
-    priceRange: [0, 1000],
+    priceRange: [0, maxPrice], // Will be updated when maxPrice loads
     rating: 0,
     features: []
   });
+
+  // Update price range when dynamic price range loads
+  useEffect(() => {
+    if (!priceRangeLoading && maxPrice > 0) {
+      setFilters(prev => ({
+        ...prev,
+        priceRange: [minPrice, maxPrice]
+      }));
+      logger.log(`🎯 Updated default price range to: $${minPrice} - $${maxPrice}`);
+    }
+  }, [minPrice, maxPrice, priceRangeLoading]);
 
   const [activeFiltersCount, setActiveFiltersCount] = useState(0);
 
@@ -54,7 +69,7 @@ export const EnhancedSearch = ({
     if (filters.query) count++;
     if (filters.categories.length > 0) count++;
     if (filters.tags.length > 0) count++;
-    if (filters.priceRange[0] > 0 || filters.priceRange[1] < 1000) count++;
+    if (filters.priceRange[0] > minPrice || filters.priceRange[1] < maxPrice) count++;
     if (filters.rating > 0) count++;
     if (filters.features.length > 0) count++;
     
@@ -83,7 +98,7 @@ export const EnhancedSearch = ({
       query: "",
       categories: [],
       tags: [],
-      priceRange: [0, 1000],
+      priceRange: [minPrice, maxPrice],
       rating: 0,
       features: []
     });
@@ -104,7 +119,7 @@ export const EnhancedSearch = ({
         if (value) toggleArrayFilter('features', value);
         break;
       case 'price':
-        updateFilters('priceRange', [0, 1000]);
+        updateFilters('priceRange', [minPrice, maxPrice]);
         break;
       case 'rating':
         updateFilters('rating', 0);
@@ -189,14 +204,21 @@ export const EnhancedSearch = ({
                 <div>
                   <Label className="text-sm font-medium mb-3 block">
                     Price Range: ${filters.priceRange[0]} - ${filters.priceRange[1]}
+                    {priceRangeLoading && <span className="text-muted-foreground ml-2">(loading...)</span>}
                   </Label>
                   <Slider
                     value={filters.priceRange}
                     onValueChange={(value) => updateFilters('priceRange', value)}
-                    max={1000}
-                    step={10}
+                    max={maxPrice}
+                    min={minPrice}
+                    step={Math.max(1, Math.floor((maxPrice - minPrice) / 100))} // Dynamic step based on range
                     className="mt-2"
+                    disabled={priceRangeLoading}
                   />
+                  <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                    <span>${minPrice}</span>
+                    <span>${maxPrice}</span>
+                  </div>
                 </div>
 
                 {/* Rating */}
@@ -276,7 +298,7 @@ export const EnhancedSearch = ({
             </Badge>
           ))}
           
-          {(filters.priceRange[0] > 0 || filters.priceRange[1] < 1000) && (
+          {(filters.priceRange[0] > minPrice || filters.priceRange[1] < maxPrice) && (
             <Badge variant="secondary" className="gap-1">
               <DollarSign className="w-3 h-3" />
               ${filters.priceRange[0]}-${filters.priceRange[1]}
