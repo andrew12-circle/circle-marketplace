@@ -424,7 +424,7 @@ export const ServiceFunnelModal = ({
           {/* Left Column - Media and Social Proof */}
           <div className="lg:col-span-5 space-y-6">
             {/* Main Image/Video */}
-            <div className="aspect-video bg-muted rounded-lg overflow-hidden relative">
+            <div className="aspect-video bg-muted rounded-lg overflow-hidden relative flex items-center justify-center">
               {(service.funnel_content?.media?.[0]?.url || service.image_url) ? (
                 <img 
                   src={service.funnel_content?.media?.[0]?.url || service.image_url} 
