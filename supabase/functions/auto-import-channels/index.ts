@@ -12,6 +12,9 @@ const logStep = (step: string, details?: any) => {
   console.log(`[AUTO-IMPORT-CHANNELS] ${step}${detailsStr}`);
 };
 
+// System user UUID for auto-imported content
+const SYSTEM_USER_UUID = '00000000-0000-0000-0000-000000000001';
+
 // Top real estate channels to auto-import
 const TOP_REAL_ESTATE_CHANNELS = [
   { id: 'UCdVrpzqm4llM1D83_b4ue_A', name: 'Tom Ferry' },
@@ -58,7 +61,7 @@ serve(async (req) => {
         const { data: existingChannel } = await supabaseClient
           .from('channels')
           .select('id')
-          .eq('creator_id', channel.id)
+          .eq('youtube_channel_id', channel.id)
           .single();
 
         if (existingChannel) {
@@ -95,11 +98,14 @@ serve(async (req) => {
         const { data: insertedChannel, error: insertError } = await supabaseClient
           .from('channels')
           .insert({
+            creator_id: SYSTEM_USER_UUID, // Use system user UUID
             name: snippet.title || channel.name,
             description: snippet.description || null,
-            creator_id: channel.id,
+            youtube_channel_id: channel.id, // Store YouTube Channel ID as text
+            youtube_channel_url: `https://www.youtube.com/channel/${channel.id}`,
             subscriber_count: parseInt(statistics.subscriberCount) || 0,
             cover_image_url: branding?.image?.bannerExternalUrl || snippet.thumbnails?.high?.url || null,
+            auto_imported: true,
             is_verified: true, // Mark auto-imported channels as verified
           })
           .select()
@@ -156,7 +162,7 @@ serve(async (req) => {
             const { data: existingChannel } = await supabaseClient
               .from('channels')
               .select('id')
-              .eq('creator_id', channelId)
+              .eq('youtube_channel_id', channelId)
               .single();
 
             if (existingChannel) continue;
@@ -180,11 +186,14 @@ serve(async (req) => {
             const { error: insertError } = await supabaseClient
               .from('channels')
               .insert({
+                creator_id: SYSTEM_USER_UUID, // Use system user UUID
                 name: channelDetail.snippet.title,
                 description: channelDetail.snippet.description || null,
-                creator_id: channelId,
+                youtube_channel_id: channelId, // Store YouTube Channel ID as text
+                youtube_channel_url: `https://www.youtube.com/channel/${channelId}`,
                 subscriber_count: subscribers,
                 cover_image_url: channelDetail.snippet.thumbnails?.high?.url || null,
+                auto_imported: true,
                 is_verified: false, // Search results are not auto-verified
               });
 

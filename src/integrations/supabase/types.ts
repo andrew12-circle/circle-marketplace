@@ -5208,6 +5208,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      validate_uuid_field: {
+        Args: { input_text: string }
+        Returns: boolean
+      }
       verify_admin_operation_request: {
         Args: {
           operation_type: string

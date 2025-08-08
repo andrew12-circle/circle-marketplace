@@ -19,6 +19,12 @@ interface ChannelImportRequest {
   userId: string;
 }
 
+// UUID validation function
+function isValidUUID(uuid: string): boolean {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(uuid);
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -28,7 +34,18 @@ serve(async (req) => {
   try {
     const { channelUrl, maxVideos = 50, userId }: ChannelImportRequest = await req.json();
     
-    console.log('Importing YouTube channel:', channelUrl);
+    // Validate userId is a proper UUID
+    if (!userId || !isValidUUID(userId)) {
+      return new Response(JSON.stringify({ 
+        success: false, 
+        error: 'Invalid or missing userId. Must be a valid UUID.' 
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 400,
+      });
+    }
+    
+    console.log('Importing YouTube channel:', channelUrl, 'for user:', userId);
     console.log('YouTube API Key available:', !!youtubeApiKey);
 
     // Extract channel ID from URL
@@ -59,28 +76,32 @@ serve(async (req) => {
     const channel = channelData.items[0];
     console.log('Channel found:', channel.snippet.title);
 
-    // Check if channel already exists
+    // Check if channel already exists for this user
     const { data: existingChannel } = await supabase
       .from('channels')
       .select('id')
-      .eq('name', channel.snippet.title)
-      .maybeSingle();
+      .eq('creator_id', userId)
+      .eq('youtube_channel_id', channelId)
+      .single();
 
     let channelDbId;
 
     if (!existingChannel) {
-      // Insert channel into database
+      // Insert channel into database with proper user UUID
       const { data: newChannel, error: channelError } = await supabase
         .from('channels')
         .insert({
-          creator_id: userId,
+          creator_id: userId, // Use the validated user UUID
           name: channel.snippet.title,
           description: channel.snippet.description || '',
-          cover_image_url: channel.snippet.thumbnails?.high?.url || channel.snippet.thumbnails?.default?.url,
-          subscriber_count: parseInt(channel.statistics.subscriberCount || '0'),
+          youtube_channel_id: channelId, // Store YouTube Channel ID as text
+          youtube_channel_url: channelUrl,
+          subscriber_count: parseInt(channel.statistics?.subscriberCount || '0'),
+          cover_image_url: channel.snippet.thumbnails?.high?.url,
+          auto_imported: false,
           is_verified: true
         })
-        .select()
+        .select('id')
         .single();
 
       if (channelError) {
@@ -121,9 +142,8 @@ serve(async (req) => {
       const { data: existingVideo } = await supabase
         .from('content')
         .select('id')
-        .eq('title', video.snippet.title)
-        .eq('content_type', 'video')
-        .maybeSingle();
+        .eq('metadata->youtube_video_id', video.id)
+        .single();
 
       if (!existingVideo) {
         // Parse duration from ISO 8601 format (PT4M13S) to readable format (4:13)
@@ -133,30 +153,26 @@ serve(async (req) => {
         const category = determineCategory(video.snippet.tags, video.snippet.title);
 
         videosToInsert.push({
-          creator_id: userId,
-          content_type: 'video',
+          creator_id: userId, // Use the validated user UUID
           title: video.snippet.title,
-          description: video.snippet.description || 'Imported from YouTube',
+          description: video.snippet.description || '',
+          content_type: duration.includes(':') && duration.split(':').length > 2 ? 'video' : 'short',
           category: category,
-          duration: duration,
-          cover_image_url: video.snippet.thumbnails?.high?.url || video.snippet.thumbnails?.default?.url,
           content_url: `https://www.youtube.com/watch?v=${video.id}`,
-          tags: video.snippet.tags || [],
-          is_pro: false,
-          is_featured: false,
+          cover_image_url: video.snippet.thumbnails?.maxres?.url || video.snippet.thumbnails?.high?.url,
+          duration: duration,
           is_published: true,
-          price: 0,
-          total_plays: parseInt(video.statistics.viewCount || '0'),
+          is_featured: false,
+          tags: video.snippet.tags || [],
           metadata: {
-            source: 'youtube',
-            video_id: video.id,
-            channel_id: channelId,
-            channel_title: channel.snippet.title,
-            imported_at: new Date().toISOString(),
-            like_count: parseInt(video.statistics.likeCount || '0'),
-            comment_count: parseInt(video.statistics.commentCount || '0')
-          },
-          published_at: video.snippet.publishedAt
+            youtube_video_id: video.id,
+            channel_title: video.snippet.channelTitle,
+            published_at: video.snippet.publishedAt,
+            view_count: parseInt(video.statistics?.viewCount || '0'),
+            like_count: parseInt(video.statistics?.likeCount || '0'),
+            comment_count: parseInt(video.statistics?.commentCount || '0'),
+            auto_imported: false
+          }
         });
       }
     }

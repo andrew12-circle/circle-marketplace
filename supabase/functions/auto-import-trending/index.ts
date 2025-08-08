@@ -7,6 +7,9 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// System user UUID for auto-imported content
+const SYSTEM_USER_UUID = '00000000-0000-0000-0000-000000000001';
+
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const youtubeApiKey = Deno.env.get('YOUTUBE_API_KEY')!;
@@ -121,22 +124,8 @@ serve(async (req) => {
     const uniqueVideos = removeDuplicates(allVideos);
     console.log(`Found ${uniqueVideos.length} unique videos to process`);
 
-    // Create a default admin user for imports if none exists
-    let adminUserId;
-    const { data: adminProfile } = await supabase
-      .from('profiles')
-      .select('user_id')
-      .eq('is_admin', true)
-      .limit(1)
-      .single();
-
-    if (adminProfile) {
-      adminUserId = adminProfile.user_id;
-    } else {
-      // Create system user for auto-imports
-      console.log('No admin found, creating system import user...');
-      adminUserId = '00000000-0000-0000-0000-000000000000'; // System user ID
-    }
+    // Use system user for all auto-imported content
+    const adminUserId = SYSTEM_USER_UUID;
 
     // Process each video
     for (const video of uniqueVideos) {
@@ -178,37 +167,32 @@ serve(async (req) => {
           video.snippet.description || ''
         );
 
-        // Import the video
+        // Import the video with system user UUID
         const { error } = await supabase
           .from('content')
           .insert({
-            creator_id: adminUserId,
-            content_type: 'video',
+            creator_id: SYSTEM_USER_UUID, // Use system user UUID
             title: video.snippet.title,
-            description: video.snippet.description || 'Auto-imported trending content',
+            description: video.snippet.description || '',
+            content_type: isShort ? 'short' : 'video',
             category: category,
-            duration: duration,
-            cover_image_url: video.snippet.thumbnails?.high?.url || video.snippet.thumbnails?.default?.url,
             content_url: `https://www.youtube.com/watch?v=${video.id}`,
-            tags: [...(video.snippet.tags || []), isShort ? 'shorts' : 'training', 'real-estate', 'auto-import'],
-            is_pro: false,
-            is_featured: shouldBeFeatured(video),
+            cover_image_url: video.snippet.thumbnails?.maxres?.url || video.snippet.thumbnails?.high?.url,
+            duration: duration,
             is_published: true,
-            price: 0,
-            total_plays: Math.min(parseInt(video.statistics.viewCount || '0'), 1000000), // Cap for display
+            is_featured: shouldBeFeatured(video),
+            tags: video.snippet.tags || [],
             metadata: {
-              source: 'youtube_real_estate_training',
-              video_id: video.id,
+              youtube_video_id: video.id,
               channel_title: video.snippet.channelTitle,
-              imported_at: new Date().toISOString(),
-              is_short: isShort,
-              like_count: parseInt(video.statistics.likeCount || '0'),
-              comment_count: parseInt(video.statistics.commentCount || '0'),
+              published_at: video.snippet.publishedAt,
+              view_count: parseInt(video.statistics?.viewCount || '0'),
+              like_count: parseInt(video.statistics?.likeCount || '0'),
+              comment_count: parseInt(video.statistics?.commentCount || '0'),
               auto_imported: true,
-              real_estate_focused: true,
-              content_type: isShort ? 'quick_tip' : 'training_video'
-            },
-            published_at: video.snippet.publishedAt
+              import_date: new Date().toISOString(),
+              search_relevance: 'trending'
+            }
           });
 
         if (error) {
