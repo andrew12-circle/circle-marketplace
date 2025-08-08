@@ -362,7 +362,7 @@ export const ServiceFunnelModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()} modal={true}>
-      <DialogContent className="max-w-7xl max-h-[95vh] overflow-y-auto p-0">
+      <DialogContent className="max-w-7xl max-h-[95vh] overflow-hidden p-0">
         <DialogHeader className="sr-only">
           <span>Service Details</span>
         </DialogHeader>

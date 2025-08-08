@@ -83,25 +83,25 @@ export const FunnelRenderer = ({ funnelContent, serviceTitle, onClose }: FunnelR
       )}
 
       {mode === "sandboxed_html" && funnelContent?.customHtml && (
-        <iframe
-          srcDoc={funnelContent.customHtml}
-          className="w-full h-[95vh] border-0"
-          title={`Custom Funnel - ${serviceTitle}`}
-          sandbox="allow-scripts allow-forms allow-popups"
-        />
+          <iframe
+            srcDoc={funnelContent.customHtml}
+            className="w-full h-full border-0"
+            title={`Custom Funnel - ${serviceTitle}`}
+            sandbox="allow-scripts allow-forms allow-popups"
+          />
       )}
 
       {mode === "external_iframe" && funnelContent?.externalUrl && (
-        <iframe
-          src={funnelContent.externalUrl}
-          className="w-full h-[95vh] border-0"
-          title={`External Funnel - ${serviceTitle}`}
-          sandbox={iframeSandbox}
-        />
+          <iframe
+            src={funnelContent.externalUrl}
+            className="w-full h-full border-0"
+            title={`External Funnel - ${serviceTitle}`}
+            sandbox={iframeSandbox}
+          />
       )}
 
       {mode === "live_fetch" && (
-        <div className="w-full h-[95vh]">
+        <div className="w-full h-full">
           {isLoading && (
             <div className="w-full h-full flex items-center justify-center">
               <span className="text-muted-foreground">Loading live content…</span>
@@ -118,7 +118,7 @@ export const FunnelRenderer = ({ funnelContent, serviceTitle, onClose }: FunnelR
           {!isLoading && !error && fetchedHtml && (
             <iframe
               srcDoc={fetchedHtml}
-              className="w-full h-[95vh] border-0"
+              className="w-full h-full border-0"
               title={`Live Funnel - ${serviceTitle}`}
               sandbox="allow-scripts allow-forms allow-popups"
             />
