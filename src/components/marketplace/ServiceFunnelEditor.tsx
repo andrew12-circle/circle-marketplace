@@ -111,20 +111,30 @@ export const ServiceFunnelEditor = ({ funnelContent, onChange }: ServiceFunnelEd
   const [showFullScreenPreview, setShowFullScreenPreview] = useState(false);
   const [customHtml, setCustomHtml] = useState(funnelContent.customHtml || '');
 
-  // Auto-enable custom HTML mode and ensure it's always enabled
+  // Initialize custom HTML mode and load default template
   useEffect(() => {
-    if (!funnelContent.useCustomHtml) {
-      updateContent('useCustomHtml', true);
-    }
-    if (!customHtml && !funnelContent.customHtml) {
-      setCustomHtml(defaultHtmlTemplate);
-      updateContent('customHtml', defaultHtmlTemplate);
+    const shouldInitialize = !funnelContent.useCustomHtml || (!customHtml && !funnelContent.customHtml);
+    
+    if (shouldInitialize) {
+      const newContent = { ...funnelContent };
+      newContent.useCustomHtml = true;
+      
+      if (!newContent.customHtml) {
+        newContent.customHtml = defaultHtmlTemplate;
+        setCustomHtml(defaultHtmlTemplate);
+      } else {
+        setCustomHtml(newContent.customHtml);
+      }
+      
+      onChange(newContent);
     }
   }, []);
 
-  // Keep local customHtml state in sync with funnelContent
+  // Keep local customHtml state in sync with funnelContent only when prop changes
   useEffect(() => {
-    setCustomHtml(funnelContent.customHtml || '');
+    if (funnelContent.customHtml !== customHtml) {
+      setCustomHtml(funnelContent.customHtml || '');
+    }
   }, [funnelContent.customHtml]);
 
   // Handle keyboard shortcuts
@@ -153,11 +163,14 @@ export const ServiceFunnelEditor = ({ funnelContent, onChange }: ServiceFunnelEd
   };
 
   const renderPreview = () => {
-    if (funnelContent.useCustomHtml && customHtml) {
+    // Show preview if we have any HTML content
+    const htmlToRender = customHtml || funnelContent.customHtml;
+    
+    if (htmlToRender) {
       return (
         <div className="w-full h-full bg-white">
           <iframe
-            srcDoc={customHtml}
+            srcDoc={htmlToRender}
             className="w-full h-full border-0"
             title="HTML Preview"
             sandbox="allow-same-origin allow-scripts"
