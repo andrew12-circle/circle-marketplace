@@ -455,10 +455,10 @@ export default function AdminDashboard() {
             </Alert>
           )}
 
-          {/* Compact Tab Navigation */}
+          {/* Grouped Tab Navigation */}
           <Tabs defaultValue="users" className="w-full space-y-8">
             <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-3">
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+              <TabsList className="h-auto grid grid-cols-2 lg:grid-cols-4 gap-3 bg-transparent p-0">
                 {/* User Management Group */}
                 <div className="space-y-2">
                   <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider px-2">User Management</h3>
@@ -577,7 +577,7 @@ export default function AdminDashboard() {
                     </TabsTrigger>
                   </div>
                 </div>
-              </div>
+              </TabsList>
             </div>
 
         <TabsContent value="creators" className="space-y-6">
