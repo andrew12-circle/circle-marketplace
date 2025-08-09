@@ -1,9 +1,7 @@
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { X, Save } from 'lucide-react';
 import { ServiceFunnelEditor } from './ServiceFunnelEditor';
-import { ServicePricingTiersEditor } from './ServicePricingTiersEditor';
 
 interface FunnelContent {
   headline: string;
@@ -156,26 +154,10 @@ export const ServiceFunnelEditorModal = ({
 
           {/* Content */}
           <div className="flex-1 overflow-hidden p-6">
-            <Tabs defaultValue="funnel" className="h-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="funnel">Funnel Design</TabsTrigger>
-                <TabsTrigger value="pricing">Pricing Tiers</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="funnel" className="h-full mt-4">
-                <ServiceFunnelEditor
-                  funnelContent={funnelContent}
-                  onChange={onChange}
-                />
-              </TabsContent>
-              
-              <TabsContent value="pricing" className="h-full mt-4">
-                <ServicePricingTiersEditor
-                  tiers={pricingTiers}
-                  onChange={onPricingTiersChange || (() => {})}
-                />
-              </TabsContent>
-            </Tabs>
+            <ServiceFunnelEditor
+              funnelContent={funnelContent}
+              onChange={onChange}
+            />
           </div>
         </div>
       </DialogContent>
