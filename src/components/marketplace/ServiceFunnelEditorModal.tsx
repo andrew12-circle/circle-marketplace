@@ -157,6 +157,7 @@ export const ServiceFunnelEditorModal = ({
             <ServiceFunnelEditor
               funnelContent={funnelContent}
               onChange={onChange}
+              hideHeaderButtons={true}
             />
           </div>
         </div>

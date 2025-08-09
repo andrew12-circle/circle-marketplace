@@ -104,9 +104,10 @@ interface FunnelContent {
 interface ServiceFunnelEditorProps {
   funnelContent: FunnelContent;
   onChange: (content: FunnelContent) => void;
+  hideHeaderButtons?: boolean; // Hide buttons when used in modal
 }
 
-export const ServiceFunnelEditor = ({ funnelContent, onChange }: ServiceFunnelEditorProps) => {
+export const ServiceFunnelEditor = ({ funnelContent, onChange, hideHeaderButtons = false }: ServiceFunnelEditorProps) => {
   const [showAgentView, setShowAgentView] = useState(false);
   const [showFullScreenPreview, setShowFullScreenPreview] = useState(false);
   const [customHtml, setCustomHtml] = useState(funnelContent.customHtml || '');
@@ -460,30 +461,32 @@ export const ServiceFunnelEditor = ({ funnelContent, onChange }: ServiceFunnelEd
       )}
 
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold">HTML Funnel Editor</h2>
-            <p className="text-muted-foreground">Create custom HTML funnels with live preview</p>
+        {!hideHeaderButtons && (
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold">HTML Funnel Editor</h2>
+              <p className="text-muted-foreground">Create custom HTML funnels with live preview</p>
+            </div>
+            <div className="flex items-center gap-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowFullScreenPreview(true)}
+              >
+                <ExternalLink className="w-4 h-4 mr-2" />
+                Full Screen Preview
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowAgentView(!showAgentView)}
+              >
+                <Eye className="w-4 h-4 mr-2" />
+                {showAgentView ? 'Desktop View' : 'Mobile View'}
+              </Button>
+            </div>
           </div>
-          <div className="flex items-center gap-4">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowFullScreenPreview(true)}
-            >
-              <ExternalLink className="w-4 h-4 mr-2" />
-              Full Screen Preview
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowAgentView(!showAgentView)}
-            >
-              <Eye className="w-4 h-4 mr-2" />
-              {showAgentView ? 'Desktop View' : 'Mobile View'}
-            </Button>
-          </div>
-        </div>
+        )}
 
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 h-[calc(100vh-12rem)]">
           {/* HTML Editor */}
