@@ -40,6 +40,7 @@ import { EnhancedProviderIntegration } from "./EnhancedProviderIntegration";
 import { FunnelRenderer } from "./FunnelRenderer";
 import { useProviderTracking } from "@/hooks/useProviderTracking";
 import { supabase } from "@/integrations/supabase/client";
+import { getClickTrackingUrl } from "@/utils/tracking";
 
 interface Service {
   id: string;
@@ -809,7 +810,10 @@ export const ServiceFunnelModal = ({
                       variant="outline" 
                       className="w-full" 
                       size="lg"
-                      onClick={() => window.open(service.website_url, '_blank')}
+                      onClick={() => {
+                        const url = getClickTrackingUrl(service.id, service.website_url!);
+                        window.open(url, '_blank');
+                      }}
                     >
                       <ArrowRight className="w-4 h-4 mr-2" />
                       Visit Service Website
@@ -822,7 +826,10 @@ export const ServiceFunnelModal = ({
                       variant="outline" 
                       className="w-full" 
                       size="lg"
-                      onClick={() => window.open(service.vendor.website_url, '_blank')}
+                      onClick={() => {
+                        const url = getClickTrackingUrl(service.id, service.vendor!.website_url!);
+                        window.open(url, '_blank');
+                      }}
                     >
                       <Building className="w-4 h-4 mr-2" />
                       Visit {service.vendor.name} Website
@@ -959,13 +966,16 @@ export const ServiceFunnelModal = ({
                       <div className="flex items-center justify-between">
                         <p><strong>Provider:</strong> {service.vendor?.name || 'Direct Service'}</p>
                         {service.vendor?.website_url && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => window.open(service.vendor.website_url, '_blank')}
-                            className="ml-2"
-                          >
-                            Visit Website
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                const url = getClickTrackingUrl(service.id, service.vendor!.website_url!);
+                                window.open(url, '_blank');
+                              }}
+                              className="ml-2"
+                            >
+                              Visit Website
                           </Button>
                         )}
                       </div>

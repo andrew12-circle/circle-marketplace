@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { getClickTrackingUrl } from '@/utils/tracking';
 
 interface ProviderIntegrationProps {
   service: {
@@ -189,14 +190,8 @@ export const EnhancedProviderIntegration = ({
       console.log('Purchase tracking logged locally - no DB call needed for now');
 
       if (integrationStatus?.payment_integration === 'external' && service.website_url) {
-        // Redirect to provider's site with tracking parameters
-        const trackingUrl = new URL(service.website_url);
-        trackingUrl.searchParams.set('ref', 'circle_platform');
-        trackingUrl.searchParams.set('user_id', user?.id || '');
-        trackingUrl.searchParams.set('service_id', service.id);
-        trackingUrl.searchParams.set('package', packageType);
-
-        window.open(trackingUrl.toString(), '_blank');
+        const url = getClickTrackingUrl(service.id, service.website_url);
+        window.open(url, '_blank');
         
         toast({
           title: "Redirected to Provider",
