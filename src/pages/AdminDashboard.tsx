@@ -39,9 +39,10 @@ import { AgentInvitationPanel } from '@/components/admin/AgentInvitationPanel';
 import VendorPointAllocationPanel from '@/components/admin/VendorPointAllocationPanel';
 import AntiScrapingSystem from '@/components/security/AntiScrapingSystem';
 import { CreatorPayoutDashboard } from '@/components/admin/CreatorPayoutDashboard';
+import { VendorCommissionAnalytics } from '@/components/admin/VendorCommissionAnalytics';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Upload, Building, Youtube, DollarSign, BarChart3, Coins, Shield as ShieldIcon, Users2, Send, BookOpen } from 'lucide-react';
+import { Upload, Building, Youtube, DollarSign, BarChart3, Coins, Shield as ShieldIcon, Users2, Send, BookOpen, ExternalLink } from 'lucide-react';
 
 interface UserProfile {
   id: string;
@@ -457,7 +458,7 @@ export default function AdminDashboard() {
           {/* Modern Tab Navigation */}
           <Tabs defaultValue="users" className="w-full space-y-8">
             <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-2">
-              <TabsList className="grid w-full grid-cols-6 lg:grid-cols-12 gap-1 bg-slate-50 p-1 rounded-lg">
+              <TabsList className="grid w-full grid-cols-6 lg:grid-cols-13 gap-1 bg-slate-50 p-1 rounded-lg">
                 <TabsTrigger 
                   value="users" 
                   className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-md data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm"
@@ -541,6 +542,13 @@ export default function AdminDashboard() {
                 >
                   <ShieldIcon className="h-4 w-4" />
                   <span className="hidden sm:inline">RESPA</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="commission" 
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-md data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm"
+                >
+                  <ExternalLink className="h-4 w-4" />
+                  <span className="hidden sm:inline">Commission</span>
                 </TabsTrigger>
               </TabsList>
             </div>
@@ -901,6 +909,10 @@ export default function AdminDashboard() {
           <RESPAServiceManager />
           <RESPAComplianceManager />
           <RESPADocumentationViewer />
+        </TabsContent>
+
+        <TabsContent value="commission" className="space-y-6">
+          <VendorCommissionAnalytics />
         </TabsContent>
 
         <TabsContent value="calculator" className="space-y-6">
