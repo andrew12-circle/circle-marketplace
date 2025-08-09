@@ -2821,6 +2821,8 @@ export type Database = {
           business_name: string | null
           circle_points: number | null
           city: string | null
+          commission_contact_email: string | null
+          commission_rate: number | null
           copay_allowed: boolean | null
           created_at: string
           creator_bio: string | null
@@ -2865,6 +2867,8 @@ export type Database = {
           business_name?: string | null
           circle_points?: number | null
           city?: string | null
+          commission_contact_email?: string | null
+          commission_rate?: number | null
           copay_allowed?: boolean | null
           created_at?: string
           creator_bio?: string | null
@@ -2909,6 +2913,8 @@ export type Database = {
           business_name?: string | null
           circle_points?: number | null
           city?: string | null
+          commission_contact_email?: string | null
+          commission_rate?: number | null
           copay_allowed?: boolean | null
           created_at?: string
           creator_bio?: string | null
@@ -4407,6 +4413,60 @@ export type Database = {
           id?: string
           is_available_now?: boolean
           next_available_slot?: string | null
+          updated_at?: string
+          vendor_id?: string
+        }
+        Relationships: []
+      }
+      vendor_commission_tracking: {
+        Row: {
+          actual_commission: number | null
+          commission_paid: boolean
+          commission_rate: number
+          created_at: string
+          estimated_commission: number
+          id: string
+          notes: string | null
+          payment_date: string | null
+          report_email_id: string | null
+          report_month: string
+          report_sent_at: string | null
+          total_clicks: number
+          unique_agents: number
+          updated_at: string
+          vendor_id: string
+        }
+        Insert: {
+          actual_commission?: number | null
+          commission_paid?: boolean
+          commission_rate?: number
+          created_at?: string
+          estimated_commission?: number
+          id?: string
+          notes?: string | null
+          payment_date?: string | null
+          report_email_id?: string | null
+          report_month: string
+          report_sent_at?: string | null
+          total_clicks?: number
+          unique_agents?: number
+          updated_at?: string
+          vendor_id: string
+        }
+        Update: {
+          actual_commission?: number | null
+          commission_paid?: boolean
+          commission_rate?: number
+          created_at?: string
+          estimated_commission?: number
+          id?: string
+          notes?: string | null
+          payment_date?: string | null
+          report_email_id?: string | null
+          report_month?: string
+          report_sent_at?: string | null
+          total_clicks?: number
+          unique_agents?: number
           updated_at?: string
           vendor_id?: string
         }
