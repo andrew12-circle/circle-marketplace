@@ -535,7 +535,7 @@ export const VendorDashboard = () => {
 
         {/* Main Dashboard Tabs */}
         <Tabs defaultValue="services" className="space-y-8">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="services" className="flex items-center gap-2">
               <Package className="w-4 h-4" />
               Services ({services.length})
@@ -547,6 +547,10 @@ export const VendorDashboard = () => {
             <TabsTrigger value="analytics" className="flex items-center gap-2">
               <BarChart3 className="w-4 h-4" />
               Analytics
+            </TabsTrigger>
+            <TabsTrigger value="funnel" className="flex items-center gap-2">
+              <Settings className="w-4 h-4" />
+              Funnel
             </TabsTrigger>
           </TabsList>
 
@@ -641,6 +645,11 @@ export const VendorDashboard = () => {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Funnel Customization Tab */}
+          <TabsContent value="funnel" className="space-y-6">
+            <VendorFunnelManager vendorId={vendorId || ''} />
           </TabsContent>
         </Tabs>
       </div>
