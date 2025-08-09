@@ -18,6 +18,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useVendorActivityTracking } from '@/hooks/useVendorActivityTracking';
 import { CoPayRequestsManager } from '@/components/vendor/CoPayRequestsManager';
+import { VendorFunnelManager } from '@/components/vendor/VendorFunnelManager';
 import { VendorCoPaySettings } from '@/components/vendor/VendorCoPaySettings';
 
 interface VendorService {
