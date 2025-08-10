@@ -4,6 +4,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { X, Save } from 'lucide-react';
 import { ServiceFunnelEditor } from './ServiceFunnelEditor';
 import { ServicePricingTiersEditor } from './ServicePricingTiersEditor';
+import { useState } from 'react';
+import { useToast } from '@/hooks/use-toast';
 
 interface ThumbnailItem {
   id: string;
@@ -170,6 +172,29 @@ export const ServiceFunnelEditorModal = ({
   pricingTiers = [],
   onPricingTiersChange
 }: ServiceFunnelEditorModalProps) => {
+  const [isSaving, setIsSaving] = useState(false);
+  const { toast } = useToast();
+
+  const handleSave = async () => {
+    try {
+      setIsSaving(true);
+      await onSave();
+      toast({
+        title: "Changes Saved",
+        description: "Your funnel changes have been saved successfully.",
+      });
+    } catch (error) {
+      console.error('Save error:', error);
+      toast({
+        title: "Save Failed",
+        description: "There was an error saving your changes. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[98vw] max-h-[98vh] w-full h-full p-0 overflow-hidden">
@@ -181,9 +206,13 @@ export const ServiceFunnelEditorModal = ({
               <p className="text-muted-foreground">Editing: {serviceName}</p>
             </div>
             <div className="flex items-center gap-3">
-              <Button onClick={onSave} className="flex items-center gap-2">
+              <Button 
+                onClick={handleSave} 
+                className="flex items-center gap-2"
+                disabled={isSaving}
+              >
                 <Save className="w-4 h-4" />
-                Save Changes
+                {isSaving ? 'Saving...' : 'Save Changes'}
               </Button>
               <Button 
                 variant="ghost" 
