@@ -161,6 +161,10 @@ const { trackBooking, trackPurchase, trackOutboundClick } = useProviderTracking(
   const subHeadline = (service.funnel_content as any)?.subHeadline || (service.funnel_content as any)?.subheadline;
   const benefits = (service.funnel_content as any)?.benefits || (service.funnel_content as any)?.whyChooseUs?.benefits || [];
   const customSections = (service.funnel_content as any)?.customSections || [];
+  const fc = service.funnel_content as any;
+  const ctaTitle = fc?.callToAction?.title || fc?.callToAction?.primaryHeadline || 'Ready to Transform Your Business?';
+  const ctaDescription = fc?.callToAction?.description || fc?.callToAction?.primaryDescription || '';
+  const scheduleText = fc?.callToAction?.primaryButtonText || 'Schedule Consultation';
 
   // Use pricing tiers if available, otherwise fallback to default packages
   const packages = service.pricing_tiers?.length ? 
@@ -754,7 +758,10 @@ const { trackBooking, trackPurchase, trackOutboundClick } = useProviderTracking(
             <div className="sticky top-6 space-y-4">
               <Card className="p-6 space-y-4 border-2 border-primary">
                 <div className="text-center space-y-2">
-                  <h3 className="text-xl font-bold">Ready to Transform Your Business?</h3>
+                  <h3 className="text-xl font-bold">{ctaTitle}</h3>
+                  {ctaDescription && (
+                    <p className="text-sm text-muted-foreground">{ctaDescription}</p>
+                  )}
                   {service.pricing_tiers?.length > 0 ? (
                     <div className="space-y-2">
                       <p className="text-sm text-muted-foreground">Selected Package: {selectedPkg?.name}</p>
@@ -814,7 +821,7 @@ const { trackBooking, trackPurchase, trackOutboundClick } = useProviderTracking(
                         onClick={() => setIsConsultationFlowOpen(true)}
                       >
                         <Phone className="w-4 h-4 mr-2" />
-                        Schedule Consultation
+                        {scheduleText}
                       </Button>
                     </>
                   ) : (
@@ -825,7 +832,7 @@ const { trackBooking, trackPurchase, trackOutboundClick } = useProviderTracking(
                         onClick={() => setIsConsultationFlowOpen(true)}
                       >
                         <Phone className="w-4 h-4 mr-2" />
-                        Schedule Free Consultation
+                        {scheduleText}
                       </Button>
                       
                       <Button 
