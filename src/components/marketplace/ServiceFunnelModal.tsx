@@ -701,15 +701,14 @@ const { trackBooking, trackPurchase, trackOutboundClick } = useProviderTracking(
               </div>
             )}
 
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">Custom pricing based on your specific needs</p>
-                  )}
-                </div>
+            </div>
+          )}
 
-                <div className="space-y-3">
+
+                <div className="lg:col-span-3">
+                  <div className="space-y-4">
+                    <Card className="p-6 space-y-4">
+                      <div className="space-y-3">
                   {/* Show Add to Cart for services with pricing tiers that don't require pricing requests */}
                   {service.pricing_tiers?.length > 0 && !service.requires_quote && !selectedPkg?.requestPricing ? (
                     <>
@@ -858,7 +857,7 @@ const { trackBooking, trackPurchase, trackOutboundClick } = useProviderTracking(
                     </p>
                   )}
                 </div>
-              </Card>
+              </div>
 
               {/* Trust Signals */}
               <Card className="p-4">
