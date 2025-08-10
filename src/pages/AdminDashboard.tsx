@@ -408,7 +408,15 @@ export default function AdminDashboard() {
               <div className="flex items-center gap-4">
                 <Button
                   variant="ghost"
-                  onClick={() => navigate(-1)}
+                  onClick={() => {
+                    const state = window.history.state as { idx?: number } | null;
+                    const idx = state?.idx ?? 0;
+                    if (idx > 0) {
+                      navigate(-1);
+                    } else {
+                      navigate('/', { replace: true });
+                    }
+                  }}
                   className="flex items-center gap-2 text-slate-600 hover:text-slate-900"
                 >
                   <ArrowLeft className="h-4 w-4" />
