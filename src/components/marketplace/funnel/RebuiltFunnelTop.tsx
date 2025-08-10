@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Star, Play, PhoneCall, ShoppingCart, CheckCircle2, X } from "lucide-react";
+import { Star, Play, PhoneCall, ShoppingCart, CheckCircle2, X, ExternalLink } from "lucide-react";
 
 interface RebuiltFunnelTopProps {
   service: any;
@@ -262,6 +262,16 @@ export const RebuiltFunnelTop: React.FC<RebuiltFunnelTopProps> = ({
                     {btn.text}
                   </Button>
                 ))}
+                {vendor?.website && (
+                  <Button
+                    variant="ghost"
+                    className="w-full"
+                    onClick={() => window.open(vendor.website, '_blank', 'noopener,noreferrer')}
+                  >
+                    <ExternalLink className="h-5 w-5 mr-2" />
+                    View Actual Website
+                  </Button>
+                )}
                 <div className="text-center pt-1">
                   <p className="text-xs text-muted-foreground">{ctaNote}</p>
                 </div>
