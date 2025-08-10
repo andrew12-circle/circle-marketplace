@@ -42,6 +42,26 @@ import { supabase } from "@/integrations/supabase/client";
 import { ReviewRatingSystem } from "@/components/marketplace/ReviewRatingSystem";
 import { SafeHTML } from "@/utils/htmlSanitizer";
 
+// Helper: detect and embed YouTube videos
+const getYouTubeId = (url: string): string | null => {
+  try {
+    const u = new URL(url);
+    if (u.hostname.includes("youtu.be")) return u.pathname.slice(1);
+    if (u.hostname.includes("youtube.com")) {
+      if (u.pathname.startsWith("/watch")) return u.searchParams.get("v");
+      if (u.pathname.startsWith("/shorts/")) return u.pathname.split("/")[2] || null;
+      if (u.pathname.startsWith("/embed/")) return u.pathname.split("/")[2] || null;
+    }
+  } catch {}
+  return null;
+};
+
+const getYouTubeEmbedUrl = (url?: string): string | null => {
+  if (!url) return null;
+  const id = getYouTubeId(url);
+  return id ? `https://www.youtube-nocookie.com/embed/${id}?rel=0&modestbranding=1` : null;
+};
+
 interface Service {
   id: string;
   title: string;
@@ -461,11 +481,37 @@ const { trackBooking, trackPurchase, trackOutboundClick } = useProviderTracking(
             {/* Main Image/Video */}
             <div className="aspect-video bg-muted rounded-lg overflow-hidden relative flex items-center justify-center">
               {(service.funnel_content?.media?.[0]?.url || service.image_url) ? (
-                <img 
-                  src={service.funnel_content?.media?.[0]?.url || service.image_url} 
-                  alt={service.funnel_content?.headline || service.title}
-                  className="w-full h-auto object-contain"
-                />
+                (() => {
+                  const mediaItem = service.funnel_content?.media?.[0];
+                  const mediaUrl = mediaItem?.url || service.image_url;
+                  const yt = getYouTubeEmbedUrl(mediaUrl);
+                  const isVideo = mediaItem?.type === 'video' || !!yt || (mediaUrl ? /\.(mp4|webm|ogg)$/i.test(mediaUrl) : false);
+                  if (isVideo) {
+                    return yt ? (
+                      <iframe
+                        src={yt}
+                        title={service.funnel_content?.headline || service.title}
+                        className="w-full h-full"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        referrerPolicy="strict-origin-when-cross-origin"
+                        allowFullScreen
+                      />
+                    ) : (
+                      <video
+                        controls
+                        className="w-full h-full object-cover"
+                        src={mediaUrl}
+                      />
+                    );
+                  }
+                  return (
+                    <img
+                      src={mediaUrl!}
+                      alt={service.funnel_content?.headline || service.title}
+                      className="w-full h-auto object-contain"
+                    />
+                  );
+                })()
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
                   <Building className="w-24 h-24 text-blue-400" />
