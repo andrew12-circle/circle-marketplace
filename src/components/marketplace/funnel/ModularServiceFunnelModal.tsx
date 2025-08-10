@@ -150,7 +150,7 @@ export const ModularServiceFunnelModal = ({
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="max-w-6xl h-[90vh] p-0">
+        <DialogContent className="max-w-6xl h-[95vh] p-0">
           <ScrollArea className="h-full">
             <div className="space-y-0">
               {/* Hero Section */}
@@ -166,7 +166,7 @@ export const ModularServiceFunnelModal = ({
               />
 
               {/* Tabbed Content */}
-              <div className="p-6">
+              <div className="border-t bg-muted/30 p-6">
                 <Tabs defaultValue="details" className="w-full">
                   <TabsList className="grid w-full grid-cols-4">
                     <TabsTrigger value="details">Service Details</TabsTrigger>
