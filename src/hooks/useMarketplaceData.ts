@@ -488,12 +488,17 @@ export const useInvalidateMarketplace = () => {
   return {
     invalidateAll: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.marketplace });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.marketplaceCombined });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.services });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.vendors });
     },
     invalidateServices: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.services });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.marketplaceCombined });
     },
     invalidateVendors: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.vendors });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.marketplaceCombined });
     },
     invalidateUserData: (userId: string) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.savedServices(userId) });

@@ -24,7 +24,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useInvalidateMarketplace } from '@/hooks/useMarketplaceData';
+import { useInvalidateMarketplace, QUERY_KEYS } from '@/hooks/useMarketplaceData';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface PricingFeature {
   id: string;
@@ -207,6 +208,7 @@ const safeParseJSON = (val: string) => {
 export const ServiceManagementPanel = () => {
   const { toast } = useToast();
   const invalidateCache = useInvalidateMarketplace();
+  const queryClient = useQueryClient();
   const [services, setServices] = useState<Service[]>([]);
   const [filteredServices, setFilteredServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
@@ -575,6 +577,23 @@ export const ServiceManagementPanel = () => {
       };
       setSelectedService(updatedService);
       setServices(services.map(s => s.id === selectedService.id ? updatedService : s));
+
+      // Optimistically update marketplace cache so front-end reflects changes immediately
+      queryClient.setQueryData(QUERY_KEYS.marketplaceCombined, (prev: any) => {
+        if (!prev) return prev;
+        const updated = {
+          ...prev,
+          services: Array.isArray(prev.services)
+            ? prev.services.map((s: any) =>
+                s.id === selectedService.id
+                  ? { ...s, funnel_content: funnelContent, pricing_tiers: pricingTiers }
+                  : s
+              )
+            : prev.services,
+        };
+        return updated;
+      });
+
 
       toast({
         title: 'Success',
