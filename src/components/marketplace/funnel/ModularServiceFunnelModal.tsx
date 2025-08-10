@@ -70,21 +70,69 @@ export const ModularServiceFunnelModal = ({
     setIsConsultationFlowOpen(true);
   };
 
+  // Bridge CTAs from custom HTML via postMessage
+  useEffect(() => {
+    const onMessage = (event: MessageEvent) => {
+      const type = (event.data && (event.data.type || event.data?.data?.type)) || event?.data?.type;
+      if (type === 'funnel:add_to_cart') {
+        handleAddToCart();
+      } else if (type === 'funnel:open_consultation') {
+        handleScheduleConsultation();
+      }
+    };
+    window.addEventListener('message', onMessage);
+    return () => window.removeEventListener('message', onMessage);
+  }, [selectedPackage, quantity]);
+
   // Check if vendor has custom funnel enabled
   const hasCustomFunnel = vendor?.funnel_enabled && service.funnel_content?.custom_html;
 
   if (hasCustomFunnel) {
-    // Render custom HTML funnel
+    // Render custom funnel at top + keep system tabs below (hybrid)
     return (
       <>
         <Dialog open={isOpen} onOpenChange={onClose}>
           <DialogContent className="max-w-6xl h-[90vh] p-0">
             <ScrollArea className="h-full">
-              <FunnelRenderer
-                funnelContent={service.funnel_content}
-                serviceTitle={service.title}
-                onClose={onClose}
-              />
+              {/* Custom Funnel */}
+              <div className="w-full">
+                <FunnelRenderer
+                  funnelContent={service.funnel_content}
+                  serviceTitle={service.title}
+                  onClose={onClose}
+                  heightClass="h-[65vh] md:h-[70vh]"
+                />
+              </div>
+
+              {/* Tabbed Content */}
+              <div className="p-6">
+                <Tabs defaultValue="details" className="w-full">
+                  <TabsList className="grid w-full grid-cols-4">
+                    <TabsTrigger value="details">Service Details</TabsTrigger>
+                    <TabsTrigger value="reviews">Agent Reviews</TabsTrigger>
+                    <TabsTrigger value="qa">Q&A</TabsTrigger>
+                    <TabsTrigger value="related">More Services</TabsTrigger>
+                  </TabsList>
+
+                  <div className="mt-6">
+                    <TabsContent value="details" className="space-y-6">
+                      <ServiceContentSection service={service} />
+                    </TabsContent>
+
+                    <TabsContent value="reviews" className="space-y-6">
+                      <ServiceReviewsSection service={service} />
+                    </TabsContent>
+
+                    <TabsContent value="qa" className="space-y-6">
+                      <ServiceQASection service={service} vendor={vendor} />
+                    </TabsContent>
+
+                    <TabsContent value="related" className="space-y-6">
+                      <ServiceRelatedSection vendor={vendor} currentServiceId={service.id} />
+                    </TabsContent>
+                  </div>
+                </Tabs>
+              </div>
             </ScrollArea>
           </DialogContent>
         </Dialog>

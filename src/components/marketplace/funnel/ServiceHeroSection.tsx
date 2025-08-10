@@ -21,10 +21,12 @@ export const ServiceHeroSection = ({
   onAddToCart,
   onScheduleConsultation
 }: ServiceHeroSectionProps) => {
-  const heroBannerUrl = vendor?.hero_banner_url;
+  const heroBannerUrl = vendor?.hero_banner_url || service?.image_url;
   const brandColors = vendor?.brand_colors || { primary: "#3b82f6", secondary: "#64748b", accent: "#06b6d4" };
   const valueStatement = vendor?.value_statement || "Professional service delivery";
   const customCTA = vendor?.custom_cta_text || "Get Started";
+  const serviceTitle = service?.title || vendor?.business_name || "Service";
+  const subheadline = service?.subtitle || vendor?.headline || "Transform Your Real Estate Business in 30 Days";
 
   const urgencyElements = [
     "🔥 In High Demand",
@@ -114,10 +116,10 @@ export const ServiceHeroSection = ({
             {/* Compelling Headline */}
             <div>
               <h1 className="text-4xl lg:text-5xl font-bold text-foreground mb-4 leading-tight">
-                {service.title}
+                {serviceTitle}
               </h1>
               <p className="text-xl text-primary font-semibold mb-2">
-                Transform Your Real Estate Business in 30 Days
+                {subheadline}
               </p>
               <p className="text-lg text-muted-foreground leading-relaxed">
                 {valueStatement || "Join thousands of top-performing agents who've already boosted their earnings with our proven system."}

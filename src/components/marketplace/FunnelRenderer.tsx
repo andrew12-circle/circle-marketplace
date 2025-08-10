@@ -16,9 +16,10 @@ interface FunnelRendererProps {
   } | null;
   serviceTitle: string;
   onClose: () => void;
+  heightClass?: string;
 }
 
-export const FunnelRenderer = ({ funnelContent, serviceTitle, onClose }: FunnelRendererProps) => {
+export const FunnelRenderer = ({ funnelContent, serviceTitle, onClose, heightClass }: FunnelRendererProps) => {
   const mode: FunnelRenderMode | undefined = funnelContent?.renderMode || (funnelContent?.useCustomHtml ? "sandboxed_html" : undefined);
   const [fetchedHtml, setFetchedHtml] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
@@ -61,7 +62,7 @@ export const FunnelRenderer = ({ funnelContent, serviceTitle, onClose }: FunnelR
   if (!mode) return null;
 
   return (
-    <div className="relative h-[95vh] w-full">
+    <div className={`relative w-full ${heightClass ?? 'h-[95vh]'}`}>
       <Button
         variant="ghost"
         size="icon"
