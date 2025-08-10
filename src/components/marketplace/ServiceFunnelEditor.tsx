@@ -1923,6 +1923,119 @@ export const ServiceFunnelEditor = ({ funnelContent, onChange }: ServiceFunnelEd
                     </div>
                   )}
 
+                  {/* Thumbnail Gallery */}
+                  {funnelContent.thumbnailGallery.enabled && funnelContent.thumbnailGallery.items.length > 0 && (
+                    <div className="space-y-4">
+                      <h2 className="text-xl font-semibold">Our Work</h2>
+                      <div className="grid grid-cols-2 gap-3">
+                        {funnelContent.thumbnailGallery.items.slice(0, 6).map((thumbnail, index) => (
+                          <div key={index} className="relative aspect-video bg-muted rounded-lg overflow-hidden">
+                            {thumbnail.mediaUrl && (
+                              <img src={thumbnail.mediaUrl} alt={thumbnail.label} className="w-full h-full object-cover" />
+                            )}
+                            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2">
+                              <p className="text-white text-xs font-medium">{thumbnail.label}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ROI Calculator */}
+                  {funnelContent.roiCalculator.enabled && (
+                    <div className="space-y-4">
+                      <h2 className="text-xl font-semibold">ROI Calculator</h2>
+                      <Card className="p-4">
+                        <div className="space-y-4">
+                          <p className="text-sm text-muted-foreground">Calculate your potential return on investment</p>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <label className="text-sm font-medium">Current Monthly Closings</label>
+                              <div className="mt-1 p-2 border rounded text-sm bg-muted">{funnelContent.roiCalculator.currentMonthlyClosings}</div>
+                            </div>
+                            <div>
+                              <label className="text-sm font-medium">Estimated Improvement</label>
+                              <div className="mt-1 p-2 border rounded text-sm bg-primary/10">+{funnelContent.roiCalculator.increasePercentage}%</div>
+                            </div>
+                          </div>
+                          <div className="p-3 bg-green-50 dark:bg-green-950 rounded-lg text-center">
+                            <div className="text-lg font-bold text-green-700 dark:text-green-300">
+                              Additional Monthly Income: ${funnelContent.roiCalculator.calculatedAdditionalIncome.toLocaleString()}
+                            </div>
+                            <div className="text-sm text-green-600 dark:text-green-400">
+                              Annual Increase: ${funnelContent.roiCalculator.calculatedAnnualIncrease.toLocaleString()}
+                            </div>
+                          </div>
+                        </div>
+                      </Card>
+                    </div>
+                  )}
+
+                  {/* Testimonial Cards */}
+                  {funnelContent.testimonialCards.enabled && funnelContent.testimonialCards.cards.length > 0 && (
+                    <div className="space-y-4">
+                      <h2 className="text-xl font-semibold">Success Stories</h2>
+                      <div className="space-y-3">
+                        {funnelContent.testimonialCards.cards.slice(0, 3).map((testimonial, index) => (
+                          <Card key={index} className="p-4">
+                            <div className="space-y-3">
+                              <div className="flex items-center gap-1">
+                                {[...Array(testimonial.rating)].map((_, i) => (
+                                  <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                                ))}
+                              </div>
+                              <p className="text-sm italic">"{testimonial.content}"</p>
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-muted rounded-full flex items-center justify-center">
+                                  <span className="text-sm font-medium">
+                                    {testimonial.name.split(' ').map(n => n[0]).join('')}
+                                  </span>
+                                </div>
+                                <div>
+                                  <div className="font-medium text-sm">{testimonial.name}</div>
+                                  <div className="text-xs text-muted-foreground">{testimonial.role}</div>
+                                </div>
+                              </div>
+                            </div>
+                          </Card>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Media Section */}
+                  {funnelContent.media.length > 0 && (
+                    <div className="space-y-4">
+                      <h2 className="text-xl font-semibold">Media Gallery</h2>
+                      <div className="grid grid-cols-1 gap-3">
+                        {funnelContent.media.slice(0, 3).map((media, index) => (
+                          <div key={index} className="relative bg-muted rounded-lg overflow-hidden aspect-video">
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <div className="text-center">
+                                <Video className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
+                                <p className="text-sm font-medium">{media.title || `Media ${index + 1}`}</p>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Urgency Section */}
+                  {funnelContent.urgencySection.enabled && (
+                    <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4 text-center">
+                      <div className="flex items-center justify-center gap-2 mb-2">
+                        <Clock className="w-5 h-5 text-destructive" />
+                        <span className="font-semibold text-destructive">Limited Time Offer</span>
+                      </div>
+                      <p className="text-sm text-destructive/80">
+                        Only {funnelContent.urgencySection.spotsRemaining} spots remaining this month!
+                      </p>
+                    </div>
+                  )}
+
                   {/* Trust Indicators */}
                   <div className="space-y-4">
                     <h2 className="text-xl font-semibold">Our Guarantee</h2>
