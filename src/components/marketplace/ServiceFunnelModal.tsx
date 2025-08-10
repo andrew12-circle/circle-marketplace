@@ -393,29 +393,50 @@ export const ServiceFunnelModal = ({
                 </div>
               )}
             </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20">
-              <h3 className="text-2xl font-bold mb-4">Why Choose {service.vendor?.name || 'This Service'}?</h3>
-              <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <div className="bg-green-500 rounded-full p-1">
-                    <TrendingUp className="w-4 h-4" />
-                  </div>
-                  <span className="text-lg">Average 250% ROI increase</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="bg-green-500 rounded-full p-1">
-                    <Users className="w-4 h-4" />
-                  </div>
-                  <span className="text-lg">500+ successful implementations</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="bg-green-500 rounded-full p-1">
-                    <Zap className="w-4 h-4" />
-                  </div>
-                  <span className="text-lg">Setup in 7 days or less</span>
+            {/* Conditional Benefits Section */}
+            {(service.funnel_content?.benefits?.length > 0 || 
+              (!service.funnel_content?.benefits && service.funnel_content !== null)) && (
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20">
+                <h3 className="text-2xl font-bold mb-4">
+                  Why Choose {service.vendor?.name || 'This Service'}?
+                </h3>
+                <div className="space-y-3">
+                  {service.funnel_content?.benefits?.length > 0 ? (
+                    // Custom benefits from funnel content
+                    service.funnel_content.benefits.map((item, i) => (
+                      <div key={i} className="flex items-center gap-3">
+                        <div className="bg-green-500 rounded-full p-1">
+                          <TrendingUp className="w-4 h-4" />
+                        </div>
+                        <span className="text-lg">{item.title}</span>
+                      </div>
+                    ))
+                  ) : (
+                    // Default benefits when section is enabled but no custom items
+                    <>
+                      <div className="flex items-center gap-3">
+                        <div className="bg-green-500 rounded-full p-1">
+                          <TrendingUp className="w-4 h-4" />
+                        </div>
+                        <span className="text-lg">Professional service delivery</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="bg-green-500 rounded-full p-1">
+                          <Users className="w-4 h-4" />
+                        </div>
+                        <span className="text-lg">Quality guarantee included</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="bg-green-500 rounded-full p-1">
+                          <Zap className="w-4 h-4" />
+                        </div>
+                        <span className="text-lg">Expert support provided</span>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
 
