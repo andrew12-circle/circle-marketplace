@@ -57,7 +57,7 @@ export const RebuiltFunnelTop: React.FC<RebuiltFunnelTopProps> = ({
   // CTA
   const ctaTitle = fc.cta?.title ?? "Ready to Transform Your Business?";
   const ctaSubtitle = fc.cta?.subtitle ?? (selectedPackage ? `${selectedPackage?.name} • ${selectedPackage?.price}` : "Custom pricing based on your needs");
-  const ctaButtons: Array<{ text: string; primary?: boolean; action?: "consult" | "cart" }> =
+  const ctaButtons: Array<{ text: string; primary?: boolean; action?: "consult" | "cart" | "website" }> =
     (fc.cta?.buttons || []).map((b: any) => ({ text: b.text, primary: b.primary, action: b.action }))
     || [];
   const ctaNote = fc.cta?.note ?? "Free consultation • No obligation • Fast response";
@@ -68,8 +68,11 @@ export const RebuiltFunnelTop: React.FC<RebuiltFunnelTopProps> = ({
 
   const [activeMedia, setActiveMedia] = useState<string>(mainMedia);
 
-  const handleCtaClick = (btn: { text: string; primary?: boolean; action?: "consult" | "cart" }) => {
+  const handleCtaClick = (btn: { text: string; primary?: boolean; action?: "consult" | "cart" | "website" }) => {
     if (btn.action === "cart") return onAddToCart();
+    if (btn.action === "website" && vendor?.website) {
+      return window.open(vendor.website, '_blank', 'noopener,noreferrer');
+    }
     // default to consultation
     return onScheduleConsultation();
   };
@@ -247,6 +250,7 @@ export const RebuiltFunnelTop: React.FC<RebuiltFunnelTopProps> = ({
                 {(ctaButtons?.length ? ctaButtons : [
                   { text: "Free Consultation", primary: true, action: "consult" as const },
                   { text: "Add to Cart", primary: false, action: "cart" as const },
+                  { text: "Website", primary: false, action: "website" as const },
                 ]).map((btn, i) => (
                   <Button
                     key={i}
@@ -256,6 +260,8 @@ export const RebuiltFunnelTop: React.FC<RebuiltFunnelTopProps> = ({
                   >
                     {btn.action === "cart" ? (
                       <ShoppingCart className="h-5 w-5 mr-2" />
+                    ) : btn.action === "website" ? (
+                      <ExternalLink className="h-5 w-5 mr-2" />
                     ) : (
                       <PhoneCall className="h-5 w-5 mr-2" />
                     )}
