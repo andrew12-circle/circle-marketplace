@@ -156,7 +156,7 @@ interface ServiceFunnelEditorModalProps {
   onOpenChange: (open: boolean) => void;
   funnelContent: FunnelContent;
   onChange: (content: FunnelContent) => void;
-  onSave: () => void;
+  onSave: () => Promise<void>;
   serviceName: string;
   pricingTiers?: PricingTier[];
   onPricingTiersChange?: (tiers: PricingTier[]) => void;
@@ -175,23 +175,40 @@ export const ServiceFunnelEditorModal = ({
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
 
+  // Timeout helper
+  const saveWithTimeout = (promise: Promise<void>, ms = 12000) => {
+    return Promise.race([
+      promise,
+      new Promise<never>((_, reject) => {
+        const id = window.setTimeout(() => {
+          reject(new Error('Save timed out. Please try again.'));
+        }, ms);
+        // Clear timeout if the main promise settles
+        promise.finally(() => window.clearTimeout(id));
+      })
+    ]);
+  };
+
   const handleSave = async () => {
+    console.log('[FunnelEditorModal] Save started');
+    setIsSaving(true);
     try {
-      setIsSaving(true);
-      await onSave();
+      await saveWithTimeout(onSave(), 12000);
+      console.log('[FunnelEditorModal] Save completed successfully');
       toast({
         title: "Changes Saved",
         description: "Your funnel changes have been saved successfully.",
       });
-    } catch (error) {
-      console.error('Save error:', error);
+    } catch (error: any) {
+      console.error('[FunnelEditorModal] Save error:', error);
       toast({
         title: "Save Failed",
-        description: "There was an error saving your changes. Please try again.",
+        description: error?.message || "There was an error saving your changes. Please try again.",
         variant: "destructive",
       });
     } finally {
       setIsSaving(false);
+      console.log('[FunnelEditorModal] Save finished (spinner cleared)');
     }
   };
 
@@ -210,6 +227,7 @@ export const ServiceFunnelEditorModal = ({
                 onClick={handleSave} 
                 className="flex items-center gap-2"
                 disabled={isSaving}
+                aria-busy={isSaving}
               >
                 <Save className="w-4 h-4" />
                 {isSaving ? 'Saving...' : 'Save Changes'}
