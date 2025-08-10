@@ -732,7 +732,7 @@ export const ServiceFunnelEditor = ({ funnelContent, onChange }: ServiceFunnelEd
                 </div>
 
                 {/* Content Area */}
-                <div className="flex-1 overflow-y-auto pr-2">
+                <div className="flex-1 overflow-y-auto pr-2 max-h-[calc(100vh-300px)] scrollbar-thin scrollbar-thumb-muted scrollbar-track-background">
                 
                 <TabsContent value="hero" className="space-y-4 mt-4">
                   <div className="space-y-3">
