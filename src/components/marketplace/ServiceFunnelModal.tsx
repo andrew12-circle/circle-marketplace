@@ -6,6 +6,7 @@ import { Separator } from "@/components/ui/separator";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import { useServiceReviews } from "@/hooks/useServiceReviews";
 import { 
   Star, 
   TrendingUp, 
@@ -178,7 +179,10 @@ export const ServiceFunnelModal = ({
   const { profile } = useAuth();
   const isProMember = profile?.is_pro_member || false;
   const riskLevel = determineServiceRisk(service.title, service.description);
-const { trackBooking, trackPurchase, trackOutboundClick } = useProviderTracking(service.id, isOpen);
+  const { trackBooking, trackPurchase, trackOutboundClick } = useProviderTracking(service.id, isOpen);
+  
+  // Fetch real reviews for this service
+  const { reviews, loading: reviewsLoading, error: reviewsError } = useServiceReviews(service.id);
 
   // Normalize funnel content variants
   const subHeadline = (service.funnel_content as any)?.subHeadline || (service.funnel_content as any)?.subheadline;
@@ -277,51 +281,37 @@ const { trackBooking, trackPurchase, trackOutboundClick } = useProviderTracking(
     }
   }, [isOpen, service.vendor?.name]);
 
-  // Mock reviews data
-  const reviews = [
-    {
-      id: 1,
-      author: "Jennifer Martinez",
-      title: "Top Producer, Realty One Group",
-      rating: 5,
-      date: "January 15, 2025",
-      verified: true,
-      review: "This service completely transformed my marketing approach. Saw a 150% increase in qualified leads within the first month. The team was professional and delivered exactly what they promised.",
-      helpful: 28,
-      comments: [
-        { author: "Mike R.", text: "What was your favorite feature of the service?" },
-        { author: "Jennifer Martinez", text: "The automated lead nurturing system was a game-changer for my workflow." }
-      ]
-    },
-    {
-      id: 2,
-      author: "Robert Chen",
-      title: "Century 21 Elite",
-      rating: 5,
-      date: "December 22, 2024",
-      verified: true,
-      review: "Outstanding ROI and excellent customer service. The implementation was smooth and the results exceeded my expectations. Highly recommend for any serious real estate professional.",
-      helpful: 19,
-      comments: [
-        { author: "Sarah K.", text: "How long did implementation take?" },
-        { author: "Robert Chen", text: "About 2 weeks from start to full deployment. Very smooth process." }
-      ]
-    },
-    {
-      id: 3,
-      author: "Amanda Thompson",
-      title: "Keller Williams Premier",
-      rating: 4,
-      date: "November 30, 2024",
-      verified: true,
-      review: "Great service overall with solid results. The only minor issue was initial setup took longer than expected, but support was very helpful throughout.",
-      helpful: 15,
-      comments: [
-        { author: "Tom W.", text: "Would you purchase again?" },
-        { author: "Amanda Thompson", text: "Absolutely! Already planning to upgrade to the premium package." }
-      ]
+  // Helper function to format review dates
+  const formatReviewDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    });
+  };
+
+  // Helper function to get reviewer title
+  const getReviewerTitle = (review: any) => {
+    if (review.author_company) {
+      const specialtyMap: Record<string, string> = {
+        'realtor': 'Real Estate Agent',
+        'mortgage': 'Mortgage Professional',
+        'insurance': 'Insurance Agent',
+        'marketing': 'Marketing Specialist',
+        'commercial': 'Commercial Agent',
+        'luxury': 'Luxury Specialist',
+        'investment': 'Investment Specialist'
+      };
+      
+      const primarySpecialty = review.author_specialties?.[0];
+      const titlePrefix = primarySpecialty ? specialtyMap[primarySpecialty] || 'Professional' : 'Professional';
+      return `${titlePrefix}, ${review.author_company}`;
     }
-  ];
+    return review.author_specialties?.[0] ? 
+      review.author_specialties[0].charAt(0).toUpperCase() + review.author_specialties[0].slice(1) + ' Professional' : 
+      'Verified User';
+  };
 
   const handleAddToCart = () => {
     addToCart({
@@ -1127,11 +1117,11 @@ const { trackBooking, trackPurchase, trackOutboundClick } = useProviderTracking(
                       <div key={review.id} className="border-b pb-4">
                         <div className="flex items-start gap-3">
                           <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center text-sm font-medium">
-                            {review.author.split(' ').map(n => n[0]).join('')}
+                            {review.author_name.split(' ').map(n => n[0]).join('')}
                           </div>
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-1">
-                              <span className="font-medium">{review.author}</span>
+                              <span className="font-medium">{review.author_name}</span>
                               {review.verified && (
                                 <Badge variant="outline" className="text-xs">
                                   ✓ Verified Purchase
@@ -1140,13 +1130,13 @@ const { trackBooking, trackPurchase, trackOutboundClick } = useProviderTracking(
                             </div>
                             <div className="flex items-center gap-2 mb-2">
                               {renderStarRating(review.rating)}
-                              <span className="text-sm text-muted-foreground">{review.date}</span>
+                              <span className="text-sm text-muted-foreground">{formatReviewDate(review.created_at)}</span>
                             </div>
                             <p className="text-sm mb-3">{review.review}</p>
                             <div className="flex items-center gap-4 text-xs text-muted-foreground">
                               <button className="flex items-center gap-1 hover:text-foreground">
                                 <ThumbsUp className="w-3 h-3" />
-                                Helpful ({review.helpful})
+                                Helpful ({review.helpful_count || 0})
                               </button>
                               <button className="flex items-center gap-1 hover:text-foreground">
                                 <ThumbsDown className="w-3 h-3" />
@@ -1157,13 +1147,9 @@ const { trackBooking, trackPurchase, trackOutboundClick } = useProviderTracking(
                               </button>
                             </div>
                             
-                            {/* Comments Section */}
+                            {/* Comments Section - Feature coming soon */}
                             <div className="mt-3 ml-4 space-y-2">
-                              {review.comments.map((comment, i) => (
-                                <div key={i} className="text-xs bg-muted/50 p-2 rounded">
-                                  <span className="font-medium">{comment.author}</span> replied: "{comment.text}"
-                                </div>
-                              ))}
+                              {/* Comments will be added as a separate feature */}
                             </div>
                           </div>
                         </div>
@@ -1257,15 +1243,7 @@ const { trackBooking, trackPurchase, trackOutboundClick } = useProviderTracking(
                             
                             {/* Agent Comments */}
                             <div className="space-y-2">
-                              {agentReview.comments.map((comment, i) => (
-                                <div key={i} className="bg-muted/30 p-3 rounded-lg text-sm">
-                                  <span className="font-medium text-primary">{comment.author}:</span>
-                                  <span className="ml-2">{comment.text}</span>
-                                </div>
-                              ))}
-                              <Button variant="ghost" size="sm" className="text-xs">
-                                Add a comment
-                              </Button>
+                              {/* Comments feature will be added later */}
                             </div>
                           </div>
                         </div>
