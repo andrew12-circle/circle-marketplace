@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -42,7 +42,8 @@ import {
   ShoppingCart,
   Eye,
   Code,
-  Verified
+  Verified,
+  Maximize2
 } from 'lucide-react';
 import { ServiceFunnelModal } from './ServiceFunnelModal';
 
@@ -211,6 +212,15 @@ export const ServiceFunnelEditor = ({ funnelContent, onChange }: ServiceFunnelEd
       description: ''
     }));
     updateContent('media', [...funnelContent.media, ...mediaItems]);
+  };
+
+  const previewRef = useRef<HTMLDivElement>(null);
+  const enterFullscreen = () => {
+    const el: any = previewRef.current;
+    if (!el) return;
+    if (el.requestFullscreen) el.requestFullscreen();
+    else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+    else if (el.msRequestFullscreen) el.msRequestFullscreen();
   };
 
   const defaultHtmlTemplate = `<!DOCTYPE html>
@@ -1659,10 +1669,14 @@ export const ServiceFunnelEditor = ({ funnelContent, onChange }: ServiceFunnelEd
                   <Smartphone className="w-4 h-4 mr-2" />
                   Mobile
                 </Button>
+                <Button variant="outline" size="sm" onClick={enterFullscreen}>
+                  <Maximize2 className="w-4 h-4 mr-2" />
+                  Full screen
+                </Button>
               </div>
             </CardHeader>
             <CardContent className="flex-1">
-              <div className={`border rounded-lg overflow-hidden bg-background ${showAgentView ? 'max-w-sm mx-auto' : ''}`}>
+              <div ref={previewRef} className={`border rounded-lg overflow-hidden bg-background ${showAgentView ? 'max-w-sm mx-auto' : ''}`}>
                 {/* Hero Section - Full Width */}
                 <div className="relative bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6">
                   <div className="absolute inset-0 bg-black/20"></div>
