@@ -5,6 +5,14 @@ import { X, Save } from 'lucide-react';
 import { ServiceFunnelEditor } from './ServiceFunnelEditor';
 import { ServicePricingTiersEditor } from './ServicePricingTiersEditor';
 
+interface ThumbnailItem {
+  id: string;
+  label: string;
+  icon: string;
+  mediaUrl?: string;
+  description?: string;
+}
+
 interface FunnelContent {
   headline: string;
   subheadline: string;
@@ -40,6 +48,12 @@ interface FunnelContent {
     proOnly?: boolean;
     savings?: string;
   }[];
+
+  thumbnailGallery: {
+    enabled: boolean;
+    title: string;
+    items: ThumbnailItem[];
+  };
   
   socialProof: {
     testimonials: {

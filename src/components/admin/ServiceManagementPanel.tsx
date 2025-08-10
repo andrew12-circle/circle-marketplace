@@ -84,6 +84,14 @@ interface Service {
   };
 }
 
+interface ThumbnailItem {
+  id: string;
+  label: string;
+  icon: string;
+  mediaUrl?: string;
+  description?: string;
+}
+
 interface FunnelContent {
   headline: string;
   subheadline: string;
@@ -116,6 +124,11 @@ interface FunnelContent {
     proOnly?: boolean;
     savings?: string;
   }[];
+  thumbnailGallery: {
+    enabled: boolean;
+    title: string;
+    items: ThumbnailItem[];
+  };
   socialProof: {
     testimonials: {
       id: string;
@@ -177,6 +190,16 @@ export const ServiceManagementPanel = () => {
     },
     media: [],
     packages: [],
+    thumbnailGallery: {
+      enabled: false,
+      title: 'What You\'ll Get',
+      items: [
+        { id: '1', label: 'Demo Video', icon: 'video' },
+        { id: '2', label: 'Case Study', icon: 'chart' },
+        { id: '3', label: 'Training', icon: 'book' },
+        { id: '4', label: 'Results', icon: 'trophy' }
+      ]
+    },
     socialProof: {
       testimonials: [],
       stats: []

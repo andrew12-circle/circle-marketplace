@@ -460,24 +460,34 @@ export const ServiceFunnelModal = ({
             </div>
 
             {/* Thumbnail Gallery */}
-            <div className="grid grid-cols-4 gap-2">
-              {[
-                { label: "Demo Video", icon: "video" },
-                { label: "Case Study", icon: "chart" },
-                { label: "Training", icon: "book" },
-                { label: "Results", icon: "trophy" }
-              ].map((item, i) => (
-                <div key={i} className="aspect-square bg-muted rounded border-2 border-transparent hover:border-primary cursor-pointer relative overflow-hidden">
-                  <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
-                    {item.icon === "video" && <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center"><div className="w-0 h-0 border-t-[6px] border-t-transparent border-l-[10px] border-l-white border-b-[6px] border-b-transparent ml-0.5"></div></div>}
-                    {item.icon === "chart" && <TrendingUp className="w-8 h-8 text-green-500" />}
-                    {item.icon === "book" && <Building className="w-8 h-8 text-blue-500" />}
-                    {item.icon === "trophy" && <Trophy className="w-8 h-8 text-yellow-500" />}
-                    <span className="text-xs text-center mt-1 px-1">{item.label}</span>
-                  </div>
+            {(service.funnel_content as any)?.thumbnailGallery?.enabled && (
+              <>
+                {(service.funnel_content as any).thumbnailGallery.title && (
+                  <h3 className="font-bold text-lg mb-3">{(service.funnel_content as any).thumbnailGallery.title}</h3>
+                )}
+                <div className="grid grid-cols-4 gap-2">
+                  {((service.funnel_content as any).thumbnailGallery.items?.length > 0 
+                    ? (service.funnel_content as any).thumbnailGallery.items 
+                    : [
+                        { id: '1', label: "Demo Video", icon: "video" },
+                        { id: '2', label: "Case Study", icon: "chart" },
+                        { id: '3', label: "Training", icon: "book" },
+                        { id: '4', label: "Results", icon: "trophy" }
+                      ]
+                  ).map((item: any, i: number) => (
+                    <div key={item.id || i} className="aspect-square bg-muted rounded border-2 border-transparent hover:border-primary cursor-pointer relative overflow-hidden">
+                      <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
+                        {item.icon === "video" && <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center"><div className="w-0 h-0 border-t-[6px] border-t-transparent border-l-[10px] border-l-white border-b-[6px] border-b-transparent ml-0.5"></div></div>}
+                        {item.icon === "chart" && <TrendingUp className="w-8 h-8 text-green-500" />}
+                        {item.icon === "book" && <Building className="w-8 h-8 text-blue-500" />}
+                        {item.icon === "trophy" && <Trophy className="w-8 h-8 text-yellow-500" />}
+                        <span className="text-xs text-center mt-1 px-1">{item.label}</span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              </>
+            )}
 
             {/* Social Proof Cards */}
             <div className="space-y-4">

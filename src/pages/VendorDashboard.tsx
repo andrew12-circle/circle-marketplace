@@ -95,6 +95,16 @@ export const VendorDashboard = () => {
     },
     media: [],
     packages: [],
+    thumbnailGallery: {
+      enabled: false,
+      title: 'What You\'ll Get',
+      items: [
+        { id: '1', label: 'Demo Video', icon: 'video' },
+        { id: '2', label: 'Case Study', icon: 'chart' },
+        { id: '3', label: 'Training', icon: 'book' },
+        { id: '4', label: 'Results', icon: 'trophy' }
+      ]
+    },
     socialProof: {
       testimonials: [],
       stats: []

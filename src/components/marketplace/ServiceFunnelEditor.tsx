@@ -66,6 +66,14 @@ interface Package {
   savings?: string;
 }
 
+interface ThumbnailItem {
+  id: string;
+  label: string;
+  icon: string;
+  mediaUrl?: string;
+  description?: string;
+}
+
 interface FunnelContent {
   headline: string;
   subheadline: string;
@@ -85,6 +93,12 @@ interface FunnelContent {
   media: MediaItem[];
   
   packages: Package[];
+
+  thumbnailGallery: {
+    enabled: boolean;
+    title: string;
+    items: ThumbnailItem[];
+  };
   
   socialProof: {
     testimonials: {
@@ -557,13 +571,14 @@ export const ServiceFunnelEditor = ({ funnelContent, onChange }: ServiceFunnelEd
             </CardHeader>
             <CardContent className="flex-1">
               <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full">
-                <TabsList className="grid w-full grid-cols-7">
+                <TabsList className="grid w-full grid-cols-8">
                   <TabsTrigger value="hero">Hero</TabsTrigger>
                   <TabsTrigger value="benefits">Benefits</TabsTrigger>
                   <TabsTrigger value="pricing">Pricing</TabsTrigger>
                   <TabsTrigger value="social">Social Proof</TabsTrigger>
                   <TabsTrigger value="trust">Trust & Contact</TabsTrigger>
                   <TabsTrigger value="cta">Call to Action</TabsTrigger>
+                  <TabsTrigger value="thumbnails">Thumbnails</TabsTrigger>
                   <TabsTrigger value="media">Media</TabsTrigger>
                 </TabsList>
                 
@@ -1062,6 +1077,142 @@ export const ServiceFunnelEditor = ({ funnelContent, onChange }: ServiceFunnelEd
                         />
                       )}
                     </div>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="thumbnails" className="space-y-4 mt-4">
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="text-lg font-semibold">Thumbnail Gallery</h3>
+                        <p className="text-sm text-muted-foreground">Configure the thumbnail gallery section</p>
+                      </div>
+                      <Switch
+                        checked={funnelContent.thumbnailGallery.enabled}
+                        onCheckedChange={(checked) => updateContent('thumbnailGallery.enabled', checked)}
+                      />
+                    </div>
+
+                    {funnelContent.thumbnailGallery.enabled && (
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="gallery-title">Section Title</Label>
+                          <Input
+                            id="gallery-title"
+                            value={funnelContent.thumbnailGallery.title}
+                            onChange={(e) => updateContent('thumbnailGallery.title', e.target.value)}
+                            placeholder="What You'll Get"
+                          />
+                        </div>
+
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <Label>Thumbnail Items</Label>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                const newItem = {
+                                  id: Date.now().toString(),
+                                  label: '',
+                                  icon: 'star',
+                                  mediaUrl: '',
+                                  description: ''
+                                };
+                                updateContent('thumbnailGallery.items', [...funnelContent.thumbnailGallery.items, newItem]);
+                              }}
+                            >
+                              <Plus className="w-4 h-4 mr-2" />
+                              Add Item
+                            </Button>
+                          </div>
+
+                          {funnelContent.thumbnailGallery.items.map((item, index) => (
+                            <Card key={item.id} className="p-4">
+                              <div className="space-y-3">
+                                <div className="flex items-center justify-between">
+                                  <h4 className="font-medium">Item {index + 1}</h4>
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => {
+                                      const newItems = funnelContent.thumbnailGallery.items.filter((_, i) => i !== index);
+                                      updateContent('thumbnailGallery.items', newItems);
+                                    }}
+                                  >
+                                    <X className="w-4 h-4" />
+                                  </Button>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-3">
+                                  <div>
+                                    <Label>Label</Label>
+                                    <Input
+                                      value={item.label}
+                                      onChange={(e) => {
+                                        const newItems = [...funnelContent.thumbnailGallery.items];
+                                        newItems[index] = { ...item, label: e.target.value };
+                                        updateContent('thumbnailGallery.items', newItems);
+                                      }}
+                                      placeholder="Demo Video"
+                                    />
+                                  </div>
+                                  <div>
+                                    <Label>Icon</Label>
+                                    <select
+                                      className="w-full p-2 border rounded"
+                                      value={item.icon}
+                                      onChange={(e) => {
+                                        const newItems = [...funnelContent.thumbnailGallery.items];
+                                        newItems[index] = { ...item, icon: e.target.value };
+                                        updateContent('thumbnailGallery.items', newItems);
+                                      }}
+                                    >
+                                      <option value="video">Video</option>
+                                      <option value="chart">Chart</option>
+                                      <option value="book">Book</option>
+                                      <option value="trophy">Trophy</option>
+                                      <option value="star">Star</option>
+                                      <option value="target">Target</option>
+                                      <option value="zap">Lightning</option>
+                                    </select>
+                                  </div>
+                                </div>
+
+                                <div>
+                                  <Label>Media URL (optional)</Label>
+                                  <Input
+                                    value={item.mediaUrl || ''}
+                                    onChange={(e) => {
+                                      const newItems = [...funnelContent.thumbnailGallery.items];
+                                      newItems[index] = { ...item, mediaUrl: e.target.value };
+                                      updateContent('thumbnailGallery.items', newItems);
+                                    }}
+                                    placeholder="https://..."
+                                  />
+                                </div>
+
+                                <div>
+                                  <Label>Description (optional)</Label>
+                                  <Textarea
+                                    value={item.description || ''}
+                                    onChange={(e) => {
+                                      const newItems = [...funnelContent.thumbnailGallery.items];
+                                      newItems[index] = { ...item, description: e.target.value };
+                                      updateContent('thumbnailGallery.items', newItems);
+                                    }}
+                                    placeholder="Brief description..."
+                                    rows={2}
+                                  />
+                                </div>
+                              </div>
+                            </Card>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </TabsContent>
 
