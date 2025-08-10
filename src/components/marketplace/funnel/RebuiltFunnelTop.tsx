@@ -36,7 +36,7 @@ export const RebuiltFunnelTop: React.FC<RebuiltFunnelTopProps> = ({
 
   // MEDIA
   const mainMedia = fc.media?.main ?? service?.image_url ?? "";
-  const thumbnails: Array<{ src: string; alt?: string }> = fc.media?.thumbnails ?? [];
+  const mediaSpots = fc.media?.spots ?? [];
   const showPlayOverlay = fc.media?.showPlayButton ?? false;
 
   // TESTIMONIALS
@@ -152,20 +152,105 @@ export const RebuiltFunnelTop: React.FC<RebuiltFunnelTopProps> = ({
               </div>
             )}
           </div>
-          {!!thumbnails?.length && (
-            <div className="grid grid-cols-4 gap-2">
-              {thumbnails.map((t, i) => (
-                <button
-                  key={i}
-                  onClick={() => setActiveMedia(t.src)}
-                  className={`aspect-square rounded-md border ${activeMedia === t.src ? "border-primary" : "border-transparent"} hover:border-primary overflow-hidden`}
-                  aria-label={`Show media ${i + 1}`}
-                >
-                  <img src={t.src} alt={t.alt || `Media ${i + 1}`} className="w-full h-full object-cover" />
-                </button>
-              ))}
-            </div>
-          )}
+          
+          {/* Media Spots - 4 specific spots that can be conditionally shown */}
+          <div className="grid grid-cols-4 gap-3">
+            {/* Demo Spot */}
+            {mediaSpots.find((spot: any) => spot.type === 'demo') && (
+              <button
+                onClick={() => setActiveMedia(mediaSpots.find((spot: any) => spot.type === 'demo').src)}
+                className={`aspect-video rounded-lg border-2 overflow-hidden transition-all ${
+                  activeMedia === mediaSpots.find((spot: any) => spot.type === 'demo').src ? "border-primary shadow-md" : "border-muted hover:border-primary/50"
+                }`}
+                aria-label="View Demo"
+              >
+                <div className="relative w-full h-full bg-muted flex items-center justify-center">
+                  {mediaSpots.find((spot: any) => spot.type === 'demo').src?.endsWith('.mp4') ? (
+                    <video src={mediaSpots.find((spot: any) => spot.type === 'demo').src} className="w-full h-full object-cover" />
+                  ) : (
+                    <img src={mediaSpots.find((spot: any) => spot.type === 'demo').src} alt="Demo" className="w-full h-full object-cover" />
+                  )}
+                  <div className="absolute inset-0 bg-black/10 flex items-center justify-center">
+                    <div className="bg-background/80 rounded px-2 py-1">
+                      <span className="text-xs font-medium text-foreground">Demo</span>
+                    </div>
+                  </div>
+                </div>
+              </button>
+            )}
+            
+            {/* Case Study Spot */}
+            {mediaSpots.find((spot: any) => spot.type === 'case-study') && (
+              <button
+                onClick={() => setActiveMedia(mediaSpots.find((spot: any) => spot.type === 'case-study').src)}
+                className={`aspect-video rounded-lg border-2 overflow-hidden transition-all ${
+                  activeMedia === mediaSpots.find((spot: any) => spot.type === 'case-study').src ? "border-primary shadow-md" : "border-muted hover:border-primary/50"
+                }`}
+                aria-label="View Case Study"
+              >
+                <div className="relative w-full h-full bg-muted flex items-center justify-center">
+                  {mediaSpots.find((spot: any) => spot.type === 'case-study').src?.endsWith('.mp4') ? (
+                    <video src={mediaSpots.find((spot: any) => spot.type === 'case-study').src} className="w-full h-full object-cover" />
+                  ) : (
+                    <img src={mediaSpots.find((spot: any) => spot.type === 'case-study').src} alt="Case Study" className="w-full h-full object-cover" />
+                  )}
+                  <div className="absolute inset-0 bg-black/10 flex items-center justify-center">
+                    <div className="bg-background/80 rounded px-2 py-1">
+                      <span className="text-xs font-medium text-foreground">Case Study</span>
+                    </div>
+                  </div>
+                </div>
+              </button>
+            )}
+            
+            {/* Features Spot */}
+            {mediaSpots.find((spot: any) => spot.type === 'features') && (
+              <button
+                onClick={() => setActiveMedia(mediaSpots.find((spot: any) => spot.type === 'features').src)}
+                className={`aspect-video rounded-lg border-2 overflow-hidden transition-all ${
+                  activeMedia === mediaSpots.find((spot: any) => spot.type === 'features').src ? "border-primary shadow-md" : "border-muted hover:border-primary/50"
+                }`}
+                aria-label="View Features"
+              >
+                <div className="relative w-full h-full bg-muted flex items-center justify-center">
+                  {mediaSpots.find((spot: any) => spot.type === 'features').src?.endsWith('.mp4') ? (
+                    <video src={mediaSpots.find((spot: any) => spot.type === 'features').src} className="w-full h-full object-cover" />
+                  ) : (
+                    <img src={mediaSpots.find((spot: any) => spot.type === 'features').src} alt="Features" className="w-full h-full object-cover" />
+                  )}
+                  <div className="absolute inset-0 bg-black/10 flex items-center justify-center">
+                    <div className="bg-background/80 rounded px-2 py-1">
+                      <span className="text-xs font-medium text-foreground">Features</span>
+                    </div>
+                  </div>
+                </div>
+              </button>
+            )}
+            
+            {/* Results Spot */}
+            {mediaSpots.find((spot: any) => spot.type === 'results') && (
+              <button
+                onClick={() => setActiveMedia(mediaSpots.find((spot: any) => spot.type === 'results').src)}
+                className={`aspect-video rounded-lg border-2 overflow-hidden transition-all ${
+                  activeMedia === mediaSpots.find((spot: any) => spot.type === 'results').src ? "border-primary shadow-md" : "border-muted hover:border-primary/50"
+                }`}
+                aria-label="View Results"
+              >
+                <div className="relative w-full h-full bg-muted flex items-center justify-center">
+                  {mediaSpots.find((spot: any) => spot.type === 'results').src?.endsWith('.mp4') ? (
+                    <video src={mediaSpots.find((spot: any) => spot.type === 'results').src} className="w-full h-full object-cover" />
+                  ) : (
+                    <img src={mediaSpots.find((spot: any) => spot.type === 'results').src} alt="Results" className="w-full h-full object-cover" />
+                  )}
+                  <div className="absolute inset-0 bg-black/10 flex items-center justify-center">
+                    <div className="bg-background/80 rounded px-2 py-1">
+                      <span className="text-xs font-medium text-foreground">Results</span>
+                    </div>
+                  </div>
+                </div>
+              </button>
+            )}
+          </div>
 
           {!!testimonialsItems?.length && (
             <div className="space-y-3">
