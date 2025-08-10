@@ -363,6 +363,7 @@ export const ServiceFunnelModal = ({
             <X className="h-6 w-6" />
           </Button>
           
+          <div className="absolute inset-0 bg-black/20"></div>
           <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
             <div className="space-y-4">
               <div className="flex items-center gap-2 mb-2">
