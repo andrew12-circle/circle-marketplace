@@ -945,20 +945,40 @@ export const ServiceFunnelModal = ({
               <p className="text-lg text-muted-foreground">Select the perfect plan for your business needs</p>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+            <div
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto"
+              role="radiogroup"
+              aria-label="Choose your package"
+            >
               {packages.map((pkg) => (
-                <Card 
-                  key={pkg.id} 
-                  className={`relative p-6 cursor-pointer transition-all hover:shadow-lg ${
-                    selectedPackage === pkg.id ? 'ring-2 ring-primary border-primary' : ''
-                  } ${pkg.popular ? 'border-primary/50 shadow-md' : ''}`}
+                <Card
+                  key={pkg.id}
+                  role="radio"
+                  aria-checked={selectedPackage === pkg.id}
+                  tabIndex={0}
+                  className={`relative p-6 cursor-pointer transition-all hover:shadow-lg h-full flex flex-col ${
+                    selectedPackage === pkg.id ? 'ring-2 ring-primary border-primary shadow-md' : ''
+                  } ${pkg.popular ? 'border-primary/50 shadow-sm' : ''}`}
                   onClick={() => setSelectedPackage(pkg.id)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setSelectedPackage(pkg.id);
+                    }
+                  }}
                 >
                   {pkg.popular && (
                     <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                       <Badge className="bg-primary text-primary-foreground px-3 py-1">
                         Most Popular
                       </Badge>
+                    </div>
+                  )}
+
+                  {selectedPackage === pkg.id && (
+                    <div className="absolute top-3 right-3 inline-flex items-center gap-1 rounded-full border bg-background/80 backdrop-blur px-2 py-1 text-xs">
+                      <CheckCircle className="w-3.5 h-3.5 text-primary" />
+                      <span>Selected</span>
                     </div>
                   )}
                   
@@ -982,7 +1002,7 @@ export const ServiceFunnelModal = ({
                     </div>
                   </div>
                   
-                  <div className="space-y-3 mb-6">
+                  <div className="space-y-3 mb-6 flex-1">
                     {pkg.features.map((feature, index) => (
                       <div key={index} className="flex items-center gap-2">
                         <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
