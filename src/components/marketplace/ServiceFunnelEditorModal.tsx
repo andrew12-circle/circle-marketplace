@@ -1,7 +1,7 @@
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { X, Save } from 'lucide-react';
+import { Save } from 'lucide-react';
 import { ServiceFunnelEditor } from './ServiceFunnelEditor';
 import { ServicePricingTiersEditor } from './ServicePricingTiersEditor';
 import { useState } from 'react';
@@ -213,13 +213,6 @@ export const ServiceFunnelEditorModal = ({
               >
                 <Save className="w-4 h-4" />
                 {isSaving ? 'Saving...' : 'Save Changes'}
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="icon"
-                onClick={() => onOpenChange(false)}
-              >
-                <X className="w-4 h-4" />
               </Button>
             </div>
           </div>
