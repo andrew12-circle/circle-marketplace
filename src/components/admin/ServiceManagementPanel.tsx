@@ -16,7 +16,8 @@ import {
   Eye,
   Building,
   Tag,
-  ShoppingCart
+  ShoppingCart,
+  CheckCircle
 } from 'lucide-react';
 import { ServiceFunnelEditorModal } from '@/components/marketplace/ServiceFunnelEditorModal';
 import { ServicePricingTiersEditor } from '@/components/marketplace/ServicePricingTiersEditor';
@@ -202,6 +203,12 @@ interface FunnelContent {
   };
 }
 
+type SaveResult = {
+  savedAt?: string;
+  verified?: boolean;
+  message?: string;
+};
+
 const safeParseJSON = (val: string) => {
   try { return JSON.parse(val); } catch { return null; }
 };
@@ -220,6 +227,7 @@ export const ServiceManagementPanel = () => {
   const [showFunnelPreview, setShowFunnelPreview] = useState(false);
   const [editForm, setEditForm] = useState<Partial<Service>>({});
   const [error, setError] = useState<string | null>(null);
+  const [lastFunnelSavedAt, setLastFunnelSavedAt] = useState<string | null>(null);
 
   // Default funnel content for new services
   const [funnelContent, setFunnelContent] = useState<FunnelContent>({
@@ -556,12 +564,12 @@ export const ServiceManagementPanel = () => {
     }
   };
 
-  const handleFunnelSave = async () => {
-    if (!selectedService) return;
+  const handleFunnelSave = async (): Promise<SaveResult> => {
+    if (!selectedService) return { savedAt: new Date().toISOString(), verified: false };
 
     try {
       // Save the funnel content to the database
-      const { error } = await supabase
+      const { error: updateError } = await supabase
         .from('services')
         .update({ 
           funnel_content: JSON.parse(JSON.stringify(funnelContent)),
@@ -569,16 +577,32 @@ export const ServiceManagementPanel = () => {
         })
         .eq('id', selectedService.id);
 
-      if (error) throw error;
+      if (updateError) throw updateError;
+
+      // Read back to verify persistence
+      const { data: verifyRow, error: fetchError } = await supabase
+        .from('services')
+        .select('id, funnel_content, pricing_tiers, updated_at')
+        .eq('id', selectedService.id)
+        .maybeSingle();
+
+      if (fetchError) throw fetchError;
+
+      const savedAt = verifyRow?.updated_at || new Date().toISOString();
+      const verified = !!verifyRow &&
+        JSON.stringify(verifyRow.funnel_content ?? null) === JSON.stringify(funnelContent) &&
+        JSON.stringify(verifyRow.pricing_tiers ?? null) === JSON.stringify(pricingTiers);
 
       // Update local state
       const updatedService = { 
         ...selectedService, 
         funnel_content: funnelContent,
-        pricing_tiers: pricingTiers
+        pricing_tiers: pricingTiers,
+        updated_at: savedAt as any
       };
       setSelectedService(updatedService);
       setServices(services.map(s => s.id === selectedService.id ? updatedService : s));
+      setLastFunnelSavedAt(savedAt);
 
       // Optimistically update marketplace cache so front-end reflects changes immediately
       queryClient.setQueryData(QUERY_KEYS.marketplaceCombined, (prev: any) => {
@@ -596,15 +620,15 @@ export const ServiceManagementPanel = () => {
         return updated;
       });
 
-
       toast({
         title: 'Success',
-        description: 'Service funnel updated successfully',
+        description: verified ? 'Service funnel saved and verified' : 'Service funnel saved',
       });
-      // Refresh marketplace data so changes are visible immediately
+      // Refresh marketplace data so changes are visible immediately (non-blocking)
       supabase.functions.invoke('warm-marketplace-cache').catch((e) => console.warn('Cache warm failed', e));
       invalidateCache.invalidateAll();
-      setShowFunnelEditor(false);
+
+      return { savedAt, verified };
     } catch (error) {
       console.error('Error saving funnel:', error);
       toast({
@@ -612,6 +636,7 @@ export const ServiceManagementPanel = () => {
         description: 'Failed to save funnel changes',
         variant: 'destructive',
       });
+      return { savedAt: new Date().toISOString(), verified: false };
     }
   };
 

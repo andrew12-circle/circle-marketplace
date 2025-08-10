@@ -1,10 +1,10 @@
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Save } from 'lucide-react';
+import { Save, CheckCircle } from 'lucide-react';
 import { ServiceFunnelEditor } from './ServiceFunnelEditor';
 import { ServicePricingTiersEditor } from './ServicePricingTiersEditor';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 
 interface ThumbnailItem {
@@ -151,12 +151,19 @@ interface PricingTier {
   position: number;
 }
 
+// Save result returned by parent after persisting to DB
+type SaveResult = {
+  savedAt?: string;
+  verified?: boolean;
+  message?: string;
+};
+
 interface ServiceFunnelEditorModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   funnelContent: FunnelContent;
   onChange: (content: FunnelContent) => void;
-  onSave: () => Promise<void>;
+  onSave: () => Promise<void | SaveResult>;
   serviceName: string;
   pricingTiers?: PricingTier[];
   onPricingTiersChange?: (tiers: PricingTier[]) => void;
@@ -173,10 +180,33 @@ export const ServiceFunnelEditorModal = ({
   onPricingTiersChange
 }: ServiceFunnelEditorModalProps) => {
   const [isSaving, setIsSaving] = useState(false);
+  const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
+  const [verified, setVerified] = useState<boolean | null>(null);
+  const [baseline, setBaseline] = useState<{ funnel: string; tiers: string }>({ funnel: '', tiers: '' });
   const { toast } = useToast();
 
-  // Timeout helper
-  const saveWithTimeout = (promise: Promise<void>, ms = 12000) => {
+  const currentSerialized = useMemo(() => ({
+    funnel: JSON.stringify(funnelContent),
+    tiers: JSON.stringify(pricingTiers || [])
+  }), [funnelContent, pricingTiers]);
+
+  const isDirty = currentSerialized.funnel !== baseline.funnel || currentSerialized.tiers !== baseline.tiers;
+
+  useEffect(() => {
+    if (open) {
+      setBaseline({
+        funnel: JSON.stringify(funnelContent),
+        tiers: JSON.stringify(pricingTiers || [])
+      });
+      // Reset saved status when reopening
+      setLastSavedAt(null);
+      setVerified(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
+  // Timeout helper (generic)
+  const saveWithTimeout = <T,>(promise: Promise<T>, ms = 12000): Promise<T> => {
     return Promise.race([
       promise,
       new Promise<never>((_, reject) => {
@@ -193,8 +223,19 @@ export const ServiceFunnelEditorModal = ({
     console.log('[FunnelEditorModal] Save started');
     setIsSaving(true);
     try {
-      await saveWithTimeout(onSave(), 12000);
+      const result = await saveWithTimeout(onSave(), 12000) as SaveResult | void;
       console.log('[FunnelEditorModal] Save completed successfully');
+      const savedTime = (result && typeof result === 'object' && 'savedAt' in result && result.savedAt)
+        ? result.savedAt as string
+        : new Date().toISOString();
+      setLastSavedAt(savedTime);
+      if (result && typeof result === 'object' && 'verified' in result) {
+        setVerified((result as SaveResult).verified ?? null);
+      } else {
+        setVerified(null);
+      }
+      // Snapshot current as baseline now that it's saved
+      setBaseline(currentSerialized);
       toast({
         title: "Changes Saved",
         description: "Your funnel changes have been saved successfully.",
@@ -222,17 +263,23 @@ export const ServiceFunnelEditorModal = ({
               <h2 className="text-2xl font-bold">Edit Service Funnel</h2>
               <p className="text-muted-foreground">Editing: {serviceName}</p>
             </div>
-            <div className="flex items-center gap-3">
-              <Button 
-                onClick={handleSave} 
-                className="flex items-center gap-2"
-                disabled={isSaving}
-                aria-busy={isSaving}
-              >
-                <Save className="w-4 h-4" />
-                {isSaving ? 'Saving...' : 'Save Changes'}
-              </Button>
-            </div>
+              <div className="flex items-center gap-3">
+                {lastSavedAt && (
+                  <div className="hidden sm:flex items-center gap-2 text-xs text-muted-foreground mr-2">
+                    <CheckCircle className="w-4 h-4" />
+                    <span>{verified ? 'Verified saved' : 'Saved'} · {new Date(lastSavedAt).toLocaleTimeString()}</span>
+                  </div>
+                )}
+                <Button 
+                  onClick={handleSave} 
+                  className="flex items-center gap-2"
+                  disabled={isSaving || !isDirty}
+                  aria-busy={isSaving}
+                >
+                  <Save className="w-4 h-4" />
+                  {isSaving ? 'Saving...' : (isDirty ? 'Save Changes' : 'Saved')}
+                </Button>
+              </div>
           </div>
 
           {/* Content */}
