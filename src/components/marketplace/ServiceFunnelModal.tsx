@@ -39,6 +39,8 @@ import { ConsultationFlow } from "./ConsultationFlow";
 import { EnhancedProviderIntegration } from "./EnhancedProviderIntegration";
 import { useProviderTracking } from "@/hooks/useProviderTracking";
 import { supabase } from "@/integrations/supabase/client";
+import { ReviewRatingSystem } from "@/components/marketplace/ReviewRatingSystem";
+import { SafeHTML } from "@/utils/htmlSanitizer";
 
 interface Service {
   id: string;
@@ -153,8 +155,13 @@ export const ServiceFunnelModal = ({
   const { profile } = useAuth();
   const isProMember = profile?.is_pro_member || false;
   const riskLevel = determineServiceRisk(service.title, service.description);
-  const { trackBooking, trackPurchase, trackOutboundClick } = useProviderTracking(service.id, isOpen);
-  
+const { trackBooking, trackPurchase, trackOutboundClick } = useProviderTracking(service.id, isOpen);
+
+  // Normalize funnel content variants
+  const subHeadline = (service.funnel_content as any)?.subHeadline || (service.funnel_content as any)?.subheadline;
+  const benefits = (service.funnel_content as any)?.benefits || (service.funnel_content as any)?.whyChooseUs?.benefits || [];
+  const customSections = (service.funnel_content as any)?.customSections || [];
+
   // Use pricing tiers if available, otherwise fallback to default packages
   const packages = service.pricing_tiers?.length ? 
     service.pricing_tiers.map(tier => ({
@@ -382,7 +389,7 @@ export const ServiceFunnelModal = ({
                 {service.funnel_content?.headline || service.title}
               </h1>
               <p className="text-xl text-blue-100">
-                {service.funnel_content?.subHeadline || "Transform your real estate business with our proven system"}
+                {subHeadline || "Transform your real estate business with our proven system"}
               </p>
               {service.vendor && (
                 <div className="flex items-center gap-4">

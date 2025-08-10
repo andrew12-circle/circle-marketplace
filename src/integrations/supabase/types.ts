@@ -2230,6 +2230,39 @@ export type Database = {
         }
         Relationships: []
       }
+      funnel_templates: {
+        Row: {
+          created_at: string | null
+          id: string
+          industry_type: string | null
+          is_active: boolean | null
+          layout_config: Json | null
+          template_description: string | null
+          template_name: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          industry_type?: string | null
+          is_active?: boolean | null
+          layout_config?: Json | null
+          template_description?: string | null
+          template_name: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          industry_type?: string | null
+          is_active?: boolean | null
+          layout_config?: Json | null
+          template_description?: string | null
+          template_name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       image_cache: {
         Row: {
           cached_url: string
@@ -2517,6 +2550,54 @@ export type Database = {
         }
         Relationships: []
       }
+      outbound_clicks: {
+        Row: {
+          agent_cookie: string | null
+          created_at: string
+          destination_url: string
+          final_url: string | null
+          id: string
+          ip_address: unknown | null
+          metadata: Json
+          referral_token: string | null
+          referrer: string | null
+          service_id: string | null
+          user_agent: string | null
+          user_id: string | null
+          vendor_id: string | null
+        }
+        Insert: {
+          agent_cookie?: string | null
+          created_at?: string
+          destination_url: string
+          final_url?: string | null
+          id?: string
+          ip_address?: unknown | null
+          metadata?: Json
+          referral_token?: string | null
+          referrer?: string | null
+          service_id?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+          vendor_id?: string | null
+        }
+        Update: {
+          agent_cookie?: string | null
+          created_at?: string
+          destination_url?: string
+          final_url?: string | null
+          id?: string
+          ip_address?: unknown | null
+          metadata?: Json
+          referral_token?: string | null
+          referrer?: string | null
+          service_id?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+          vendor_id?: string | null
+        }
+        Relationships: []
+      }
       playbook_creation_progress: {
         Row: {
           completed_sections: Json | null
@@ -2773,6 +2854,8 @@ export type Database = {
           business_name: string | null
           circle_points: number | null
           city: string | null
+          commission_contact_email: string | null
+          commission_rate: number | null
           copay_allowed: boolean | null
           created_at: string
           creator_bio: string | null
@@ -2817,6 +2900,8 @@ export type Database = {
           business_name?: string | null
           circle_points?: number | null
           city?: string | null
+          commission_contact_email?: string | null
+          commission_rate?: number | null
           copay_allowed?: boolean | null
           created_at?: string
           creator_bio?: string | null
@@ -2861,6 +2946,8 @@ export type Database = {
           business_name?: string | null
           circle_points?: number | null
           city?: string | null
+          commission_contact_email?: string | null
+          commission_rate?: number | null
           copay_allowed?: boolean | null
           created_at?: string
           creator_bio?: string | null
@@ -2897,6 +2984,39 @@ export type Database = {
           website_url?: string | null
           years_experience?: number | null
           zip_code?: string | null
+        }
+        Relationships: []
+      }
+      referral_tokens: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          id: string
+          metadata: Json
+          service_id: string | null
+          token: string
+          user_id: string | null
+          vendor_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          metadata?: Json
+          service_id?: string | null
+          token: string
+          user_id?: string | null
+          vendor_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          metadata?: Json
+          service_id?: string | null
+          token?: string
+          user_id?: string | null
+          vendor_id?: string | null
         }
         Relationships: []
       }
@@ -3565,6 +3685,7 @@ export type Database = {
           discount_percentage: string | null
           duration: string | null
           estimated_roi: number | null
+          funnel_content: Json | null
           id: string
           image_url: string | null
           is_featured: boolean | null
@@ -3607,6 +3728,7 @@ export type Database = {
           discount_percentage?: string | null
           duration?: string | null
           estimated_roi?: number | null
+          funnel_content?: Json | null
           id?: string
           image_url?: string | null
           is_featured?: boolean | null
@@ -3649,6 +3771,7 @@ export type Database = {
           discount_percentage?: string | null
           duration?: string | null
           estimated_roi?: number | null
+          funnel_content?: Json | null
           id?: string
           image_url?: string | null
           is_featured?: boolean | null
@@ -4328,6 +4451,60 @@ export type Database = {
         }
         Relationships: []
       }
+      vendor_commission_tracking: {
+        Row: {
+          actual_commission: number | null
+          commission_paid: boolean
+          commission_rate: number
+          created_at: string
+          estimated_commission: number
+          id: string
+          notes: string | null
+          payment_date: string | null
+          report_email_id: string | null
+          report_month: string
+          report_sent_at: string | null
+          total_clicks: number
+          unique_agents: number
+          updated_at: string
+          vendor_id: string
+        }
+        Insert: {
+          actual_commission?: number | null
+          commission_paid?: boolean
+          commission_rate?: number
+          created_at?: string
+          estimated_commission?: number
+          id?: string
+          notes?: string | null
+          payment_date?: string | null
+          report_email_id?: string | null
+          report_month: string
+          report_sent_at?: string | null
+          total_clicks?: number
+          unique_agents?: number
+          updated_at?: string
+          vendor_id: string
+        }
+        Update: {
+          actual_commission?: number | null
+          commission_paid?: boolean
+          commission_rate?: number
+          created_at?: string
+          estimated_commission?: number
+          id?: string
+          notes?: string | null
+          payment_date?: string | null
+          report_email_id?: string | null
+          report_month?: string
+          report_sent_at?: string | null
+          total_clicks?: number
+          unique_agents?: number
+          updated_at?: string
+          vendor_id?: string
+        }
+        Relationships: []
+      }
       vendor_commissions: {
         Row: {
           commission_amount: number
@@ -4490,6 +4667,57 @@ export type Database = {
         }
         Relationships: []
       }
+      vendor_qa: {
+        Row: {
+          agent_id: string | null
+          answer: string | null
+          created_at: string | null
+          id: string
+          is_answered: boolean | null
+          is_featured: boolean | null
+          question: string
+          updated_at: string | null
+          vendor_id: string
+        }
+        Insert: {
+          agent_id?: string | null
+          answer?: string | null
+          created_at?: string | null
+          id?: string
+          is_answered?: boolean | null
+          is_featured?: boolean | null
+          question: string
+          updated_at?: string | null
+          vendor_id: string
+        }
+        Update: {
+          agent_id?: string | null
+          answer?: string | null
+          created_at?: string | null
+          id?: string
+          is_answered?: boolean | null
+          is_featured?: boolean | null
+          question?: string
+          updated_at?: string | null
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_qa_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_qa_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors_with_local_reps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vendor_user_associations: {
         Row: {
           created_at: string | null
@@ -4543,6 +4771,7 @@ export type Database = {
           agreement_notes: string | null
           agreement_renewal_date: string | null
           agreement_start_date: string | null
+          brand_colors: Json | null
           budget_currency: string | null
           campaigns_funded: number | null
           circle_commission_percentage: number | null
@@ -4551,7 +4780,11 @@ export type Database = {
           commission_type: string | null
           contact_email: string | null
           created_at: string
+          custom_cta_text: string | null
           description: string | null
+          funnel_enabled: boolean | null
+          funnel_template_id: string | null
+          hero_banner_url: string | null
           id: string
           individual_email: string | null
           individual_license_number: string | null
@@ -4581,6 +4814,7 @@ export type Database = {
           service_zip_codes: string[] | null
           sort_order: number | null
           updated_at: string
+          value_statement: string | null
           vendor_type: string | null
           website_url: string | null
         }
@@ -4591,6 +4825,7 @@ export type Database = {
           agreement_notes?: string | null
           agreement_renewal_date?: string | null
           agreement_start_date?: string | null
+          brand_colors?: Json | null
           budget_currency?: string | null
           campaigns_funded?: number | null
           circle_commission_percentage?: number | null
@@ -4599,7 +4834,11 @@ export type Database = {
           commission_type?: string | null
           contact_email?: string | null
           created_at?: string
+          custom_cta_text?: string | null
           description?: string | null
+          funnel_enabled?: boolean | null
+          funnel_template_id?: string | null
+          hero_banner_url?: string | null
           id?: string
           individual_email?: string | null
           individual_license_number?: string | null
@@ -4629,6 +4868,7 @@ export type Database = {
           service_zip_codes?: string[] | null
           sort_order?: number | null
           updated_at?: string
+          value_statement?: string | null
           vendor_type?: string | null
           website_url?: string | null
         }
@@ -4639,6 +4879,7 @@ export type Database = {
           agreement_notes?: string | null
           agreement_renewal_date?: string | null
           agreement_start_date?: string | null
+          brand_colors?: Json | null
           budget_currency?: string | null
           campaigns_funded?: number | null
           circle_commission_percentage?: number | null
@@ -4647,7 +4888,11 @@ export type Database = {
           commission_type?: string | null
           contact_email?: string | null
           created_at?: string
+          custom_cta_text?: string | null
           description?: string | null
+          funnel_enabled?: boolean | null
+          funnel_template_id?: string | null
+          hero_banner_url?: string | null
           id?: string
           individual_email?: string | null
           individual_license_number?: string | null
@@ -4677,6 +4922,7 @@ export type Database = {
           service_zip_codes?: string[] | null
           sort_order?: number | null
           updated_at?: string
+          value_statement?: string | null
           vendor_type?: string | null
           website_url?: string | null
         }
@@ -5309,6 +5555,15 @@ export type Database = {
           client_user_agent?: string
         }
         Returns: undefined
+      }
+      mint_referral_token: {
+        Args: {
+          p_user_id: string
+          p_vendor_id: string
+          p_service_id: string
+          p_ttl_minutes?: number
+        }
+        Returns: string
       }
       process_automatic_copay: {
         Args: {
