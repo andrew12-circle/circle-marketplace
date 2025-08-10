@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import React, { useState, useEffect } from "react";
-import { ServiceHeroSection } from "./ServiceHeroSection";
+import { RebuiltFunnelTop } from "./RebuiltFunnelTop";
 import { ServiceContentSection } from "./ServiceContentSection";
 import { ServiceReviewsSection } from "./ServiceReviewsSection";
 import { ServiceQASection } from "./ServiceQASection";
@@ -154,7 +154,7 @@ export const ModularServiceFunnelModal = ({
           <ScrollArea className="h-full">
             <div className="space-y-0">
               {/* Hero Section */}
-              <ServiceHeroSection
+              <RebuiltFunnelTop
                 service={service}
                 vendor={vendor}
                 selectedPackage={selectedPackage}
@@ -162,6 +162,7 @@ export const ModularServiceFunnelModal = ({
                 onQuantityChange={setQuantity}
                 onAddToCart={handleAddToCart}
                 onScheduleConsultation={handleScheduleConsultation}
+                onClose={onClose}
               />
 
               {/* Tabbed Content */}
