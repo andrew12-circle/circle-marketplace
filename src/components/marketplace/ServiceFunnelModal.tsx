@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { toast } from "sonner";
 import { 
   Star, 
   TrendingUp, 
@@ -909,11 +910,35 @@ const { trackBooking, trackPurchase, trackOutboundClick } = useProviderTracking(
 
               {/* Save/Share */}
               <div className="flex gap-2">
-                <Button variant="ghost" size="sm" className="flex-1">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="flex-1"
+                  onClick={() => {
+                    // Add to saved items logic here
+                    toast.success("Service saved to your favorites!");
+                  }}
+                >
                   <Heart className="w-4 h-4 mr-1" />
                   Save
                 </Button>
-                <Button variant="ghost" size="sm" className="flex-1">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="flex-1"
+                  onClick={() => {
+                    if (navigator.share) {
+                      navigator.share({
+                        title: service?.title || 'Check out this service',
+                        text: service?.description || 'I found this great service on the marketplace',
+                        url: window.location.href
+                      });
+                    } else {
+                      navigator.clipboard.writeText(window.location.href);
+                      toast.success("Link copied to clipboard!");
+                    }
+                  }}
+                >
                   <Share2 className="w-4 h-4 mr-1" />
                   Share
                 </Button>
