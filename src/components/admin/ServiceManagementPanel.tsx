@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { ServiceFunnelEditorModal } from '@/components/marketplace/ServiceFunnelEditorModal';
 import { ServicePricingTiersEditor } from '@/components/marketplace/ServicePricingTiersEditor';
+import { ServiceFunnelModal } from '@/components/marketplace/ServiceFunnelModal';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
@@ -986,10 +987,16 @@ export const ServiceManagementPanel = () => {
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <h3 className="text-lg font-semibold">Service Funnel Pages</h3>
-                    <Button onClick={() => setShowFunnelEditor(true)}>
-                      <Edit className="h-4 w-4 mr-2" />
-                      Edit Funnel
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <Button variant="outline" onClick={() => setShowFunnelPreview(true)}>
+                        <Eye className="h-4 w-4 mr-2" />
+                        Preview Funnel
+                      </Button>
+                      <Button onClick={() => setShowFunnelEditor(true)}>
+                        <Edit className="h-4 w-4 mr-2" />
+                        Edit Funnel
+                      </Button>
+                    </div>
                   </div>
                   
                   <div className="text-center py-8 border rounded-lg">
@@ -1016,6 +1023,24 @@ export const ServiceManagementPanel = () => {
         pricingTiers={pricingTiers}
         onPricingTiersChange={setPricingTiers}
       />
+
+      {showFunnelPreview && selectedService && (
+        <ServiceFunnelModal
+          isOpen={showFunnelPreview}
+          onClose={() => setShowFunnelPreview(false)}
+          service={{
+            ...(selectedService as any),
+            funnel_content: funnelContent,
+            pricing_tiers: pricingTiers,
+            vendor: selectedService.vendors ? {
+              name: selectedService.vendors.name,
+              rating: selectedService.rating || 5,
+              review_count: 25,
+              is_verified: true
+            } : null
+          } as any}
+        />
+      )}
     </div>
   );
 };

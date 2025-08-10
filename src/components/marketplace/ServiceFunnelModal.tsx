@@ -395,6 +395,9 @@ const { trackBooking, trackPurchase, trackOutboundClick } = useProviderTracking(
               <p className="text-xl text-blue-100">
                 {subHeadline || "Transform your real estate business with our proven system"}
               </p>
+              {fc?.heroDescription && (
+                <p className="text-base text-blue-100/90">{fc.heroDescription}</p>
+              )}
               {service.vendor && (
                 <div className="flex items-center gap-4">
                   {renderStarRating(service.vendor.rating, "lg")}
@@ -639,6 +642,36 @@ const { trackBooking, trackPurchase, trackOutboundClick } = useProviderTracking(
                     <span className="text-green-600 font-semibold">+${((service.funnel_content as any).roiCalculator.calculatedAnnualIncrease || 459000).toLocaleString()}</span>
                   </div>
                 </div>
+              </div>
+            )}
+
+            {fc?.socialProof?.stats?.length > 0 && (
+              <div className="bg-amber-50 p-4 rounded-lg border">
+                <h3 className="font-bold text-lg mb-3">Proven Results</h3>
+                <div className="grid grid-cols-2 gap-3">
+                  {fc.socialProof.stats.map((s: any, i: number) => (
+                    <div key={i} className="flex items-center gap-2">
+                      <Badge variant="secondary">{s.value}</Badge>
+                      <span className="text-sm">{s.label}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {fc?.socialProof?.testimonials?.length > 0 && (
+              <div className="space-y-3">
+                <h3 className="font-bold text-lg">What clients say</h3>
+                {fc.socialProof.testimonials.slice(0, 2).map((t: any, i: number) => (
+                  <Card key={i} className="p-4">
+                    <div className="flex items-center gap-2 mb-1">
+                      {renderStarRating(t.rating)}
+                      <span className="text-xs text-muted-foreground">{t.role}</span>
+                    </div>
+                    <p className="text-sm">"{t.content}"</p>
+                    <p className="text-xs text-muted-foreground mt-1">— {t.name}</p>
+                  </Card>
+                ))}
               </div>
             )}
 
@@ -936,22 +969,47 @@ const { trackBooking, trackPurchase, trackOutboundClick } = useProviderTracking(
               <Card className="p-4">
                 <h4 className="font-semibold mb-3 text-sm">Why Agents Trust Us</h4>
                 <div className="space-y-2 text-xs text-muted-foreground">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="w-3 h-3 text-green-500" />
-                    <span>500+ successful implementations</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="w-3 h-3 text-green-500" />
-                    <span>99% client satisfaction rate</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="w-3 h-3 text-green-500" />
-                    <span>RESPA compliant & fully insured</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="w-3 h-3 text-green-500" />
-                    <span>Money-back guarantee</span>
-                  </div>
+                  {fc?.trustIndicators && (fc.trustIndicators.guarantee || fc.trustIndicators.cancellation || fc.trustIndicators.certification) ? (
+                    <>
+                      {fc.trustIndicators.guarantee && (
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="w-3 h-3 text-green-500" />
+                          <span>{fc.trustIndicators.guarantee}</span>
+                        </div>
+                      )}
+                      {fc.trustIndicators.cancellation && (
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="w-3 h-3 text-green-500" />
+                          <span>{fc.trustIndicators.cancellation}</span>
+                        </div>
+                      )}
+                      {fc.trustIndicators.certification && (
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="w-3 h-3 text-green-500" />
+                          <span>{fc.trustIndicators.certification}</span>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="w-3 h-3 text-green-500" />
+                        <span>500+ successful implementations</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="w-3 h-3 text-green-500" />
+                        <span>99% client satisfaction rate</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="w-3 h-3 text-green-500" />
+                        <span>RESPA compliant & fully insured</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="w-3 h-3 text-green-500" />
+                        <span>Money-back guarantee</span>
+                      </div>
+                    </>
+                  )}
                 </div>
               </Card>
 
@@ -986,13 +1044,23 @@ const { trackBooking, trackPurchase, trackOutboundClick } = useProviderTracking(
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <h3 className="font-semibold mb-3">Service Benefits</h3>
-                    <ul className="space-y-2 text-sm">
-                      <li>• Professional implementation</li>
-                      <li>• Dedicated support team</li>
-                      <li>• Custom configuration</li>
-                      <li>• Performance monitoring</li>
-                      <li>• Regular optimization</li>
-                    </ul>
+                    <div className="space-y-2 text-sm">
+                      {benefits?.length ? (
+                        benefits.map((b: any, i: number) => (
+                          <div key={i}>• {b.title}</div>
+                        ))
+                      ) : fc?.heroDescription ? (
+                        <p>{fc.heroDescription}</p>
+                      ) : (
+                        <>
+                          <div>• Professional implementation</div>
+                          <div>• Dedicated support team</div>
+                          <div>• Custom configuration</div>
+                          <div>• Performance monitoring</div>
+                          <div>• Regular optimization</div>
+                        </>
+                      )}
+                    </div>
                   </div>
                   <div>
                     <h3 className="font-semibold mb-3">Service Information</h3>
