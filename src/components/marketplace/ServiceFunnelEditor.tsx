@@ -1930,9 +1930,22 @@ export const ServiceFunnelEditor = ({ funnelContent, onChange }: ServiceFunnelEd
                       <div className="grid grid-cols-2 gap-3">
                         {funnelContent.thumbnailGallery.items.slice(0, 6).map((thumbnail, index) => (
                           <div key={index} className="relative aspect-video bg-muted rounded-lg overflow-hidden">
-                            {thumbnail.mediaUrl && (
-                              <img src={thumbnail.mediaUrl} alt={thumbnail.label} className="w-full h-full object-cover" />
-                            )}
+                              <img
+                                src={thumbnail.mediaUrl || '/placeholder.svg'}
+                                alt={thumbnail.label ? `${thumbnail.label} thumbnail` : 'Service media thumbnail'}
+                                className="w-full h-full object-cover"
+                                loading="lazy"
+                                decoding="async"
+                                onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/placeholder.svg'; }}
+                              />
+                              {!thumbnail.mediaUrl && (
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                  <div className="inline-flex items-center justify-center rounded-full bg-background/70 backdrop-blur px-3 py-2 text-xs font-medium">
+                                    <Video className="w-4 h-4 mr-1 text-primary" />
+                                    <span>Video</span>
+                                  </div>
+                                </div>
+                              )}
                             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2">
                               <p className="text-white text-xs font-medium">{thumbnail.label}</p>
                             </div>
