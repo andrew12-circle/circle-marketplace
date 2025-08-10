@@ -493,7 +493,7 @@ export const ServiceFunnelEditor = ({ funnelContent, onChange }: ServiceFunnelEd
                 Create your complete funnel page with HTML, CSS, and inline styles
               </p>
             </CardHeader>
-            <CardContent className="flex-1">
+            <CardContent className="flex-1 overflow-y-auto max-h-[calc(100vh-240px)] pr-1">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
@@ -581,7 +581,7 @@ export const ServiceFunnelEditor = ({ funnelContent, onChange }: ServiceFunnelEd
                 </Button>
               </div>
             </CardHeader>
-            <CardContent className="flex-1">
+            <CardContent className="flex-1 overflow-y-auto max-h-[calc(100vh-240px)] pr-1">
               {(funnelContent.useCustomHtml && customHtml) ? (
                 <div className={`border rounded-lg overflow-hidden bg-white ${showAgentView ? 'max-w-sm mx-auto' : ''}`}>
                   <iframe
@@ -613,7 +613,7 @@ export const ServiceFunnelEditor = ({ funnelContent, onChange }: ServiceFunnelEd
                 Edit your funnel content with an intuitive visual interface
               </p>
             </CardHeader>
-            <CardContent className="flex-1">
+            <CardContent className="flex-1 overflow-y-auto max-h-[calc(100vh-240px)] pr-1">
               <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full">
                 <TabsList className="w-full flex gap-1 overflow-x-auto whitespace-nowrap rounded-md bg-background shadow-sm p-1">
                   <TabsTrigger className="flex-shrink-0" value="hero"><Crown className="w-4 h-4 mr-2" />Hero</TabsTrigger>
@@ -1675,7 +1675,7 @@ export const ServiceFunnelEditor = ({ funnelContent, onChange }: ServiceFunnelEd
                 </Button>
               </div>
             </CardHeader>
-            <CardContent className="flex-1">
+            <CardContent className="flex-1 overflow-y-auto max-h-[calc(100vh-240px)]">
               <div ref={previewRef} className={`border rounded-lg overflow-hidden bg-background ${showAgentView ? 'max-w-sm mx-auto' : ''}`}>
                 {/* Hero Section - Full Width */}
                 <div className="relative bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6">
