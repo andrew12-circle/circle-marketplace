@@ -1014,6 +1014,12 @@ export const ServiceManagementPanel = () => {
                   <div className="flex justify-between items-center">
                     <h3 className="text-lg font-semibold">Service Funnel Pages</h3>
                     <div className="flex items-center gap-2">
+                      {lastFunnelSavedAt && (
+                        <div className="hidden sm:flex items-center gap-2 text-xs text-muted-foreground mr-2">
+                          <CheckCircle className="h-4 w-4" />
+                          <span>Last saved · {new Date(lastFunnelSavedAt).toLocaleTimeString()}</span>
+                        </div>
+                      )}
                       <Button variant="outline" onClick={() => setShowFunnelPreview(true)}>
                         <Eye className="h-4 w-4 mr-2" />
                         Preview Funnel

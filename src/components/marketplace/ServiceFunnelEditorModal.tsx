@@ -1,4 +1,4 @@
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Save, CheckCircle } from 'lucide-react';
@@ -206,7 +206,7 @@ export const ServiceFunnelEditorModal = ({
   }, [open]);
 
   // Timeout helper (generic)
-  const saveWithTimeout = <T,>(promise: Promise<T>, ms = 12000): Promise<T> => {
+  const saveWithTimeout = <T,>(promise: Promise<T>, ms = 30000): Promise<T> => {
     return Promise.race([
       promise,
       new Promise<never>((_, reject) => {
@@ -223,7 +223,7 @@ export const ServiceFunnelEditorModal = ({
     console.log('[FunnelEditorModal] Save started');
     setIsSaving(true);
     try {
-      const result = await saveWithTimeout(onSave(), 12000) as SaveResult | void;
+      const result = await saveWithTimeout(onSave(), 30000) as SaveResult | void;
       console.log('[FunnelEditorModal] Save completed successfully');
       const savedTime = (result && typeof result === 'object' && 'savedAt' in result && result.savedAt)
         ? result.savedAt as string
@@ -260,8 +260,8 @@ export const ServiceFunnelEditorModal = ({
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <div>
-              <h2 className="text-2xl font-bold">Edit Service Funnel</h2>
-              <p className="text-muted-foreground">Editing: {serviceName}</p>
+              <DialogTitle className="text-2xl font-bold">Edit Service Funnel</DialogTitle>
+              <DialogDescription className="text-muted-foreground">Editing: {serviceName}</DialogDescription>
             </div>
               <div className="flex items-center gap-3">
                 {lastSavedAt && (
