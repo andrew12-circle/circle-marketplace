@@ -139,7 +139,7 @@ export const RebuiltFunnelTop: React.FC<RebuiltFunnelTopProps> = ({
             {activeMedia?.endsWith(".mp4") ? (
               <video src={activeMedia} controls className="w-full h-full object-cover" />
             ) : (
-              <img src={activeMedia} alt={service?.title ?? "Service media"} className="w-full h-full object-cover" />
+              <img src={activeMedia} alt={service?.title ?? "Service media"} className="w-full h-full object-contain" />
             )}
             {showPlayOverlay && !activeMedia?.endsWith(".mp4") && (
               <div className="absolute inset-0 flex items-center justify-center bg-background/10">
