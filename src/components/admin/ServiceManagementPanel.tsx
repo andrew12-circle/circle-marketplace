@@ -631,12 +631,15 @@ export const ServiceManagementPanel = () => {
       return { savedAt, verified };
     } catch (error) {
       console.error('Error saving funnel:', error);
+      const err: any = error;
+      const message = err?.message || err?.error_description || 'Failed to save funnel changes';
+      const code = err?.code;
       toast({
-        title: 'Error',
-        description: 'Failed to save funnel changes',
+        title: 'Save failed',
+        description: code ? `${message} (code: ${code})` : message,
         variant: 'destructive',
       });
-      return { savedAt: new Date().toISOString(), verified: false };
+      return { savedAt: new Date().toISOString(), verified: false, message };
     }
   };
 
