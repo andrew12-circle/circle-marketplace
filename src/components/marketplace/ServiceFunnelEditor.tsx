@@ -99,6 +99,40 @@ interface FunnelContent {
     title: string;
     items: ThumbnailItem[];
   };
+
+  roiCalculator: {
+    enabled: boolean;
+    title: string;
+    currentMonthlyClosings: number;
+    averageCommission: number;
+    increasePercentage: number;
+    calculatedAdditionalIncome: number;
+    calculatedAnnualIncrease: number;
+  };
+
+  testimonialCards: {
+    enabled: boolean;
+    title: string;
+    cards: {
+      id: string;
+      name: string;
+      role: string;
+      content: string;
+      rating: number;
+      timeAgo: string;
+      borderColor: string;
+      iconColor: string;
+      icon: string;
+    }[];
+  };
+
+  urgencySection: {
+    enabled: boolean;
+    title: string;
+    message: string;
+    spotsRemaining: number;
+    totalSpots: number;
+  };
   
   socialProof: {
     testimonials: {
@@ -571,7 +605,7 @@ export const ServiceFunnelEditor = ({ funnelContent, onChange }: ServiceFunnelEd
             </CardHeader>
             <CardContent className="flex-1">
               <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full">
-                <TabsList className="grid w-full grid-cols-8">
+                <TabsList className="grid w-full grid-cols-10">
                   <TabsTrigger value="hero">Hero</TabsTrigger>
                   <TabsTrigger value="benefits">Benefits</TabsTrigger>
                   <TabsTrigger value="pricing">Pricing</TabsTrigger>
@@ -579,6 +613,8 @@ export const ServiceFunnelEditor = ({ funnelContent, onChange }: ServiceFunnelEd
                   <TabsTrigger value="trust">Trust & Contact</TabsTrigger>
                   <TabsTrigger value="cta">Call to Action</TabsTrigger>
                   <TabsTrigger value="thumbnails">Thumbnails</TabsTrigger>
+                  <TabsTrigger value="roi">ROI Calc</TabsTrigger>
+                  <TabsTrigger value="testimonials">Testimonials</TabsTrigger>
                   <TabsTrigger value="media">Media</TabsTrigger>
                 </TabsList>
                 
@@ -1210,6 +1246,313 @@ export const ServiceFunnelEditor = ({ funnelContent, onChange }: ServiceFunnelEd
                               </div>
                             </Card>
                           ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="roi" className="space-y-4 mt-4">
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="text-lg font-semibold">ROI Calculator</h3>
+                        <p className="text-sm text-muted-foreground">Configure the ROI calculator section</p>
+                      </div>
+                      <Switch
+                        checked={funnelContent.roiCalculator.enabled}
+                        onCheckedChange={(checked) => updateContent('roiCalculator.enabled', checked)}
+                      />
+                    </div>
+
+                    {funnelContent.roiCalculator.enabled && (
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="roi-title">Section Title</Label>
+                          <Input
+                            id="roi-title"
+                            value={funnelContent.roiCalculator.title}
+                            onChange={(e) => updateContent('roiCalculator.title', e.target.value)}
+                            placeholder="ROI Calculator"
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Current Monthly Closings</Label>
+                            <Input
+                              type="number"
+                              value={funnelContent.roiCalculator.currentMonthlyClosings}
+                              onChange={(e) => updateContent('roiCalculator.currentMonthlyClosings', Number(e.target.value))}
+                              placeholder="3"
+                            />
+                          </div>
+                          <div>
+                            <Label>Average Commission ($)</Label>
+                            <Input
+                              type="number"
+                              value={funnelContent.roiCalculator.averageCommission}
+                              onChange={(e) => updateContent('roiCalculator.averageCommission', Number(e.target.value))}
+                              placeholder="8500"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Increase Percentage (%)</Label>
+                            <Input
+                              type="number"
+                              value={funnelContent.roiCalculator.increasePercentage}
+                              onChange={(e) => updateContent('roiCalculator.increasePercentage', Number(e.target.value))}
+                              placeholder="150"
+                            />
+                          </div>
+                          <div>
+                            <Label>Additional Monthly Income ($)</Label>
+                            <Input
+                              type="number"
+                              value={funnelContent.roiCalculator.calculatedAdditionalIncome}
+                              onChange={(e) => updateContent('roiCalculator.calculatedAdditionalIncome', Number(e.target.value))}
+                              placeholder="38250"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <Label>Annual Increase ($)</Label>
+                          <Input
+                            type="number"
+                            value={funnelContent.roiCalculator.calculatedAnnualIncrease}
+                            onChange={(e) => updateContent('roiCalculator.calculatedAnnualIncrease', Number(e.target.value))}
+                            placeholder="459000"
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="testimonials" className="space-y-4 mt-4">
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="text-lg font-semibold">Testimonial Cards</h3>
+                        <p className="text-sm text-muted-foreground">Configure the testimonial cards section</p>
+                      </div>
+                      <Switch
+                        checked={funnelContent.testimonialCards.enabled}
+                        onCheckedChange={(checked) => updateContent('testimonialCards.enabled', checked)}
+                      />
+                    </div>
+
+                    {funnelContent.testimonialCards.enabled && (
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="testimonials-title">Section Title</Label>
+                          <Input
+                            id="testimonials-title"
+                            value={funnelContent.testimonialCards.title}
+                            onChange={(e) => updateContent('testimonialCards.title', e.target.value)}
+                            placeholder="Recent Success Stories"
+                          />
+                        </div>
+
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <Label>Testimonial Cards</Label>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                const newCard = {
+                                  id: Date.now().toString(),
+                                  name: '',
+                                  role: '',
+                                  content: '',
+                                  rating: 5,
+                                  timeAgo: '1 week ago',
+                                  borderColor: 'green',
+                                  iconColor: 'green',
+                                  icon: 'trending'
+                                };
+                                updateContent('testimonialCards.cards', [...funnelContent.testimonialCards.cards, newCard]);
+                              }}
+                            >
+                              <Plus className="w-4 h-4 mr-2" />
+                              Add Card
+                            </Button>
+                          </div>
+
+                          {funnelContent.testimonialCards.cards.map((card, index) => (
+                            <Card key={card.id} className="p-4">
+                              <div className="space-y-3">
+                                <div className="flex items-center justify-between">
+                                  <h4 className="font-medium">Card {index + 1}</h4>
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => {
+                                      const newCards = funnelContent.testimonialCards.cards.filter((_, i) => i !== index);
+                                      updateContent('testimonialCards.cards', newCards);
+                                    }}
+                                  >
+                                    <X className="w-4 h-4" />
+                                  </Button>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-3">
+                                  <div>
+                                    <Label>Name</Label>
+                                    <Input
+                                      value={card.name}
+                                      onChange={(e) => {
+                                        const newCards = [...funnelContent.testimonialCards.cards];
+                                        newCards[index] = { ...card, name: e.target.value };
+                                        updateContent('testimonialCards.cards', newCards);
+                                      }}
+                                      placeholder="John D."
+                                    />
+                                  </div>
+                                  <div>
+                                    <Label>Role</Label>
+                                    <Input
+                                      value={card.role}
+                                      onChange={(e) => {
+                                        const newCards = [...funnelContent.testimonialCards.cards];
+                                        newCards[index] = { ...card, role: e.target.value };
+                                        updateContent('testimonialCards.cards', newCards);
+                                      }}
+                                      placeholder="Keller Williams"
+                                    />
+                                  </div>
+                                </div>
+
+                                <div>
+                                  <Label>Content</Label>
+                                  <Textarea
+                                    value={card.content}
+                                    onChange={(e) => {
+                                      const newCards = [...funnelContent.testimonialCards.cards];
+                                      newCards[index] = { ...card, content: e.target.value };
+                                      updateContent('testimonialCards.cards', newCards);
+                                    }}
+                                    placeholder="Testimonial content..."
+                                    rows={3}
+                                  />
+                                </div>
+
+                                <div className="grid grid-cols-3 gap-3">
+                                  <div>
+                                    <Label>Rating</Label>
+                                    <Input
+                                      type="number"
+                                      min="1"
+                                      max="5"
+                                      value={card.rating}
+                                      onChange={(e) => {
+                                        const newCards = [...funnelContent.testimonialCards.cards];
+                                        newCards[index] = { ...card, rating: Number(e.target.value) };
+                                        updateContent('testimonialCards.cards', newCards);
+                                      }}
+                                    />
+                                  </div>
+                                  <div>
+                                    <Label>Time Ago</Label>
+                                    <Input
+                                      value={card.timeAgo}
+                                      onChange={(e) => {
+                                        const newCards = [...funnelContent.testimonialCards.cards];
+                                        newCards[index] = { ...card, timeAgo: e.target.value };
+                                        updateContent('testimonialCards.cards', newCards);
+                                      }}
+                                      placeholder="1 week ago"
+                                    />
+                                  </div>
+                                  <div>
+                                    <Label>Border Color</Label>
+                                    <select
+                                      className="w-full p-2 border rounded"
+                                      value={card.borderColor}
+                                      onChange={(e) => {
+                                        const newCards = [...funnelContent.testimonialCards.cards];
+                                        newCards[index] = { ...card, borderColor: e.target.value };
+                                        updateContent('testimonialCards.cards', newCards);
+                                      }}
+                                    >
+                                      <option value="green">Green</option>
+                                      <option value="blue">Blue</option>
+                                      <option value="purple">Purple</option>
+                                      <option value="orange">Orange</option>
+                                      <option value="red">Red</option>
+                                    </select>
+                                  </div>
+                                </div>
+                              </div>
+                            </Card>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="media" className="space-y-4 mt-4">
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="text-lg font-semibold">Urgency Section</h3>
+                        <p className="text-sm text-muted-foreground">Configure the urgency section</p>
+                      </div>
+                      <Switch
+                        checked={funnelContent.urgencySection.enabled}
+                        onCheckedChange={(checked) => updateContent('urgencySection.enabled', checked)}
+                      />
+                    </div>
+
+                    {funnelContent.urgencySection.enabled && (
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="urgency-title">Section Title</Label>
+                          <Input
+                            id="urgency-title"
+                            value={funnelContent.urgencySection.title}
+                            onChange={(e) => updateContent('urgencySection.title', e.target.value)}
+                            placeholder="Limited Availability"
+                          />
+                        </div>
+
+                        <div>
+                          <Label>Message</Label>
+                          <Textarea
+                            value={funnelContent.urgencySection.message}
+                            onChange={(e) => updateContent('urgencySection.message', e.target.value)}
+                            placeholder="We only take on 5 new clients per month to ensure quality service."
+                            rows={3}
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Spots Remaining</Label>
+                            <Input
+                              type="number"
+                              value={funnelContent.urgencySection.spotsRemaining}
+                              onChange={(e) => updateContent('urgencySection.spotsRemaining', Number(e.target.value))}
+                              placeholder="2"
+                            />
+                          </div>
+                          <div>
+                            <Label>Total Spots</Label>
+                            <Input
+                              type="number"
+                              value={funnelContent.urgencySection.totalSpots}
+                              onChange={(e) => updateContent('urgencySection.totalSpots', Number(e.target.value))}
+                              placeholder="5"
+                            />
+                          </div>
                         </div>
                       </div>
                     )}

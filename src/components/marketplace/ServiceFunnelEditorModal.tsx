@@ -54,6 +54,40 @@ interface FunnelContent {
     title: string;
     items: ThumbnailItem[];
   };
+
+  roiCalculator: {
+    enabled: boolean;
+    title: string;
+    currentMonthlyClosings: number;
+    averageCommission: number;
+    increasePercentage: number;
+    calculatedAdditionalIncome: number;
+    calculatedAnnualIncrease: number;
+  };
+
+  testimonialCards: {
+    enabled: boolean;
+    title: string;
+    cards: {
+      id: string;
+      name: string;
+      role: string;
+      content: string;
+      rating: number;
+      timeAgo: string;
+      borderColor: string;
+      iconColor: string;
+      icon: string;
+    }[];
+  };
+
+  urgencySection: {
+    enabled: boolean;
+    title: string;
+    message: string;
+    spotsRemaining: number;
+    totalSpots: number;
+  };
   
   socialProof: {
     testimonials: {

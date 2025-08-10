@@ -105,6 +105,39 @@ export const VendorDashboard = () => {
         { id: '4', label: 'Results', icon: 'trophy' }
       ]
     },
+    roiCalculator: {
+      enabled: false,
+      title: 'ROI Calculator',
+      currentMonthlyClosings: 3,
+      averageCommission: 8500,
+      increasePercentage: 150,
+      calculatedAdditionalIncome: 38250,
+      calculatedAnnualIncrease: 459000
+    },
+    testimonialCards: {
+      enabled: false,
+      title: 'Recent Success Stories',
+      cards: [
+        {
+          id: '1',
+          name: 'Sarah T.',
+          role: 'Keller Williams',
+          content: 'Increased my closings by 200% in just 3 months!',
+          rating: 5,
+          timeAgo: '2 weeks ago',
+          borderColor: 'green',
+          iconColor: 'green',
+          icon: 'trending'
+        }
+      ]
+    },
+    urgencySection: {
+      enabled: false,
+      title: 'Limited Availability',
+      message: 'We only take on 5 new clients per month to ensure quality service.',
+      spotsRemaining: 2,
+      totalSpots: 5
+    },
     socialProof: {
       testimonials: [],
       stats: []

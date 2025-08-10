@@ -490,42 +490,57 @@ export const ServiceFunnelModal = ({
             )}
 
             {/* Social Proof Cards */}
-            <div className="space-y-4">
-              <h3 className="font-bold text-lg">Recent Success Stories</h3>
-              <div className="space-y-3">
-                <Card className="p-4 border-l-4 border-l-green-500">
-                  <div className="flex items-start gap-3">
-                    <div className="bg-green-100 rounded-full p-2">
-                      <TrendingUp className="w-4 h-4 text-green-600" />
-                    </div>
-                    <div>
-                      <p className="font-medium">Sarah M. - Keller Williams</p>
-                      <p className="text-sm text-muted-foreground">"Increased my closing rate by 180% in just 3 months!"</p>
-                      <div className="flex items-center gap-1 mt-1">
-                        {renderStarRating(5)}
-                        <span className="text-xs text-muted-foreground ml-2">2 days ago</span>
+            {(service.funnel_content as any)?.testimonialCards?.enabled && (
+              <div className="space-y-4">
+                <h3 className="font-bold text-lg">
+                  {(service.funnel_content as any).testimonialCards.title || 'Recent Success Stories'}
+                </h3>
+                <div className="space-y-3">
+                  {((service.funnel_content as any).testimonialCards.cards?.length > 0 
+                    ? (service.funnel_content as any).testimonialCards.cards 
+                    : [
+                        {
+                          id: '1',
+                          name: 'Sarah T.',
+                          role: 'Keller Williams',
+                          content: 'Increased my closings by 200% in just 3 months!',
+                          rating: 5,
+                          timeAgo: '2 weeks ago',
+                          borderColor: 'green'
+                        },
+                        {
+                          id: '2',
+                          name: 'Mike R.',
+                          role: 'RE/MAX',
+                          content: 'ROI was 320% in the first quarter alone.',
+                          rating: 5,
+                          timeAgo: '1 week ago',
+                          borderColor: 'blue'
+                        }
+                      ]
+                  ).map((card: any) => (
+                    <Card key={card.id} className={`p-4 border-l-4 border-l-${card.borderColor}-500`}>
+                      <div className="flex items-start gap-3">
+                        <div className={`bg-${card.borderColor}-100 rounded-full p-2`}>
+                          {card.borderColor === 'green' && <TrendingUp className="w-4 h-4 text-green-600" />}
+                          {card.borderColor === 'blue' && <DollarSign className="w-4 h-4 text-blue-600" />}
+                        </div>
+                        <div>
+                          <p className="font-medium">{card.name} - {card.role}</p>
+                          <p className="text-sm text-muted-foreground">"{card.content}"</p>
+                          <div className="flex items-center gap-1 mt-1">
+                            {[...Array(card.rating)].map((_, i) => (
+                              <Star key={i} className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                            ))}
+                            <span className="text-xs text-muted-foreground ml-2">{card.timeAgo}</span>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                </Card>
-                
-                <Card className="p-4 border-l-4 border-l-blue-500">
-                  <div className="flex items-start gap-3">
-                    <div className="bg-blue-100 rounded-full p-2">
-                      <DollarSign className="w-4 h-4 text-blue-600" />
-                    </div>
-                    <div>
-                      <p className="font-medium">Mike R. - RE/MAX</p>
-                      <p className="text-sm text-muted-foreground">"ROI was 320% in the first quarter alone."</p>
-                      <div className="flex items-center gap-1 mt-1">
-                        {renderStarRating(5)}
-                        <span className="text-xs text-muted-foreground ml-2">1 week ago</span>
-                      </div>
-                    </div>
-                  </div>
-                </Card>
+                    </Card>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Middle Column - Value Proposition */}
@@ -583,32 +598,38 @@ export const ServiceFunnelModal = ({
             <Separator />
 
             {/* ROI Calculator */}
-            <div className="bg-gradient-to-r from-green-50 to-blue-50 p-4 rounded-lg border">
-              <h3 className="font-bold text-lg mb-3">ROI Calculator</h3>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-sm">Current monthly closings:</span>
-                  <span className="font-medium">3 deals</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm">Average commission:</span>
-                  <span className="font-medium">$8,500</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm">With our system (150% increase):</span>
-                  <span className="font-medium text-green-600">7.5 deals</span>
-                </div>
-                <Separator />
-                <div className="flex justify-between text-lg font-bold">
-                  <span>Additional monthly income:</span>
-                  <span className="text-green-600">+$38,250</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span>Annual increase:</span>
-                  <span className="text-green-600 font-semibold">+$459,000</span>
+            {(service.funnel_content as any)?.roiCalculator?.enabled && (
+              <div className="bg-gradient-to-r from-green-50 to-blue-50 p-4 rounded-lg border">
+                <h3 className="font-bold text-lg mb-3">
+                  {(service.funnel_content as any).roiCalculator.title || 'ROI Calculator'}
+                </h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-sm">Current monthly closings:</span>
+                    <span className="font-medium">{(service.funnel_content as any).roiCalculator.currentMonthlyClosings || 3} deals</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm">Average commission:</span>
+                    <span className="font-medium">${((service.funnel_content as any).roiCalculator.averageCommission || 8500).toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm">With our system ({(service.funnel_content as any).roiCalculator.increasePercentage || 150}% increase):</span>
+                    <span className="font-medium text-green-600">
+                      {(((service.funnel_content as any).roiCalculator.currentMonthlyClosings || 3) * ((service.funnel_content as any).roiCalculator.increasePercentage || 150) / 100 + ((service.funnel_content as any).roiCalculator.currentMonthlyClosings || 3)).toFixed(1)} deals
+                    </span>
+                  </div>
+                  <Separator />
+                  <div className="flex justify-between text-lg font-bold">
+                    <span>Additional monthly income:</span>
+                    <span className="text-green-600">+${((service.funnel_content as any).roiCalculator.calculatedAdditionalIncome || 38250).toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span>Annual increase:</span>
+                    <span className="text-green-600 font-semibold">+${((service.funnel_content as any).roiCalculator.calculatedAnnualIncrease || 459000).toLocaleString()}</span>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
             {/* Time Investment */}
             <div className="bg-blue-50 p-4 rounded-lg border">
@@ -703,16 +724,22 @@ export const ServiceFunnelModal = ({
             )}
 
             {/* Urgency */}
-            <div className="bg-red-50 border border-red-200 p-4 rounded-lg">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-                <span className="font-semibold text-red-700">Limited Availability</span>
+            {(service.funnel_content as any)?.urgencySection?.enabled && (
+              <div className="bg-red-50 border border-red-200 p-4 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                  <span className="font-semibold text-red-700">
+                    {(service.funnel_content as any).urgencySection.title || 'Limited Availability'}
+                  </span>
+                </div>
+                <p className="text-sm text-red-600">
+                  {(service.funnel_content as any).urgencySection.message || 'We only take on 5 new clients per month to ensure quality service.'} 
+                  <span className="font-semibold"> 
+                    {(service.funnel_content as any).urgencySection.spotsRemaining || 2} spots remaining this month.
+                  </span>
+                </p>
               </div>
-              <p className="text-sm text-red-600">
-                We only take on 5 new clients per month to ensure quality service. 
-                <span className="font-semibold"> 2 spots remaining this month.</span>
-              </p>
-            </div>
+            )}
           </div>
 
           {/* Right Column - CTA and Contact */}

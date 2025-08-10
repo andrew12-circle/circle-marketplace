@@ -129,6 +129,37 @@ interface FunnelContent {
     title: string;
     items: ThumbnailItem[];
   };
+  roiCalculator: {
+    enabled: boolean;
+    title: string;
+    currentMonthlyClosings: number;
+    averageCommission: number;
+    increasePercentage: number;
+    calculatedAdditionalIncome: number;
+    calculatedAnnualIncrease: number;
+  };
+  testimonialCards: {
+    enabled: boolean;
+    title: string;
+    cards: {
+      id: string;
+      name: string;
+      role: string;
+      content: string;
+      rating: number;
+      timeAgo: string;
+      borderColor: string;
+      iconColor: string;
+      icon: string;
+    }[];
+  };
+  urgencySection: {
+    enabled: boolean;
+    title: string;
+    message: string;
+    spotsRemaining: number;
+    totalSpots: number;
+  };
   socialProof: {
     testimonials: {
       id: string;
@@ -199,6 +230,50 @@ export const ServiceManagementPanel = () => {
         { id: '3', label: 'Training', icon: 'book' },
         { id: '4', label: 'Results', icon: 'trophy' }
       ]
+    },
+    roiCalculator: {
+      enabled: false,
+      title: 'ROI Calculator',
+      currentMonthlyClosings: 3,
+      averageCommission: 8500,
+      increasePercentage: 150,
+      calculatedAdditionalIncome: 38250,
+      calculatedAnnualIncrease: 459000
+    },
+    testimonialCards: {
+      enabled: false,
+      title: 'Recent Success Stories',
+      cards: [
+        {
+          id: '1',
+          name: 'Sarah T.',
+          role: 'Keller Williams',
+          content: 'Increased my closings by 200% in just 3 months!',
+          rating: 5,
+          timeAgo: '2 weeks ago',
+          borderColor: 'green',
+          iconColor: 'green',
+          icon: 'trending'
+        },
+        {
+          id: '2',
+          name: 'Mike R.',
+          role: 'RE/MAX',
+          content: 'ROI was 320% in the first quarter alone.',
+          rating: 5,
+          timeAgo: '1 week ago',
+          borderColor: 'blue',
+          iconColor: 'blue',
+          icon: 'dollar'
+        }
+      ]
+    },
+    urgencySection: {
+      enabled: false,
+      title: 'Limited Availability',
+      message: 'We only take on 5 new clients per month to ensure quality service.',
+      spotsRemaining: 2,
+      totalSpots: 5
     },
     socialProof: {
       testimonials: [],
