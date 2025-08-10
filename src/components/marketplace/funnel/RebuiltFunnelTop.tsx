@@ -245,7 +245,7 @@ export const RebuiltFunnelTop: React.FC<RebuiltFunnelTopProps> = ({
               </div>
               <div className="space-y-3">
                 {(ctaButtons?.length ? ctaButtons : [
-                  { text: "Schedule Free Consultation", primary: true, action: "consult" as const },
+                  { text: "Free Consultation", primary: true, action: "consult" as const },
                   { text: "Add to Cart", primary: false, action: "cart" as const },
                 ]).map((btn, i) => (
                   <Button
