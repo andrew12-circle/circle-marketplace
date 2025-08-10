@@ -83,7 +83,10 @@ interface Service {
     name: string;
     logo_url?: string;
   };
+  funnel_content?: any;
+  pricing_tiers?: any;
 }
+
 
 interface ThumbnailItem {
   id: string;
@@ -196,6 +199,10 @@ interface FunnelContent {
     message: string;
   };
 }
+
+const safeParseJSON = (val: string) => {
+  try { return JSON.parse(val); } catch { return null; }
+};
 
 export const ServiceManagementPanel = () => {
   const { toast } = useToast();
@@ -391,15 +398,42 @@ export const ServiceManagementPanel = () => {
     setIsEditingDetails(false);
     setShowFunnelEditor(false);
     
-    // Initialize funnel content with service data
-    setFunnelContent({
-      ...funnelContent,
-      headline: service.title,
-      subheadline: service.description || '',
-      heroDescription: service.description || '',
-      estimatedRoi: service.estimated_roi || 0,
-      duration: service.duration || ''
-    });
+    // Load saved funnel content if present and normalize keys; otherwise seed from service
+    const rawFunnel: any = (service as any).funnel_content;
+    if (rawFunnel) {
+      const parsed = typeof rawFunnel === 'string' ? safeParseJSON(rawFunnel) : rawFunnel;
+      const merged: any = { ...funnelContent, ...(parsed || {}) };
+      const normalized: FunnelContent = {
+        ...merged,
+        headline: merged.headline ?? service.title,
+        subheadline: merged.subheadline ?? merged.subHeadline ?? merged.sub_headline ?? (service.description || ''),
+        heroDescription: merged.heroDescription ?? merged.hero_description ?? merged.description ?? (service.description || ''),
+        estimatedRoi: typeof merged.estimatedRoi === 'number' ? merged.estimatedRoi : (service.estimated_roi || 0),
+        duration: merged.duration ?? (service.duration || ''),
+      };
+      setFunnelContent(normalized);
+    } else {
+      setFunnelContent({
+        ...funnelContent,
+        headline: service.title,
+        subheadline: service.description || '',
+        heroDescription: service.description || '',
+        estimatedRoi: service.estimated_roi || 0,
+        duration: service.duration || ''
+      });
+    }
+
+    // Load saved pricing tiers if present
+    const rawTiers: any = (service as any).pricing_tiers;
+    if (rawTiers) {
+      if (typeof rawTiers === 'string') {
+        const parsed = safeParseJSON(rawTiers);
+        if (Array.isArray(parsed)) setPricingTiers(parsed as PricingTier[]);
+      } else if (Array.isArray(rawTiers)) {
+        setPricingTiers(rawTiers as PricingTier[]);
+      }
+    }
+
   };
 
   const handleServiceUpdate = async () => {
@@ -960,6 +994,8 @@ export const ServiceManagementPanel = () => {
         onChange={setFunnelContent}
         onSave={handleFunnelSave}
         serviceName={selectedService?.title || ''}
+        pricingTiers={pricingTiers}
+        onPricingTiersChange={setPricingTiers}
       />
     </div>
   );
