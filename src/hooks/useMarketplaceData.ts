@@ -116,9 +116,9 @@ const fetchServices = async (): Promise<Service[]> => {
       .order('sort_order', { ascending: true })
       .order('created_at', { ascending: false })
       .limit(200), // Increased from 100 to 200 to accommodate all services
-    10000, // Reduced timeout
-    'fetchServices'
-  );
+      12000, // 12s timeout for services
+      'fetchServices'
+    );
 
   const duration = performance.now() - t0;
   performanceMonitor.trackRequest('/services', 'SELECT', duration, !error, false);
@@ -169,9 +169,9 @@ const fetchVendors = async (): Promise<Vendor[]> => {
       .order('sort_order', { ascending: true })
       .order('rating', { ascending: false })
       .limit(50),
-    8000, // Reduced timeout
-    'fetchVendors'
-  );
+      15000, // 15s timeout for vendors
+      'fetchVendors'
+    );
 
   const duration = performance.now() - t0;
   performanceMonitor.trackRequest('/vendors', 'SELECT', duration, !error, false);
@@ -225,7 +225,7 @@ const fetchCombinedMarketplaceData = async (): Promise<MarketplaceData> => {
         .eq('cache_key', 'marketplace_data')
         .gt('expires_at', new Date().toISOString())
         .maybeSingle(),
-      6000, // Increased timeout for database cache
+      3000, // 3s timeout for database cache
       'marketplace_cache'
     );
     performanceMonitor.trackRequest('/marketplace_cache', 'SELECT', performance.now() - t0, true, true);
@@ -239,30 +239,61 @@ const fetchCombinedMarketplaceData = async (): Promise<MarketplaceData> => {
     // Continue to fresh data fetch - don't fail completely
   }
 
-  // Use Promise.all for parallel fetching with enhanced error handling
+  // Use Promise.allSettled for parallel fetching with partial success and fallback
   try {
-    const [services, vendors] = await Promise.all([
-      fetchServices().catch(error => {
-        logger.error('Services fetch failed:', error);
-        throw new Error(`Services fetch failed: ${error.message}`);
-      }),
-      fetchVendors().catch(error => {
-        logger.error('Vendors fetch failed:', error);
-        throw new Error(`Vendors fetch failed: ${error.message}`);
-      })
+    const [servicesResult, vendorsResult] = await Promise.allSettled([
+      fetchServices(),
+      fetchVendors(),
     ]);
+
+    let services: Service[] = [];
+    let vendors: Vendor[] = [];
+
+    if (servicesResult.status === 'fulfilled') {
+      services = servicesResult.value;
+    } else {
+      logger.error('Services fetch failed:', servicesResult.reason);
+    }
+
+    if (vendorsResult.status === 'fulfilled') {
+      vendors = vendorsResult.value;
+    } else {
+      logger.error('Vendors fetch failed:', vendorsResult.reason);
+    }
+
+    // If both failed, try edge function fallback
+    if (services.length === 0 && vendors.length === 0) {
+      try {
+        const tFallback = performance.now();
+        const { data: fallbackData, error: fallbackError } = await withTimeout(
+          supabase.functions.invoke('get-marketplace-data'),
+          7000,
+          'get-marketplace-data'
+        );
+        performanceMonitor.trackRequest('/functions/get-marketplace-data', 'INVOKE', performance.now() - tFallback, !fallbackError, false);
+
+        if (fallbackError) throw fallbackError;
+        const combined = (fallbackData as any)?.data || fallbackData; // support possible shapes
+        services = combined?.services || [];
+        vendors = combined?.vendors || [];
+      } catch (e) {
+        logger.error('Edge function fallback failed:', e);
+      }
+    }
+
+    // Still nothing? Throw to trigger toast once
+    if (services.length === 0 && vendors.length === 0) {
+      throw new Error('All marketplace data sources failed');
+    }
 
     const data = { services, vendors };
 
-    // Warm the cache in background (don't block) - reduced timeout
-    setTimeout(async () => {
-      try {
-        const t1 = performance.now();
-        await withTimeout(supabase.functions.invoke('warm-marketplace-cache'), 3000, 'warm-marketplace-cache');
-        performanceMonitor.trackRequest('/functions/warm-marketplace-cache', 'INVOKE', performance.now() - t1, true, false);
-      } catch (error) {
-        logger.log('Cache warming failed (background):', error);
-      }
+    // Warm the cache in background (fire-and-forget)
+    setTimeout(() => {
+      const t1 = performance.now();
+      withTimeout(supabase.functions.invoke('warm-marketplace-cache'), 3000, 'warm-marketplace-cache')
+        .then(() => performanceMonitor.trackRequest('/functions/warm-marketplace-cache', 'INVOKE', performance.now() - t1, true, false))
+        .catch((error) => logger.log('Cache warming failed (background):', error));
     }, 100);
 
     performanceMonitor.track('fetchCombinedMarketplaceData', performance.now() - overallStart, {

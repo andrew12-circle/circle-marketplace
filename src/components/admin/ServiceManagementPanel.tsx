@@ -581,7 +581,7 @@ export const ServiceManagementPanel = () => {
         description: 'Service funnel updated successfully',
       });
       // Refresh marketplace data so changes are visible immediately
-      try { await supabase.functions.invoke('warm-marketplace-cache'); } catch (e) { console.warn('Cache warm failed', e); }
+      supabase.functions.invoke('warm-marketplace-cache').catch((e) => console.warn('Cache warm failed', e));
       invalidateCache.invalidateAll();
       setShowFunnelEditor(false);
     } catch (error) {
