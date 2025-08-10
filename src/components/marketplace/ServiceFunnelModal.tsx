@@ -464,7 +464,7 @@ const { trackBooking, trackPurchase, trackOutboundClick } = useProviderTracking(
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-6">
           {/* Left Column - Media and Social Proof */}
-          <div className={`${showMiddle ? 'lg:col-span-5' : 'lg:col-span-9'} space-y-6`}>
+          <div className={`${showMiddle ? 'lg:col-span-5' : 'lg:col-span-8'} space-y-6`}>
             {/* Main Image/Video */}
             <div className="aspect-video bg-muted rounded-lg overflow-hidden relative flex items-center justify-center">
               {(service.funnel_content?.media?.[0]?.url || service.image_url) ? (
@@ -704,11 +704,11 @@ const { trackBooking, trackPurchase, trackOutboundClick } = useProviderTracking(
             </div>
           )}
 
-
-                <div className="lg:col-span-3">
-                  <div className="space-y-4">
-                    <Card className="p-6 space-y-4">
-                      <div className="space-y-3">
+          {/* Right Column - Choose Your Package (Widened) */}
+          <div className="lg:col-span-4">
+            <div className="space-y-4">
+              <Card className="p-6 space-y-4">
+                <div className="space-y-3">
                   {/* Show Add to Cart for services with pricing tiers that don't require pricing requests */}
                   {service.pricing_tiers?.length > 0 && !service.requires_quote && !selectedPkg?.requestPricing ? (
                     <>
@@ -857,7 +857,7 @@ const { trackBooking, trackPurchase, trackOutboundClick } = useProviderTracking(
                     </p>
                   )}
                 </div>
-              </div>
+              </Card>
 
               {/* Trust Signals */}
               <Card className="p-4">
@@ -921,6 +921,79 @@ const { trackBooking, trackPurchase, trackOutboundClick } = useProviderTracking(
             </div>
           </div>
         </div>
+
+        {/* Choose Your Package Section - Full Width */}
+        {showPackagesSection && (
+          <div className="border-t bg-muted/20 p-6">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold mb-3">Choose Your Package</h2>
+              <p className="text-lg text-muted-foreground">Select the perfect plan for your business needs</p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+              {packages.map((pkg) => (
+                <Card 
+                  key={pkg.id} 
+                  className={`relative p-6 cursor-pointer transition-all hover:shadow-lg ${
+                    selectedPackage === pkg.id ? 'ring-2 ring-primary border-primary' : ''
+                  } ${pkg.popular ? 'border-primary/50 shadow-md' : ''}`}
+                  onClick={() => setSelectedPackage(pkg.id)}
+                >
+                  {pkg.popular && (
+                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                      <Badge className="bg-primary text-primary-foreground px-3 py-1">
+                        Most Popular
+                      </Badge>
+                    </div>
+                  )}
+                  
+                  <div className="text-center mb-4">
+                    <h3 className="text-xl font-bold mb-2">{pkg.name}</h3>
+                    <p className="text-sm text-muted-foreground mb-4">{pkg.description}</p>
+                    
+                    <div className="mb-4">
+                      {pkg.requestPricing ? (
+                        <div className="text-2xl font-bold text-primary">Contact for Pricing</div>
+                      ) : (
+                        <div className="space-y-1">
+                          <div className="text-3xl font-bold text-primary">${pkg.price}</div>
+                          {pkg.originalPrice && pkg.originalPrice !== pkg.price && (
+                            <div className="text-sm text-muted-foreground line-through">
+                              ${pkg.originalPrice}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-3 mb-6">
+                    {pkg.features.map((feature, index) => (
+                      <div key={index} className="flex items-center gap-2">
+                        <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
+                        <span className="text-sm">{feature}</span>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <Button 
+                    className={`w-full ${
+                      selectedPackage === pkg.id 
+                        ? 'bg-primary hover:bg-primary/90' 
+                        : 'bg-secondary hover:bg-secondary/80'
+                    }`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedPackage(pkg.id);
+                    }}
+                  >
+                    {selectedPackage === pkg.id ? 'Selected' : 'Select Package'}
+                  </Button>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Bottom Section - Tabs */}
         <div className="border-t bg-muted/20">
