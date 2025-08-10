@@ -382,7 +382,7 @@ const { trackBooking, trackPurchase, trackOutboundClick } = useProviderTracking(
   const showPackagesSection = Array.isArray(service.pricing_tiers) && service.pricing_tiers.length > 0;
   const showUrgency = !!fc?.urgencySection?.enabled;
   const showTimeInvestment = !!(fc?.timeInvestment?.enabled || fc?.showTimeInvestment);
-  const showMiddle = hasBenefits || showROI || showStats || showTestimonials || showPackagesSection || showUrgency || showTimeInvestment;
+  const showMiddle = hasBenefits || showROI || showStats || showTestimonials || showUrgency || showTimeInvestment;
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()} modal={true}>
@@ -701,120 +701,6 @@ const { trackBooking, trackPurchase, trackOutboundClick } = useProviderTracking(
               </div>
             )}
 
-            {/* Pricing Tiers Section - Only show if service has custom pricing tiers */}
-            {service.pricing_tiers?.length > 0 && (
-<div>
-  <h2 className="text-2xl font-bold mb-4">Choose Your Package</h2>
-  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-    {packages.map((pkg) => (
-      <Card 
-        key={pkg.id} 
-        className={`h-full p-4 cursor-pointer transition-all border-2 ${
-          selectedPackage === pkg.id 
-            ? 'border-primary bg-primary/5' 
-            : 'border-border hover:border-primary/50'
-        } ${pkg.popular ? 'ring-2 ring-primary/20' : ''}`}
-        onClick={() => setSelectedPackage(pkg.id)}
-      >
-        <div className="flex h-full items-start justify-between">
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-2">
-              <h3 className="font-semibold text-lg">{pkg.name}</h3>
-              {pkg.popular && (
-                <Badge className="bg-primary text-primary-foreground">
-                  <Crown className="w-3 h-3 mr-1" />
-                  Most Popular
-                </Badge>
-              )}
-            </div>
-            <p className="text-sm text-muted-foreground mb-3">{pkg.description}</p>
-            <div className="space-y-1 mb-3">
-              {pkg.features.slice(0, 3).map((feature, idx) => (
-                <div key={idx} className="flex items-center gap-2 text-sm">
-                  <CheckCircle className="w-3 h-3 text-green-500" />
-                  <span>{feature}</span>
-                </div>
-              ))}
-              {pkg.features.length > 3 && (
-                <div className="text-xs text-muted-foreground">
-                  +{pkg.features.length - 3} more features
-                </div>
-              )}
-            </div>
-            <div className="mt-auto flex items-center gap-2">
-              {pkg.requestPricing ? (
-                <span className="text-2xl font-bold text-primary">Request Pricing</span>
-              ) : (
-                <>
-                  <span className="text-2xl font-bold">${pkg.price}</span>
-                  {pkg.originalPrice && pkg.originalPrice > pkg.price && (
-                    <span className="text-sm text-muted-foreground line-through">
-                      ${pkg.originalPrice}
-                    </span>
-                  )}
-                </>
-              )}
-            </div>
-          </div>
-          <div className="ml-4">
-            <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
-              selectedPackage === pkg.id 
-                ? 'border-primary bg-primary' 
-                : 'border-muted-foreground'
-            }`}>
-              {selectedPackage === pkg.id && (
-                <CheckCircle className="w-4 h-4 text-white" />
-              )}
-            </div>
-          </div>
-        </div>
-      </Card>
-    ))}
-  </div>
-</div>
-            )}
-
-            {/* Urgency */}
-            {(service.funnel_content as any)?.urgencySection?.enabled && (
-              <div className="bg-red-50 border border-red-200 p-4 rounded-lg">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-                  <span className="font-semibold text-red-700">
-                    {(service.funnel_content as any).urgencySection.title || 'Limited Availability'}
-                  </span>
-                </div>
-                <p className="text-sm text-red-600">
-                  {(service.funnel_content as any).urgencySection.message || 'We only take on 5 new clients per month to ensure quality service.'} 
-                  <span className="font-semibold"> 
-                    {(service.funnel_content as any).urgencySection.spotsRemaining || 2} spots remaining this month.
-                  </span>
-                </p>
-              </div>
-            )}
-          </div>
-
-          )}
-
-          {/* Right Column - CTA and Contact */}
-          <div className="lg:col-span-3">
-            <div className="sticky top-6 space-y-4">
-              <Card className="p-6 space-y-4 border-2 border-primary">
-                <div className="text-center space-y-2">
-                  <h3 className="text-xl font-bold">{ctaTitle}</h3>
-                  {ctaDescription && (
-                    <p className="text-sm text-muted-foreground">{ctaDescription}</p>
-                  )}
-                  {service.pricing_tiers?.length > 0 ? (
-                    <div className="space-y-2">
-                      <p className="text-sm text-muted-foreground">Selected Package: {selectedPkg?.name}</p>
-                      {selectedPkg?.requestPricing ? (
-                        <div className="text-2xl font-bold text-primary">Request Pricing</div>
-                      ) : (
-                        <div className="space-y-1">
-                          <div className="text-2xl font-bold text-primary">${selectedPkg?.price}</div>
-                          {selectedPkg?.originalPrice && selectedPkg.originalPrice > selectedPkg.price && (
-                            <p className="text-sm text-muted-foreground line-through">${selectedPkg.originalPrice}</p>
-                          )}
                         </div>
                       )}
                     </div>
