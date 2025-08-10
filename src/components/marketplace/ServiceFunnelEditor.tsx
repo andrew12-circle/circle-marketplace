@@ -613,20 +613,126 @@ export const ServiceFunnelEditor = ({ funnelContent, onChange }: ServiceFunnelEd
                 Edit your funnel content with an intuitive visual interface
               </p>
             </CardHeader>
-            <CardContent className="flex-1 overflow-y-auto max-h-[calc(100vh-240px)] pr-1">
-              <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full">
-                <TabsList className="w-full flex gap-1 overflow-x-auto whitespace-nowrap rounded-md bg-background shadow-sm p-1">
-                  <TabsTrigger className="flex-shrink-0" value="hero"><Crown className="w-4 h-4 mr-2" />Hero</TabsTrigger>
-                  <TabsTrigger className="flex-shrink-0" value="benefits"><Award className="w-4 h-4 mr-2" />Benefits</TabsTrigger>
-                  <TabsTrigger className="flex-shrink-0" value="pricing"><DollarSign className="w-4 h-4 mr-2" />Pricing</TabsTrigger>
-                  <TabsTrigger className="flex-shrink-0" value="social"><Users className="w-4 h-4 mr-2" />Social Proof</TabsTrigger>
-                  <TabsTrigger className="flex-shrink-0" value="trust"><Shield className="w-4 h-4 mr-2" />Trust & Contact</TabsTrigger>
-                  <TabsTrigger className="flex-shrink-0" value="cta"><Target className="w-4 h-4 mr-2" />Call to Action</TabsTrigger>
-                  <TabsTrigger className="flex-shrink-0" value="thumbnails"><ImageIcon className="w-4 h-4 mr-2" />Thumbnails</TabsTrigger>
-                  <TabsTrigger className="flex-shrink-0" value="roi"><TrendingUp className="w-4 h-4 mr-2" />ROI Calc</TabsTrigger>
-                  <TabsTrigger className="flex-shrink-0" value="testimonials"><Star className="w-4 h-4 mr-2" />Testimonials</TabsTrigger>
-                  <TabsTrigger className="flex-shrink-0" value="media"><Video className="w-4 h-4 mr-2" />Media</TabsTrigger>
-                </TabsList>
+            <CardContent className="flex-1 overflow-hidden max-h-[calc(100vh-240px)]">
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex">
+                {/* Vertical Navigation Sidebar */}
+                <div className="w-48 border-r border-border pr-4 mr-4 overflow-y-auto">
+                  <div className="space-y-1">
+                    <button
+                      onClick={() => setActiveTab('hero')}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-md transition-all ${
+                        activeTab === 'hero' 
+                          ? 'bg-primary text-primary-foreground shadow-sm' 
+                          : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                      }`}
+                    >
+                      <Crown className="w-4 h-4" />
+                      Hero Section
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('benefits')}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-md transition-all ${
+                        activeTab === 'benefits' 
+                          ? 'bg-primary text-primary-foreground shadow-sm' 
+                          : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                      }`}
+                    >
+                      <Award className="w-4 h-4" />
+                      Benefits
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('pricing')}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-md transition-all ${
+                        activeTab === 'pricing' 
+                          ? 'bg-primary text-primary-foreground shadow-sm' 
+                          : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                      }`}
+                    >
+                      <DollarSign className="w-4 h-4" />
+                      Pricing
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('social')}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-md transition-all ${
+                        activeTab === 'social' 
+                          ? 'bg-primary text-primary-foreground shadow-sm' 
+                          : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                      }`}
+                    >
+                      <Users className="w-4 h-4" />
+                      Social Proof
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('trust')}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-md transition-all ${
+                        activeTab === 'trust' 
+                          ? 'bg-primary text-primary-foreground shadow-sm' 
+                          : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                      }`}
+                    >
+                      <Shield className="w-4 h-4" />
+                      Trust & Contact
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('cta')}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-md transition-all ${
+                        activeTab === 'cta' 
+                          ? 'bg-primary text-primary-foreground shadow-sm' 
+                          : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                      }`}
+                    >
+                      <Target className="w-4 h-4" />
+                      Call to Action
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('thumbnails')}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-md transition-all ${
+                        activeTab === 'thumbnails' 
+                          ? 'bg-primary text-primary-foreground shadow-sm' 
+                          : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                      }`}
+                    >
+                      <ImageIcon className="w-4 h-4" />
+                      Thumbnails
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('roi')}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-md transition-all ${
+                        activeTab === 'roi' 
+                          ? 'bg-primary text-primary-foreground shadow-sm' 
+                          : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                      }`}
+                    >
+                      <TrendingUp className="w-4 h-4" />
+                      ROI Calculator
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('testimonials')}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-md transition-all ${
+                        activeTab === 'testimonials' 
+                          ? 'bg-primary text-primary-foreground shadow-sm' 
+                          : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                      }`}
+                    >
+                      <Star className="w-4 h-4" />
+                      Testimonials
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('media')}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-md transition-all ${
+                        activeTab === 'media' 
+                          ? 'bg-primary text-primary-foreground shadow-sm' 
+                          : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                      }`}
+                    >
+                      <Video className="w-4 h-4" />
+                      Media
+                    </button>
+                  </div>
+                </div>
+
+                {/* Content Area */}
+                <div className="flex-1 overflow-y-auto pr-2">
                 
                 <TabsContent value="hero" className="space-y-4 mt-4">
                   <div className="space-y-3">
@@ -1641,6 +1747,7 @@ export const ServiceFunnelEditor = ({ funnelContent, onChange }: ServiceFunnelEd
                     )}
                   </div>
                 </TabsContent>
+                </div>
               </Tabs>
             </CardContent>
           </Card>
