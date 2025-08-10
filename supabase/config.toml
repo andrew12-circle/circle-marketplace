@@ -56,12 +56,3 @@ verify_jwt = false
 
 [functions.get-marketplace-data]
 verify_jwt = false
-
-[functions.click-tracker]
-verify_jwt = false
-
-[functions.send-vendor-reports]
-verify_jwt = false
-
-[functions.setup-monthly-reports]
-verify_jwt = false

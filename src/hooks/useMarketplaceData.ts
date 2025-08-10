@@ -132,7 +132,6 @@ const fetchServices = async (): Promise<Service[]> => {
     ...service,
     discount_percentage: service.discount_percentage ? String(service.discount_percentage) : undefined,
     is_verified: service.is_verified || false,
-    funnel_content: service.funnel_content || {}, // Include funnel_content
     vendor: {
       id: service.vendor_id,
       name: 'Service Provider',

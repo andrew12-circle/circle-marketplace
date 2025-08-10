@@ -1,7 +1,9 @@
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { X, Save } from 'lucide-react';
 import { ServiceFunnelEditor } from './ServiceFunnelEditor';
+import { ServicePricingTiersEditor } from './ServicePricingTiersEditor';
 
 interface FunnelContent {
   headline: string;
@@ -76,9 +78,6 @@ interface FunnelContent {
     enabled: boolean;
     message: string;
   };
-
-  customHtml?: string;
-  useCustomHtml?: boolean;
 }
 
 interface PricingFeature {
@@ -126,10 +125,6 @@ export const ServiceFunnelEditorModal = ({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[98vw] max-h-[98vh] w-full h-full p-0 overflow-hidden">
-        <DialogTitle className="sr-only">Edit Service Funnel</DialogTitle>
-        <DialogDescription className="sr-only">
-          Edit the funnel content and pricing tiers for {serviceName}
-        </DialogDescription>
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -154,11 +149,26 @@ export const ServiceFunnelEditorModal = ({
 
           {/* Content */}
           <div className="flex-1 overflow-hidden p-6">
-            <ServiceFunnelEditor
-              funnelContent={funnelContent}
-              onChange={onChange}
-              hideHeaderButtons={true}
-            />
+            <Tabs defaultValue="funnel" className="h-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="funnel">Funnel Design</TabsTrigger>
+                <TabsTrigger value="pricing">Pricing Tiers</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="funnel" className="h-full mt-4">
+                <ServiceFunnelEditor
+                  funnelContent={funnelContent}
+                  onChange={onChange}
+                />
+              </TabsContent>
+              
+              <TabsContent value="pricing" className="h-full mt-4">
+                <ServicePricingTiersEditor
+                  tiers={pricingTiers}
+                  onChange={onPricingTiersChange || (() => {})}
+                />
+              </TabsContent>
+            </Tabs>
           </div>
         </div>
       </DialogContent>

@@ -34,7 +34,6 @@ import {
   Handshake
 } from "lucide-react";
 import { getRiskBadge, getComplianceAlert, determineServiceRisk } from "./RESPAComplianceSystem";
-import { getClickTrackingUrl } from "@/utils/tracking";
 
 interface VendorFunnelModalProps {
   isOpen: boolean;
@@ -637,10 +636,7 @@ export const VendorFunnelModal = ({
                       variant="outline"
                       className="w-full border-gray-300 text-gray-700 hover:bg-gray-50"
                       size="lg"
-                      onClick={() => {
-                        const url = getClickTrackingUrl(undefined, vendor.website_url!);
-                        window.open(url, '_blank');
-                      }}
+                      onClick={() => window.open(vendor.website_url, '_blank')}
                     >
                       <Building className="w-4 h-4 mr-2" />
                       Visit Website

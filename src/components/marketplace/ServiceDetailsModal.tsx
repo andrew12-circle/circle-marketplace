@@ -25,7 +25,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { ReviewRatingSystem } from "./ReviewRatingSystem";
 import { useServiceRatings } from "@/hooks/useServiceRatings";
-import { getClickTrackingUrl } from "@/utils/tracking";
 
 interface Service {
   id: string;
@@ -405,11 +404,7 @@ export const ServiceDetailsModal = ({ service, isOpen, onClose }: ServiceDetails
                 <Button 
                   variant="outline" 
                   className="w-full"
-                  onClick={() => {
-                    const dest = service.funnel_content?.callToAction?.contactInfo?.website || `https://${service.vendor.name.toLowerCase().replace(' ', '')}.com`;
-                    const url = getClickTrackingUrl(service.id, dest);
-                    window.open(url, '_blank');
-                  }}
+                  onClick={() => window.open(service.funnel_content?.callToAction?.contactInfo?.website || `https://${service.vendor.name.toLowerCase().replace(' ', '')}.com`, '_blank')}
                 >
                   <ExternalLink className="w-4 h-4 mr-2" />
                   {service.funnel_content?.callToAction?.primaryButtonText || "Visit Official Website"}

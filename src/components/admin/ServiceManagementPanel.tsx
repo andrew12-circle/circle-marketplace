@@ -418,56 +418,12 @@ export const ServiceManagementPanel = () => {
     }
   };
 
-  const handleFunnelSave = async () => {
-    console.log('🔥 handleFunnelSave called');
-    console.log('Selected service:', selectedService?.id);
-    console.log('Funnel content exists:', !!funnelContent);
-    
-    if (!selectedService || !funnelContent) {
-      console.error('Missing required data:', { selectedService: !!selectedService, funnelContent: !!funnelContent });
-      toast({
-        title: 'Error',
-        description: 'Missing service or funnel content data',
-        variant: 'destructive',
-      });
-      return;
-    }
-    
-    console.log('Saving funnel content:', funnelContent);
-    console.log('🚀 About to make database call...');
-    
-    try {
-      const { data, error } = await supabase
-        .from('services')
-        .update({ 
-          funnel_content: funnelContent as any
-        })
-        .eq('id', selectedService.id)
-        .select();
-
-      console.log('Database response:', { data, error });
-
-      if (error) throw error;
-
-      // Update local state
-      const updatedService = { ...selectedService, funnel_content: funnelContent };
-      setSelectedService(updatedService);
-      setServices(services.map(s => s.id === selectedService.id ? updatedService : s));
-
-      console.log('✅ Funnel saved successfully');
-      toast({
-        title: 'Success',
-        description: 'Service funnel updated successfully',
-      });
-      setShowFunnelEditor(false);
-    } catch (error) {
-      console.error('❌ Error saving funnel:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to save funnel content',
-        variant: 'destructive',
-      });
-    }
+  const handleFunnelSave = () => {
+    toast({
+      title: 'Success',
+      description: 'Service funnel updated successfully',
+    });
+    setShowFunnelEditor(false);
   };
 
   if (loading) {

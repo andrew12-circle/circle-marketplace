@@ -39,10 +39,9 @@ import { AgentInvitationPanel } from '@/components/admin/AgentInvitationPanel';
 import VendorPointAllocationPanel from '@/components/admin/VendorPointAllocationPanel';
 import AntiScrapingSystem from '@/components/security/AntiScrapingSystem';
 import { CreatorPayoutDashboard } from '@/components/admin/CreatorPayoutDashboard';
-import { VendorCommissionAnalytics } from '@/components/admin/VendorCommissionAnalytics';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Upload, Building, Youtube, DollarSign, BarChart3, Coins, Shield as ShieldIcon, Users2, Send, BookOpen, ExternalLink } from 'lucide-react';
+import { Upload, Building, Youtube, DollarSign, BarChart3, Coins, Shield as ShieldIcon, Users2, Send, BookOpen } from 'lucide-react';
 
 interface UserProfile {
   id: string;
@@ -455,128 +454,94 @@ export default function AdminDashboard() {
             </Alert>
           )}
 
-          {/* Grouped Tab Navigation */}
+          {/* Modern Tab Navigation */}
           <Tabs defaultValue="users" className="w-full space-y-8">
-            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-3">
-              <TabsList className="h-auto grid grid-cols-2 lg:grid-cols-4 gap-3 bg-transparent p-0">
-                {/* User Management Group */}
-                <div className="space-y-2">
-                  <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider px-2">User Management</h3>
-                  <div className="space-y-1">
-                    <TabsTrigger 
-                      value="users" 
-                      className="w-full justify-start gap-2 px-3 py-2 text-sm font-medium rounded-lg data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700 data-[state=active]:border-blue-200 border border-transparent hover:bg-slate-50"
-                    >
-                      <Users className="h-4 w-4" />
-                      Users
-                    </TabsTrigger>
-                    <TabsTrigger 
-                      value="creators" 
-                      className="w-full justify-start gap-2 px-3 py-2 text-sm font-medium rounded-lg data-[state=active]:bg-purple-50 data-[state=active]:text-purple-700 data-[state=active]:border-purple-200 border border-transparent hover:bg-slate-50"
-                    >
-                      <Users2 className="h-4 w-4" />
-                      Creators
-                    </TabsTrigger>
-                    <TabsTrigger 
-                      value="agent-invites" 
-                      className="w-full justify-start gap-2 px-3 py-2 text-sm font-medium rounded-lg data-[state=active]:bg-green-50 data-[state=active]:text-green-700 data-[state=active]:border-green-200 border border-transparent hover:bg-slate-50"
-                    >
-                      <Send className="h-4 w-4" />
-                      Invites
-                    </TabsTrigger>
-                  </div>
-                </div>
-
-                {/* Content & Services Group */}
-                <div className="space-y-2">
-                  <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider px-2">Content & Services</h3>
-                  <div className="space-y-1">
-                    <TabsTrigger 
-                      value="content" 
-                      className="w-full justify-start gap-2 px-3 py-2 text-sm font-medium rounded-lg data-[state=active]:bg-amber-50 data-[state=active]:text-amber-700 data-[state=active]:border-amber-200 border border-transparent hover:bg-slate-50"
-                    >
-                      <Star className="h-4 w-4" />
-                      Content
-                    </TabsTrigger>
-                    <TabsTrigger 
-                      value="services" 
-                      className="w-full justify-start gap-2 px-3 py-2 text-sm font-medium rounded-lg data-[state=active]:bg-indigo-50 data-[state=active]:text-indigo-700 data-[state=active]:border-indigo-200 border border-transparent hover:bg-slate-50"
-                    >
-                      <Upload className="h-4 w-4" />
-                      Services
-                    </TabsTrigger>
-                    <TabsTrigger 
-                      value="reviews" 
-                      className="w-full justify-start gap-2 px-3 py-2 text-sm font-medium rounded-lg data-[state=active]:bg-pink-50 data-[state=active]:text-pink-700 data-[state=active]:border-pink-200 border border-transparent hover:bg-slate-50"
-                    >
-                      <Star className="h-4 w-4" />
-                      Reviews
-                    </TabsTrigger>
-                    <TabsTrigger 
-                      value="vendors" 
-                      className="w-full justify-start gap-2 px-3 py-2 text-sm font-medium rounded-lg data-[state=active]:bg-cyan-50 data-[state=active]:text-cyan-700 data-[state=active]:border-cyan-200 border border-transparent hover:bg-slate-50"
-                    >
-                      <Building className="h-4 w-4" />
-                      Vendors
-                    </TabsTrigger>
-                  </div>
-                </div>
-
-                {/* System Management Group */}
-                <div className="space-y-2">
-                  <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider px-2">System</h3>
-                  <div className="space-y-1">
-                    <TabsTrigger 
-                      value="security" 
-                      className="w-full justify-start gap-2 px-3 py-2 text-sm font-medium rounded-lg data-[state=active]:bg-red-50 data-[state=active]:text-red-700 data-[state=active]:border-red-200 border border-transparent hover:bg-slate-50"
-                    >
-                      <Lock className="h-4 w-4" />
-                      Security
-                    </TabsTrigger>
-                    <TabsTrigger 
-                      value="points" 
-                      className="w-full justify-start gap-2 px-3 py-2 text-sm font-medium rounded-lg data-[state=active]:bg-orange-50 data-[state=active]:text-orange-700 data-[state=active]:border-orange-200 border border-transparent hover:bg-slate-50"
-                    >
-                      <Coins className="h-4 w-4" />
-                      Points
-                    </TabsTrigger>
-                    <TabsTrigger 
-                      value="analytics" 
-                      className="w-full justify-start gap-2 px-3 py-2 text-sm font-medium rounded-lg data-[state=active]:bg-emerald-50 data-[state=active]:text-emerald-700 data-[state=active]:border-emerald-200 border border-transparent hover:bg-slate-50"
-                    >
-                      <BarChart3 className="h-4 w-4" />
-                      Analytics
-                    </TabsTrigger>
-                    <TabsTrigger 
-                      value="youtube" 
-                      className="w-full justify-start gap-2 px-3 py-2 text-sm font-medium rounded-lg data-[state=active]:bg-red-50 data-[state=active]:text-red-700 data-[state=active]:border-red-200 border border-transparent hover:bg-slate-50"
-                    >
-                      <Youtube className="h-4 w-4" />
-                      YouTube
-                    </TabsTrigger>
-                  </div>
-                </div>
-
-                {/* Compliance & Finance Group */}
-                <div className="space-y-2">
-                  <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider px-2">Compliance</h3>
-                  <div className="space-y-1">
-                    <TabsTrigger 
-                      value="respa" 
-                      className="w-full justify-start gap-2 px-3 py-2 text-sm font-medium rounded-lg data-[state=active]:bg-violet-50 data-[state=active]:text-violet-700 data-[state=active]:border-violet-200 border border-transparent hover:bg-slate-50"
-                    >
-                      <ShieldIcon className="h-4 w-4" />
-                      RESPA
-                    </TabsTrigger>
-                    <TabsTrigger 
-                      value="commission" 
-                      className="w-full justify-start gap-2 px-3 py-2 text-sm font-medium rounded-lg data-[state=active]:bg-teal-50 data-[state=active]:text-teal-700 data-[state=active]:border-teal-200 border border-transparent hover:bg-slate-50"
-                    >
-                      <DollarSign className="h-4 w-4" />
-                      Commission
-                    </TabsTrigger>
-                  </div>
-                </div>
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-2">
+              <TabsList className="grid w-full grid-cols-6 lg:grid-cols-12 gap-1 bg-slate-50 p-1 rounded-lg">
+                <TabsTrigger 
+                  value="users" 
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-md data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm"
+                >
+                  <Users className="h-4 w-4" />
+                  <span className="hidden sm:inline">Users</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="creators" 
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-md data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm"
+                >
+                  <Users2 className="h-4 w-4" />
+                  <span className="hidden sm:inline">Creators</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="security" 
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-md data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm"
+                >
+                  <Lock className="h-4 w-4" />
+                  <span className="hidden sm:inline">Security</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="content" 
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-md data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm"
+                >
+                  <Star className="h-4 w-4" />
+                  <span className="hidden sm:inline">Content</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="services" 
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-md data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm"
+                >
+                  <Upload className="h-4 w-4" />
+                  <span className="hidden sm:inline">Services</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="reviews" 
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-md data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm"
+                >
+                  <Star className="h-4 w-4" />
+                  <span className="hidden sm:inline">Reviews</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="vendors" 
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-md data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm"
+                >
+                  <Building className="h-4 w-4" />
+                  <span className="hidden sm:inline">Vendors</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="points" 
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-md data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm"
+                >
+                  <Coins className="h-4 w-4" />
+                  <span className="hidden sm:inline">Points</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="analytics" 
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-md data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm"
+                >
+                  <BarChart3 className="h-4 w-4" />
+                  <span className="hidden sm:inline">Analytics</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="youtube" 
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-md data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm"
+                >
+                  <Youtube className="h-4 w-4" />
+                  <span className="hidden sm:inline">YouTube</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="agent-invites" 
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-md data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm"
+                >
+                  <BookOpen className="h-4 w-4" />
+                  <span className="hidden sm:inline">Invites</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="respa" 
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-md data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm"
+                >
+                  <ShieldIcon className="h-4 w-4" />
+                  <span className="hidden sm:inline">RESPA</span>
+                </TabsTrigger>
               </TabsList>
             </div>
 
@@ -936,10 +901,6 @@ export default function AdminDashboard() {
           <RESPAServiceManager />
           <RESPAComplianceManager />
           <RESPADocumentationViewer />
-        </TabsContent>
-
-        <TabsContent value="commission" className="space-y-6">
-          <VendorCommissionAnalytics />
         </TabsContent>
 
         <TabsContent value="calculator" className="space-y-6">
