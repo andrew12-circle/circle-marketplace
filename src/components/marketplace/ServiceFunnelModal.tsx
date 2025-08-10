@@ -45,9 +45,11 @@ import { SafeHTML } from "@/utils/htmlSanitizer";
 // Helper: detect and embed YouTube videos
 const getYouTubeId = (url: string): string | null => {
   try {
-    const u = new URL(url);
-    if (u.hostname.includes("youtu.be")) return u.pathname.slice(1);
-    if (u.hostname.includes("youtube.com")) {
+    const normalized = /^https?:\/\//i.test(url) ? url : `https://${url}`;
+    const u = new URL(normalized);
+    const host = u.hostname.replace(/^www\./, '');
+    if (host.includes("youtu.be")) return u.pathname.slice(1);
+    if (host.includes("youtube.com")) {
       if (u.pathname.startsWith("/watch")) return u.searchParams.get("v");
       if (u.pathname.startsWith("/shorts/")) return u.pathname.split("/")[2] || null;
       if (u.pathname.startsWith("/embed/")) return u.pathname.split("/")[2] || null;
@@ -488,10 +490,11 @@ const { trackBooking, trackPurchase, trackOutboundClick } = useProviderTracking(
                   const isVideo = mediaItem?.type === 'video' || !!yt || (mediaUrl ? /\.(mp4|webm|ogg)$/i.test(mediaUrl) : false);
                   if (isVideo) {
                     return yt ? (
-                      <iframe
+<iframe
                         src={yt}
                         title={service.funnel_content?.headline || service.title}
                         className="w-full h-full"
+                        loading="lazy"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                         referrerPolicy="strict-origin-when-cross-origin"
                         allowFullScreen
