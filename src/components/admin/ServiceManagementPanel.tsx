@@ -24,6 +24,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useInvalidateMarketplace } from '@/hooks/useMarketplaceData';
 
 interface PricingFeature {
   id: string;
@@ -198,6 +199,7 @@ interface FunnelContent {
 
 export const ServiceManagementPanel = () => {
   const { toast } = useToast();
+  const invalidateCache = useInvalidateMarketplace();
   const [services, setServices] = useState<Service[]>([]);
   const [filteredServices, setFilteredServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
@@ -544,6 +546,9 @@ export const ServiceManagementPanel = () => {
         title: 'Success',
         description: 'Service funnel updated successfully',
       });
+      // Refresh marketplace data so changes are visible immediately
+      try { await supabase.functions.invoke('warm-marketplace-cache'); } catch (e) { console.warn('Cache warm failed', e); }
+      invalidateCache.invalidateAll();
       setShowFunnelEditor(false);
     } catch (error) {
       console.error('Error saving funnel:', error);
