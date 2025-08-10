@@ -217,6 +217,7 @@ export const ServiceManagementPanel = () => {
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [isEditingDetails, setIsEditingDetails] = useState(false);
   const [showFunnelEditor, setShowFunnelEditor] = useState(false);
+  const [showFunnelPreview, setShowFunnelPreview] = useState(false);
   const [editForm, setEditForm] = useState<Partial<Service>>({});
   const [error, setError] = useState<string | null>(null);
 
