@@ -27,9 +27,37 @@ export const useMarketplaceFilters = (
     };
 
     return services.filter(service => {
-      const matchesSearch = service.title?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                           service.description?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                           service.vendor?.name?.toLowerCase().includes(searchTerm.toLowerCase());
+      // Build search tokens with simple synonyms
+      const baseQuery = (searchTerm || '').toLowerCase().trim();
+
+      const tokens = new Set<string>(
+        baseQuery ? [baseQuery, ...baseQuery.split(/[\s-]+/).filter(Boolean)] : []
+      );
+
+      // Synonym expansion to make "360 marketing" find "360 branding" and vice versa
+      const expandToken = (tok: string) => {
+        if (tok === 'marketing') tokens.add('branding');
+        if (tok === 'branding') tokens.add('marketing');
+        if (tok === '360') {
+          tokens.add('360 branding');
+          tokens.add('360 marketing');
+        }
+        if (tok === '360branding' || tok === '360-branding') tokens.add('360 branding');
+        if (tok === '360marketing' || tok === '360-marketing') tokens.add('360 marketing');
+      };
+      Array.from(tokens).forEach(expandToken);
+
+      const haystackParts = [
+        service.title?.toLowerCase() || '',
+        service.description?.toLowerCase() || '',
+        service.vendor?.name?.toLowerCase() || '',
+        service.category?.toLowerCase() || '',
+        ...(service.tags?.map(t => (t || '').toLowerCase()) || [])
+      ];
+
+      const matchesSearch = tokens.size === 0
+        ? true
+        : Array.from(tokens).some(tok => haystackParts.some(part => part.includes(tok)));
       
       const matchesCategory = filters.category === "all" || service.category === filters.category;
       

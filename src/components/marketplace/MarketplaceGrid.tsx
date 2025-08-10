@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { OptimizedServiceCard } from "./OptimizedServiceCard";
 import { OptimizedVendorCard } from "./OptimizedVendorCard";
@@ -150,6 +150,13 @@ export const MarketplaceGrid = () => {
     icon: Mail,
     gradient: 'from-purple-500 to-purple-600',
     color: 'text-purple-600'
+  }, {
+    id: 'branding-identity',
+    name: 'Branding & Identity',
+    description: 'Logos, brand kits, and 360 branding packages',
+    icon: BookOpen,
+    gradient: 'from-fuchsia-500 to-fuchsia-600',
+    color: 'text-fuchsia-600'
   }, {
     id: 'social-media',
     name: 'Social Media Management',
@@ -311,6 +318,29 @@ export const MarketplaceGrid = () => {
     setSelectedProductCategory(null);
   };
 
+  // Deep-linking: support ?q= and ?serviceId=
+  const [deeplinkServiceId, setDeeplinkServiceId] = useState<string | null>(null);
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const q = params.get('q') || params.get('query') || '';
+    const sid = params.get('serviceId') || params.get('service');
+    if (q) {
+      setSearchTerm(q);
+      setSearchFilters(prev => ({ ...prev, query: q }));
+    }
+    if (sid) setDeeplinkServiceId(sid);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (!deeplinkServiceId) return;
+    const target = services.find(s => s.id === deeplinkServiceId);
+    if (target) {
+      handleViewServiceDetails(deeplinkServiceId);
+      setDeeplinkServiceId(null);
+    }
+  }, [deeplinkServiceId, services, handleViewServiceDetails]);
+
   // Filter services by selected product category
   const getServicesForProduct = (productId: string) => {
     const productMapping: {
@@ -319,6 +349,7 @@ export const MarketplaceGrid = () => {
       'facebook-ads': ['facebook', 'social media ads', 'digital marketing', 'meta ads', 'instagram ads', 'social advertising', 'paid social'],
       'google-ads': ['google', 'ppc', 'search ads', 'google adwords', 'paid search', 'sem', 'display ads', 'youtube ads'],
       'direct-mail': ['direct mail', 'postcards', 'flyers', 'mailers', 'print marketing', 'door hangers', 'marketing materials'],
+      'branding-identity': ['branding', 'brand', 'brand identity', 'logo', 'brand kit', '360 branding', '360 marketing'],
       'social-media': ['social media', 'social marketing', 'instagram', 'linkedin', 'social management', 'content creation'],
       'website-design': ['website', 'web design', 'landing page', 'web development', 'site design', 'wordpress', 'real estate website'],
       'seo-services': ['seo', 'search optimization', 'search engine', 'organic search', 'local seo', 'google ranking'],
