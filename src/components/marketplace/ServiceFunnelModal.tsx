@@ -373,6 +373,17 @@ const { trackBooking, trackPurchase, trackOutboundClick } = useProviderTracking(
     );
   };
 
+  const hasBenefits = Array.isArray(fc?.benefits) && fc.benefits.length > 0;
+  const showThumbnailGallery = !!fc?.thumbnailGallery?.enabled;
+  const showTestimonialCards = !!fc?.testimonialCards?.enabled;
+  const showROI = !!fc?.roiCalculator?.enabled;
+  const showStats = Array.isArray(fc?.socialProof?.stats) && fc.socialProof.stats.length > 0;
+  const showTestimonials = Array.isArray(fc?.socialProof?.testimonials) && fc.socialProof.testimonials.length > 0;
+  const showPackagesSection = Array.isArray(service.pricing_tiers) && service.pricing_tiers.length > 0;
+  const showUrgency = !!fc?.urgencySection?.enabled;
+  const showTimeInvestment = !!(fc?.timeInvestment?.enabled || fc?.showTimeInvestment);
+  const showMiddle = hasBenefits || showROI || showStats || showTestimonials || showPackagesSection || showUrgency || showTimeInvestment;
+
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()} modal={true}>
       <DialogContent className="max-w-7xl max-h-[95vh] overflow-y-auto p-0">
@@ -430,46 +441,20 @@ const { trackBooking, trackPurchase, trackOutboundClick } = useProviderTracking(
               )}
             </div>
             {/* Conditional Benefits Section */}
-            {(service.funnel_content?.benefits?.length > 0 || 
-              (!service.funnel_content?.benefits && service.funnel_content !== null)) && (
+            {hasBenefits && (
               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20">
                 <h3 className="text-2xl font-bold mb-4">
                   Why Choose {service.vendor?.name || 'This Service'}?
                 </h3>
                 <div className="space-y-3">
-                  {service.funnel_content?.benefits?.length > 0 ? (
-                    // Custom benefits from funnel content
-                    service.funnel_content.benefits.map((item, i) => (
-                      <div key={i} className="flex items-center gap-3">
-                        <div className="bg-green-500 rounded-full p-1">
-                          <TrendingUp className="w-4 h-4" />
-                        </div>
-                        <span className="text-lg">{item.title}</span>
+                  {fc.benefits.map((item: any, i: number) => (
+                    <div key={i} className="flex items-center gap-3">
+                      <div className="bg-green-500 rounded-full p-1">
+                        <TrendingUp className="w-4 h-4" />
                       </div>
-                    ))
-                  ) : (
-                    // Default benefits when section is enabled but no custom items
-                    <>
-                      <div className="flex items-center gap-3">
-                        <div className="bg-green-500 rounded-full p-1">
-                          <TrendingUp className="w-4 h-4" />
-                        </div>
-                        <span className="text-lg">Professional service delivery</span>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <div className="bg-green-500 rounded-full p-1">
-                          <Users className="w-4 h-4" />
-                        </div>
-                        <span className="text-lg">Quality guarantee included</span>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <div className="bg-green-500 rounded-full p-1">
-                          <Zap className="w-4 h-4" />
-                        </div>
-                        <span className="text-lg">Expert support provided</span>
-                      </div>
-                    </>
-                  )}
+                      <span className="text-lg">{item.title}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
@@ -479,7 +464,7 @@ const { trackBooking, trackPurchase, trackOutboundClick } = useProviderTracking(
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-6">
           {/* Left Column - Media and Social Proof */}
-          <div className="lg:col-span-5 space-y-6">
+          <div className={`${showMiddle ? 'lg:col-span-5' : 'lg:col-span-9'} space-y-6`}>
             {/* Main Image/Video */}
             <div className="aspect-video bg-muted rounded-lg overflow-hidden relative flex items-center justify-center">
               {(service.funnel_content?.media?.[0]?.url || service.image_url) ? (
@@ -607,56 +592,28 @@ const { trackBooking, trackPurchase, trackOutboundClick } = useProviderTracking(
           </div>
 
           {/* Middle Column - Value Proposition */}
+          {showMiddle && (
           <div className="lg:col-span-4 space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold mb-4">What You'll Get</h2>
-              <div className="space-y-4">
-                {service.funnel_content?.benefits?.length ? 
-                  service.funnel_content.benefits.map((benefit, index) => (
+            {hasBenefits && (
+              <div>
+                <h2 className="text-2xl font-bold mb-4">What You'll Get</h2>
+                <div className="space-y-4">
+                  {fc.benefits.map((benefit: any, index: number) => (
                     <div key={index} className="flex items-start gap-3">
                       <div className="bg-green-100 rounded-full p-2 mt-1">
                         <Target className="w-5 h-5 text-green-600" />
                       </div>
                       <div>
                         <h3 className="font-semibold">{benefit.title}</h3>
-                        <p className="text-sm text-muted-foreground">{benefit.description}</p>
+                        {benefit.description && (
+                          <p className="text-sm text-muted-foreground">{benefit.description}</p>
+                        )}
                       </div>
                     </div>
-                  )) : (
-                  <>
-                    <div className="flex items-start gap-3">
-                      <div className="bg-green-100 rounded-full p-2 mt-1">
-                        <Target className="w-5 h-5 text-green-600" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold">Proven Lead Generation System</h3>
-                        <p className="text-sm text-muted-foreground">Our proprietary system that's generated over $50M in commissions for our clients</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-start gap-3">
-                      <div className="bg-blue-100 rounded-full p-2 mt-1">
-                        <Zap className="w-5 h-5 text-blue-600" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold">Complete Setup & Training</h3>
-                        <p className="text-sm text-muted-foreground">White-glove implementation with 1-on-1 training sessions</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-start gap-3">
-                      <div className="bg-purple-100 rounded-full p-2 mt-1">
-                        <Users className="w-5 h-5 text-purple-600" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold">Ongoing Support & Optimization</h3>
-                        <p className="text-sm text-muted-foreground">Dedicated account manager and monthly strategy calls</p>
-                      </div>
-                    </div>
-                  </>
-                )}
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             <Separator />
 
@@ -724,24 +681,25 @@ const { trackBooking, trackPurchase, trackOutboundClick } = useProviderTracking(
               </div>
             )}
 
-            {/* Time Investment */}
-            <div className="bg-blue-50 p-4 rounded-lg border">
-              <h3 className="font-bold mb-3">Time Investment</h3>
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-blue-600" />
-                  <span className="text-sm">Setup: 2-3 hours over 1 week</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-blue-600" />
-                  <span className="text-sm">Daily maintenance: 15 minutes</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Trophy className="w-4 h-4 text-blue-600" />
-                  <span className="text-sm">Results visible: Within 30 days</span>
+            {showTimeInvestment && (
+              <div className="bg-blue-50 p-4 rounded-lg border">
+                <h3 className="font-bold mb-3">Time Investment</h3>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-blue-600" />
+                    <span className="text-sm">Setup: 2-3 hours over 1 week</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-blue-600" />
+                    <span className="text-sm">Daily maintenance: 15 minutes</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Trophy className="w-4 h-4 text-blue-600" />
+                    <span className="text-sm">Results visible: Within 30 days</span>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
             {/* Pricing Tiers Section - Only show if service has custom pricing tiers */}
             {service.pricing_tiers?.length > 0 && (
@@ -834,6 +792,8 @@ const { trackBooking, trackPurchase, trackOutboundClick } = useProviderTracking(
               </div>
             )}
           </div>
+
+          )}
 
           {/* Right Column - CTA and Contact */}
           <div className="lg:col-span-3">
