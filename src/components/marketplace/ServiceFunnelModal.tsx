@@ -999,12 +999,22 @@ const { trackBooking, trackPurchase, trackOutboundClick } = useProviderTracking(
         <div className="border-t bg-muted/20">
           <div className="p-6">
             <Tabs defaultValue="details" className="w-full">
-              <TabsList className="grid w-full grid-cols-5">
-                <TabsTrigger value="details">Service Details</TabsTrigger>
-                <TabsTrigger value="reviews">Customer Reviews</TabsTrigger>
-                <TabsTrigger value="agent-reviews">Agent Reviews</TabsTrigger>
-                <TabsTrigger value="qa">Q&A</TabsTrigger>
-                <TabsTrigger value="related">Related Services</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-1 md:gap-2 h-auto p-1">
+                <TabsTrigger value="details" className="text-xs md:text-sm whitespace-nowrap px-2 md:px-4 py-2">
+                  Service Details
+                </TabsTrigger>
+                <TabsTrigger value="reviews" className="text-xs md:text-sm whitespace-nowrap px-2 md:px-4 py-2">
+                  Reviews
+                </TabsTrigger>
+                <TabsTrigger value="agent-reviews" className="text-xs md:text-sm whitespace-nowrap px-2 md:px-4 py-2">
+                  Agent Reviews
+                </TabsTrigger>
+                <TabsTrigger value="qa" className="text-xs md:text-sm whitespace-nowrap px-2 md:px-4 py-2">
+                  Q&A
+                </TabsTrigger>
+                <TabsTrigger value="related" className="text-xs md:text-sm whitespace-nowrap px-2 md:px-4 py-2">
+                  Related
+                </TabsTrigger>
               </TabsList>
               
               <TabsContent value="details" className="mt-6 space-y-4">
