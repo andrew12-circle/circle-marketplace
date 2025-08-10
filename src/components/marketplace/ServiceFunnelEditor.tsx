@@ -605,17 +605,17 @@ export const ServiceFunnelEditor = ({ funnelContent, onChange }: ServiceFunnelEd
             </CardHeader>
             <CardContent className="flex-1">
               <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full">
-                <TabsList className="grid w-full grid-cols-10">
-                  <TabsTrigger value="hero">Hero</TabsTrigger>
-                  <TabsTrigger value="benefits">Benefits</TabsTrigger>
-                  <TabsTrigger value="pricing">Pricing</TabsTrigger>
-                  <TabsTrigger value="social">Social Proof</TabsTrigger>
-                  <TabsTrigger value="trust">Trust & Contact</TabsTrigger>
-                  <TabsTrigger value="cta">Call to Action</TabsTrigger>
-                  <TabsTrigger value="thumbnails">Thumbnails</TabsTrigger>
-                  <TabsTrigger value="roi">ROI Calc</TabsTrigger>
-                  <TabsTrigger value="testimonials">Testimonials</TabsTrigger>
-                  <TabsTrigger value="media">Media</TabsTrigger>
+                <TabsList className="w-full flex gap-1 overflow-x-auto whitespace-nowrap rounded-md bg-background shadow-sm p-1">
+                  <TabsTrigger className="flex-shrink-0" value="hero"><Crown className="w-4 h-4 mr-2" />Hero</TabsTrigger>
+                  <TabsTrigger className="flex-shrink-0" value="benefits"><Award className="w-4 h-4 mr-2" />Benefits</TabsTrigger>
+                  <TabsTrigger className="flex-shrink-0" value="pricing"><DollarSign className="w-4 h-4 mr-2" />Pricing</TabsTrigger>
+                  <TabsTrigger className="flex-shrink-0" value="social"><Users className="w-4 h-4 mr-2" />Social Proof</TabsTrigger>
+                  <TabsTrigger className="flex-shrink-0" value="trust"><Shield className="w-4 h-4 mr-2" />Trust & Contact</TabsTrigger>
+                  <TabsTrigger className="flex-shrink-0" value="cta"><Target className="w-4 h-4 mr-2" />Call to Action</TabsTrigger>
+                  <TabsTrigger className="flex-shrink-0" value="thumbnails"><ImageIcon className="w-4 h-4 mr-2" />Thumbnails</TabsTrigger>
+                  <TabsTrigger className="flex-shrink-0" value="roi"><TrendingUp className="w-4 h-4 mr-2" />ROI Calc</TabsTrigger>
+                  <TabsTrigger className="flex-shrink-0" value="testimonials"><Star className="w-4 h-4 mr-2" />Testimonials</TabsTrigger>
+                  <TabsTrigger className="flex-shrink-0" value="media"><Video className="w-4 h-4 mr-2" />Media</TabsTrigger>
                 </TabsList>
                 
                 <TabsContent value="hero" className="space-y-4 mt-4">
