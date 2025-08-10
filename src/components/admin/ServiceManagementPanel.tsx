@@ -516,12 +516,43 @@ export const ServiceManagementPanel = () => {
     }
   };
 
-  const handleFunnelSave = () => {
-    toast({
-      title: 'Success',
-      description: 'Service funnel updated successfully',
-    });
-    setShowFunnelEditor(false);
+  const handleFunnelSave = async () => {
+    if (!selectedService) return;
+
+    try {
+      // Save the funnel content to the database
+      const { error } = await supabase
+        .from('services')
+        .update({ 
+          funnel_content: JSON.parse(JSON.stringify(funnelContent)),
+          pricing_tiers: JSON.parse(JSON.stringify(pricingTiers))
+        })
+        .eq('id', selectedService.id);
+
+      if (error) throw error;
+
+      // Update local state
+      const updatedService = { 
+        ...selectedService, 
+        funnel_content: funnelContent,
+        pricing_tiers: pricingTiers
+      };
+      setSelectedService(updatedService);
+      setServices(services.map(s => s.id === selectedService.id ? updatedService : s));
+
+      toast({
+        title: 'Success',
+        description: 'Service funnel updated successfully',
+      });
+      setShowFunnelEditor(false);
+    } catch (error) {
+      console.error('Error saving funnel:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to save funnel changes',
+        variant: 'destructive',
+      });
+    }
   };
 
   if (loading) {
