@@ -675,6 +675,68 @@ export const ServiceFunnelModal = ({
                         </div>
                       </CardContent>
                     </Card>
+
+                    {/* Question 5 - What's Included */}
+                    <Card className="border-l-4 border-l-indigo-500 shadow-sm hover:shadow-md transition-shadow animate-fade-in">
+                      <CardContent className="p-6">
+                        <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                          <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold text-sm">5</div>
+                          What's Included?
+                        </h3>
+                        
+                        <div className="space-y-6">
+                          {/* Core Features */}
+                          <div>
+                            <h4 className="font-semibold text-gray-900 mb-3">Core Features</h4>
+                            <div className="space-y-2">
+                              <div className="flex items-center gap-3">
+                                <CheckCircle className="w-5 h-5 text-indigo-500" />
+                                <span className="text-gray-700">IDX website</span>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <CheckCircle className="w-5 h-5 text-indigo-500" />
+                                <span className="text-gray-700">CRM with auto-drip</span>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <CheckCircle className="w-5 h-5 text-indigo-500" />
+                                <span className="text-gray-700">Facebook & Google ad integration</span>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <CheckCircle className="w-5 h-5 text-indigo-500" />
+                                <span className="text-gray-700">Text & email automation</span>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <CheckCircle className="w-5 h-5 text-indigo-500" />
+                                <span className="text-gray-700">Lead routing</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Optional Add-ons */}
+                          <div>
+                            <h4 className="font-semibold text-gray-900 mb-3">Optional Add-ons or Upgrades</h4>
+                            <div className="space-y-2">
+                              <div className="flex items-center gap-3">
+                                <Plus className="w-5 h-5 text-gray-400" />
+                                <span className="text-gray-600">Advanced analytics dashboard</span>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <Plus className="w-5 h-5 text-gray-400" />
+                                <span className="text-gray-600">Custom branding package</span>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <Plus className="w-5 h-5 text-gray-400" />
+                                <span className="text-gray-600">Dedicated account manager</span>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <Plus className="w-5 h-5 text-gray-400" />
+                                <span className="text-gray-600">Enhanced lead scoring</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
                   </div>
                 </div>
 
