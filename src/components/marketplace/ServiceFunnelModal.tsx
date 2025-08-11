@@ -8,6 +8,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { toast } from "sonner";
 import { useServiceReviews } from "@/hooks/useServiceReviews";
 import { ROICalculator } from "./ROICalculator";
+import { PricingChoiceModal } from "./PricingChoiceModal";
 import { 
   Star, 
   TrendingUp, 
@@ -173,6 +174,7 @@ export const ServiceFunnelModal = ({
   const [selectedPackage, setSelectedPackage] = useState<string>("");
   const [quantity, setQuantity] = useState(1);
   const [isConsultationFlowOpen, setIsConsultationFlowOpen] = useState(false);
+  const [isPricingChoiceOpen, setIsPricingChoiceOpen] = useState(false);
   const [activeMediaUrl, setActiveMediaUrl] = useState<string | null>(null);
   const [vendorAvailability, setVendorAvailability] = useState<{
     is_available_now: boolean;
@@ -269,6 +271,29 @@ export const ServiceFunnelModal = ({
       payment_method: 'cart'
     });
     
+    onClose();
+  };
+
+  const handleChooseProPrice = () => {
+    setIsPricingChoiceOpen(false);
+    handleAddToCart();
+  };
+
+  const handleChooseCoPay = () => {
+    setIsPricingChoiceOpen(false);
+    // Handle copay request flow here
+    toast("Co-pay request initiated! You'll be connected with a vendor partner.", {
+      description: "Check your notifications for updates on your co-pay request."
+    });
+    onClose();
+  };
+
+  const handleChooseAgentPoints = () => {
+    setIsPricingChoiceOpen(false);
+    // Handle agent points payment here
+    toast("Processing payment with agent points...", {
+      description: "Your points will be deducted upon successful processing."
+    });
     onClose();
   };
 
@@ -821,7 +846,7 @@ export const ServiceFunnelModal = ({
                               </Button>
                               <Button 
                                 variant="outline" 
-                                onClick={handleAddToCart}
+                                onClick={() => setIsPricingChoiceOpen(true)}
                                 className="flex-1 border-2 border-gray-300 hover:border-gray-400 py-2 rounded-lg"
                               >
                                 <ShoppingCart className="w-4 h-4 mr-2" />
@@ -937,7 +962,7 @@ export const ServiceFunnelModal = ({
                             </Button>
                             <Button 
                               variant="outline" 
-                              onClick={handleAddToCart}
+                            onClick={() => setIsPricingChoiceOpen(true)}
                               className="border-2 border-gray-300 hover:border-gray-400 px-8 py-3 rounded-xl font-semibold"
                             >
                               <ShoppingCart className="w-4 h-4 mr-2" />
@@ -983,7 +1008,7 @@ export const ServiceFunnelModal = ({
                          
                          <Button 
                            variant="outline" 
-                           onClick={handleAddToCart}
+                           onClick={() => setIsPricingChoiceOpen(true)}
                            className="w-full border-2 border-gray-300 hover:border-gray-400 py-3 rounded-xl font-semibold"
                          >
                            <ShoppingCart className="w-5 h-5 mr-2" />
@@ -1020,6 +1045,26 @@ export const ServiceFunnelModal = ({
             isOpen={isConsultationFlowOpen}
             onClose={() => setIsConsultationFlowOpen(false)}
             service={service}
+          />
+        )}
+
+        {/* Pricing Choice Modal */}
+        {isPricingChoiceOpen && (
+          <PricingChoiceModal
+            isOpen={isPricingChoiceOpen}
+            onClose={() => setIsPricingChoiceOpen(false)}
+            service={{
+              id: service.id,
+              title: `${service.title} - ${selectedPkg?.name || 'Selected Package'}`,
+              pro_price: selectedPkg?.price?.toString() || '0',
+              retail_price: selectedPkg?.originalPrice?.toString() || selectedPkg?.price?.toString() || '0',
+              respa_split_limit: 50, // Default 50% split limit
+              price_duration: service.duration,
+              requires_quote: selectedPkg?.requestPricing || service.requires_quote
+            }}
+            onChooseProPrice={handleChooseProPrice}
+            onChooseCoPay={handleChooseCoPay}
+            onChooseAgentPoints={handleChooseAgentPoints}
           />
         )}
       </DialogContent>
