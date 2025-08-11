@@ -481,6 +481,77 @@ export const ServiceFunnelModal = ({
                 )}
               </div>
               
+              {/* 4 Media Thumbnails */}
+              {(service.funnel_content as any)?.thumbnailGallery?.enabled && (
+                <div className="grid grid-cols-4 gap-2">
+                  {((service.funnel_content as any).thumbnailGallery.items?.length > 0 
+                    ? (service.funnel_content as any).thumbnailGallery.items 
+                    : [
+                        { id: '1', label: "Demo Video", icon: "video" },
+                        { id: '2', label: "Case Study", icon: "chart" },
+                        { id: '3', label: "Training", icon: "book" },
+                        { id: '4', label: "Results", icon: "trophy" }
+                      ]
+                  ).slice(0, 4).map((item: any, index: number) => (
+                    <div
+                      key={item.id || index}
+                      className="aspect-square bg-muted rounded-lg overflow-hidden relative cursor-pointer hover:opacity-80 transition-opacity"
+                      onClick={() => {
+                        const mediaUrl = item.mediaUrl || item.url;
+                        if (mediaUrl) setActiveMediaUrl(mediaUrl);
+                      }}
+                      role="button"
+                      aria-label={item.label ? `Open ${item.label}` : 'Open media'}
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          const mediaUrl = item.mediaUrl || item.url;
+                          if (mediaUrl) setActiveMediaUrl(mediaUrl);
+                        }
+                      }}
+                    >
+                      {(() => {
+                        const mediaUrl = item.mediaUrl || item.url;
+                        const ytId = mediaUrl ? getYouTubeId(mediaUrl) : null;
+                        const isImage = mediaUrl ? /\.(png|jpg|jpeg|webp|gif)$/i.test(mediaUrl) : false;
+                        const thumb = ytId ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : (isImage ? mediaUrl : null);
+                        return thumb ? (
+                          <>
+                            <img
+                              src={thumb}
+                              alt={item.label ? `${item.label} thumbnail` : 'Media thumbnail'}
+                              className="w-full h-full object-cover"
+                              loading="lazy"
+                              decoding="async"
+                            />
+                            {ytId && (
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center shadow-md">
+                                  <div className="w-0 h-0 border-t-[4px] border-t-transparent border-l-[6px] border-l-white border-b-[4px] border-b-transparent ml-0.5" />
+                                </div>
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
+                            {item.icon === 'video' && (
+                              <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center">
+                                <div className="w-0 h-0 border-t-[4px] border-t-transparent border-l-[6px] border-l-white border-b-[4px] border-b-transparent ml-0.5" />
+                              </div>
+                            )}
+                            {item.icon === 'chart' && <TrendingUp className="w-6 h-6 text-green-500" />}
+                            {item.icon === 'book' && <Building className="w-6 h-6 text-blue-500" />}
+                            {item.icon === 'trophy' && <Trophy className="w-6 h-6 text-yellow-500" />}
+                            <span className="text-xs text-center mt-1 px-1">{item.label}</span>
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  ))}
+                </div>
+              )}
+              
               {/* Vendor Logo below media */}
               {service.vendor?.logo_url && (
                 <div className="flex justify-center">
@@ -519,81 +590,6 @@ export const ServiceFunnelModal = ({
           <div className="lg:col-span-4 space-y-6">
 
 
-            {/* Thumbnail Gallery */}
-            {(service.funnel_content as any)?.thumbnailGallery?.enabled && (
-              <>
-                {(service.funnel_content as any).thumbnailGallery.title && (
-                  <h3 className="font-bold text-lg mb-3">{(service.funnel_content as any).thumbnailGallery.title}</h3>
-                )}
-                <div className="grid grid-cols-4 gap-2">
-                  {((service.funnel_content as any).thumbnailGallery.items?.length > 0 
-                    ? (service.funnel_content as any).thumbnailGallery.items 
-                    : [
-                        { id: '1', label: "Demo Video", icon: "video" },
-                        { id: '2', label: "Case Study", icon: "chart" },
-                        { id: '3', label: "Training", icon: "book" },
-                        { id: '4', label: "Results", icon: "trophy" }
-                      ]
-                  ).map((item: any, i: number) => (
-                    <div
-                      key={item.id || i}
-                      className="aspect-square bg-muted rounded border-2 border-transparent hover:border-primary cursor-pointer relative overflow-hidden"
-                      onClick={() => {
-                        const mediaUrl = item.mediaUrl || item.url;
-                        if (mediaUrl) setActiveMediaUrl(mediaUrl);
-                      }}
-                      role="button"
-                      aria-label={item.label ? `Open ${item.label}` : 'Open media'}
-                      tabIndex={0}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault();
-                          const mediaUrl = item.mediaUrl || item.url;
-                          if (mediaUrl) setActiveMediaUrl(mediaUrl);
-                        }
-                      }}
-                    >
-                      {(() => {
-                        const mediaUrl = item.mediaUrl || item.url;
-                        const ytId = mediaUrl ? getYouTubeId(mediaUrl) : null;
-                        const isImage = mediaUrl ? /\.(png|jpg|jpeg|webp|gif)$/i.test(mediaUrl) : false;
-                        const thumb = ytId ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : (isImage ? mediaUrl : null);
-                        return thumb ? (
-                          <>
-                            <img
-                              src={thumb}
-                              alt={item.label ? `${item.label} thumbnail` : 'Media thumbnail'}
-                              className="w-full h-full object-cover"
-                              loading="lazy"
-                              decoding="async"
-                            />
-                            {ytId && (
-                              <div className="absolute inset-0 flex items-center justify-center">
-                                <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center shadow-md">
-                                  <div className="w-0 h-0 border-t-[6px] border-t-transparent border-l-[10px] border-l-white border-b-[6px] border-b-transparent ml-0.5" />
-                                </div>
-                              </div>
-                            )}
-                          </>
-                        ) : (
-                          <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
-                            {item.icon === 'video' && (
-                              <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
-                                <div className="w-0 h-0 border-t-[6px] border-t-transparent border-l-[10px] border-l-white border-b-[6px] border-b-transparent ml-0.5" />
-                              </div>
-                            )}
-                            {item.icon === 'chart' && <TrendingUp className="w-8 h-8 text-green-500" />}
-                            {item.icon === 'book' && <Building className="w-8 h-8 text-blue-500" />}
-                            {item.icon === 'trophy' && <Trophy className="w-8 h-8 text-yellow-500" />}
-                            <span className="text-xs text-center mt-1 px-1">{item.label}</span>
-                          </div>
-                        );
-                      })()}
-                    </div>
-                  ))}
-                </div>
-              </>
-            )}
 
             {/* Social Proof Cards */}
             {(service.funnel_content as any)?.testimonialCards?.enabled && (
