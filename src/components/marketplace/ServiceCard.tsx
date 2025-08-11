@@ -308,7 +308,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false, b
             </div>
 
             {/* Service Rating - Updated to use bulk ratings when available */}
-            {shouldShowRating && (
+            {(totalReviews || 0) > 0 && shouldShowRating && (
               <div className="flex items-center gap-1 mb-3">
                 {[...Array(5)].map((_, i) => {
                   const isFullStar = i < Math.floor(averageRating);
@@ -333,7 +333,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false, b
                   );
                 })}
                 <span className="text-sm text-muted-foreground ml-1">
-                  {averageRating > 0 ? `${averageRating.toFixed(1)} (${totalReviews})` : "No reviews yet"}
+                  {`${averageRating.toFixed(1)} (${totalReviews})`}
                 </span>
                 {totalReviews > 0 && (
                   <span className="text-xs text-muted-foreground ml-2">
