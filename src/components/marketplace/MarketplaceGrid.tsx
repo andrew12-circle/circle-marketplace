@@ -24,6 +24,8 @@ import { useMarketplaceData, useSavedServices, useInvalidateMarketplace, type Se
 import { useMarketplaceFilters } from "@/hooks/useMarketplaceFilters";
 import { useBulkServiceRatings } from "@/hooks/useBulkServiceRatings";
 import { logger } from "@/utils/logger";
+import { useQueryClient } from "@tanstack/react-query";
+import { marketplaceCircuitBreaker } from "@/utils/circuitBreaker";
 
 interface FilterState {
   category: string;
@@ -54,6 +56,7 @@ export const MarketplaceGrid = () => {
   const { data: marketplaceData, isLoading, error } = useMarketplaceData();
   const { data: savedServiceIds = [] } = useSavedServices();
   const { invalidateAll } = useInvalidateMarketplace();
+  const queryClient = useQueryClient();
   const [showRecovery, setShowRecovery] = useState(false);
   useEffect(() => {
     if (isLoading && !marketplaceData) {
@@ -63,15 +66,26 @@ export const MarketplaceGrid = () => {
     setShowRecovery(false);
   }, [isLoading, marketplaceData]);
 
+  const resetFailureState = useCallback(() => {
+    try { marketplaceCircuitBreaker.reset(); } catch {}
+  }, []);
+
   const handleReloadDataQuick = useCallback(() => {
     try { sessionStorage.setItem('forceFreshData', '1'); } catch {}
+    resetFailureState();
     invalidateAll();
-  }, [invalidateAll]);
+  }, [invalidateAll, resetFailureState]);
 
-  const handleHardRefresh = useCallback(() => {
+  const handleHardRefresh = useCallback(async () => {
     try { sessionStorage.setItem('forceFreshData', '1'); } catch {}
-    window.location.reload();
-  }, []);
+    resetFailureState();
+    try {
+      await queryClient.cancelQueries();
+      queryClient.clear();
+    } catch {}
+    invalidateAll();
+    setShowRecovery(false);
+  }, [invalidateAll, queryClient, resetFailureState]);
   // Memoize extracted data to prevent unnecessary re-renders
   const services = useMemo(() => 
     (marketplaceData as { services: Service[]; vendors: Vendor[] })?.services || [], 
