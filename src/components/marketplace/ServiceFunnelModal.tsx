@@ -32,7 +32,8 @@ import {
   ThumbsDown,
   Verified,
   Crown,
-  X
+  X,
+  Play
 } from "lucide-react";
 import { getRiskBadge, getComplianceAlert, determineServiceRisk } from "./RESPAComplianceSystem";
 import { useCart } from "@/contexts/CartContext";
@@ -433,19 +434,68 @@ export const ServiceFunnelModal = ({
                 </div>
               )}
             </div>
-            {/* Right column: Logo + Optional Benefits */}
-            <div className="flex flex-col items-end gap-4">
-              {service.vendor?.logo_url ? (
-                <img
-                  src={service.vendor.logo_url}
-                  alt={`${service.vendor?.name || 'Vendor'} logo`}
-                  className="h-12 lg:h-16 object-contain bg-white/80 rounded-md p-2 shadow-md"
-                />
-              ) : (
-                <div className="h-12 lg:h-16 bg-white/20 border border-white/40 rounded-md p-2 shadow-md flex items-center justify-center text-white text-sm">
-                  {service.vendor?.name || 'Logo'}
-                </div>
-              )}
+            {/* Right column: Main Media */}
+            <div className="flex flex-col gap-4">
+              {/* Main Image/Video */}
+              <div className="aspect-video bg-muted rounded-lg overflow-hidden relative flex items-center justify-center">
+                {(service.funnel_content?.media?.[0]?.url || service.image_url) ? (
+                  (() => {
+                    const baseMediaItem = service.funnel_content?.media?.[0];
+                    const baseUrl = baseMediaItem?.url || service.image_url;
+                    const currentUrl = activeMediaUrl || baseUrl;
+                    const yt = getYouTubeEmbedUrl(currentUrl || undefined);
+                    const isVideo = !!yt || (currentUrl ? /\.(mp4|webm|ogg)$/i.test(currentUrl) : false);
+                    if (isVideo) {
+                      return yt ? (
+                        <iframe
+                          src={yt}
+                          title={service.funnel_content?.headline || service.title}
+                          className="w-full h-full"
+                          loading="lazy"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                          referrerPolicy="strict-origin-when-cross-origin"
+                          allowFullScreen
+                        />
+                      ) : (
+                        <video
+                          controls
+                          className="w-full h-full object-cover"
+                          src={currentUrl || undefined}
+                        />
+                      );
+                    } else {
+                      return (
+                        <img
+                          src={currentUrl || undefined}
+                          alt={service.funnel_content?.headline || service.title}
+                          className="w-full h-full object-cover cursor-pointer"
+                          onClick={() => setActiveMediaUrl(currentUrl)}
+                        />
+                      );
+                    }
+                  })()
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                    <Play className="w-16 h-16 text-white" />
+                  </div>
+                )}
+              </div>
+              
+              {/* Vendor Logo below media */}
+              <div className="flex justify-center">
+                {service.vendor?.logo_url ? (
+                  <img
+                    src={service.vendor.logo_url}
+                    alt={`${service.vendor?.name || 'Vendor'} logo`}
+                    className="h-12 lg:h-16 object-contain bg-white/80 rounded-md p-2 shadow-md"
+                  />
+                ) : (
+                  <div className="h-12 lg:h-16 bg-white/20 border border-white/40 rounded-md p-2 shadow-md flex items-center justify-center text-white text-sm">
+                    {service.vendor?.name || 'Logo'}
+                  </div>
+                )}
+              </div>
+
               {hasBenefits && (
                 <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20 w-full">
                   <h3 className="text-2xl font-bold mb-4">
@@ -469,50 +519,8 @@ export const ServiceFunnelModal = ({
 
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-6">
-          {/* Left Column - Media and Social Proof */}
+          {/* Left Column - Social Proof */}
           <div className="lg:col-span-4 space-y-6">
-            {/* Main Image/Video */}
-            <div className="aspect-video bg-muted rounded-lg overflow-hidden relative flex items-center justify-center">
-              {(service.funnel_content?.media?.[0]?.url || service.image_url) ? (
-                (() => {
-                  const baseMediaItem = service.funnel_content?.media?.[0];
-                  const baseUrl = baseMediaItem?.url || service.image_url;
-                  const currentUrl = activeMediaUrl || baseUrl;
-                  const yt = getYouTubeEmbedUrl(currentUrl || undefined);
-                  const isVideo = !!yt || (currentUrl ? /\.(mp4|webm|ogg)$/i.test(currentUrl) : false);
-                  if (isVideo) {
-                    return yt ? (
-                      <iframe
-                        src={yt}
-                        title={service.funnel_content?.headline || service.title}
-                        className="w-full h-full"
-                        loading="lazy"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        referrerPolicy="strict-origin-when-cross-origin"
-                        allowFullScreen
-                      />
-                    ) : (
-                      <video
-                        controls
-                        className="w-full h-full object-cover"
-                        src={currentUrl || undefined}
-                      />
-                    );
-                  }
-                  return (
-                    <img
-                      src={currentUrl || ''}
-                      alt={service.funnel_content?.headline || service.title}
-                      className="w-full h-auto object-contain"
-                    />
-                  );
-                })()
-              ) : (
-                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
-                  <Building className="w-24 h-24 text-blue-400" />
-                </div>
-              )}
-            </div>
 
 
             {/* Thumbnail Gallery */}
