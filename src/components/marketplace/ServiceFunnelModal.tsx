@@ -383,7 +383,7 @@ export const ServiceFunnelModal = ({
                 <div className="grid lg:grid-cols-2 gap-12 items-center">
                   {/* Left Content */}
                   <div className="space-y-6 animate-fade-in">
-                    <h1 className="text-3xl lg:text-5xl font-bold leading-tight bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
+                    <h1 className="text-2xl lg:text-3xl font-bold leading-tight bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
                       {service.funnel_content?.headline || service.title}
                     </h1>
                     
