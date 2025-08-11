@@ -26,6 +26,9 @@ export const CampaignServicesHeader = () => {
             <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
               Curated Solutions for Agents
             </h2>
+            <p className="mt-1 text-muted-foreground">
+              Discover proven campaigns and services tailored to help agents grow.
+            </p>
           </div>
           
           <div className="flex flex-col sm:flex-row gap-3">
