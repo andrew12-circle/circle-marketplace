@@ -8,7 +8,7 @@ import { AskCircleAIModal } from "./AskCircleAIModal";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
-
+import { useNavigate } from "react-router-dom";
 interface BusinessInsight {
   type: 'performance' | 'opportunity' | 'recommendation';
   title: string;
@@ -32,7 +32,7 @@ export const AIConciergeBanner = () => {
   const [aiRecommendation, setAiRecommendation] = useState<string | null>(null);
   const [isRecommendationExpanded, setIsRecommendationExpanded] = useState(false);
   const { toast } = useToast();
-
+  const navigate = useNavigate();
   const placeholderQuestions = [
     "How can I help you today?",
     "Anything particular you're looking for?", 
@@ -195,12 +195,21 @@ export const AIConciergeBanner = () => {
 
 
   const handleSendMessage = () => {
-    if (chatInput.trim()) {
-      // Open the AI modal with the user's message
-      setIsAIModalOpen(true);
-    }
-  };
+    const query = chatInput.trim();
+    if (!query) return;
 
+    if (!user || !profile) {
+      toast({
+        title: "Create a free account",
+        description: "Sign in to get personalized, location-aware recommendations.",
+      });
+      navigate("/auth");
+      return;
+    }
+
+    // Deep-link into marketplace search with the typed query
+    navigate(`/marketplace?q=${encodeURIComponent(query)}`);
+  };
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       handleSendMessage();
@@ -272,7 +281,17 @@ export const AIConciergeBanner = () => {
                     />
                   </div>
                   <Button 
-                    onClick={() => setIsAIModalOpen(true)}
+                    onClick={() => {
+                      if (!user || !profile) {
+                        toast({
+                          title: "Create a free account",
+                          description: "Sign in to talk to Circle AI.",
+                        });
+                        navigate("/auth");
+                        return;
+                      }
+                      setIsAIModalOpen(true);
+                    }}
                     size="sm" 
                     variant="outline"
                     className="bg-background/50 hover:bg-background border-border/50 p-2"
@@ -453,6 +472,7 @@ export const AIConciergeBanner = () => {
       <AskCircleAIModal 
         open={isAIModalOpen} 
         onOpenChange={setIsAIModalOpen} 
+        initialPrompt={chatInput}
       />
     </div>
   );
