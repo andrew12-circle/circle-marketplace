@@ -842,7 +842,7 @@ export const ServiceFunnelModal = ({
                         </div>
                       </AccordionTrigger>
                       <AccordionContent className="border-l-4 border-l-violet-500 pl-4 bg-white rounded-b-lg shadow-sm pt-0" data-section="pricing">
-                        <div className="p-6 pt-0">
+                        <div className="p-6 pt-5">
                           <div className={`grid gap-6 ${
                             packages.length === 1 ? 'grid-cols-1 max-w-md mx-auto' :
                             packages.length === 2 ? 'grid-cols-1 md:grid-cols-2 max-w-2xl mx-auto' :
