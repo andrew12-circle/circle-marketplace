@@ -500,7 +500,7 @@ export const ServiceFunnelModal = ({
                       <CardContent className="p-6">
                         <h3 className="text-xl font-bold text-gray-900 mb-3 flex items-center gap-2">
                           <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold text-sm">1</div>
-                          What Is This?
+                          What is this and why should I care?
                         </h3>
                         <p className="text-gray-600 leading-relaxed">
                           {fc?.heroDescription || service.description || "All-in-one real estate lead generation & CRM platform designed to turn online leads into closings faster"}
