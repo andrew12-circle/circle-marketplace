@@ -992,19 +992,20 @@ export const ServiceFunnelModal = ({
                            Book Consultation
                          </Button>
                          
-                         <Button 
-                           variant="outline" 
-                           onClick={() => {
-                             if (service.vendor?.website_url) {
-                               trackOutboundClick(service.vendor.website_url, 'vendor_website');
-                               window.open(service.vendor.website_url, '_blank');
-                             }
-                           }}
-                           className="w-full border-2 border-gray-300 hover:border-gray-400 py-3 rounded-xl font-semibold"
-                         >
-                            <Building className="w-5 h-5 mr-2" />
-                            View Website
-                          </Button>
+                          <Button 
+                            variant="outline" 
+                            onClick={() => {
+                              if (service.vendor?.website_url) {
+                                trackOutboundClick(service.vendor.website_url, 'vendor_website');
+                                window.open(service.vendor.website_url, '_blank');
+                              }
+                            }}
+                            disabled={!service.vendor?.website_url}
+                            className="w-full border-2 border-gray-300 hover:border-gray-400 py-3 rounded-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                             <Building className="w-5 h-5 mr-2" />
+                             {service.vendor?.website_url ? 'View Website' : 'Website Not Available'}
+                           </Button>
                          
                          
                           <Button 
