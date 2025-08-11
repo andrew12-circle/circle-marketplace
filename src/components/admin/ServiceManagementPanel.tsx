@@ -91,7 +91,6 @@ interface Service {
   pricing_tiers?: any;
 }
 
-
 interface ThumbnailItem {
   id: string;
   label: string;
@@ -388,7 +387,8 @@ export const ServiceManagementPanel = () => {
           vendors (name, logo_url),
           service_providers (name, logo_url)
         `)
-        .order('title');
+        .order('sort_order', { ascending: true })
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
       setServices(data || []);
@@ -735,7 +735,10 @@ export const ServiceManagementPanel = () => {
                         )}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between">
-                            <h3 className="font-semibold truncate">{service.title}</h3>
+                            <div className="flex items-center gap-2 min-w-0">
+                              <Badge variant="secondary" className="text-[10px] shrink-0">#{service.sort_order ?? '-'}</Badge>
+                              <h3 className="font-semibold truncate">{service.title}</h3>
+                            </div>
                             <div className="flex items-center gap-2">
                               <span className="text-xs text-muted-foreground">Verified</span>
                               <Switch
@@ -773,14 +776,12 @@ export const ServiceManagementPanel = () => {
                                 {service.retail_price}
                               </span>
                             )}
-                            {/* Only show vendor info if it's not the default "Circle Marketplace" */}
                             {(service.vendors?.name && service.vendors.name !== 'Circle Marketplace') && (
                               <span className="flex items-center gap-1">
                                 <Building className="h-3 w-3" />
                                 {service.vendors.name}
                               </span>
                             )}
-                            {/* Show service provider info if available and different from Circle Marketplace */}
                             {(service.service_providers?.name && service.service_providers.name !== 'Circle Marketplace') && (
                               <span className="flex items-center gap-1">
                                 <Building className="h-3 w-3" />
