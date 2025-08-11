@@ -869,14 +869,29 @@ export const ServiceFunnelModal = ({
                                 
                                 <div className="text-center mb-4">
                                   <h4 className="font-bold text-lg text-gray-900 mb-2">{pkg.name}</h4>
-                                  <div className="text-3xl font-bold text-blue-600 mb-1">
-                                    ${pkg.requestPricing ? 'Quote' : pkg.price}
-                                  </div>
-                                  {pkg.originalPrice && !pkg.requestPricing && (
-                                    <div className="text-sm text-gray-500 line-through">
-                                      was ${pkg.originalPrice}
+                                  
+                                  {/* Pricing Tiers */}
+                                  <div className="space-y-2 mb-3">
+                                    <div className="flex items-center justify-between text-sm">
+                                      <span className="text-gray-600">Retail:</span>
+                                      <span className="font-medium text-gray-800">
+                                        ${pkg.requestPricing ? 'Quote' : (pkg.originalPrice || pkg.price)}
+                                      </span>
                                     </div>
-                                  )}
+                                    <div className="flex items-center justify-between text-sm">
+                                      <span className="text-blue-600">Pro Member:</span>
+                                      <span className="font-medium text-blue-600">
+                                        ${pkg.requestPricing ? 'Quote' : Math.round(pkg.price * 0.85)}
+                                      </span>
+                                    </div>
+                                    <div className="flex items-center justify-between text-sm bg-green-50 p-2 rounded border border-green-200">
+                                      <span className="text-green-700 font-medium">Co-Pay:</span>
+                                      <span className="font-bold text-green-700">
+                                        ${pkg.requestPricing ? 'Quote' : Math.round(pkg.price * 0.15)}
+                                      </span>
+                                    </div>
+                                  </div>
+                                  
                                   <p className="text-sm text-gray-600 mt-3">{pkg.description}</p>
                                 </div>
 
