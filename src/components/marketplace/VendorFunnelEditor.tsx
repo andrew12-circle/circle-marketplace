@@ -110,6 +110,7 @@ interface FunnelContent {
 
 interface VendorFunnelEditorProps {
   vendorId: string;
+  serviceId?: string;
   initialContent?: FunnelContent;
   onSave: (content: FunnelContent) => void;
   onCancel: () => void;
@@ -128,7 +129,7 @@ const BENEFIT_ICONS = [
   { value: 'clock', label: 'Clock', icon: Clock }
 ];
 
-export const VendorFunnelEditor = ({ vendorId, initialContent, onSave, onCancel }: VendorFunnelEditorProps) => {
+export const VendorFunnelEditor = ({ vendorId, serviceId, initialContent, onSave, onCancel }: VendorFunnelEditorProps) => {
   const [uploadedMediaUrls, setUploadedMediaUrls] = useState<string[]>([]);
   const [content, setContent] = useState<FunnelContent>(initialContent || {
     headline: '',
@@ -313,6 +314,18 @@ export const VendorFunnelEditor = ({ vendorId, initialContent, onSave, onCancel 
         ...content,
         mediaUrls: uploadedMediaUrls
       };
+
+      // If a serviceId is provided, persist to services.funnel_content (live)
+      if (serviceId) {
+        const { error } = await supabase
+          .from('services')
+          .update({ funnel_content: JSON.parse(JSON.stringify(finalContent)) })
+          .eq('id', serviceId);
+        if (error) throw error;
+        // Warm marketplace cache (non-blocking)
+        supabase.functions.invoke('warm-marketplace-cache').catch(() => {});
+      }
+
       onSave(finalContent);
       toast.success('Funnel page saved successfully');
     } catch (error) {

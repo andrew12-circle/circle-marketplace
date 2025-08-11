@@ -28,6 +28,7 @@ import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useInvalidateMarketplace, QUERY_KEYS } from '@/hooks/useMarketplaceData';
 import { useQueryClient } from '@tanstack/react-query';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface PricingFeature {
   id: string;
@@ -228,6 +229,7 @@ export const ServiceManagementPanel = () => {
   const [editForm, setEditForm] = useState<Partial<Service>>({});
   const [error, setError] = useState<string | null>(null);
   const [lastFunnelSavedAt, setLastFunnelSavedAt] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'details' | 'pricing' | 'funnel'>('details');
 
   // Default funnel content for new services
   const [funnelContent, setFunnelContent] = useState<FunnelContent>({
@@ -642,6 +644,28 @@ export const ServiceManagementPanel = () => {
       return { savedAt: new Date().toISOString(), verified: false, message };
     }
   };
+  const isPricingDirty = selectedService
+    ? JSON.stringify(pricingTiers) !== JSON.stringify((selectedService as any).pricing_tiers || [])
+    : false;
+
+  const formatRelativeTime = (iso?: string | null) => {
+    if (!iso) return '';
+    const diffMs = Date.now() - new Date(iso).getTime();
+    const mins = Math.max(0, Math.floor(diffMs / 60000));
+    if (mins < 1) return 'just now';
+    if (mins === 1) return '1 minute ago';
+    return `${mins} minutes ago`;
+  };
+
+  const handleTabChange = (value: 'details' | 'pricing' | 'funnel') => {
+    if (activeTab === 'pricing' && value !== 'pricing' && isPricingDirty) {
+      const proceed = window.confirm('You have unsaved pricing changes. Save before leaving this tab?');
+      if (proceed) {
+        handleFunnelSave();
+      }
+    }
+    setActiveTab(value);
+  };
 
   if (loading) {
     return <p>Loading services...</p>;
@@ -806,11 +830,20 @@ export const ServiceManagementPanel = () => {
             </div>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="details" className="w-full">
+            <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
               <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="details">Service Details</TabsTrigger>
                 <TabsTrigger value="pricing">Pricing & Features</TabsTrigger>
-                <TabsTrigger value="funnel">Funnel Pages</TabsTrigger>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <TabsTrigger value="funnel">Service Funnel (Live)</TabsTrigger>
+                    </TooltipTrigger>
+                    <TooltipContent side="top">
+                      <p>Edits here update the live funnel page after saving.</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </TabsList>
 
               <TabsContent value="details" className="space-y-4">
@@ -1026,7 +1059,15 @@ export const ServiceManagementPanel = () => {
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
                       <h3 className="text-lg font-semibold">Service Funnel Pages</h3>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-3">
+                        {lastFunnelSavedAt && (
+                          <span className="text-xs text-muted-foreground">
+                            Saved {formatRelativeTime(lastFunnelSavedAt)}
+                          </span>
+                        )}
+                        {isPricingDirty && (
+                          <Badge variant="outline" className="text-xs">Unsaved pricing</Badge>
+                        )}
                         <Button variant="outline" onClick={() => setShowFunnelPreview(true)}>
                           <Eye className="h-4 w-4 mr-2" />
                           Preview Funnel
