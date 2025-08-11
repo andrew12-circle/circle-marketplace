@@ -513,7 +513,7 @@ export const ServiceFunnelModal = ({
                       <CardContent className="p-6">
                         <h3 className="text-xl font-bold text-gray-900 mb-3 flex items-center gap-2">
                           <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-green-600 font-bold text-sm">2</div>
-                          What's My Investment?
+                          How much will this cost me?
                         </h3>
                         <div className="space-y-3">
                           {selectedPkg ? (
