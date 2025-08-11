@@ -435,12 +435,16 @@ export const ServiceFunnelModal = ({
             </div>
             {/* Right column: Logo + Optional Benefits */}
             <div className="flex flex-col items-end gap-4">
-              {service.vendor?.logo_url && (
+              {service.vendor?.logo_url ? (
                 <img
                   src={service.vendor.logo_url}
                   alt={`${service.vendor?.name || 'Vendor'} logo`}
                   className="h-12 lg:h-16 object-contain bg-white/80 rounded-md p-2 shadow-md"
                 />
+              ) : (
+                <div className="h-12 lg:h-16 bg-white/20 border border-white/40 rounded-md p-2 shadow-md flex items-center justify-center text-white text-sm">
+                  {service.vendor?.name || 'Logo'}
+                </div>
               )}
               {hasBenefits && (
                 <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20 w-full">
