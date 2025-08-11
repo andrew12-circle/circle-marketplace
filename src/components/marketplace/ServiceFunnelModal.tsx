@@ -739,7 +739,6 @@ export const ServiceFunnelModal = ({
             )}
 
             </div>
-          )}
 
           {/* Middle Column - Service Overview Flow */}
           <div className="lg:col-span-5 lg:order-2 space-y-6">
