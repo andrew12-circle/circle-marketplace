@@ -1006,14 +1006,6 @@ export const ServiceFunnelModal = ({
                             View Website
                           </Button>
                          
-                         <Button 
-                           variant="outline" 
-                           onClick={() => setIsPricingChoiceOpen(true)}
-                           className="w-full border-2 border-gray-300 hover:border-gray-400 py-3 rounded-xl font-semibold"
-                         >
-                           <ShoppingCart className="w-5 h-5 mr-2" />
-                           Add to Cart
-                         </Button>
                          
                           <Button 
                             variant="outline" 
