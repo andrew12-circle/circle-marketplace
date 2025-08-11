@@ -165,7 +165,7 @@ export const Pricing = () => {
                   <div className="text-3xl font-bold mb-4">$97<span className="text-sm font-normal text-muted-foreground">/agent/month</span></div>
                   <p className="text-sm text-muted-foreground mb-6">Unlock Pro Pricing & Vendor Support Get exclusive rates, expert vendor help, and curated content — all backed by marketplace insights tailored to your stage of business. We meet you where you are and help take you where you want to go.</p>
                   <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white" onClick={() => handleSubscription("pro")} disabled={loading === "pro"}>
-                    {loading === "pro" ? "Loading..." : "Start Your Free Trial"}
+                    {loading === "pro" ? "Loading..." : "Start Your Free 30-Day Trial"}
                   </Button>
                 </div>
                </div>
