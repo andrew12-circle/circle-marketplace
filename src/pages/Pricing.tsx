@@ -88,7 +88,7 @@ export const Pricing = () => {
             The Smarter Way to Grow Your Real Estate Business
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-8 md:mb-12">
-            Find vetted creative partners and manage your marketing with powerful tools designed to help you grow.
+            Unlock exclusive vendor pricing, side-by-side comparisons, and curated services built for agents. Plus, get training and resources that meet you exactly where you are — all in one place.
           </p>
           
           <div className="inline-block">
