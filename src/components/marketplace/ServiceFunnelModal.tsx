@@ -807,6 +807,58 @@ export const ServiceFunnelModal = ({
                     1 extra closing per month covers your cost 5x over
                   </p>
                 </div>
+
+                {/* Media Gallery */}
+                {(service.funnel_content as any)?.thumbnailGallery?.enabled && (
+                  <div className="space-y-3">
+                    <h4 className="font-semibold">See It In Action</h4>
+                    <div className="grid grid-cols-2 gap-2">
+                      {(service.funnel_content as any).thumbnailGallery.items?.map((item: any, index: number) => (
+                        <div
+                          key={index}
+                          className="aspect-video bg-muted rounded-lg overflow-hidden border cursor-pointer hover:border-primary transition-colors"
+                          onClick={() => setActiveMediaUrl(item.url)}
+                        >
+                          {(() => {
+                            const thumb = item.thumbnail || item.url;
+                            const ytId = thumb ? getYouTubeId(thumb) : null;
+                            const ytThumb = ytId ? `https://img.youtube.com/vi/${ytId}/mqdefault.jpg` : null;
+                            return ytThumb || thumb ? (
+                              <>
+                                <img
+                                  src={ytThumb || thumb}
+                                  alt={item.label ? `${item.label} thumbnail` : 'Media thumbnail'}
+                                  className="w-full h-full object-cover"
+                                  loading="lazy"
+                                  decoding="async"
+                                />
+                                {ytId && (
+                                  <div className="absolute inset-0 flex items-center justify-center">
+                                    <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center shadow-md">
+                                      <div className="w-0 h-0 border-t-[4px] border-t-transparent border-l-[6px] border-l-white border-b-[4px] border-b-transparent ml-0.5" />
+                                    </div>
+                                  </div>
+                                )}
+                              </>
+                            ) : (
+                              <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
+                                {item.icon === 'video' && (
+                                  <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center">
+                                    <div className="w-0 h-0 border-t-[4px] border-t-transparent border-l-[6px] border-l-white border-b-[4px] border-b-transparent ml-0.5" />
+                                  </div>
+                                )}
+                                {item.icon === 'chart' && <TrendingUp className="w-6 h-6 text-green-500" />}
+                                {item.icon === 'book' && <Building className="w-6 h-6 text-blue-500" />}
+                                {item.icon === 'trophy' && <Trophy className="w-6 h-6 text-yellow-500" />}
+                                <span className="text-xs text-center mt-1 px-1">{item.label}</span>
+                              </div>
+                            );
+                          })()}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </Card>
 
