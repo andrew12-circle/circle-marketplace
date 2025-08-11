@@ -470,7 +470,7 @@ export const ServiceFunnelModal = ({
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-6">
           {/* Left Column - Media and Social Proof */}
-          <div className={`${showMiddle ? 'lg:col-span-5' : 'lg:col-span-8'} space-y-6`}>
+          <div className="lg:col-span-4 space-y-6">
             {/* Main Image/Video */}
             <div className="aspect-video bg-muted rounded-lg overflow-hidden relative flex items-center justify-center">
               {(service.funnel_content?.media?.[0]?.url || service.image_url) ? (
@@ -766,7 +766,187 @@ export const ServiceFunnelModal = ({
             </div>
           )}
 
-          {/* Right Column - Choose Your Package (Widened) */}
+          {/* Middle Column - Service Overview Flow */}
+          <div className="lg:col-span-5 lg:order-2 space-y-6">
+            {/* 1. What Is This and Why Should I Care? */}
+            <Card className="p-6">
+              <div className="space-y-4">
+                <h3 className="text-xl font-bold text-primary">What Is This and Why Should I Care?</h3>
+                <div className="space-y-2">
+                  <p className="text-lg text-muted-foreground">
+                    {fc?.heroDescription || service.description || "All-in-one real estate lead generation & CRM platform"}
+                  </p>
+                  <p className="text-base font-medium text-foreground">
+                    {fc?.headline || service.title || "Turn online leads into closings faster"}
+                  </p>
+                </div>
+              </div>
+            </Card>
+
+            {/* 2. How Much Will This Cost Me? */}
+            <Card className="p-6">
+              <div className="space-y-4">
+                <h3 className="text-xl font-bold text-primary">How Much Will This Cost Me?</h3>
+                <div className="space-y-3">
+                  {selectedPkg ? (
+                    <div className="flex items-center justify-between">
+                      <span className="text-base">Monthly Cost:</span>
+                      <span className="text-lg font-semibold">${selectedPkg.price}</span>
+                    </div>
+                  ) : service.pricing_tiers?.length > 0 ? (
+                    <div className="space-y-2">
+                      {service.pricing_tiers.slice(0, 2).map((tier) => (
+                        <div key={tier.id} className="flex items-center justify-between">
+                          <span className="text-sm">{tier.name}:</span>
+                          <span className="font-medium">${tier.price}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between">
+                      <span className="text-base">Starting at:</span>
+                      <span className="text-lg font-semibold">Contact for pricing</span>
+                    </div>
+                  )}
+                  <div className="text-sm text-muted-foreground">
+                    <div>• No setup fees</div>
+                    <div>• Co-pay marketing coverage available</div>
+                    <div>• Circle Pro members get additional discounts</div>
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+            {/* 3. What's My ROI Potential? */}
+            <Card className="p-6">
+              <div className="space-y-4">
+                <h3 className="text-xl font-bold text-primary">What&apos;s My ROI Potential?</h3>
+                <div className="space-y-3">
+                  <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                    <div className="text-2xl font-bold text-green-600">Average ROI: 600%</div>
+                    <div className="text-sm text-green-700">$1,600 in → $9,600+ out</div>
+                  </div>
+                  <p className="text-muted-foreground">
+                    1 extra closing per month covers your cost 5x over
+                  </p>
+                </div>
+              </div>
+            </Card>
+
+            {/* 4. How Soon Will I See Results? */}
+            <Card className="p-6">
+              <div className="space-y-4">
+                <h3 className="text-xl font-bold text-primary">How Soon Will I See Results?</h3>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                      <span className="text-blue-600 font-bold text-sm">1</span>
+                    </div>
+                    <span className="text-sm">Setup complete within 48 hours</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                      <span className="text-blue-600 font-bold text-sm">2</span>
+                    </div>
+                    <span className="text-sm">First leads within 1-2 weeks</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                      <span className="text-green-600 font-bold text-sm">3</span>
+                    </div>
+                    <span className="text-sm">Most see closings in months 4-6</span>
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+            {/* 5. What's Included? */}
+            <Card className="p-6">
+              <div className="space-y-4">
+                <h3 className="text-xl font-bold text-primary">What&apos;s Included?</h3>
+                <div className="space-y-2">
+                  <div className="grid grid-cols-1 gap-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span className="text-sm">IDX website with lead capture</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span className="text-sm">CRM with automated drip campaigns</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span className="text-sm">Facebook & Google ad integration</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span className="text-sm">Text & email automation</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span className="text-sm">Smart lead routing & scoring</span>
+                    </div>
+                  </div>
+                  <div className="mt-4 pt-4 border-t">
+                    <div className="text-sm font-medium text-muted-foreground mb-2">Optional Add-ons:</div>
+                    <div className="text-sm text-muted-foreground">
+                      • Premium lead sources (+$200/mo)<br/>
+                      • Advanced analytics (+$100/mo)<br/>
+                      • Custom integrations (quote)
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+            {/* 6. Proof It Works */}
+            <Card className="p-6">
+              <div className="space-y-4">
+                <h3 className="text-xl font-bold text-primary">Proof It Works</h3>
+                <div className="space-y-4">
+                  {/* Agent Reviews */}
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      {renderStarRating(4.8, "sm")}
+                      <span className="text-sm font-medium">4.8/5 from 847+ agents</span>
+                    </div>
+                    <div className="bg-gray-50 p-3 rounded-lg">
+                      <p className="text-sm italic">&quot;Doubled my lead volume in 90 days. ROI paid for itself in month 2.&quot;</p>
+                      <p className="text-xs text-muted-foreground mt-1">— Sarah M., Keller Williams</p>
+                    </div>
+                  </div>
+                  
+                  {/* Case Study Snapshot */}
+                  <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                    <div className="text-sm font-medium mb-2">Case Study: 12-Month Results</div>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <div className="text-xs text-muted-foreground">Before:</div>
+                        <div className="font-medium">12 leads/month</div>
+                      </div>
+                      <div>
+                        <div className="text-xs text-muted-foreground">After:</div>
+                        <div className="font-medium text-green-600">48 leads/month</div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Verification Badge */}
+                  {service.vendor?.is_verified && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <Badge className="bg-blue-500 text-white">
+                        <Verified className="w-3 h-3 mr-1" />
+                        Verified Provider
+                      </Badge>
+                      <span className="text-muted-foreground">Background checked & verified</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </Card>
+          </div>
+
+          {/* Right Column - Choose Your Package (Locked) */}
           <div className="lg:col-span-3 lg:order-3">
             <div className="space-y-4">
               <Card className="p-6 space-y-4">
