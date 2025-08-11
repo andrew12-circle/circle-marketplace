@@ -638,6 +638,48 @@ export type Database = {
           },
         ]
       }
+      client_errors: {
+        Row: {
+          component: string | null
+          created_at: string
+          error_type: string
+          id: string
+          message: string | null
+          metadata: Json
+          section: string | null
+          stack: string | null
+          url: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          component?: string | null
+          created_at?: string
+          error_type?: string
+          id?: string
+          message?: string | null
+          metadata?: Json
+          section?: string | null
+          stack?: string | null
+          url?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          component?: string | null
+          created_at?: string
+          error_type?: string
+          id?: string
+          message?: string | null
+          metadata?: Json
+          section?: string | null
+          stack?: string | null
+          url?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       co_pay_audit_log: {
         Row: {
           action_details: Json | null

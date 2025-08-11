@@ -28,6 +28,7 @@ import { VendorRegistration } from "./pages/VendorRegistration";
 import { VendorDashboard } from "./pages/VendorDashboard";
 import { VendorAnalyticsDashboard } from "./pages/VendorAnalyticsDashboard";
 import CommandCenter from "./pages/CommandCenter";
+import HealthStability from "./pages/HealthStability";
 import NotFound from "./pages/NotFound";
 
 // Legal pages
@@ -79,6 +80,7 @@ createRoot(document.getElementById("root")!).render(
               <Route path="/vendor-dashboard" element={<VendorDashboard />} />
               <Route path="/vendor-analytics" element={<VendorAnalyticsDashboard />} />
               <Route path="/command-center" element={<CommandCenter />} />
+              <Route path="/health" element={<HealthStability />} />
               
               {/* Legal routes */}
               <Route path="/legal/terms" element={<TermsOfService />} />

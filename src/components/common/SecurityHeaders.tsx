@@ -1,4 +1,6 @@
 import { useEffect } from 'react';
+import { reportClientError } from '@/utils/errorReporting';
+
 
 // Component to set security headers via meta tags
 export const SecurityHeaders: React.FC = () => {
@@ -8,11 +10,12 @@ export const SecurityHeaders: React.FC = () => {
     cspMeta.httpEquiv = 'Content-Security-Policy';
     cspMeta.content = `
       default-src 'self';
-      script-src 'self' *.supabase.co *.googleapis.com;
+      script-src 'self' https://js.stripe.com *.supabase.co *.googleapis.com;
       style-src 'self' *.googleapis.com;
-      img-src 'self' data: blob: *.supabase.co *.google.com;
+      img-src 'self' data: blob: *.supabase.co *.google.com *.stripe.com;
       font-src 'self' *.googleapis.com *.gstatic.com;
-      connect-src 'self' *.supabase.co *.googleapis.com;
+      connect-src 'self' https://api.stripe.com wss://*.supabase.co *.supabase.co *.googleapis.com https://m.stripe.network;
+      frame-src 'self' https://js.stripe.com https://checkout.stripe.com;
       media-src 'self' blob: *.supabase.co;
       object-src 'none';
       base-uri 'self';
@@ -35,6 +38,23 @@ export const SecurityHeaders: React.FC = () => {
     const referrerMeta = document.createElement('meta');
     referrerMeta.name = 'referrer';
     referrerMeta.content = 'strict-origin-when-cross-origin';
+
+    // Add event listener to capture CSP violations
+    const onCspViolation = (e: any) => {
+      reportClientError({
+        error_type: 'csp_violation',
+        message: `CSP violation: ${e?.violatedDirective || 'unknown'}`,
+        metadata: {
+          blockedURI: e?.blockedURI,
+          violatedDirective: e?.violatedDirective,
+          originalPolicy: e?.originalPolicy,
+          sourceFile: e?.sourceFile,
+          lineNumber: e?.lineNumber,
+          columnNumber: e?.columnNumber,
+        }
+      });
+    };
+    window.addEventListener('securitypolicyviolation', onCspViolation as any);
     
     // Add meta tags to head
     document.head.appendChild(cspMeta);
@@ -45,6 +65,7 @@ export const SecurityHeaders: React.FC = () => {
     // Cleanup function
     return () => {
       try {
+        window.removeEventListener('securitypolicyviolation', onCspViolation as any);
         document.head.removeChild(cspMeta);
         document.head.removeChild(frameMeta);
         document.head.removeChild(nosniffMeta);
@@ -56,4 +77,5 @@ export const SecurityHeaders: React.FC = () => {
   }, []);
   
   return null; // This component doesn't render anything
+
 };

@@ -85,17 +85,23 @@ export const useProviderTracking = (serviceId: string, enabled: boolean = true) 
     }
   }, [serviceId]);
 
-  // Track page view automatically
+  // Track page view automatically with de-dup (15 min TTL)
   useEffect(() => {
     if (!enabled) return;
     if (serviceId && !isTracking) {
+      const key = `svc_view_${serviceId}`;
+      const last = typeof sessionStorage !== 'undefined' ? Number(sessionStorage.getItem(key) || 0) : 0;
+      const now = Date.now();
+      const fifteenMin = 15 * 60 * 1000;
+
       setIsTracking(true);
-      trackEvent({
-        event_type: 'view',
-        event_data: {
-          source: 'service_funnel'
-        }
-      });
+      if (!last || now - last > fifteenMin) {
+        trackEvent({
+          event_type: 'view',
+          event_data: { source: 'service_funnel', dedup: true }
+        });
+        try { sessionStorage.setItem(key, String(now)); } catch {}
+      }
       loadMetrics();
     }
   }, [serviceId, trackEvent, loadMetrics, isTracking, enabled]);

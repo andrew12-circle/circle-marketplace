@@ -30,6 +30,7 @@ import AdvancedFeaturesDashboard from "./pages/AdvancedFeaturesDashboard";
 import AIDashboard from "./pages/AIDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
+import HealthStability from "./pages/HealthStability";
 import { TermsOfService } from "./pages/legal/TermsOfService";
 import { PrivacyPolicy } from "./pages/legal/PrivacyPolicy";
 import { CookiePolicy } from "./pages/legal/CookiePolicy";
@@ -41,12 +42,13 @@ import { CommandCenterTest } from "./pages/CommandCenterTest";
 import { Academy } from "./pages/Academy";
 import CompliancePage from "./pages/CompliancePage";
 import AdminCommissions from "./pages/AdminCommissions";
+import { reportClientError } from "@/utils/errorReporting";
 const queryClient = new QueryClient();
 
 const App = () => {
   console.log("App component rendering");
   return (
-    <ErrorBoundary section="Application">
+    <ErrorBoundary section="Application" onError={(error, info) => { reportClientError({ error_type: 'runtime', message: error.message, stack: error.stack, section: 'Application', component: 'App', metadata: { componentStack: (info as any)?.componentStack } }); }}>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <CSRFProvider>
@@ -77,6 +79,7 @@ const App = () => {
                 <Route path="/vendor-analytics" element={<VendorAnalyticsDashboard />} />
                 <Route path="/vendor-registration" element={<VendorRegistration />} />
                 <Route path="/analytics" element={<AnalyticsDashboard />} />
+                <Route path="/health" element={<HealthStability />} />
                 <Route path="/support" element={<SupportDashboard />} />
                 <Route path="/advanced-features" element={<AdvancedFeaturesDashboard />} />
                 <Route path="/ai-dashboard" element={<AIDashboard />} />
