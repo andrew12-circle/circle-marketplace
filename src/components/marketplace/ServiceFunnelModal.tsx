@@ -1011,24 +1011,39 @@ export const ServiceFunnelModal = ({
                          
                            <Button 
                              variant="outline" 
-                             onClick={() => {
-                               // First expand the pricing accordion (section 7)
-                               const accordionTrigger = document.querySelector('[value="question-7"]');
-                               if (accordionTrigger) {
-                                 (accordionTrigger as HTMLElement).click();
-                               }
-                               
-                               // Then scroll to the pricing section after a brief delay
-                               setTimeout(() => {
-                                 const pricingSection = document.querySelector('[value="question-7"]');
-                                 if (pricingSection) {
-                                   pricingSection.scrollIntoView({ 
-                                     behavior: 'smooth', 
-                                     block: 'start' 
-                                   });
-                                 }
-                               }, 100);
-                             }}
+                              onClick={() => {
+                                console.log('Pricing button clicked');
+                                
+                                // Method 1: Try to find and click the accordion trigger
+                                let accordionTrigger = document.querySelector('[value="question-7"] [data-state]');
+                                if (!accordionTrigger) {
+                                  // Method 2: Alternative selector
+                                  accordionTrigger = document.querySelector('[value="question-7"] button');
+                                }
+                                
+                                console.log('Found accordion trigger:', accordionTrigger);
+                                
+                                if (accordionTrigger) {
+                                  (accordionTrigger as HTMLElement).click();
+                                  console.log('Clicked accordion trigger');
+                                } else {
+                                  console.log('No accordion trigger found');
+                                }
+                                
+                                // Then scroll to the pricing section after a brief delay
+                                setTimeout(() => {
+                                  const pricingSection = document.querySelector('[value="question-7"]');
+                                  console.log('Found pricing section:', pricingSection);
+                                  
+                                  if (pricingSection) {
+                                    pricingSection.scrollIntoView({ 
+                                      behavior: 'smooth', 
+                                      block: 'start' 
+                                    });
+                                    console.log('Scrolled to pricing section');
+                                  }
+                                }, 300);
+                              }}
                              className="w-full border-2 border-gray-300 hover:border-gray-400 py-3 rounded-xl font-semibold"
                            >
                              <DollarSign className="w-5 h-5 mr-2" />
