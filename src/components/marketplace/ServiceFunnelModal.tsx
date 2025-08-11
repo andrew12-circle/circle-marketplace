@@ -284,38 +284,6 @@ export const ServiceFunnelModal = ({
     }
   }, [isOpen, service.vendor?.name]);
 
-  // Helper function to format review dates
-  const formatReviewDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    });
-  };
-
-  // Helper function to get reviewer title
-  const getReviewerTitle = (review: any) => {
-    if (review.author_company) {
-      const specialtyMap: Record<string, string> = {
-        'realtor': 'Real Estate Agent',
-        'mortgage': 'Mortgage Professional',
-        'insurance': 'Insurance Agent',
-        'marketing': 'Marketing Specialist',
-        'commercial': 'Commercial Agent',
-        'luxury': 'Luxury Specialist',
-        'investment': 'Investment Specialist'
-      };
-      
-      const primarySpecialty = review.author_specialties?.[0];
-      const titlePrefix = primarySpecialty ? specialtyMap[primarySpecialty] || 'Professional' : 'Professional';
-      return `${titlePrefix}, ${review.author_company}`;
-    }
-    return review.author_specialties?.[0] ? 
-      review.author_specialties[0].charAt(0).toUpperCase() + review.author_specialties[0].slice(1) + ' Professional' : 
-      'Verified User';
-  };
-
   const handleAddToCart = () => {
     addToCart({
       id: service.id,
@@ -367,1171 +335,487 @@ export const ServiceFunnelModal = ({
     );
   };
 
-  const hasBenefits = Array.isArray(fc?.benefits) && fc.benefits.length > 0;
-  const showThumbnailGallery = !!fc?.thumbnailGallery?.enabled;
-  const showTestimonialCards = !!fc?.testimonialCards?.enabled;
-  const showROI = !!fc?.roiCalculator?.enabled;
-  const showStats = Array.isArray(fc?.socialProof?.stats) && fc.socialProof.stats.length > 0;
-  const showTestimonials = Array.isArray(fc?.socialProof?.testimonials) && fc.socialProof.testimonials.length > 0;
-  const showPackagesSection = Array.isArray(service.pricing_tiers) && service.pricing_tiers.length > 0;
-  const showUrgency = !!fc?.urgencySection?.enabled;
-  const showTimeInvestment = !!(fc?.timeInvestment?.enabled || fc?.showTimeInvestment);
-  const showMiddle = hasBenefits || showROI || showStats || showTestimonials || showUrgency || showTimeInvestment;
-
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()} modal={true}>
-      <DialogContent className="max-w-7xl max-h-[95vh] overflow-y-auto p-0">
+      <DialogContent className="max-w-[90vw] lg:max-w-6xl max-h-[90vh] overflow-hidden p-0 animate-scale-in">
         <DialogHeader className="sr-only">
           <span>Service Details</span>
         </DialogHeader>
         
-        {/* Hero Section */}
-        <div className="relative bg-gradient-to-r from-blue-600 to-purple-600 text-white p-8">
-          {/* Close Button */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute top-4 right-4 z-50 h-10 w-10 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              onClose();
-            }}
-          >
-            <X className="h-6 w-6" />
-          </Button>
-          
-          <div className="absolute inset-0 bg-black/20"></div>
-          <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 mb-2">
-                {service.vendor?.is_verified && (
-                  <Badge className="bg-green-500 text-white">
-                    <Verified className="w-3 h-3 mr-1" />
-                    Top Rated Pro
-                  </Badge>
-                )}
-                <Badge className="bg-orange-500 text-white">
-                  <Trophy className="w-3 h-3 mr-1" />
-                  Premium Provider
-                </Badge>
-              </div>
-              <h1 className="text-4xl font-bold leading-tight">
-                {service.funnel_content?.headline || service.title}
-              </h1>
-              <p className="text-xl text-blue-100">
-                {subHeadline || "Transform your real estate business with our proven system"}
-              </p>
-              {fc?.heroDescription && (
-                <p className="text-base text-blue-100/90">{fc.heroDescription}</p>
-              )}
-              {service.vendor && (
-                <div className="flex items-center gap-4">
-                  {renderStarRating(service.vendor.rating, "lg")}
-                  <span className="text-lg">
-                    {service.vendor.rating} ({service.vendor.review_count}+ reviews)
-                  </span>
-                </div>
-              )}
-            </div>
-            {/* Right column: Main Media */}
-            <div className="flex flex-col gap-4">
-              {/* Main Image/Video */}
-              <div className="aspect-video bg-muted rounded-lg overflow-hidden relative flex items-center justify-center">
-                {(service.funnel_content?.media?.[0]?.url || service.image_url) ? (
-                  (() => {
-                    const baseMediaItem = service.funnel_content?.media?.[0];
-                    const baseUrl = baseMediaItem?.url || service.image_url;
-                    const currentUrl = activeMediaUrl || baseUrl;
-                    const yt = getYouTubeEmbedUrl(currentUrl || undefined);
-                    const isVideo = !!yt || (currentUrl ? /\.(mp4|webm|ogg)$/i.test(currentUrl) : false);
-                    if (isVideo) {
-                      return yt ? (
-                        <iframe
-                          src={yt}
-                          title={service.funnel_content?.headline || service.title}
-                          className="w-full h-full"
-                          loading="lazy"
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                          referrerPolicy="strict-origin-when-cross-origin"
-                          allowFullScreen
-                        />
-                      ) : (
-                        <video
-                          controls
-                          className="w-full h-full object-cover"
-                          src={currentUrl || undefined}
-                        />
-                      );
-                    } else {
-                      return (
-                        <img
-                          src={currentUrl || undefined}
-                          alt={service.funnel_content?.headline || service.title}
-                          className="w-full h-auto object-contain p-5 cursor-pointer"
-                          onClick={() => setActiveMediaUrl(currentUrl)}
-                        />
-                      );
-                    }
-                  })()
-                ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                    <Play className="w-16 h-16 text-white" />
-                  </div>
-                )}
-              </div>
-              
-              {/* 4 Media Thumbnails */}
-              {(service.funnel_content as any)?.thumbnailGallery?.enabled && (
-                <div className="grid grid-cols-4 gap-2">
-                  {((service.funnel_content as any).thumbnailGallery.items?.length > 0 
-                    ? (service.funnel_content as any).thumbnailGallery.items 
-                    : [
-                        { id: '1', label: "Demo Video", icon: "video" },
-                        { id: '2', label: "Case Study", icon: "chart" },
-                        { id: '3', label: "Training", icon: "book" },
-                        { id: '4', label: "Results", icon: "trophy" }
-                      ]
-                  ).slice(0, 4).map((item: any, index: number) => (
-                    <div
-                      key={item.id || index}
-                      className="aspect-square bg-muted rounded-lg overflow-hidden relative cursor-pointer hover:opacity-80 transition-opacity"
-                      onClick={() => {
-                        const mediaUrl = item.mediaUrl || item.url;
-                        if (mediaUrl) setActiveMediaUrl(mediaUrl);
-                      }}
-                      role="button"
-                      aria-label={item.label ? `Open ${item.label}` : 'Open media'}
-                      tabIndex={0}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault();
-                          const mediaUrl = item.mediaUrl || item.url;
-                          if (mediaUrl) setActiveMediaUrl(mediaUrl);
-                        }
-                      }}
-                    >
-                      {(() => {
-                        const mediaUrl = item.mediaUrl || item.url;
-                        const ytId = mediaUrl ? getYouTubeId(mediaUrl) : null;
-                        const isImage = mediaUrl ? /\.(png|jpg|jpeg|webp|gif)$/i.test(mediaUrl) : false;
-                        const thumb = ytId ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : (isImage ? mediaUrl : null);
-                        return thumb ? (
-                          <>
-                            <img
-                              src={thumb}
-                              alt={item.label ? `${item.label} thumbnail` : 'Media thumbnail'}
-                              className="w-full h-full object-cover"
-                              loading="lazy"
-                              decoding="async"
-                            />
-                            {ytId && (
-                              <div className="absolute inset-0 flex items-center justify-center">
-                                <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center shadow-md">
-                                  <div className="w-0 h-0 border-t-[4px] border-t-transparent border-l-[6px] border-l-white border-b-[4px] border-b-transparent ml-0.5" />
-                                </div>
-                              </div>
-                            )}
-                          </>
-                        ) : (
-                          <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
-                            {item.icon === 'video' && (
-                              <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center">
-                                <div className="w-0 h-0 border-t-[4px] border-t-transparent border-l-[6px] border-l-white border-b-[4px] border-b-transparent ml-0.5" />
-                              </div>
-                            )}
-                            {item.icon === 'chart' && <TrendingUp className="w-6 h-6 text-green-500" />}
-                            {item.icon === 'book' && <Building className="w-6 h-6 text-blue-500" />}
-                            {item.icon === 'trophy' && <Trophy className="w-6 h-6 text-yellow-500" />}
-                            <span className="text-xs text-center mt-1 px-1">{item.label}</span>
-                          </div>
-                        );
-                      })()}
-                    </div>
-                  ))}
-                </div>
-              )}
-              
-              {/* Vendor Logo below media */}
-              {service.vendor?.logo_url && (
-                <div className="flex justify-center">
-                  <img
-                    src={service.vendor.logo_url}
-                    alt={`${service.vendor?.name || 'Vendor'} logo`}
-                    className="h-12 lg:h-16 object-contain bg-white/80 rounded-md p-2 shadow-md"
-                  />
-                </div>
-              )}
+        {/* Close Button - Fixed Position */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute top-4 right-4 z-50 h-8 w-8 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white shadow-lg border border-white/20"
+          onClick={onClose}
+        >
+          <X className="h-4 w-4 text-gray-700" />
+        </Button>
 
-              {hasBenefits && (
-                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20 w-full">
-                  <h3 className="text-2xl font-bold mb-4">
-                    Why Choose {service.vendor?.name || 'This Service'}?
-                  </h3>
-                  <div className="space-y-3">
-                    {fc.benefits.map((item: any, i: number) => (
-                      <div key={i} className="flex items-center gap-3">
-                        <div className="bg-green-500 rounded-full p-1">
-                          <TrendingUp className="w-4 h-4" />
-                        </div>
-                        <span className="text-lg">{item.title}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 p-6">
-          {/* Left Column - Social Proof */}
-          <div className="lg:col-span-3 space-y-6">
-
-
-
-            {/* Social Proof Cards */}
-            {(service.funnel_content as any)?.testimonialCards?.enabled && (
-              <div className="space-y-4">
-                <h3 className="font-bold text-lg">
-                  {(service.funnel_content as any).testimonialCards.title || 'Recent Success Stories'}
-                </h3>
-                <div className="space-y-3">
-                  {((service.funnel_content as any).testimonialCards.cards?.length > 0 
-                    ? (service.funnel_content as any).testimonialCards.cards 
-                    : [
-                        {
-                          id: '1',
-                          name: 'Sarah T.',
-                          role: 'Keller Williams',
-                          content: 'Increased my closings by 200% in just 3 months!',
-                          rating: 5,
-                          timeAgo: '2 weeks ago',
-                          borderColor: 'green'
-                        },
-                        {
-                          id: '2',
-                          name: 'Mike R.',
-                          role: 'RE/MAX',
-                          content: 'ROI was 320% in the first quarter alone.',
-                          rating: 5,
-                          timeAgo: '1 week ago',
-                          borderColor: 'blue'
-                        }
-                      ]
-                  ).map((card: any) => (
-                    <Card key={card.id} className={`p-4 border-l-4 border-l-${card.borderColor}-500`}>
-                      <div className="flex items-start gap-3">
-                        <div className={`bg-${card.borderColor}-100 rounded-full p-2`}>
-                          {card.borderColor === 'green' && <TrendingUp className="w-4 h-4 text-green-600" />}
-                          {card.borderColor === 'blue' && <DollarSign className="w-4 h-4 text-blue-600" />}
-                        </div>
-                        <div>
-                          <p className="font-medium">{card.name} - {card.role}</p>
-                          <p className="text-sm text-muted-foreground">"{card.content}"</p>
-                          <div className="flex items-center gap-1 mt-1">
-                            {[...Array(card.rating)].map((_, i) => (
-                              <Star key={i} className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                            ))}
-                            <span className="text-xs text-muted-foreground ml-2">{card.timeAgo}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Middle Column - Value Proposition */}
-          {showMiddle && (
-          <div className="lg:col-span-3 space-y-6">
-            {hasBenefits && (
-              <div>
-                <h2 className="text-2xl font-bold mb-4">What You'll Get</h2>
-                <div className="space-y-4">
-                  {fc.benefits.map((benefit: any, index: number) => (
-                    <div key={index} className="flex items-start gap-3">
-                      <div className="bg-green-100 rounded-full p-2 mt-1">
-                        <Target className="w-5 h-5 text-green-600" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold">{benefit.title}</h3>
-                        {benefit.description && (
-                          <p className="text-sm text-muted-foreground">{benefit.description}</p>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            <Separator />
-
-
-            {fc?.socialProof?.stats?.length > 0 && (
-              <div className="bg-amber-50 p-4 rounded-lg border">
-                <h3 className="font-bold text-lg mb-3">Proven Results</h3>
-                <div className="grid grid-cols-2 gap-3">
-                  {fc.socialProof.stats.map((s: any, i: number) => (
-                    <div key={i} className="flex items-center gap-2">
-                      <Badge variant="secondary">{s.value}</Badge>
-                      <span className="text-sm">{s.label}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-
-            {showTimeInvestment && (
-              <div className="bg-blue-50 p-4 rounded-lg border">
-                <h3 className="font-bold mb-3">Time Investment</h3>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-blue-600" />
-                    <span className="text-sm">Setup: 2-3 hours over 1 week</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-blue-600" />
-                    <span className="text-sm">Daily maintenance: 15 minutes</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Trophy className="w-4 h-4 text-blue-600" />
-                    <span className="text-sm">Results visible: Within 30 days</span>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            </div>
-          )}
-
-          {/* Middle Column - Service Overview Flow */}
-          <div className="lg:col-span-6 lg:order-2 space-y-6">
-            {/* 1. What Is This and Why Should I Care? */}
-            <Card className="p-6">
-              <div className="space-y-4">
-                <h3 className="text-xl font-bold text-primary">What Is This and Why Should I Care?</h3>
-                <div className="space-y-2">
-                  <p className="text-lg text-muted-foreground">
-                    {fc?.heroDescription || service.description || "All-in-one real estate lead generation & CRM platform"}
-                  </p>
-                  <p className="text-base font-medium text-foreground">
-                    {fc?.headline || service.title || "Turn online leads into closings faster"}
-                  </p>
-                </div>
-              </div>
-            </Card>
-
-            {/* 2. How Much Will This Cost Me? */}
-            <Card className="p-6">
-              <div className="space-y-4">
-                <h3 className="text-xl font-bold text-primary">How Much Will This Cost Me?</h3>
-                <div className="space-y-3">
-                  {selectedPkg ? (
-                    <div className="flex items-center justify-between">
-                      <span className="text-base">Monthly Cost:</span>
-                      <span className="text-lg font-semibold">${selectedPkg.price}</span>
-                    </div>
-                  ) : service.pricing_tiers?.length > 0 ? (
-                    <div className="space-y-2">
-                      {service.pricing_tiers.slice(0, 2).map((tier) => (
-                        <div key={tier.id} className="flex items-center justify-between">
-                          <span className="text-sm">{tier.name}:</span>
-                          <span className="font-medium">${tier.price}</span>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-between">
-                      <span className="text-base">Starting at:</span>
-                      <span className="text-lg font-semibold">Contact for pricing</span>
-                    </div>
+        <div className="overflow-y-auto max-h-[90vh]">
+          {/* Modern Hero Section */}
+          <div className="relative bg-gradient-to-br from-slate-900 via-blue-900 to-purple-900 text-white overflow-hidden">
+            <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%239C92AC%22%20fill-opacity%3D%220.1%22%3E%3Ccircle%20cx%3D%2230%22%20cy%3D%2230%22%20r%3D%223%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-20"></div>
+            
+            <div className="relative p-8 lg:p-12">
+              <div className="max-w-4xl mx-auto">
+                {/* Badges */}
+                <div className="flex flex-wrap items-center gap-3 mb-6 animate-fade-in">
+                  {service.vendor?.is_verified && (
+                    <Badge className="bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 backdrop-blur-sm">
+                      <Verified className="w-3 h-3 mr-1" />
+                      Verified Pro
+                    </Badge>
                   )}
-                  <div className="text-sm text-muted-foreground">
-                    <div>• No setup fees</div>
-                    <div>• Co-pay marketing coverage available</div>
-                    <div>• Circle Pro members get additional discounts</div>
-                  </div>
+                  <Badge className="bg-amber-500/20 text-amber-300 border border-amber-400/30 backdrop-blur-sm">
+                    <Trophy className="w-3 h-3 mr-1" />
+                    Premium Provider
+                  </Badge>
+                  {service.estimated_roi && (
+                    <Badge className="bg-green-500/20 text-green-300 border border-green-400/30 backdrop-blur-sm">
+                      <TrendingUp className="w-3 h-3 mr-1" />
+                      {service.estimated_roi}% ROI
+                    </Badge>
+                  )}
                 </div>
-              </div>
-            </Card>
 
-            {/* 3. What's My ROI Potential? */}
-            <Card className="p-6">
-              <div className="space-y-4">
-                <h3 className="text-xl font-bold text-primary">What&apos;s My ROI Potential?</h3>
-                <div className="space-y-3">
-                  {/* ROI Calculator Integration */}
-                  {(service.funnel_content as any)?.roiCalculator?.enabled ? (
-                    <div className="bg-gradient-to-r from-green-50 to-blue-50 p-4 rounded-lg border">
-                      <h4 className="font-bold text-lg mb-3">
-                        {(service.funnel_content as any).roiCalculator.title || 'Personal ROI Calculator'}
-                      </h4>
-                      <div className="space-y-3">
-                        <div className="flex justify-between">
-                          <span className="text-sm">Current monthly closings:</span>
-                          <span className="font-medium">{(service.funnel_content as any).roiCalculator.currentMonthlyClosings || 3} deals</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-sm">Average commission:</span>
-                          <span className="font-medium">${((service.funnel_content as any).roiCalculator.averageCommission || 8500).toLocaleString()}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-sm">With our system ({(service.funnel_content as any).roiCalculator.increasePercentage || 150}% increase):</span>
-                          <span className="font-medium text-green-600">
-                            {(((service.funnel_content as any).roiCalculator.currentMonthlyClosings || 3) * ((service.funnel_content as any).roiCalculator.increasePercentage || 150) / 100 + ((service.funnel_content as any).roiCalculator.currentMonthlyClosings || 3)).toFixed(1)} deals
+                {/* Main Content Grid */}
+                <div className="grid lg:grid-cols-2 gap-12 items-center">
+                  {/* Left Content */}
+                  <div className="space-y-6 animate-fade-in">
+                    <h1 className="text-3xl lg:text-5xl font-bold leading-tight bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
+                      {service.funnel_content?.headline || service.title}
+                    </h1>
+                    
+                    <p className="text-lg lg:text-xl text-blue-100 leading-relaxed">
+                      {subHeadline || "Transform your real estate business with our proven system"}
+                    </p>
+
+                    {service.vendor && (
+                      <div className="flex items-center gap-4 p-4 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
+                        <div className="flex items-center gap-2">
+                          {renderStarRating(service.vendor.rating, "lg")}
+                          <span className="text-lg font-medium">
+                            {service.vendor.rating}
                           </span>
                         </div>
-                        <Separator />
-                        <div className="flex justify-between text-lg font-bold">
-                          <span>Additional monthly income:</span>
-                          <span className="text-green-600">+${((service.funnel_content as any).roiCalculator.calculatedAdditionalIncome || 38250).toLocaleString()}</span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span>Annual increase:</span>
-                          <span className="text-green-600 font-semibold">+${((service.funnel_content as any).roiCalculator.calculatedAnnualIncrease || 459000).toLocaleString()}</span>
-                        </div>
+                        <Separator orientation="vertical" className="h-6 bg-white/30" />
+                        <span className="text-sm text-blue-200">
+                          {service.vendor.review_count}+ reviews
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Quick Stats */}
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="text-center p-3 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
+                        <div className="text-2xl font-bold">600%</div>
+                        <div className="text-xs text-blue-200">Avg ROI</div>
+                      </div>
+                      <div className="text-center p-3 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
+                        <div className="text-2xl font-bold">30</div>
+                        <div className="text-xs text-blue-200">Days Setup</div>
+                      </div>
+                      <div className="text-center p-3 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
+                        <div className="text-2xl font-bold">24/7</div>
+                        <div className="text-xs text-blue-200">Support</div>
                       </div>
                     </div>
-                  ) : (
-                    <>
-                      <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-                        <div className="text-2xl font-bold text-green-600">Average ROI: 600%</div>
-                        <div className="text-sm text-green-700">$1,600 in → $9,600+ out</div>
-                      </div>
-                      <p className="text-muted-foreground">
-                        1 extra closing per month covers your cost 5x over
-                      </p>
-                    </>
-                  )}
-                </div>
+                  </div>
 
-                {/* Media Gallery */}
-                {(service.funnel_content as any)?.thumbnailGallery?.enabled && (
-                  <div className="space-y-3">
-                    <h4 className="font-semibold">See It In Action</h4>
-                    <div className="grid grid-cols-2 gap-2">
-                      {(service.funnel_content as any).thumbnailGallery.items?.map((item: any, index: number) => (
-                        <div
-                          key={index}
-                          className="aspect-video bg-muted rounded-lg overflow-hidden border cursor-pointer hover:border-primary transition-colors"
-                          onClick={() => setActiveMediaUrl(item.url)}
-                        >
-                          {(() => {
-                            const thumb = item.thumbnail || item.url;
-                            const ytId = thumb ? getYouTubeId(thumb) : null;
-                            const ytThumb = ytId ? `https://img.youtube.com/vi/${ytId}/mqdefault.jpg` : null;
-                            return ytThumb || thumb ? (
-                              <>
-                                <img
-                                  src={ytThumb || thumb}
-                                  alt={item.label ? `${item.label} thumbnail` : 'Media thumbnail'}
-                                  className="w-full h-full object-cover"
-                                  loading="lazy"
-                                  decoding="async"
-                                />
-                                {ytId && (
-                                  <div className="absolute inset-0 flex items-center justify-center">
-                                    <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center shadow-md">
-                                      <div className="w-0 h-0 border-t-[4px] border-t-transparent border-l-[6px] border-l-white border-b-[4px] border-b-transparent ml-0.5" />
-                                    </div>
-                                  </div>
-                                )}
-                              </>
+                  {/* Right Media */}
+                  <div className="relative animate-fade-in">
+                    <div className="aspect-video bg-white/10 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/20 shadow-2xl">
+                      {(service.funnel_content?.media?.[0]?.url || service.image_url) ? (
+                        (() => {
+                          const baseMediaItem = service.funnel_content?.media?.[0];
+                          const baseUrl = baseMediaItem?.url || service.image_url;
+                          const currentUrl = activeMediaUrl || baseUrl;
+                          const yt = getYouTubeEmbedUrl(currentUrl || undefined);
+                          const isVideo = !!yt || (currentUrl ? /\.(mp4|webm|ogg)$/i.test(currentUrl) : false);
+                          
+                          if (isVideo) {
+                            return yt ? (
+                              <iframe
+                                src={yt}
+                                title={service.funnel_content?.headline || service.title}
+                                className="w-full h-full"
+                                loading="lazy"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                referrerPolicy="strict-origin-when-cross-origin"
+                                allowFullScreen
+                              />
                             ) : (
-                              <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
-                                {item.icon === 'video' && (
-                                  <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center">
-                                    <div className="w-0 h-0 border-t-[4px] border-t-transparent border-l-[6px] border-l-white border-b-[4px] border-b-transparent ml-0.5" />
-                                  </div>
-                                )}
-                                {item.icon === 'chart' && <TrendingUp className="w-6 h-6 text-green-500" />}
-                                {item.icon === 'book' && <Building className="w-6 h-6 text-blue-500" />}
-                                {item.icon === 'trophy' && <Trophy className="w-6 h-6 text-yellow-500" />}
-                                <span className="text-xs text-center mt-1 px-1">{item.label}</span>
-                              </div>
+                              <video
+                                controls
+                                className="w-full h-full object-cover"
+                                src={currentUrl || undefined}
+                              />
                             );
-                          })()}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </Card>
-
-            {/* 4. How Soon Will I See Results? */}
-            <Card className="p-6">
-              <div className="space-y-4">
-                <h3 className="text-xl font-bold text-primary">How Soon Will I See Results?</h3>
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                      <span className="text-blue-600 font-bold text-sm">1</span>
-                    </div>
-                    <span className="text-sm">Setup complete within 48 hours</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                      <span className="text-blue-600 font-bold text-sm">2</span>
-                    </div>
-                    <span className="text-sm">First leads within 1-2 weeks</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                      <span className="text-green-600 font-bold text-sm">3</span>
-                    </div>
-                    <span className="text-sm">Most see closings in months 4-6</span>
-                  </div>
-                </div>
-              </div>
-            </Card>
-
-            {/* 5. What's Included? */}
-            <Card className="p-6">
-              <div className="space-y-4">
-                <h3 className="text-xl font-bold text-primary">What&apos;s Included?</h3>
-                <div className="space-y-2">
-                  <div className="grid grid-cols-1 gap-2">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <span className="text-sm">IDX website with lead capture</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <span className="text-sm">CRM with automated drip campaigns</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <span className="text-sm">Facebook & Google ad integration</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <span className="text-sm">Text & email automation</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <span className="text-sm">Smart lead routing & scoring</span>
-                    </div>
-                  </div>
-                  <div className="mt-4 pt-4 border-t">
-                    <div className="text-sm font-medium text-muted-foreground mb-2">Optional Add-ons:</div>
-                    <div className="text-sm text-muted-foreground">
-                      • Premium lead sources (+$200/mo)<br/>
-                      • Advanced analytics (+$100/mo)<br/>
-                      • Custom integrations (quote)
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </Card>
-
-            {/* 6. Proof It Works */}
-            <Card className="p-6">
-              <div className="space-y-4">
-                <h3 className="text-xl font-bold text-primary">Proof It Works</h3>
-                <div className="space-y-4">
-                  {/* Client Testimonials */}
-                  {fc?.socialProof?.testimonials?.length > 0 ? (
-                    <div className="space-y-3">
-                      <div className="text-sm font-medium">What clients say:</div>
-                      {fc.socialProof.testimonials.slice(0, 2).map((t: any, i: number) => (
-                        <div key={i} className="bg-gray-50 p-3 rounded-lg">
-                          <div className="flex items-center gap-2 mb-1">
-                            {renderStarRating(t.rating, "sm")}
-                            <span className="text-xs text-muted-foreground">{t.role}</span>
-                          </div>
-                          <p className="text-sm italic">&quot;{t.content}&quot;</p>
-                          <p className="text-xs text-muted-foreground mt-1">— {t.name}</p>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-2">
-                        {renderStarRating(4.8, "sm")}
-                        <span className="text-sm font-medium">4.8/5 from 847+ agents</span>
-                      </div>
-                      <div className="bg-gray-50 p-3 rounded-lg">
-                        <p className="text-sm italic">&quot;Doubled my lead volume in 90 days. ROI paid for itself in month 2.&quot;</p>
-                        <p className="text-xs text-muted-foreground mt-1">— Sarah M., Keller Williams</p>
-                      </div>
-                    </div>
-                  )}
-                  
-                  {/* Case Study Snapshot */}
-                  <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                    <div className="text-sm font-medium mb-2">Case Study: 12-Month Results</div>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <div className="text-xs text-muted-foreground">Before:</div>
-                        <div className="font-medium">12 leads/month</div>
-                      </div>
-                      <div>
-                        <div className="text-xs text-muted-foreground">After:</div>
-                        <div className="font-medium text-green-600">48 leads/month</div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {/* Verification Badge */}
-                  {service.vendor?.is_verified && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <Badge className="bg-blue-500 text-white">
-                        <Verified className="w-3 h-3 mr-1" />
-                        Verified Provider
-                      </Badge>
-                      <span className="text-muted-foreground">Background checked & verified</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </Card>
-          </div>
-
-          {/* Right Column - Choose Your Package (Locked) */}
-          <div className="lg:col-span-3 lg:order-3">
-            <div className="space-y-4">
-              <Card className="p-6 space-y-4">
-                <div className="space-y-3">
-                  {/* Show Add to Cart for services with pricing tiers that don't require pricing requests */}
-                  {service.pricing_tiers?.length > 0 && !service.requires_quote && !selectedPkg?.requestPricing ? (
-                    <>
-                      {/* Quantity Selector */}
-                      <div className="flex items-center justify-center gap-3">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                          disabled={quantity <= 1}
-                        >
-                          <Minus className="w-4 h-4" />
-                        </Button>
-                        <span className="w-12 text-center font-medium">Qty: {quantity}</span>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setQuantity(quantity + 1)}
-                        >
-                          <Plus className="w-4 h-4" />
-                        </Button>
-                      </div>
-                      
-                      <Button 
-                        className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold" 
-                        size="lg"
-                        onClick={handleAddToCart}
-                      >
-                        <ShoppingCart className="w-4 h-4 mr-2" />
-                        Add to Cart - ${(selectedPkg?.price || 0) * quantity}
-                      </Button>
-                      
-                      <Button 
-                        variant="outline" 
-                        className="w-full" 
-                        size="lg"
-                        onClick={() => setIsConsultationFlowOpen(true)}
-                      >
-                        <Phone className="w-4 h-4 mr-2" />
-                        {scheduleText}
-                      </Button>
-                    </>
-                  ) : (
-                    <>
-                      <Button 
-                        className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold" 
-                        size="lg"
-                        onClick={() => setIsConsultationFlowOpen(true)}
-                      >
-                        <Phone className="w-4 h-4 mr-2" />
-                        {scheduleText}
-                      </Button>
-                      
-                      <Button 
-                        variant="outline" 
-                        className="w-full" 
-                        size="lg"
-                        onClick={() => setIsConsultationFlowOpen(true)}
-                      >
-                        <Mail className="w-4 h-4 mr-2" />
-                        Get Custom Quote
-                      </Button>
-                    </>
-                  )}
-                  
-                  {service.website_url && (
-                    <Button 
-                      variant="outline" 
-                      className="w-full" 
-                      size="lg"
-                      onClick={() => window.open(service.website_url, '_blank')}
-                    >
-                      <ArrowRight className="w-4 h-4 mr-2" />
-                      Visit Service Website
-                    </Button>
-                  )}
-                  
-                  
-                  {service.vendor?.website_url && (
-                    <Button 
-                      variant="outline" 
-                      className="w-full" 
-                      size="lg"
-                      onClick={() => window.open(service.vendor.website_url, '_blank')}
-                    >
-                      <Building className="w-4 h-4 mr-2" />
-                      Visit {service.vendor.name} Website
-                    </Button>
-                  )}
-
-                  <div className="text-center">
-                    <p className="text-xs text-muted-foreground">
-                      <span className="font-medium">Free consultation</span> • No obligation • Response within 2 hours
-                    </p>
-                  </div>
-                </div>
-
-                <Separator />
-
-                <div className="space-y-2">
-                  <h4 className="font-semibold text-sm">What happens next?</h4>
-                  <div className="space-y-2 text-xs text-muted-foreground">
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 bg-green-100 rounded-full flex items-center justify-center">
-                        <span className="text-green-600 font-bold text-xs">1</span>
-                      </div>
-                      <span>15-min discovery call to understand your goals</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 bg-green-100 rounded-full flex items-center justify-center">
-                        <span className="text-green-600 font-bold text-xs">2</span>
-                      </div>
-                      <span>Custom proposal with ROI projections</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 bg-green-100 rounded-full flex items-center justify-center">
-                        <span className="text-green-600 font-bold text-xs">3</span>
-                      </div>
-                      <span>Implementation starts within 48 hours</span>
-                    </div>
-                  </div>
-                </div>
-
-                <Separator />
-
-                <div className="text-center space-y-2">
-                  <div className="flex items-center justify-center gap-2">
-                    <div className={`w-2 h-2 rounded-full ${
-                      vendorAvailability?.is_available_now ? 'bg-green-500' : 'bg-yellow-500'
-                    }`}></div>
-                    <span className={`text-sm font-medium ${
-                      vendorAvailability?.is_available_now ? 'text-green-600' : 'text-yellow-600'
-                    }`}>
-                      {vendorAvailability?.is_available_now ? 'Available Now' : 'Available Soon'}
-                    </span>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    {vendorAvailability?.availability_message || 
-                     (vendorAvailability?.is_available_now ? 
-                      'Typically responds within 1 hour' : 
-                      'Will respond within 24 hours')}
-                  </p>
-                  {vendorAvailability?.next_available_slot && (
-                    <p className="text-xs text-muted-foreground">
-                      Next available: {new Date(vendorAvailability.next_available_slot).toLocaleDateString()}
-                    </p>
-                  )}
-                </div>
-              </Card>
-
-
-              {/* Save/Share */}
-              <div className="flex gap-2">
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="flex-1"
-                  onClick={() => {
-                    // Add to saved items logic here
-                    toast.success("Service saved to your favorites!");
-                  }}
-                >
-                  <Heart className="w-4 h-4 mr-1" />
-                  Save
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="flex-1"
-                  onClick={() => {
-                    if (navigator.share) {
-                      navigator.share({
-                        title: service?.title || 'Check out this service',
-                        text: service?.description || 'I found this great service on the marketplace',
-                        url: window.location.href
-                      });
-                    } else {
-                      navigator.clipboard.writeText(window.location.href);
-                      toast.success("Link copied to clipboard!");
-                    }
-                  }}
-                >
-                  <Share2 className="w-4 h-4 mr-1" />
-                  Share
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Choose Your Package Section - Full Width */}
-        {showPackagesSection && (
-          <div className="border-t bg-muted/20 p-6">
-            <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold mb-3">Choose Your Package</h2>
-              <p className="text-lg text-muted-foreground">Select the perfect plan for your business needs</p>
-            </div>
-            
-            <div
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto"
-              role="radiogroup"
-              aria-label="Choose your package"
-            >
-              {packages.map((pkg) => (
-                <Card
-                  key={pkg.id}
-                  role="radio"
-                  aria-checked={selectedPackage === pkg.id}
-                  tabIndex={0}
-                  className={`relative p-6 cursor-pointer transition-all hover:shadow-lg h-full flex flex-col ${
-                    selectedPackage === pkg.id ? 'ring-2 ring-primary border-primary shadow-md' : ''
-                  } ${pkg.popular ? 'border-primary/50 shadow-sm' : ''}`}
-                  onClick={() => setSelectedPackage(pkg.id)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      setSelectedPackage(pkg.id);
-                    }
-                  }}
-                >
-                  {pkg.popular && (
-                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                      <Badge className="bg-primary text-primary-foreground px-3 py-1">
-                        Most Popular
-                      </Badge>
-                    </div>
-                  )}
-
-                  {selectedPackage === pkg.id && (
-                    <div className="absolute top-3 right-3 inline-flex items-center gap-1 rounded-full border bg-background/80 backdrop-blur px-2 py-1 text-xs">
-                      <CheckCircle className="w-3.5 h-3.5 text-primary" />
-                      <span>Selected</span>
-                    </div>
-                  )}
-                  
-                  <div className="text-center mb-4">
-                    <h3 className="text-xl font-bold mb-2">{pkg.name}</h3>
-                    <p className="text-sm text-muted-foreground mb-4">{pkg.description}</p>
-                    
-                    <div className="mb-4">
-                      {pkg.requestPricing ? (
-                        <div className="text-2xl font-bold text-primary">Contact for Pricing</div>
+                          } else {
+                            return (
+                              <img
+                                src={currentUrl || undefined}
+                                alt={service.funnel_content?.headline || service.title}
+                                className="w-full h-full object-cover hover-scale"
+                              />
+                            );
+                          }
+                        })()
                       ) : (
-                        <div className="space-y-1">
-                          <div className="text-3xl font-bold text-primary">${pkg.price}</div>
-                          {pkg.originalPrice && pkg.originalPrice !== pkg.price && (
-                            <div className="text-sm text-muted-foreground line-through">
-                              ${pkg.originalPrice}
-                            </div>
-                          )}
+                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-600/20 to-purple-600/20">
+                          <Play className="w-16 h-16 text-white/60" />
                         </div>
                       )}
                     </div>
-                  </div>
-                  
-                  <div className="space-y-3 mb-6 flex-1">
-                    {pkg.features.map((feature, index) => (
-                      <div key={index} className="flex items-center gap-2">
-                        <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
-                        <span className="text-sm">{feature}</span>
+
+                    {/* Vendor Logo */}
+                    {service.vendor?.logo_url && (
+                      <div className="absolute -bottom-6 left-6">
+                        <div className="bg-white rounded-xl p-3 shadow-lg border border-gray-200">
+                          <img
+                            src={service.vendor.logo_url}
+                            alt={`${service.vendor?.name || 'Vendor'} logo`}
+                            className="h-8 w-auto object-contain"
+                          />
+                        </div>
                       </div>
-                    ))}
+                    )}
                   </div>
-                  
-                  <Button 
-                    className={`w-full ${
-                      selectedPackage === pkg.id 
-                        ? 'bg-primary hover:bg-primary/90' 
-                        : 'bg-secondary hover:bg-secondary/80'
-                    }`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedPackage(pkg.id);
-                    }}
-                  >
-                    {selectedPackage === pkg.id ? 'Selected' : 'Select Package'}
-                  </Button>
-                </Card>
-              ))}
+                </div>
+              </div>
             </div>
           </div>
-        )}
 
-        {/* Bottom Section - Tabs */}
-        <div className="border-t bg-muted/20">
-          <div className="p-6">
-            <Tabs defaultValue="qa" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1 md:gap-2 h-auto p-1">
-                <TabsTrigger value="qa" className="text-xs md:text-sm whitespace-nowrap px-2 md:px-4 py-2">
-                  Q&A
-                </TabsTrigger>
-                <TabsTrigger value="related" className="text-xs md:text-sm whitespace-nowrap px-2 md:px-4 py-2">
-                  Related
-                </TabsTrigger>
-              </TabsList>
-              
-              
-              <TabsContent value="reviews" className="mt-6">
-                <div className="space-y-6">
-                  <div className="flex items-center gap-4 mb-6">
-                  {service.vendor ? (
-                    <div className="text-center">
-                      <div className="text-3xl font-bold">{service.vendor.rating}</div>
-                      {renderStarRating(service.vendor.rating, "lg")}
-                      <p className="text-sm text-muted-foreground">{service.vendor.review_count} global ratings</p>
-                    </div>
-                  ) : (
-                    <div className="text-center">
-                      <div className="text-lg text-muted-foreground">Direct Service</div>
-                      <p className="text-sm text-muted-foreground">No vendor ratings available</p>
-                    </div>
-                  )}
-                    <div className="flex-1 space-y-1">
-                      {[5, 4, 3, 2, 1].map((stars) => (
-                        <div key={stars} className="flex items-center gap-2 text-sm">
-                          <span>{stars} star</span>
-                          <div className="flex-1 bg-muted h-2 rounded-full overflow-hidden">
-                            <div 
-                              className="h-full bg-yellow-400" 
-                              style={{ width: `${stars === 5 ? 70 : stars === 4 ? 20 : 5}%` }}
-                            />
-                          </div>
-                          <span className="text-muted-foreground">{stars === 5 ? '70' : stars === 4 ? '20' : '5'}%</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Individual Reviews */}
+          {/* Main Content Section */}
+          <div className="bg-gray-50/50 py-12">
+            <div className="max-w-6xl mx-auto px-6">
+              <div className="grid lg:grid-cols-3 gap-8">
+                
+                {/* Left Column - Key Questions */}
+                <div className="lg:col-span-2 space-y-6">
                   <div className="space-y-6">
-                    {reviews.map((review) => (
-                      <div key={review.id} className="border-b pb-4">
-                        <div className="flex items-start gap-3">
-                          <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center text-sm font-medium">
-                            {review.author_name.split(' ').map(n => n[0]).join('')}
+                    {/* Question 1 */}
+                    <Card className="border-l-4 border-l-blue-500 shadow-sm hover:shadow-md transition-shadow animate-fade-in">
+                      <CardContent className="p-6">
+                        <h3 className="text-xl font-bold text-gray-900 mb-3 flex items-center gap-2">
+                          <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold text-sm">1</div>
+                          What Is This?
+                        </h3>
+                        <p className="text-gray-600 leading-relaxed">
+                          {fc?.heroDescription || service.description || "All-in-one real estate lead generation & CRM platform designed to turn online leads into closings faster"}
+                        </p>
+                      </CardContent>
+                    </Card>
+
+                    {/* Question 2 */}
+                    <Card className="border-l-4 border-l-green-500 shadow-sm hover:shadow-md transition-shadow animate-fade-in">
+                      <CardContent className="p-6">
+                        <h3 className="text-xl font-bold text-gray-900 mb-3 flex items-center gap-2">
+                          <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-green-600 font-bold text-sm">2</div>
+                          What's My Investment?
+                        </h3>
+                        <div className="space-y-3">
+                          {selectedPkg ? (
+                            <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                              <div className="flex justify-between items-center">
+                                <span className="font-medium">{selectedPkg.name}:</span>
+                                <span className="text-2xl font-bold text-green-600">${selectedPkg.price}</span>
+                              </div>
+                              <p className="text-sm text-gray-600 mt-1">{selectedPkg.description}</p>
+                            </div>
+                          ) : (
+                            <div className="text-gray-600">Contact for custom pricing</div>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Question 3 - ROI */}
+                    <Card className="border-l-4 border-l-purple-500 shadow-sm hover:shadow-md transition-shadow animate-fade-in">
+                      <CardContent className="p-6">
+                        <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                          <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 font-bold text-sm">3</div>
+                          What's My ROI Potential?
+                        </h3>
+                        
+                        {/* ROI Calculator Integration */}
+                        {(service.funnel_content as any)?.roiCalculator?.enabled ? (
+                          <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-6 rounded-xl border border-purple-200">
+                            <h4 className="font-bold text-lg mb-4 text-purple-900">
+                              {(service.funnel_content as any).roiCalculator.title || 'Personal ROI Calculator'}
+                            </h4>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div className="space-y-3">
+                                <div className="flex justify-between">
+                                  <span className="text-sm text-gray-600">Current monthly closings:</span>
+                                  <span className="font-medium">{(service.funnel_content as any).roiCalculator.currentMonthlyClosings || 3} deals</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-sm text-gray-600">Average commission:</span>
+                                  <span className="font-medium">${((service.funnel_content as any).roiCalculator.averageCommission || 8500).toLocaleString()}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-sm text-gray-600">With our system:</span>
+                                  <span className="font-medium text-green-600">
+                                    {(((service.funnel_content as any).roiCalculator.currentMonthlyClosings || 3) * ((service.funnel_content as any).roiCalculator.increasePercentage || 150) / 100 + ((service.funnel_content as any).roiCalculator.currentMonthlyClosings || 3)).toFixed(1)} deals
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="bg-white/70 p-4 rounded-lg border">
+                                <div className="text-center">
+                                  <div className="text-3xl font-bold text-green-600">
+                                    +${((service.funnel_content as any).roiCalculator.calculatedAdditionalIncome || 38250).toLocaleString()}
+                                  </div>
+                                  <div className="text-sm text-gray-600">Additional Monthly Income</div>
+                                  <div className="text-lg font-semibold text-green-600 mt-2">
+                                    +${((service.funnel_content as any).roiCalculator.calculatedAnnualIncrease || 459000).toLocaleString()}/year
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
                           </div>
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="font-medium">{review.author_name}</span>
-                              {review.verified && (
-                                <Badge variant="outline" className="text-xs">
-                                  ✓ Verified Purchase
-                                </Badge>
+                        ) : (
+                          <div className="bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-xl border border-green-200">
+                            <div className="text-center">
+                              <div className="text-4xl font-bold text-green-600 mb-2">600% ROI</div>
+                              <div className="text-gray-600 mb-4">Average return on investment</div>
+                              <div className="bg-white/70 p-4 rounded-lg">
+                                <div className="text-lg font-semibold">Investment: $1,600 → Returns: $9,600+</div>
+                                <div className="text-sm text-gray-600 mt-1">1 extra closing per month covers your cost 5x over</div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Media Gallery */}
+                        {(service.funnel_content as any)?.thumbnailGallery?.enabled && (
+                          <div className="mt-6">
+                            <h4 className="font-semibold mb-3 text-gray-900">See It In Action</h4>
+                            <div className="grid grid-cols-2 gap-3">
+                              {(service.funnel_content as any).thumbnailGallery.items?.map((item: any, index: number) => (
+                                <div
+                                  key={index}
+                                  className="aspect-video bg-gray-100 rounded-lg overflow-hidden border cursor-pointer hover:border-purple-400 transition-all hover-scale"
+                                  onClick={() => setActiveMediaUrl(item.url)}
+                                >
+                                  {(() => {
+                                    const thumb = item.thumbnail || item.url;
+                                    const ytId = thumb ? getYouTubeId(thumb) : null;
+                                    const ytThumb = ytId ? `https://img.youtube.com/vi/${ytId}/mqdefault.jpg` : null;
+                                    return ytThumb || thumb ? (
+                                      <div className="relative w-full h-full">
+                                        <img
+                                          src={ytThumb || thumb}
+                                          alt={item.label ? `${item.label} thumbnail` : 'Media thumbnail'}
+                                          className="w-full h-full object-cover"
+                                          loading="lazy"
+                                        />
+                                        {ytId && (
+                                          <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                                            <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center shadow-lg">
+                                              <Play className="w-4 h-4 text-white ml-0.5" />
+                                            </div>
+                                          </div>
+                                        )}
+                                      </div>
+                                    ) : (
+                                      <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
+                                        {item.icon === 'video' && <Play className="w-8 h-8 text-red-500" />}
+                                        {item.icon === 'chart' && <TrendingUp className="w-8 h-8 text-green-500" />}
+                                        {item.icon === 'book' && <Building className="w-8 h-8 text-blue-500" />}
+                                        {item.icon === 'trophy' && <Trophy className="w-8 h-8 text-yellow-500" />}
+                                        <span className="text-xs text-center mt-2 px-2 text-gray-600">{item.label}</span>
+                                      </div>
+                                    );
+                                  })()}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+
+                    {/* Question 4 */}
+                    <Card className="border-l-4 border-l-orange-500 shadow-sm hover:shadow-md transition-shadow animate-fade-in">
+                      <CardContent className="p-6">
+                        <h3 className="text-xl font-bold text-gray-900 mb-3 flex items-center gap-2">
+                          <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center text-orange-600 font-bold text-sm">4</div>
+                          How Soon Will I See Results?
+                        </h3>
+                        <div className="space-y-4">
+                          <div className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
+                            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                              <Clock className="w-5 h-5 text-blue-600" />
+                            </div>
+                            <div>
+                              <div className="font-medium">Setup: 24-48 hours</div>
+                              <div className="text-sm text-gray-600">Complete onboarding and configuration</div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
+                            <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                              <TrendingUp className="w-5 h-5 text-green-600" />
+                            </div>
+                            <div>
+                              <div className="font-medium">First leads: 1-2 weeks</div>
+                              <div className="text-sm text-gray-600">Initial lead generation begins</div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
+                            <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                              <Trophy className="w-5 h-5 text-purple-600" />
+                            </div>
+                            <div>
+                              <div className="font-medium">Closings: 30-90 days</div>
+                              <div className="text-sm text-gray-600">First conversions to closed deals</div>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
+
+                {/* Right Column - Package Selection & Testimonials */}
+                <div className="space-y-6">
+                  {/* Package Selection */}
+                  <Card className="sticky top-6 shadow-lg border-0 bg-gradient-to-br from-white to-gray-50 animate-fade-in">
+                    <CardContent className="p-6">
+                      <h3 className="text-xl font-bold text-gray-900 mb-4">Choose Your Package</h3>
+                      <div className="space-y-4">
+                        {packages.map((pkg) => (
+                          <div
+                            key={pkg.id}
+                            className={`p-4 rounded-xl border-2 cursor-pointer transition-all hover-scale ${
+                              selectedPackage === pkg.id
+                                ? 'border-blue-500 bg-blue-50'
+                                : 'border-gray-200 hover:border-gray-300'
+                            } ${pkg.popular ? 'ring-2 ring-blue-200' : ''}`}
+                            onClick={() => setSelectedPackage(pkg.id)}
+                          >
+                            {pkg.popular && (
+                              <Badge className="mb-2 bg-blue-500">Most Popular</Badge>
+                            )}
+                            <div className="flex justify-between items-start mb-2">
+                              <h4 className="font-semibold text-gray-900">{pkg.name}</h4>
+                              <div className="text-right">
+                                <div className="text-2xl font-bold text-gray-900">
+                                  ${pkg.requestPricing ? 'Quote' : pkg.price}
+                                </div>
+                                {pkg.originalPrice && !pkg.requestPricing && (
+                                  <div className="text-sm text-gray-500 line-through">
+                                    ${pkg.originalPrice}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            <p className="text-sm text-gray-600 mb-3">{pkg.description}</p>
+                            <div className="space-y-1">
+                              {pkg.features.slice(0, 3).map((feature, idx) => (
+                                <div key={idx} className="flex items-center gap-2 text-sm">
+                                  <CheckCircle className="w-4 h-4 text-green-500" />
+                                  <span className="text-gray-600">{feature}</span>
+                                </div>
+                              ))}
+                              {pkg.features.length > 3 && (
+                                <div className="text-sm text-gray-500">
+                                  +{pkg.features.length - 3} more features
+                                </div>
                               )}
                             </div>
-                            <div className="flex items-center gap-2 mb-2">
-                              {renderStarRating(review.rating)}
-                              <span className="text-sm text-muted-foreground">{formatReviewDate(review.created_at)}</span>
-                            </div>
-                            <p className="text-sm mb-3">{review.review}</p>
-                            <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                              <button className="flex items-center gap-1 hover:text-foreground">
-                                <ThumbsUp className="w-3 h-3" />
-                                Helpful ({review.helpful_count || 0})
-                              </button>
-                              <button className="flex items-center gap-1 hover:text-foreground">
-                                <ThumbsDown className="w-3 h-3" />
-                                Not helpful
-                              </button>
-                              <button className="hover:text-foreground">
-                                Comment
-                              </button>
-                            </div>
-                            
-                            {/* Comments Section - Feature coming soon */}
-                            <div className="mt-3 ml-4 space-y-2">
-                              {/* Comments will be added as a separate feature */}
-                            </div>
                           </div>
-                        </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="agent-reviews" className="mt-6">
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-semibold">Real Estate Agent Reviews</h3>
-                    <Button size="sm">Write Agent Review</Button>
-                  </div>
-                  
-                  {/* Agent Reviews */}
-                  <div className="space-y-6">
-                    {[
-                      {
-                        id: 1,
-                        agentName: "Patricia Williams",
-                        agentTitle: "Senior Agent, Coldwell Banker",
-                        license: "FL RE #BK3456789",
-                        yearsExperience: 10,
-                        rating: 5,
-                        date: "January 12, 2025",
-                        review: "This service revolutionized my client presentation process. The quality of deliverables is outstanding and it's helped me close 3 additional deals this quarter.",
-                        helpful: 18,
-                        comments: [
-                          { author: "Mark T.", text: "How easy was the setup process?" },
-                          { author: "Patricia Williams", text: "Very straightforward! The onboarding team walked me through everything step by step." }
-                        ]
-                      },
-                      {
-                        id: 2,
-                        agentName: "Carlos Rodriguez",
-                        agentTitle: "Top Producer, RE/MAX Excellence",
-                        license: "TX RE #123456789",
-                        yearsExperience: 7,
-                        rating: 5,
-                        date: "December 30, 2024",
-                        review: "Incredible value for the investment. My clients are impressed with the professional quality and it's definitely given me a competitive edge in listings.",
-                        helpful: 25,
-                        comments: [
-                          { author: "Lisa K.", text: "Would you recommend the premium package?" },
-                          { author: "Carlos Rodriguez", text: "Absolutely! The premium features are worth every penny for serious agents." }
-                        ]
-                      }
-                    ].map((agentReview) => (
-                      <div key={agentReview.id} className="border rounded-lg p-4 bg-background">
-                        <div className="flex items-start gap-3">
-                          <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center text-sm font-medium">
-                            {agentReview.agentName.split(' ').map(n => n[0]).join('')}
-                          </div>
-                          <div className="flex-1">
-                            <div className="flex items-start justify-between mb-2">
-                              <div>
-                                <div className="flex items-center gap-2 mb-1">
-                                  <span className="font-medium">{agentReview.agentName}</span>
-                                  <Badge variant="outline" className="text-xs">
-                                    ✓ Verified Agent
-                                  </Badge>
+
+                      <div className="mt-6 space-y-3">
+                        <Button 
+                          onClick={() => setIsConsultationFlowOpen(true)}
+                          className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all"
+                        >
+                          Get Started Now
+                          <ArrowRight className="w-5 h-5 ml-2" />
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          onClick={handleAddToCart}
+                          className="w-full border-2 border-gray-300 hover:border-gray-400 py-3 rounded-xl font-semibold"
+                        >
+                          <ShoppingCart className="w-4 h-4 mr-2" />
+                          Add to Cart
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Testimonials */}
+                  {(service.funnel_content as any)?.testimonialCards?.enabled && (
+                    <Card className="shadow-lg animate-fade-in">
+                      <CardContent className="p-6">
+                        <h3 className="font-bold text-lg mb-4 text-gray-900">
+                          {(service.funnel_content as any).testimonialCards.title || 'Success Stories'}
+                        </h3>
+                        <div className="space-y-4">
+                          {((service.funnel_content as any).testimonialCards.cards?.length > 0 
+                            ? (service.funnel_content as any).testimonialCards.cards 
+                            : [
+                                {
+                                  id: '1',
+                                  name: 'Sarah T.',
+                                  role: 'Keller Williams',
+                                  content: 'Increased my closings by 200% in just 3 months!',
+                                  rating: 5,
+                                  timeAgo: '2 weeks ago',
+                                  borderColor: 'green'
+                                },
+                                {
+                                  id: '2',
+                                  name: 'Mike R.',
+                                  role: 'RE/MAX',
+                                  content: 'ROI was 320% in the first quarter alone.',
+                                  rating: 5,
+                                  timeAgo: '1 week ago',
+                                  borderColor: 'blue'
+                                }
+                              ]
+                          ).map((card: any) => (
+                            <div key={card.id} className="p-4 bg-gray-50 rounded-xl border">
+                              <div className="flex items-start gap-3">
+                                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                                  {card.name.charAt(0)}
                                 </div>
-                                <p className="text-sm text-muted-foreground">{agentReview.agentTitle}</p>
-                                <p className="text-xs text-muted-foreground">
-                                  License: {agentReview.license} • {agentReview.yearsExperience} years experience
-                                </p>
+                                <div className="flex-1">
+                                  <div className="font-medium text-gray-900">{card.name}</div>
+                                  <div className="text-sm text-gray-600">{card.role}</div>
+                                  <p className="text-sm text-gray-700 mt-2 italic">"{card.content}"</p>
+                                  <div className="flex items-center gap-2 mt-2">
+                                    {renderStarRating(card.rating)}
+                                    <span className="text-xs text-gray-500">{card.timeAgo}</span>
+                                  </div>
+                                </div>
                               </div>
-                              <div className="text-right">
-                                {renderStarRating(agentReview.rating)}
-                                <p className="text-xs text-muted-foreground mt-1">{agentReview.date}</p>
-                              </div>
                             </div>
-                            
-                            <p className="text-sm mb-3">{agentReview.review}</p>
-                            
-                            <div className="flex items-center gap-4 text-xs text-muted-foreground mb-3">
-                              <button className="flex items-center gap-1 hover:text-foreground">
-                                <ThumbsUp className="w-3 h-3" />
-                                Helpful ({agentReview.helpful})
-                              </button>
-                              <button className="flex items-center gap-1 hover:text-foreground">
-                                <ThumbsDown className="w-3 h-3" />
-                                Not helpful
-                              </button>
-                              <button className="hover:text-foreground">
-                                Comment
-                              </button>
-                            </div>
-                            
-                            {/* Agent Comments */}
-                            <div className="space-y-2">
-                              {/* Comments feature will be added later */}
-                            </div>
-                          </div>
+                          ))}
                         </div>
-                      </div>
-                    ))}
-                  </div>
+                      </CardContent>
+                    </Card>
+                  )}
                 </div>
-              </TabsContent>
-
-              <TabsContent value="qa" className="mt-6">
-                <p className="text-muted-foreground">Questions & Answers section coming soon...</p>
-              </TabsContent>
-              
-              <TabsContent value="related" className="mt-6">
-                <div className="space-y-6">
-                  {/* More Services Section */}
-                  <div>
-                    <h3 className="font-semibold mb-4">Related Services from {service.vendor?.name || 'This Provider'}</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      {[1, 2, 3].map((i) => (
-                        <Card key={i} className="p-4">
-                          <div className="aspect-square bg-muted rounded mb-3">
-                            <div className="w-full h-full flex items-center justify-center">
-                              <Building className="w-12 h-12 text-muted-foreground" />
-                            </div>
-                          </div>
-                          <h4 className="font-medium mb-2">{service.category} Solution {i}</h4>
-                          <p className="text-sm text-muted-foreground mb-2">Complementary service for your needs</p>
-                          <div className="flex items-center justify-between">
-                            <span className="font-bold">${(parseFloat(service.retail_price || "100") * (0.8 + i * 0.3)).toFixed(0)}</span>
-                            <Button size="sm">View Details</Button>
-                          </div>
-                        </Card>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Videos Section */}
-                  <div>
-                    <h3 className="font-semibold mb-4">Service Videos</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {[1, 2, 3, 4].map((i) => (
-                        <Card key={i} className="p-4">
-                          <div className="aspect-video bg-muted rounded mb-3 relative cursor-pointer hover:bg-muted/80 transition-colors">
-                            <div className="w-full h-full flex items-center justify-center">
-                              <div className="w-16 h-16 bg-black/20 rounded-full flex items-center justify-center">
-                                <div className="w-0 h-0 border-l-[16px] border-l-white border-t-[10px] border-t-transparent border-b-[10px] border-b-transparent ml-1"></div>
-                              </div>
-                            </div>
-                            <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
-                              {i + 2}:1{i}
-                            </div>
-                          </div>
-                          <h4 className="font-medium mb-1">How {service.category} Works - Part {i}</h4>
-                          <p className="text-sm text-muted-foreground">Learn about our service process</p>
-                        </Card>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </TabsContent>
-            </Tabs>
+              </div>
+            </div>
           </div>
         </div>
+
+        {/* Consultation Flow Modal */}
+        {isConsultationFlowOpen && (
+          <ConsultationFlow
+            isOpen={isConsultationFlowOpen}
+            onClose={() => setIsConsultationFlowOpen(false)}
+            service={service}
+          />
+        )}
       </DialogContent>
-      
-      {/* Consultation Flow Modal */}
-      <ConsultationFlow
-        isOpen={isConsultationFlowOpen}
-        onClose={() => setIsConsultationFlowOpen(false)}
-        service={service}
-      />
     </Dialog>
   );
 };
