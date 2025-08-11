@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { toast } from "sonner";
 import { useServiceReviews } from "@/hooks/useServiceReviews";
+import { ROICalculator } from "./ROICalculator";
 import { 
   Star, 
   TrendingUp, 
@@ -505,16 +506,7 @@ export const ServiceFunnelModal = ({
                       </AccordionTrigger>
                       <AccordionContent className="border-l-4 border-l-purple-500 pl-4 bg-white rounded-b-lg shadow-sm pt-0">
                         <div className="p-6 pt-0">
-                          <div className="bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-xl border border-green-200">
-                            <div className="text-center">
-                              <div className="text-4xl font-bold text-green-600 mb-2">600% ROI</div>
-                              <div className="text-gray-600 mb-4">Average return on investment</div>
-                              <div className="bg-white/70 p-4 rounded-lg">
-                                <div className="text-lg font-semibold">Investment: $1,600 → Returns: $9,600+</div>
-                                <div className="text-sm text-gray-600 mt-1">1 extra closing per month covers your cost 5x over</div>
-                              </div>
-                            </div>
-                          </div>
+                          <ROICalculator />
                         </div>
                       </AccordionContent>
                     </AccordionItem>
