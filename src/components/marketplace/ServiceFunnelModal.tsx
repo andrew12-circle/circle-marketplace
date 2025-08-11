@@ -108,6 +108,7 @@ interface Service {
     review_count: number;
     is_verified: boolean;
     website_url?: string;
+    logo_url?: string;
   } | null;
   funnel_content?: {
     headline?: string;
@@ -432,24 +433,33 @@ export const ServiceFunnelModal = ({
                 </div>
               )}
             </div>
-            {/* Conditional Benefits Section */}
-            {hasBenefits && (
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20">
-                <h3 className="text-2xl font-bold mb-4">
-                  Why Choose {service.vendor?.name || 'This Service'}?
-                </h3>
-                <div className="space-y-3">
-                  {fc.benefits.map((item: any, i: number) => (
-                    <div key={i} className="flex items-center gap-3">
-                      <div className="bg-green-500 rounded-full p-1">
-                        <TrendingUp className="w-4 h-4" />
+            {/* Right column: Logo + Optional Benefits */}
+            <div className="flex flex-col items-end gap-4">
+              {service.vendor?.logo_url && (
+                <img
+                  src={service.vendor.logo_url}
+                  alt={`${service.vendor?.name || 'Vendor'} logo`}
+                  className="h-12 lg:h-16 object-contain bg-white/80 rounded-md p-2 shadow-md"
+                />
+              )}
+              {hasBenefits && (
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20 w-full">
+                  <h3 className="text-2xl font-bold mb-4">
+                    Why Choose {service.vendor?.name || 'This Service'}?
+                  </h3>
+                  <div className="space-y-3">
+                    {fc.benefits.map((item: any, i: number) => (
+                      <div key={i} className="flex items-center gap-3">
+                        <div className="bg-green-500 rounded-full p-1">
+                          <TrendingUp className="w-4 h-4" />
+                        </div>
+                        <span className="text-lg">{item.title}</span>
                       </div>
-                      <span className="text-lg">{item.title}</span>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
 
