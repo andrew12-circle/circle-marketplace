@@ -844,6 +844,85 @@ export const ServiceFunnelModal = ({
                         </div>
                       </CardContent>
                     </Card>
+
+                    {/* Question 7 - How to Get Started */}
+                    <Card className="border-l-4 border-l-blue-500 shadow-sm hover:shadow-md transition-shadow animate-fade-in">
+                      <CardContent className="p-6">
+                        <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                          <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold text-sm">7</div>
+                          How Do I Get Started?
+                        </h3>
+                        
+                        <div className="space-y-6">
+                          {/* Main CTA */}
+                          <div className="text-center bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-xl border border-blue-200">
+                            <h4 className="text-2xl font-bold text-gray-900 mb-2">Ready to Transform Your Business?</h4>
+                            <p className="text-gray-600 mb-4">Join thousands of agents who've already made the switch</p>
+                            
+                            <Button 
+                              onClick={() => setIsConsultationFlowOpen(true)}
+                              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-3 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all hover-scale"
+                            >
+                              Book Your Free Demo
+                              <ArrowRight className="w-5 h-5 ml-2" />
+                            </Button>
+                          </div>
+
+                          {/* Quick Steps */}
+                          <div>
+                            <h4 className="font-semibold text-gray-900 mb-3">Getting started is easy:</h4>
+                            <div className="space-y-3">
+                              <div className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
+                                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold text-sm">1</div>
+                                <div>
+                                  <div className="font-medium">Book a 15-minute demo</div>
+                                  <div className="text-sm text-gray-600">See the platform in action</div>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
+                                <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-green-600 font-bold text-sm">2</div>
+                                <div>
+                                  <div className="font-medium">Choose your package</div>
+                                  <div className="text-sm text-gray-600">Select the plan that fits your needs</div>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
+                                <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 font-bold text-sm">3</div>
+                                <div>
+                                  <div className="font-medium">Go live in 24-48 hours</div>
+                                  <div className="text-sm text-gray-600">We handle the setup for you</div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Alternative Actions */}
+                          <div className="flex gap-3">
+                            <Button 
+                              variant="outline" 
+                              onClick={() => {
+                                if (service.vendor?.website_url) {
+                                  trackOutboundClick(service.vendor.website_url, 'vendor_website');
+                                  window.open(service.vendor.website_url, '_blank');
+                                }
+                              }}
+                              className="flex-1 border-2 border-gray-300 hover:border-gray-400 py-2 rounded-lg"
+                            >
+                              <Building className="w-4 h-4 mr-2" />
+                              Visit Vendor Site
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              onClick={handleAddToCart}
+                              className="flex-1 border-2 border-gray-300 hover:border-gray-400 py-2 rounded-lg"
+                            >
+                              <ShoppingCart className="w-4 h-4 mr-2" />
+                              Add to Cart
+                            </Button>
+                          </div>
+                         </div>
+                      </CardContent>
+                    </Card>
                   </div>
                 </div>
 
