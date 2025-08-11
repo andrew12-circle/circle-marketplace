@@ -20,4 +20,17 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'query-vendor': ['@tanstack/react-query'],
+          'ui-vendor': ['lucide-react', '@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu'],
+          'supabase-vendor': ['@supabase/supabase-js'],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 1000,
+  },
 }));
