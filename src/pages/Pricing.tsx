@@ -73,7 +73,7 @@ export const Pricing = () => {
                     Login
                   </Link>
                   <Button asChild className="bg-gradient-to-r from-circle-primary to-circle-primary-light text-white">
-                    <Link to="/auth">Join Free & Explore</Link>
+                    <Link to="/auth?mode=signup">Join Free & Explore</Link>
                   </Button>
                 </>}
             </div>
@@ -120,7 +120,7 @@ export const Pricing = () => {
                 {user ? <Button className="w-full bg-teal-600 hover:bg-teal-700 text-white" asChild>
                     <Link to="/">Go to Marketplace</Link>
                   </Button> : <Button className="w-full bg-teal-600 hover:bg-teal-700 text-white" asChild>
-                    <Link to="/auth">Create Free Account</Link>
+                    <Link to="/auth?mode=signup">Create Free Account</Link>
                   </Button>}
               </div>
 
@@ -152,7 +152,7 @@ export const Pricing = () => {
                   {user ? <Button className="w-full bg-teal-600 hover:bg-teal-700 text-white" asChild>
                       <Link to="/">Go to Marketplace</Link>
                     </Button> : <Button className="w-full bg-teal-600 hover:bg-teal-700 text-white" asChild>
-                      <Link to="/auth">Create Free Account</Link>
+                      <Link to="/auth?mode=signup">Create Free Account</Link>
                     </Button>}
                 </div>
 
