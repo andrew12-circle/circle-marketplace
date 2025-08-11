@@ -336,12 +336,6 @@ export const ServiceFunnelModal = ({
                     <Trophy className="w-3 h-3 mr-1" />
                     Premium Provider
                   </Badge>
-                  {service.estimated_roi && (
-                    <Badge className="bg-green-500/20 text-green-300 border border-green-400/30 backdrop-blur-sm">
-                      <TrendingUp className="w-3 h-3 mr-1" />
-                      {service.estimated_roi}% ROI
-                    </Badge>
-                  )}
                 </div>
 
                 {/* Main Content Grid */}
