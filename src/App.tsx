@@ -40,7 +40,7 @@ import CommandCenter from "./pages/CommandCenter";
 import { CommandCenterTest } from "./pages/CommandCenterTest";
 import { Academy } from "./pages/Academy";
 import CompliancePage from "./pages/CompliancePage";
-
+import AdminCommissions from "./pages/AdminCommissions";
 const queryClient = new QueryClient();
 
 const App = () => {
@@ -82,6 +82,7 @@ const App = () => {
                 <Route path="/ai-dashboard" element={<AIDashboard />} />
                  <Route path="/admin" element={<AdminDashboard />} />
                  <Route path="/admin/accounting" element={<AdminAccounting />} />
+                 <Route path="/admin/commissions" element={<AdminCommissions />} />
                  <Route path="/compliance" element={<CompliancePage />} />
                 
                 {/* Legal Pages */}

@@ -185,7 +185,7 @@ export const ServiceFunnelModal = ({
   const { profile } = useAuth();
   const isProMember = profile?.is_pro_member || false;
   const riskLevel = determineServiceRisk(service.title, service.description);
-  const { trackBooking, trackPurchase, trackOutboundClick } = useProviderTracking(service.id, isOpen);
+  const { trackBooking, trackPurchase, trackOutboundClick, trackEvent, trackWebsiteClick } = useProviderTracking(service.id, isOpen);
   const [openItem, setOpenItem] = useState<string | undefined>(undefined);
   const pricingRef = useRef<HTMLDivElement | null>(null);
   
@@ -999,9 +999,7 @@ export const ServiceFunnelModal = ({
                             onClick={() => {
                               const rawUrl = service.vendor?.website_url || service.website_url;
                               if (rawUrl) {
-                                const normalized = /^https?:\/\//i.test(rawUrl) ? rawUrl : `https://${rawUrl}`;
-                                trackOutboundClick(normalized, 'vendor_website');
-                                window.open(normalized, '_blank', 'noopener,noreferrer');
+                                trackWebsiteClick(rawUrl, undefined, 'vendor_website');
                               }
                             }}
                             disabled={!service.vendor?.website_url && !service.website_url}
@@ -1012,10 +1010,12 @@ export const ServiceFunnelModal = ({
                            </Button>
                          
                          
-                           <Button 
-                             variant="outline" 
-                              onClick={() => {
-                                setOpenItem('question-7');
+                            <Button 
+                              variant="outline" 
+                               onClick={() => {
+                                 setOpenItem('question-7');
+                                 trackEvent({ event_type: 'click', event_data: { context: 'pricing', section: 'question-7' } } as any);
+                               }}
                                 requestAnimationFrame(() => {
                                   pricingRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                                 });

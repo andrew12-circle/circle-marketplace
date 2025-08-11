@@ -23,6 +23,7 @@ import { DirectPurchaseModal } from "./DirectPurchaseModal";
 import { Service } from "@/hooks/useMarketplaceData";
 import { useActiveDisclaimer } from "@/hooks/useActiveDisclaimer";
 import { useServiceRatingFromBulk } from "@/hooks/useBulkServiceRatings";
+import { useProviderTracking } from "@/hooks/useProviderTracking";
 
 interface ServiceRatingStats {
   averageRating: number;
@@ -52,6 +53,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false, b
   const { addToCart } = useCart();
   const { profile, user } = useAuth();
   const { trackServiceView } = useServiceAnalytics();
+  const { trackEvent } = useProviderTracking(service.id, true);
   const navigate = useNavigate();
   const { formatPrice } = useCurrency();
   const isProMember = profile?.is_pro_member || false;
@@ -162,6 +164,11 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false, b
       console.log('Blocked - modal already open or closing');
       return;
     }
+    // Track click on service card opening the funnel
+    await trackEvent({
+      event_type: 'click',
+      event_data: { context: 'service_card', action: 'open_funnel' }
+    } as any);
     // Track the service view
     await trackServiceView(service.id);
     console.log('Setting funnel modal to true');

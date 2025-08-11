@@ -31,21 +31,19 @@ export const useProviderTracking = (serviceId: string, enabled: boolean = true) 
     if (!serviceId) return false;
 
     try {
-      // Use console logging for now until types are updated
-      console.log('Tracking event:', {
-        serviceId,
-        eventType: event.event_type,
-        userId: user?.id,
-        eventData: event.event_data,
-        revenue: event.revenue_attributed
+      // Persist event to Supabase
+      const { error } = await supabase.from('service_tracking_events').insert({
+        service_id: serviceId,
+        vendor_id: (event as any).vendor_id || null,
+        user_id: user?.id || null,
+        event_type: event.event_type,
+        event_data: event.event_data || {},
+        revenue_attributed: event.revenue_attributed || 0
       });
 
-      // Simple console tracking since RPC functions aren't available
-      if (event.event_type === 'view') {
-        console.log('Service view tracked locally for service:', serviceId);
-      }
+      if (error) throw error;
 
-      // Update metrics if needed
+      // Refresh metrics for revenue-impacting events
       if (event.event_type === 'purchase' || event.event_type === 'booking') {
         await loadMetrics();
       }
@@ -62,18 +60,26 @@ export const useProviderTracking = (serviceId: string, enabled: boolean = true) 
     if (!serviceId) return;
 
     try {
-      // Use mock data for now until types are updated
-      const mockMetrics: TrackingMetrics = {
-        total_views: 145,
-        total_clicks: 23,
-        total_bookings: 8,
-        total_purchases: 3,
-        conversion_rate: 12.5,
-        revenue_attributed: 2450,
-        last_updated: new Date().toISOString()
-      };
+      // Load real metrics via RPC
+      const { data, error } = await supabase.rpc('get_service_tracking_metrics', {
+        p_service_id: serviceId,
+        p_time_period: '30d'
+      });
 
-      setMetrics(mockMetrics);
+      if (error) throw error;
+
+      const m = (data as any) || {};
+      const mapped = {
+        total_views: m.total_views ?? 0,
+        total_clicks: m.total_clicks ?? 0,
+        total_bookings: m.total_bookings ?? 0,
+        total_purchases: m.total_purchases ?? 0,
+        conversion_rate: m.conversion_rate ?? 0,
+        revenue_attributed: m.revenue_attributed ?? 0,
+        last_updated: m.last_updated ?? new Date().toISOString()
+      } as TrackingMetrics;
+
+      setMetrics(mapped);
     } catch (error) {
       console.error('Error loading metrics:', error);
     }
@@ -105,6 +111,42 @@ export const useProviderTracking = (serviceId: string, enabled: boolean = true) 
       }
     });
   }, [trackEvent]);
+
+  // Track website click-through with referral token and open in new tab
+  const trackWebsiteClick = useCallback(async (rawUrl: string, vendorId?: string, context: string = 'vendor_website') => {
+    try {
+      const normalized = /^https?:\/\//i.test(rawUrl) ? rawUrl : `https://${rawUrl}`;
+      let finalUrl = normalized;
+
+      // Mint referral token if user is logged in and vendorId provided
+      if (user?.id && vendorId) {
+        const { data: token, error: tokenError } = await supabase.rpc('mint_referral_token', {
+          p_user_id: user.id,
+          p_vendor_id: vendorId,
+          p_service_id: serviceId
+        });
+        if (!tokenError && token) {
+          const u = new URL(normalized);
+          u.searchParams.set('ref', String(token));
+          finalUrl = u.toString();
+        }
+      }
+
+      await trackEvent({
+        event_type: 'click',
+        event_data: { url: finalUrl, context, click_type: 'external' },
+        revenue_attributed: 0,
+        vendor_id: vendorId
+      } as any);
+
+      window.open(finalUrl, '_blank', 'noopener,noreferrer');
+    } catch (e) {
+      console.error('Error tracking website click:', e);
+      // Fallback open
+      const normalized = /^https?:\/\//i.test(rawUrl) ? rawUrl : `https://${rawUrl}`;
+      window.open(normalized, '_blank', 'noopener,noreferrer');
+    }
+  }, [trackEvent, user?.id, supabase, serviceId]);
 
   // Track booking events
   const trackBooking = useCallback(async (bookingData: any) => {
@@ -148,6 +190,7 @@ export const useProviderTracking = (serviceId: string, enabled: boolean = true) 
     metrics,
     trackEvent,
     trackOutboundClick,
+    trackWebsiteClick,
     trackBooking,
     trackPurchase,
     trackConversion,
