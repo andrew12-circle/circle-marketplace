@@ -128,6 +128,45 @@ export type Database = {
         }
         Relationships: []
       }
+      agent_performance_tracking: {
+        Row: {
+          agent_id: string
+          average_commission: number | null
+          conversion_rate: number | null
+          created_at: string
+          id: string
+          lead_generation_score: number | null
+          month_year: string
+          transactions_closed: number | null
+          updated_at: string
+          volume_closed: number | null
+        }
+        Insert: {
+          agent_id: string
+          average_commission?: number | null
+          conversion_rate?: number | null
+          created_at?: string
+          id?: string
+          lead_generation_score?: number | null
+          month_year: string
+          transactions_closed?: number | null
+          updated_at?: string
+          volume_closed?: number | null
+        }
+        Update: {
+          agent_id?: string
+          average_commission?: number | null
+          conversion_rate?: number | null
+          created_at?: string
+          id?: string
+          lead_generation_score?: number | null
+          month_year?: string
+          transactions_closed?: number | null
+          updated_at?: string
+          volume_closed?: number | null
+        }
+        Relationships: []
+      }
       agent_playbook_templates: {
         Row: {
           created_at: string
@@ -379,6 +418,51 @@ export type Database = {
             referencedColumns: ["user_id"]
           },
         ]
+      }
+      ai_service_bundles: {
+        Row: {
+          bundle_name: string
+          bundle_type: string
+          created_at: string
+          description: string | null
+          estimated_roi_percentage: number | null
+          id: string
+          implementation_timeline_weeks: number | null
+          is_active: boolean | null
+          service_ids: string[] | null
+          target_challenges: string[] | null
+          total_price: number | null
+          updated_at: string
+        }
+        Insert: {
+          bundle_name: string
+          bundle_type: string
+          created_at?: string
+          description?: string | null
+          estimated_roi_percentage?: number | null
+          id?: string
+          implementation_timeline_weeks?: number | null
+          is_active?: boolean | null
+          service_ids?: string[] | null
+          target_challenges?: string[] | null
+          total_price?: number | null
+          updated_at?: string
+        }
+        Update: {
+          bundle_name?: string
+          bundle_type?: string
+          created_at?: string
+          description?: string | null
+          estimated_roi_percentage?: number | null
+          id?: string
+          implementation_timeline_weeks?: number | null
+          is_active?: boolean | null
+          service_ids?: string[] | null
+          target_challenges?: string[] | null
+          total_price?: number | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       audit_log: {
         Row: {
@@ -2305,6 +2389,65 @@ export type Database = {
         }
         Relationships: []
       }
+      goal_based_recommendations: {
+        Row: {
+          agent_id: string
+          bundle_id: string | null
+          confidence_score: number | null
+          created_at: string
+          estimated_roi_percentage: number | null
+          id: string
+          is_accepted: boolean | null
+          is_dismissed: boolean | null
+          is_viewed: boolean | null
+          priority_rank: number | null
+          recommendation_text: string
+          recommendation_type: string
+          service_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          agent_id: string
+          bundle_id?: string | null
+          confidence_score?: number | null
+          created_at?: string
+          estimated_roi_percentage?: number | null
+          id?: string
+          is_accepted?: boolean | null
+          is_dismissed?: boolean | null
+          is_viewed?: boolean | null
+          priority_rank?: number | null
+          recommendation_text: string
+          recommendation_type: string
+          service_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          agent_id?: string
+          bundle_id?: string | null
+          confidence_score?: number | null
+          created_at?: string
+          estimated_roi_percentage?: number | null
+          id?: string
+          is_accepted?: boolean | null
+          is_dismissed?: boolean | null
+          is_viewed?: boolean | null
+          priority_rank?: number | null
+          recommendation_text?: string
+          recommendation_type?: string
+          service_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_based_recommendations_bundle_id_fkey"
+            columns: ["bundle_id"]
+            isOneToOne: false
+            referencedRelation: "ai_service_bundles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       image_cache: {
         Row: {
           cached_url: string
@@ -2468,6 +2611,48 @@ export type Database = {
           id?: string
           identifier?: string
           locked_until?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      market_benchmarks: {
+        Row: {
+          agent_tier: string
+          avg_commission_per_deal: number | null
+          avg_transactions_per_year: number | null
+          avg_volume_per_year: number | null
+          benchmark_year: number
+          created_at: string
+          data_source: string | null
+          id: string
+          market_area: string
+          state: string
+          updated_at: string
+        }
+        Insert: {
+          agent_tier: string
+          avg_commission_per_deal?: number | null
+          avg_transactions_per_year?: number | null
+          avg_volume_per_year?: number | null
+          benchmark_year: number
+          created_at?: string
+          data_source?: string | null
+          id?: string
+          market_area: string
+          state: string
+          updated_at?: string
+        }
+        Update: {
+          agent_tier?: string
+          avg_commission_per_deal?: number | null
+          avg_transactions_per_year?: number | null
+          avg_volume_per_year?: number | null
+          benchmark_year?: number
+          created_at?: string
+          data_source?: string | null
+          id?: string
+          market_area?: string
+          state?: string
           updated_at?: string
         }
         Relationships: []
@@ -2890,9 +3075,13 @@ export type Database = {
       }
       profiles: {
         Row: {
+          annual_goal_transactions: number | null
+          annual_goal_volume: number | null
           avatar_url: string | null
+          average_commission_per_deal: number | null
           bank_details: Json | null
           bio: string | null
+          budget_preference: string | null
           business_name: string | null
           circle_points: number | null
           city: string | null
@@ -2914,10 +3103,14 @@ export type Database = {
           is_pro: boolean | null
           is_pro_member: boolean | null
           is_settlement_service_provider: boolean | null
+          last_assessment_date: string | null
           latitude: number | null
           location: string | null
           longitude: number | null
+          marketing_time_per_week: number | null
+          onboarding_completed: boolean | null
           phone: string | null
+          primary_challenge: string | null
           respa_max_copay_percentage: number | null
           respa_notes: string | null
           respa_service_categories: string[] | null
@@ -2936,9 +3129,13 @@ export type Database = {
           zip_code: string | null
         }
         Insert: {
+          annual_goal_transactions?: number | null
+          annual_goal_volume?: number | null
           avatar_url?: string | null
+          average_commission_per_deal?: number | null
           bank_details?: Json | null
           bio?: string | null
+          budget_preference?: string | null
           business_name?: string | null
           circle_points?: number | null
           city?: string | null
@@ -2960,10 +3157,14 @@ export type Database = {
           is_pro?: boolean | null
           is_pro_member?: boolean | null
           is_settlement_service_provider?: boolean | null
+          last_assessment_date?: string | null
           latitude?: number | null
           location?: string | null
           longitude?: number | null
+          marketing_time_per_week?: number | null
+          onboarding_completed?: boolean | null
           phone?: string | null
+          primary_challenge?: string | null
           respa_max_copay_percentage?: number | null
           respa_notes?: string | null
           respa_service_categories?: string[] | null
@@ -2982,9 +3183,13 @@ export type Database = {
           zip_code?: string | null
         }
         Update: {
+          annual_goal_transactions?: number | null
+          annual_goal_volume?: number | null
           avatar_url?: string | null
+          average_commission_per_deal?: number | null
           bank_details?: Json | null
           bio?: string | null
+          budget_preference?: string | null
           business_name?: string | null
           circle_points?: number | null
           city?: string | null
@@ -3006,10 +3211,14 @@ export type Database = {
           is_pro?: boolean | null
           is_pro_member?: boolean | null
           is_settlement_service_provider?: boolean | null
+          last_assessment_date?: string | null
           latitude?: number | null
           location?: string | null
           longitude?: number | null
+          marketing_time_per_week?: number | null
+          onboarding_completed?: boolean | null
           phone?: string | null
+          primary_challenge?: string | null
           respa_max_copay_percentage?: number | null
           respa_notes?: string | null
           respa_service_categories?: string[] | null

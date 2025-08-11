@@ -11,6 +11,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
 import { GoalAssessmentModal } from "./GoalAssessmentModal";
 import { AIRecommendationsDashboard } from "./AIRecommendationsDashboard";
+
 export const AIConciergeBanner = () => {
   const { user, profile } = useAuth();
   const [isAIModalOpen, setIsAIModalOpen] = useState(false);
@@ -21,6 +22,7 @@ export const AIConciergeBanner = () => {
   const [showRecommendationsDashboard, setShowRecommendationsDashboard] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+
   const placeholderQuestions = [
     "How can I help you today?",
     "What business goals are you working on?",
@@ -43,24 +45,6 @@ export const AIConciergeBanner = () => {
       }
     }
   }, [user, profile]);
-
-  const generateRecommendations = async () => {
-    if (!user?.id || !(profile as any)?.onboarding_completed) return;
-
-    try {
-      const { data, error } = await supabase.functions.invoke('generate-ai-recommendations', {
-        body: { agent_id: user.id }
-      });
-
-      if (error) throw error;
-
-      if (data?.success) {
-        console.log(`Generated ${data.recommendations_count} recommendations`);
-      }
-    } catch (error) {
-      console.error('Error generating recommendations:', error);
-    }
-  };
 
   // Animated placeholder text effect
   useEffect(() => {
@@ -106,6 +90,23 @@ export const AIConciergeBanner = () => {
     return () => clearTimeout(timeout);
   }, [isInputFocused, chatInput]);
 
+  const generateRecommendations = async () => {
+    if (!user?.id || !(profile as any)?.onboarding_completed) return;
+
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-ai-recommendations', {
+        body: { agent_id: user.id }
+      });
+
+      if (error) throw error;
+
+      if (data?.success) {
+        console.log(`Generated ${data.recommendations_count} recommendations`);
+      }
+    } catch (error) {
+      console.error('Error generating recommendations:', error);
+    }
+  };
 
   const handleSendMessage = () => {
     const query = chatInput.trim();
@@ -123,6 +124,7 @@ export const AIConciergeBanner = () => {
     // Deep-link into marketplace search with the typed query
     navigate(`/marketplace?q=${encodeURIComponent(query)}`);
   };
+
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       handleSendMessage();
