@@ -786,63 +786,63 @@ export const ServiceFunnelModal = ({
                 <div className="space-y-6">
                   {/* Pricing Section */}
                   <Card className="sticky top-6 shadow-lg border-0 bg-gradient-to-br from-white to-gray-50 animate-fade-in">
-                    <CardContent className="p-6">
-                      <h3 className="text-xl font-bold text-gray-900 mb-4">Pricing</h3>
-                      
-                      {/* Main Price Display */}
-                      <div className="text-center mb-6">
-                        <div className="text-4xl font-bold text-gray-900 mb-1">
-                          ${service.retail_price || '999'}
-                        </div>
-                        <div className="text-sm text-gray-600">One-time setup fee</div>
-                        {service.discount_percentage && (
-                          <Badge className="mt-2 bg-green-500">
-                            {service.discount_percentage}% Off
-                          </Badge>
-                        )}
-                      </div>
-
-                      {/* Key Features */}
-                      <div className="space-y-3 mb-6">
-                        <div className="flex items-center gap-3">
-                          <CheckCircle className="w-5 h-5 text-green-500" />
-                          <span className="text-gray-700">Complete setup & training</span>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <CheckCircle className="w-5 h-5 text-green-500" />
-                          <span className="text-gray-700">24/7 support included</span>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <CheckCircle className="w-5 h-5 text-green-500" />
-                          <span className="text-gray-700">30-day money back guarantee</span>
-                        </div>
-                      </div>
-
-                      {/* Action Buttons */}
-                      <div className="space-y-3">
-                        <Button 
-                          onClick={() => setIsConsultationFlowOpen(true)}
-                          className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all"
-                        >
-                          Get Started Now
-                          <ArrowRight className="w-5 h-5 ml-2" />
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          onClick={handleAddToCart}
-                          className="w-full border-2 border-gray-300 hover:border-gray-400 py-3 rounded-xl font-semibold"
-                        >
-                          <ShoppingCart className="w-4 h-4 mr-2" />
-                          Add to Cart
-                        </Button>
-                      </div>
-                    </CardContent>
+                     <CardContent className="p-6">
+                       <h3 className="text-xl font-bold text-gray-900 mb-6">Quick Actions</h3>
+                       
+                       {/* Action Buttons */}
+                       <div className="space-y-3">
+                         <Button 
+                           onClick={() => setIsConsultationFlowOpen(true)}
+                           className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all"
+                         >
+                           <Calendar className="w-5 h-5 mr-2" />
+                           Book Consultation
+                         </Button>
+                         
+                         <Button 
+                           variant="outline" 
+                           onClick={() => {
+                             if (service.vendor?.website_url) {
+                               trackOutboundClick(service.vendor.website_url, 'vendor_website');
+                               window.open(service.vendor.website_url, '_blank');
+                             }
+                           }}
+                           className="w-full border-2 border-gray-300 hover:border-gray-400 py-3 rounded-xl font-semibold"
+                         >
+                           <Building className="w-5 h-5 mr-2" />
+                           View Service Website
+                         </Button>
+                         
+                         <Button 
+                           variant="outline" 
+                           onClick={handleAddToCart}
+                           className="w-full border-2 border-gray-300 hover:border-gray-400 py-3 rounded-xl font-semibold"
+                         >
+                           <ShoppingCart className="w-5 h-5 mr-2" />
+                           Add to Cart
+                         </Button>
+                         
+                         <Button 
+                           variant="outline" 
+                           onClick={() => {
+                             const pricingSection = document.querySelector('[data-section="pricing"]');
+                             if (pricingSection) {
+                               pricingSection.scrollIntoView({ behavior: 'smooth' });
+                             }
+                           }}
+                           className="w-full border-2 border-blue-300 hover:border-blue-400 text-blue-600 hover:text-blue-700 py-3 rounded-xl font-semibold"
+                         >
+                           <DollarSign className="w-5 h-5 mr-2" />
+                           See Other Pricing
+                         </Button>
+                       </div>
+                     </CardContent>
                   </Card>
                 </div>
               </div>
 
               {/* Section 7 - Full Width Pricing */}
-              <div className="mt-12">
+              <div className="mt-12" data-section="pricing">
                 <Card className="border-l-4 border-l-green-500 shadow-sm hover:shadow-md transition-shadow animate-fade-in">
                   <CardContent className="p-8">
                     <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
