@@ -584,12 +584,14 @@ export const ServiceFunnelModal = ({
           </div>
         </div>
 
-        {/* Main Content Grid - Top Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-9 gap-6 p-6">
-          {/* Main Middle Column - Service Overview Flow */}
-          <div className="lg:col-span-6 space-y-6">
-            {/* Content moved to bottom */}
-          </div>
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-6">
+          {/* Left Column - Social Proof */}
+          <div className="lg:col-span-4 space-y-6">
+
+
+
+            {/* Social Proof Cards */}
             {(service.funnel_content as any)?.testimonialCards?.enabled && (
               <div className="space-y-4">
                 <h3 className="font-bold text-lg">
@@ -643,9 +645,9 @@ export const ServiceFunnelModal = ({
             )}
           </div>
 
-          {/* Right Column - Choose Your Package (Locked) */}
-          <div className="lg:col-span-3 lg:order-3">
-            <div className="space-y-4">
+          {/* Middle Column - Value Proposition */}
+          {showMiddle && (
+          <div className="lg:col-span-4 space-y-6">
             {hasBenefits && (
               <div>
                 <h2 className="text-2xl font-bold mb-4">What You'll Get</h2>
@@ -739,6 +741,7 @@ export const ServiceFunnelModal = ({
             )}
 
             </div>
+          )}
 
           {/* Middle Column - Service Overview Flow */}
           <div className="lg:col-span-5 lg:order-2 space-y-6">
@@ -1127,125 +1130,6 @@ export const ServiceFunnelModal = ({
                   Share
                 </Button>
               </div>
-            </div>
-        </div>
-
-        {/* Bottom Section - Social Proof */}
-        <div className="p-6 pt-0">
-          <div className="lg:col-span-12 space-y-6">
-            {/* Social Proof Cards */}
-            {(service.funnel_content as any)?.testimonialCards?.enabled && (
-              <div className="space-y-4">
-                <h3 className="font-bold text-lg">
-                  {(service.funnel_content as any).testimonialCards.title || 'Recent Success Stories'}
-                </h3>
-                <div className="space-y-3">
-                  {(service.funnel_content as any).testimonialCards.items?.slice(0, 3).map((card: any, i: number) => (
-                    <Card key={i} className="p-4">
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                          <span className="text-blue-600 font-bold text-sm">{card.initials || 'A'}</span>
-                        </div>
-                        <div>
-                          <p className="font-medium text-sm">{card.name}</p>
-                          <p className="text-xs text-muted-foreground">{card.role}</p>
-                        </div>
-                      </div>
-                      <p className="text-sm">"{card.content}"</p>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* ROI Calculator */}
-            {(service.funnel_content as any)?.roiCalculator?.enabled && (
-              <Card className="p-6">
-                <h3 className="font-bold text-lg mb-4">
-                  {(service.funnel_content as any).roiCalculator.title || 'Calculate Your ROI'}
-                </h3>
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-sm font-medium mb-1 block">Monthly Investment</label>
-                      <div className="relative">
-                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-sm">$</span>
-                        <input 
-                          type="number" 
-                          className="w-full pl-8 pr-3 py-2 border rounded text-sm"
-                          placeholder="1,500"
-                          defaultValue={1500}
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium mb-1 block">Average Deal Value</label>
-                      <div className="relative">
-                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-sm">$</span>
-                        <input 
-                          type="number" 
-                          className="w-full pl-8 pr-3 py-2 border rounded text-sm"
-                          placeholder="8,000"
-                          defaultValue={8000}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  <div className="bg-green-50 p-4 rounded border border-green-200">
-                    <div className="text-center">
-                      <p className="text-sm text-muted-foreground">Projected Monthly ROI</p>
-                      <p className="text-2xl font-bold text-green-600">$9,600</p>
-                      <p className="text-sm text-green-600">640% Return</p>
-                    </div>
-                  </div>
-                </div>
-              </Card>
-            )}
-
-            {/* Performance Stats */}
-            {(service.funnel_content as any)?.socialProof?.stats?.length > 0 && (
-              <div className="space-y-4">
-                <h3 className="font-bold text-lg">Performance Numbers</h3>
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                  {(service.funnel_content as any).socialProof.stats.map((stat: any, i: number) => (
-                    <Card key={i} className="p-4 text-center">
-                      <p className="text-2xl font-bold text-primary">{stat.value}</p>
-                      <p className="text-sm text-muted-foreground">{stat.label}</p>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-        </div>
-
-        {/* Social Proof Section - Full Width Bottom */}
-        <div className="p-6 pt-0 border-t bg-muted/10">
-          <div className="space-y-6">
-            <h3 className="font-bold text-xl text-center">What Real Agents Say</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {[
-                { name: 'Sarah T.', role: 'Keller Williams', content: 'Increased my closings by 200% in just 3 months!', rating: 5 },
-                { name: 'Mike R.', role: 'RE/MAX', content: 'ROI was 320% in the first quarter alone.', rating: 5 },
-                { name: 'Lisa M.', role: 'Coldwell Banker', content: 'Best investment I made for my business this year.', rating: 5 }
-              ].map((card, i) => (
-                <Card key={i} className="p-4">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                      <span className="text-blue-600 font-bold text-sm">{card.name.split(' ').map(n => n[0]).join('')}</span>
-                    </div>
-                    <div>
-                      <p className="font-medium text-sm">{card.name}</p>
-                      <p className="text-xs text-muted-foreground">{card.role}</p>
-                    </div>
-                  </div>
-                  <p className="text-sm italic">"{card.content}"</p>
-                  <div className="flex items-center mt-2">
-                    {renderStarRating(card.rating, "sm")}
-                  </div>
-                </Card>
-              ))}
             </div>
           </div>
         </div>
