@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { toast } from "sonner";
 import { useServiceReviews } from "@/hooks/useServiceReviews";
-import { ROICalculator } from "./ROICalculator";
+import { AnswerDropdown } from "./AnswerDropdown";
 import { PricingChoiceModal } from "./PricingChoiceModal";
 import { 
   Star, 
@@ -200,6 +200,7 @@ export const ServiceFunnelModal = ({
   const ctaTitle = fc?.callToAction?.title || fc?.callToAction?.primaryHeadline || 'Ready to Transform Your Business?';
   const ctaDescription = fc?.callToAction?.description || fc?.callToAction?.primaryDescription || '';
   const scheduleText = fc?.callToAction?.primaryButtonText || 'Schedule Consultation';
+  const faqSections: Array<{ id: string; title: string; content: string }> = (fc?.faqSections as any) || [];
 
   // Use pricing tiers if available, otherwise fallback to default packages
   const packages = service.pricing_tiers?.length ? 
@@ -533,7 +534,11 @@ export const ServiceFunnelModal = ({
                       </AccordionTrigger>
                       <AccordionContent className="border-l-4 border-l-purple-500 pl-4 bg-white rounded-b-lg shadow-sm pt-0">
                         <div className="p-6 pt-0">
-                          <ROICalculator />
+                          <AnswerDropdown
+                            items={faqSections.map((s: any) => ({ id: s.id || s.title, title: s.title, content: s.content }))}
+                            label="Select a topic"
+                            placeholder="Choose an answer"
+                          />
                         </div>
                       </AccordionContent>
                     </AccordionItem>
