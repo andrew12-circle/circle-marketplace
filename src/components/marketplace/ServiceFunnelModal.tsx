@@ -1009,20 +1009,31 @@ export const ServiceFunnelModal = ({
                            </Button>
                          
                          
-                          <Button 
-                            variant="outline" 
-                            onClick={() => {
-                              // Trigger accordion to open section 7
-                              const accordionTrigger = document.querySelector('[value="question-7"]');
-                              if (accordionTrigger) {
-                                (accordionTrigger as HTMLElement).click();
-                              }
-                            }}
-                            className="w-full border-2 border-blue-300 hover:border-blue-400 text-blue-600 hover:text-blue-700 py-3 rounded-xl font-semibold"
-                          >
-                            <DollarSign className="w-5 h-5 mr-2" />
-                            Pricing
-                          </Button>
+                           <Button 
+                             variant="outline" 
+                             onClick={() => {
+                               // First expand the pricing accordion (section 7)
+                               const accordionTrigger = document.querySelector('[value="question-7"]');
+                               if (accordionTrigger) {
+                                 (accordionTrigger as HTMLElement).click();
+                               }
+                               
+                               // Then scroll to the pricing section after a brief delay
+                               setTimeout(() => {
+                                 const pricingSection = document.querySelector('[value="question-7"]');
+                                 if (pricingSection) {
+                                   pricingSection.scrollIntoView({ 
+                                     behavior: 'smooth', 
+                                     block: 'start' 
+                                   });
+                                 }
+                               }, 100);
+                             }}
+                             className="w-full border-2 border-blue-300 hover:border-blue-400 text-blue-600 hover:text-blue-700 py-3 rounded-xl font-semibold"
+                           >
+                             <DollarSign className="w-5 h-5 mr-2" />
+                             Pricing
+                           </Button>
                        </div>
                      </CardContent>
                   </Card>
