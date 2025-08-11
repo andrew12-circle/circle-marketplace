@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { ShoppingBag, Clock, CheckCircle, XCircle, ExternalLink } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Link } from "react-router-dom";
 
 interface Order {
   id: string;
@@ -108,7 +109,7 @@ export const OrderHistory = () => {
               Please sign in to view your order history.
             </p>
             <Button asChild>
-              <a href="/auth">Sign In</a>
+              <Link to="/auth">Sign In</Link>
             </Button>
           </CardContent>
         </Card>
@@ -137,7 +138,7 @@ export const OrderHistory = () => {
                 You haven't made any purchases yet. Start exploring our marketplace!
               </p>
               <Button asChild>
-                <a href="/">Browse Services</a>
+                <Link to="/">Browse Services</Link>
               </Button>
             </CardContent>
           </Card>
