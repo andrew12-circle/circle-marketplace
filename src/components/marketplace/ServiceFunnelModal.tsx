@@ -477,7 +477,7 @@ export const ServiceFunnelModal = ({
                 
                 {/* Left Column - Collapsible Questions */}
                 <div className="lg:col-span-2">
-                  <Accordion type="single" collapsible defaultValue="question-1" className="space-y-4">
+                  <Accordion type="single" collapsible className="space-y-4">
                     {/* Question 1 */}
                     <AccordionItem value="question-1">
                       <AccordionTrigger className="text-xl font-bold text-gray-900 hover:no-underline border-l-4 border-l-blue-500 pl-4 bg-white rounded-t-lg shadow-sm">
