@@ -27,6 +27,7 @@ export const AIConciergeBanner = () => {
   const [chatInput, setChatInput] = useState("");
   const [placeholderText, setPlaceholderText] = useState("");
   const [isTyping, setIsTyping] = useState(true);
+  const [isInputFocused, setIsInputFocused] = useState(false);
   const [isLoadingRecommendation, setIsLoadingRecommendation] = useState(false);
   const [aiRecommendation, setAiRecommendation] = useState<string | null>(null);
   const [isRecommendationExpanded, setIsRecommendationExpanded] = useState(false);
@@ -139,8 +140,17 @@ export const AIConciergeBanner = () => {
 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Animated placeholder text effect with cleanup
+  // Animated placeholder text effect with cleanup, pauses on focus or input
   useEffect(() => {
+    // Pause typing when the input is focused or has content
+    if (isInputFocused || chatInput.trim().length > 0) {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      setPlaceholderText("");
+      return;
+    }
+
     let currentQuestionIndex = 0;
     let currentCharIndex = 0;
     let isDeleting = false;
@@ -155,7 +165,7 @@ export const AIConciergeBanner = () => {
         if (currentCharIndex === 0) {
           isDeleting = false;
           currentQuestionIndex = (currentQuestionIndex + 1) % placeholderQuestions.length;
-          timeoutRef.current = setTimeout(typeEffect, 1000); // Reduced frequency
+          timeoutRef.current = setTimeout(typeEffect, 1000);
           return;
         }
       } else {
@@ -166,12 +176,12 @@ export const AIConciergeBanner = () => {
           timeoutRef.current = setTimeout(() => {
             isDeleting = true;
             typeEffect();
-          }, 3000); // Longer pause when finished
+          }, 3000);
           return;
         }
       }
       
-      timeoutRef.current = setTimeout(typeEffect, isDeleting ? 150 : 200); // Reduced frequency
+      timeoutRef.current = setTimeout(typeEffect, isDeleting ? 150 : 200);
     };
     
     typeEffect();
@@ -181,7 +191,7 @@ export const AIConciergeBanner = () => {
         clearTimeout(timeoutRef.current);
       }
     };
-  }, []);
+  }, [isInputFocused, chatInput]);
 
 
   const handleSendMessage = () => {
@@ -256,6 +266,8 @@ export const AIConciergeBanner = () => {
                       value={chatInput}
                       onChange={(e) => setChatInput(e.target.value)}
                       onKeyPress={handleKeyPress}
+                      onFocus={() => setIsInputFocused(true)}
+                      onBlur={() => setIsInputFocused(false)}
                       placeholder={placeholderText}
                       className="bg-background/50 border-border/50 placeholder:text-muted-foreground/70 focus:bg-background text-sm md:text-base"
                     />

@@ -32,7 +32,7 @@ export const useServiceReviews = (serviceId: string) => {
       try {
         setLoading(true);
         
-        // Fetch reviews with user profile information
+        // Fetch reviews first (without relying on FK join)
         const { data: reviewsData, error: reviewsError } = await supabase
           .from('service_reviews')
           .select(`
@@ -43,12 +43,7 @@ export const useServiceReviews = (serviceId: string) => {
             verified,
             review_source,
             source_url,
-            profiles:user_id (
-              display_name,
-              business_name,
-              avatar_url,
-              specialties
-            )
+            user_id
           `)
           .eq('service_id', serviceId)
           .order('created_at', { ascending: false })
@@ -58,23 +53,39 @@ export const useServiceReviews = (serviceId: string) => {
           throw reviewsError;
         }
 
+        // Load profile data separately and merge client-side
+        const userIds = Array.from(new Set((reviewsData || []).map((r: any) => r.user_id).filter(Boolean)));
+        let profilesMap: Record<string, any> = {};
+
+        if (userIds.length > 0) {
+          const { data: profilesData, error: profilesError } = await supabase
+            .from('profiles')
+            .select('id, display_name, business_name, avatar_url, specialties')
+            .in('id', userIds);
+
+          if (!profilesError && profilesData) {
+            profilesMap = Object.fromEntries(profilesData.map((p: any) => [p.id, p]));
+          }
+        }
+
         // Transform the data to match our interface
-        const transformedReviews: ServiceReview[] = (reviewsData || []).map(review => ({
-          id: review.id,
-          rating: review.rating,
-          review: review.review,
-          created_at: review.created_at,
-          verified: review.verified || false,
-          review_source: review.review_source,
-          source_url: review.source_url,
-          author_name: (review.profiles as any)?.display_name || 
-                      (review.profiles as any)?.business_name || 
-                      'Anonymous User',
-          author_company: (review.profiles as any)?.business_name,
-          author_avatar: (review.profiles as any)?.avatar_url,
-          author_specialties: (review.profiles as any)?.specialties || [],
-          helpful_count: Math.floor(Math.random() * 30) + 1 // Mock helpful count for now
-        }));
+        const transformedReviews: ServiceReview[] = (reviewsData || []).map((review: any) => {
+          const profile = profilesMap[review.user_id || ''] || {};
+          return {
+            id: review.id,
+            rating: review.rating,
+            review: review.review,
+            created_at: review.created_at,
+            verified: review.verified || false,
+            review_source: review.review_source,
+            source_url: review.source_url,
+            author_name: profile.display_name || profile.business_name || 'Anonymous User',
+            author_company: profile.business_name,
+            author_avatar: profile.avatar_url,
+            author_specialties: profile.specialties || [],
+            helpful_count: Math.floor(Math.random() * 30) + 1 // Mock helpful count for now
+          };
+        });
 
         setReviews(transformedReviews);
         setError(null);

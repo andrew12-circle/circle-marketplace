@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -186,6 +186,8 @@ export const ServiceFunnelModal = ({
   const isProMember = profile?.is_pro_member || false;
   const riskLevel = determineServiceRisk(service.title, service.description);
   const { trackBooking, trackPurchase, trackOutboundClick } = useProviderTracking(service.id, isOpen);
+  const [openItem, setOpenItem] = useState<string | undefined>(undefined);
+  const pricingRef = useRef<HTMLDivElement | null>(null);
   
   // Fetch real reviews for this service
   const { reviews, loading: reviewsLoading, error: reviewsError } = useServiceReviews(service.id);
@@ -503,7 +505,7 @@ export const ServiceFunnelModal = ({
                 
                 {/* Left Column - Collapsible Questions */}
                 <div className="lg:col-span-2">
-                  <Accordion type="single" collapsible className="space-y-4">
+                  <Accordion type="single" collapsible value={openItem} onValueChange={setOpenItem} className="space-y-4">
                     {/* Question 1 */}
                     <AccordionItem value="question-1">
                       <AccordionTrigger className="text-xl font-bold text-gray-900 hover:no-underline border-l-4 border-l-blue-500 pl-4 bg-white rounded-t-lg shadow-sm">
@@ -859,7 +861,7 @@ export const ServiceFunnelModal = ({
                     </AccordionItem>
 
                     {/* Question 7 - Choose Your Package */}
-                    <AccordionItem value="question-7">
+                    <AccordionItem value="question-7" ref={pricingRef}>
                       <AccordionTrigger className="text-xl font-bold text-gray-900 hover:no-underline border-l-4 border-l-violet-500 pl-4 bg-white rounded-t-lg shadow-sm">
                         <div className="flex items-center gap-2">
                           <div className="w-8 h-8 bg-violet-100 rounded-full flex items-center justify-center text-violet-600 font-bold text-sm">7</div>
@@ -995,10 +997,11 @@ export const ServiceFunnelModal = ({
                           <Button 
                             variant="outline" 
                             onClick={() => {
-                              const websiteUrl = service.vendor?.website_url || service.website_url;
-                              if (websiteUrl) {
-                                trackOutboundClick(websiteUrl, 'vendor_website');
-                                window.open(websiteUrl, '_blank');
+                              const rawUrl = service.vendor?.website_url || service.website_url;
+                              if (rawUrl) {
+                                const normalized = /^https?:\/\//i.test(rawUrl) ? rawUrl : `https://${rawUrl}`;
+                                trackOutboundClick(normalized, 'vendor_website');
+                                window.open(normalized, '_blank', 'noopener,noreferrer');
                               }
                             }}
                             disabled={!service.vendor?.website_url && !service.website_url}
@@ -1012,37 +1015,10 @@ export const ServiceFunnelModal = ({
                            <Button 
                              variant="outline" 
                               onClick={() => {
-                                console.log('Pricing button clicked');
-                                
-                                // Method 1: Try to find and click the accordion trigger
-                                let accordionTrigger = document.querySelector('[value="question-7"] [data-state]');
-                                if (!accordionTrigger) {
-                                  // Method 2: Alternative selector
-                                  accordionTrigger = document.querySelector('[value="question-7"] button');
-                                }
-                                
-                                console.log('Found accordion trigger:', accordionTrigger);
-                                
-                                if (accordionTrigger) {
-                                  (accordionTrigger as HTMLElement).click();
-                                  console.log('Clicked accordion trigger');
-                                } else {
-                                  console.log('No accordion trigger found');
-                                }
-                                
-                                // Then scroll to the pricing section after a brief delay
-                                setTimeout(() => {
-                                  const pricingSection = document.querySelector('[value="question-7"]');
-                                  console.log('Found pricing section:', pricingSection);
-                                  
-                                  if (pricingSection) {
-                                    pricingSection.scrollIntoView({ 
-                                      behavior: 'smooth', 
-                                      block: 'start' 
-                                    });
-                                    console.log('Scrolled to pricing section');
-                                  }
-                                }, 300);
+                                setOpenItem('question-7');
+                                requestAnimationFrame(() => {
+                                  pricingRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                });
                               }}
                              className="w-full border-2 border-gray-300 hover:border-gray-400 py-3 rounded-xl font-semibold"
                            >
