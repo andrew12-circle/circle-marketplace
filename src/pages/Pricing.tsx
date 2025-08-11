@@ -116,7 +116,7 @@ export const Pricing = () => {
               <div className="bg-white rounded-lg border p-6 text-center">
                 <h3 className="text-xl font-semibold mb-2">Circle Starter</h3>
                 <div className="text-3xl font-bold mb-4">$0<span className="text-sm font-normal text-muted-foreground">/month</span></div>
-                <p className="text-sm text-muted-foreground mb-6">Agents exploring the marketplace</p>
+                <p className="text-sm text-muted-foreground mb-6">Take a Look Around — Retail Rates Shown</p>
                 {user ? <Button className="w-full bg-teal-600 hover:bg-teal-700 text-white" asChild>
                     <Link to="/">Go to Marketplace</Link>
                   </Button> : <Button className="w-full bg-teal-600 hover:bg-teal-700 text-white" asChild>
@@ -148,7 +148,7 @@ export const Pricing = () => {
                 <div className="bg-white rounded-lg border p-6 text-center">
                   <h3 className="text-xl font-semibold mb-2">Circle Starter</h3>
                   <div className="text-3xl font-bold mb-4">$0<span className="text-sm font-normal text-muted-foreground">/month</span></div>
-                  <p className="text-sm text-muted-foreground mb-6">Agents exploring the marketplace</p>
+                  <p className="text-sm text-muted-foreground mb-6">Take a Look Around — Retail Rates Shown</p>
                   {user ? <Button className="w-full bg-teal-600 hover:bg-teal-700 text-white" asChild>
                       <Link to="/">Go to Marketplace</Link>
                     </Button> : <Button className="w-full bg-teal-600 hover:bg-teal-700 text-white" asChild>
