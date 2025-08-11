@@ -1658,7 +1658,7 @@ const AcademyContent = () => {
               {/* Top row - Logo and User Actions */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <img src={circleLogoUrl} alt="Circle Logo" className="w-10 h-10 object-contain" style={{
+                  <img src={circleLogoUrl} alt="Circle Logo" className="w-10 h-10 object-contain" width="40" height="40" loading="eager" style={{
                 imageRendering: 'crisp-edges'
               }} />
                 </div>
@@ -1689,7 +1689,7 @@ const AcademyContent = () => {
         <div className="flex items-center justify-between">
               {/* Logo */}
               <div className="flex items-center gap-2 sm:gap-3">
-                <img src={circleLogoUrl} alt="Circle Logo" className="w-12 h-12 sm:w-16 sm:h-16 object-contain" style={{
+                <img src={circleLogoUrl} alt="Circle Logo" className="w-12 h-12 sm:w-16 sm:h-16 object-contain" width="64" height="64" loading="eager" style={{
               imageRendering: 'crisp-edges'
             }} />
               </div>

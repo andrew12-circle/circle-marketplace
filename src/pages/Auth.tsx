@@ -301,6 +301,8 @@ export const Auth = () => {
               src={circleLogoUrl}
               alt="Circle Logo" 
               className="w-16 h-16 object-contain"
+              width="64"
+              height="64"
               style={{
                 imageRendering: 'crisp-edges'
               }}

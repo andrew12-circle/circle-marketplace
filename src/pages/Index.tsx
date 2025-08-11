@@ -37,6 +37,9 @@ const Index = () => {
                       src={circleLogoUrl}
                       alt="Circle Logo" 
                       className="w-10 h-10 object-contain"
+                      width="40"
+                      height="40"
+                      loading="eager"
                       style={{
                         imageRendering: 'crisp-edges'
                       }}
@@ -92,6 +95,9 @@ const Index = () => {
                     src={circleLogoUrl}
                     alt="Circle Logo" 
                     className="w-12 h-12 sm:w-16 sm:h-16 object-contain"
+                    width="64"
+                    height="64"
+                    loading="eager"
                     style={{
                       imageRendering: 'crisp-edges'
                     }}
