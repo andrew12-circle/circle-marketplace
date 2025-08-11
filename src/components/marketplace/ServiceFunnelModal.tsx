@@ -1090,11 +1090,8 @@ export const ServiceFunnelModal = ({
         {/* Bottom Section - Tabs */}
         <div className="border-t bg-muted/20">
           <div className="p-6">
-            <Tabs defaultValue="details" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-1 md:gap-2 h-auto p-1">
-                <TabsTrigger value="details" className="text-xs md:text-sm whitespace-nowrap px-2 md:px-4 py-2">
-                  Service Details
-                </TabsTrigger>
+            <Tabs defaultValue="reviews" className="w-full">
+              <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1 md:gap-2 h-auto p-1">
                 <TabsTrigger value="reviews" className="text-xs md:text-sm whitespace-nowrap px-2 md:px-4 py-2">
                   Reviews
                 </TabsTrigger>
@@ -1109,53 +1106,6 @@ export const ServiceFunnelModal = ({
                 </TabsTrigger>
               </TabsList>
               
-              <TabsContent value="details" className="mt-6 space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <h3 className="font-semibold mb-3">Service Benefits</h3>
-                    <div className="space-y-2 text-sm">
-                      {benefits?.length ? (
-                        benefits.map((b: any, i: number) => (
-                          <div key={i}>• {b.title}</div>
-                        ))
-                      ) : fc?.heroDescription ? (
-                        <p>{fc.heroDescription}</p>
-                      ) : (
-                        <>
-                          <div>• Professional implementation</div>
-                          <div>• Dedicated support team</div>
-                          <div>• Custom configuration</div>
-                          <div>• Performance monitoring</div>
-                          <div>• Regular optimization</div>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold mb-3">Service Information</h3>
-                    <div className="space-y-2 text-sm">
-                      <p><strong>Category:</strong> {service.category}</p>
-                      <p><strong>Duration:</strong> {service.duration || "Flexible"}</p>
-                      <div className="flex items-center justify-between">
-                        <p><strong>Provider:</strong> {service.vendor?.name || 'Direct Service'}</p>
-                        {service.vendor?.website_url && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => window.open(service.vendor.website_url, '_blank')}
-                            className="ml-2"
-                          >
-                            Visit Website
-                          </Button>
-                        )}
-                      </div>
-                      {service.estimated_roi && (
-                        <p><strong>Est. ROI:</strong> {service.estimated_roi}x</p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </TabsContent>
               
               <TabsContent value="reviews" className="mt-6">
                 <div className="space-y-6">
