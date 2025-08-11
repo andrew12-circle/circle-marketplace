@@ -12,8 +12,10 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     
-    <!-- Preload critical logo image -->
+    <!-- Preload critical logo image and potential LCP images -->
     <link rel="preload" href="/lovable-uploads/97692497-6d98-46a8-b6fc-05cd68bdc160.png" as="image" type="image/png">
+    <link rel="preload" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS0RwXfXLmbYhwqqBNPxARooTBBuRX8EA2DPA&s" as="image" type="image/jpeg">
+    <link rel="preload" href="https://storage.googleapis.com/msgsndr/UjxJODh2Df0UKjTnKpcP/media/68255d47c398f6cc6978ed74.png" as="image" type="image/png">
     
     <title>Circle Network</title>
     <meta name="description" content="Empowering real estate professionals to grow smarter with Circle's marketplace and academy." />
@@ -219,11 +221,32 @@
         padding: 2rem 1rem;
       }
       
+      /* Shimmer animation for skeleton loading */
+      @keyframes shimmer {
+        0% { background-position: -200px 0; }
+        100% { background-position: calc(200px + 100%) 0; }
+      }
+      
       /* Ensure content is visible immediately */
       .lcp-content {
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif !important;
         visibility: visible !important;
         opacity: 1 !important;
+      }
+      
+      /* Optimize image loading */
+      img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+      }
+      
+      /* Ensure critical images load with priority */
+      img[src*="lovable-uploads"], 
+      img[src*="encrypted-tbn0"], 
+      img[src*="storage.googleapis.com"] {
+        loading: eager;
+        fetchpriority: high;
       }
       
       /* Hide loading states initially */
@@ -250,19 +273,74 @@
   </head>
 
   <body>
-    <!-- Critical above-the-fold content skeleton for immediate rendering -->
+    <!-- Enhanced critical above-the-fold content skeleton matching actual LCP -->
     <div id="critical-content" class="lcp-content">
       <div class="min-h-screen bg-background">
         <header class="border-b">
           <div class="container flex items-center justify-between py-4">
             <div class="flex items-center gap-4">
+              <img src="/lovable-uploads/97692497-6d98-46a8-b6fc-05cd68bdc160.png" alt="Circle Network" width="32" height="32" style="display: inline-block;">
               <div class="font-bold text-xl">Circle Network</div>
+            </div>
+            <div class="flex items-center gap-4">
+              <div class="btn btn-primary">Sign In</div>
             </div>
           </div>
         </header>
-        <main class="hero-content py-16">
-          <h1 class="text-3xl font-bold mb-4">Professional Marketplace</h1>
-          <p class="text-gray-600 mb-8">Discover services and grow your business</p>
+        <main class="container py-16">
+          <div class="hero-content mb-12">
+            <h1 class="text-3xl font-bold mb-4">Professional Services Marketplace</h1>
+            <p class="text-gray-600 mb-8">Discover top-rated services and grow your real estate business</p>
+          </div>
+          
+          <!-- Critical marketplace content skeleton to match actual LCP -->
+          <section class="py-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              <!-- Featured service card skeleton matching the largest likely LCP element -->
+              <div class="card p-6">
+                <div class="mb-4">
+                  <div style="width: 100%; height: 160px; background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 8px;"></div>
+                </div>
+                <div class="mb-2">
+                  <div style="height: 24px; background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 4px; margin-bottom: 8px;"></div>
+                  <div style="height: 16px; background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 4px; width: 80%;"></div>
+                </div>
+                <div class="flex justify-between items-center mt-4">
+                  <div style="height: 20px; width: 60px; background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 4px;"></div>
+                  <div style="height: 32px; width: 80px; background: linear-gradient(90deg, #3b82f6 25%, #2563eb 50%, #3b82f6 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 6px;"></div>
+                </div>
+              </div>
+              
+              <!-- Additional skeleton cards -->
+              <div class="card p-6">
+                <div class="mb-4">
+                  <div style="width: 100%; height: 160px; background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 8px;"></div>
+                </div>
+                <div class="mb-2">
+                  <div style="height: 24px; background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 4px; margin-bottom: 8px;"></div>
+                  <div style="height: 16px; background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 4px; width: 70%;"></div>
+                </div>
+                <div class="flex justify-between items-center mt-4">
+                  <div style="height: 20px; width: 60px; background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 4px;"></div>
+                  <div style="height: 32px; width: 80px; background: linear-gradient(90deg, #3b82f6 25%, #2563eb 50%, #3b82f6 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 6px;"></div>
+                </div>
+              </div>
+              
+              <div class="card p-6">
+                <div class="mb-4">
+                  <div style="width: 100%; height: 160px; background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 8px;"></div>
+                </div>
+                <div class="mb-2">
+                  <div style="height: 24px; background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 4px; margin-bottom: 8px;"></div>
+                  <div style="height: 16px; background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 4px; width: 85%;"></div>
+                </div>
+                <div class="flex justify-between items-center mt-4">
+                  <div style="height: 20px; width: 60px; background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 4px;"></div>
+                  <div style="height: 32px; width: 80px; background: linear-gradient(90deg, #3b82f6 25%, #2563eb 50%, #3b82f6 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 6px;"></div>
+                </div>
+              </div>
+            </div>
+          </section>
         </main>
       </div>
     </div>
