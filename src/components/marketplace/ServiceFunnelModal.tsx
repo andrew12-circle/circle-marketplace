@@ -1090,14 +1090,8 @@ export const ServiceFunnelModal = ({
         {/* Bottom Section - Tabs */}
         <div className="border-t bg-muted/20">
           <div className="p-6">
-            <Tabs defaultValue="reviews" className="w-full">
+            <Tabs defaultValue="qa" className="w-full">
               <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1 md:gap-2 h-auto p-1">
-                <TabsTrigger value="reviews" className="text-xs md:text-sm whitespace-nowrap px-2 md:px-4 py-2">
-                  Reviews
-                </TabsTrigger>
-                <TabsTrigger value="agent-reviews" className="text-xs md:text-sm whitespace-nowrap px-2 md:px-4 py-2">
-                  Agent Reviews
-                </TabsTrigger>
                 <TabsTrigger value="qa" className="text-xs md:text-sm whitespace-nowrap px-2 md:px-4 py-2">
                   Q&A
                 </TabsTrigger>
