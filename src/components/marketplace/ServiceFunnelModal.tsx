@@ -387,7 +387,7 @@ export const ServiceFunnelModal = ({
                       {service.funnel_content?.headline || service.title}
                     </h1>
                     
-                    <p className="text-lg lg:text-xl text-blue-100 leading-relaxed">
+                    <p className="text-base lg:text-lg text-blue-100 leading-relaxed">
                       {subHeadline || "Transform your real estate business with our proven system"}
                     </p>
 
