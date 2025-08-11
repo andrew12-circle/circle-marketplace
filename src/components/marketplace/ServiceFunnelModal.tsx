@@ -564,13 +564,13 @@ export const ServiceFunnelModal = ({
 
                     {/* Question 4 - What's Included */}
                     <AccordionItem value="question-4">
-                      <AccordionTrigger className="text-xl font-bold text-gray-900 hover:no-underline border-l-4 border-l-indigo-500 pl-4 bg-white rounded-t-lg shadow-sm">
+                      <AccordionTrigger className="text-xl font-bold text-gray-900 hover:no-underline border-l-4 border-l-red-500 pl-4 bg-white rounded-t-lg shadow-sm">
                         <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold text-sm">4</div>
+                          <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center text-red-600 font-bold text-sm">4</div>
                           What's Included?
                         </div>
                       </AccordionTrigger>
-                      <AccordionContent className="border-l-4 border-l-indigo-500 pl-4 bg-white rounded-b-lg shadow-sm pt-0">
+                      <AccordionContent className="border-l-4 border-l-red-500 pl-4 bg-white rounded-b-lg shadow-sm pt-0">
                         <div className="p-6 pt-0">
                           <div className="space-y-6">
                             {/* Core Features */}
@@ -578,23 +578,23 @@ export const ServiceFunnelModal = ({
                               <h4 className="font-semibold text-gray-900 mb-3">Core Features</h4>
                               <div className="space-y-2">
                                 <div className="flex items-center gap-3">
-                                  <CheckCircle className="w-5 h-5 text-indigo-500" />
+                                  <CheckCircle className="w-5 h-5 text-red-500" />
                                   <span className="text-gray-700">IDX website</span>
                                 </div>
                                 <div className="flex items-center gap-3">
-                                  <CheckCircle className="w-5 h-5 text-indigo-500" />
+                                  <CheckCircle className="w-5 h-5 text-red-500" />
                                   <span className="text-gray-700">CRM with auto-drip</span>
                                 </div>
                                 <div className="flex items-center gap-3">
-                                  <CheckCircle className="w-5 h-5 text-indigo-500" />
+                                  <CheckCircle className="w-5 h-5 text-red-500" />
                                   <span className="text-gray-700">Facebook & Google ad integration</span>
                                 </div>
                                 <div className="flex items-center gap-3">
-                                  <CheckCircle className="w-5 h-5 text-indigo-500" />
+                                  <CheckCircle className="w-5 h-5 text-red-500" />
                                   <span className="text-gray-700">Text & email automation</span>
                                 </div>
                                 <div className="flex items-center gap-3">
-                                  <CheckCircle className="w-5 h-5 text-indigo-500" />
+                                  <CheckCircle className="w-5 h-5 text-red-500" />
                                   <span className="text-gray-700">Lead routing</span>
                                 </div>
                               </div>
@@ -715,13 +715,13 @@ export const ServiceFunnelModal = ({
 
                     {/* Question 6 - How to Get Started */}
                     <AccordionItem value="question-6">
-                      <AccordionTrigger className="text-xl font-bold text-gray-900 hover:no-underline border-l-4 border-l-blue-500 pl-4 bg-white rounded-t-lg shadow-sm">
+                      <AccordionTrigger className="text-xl font-bold text-gray-900 hover:no-underline border-l-4 border-l-teal-500 pl-4 bg-white rounded-t-lg shadow-sm">
                         <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold text-sm">6</div>
+                          <div className="w-8 h-8 bg-teal-100 rounded-full flex items-center justify-center text-teal-600 font-bold text-sm">6</div>
                           How Do I Get Started?
                         </div>
                       </AccordionTrigger>
-                      <AccordionContent className="border-l-4 border-l-blue-500 pl-4 bg-white rounded-b-lg shadow-sm pt-0">
+                      <AccordionContent className="border-l-4 border-l-teal-500 pl-4 bg-white rounded-b-lg shadow-sm pt-0">
                         <div className="p-6 pt-0">
                           <div className="space-y-6">
                             {/* Main CTA */}
@@ -797,13 +797,13 @@ export const ServiceFunnelModal = ({
 
                     {/* Question 7 - Choose Your Package */}
                     <AccordionItem value="question-7">
-                      <AccordionTrigger className="text-xl font-bold text-gray-900 hover:no-underline border-l-4 border-l-green-500 pl-4 bg-white rounded-t-lg shadow-sm">
+                      <AccordionTrigger className="text-xl font-bold text-gray-900 hover:no-underline border-l-4 border-l-violet-500 pl-4 bg-white rounded-t-lg shadow-sm">
                         <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-green-600 font-bold text-sm">7</div>
+                          <div className="w-8 h-8 bg-violet-100 rounded-full flex items-center justify-center text-violet-600 font-bold text-sm">7</div>
                           Choose Your Package
                         </div>
                       </AccordionTrigger>
-                      <AccordionContent className="border-l-4 border-l-green-500 pl-4 bg-white rounded-b-lg shadow-sm pt-0" data-section="pricing">
+                      <AccordionContent className="border-l-4 border-l-violet-500 pl-4 bg-white rounded-b-lg shadow-sm pt-0" data-section="pricing">
                         <div className="p-6 pt-0">
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                             {packages.slice(0, 4).map((pkg, index) => (
