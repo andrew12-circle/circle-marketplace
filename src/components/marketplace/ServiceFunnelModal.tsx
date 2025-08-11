@@ -800,6 +800,99 @@ export const ServiceFunnelModal = ({
                         </div>
                       </AccordionContent>
                     </AccordionItem>
+
+                    {/* Question 7 - Choose Your Package */}
+                    <AccordionItem value="question-7">
+                      <AccordionTrigger className="text-xl font-bold text-gray-900 hover:no-underline border-l-4 border-l-green-500 pl-4 bg-white rounded-t-lg shadow-sm">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-green-600 font-bold text-sm">7</div>
+                          Choose Your Package
+                        </div>
+                      </AccordionTrigger>
+                      <AccordionContent className="border-l-4 border-l-green-500 pl-4 bg-white rounded-b-lg shadow-sm pt-0" data-section="pricing">
+                        <div className="p-6 pt-0">
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            {packages.slice(0, 4).map((pkg, index) => (
+                              <div
+                                key={pkg.id}
+                                className={`relative p-6 rounded-xl border-2 cursor-pointer transition-all hover-scale ${
+                                  selectedPackage === pkg.id
+                                    ? 'border-blue-500 bg-blue-50'
+                                    : 'border-gray-200 hover:border-gray-300'
+                                } ${pkg.popular ? 'ring-2 ring-blue-200' : ''}`}
+                                onClick={() => setSelectedPackage(pkg.id)}
+                              >
+                                {pkg.popular && (
+                                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                                    <Badge className="bg-blue-500 text-white px-3 py-1">Most Popular</Badge>
+                                  </div>
+                                )}
+                                
+                                <div className="text-center mb-4">
+                                  <h4 className="font-bold text-lg text-gray-900 mb-2">{pkg.name}</h4>
+                                  <div className="text-3xl font-bold text-blue-600 mb-1">
+                                    ${pkg.requestPricing ? 'Quote' : pkg.price}
+                                  </div>
+                                  {pkg.originalPrice && !pkg.requestPricing && (
+                                    <div className="text-sm text-gray-500 line-through">
+                                      was ${pkg.originalPrice}
+                                    </div>
+                                  )}
+                                  <p className="text-sm text-gray-600 mt-3">{pkg.description}</p>
+                                </div>
+
+                                <div className="space-y-3 mb-6">
+                                  {pkg.features.slice(0, 4).map((feature, idx) => (
+                                    <div key={idx} className="flex items-start gap-2 text-sm">
+                                      <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+                                      <span className="text-gray-600">{feature}</span>
+                                    </div>
+                                  ))}
+                                  {pkg.features.length > 4 && (
+                                    <div className="text-sm text-gray-500 text-center">
+                                      +{pkg.features.length - 4} more features
+                                    </div>
+                                  )}
+                                </div>
+
+                                <Button 
+                                  className={`w-full ${
+                                    selectedPackage === pkg.id 
+                                      ? 'bg-blue-600 hover:bg-blue-700 text-white' 
+                                      : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                                  }`}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedPackage(pkg.id);
+                                  }}
+                                >
+                                  {selectedPackage === pkg.id ? 'Selected' : 'Select Package'}
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+
+                          {/* Action Buttons */}
+                          <div className="mt-8 flex gap-4 justify-center">
+                            <Button 
+                              onClick={() => setIsConsultationFlowOpen(true)}
+                              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-3 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all"
+                            >
+                              Get Started with {selectedPkg?.name || 'Selected Package'}
+                              <ArrowRight className="w-5 h-5 ml-2" />
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              onClick={handleAddToCart}
+                              className="border-2 border-gray-300 hover:border-gray-400 px-8 py-3 rounded-xl font-semibold"
+                            >
+                              <ShoppingCart className="w-4 h-4 mr-2" />
+                              Add to Cart - ${selectedPkg?.price || '0'}
+                            </Button>
+                          </div>
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
                   </Accordion>
                 </div>
 
@@ -843,116 +936,26 @@ export const ServiceFunnelModal = ({
                            Add to Cart
                          </Button>
                          
-                         <Button 
-                           variant="outline" 
-                           onClick={() => {
-                             const pricingSection = document.querySelector('[data-section="pricing"]');
-                             if (pricingSection) {
-                               pricingSection.scrollIntoView({ behavior: 'smooth' });
-                             }
-                           }}
-                           className="w-full border-2 border-blue-300 hover:border-blue-400 text-blue-600 hover:text-blue-700 py-3 rounded-xl font-semibold"
-                         >
-                           <DollarSign className="w-5 h-5 mr-2" />
-                           See Other Pricing
-                         </Button>
+                          <Button 
+                            variant="outline" 
+                            onClick={() => {
+                              // Trigger accordion to open section 7
+                              const accordionTrigger = document.querySelector('[value="question-7"]');
+                              if (accordionTrigger) {
+                                (accordionTrigger as HTMLElement).click();
+                              }
+                            }}
+                            className="w-full border-2 border-blue-300 hover:border-blue-400 text-blue-600 hover:text-blue-700 py-3 rounded-xl font-semibold"
+                          >
+                            <DollarSign className="w-5 h-5 mr-2" />
+                            See Other Pricing
+                          </Button>
                        </div>
                      </CardContent>
                   </Card>
                 </div>
               </div>
 
-              {/* Section 7 - Full Width Pricing */}
-              <div className="mt-12" data-section="pricing">
-                <Card className="border-l-4 border-l-green-500 shadow-sm hover:shadow-md transition-shadow animate-fade-in">
-                  <CardContent className="p-8">
-                    <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-                      <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-green-600 font-bold">7</div>
-                      Choose Your Package
-                    </h3>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                      {packages.slice(0, 4).map((pkg, index) => (
-                        <div
-                          key={pkg.id}
-                          className={`relative p-6 rounded-xl border-2 cursor-pointer transition-all hover-scale ${
-                            selectedPackage === pkg.id
-                              ? 'border-blue-500 bg-blue-50'
-                              : 'border-gray-200 hover:border-gray-300'
-                          } ${pkg.popular ? 'ring-2 ring-blue-200' : ''}`}
-                          onClick={() => setSelectedPackage(pkg.id)}
-                        >
-                          {pkg.popular && (
-                            <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                              <Badge className="bg-blue-500 text-white px-3 py-1">Most Popular</Badge>
-                            </div>
-                          )}
-                          
-                          <div className="text-center mb-4">
-                            <h4 className="font-bold text-lg text-gray-900 mb-2">{pkg.name}</h4>
-                            <div className="text-3xl font-bold text-blue-600 mb-1">
-                              ${pkg.requestPricing ? 'Quote' : pkg.price}
-                            </div>
-                            {pkg.originalPrice && !pkg.requestPricing && (
-                              <div className="text-sm text-gray-500 line-through">
-                                was ${pkg.originalPrice}
-                              </div>
-                            )}
-                            <p className="text-sm text-gray-600 mt-3">{pkg.description}</p>
-                          </div>
-
-                          <div className="space-y-3 mb-6">
-                            {pkg.features.slice(0, 4).map((feature, idx) => (
-                              <div key={idx} className="flex items-start gap-2 text-sm">
-                                <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-                                <span className="text-gray-600">{feature}</span>
-                              </div>
-                            ))}
-                            {pkg.features.length > 4 && (
-                              <div className="text-sm text-gray-500 text-center">
-                                +{pkg.features.length - 4} more features
-                              </div>
-                            )}
-                          </div>
-
-                          <Button 
-                            className={`w-full ${
-                              selectedPackage === pkg.id 
-                                ? 'bg-blue-600 hover:bg-blue-700 text-white' 
-                                : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-                            }`}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedPackage(pkg.id);
-                            }}
-                          >
-                            {selectedPackage === pkg.id ? 'Selected' : 'Select Package'}
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div className="mt-8 flex gap-4 justify-center">
-                      <Button 
-                        onClick={() => setIsConsultationFlowOpen(true)}
-                        className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-3 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all"
-                      >
-                        Get Started with {selectedPkg?.name || 'Selected Package'}
-                        <ArrowRight className="w-5 h-5 ml-2" />
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        onClick={handleAddToCart}
-                        className="border-2 border-gray-300 hover:border-gray-400 px-8 py-3 rounded-xl font-semibold"
-                      >
-                        <ShoppingCart className="w-4 h-4 mr-2" />
-                        Add to Cart - ${selectedPkg?.price || '0'}
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
             </div>
           </div>
         </div>
