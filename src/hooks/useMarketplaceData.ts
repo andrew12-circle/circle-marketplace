@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { logger } from '@/utils/logger';
 import { performanceMonitor } from '@/utils/performanceMonitor';
+import { marketplaceCircuitBreaker, CircuitBreakerState } from '@/utils/circuitBreaker';
 
 export interface Service {
   id: string;
@@ -228,32 +229,28 @@ const fetchCombinedMarketplaceData = async (): Promise<MarketplaceData> => {
   const overallStart = performance.now();
   logger.log('🔄 Fetching combined marketplace data...');
 
-  // Try to get from database cache first with circuit breaker
-  try {
-    const t0 = performance.now();
-    const { data: cacheData } = await withTimeout(
-      supabase
-        .from('marketplace_cache')
-        .select('cache_data')
-        .eq('cache_key', 'marketplace_data')
-        .gt('expires_at', new Date().toISOString())
-        .maybeSingle(),
-      3000, // 3s timeout for database cache
-      'marketplace_cache'
-    );
-    performanceMonitor.trackRequest('/marketplace_cache', 'SELECT', performance.now() - t0, true, true);
-
-    if (cacheData?.cache_data && typeof cacheData.cache_data === 'object') {
-      logger.log('✅ Retrieved marketplace data from database cache');
-      return cacheData.cache_data as unknown as MarketplaceData;
+  // Fresh override via URL (?fresh=1) or sessionStorage flag
+  let forceFresh = false;
+  if (typeof window !== 'undefined') {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      forceFresh = params.get('fresh') === '1' || sessionStorage.getItem('forceFreshData') === '1';
+      // Clean up one-time flag and URL param
+      if (forceFresh) {
+        sessionStorage.removeItem('forceFreshData');
+        if (params.get('fresh') === '1') {
+          params.delete('fresh');
+          const newUrl = window.location.pathname + (params.toString() ? `?${params.toString()}` : '') + window.location.hash;
+          window.history.replaceState({}, '', newUrl);
+        }
+      }
+    } catch (e) {
+      // no-op
     }
-  } catch (error) {
-    logger.log('No valid database cache found, fetching fresh data...', error);
-    // Continue to fresh data fetch - don't fail completely
   }
 
-  // Use Promise.allSettled for parallel fetching with partial success and fallback
-  try {
+  // Helper to fetch live data (services + vendors) with fallback to edge func
+  const fetchLive = async (): Promise<MarketplaceData> => {
     const [servicesResult, vendorsResult] = await Promise.allSettled([
       fetchServices(),
       fetchVendors(),
@@ -262,17 +259,11 @@ const fetchCombinedMarketplaceData = async (): Promise<MarketplaceData> => {
     let services: Service[] = [];
     let vendors: Vendor[] = [];
 
-    if (servicesResult.status === 'fulfilled') {
-      services = servicesResult.value;
-    } else {
-      logger.error('Services fetch failed:', servicesResult.reason);
-    }
+    if (servicesResult.status === 'fulfilled') services = servicesResult.value;
+    else logger.error('Services fetch failed:', servicesResult.reason);
 
-    if (vendorsResult.status === 'fulfilled') {
-      vendors = vendorsResult.value;
-    } else {
-      logger.error('Vendors fetch failed:', vendorsResult.reason);
-    }
+    if (vendorsResult.status === 'fulfilled') vendors = vendorsResult.value;
+    else logger.error('Vendors fetch failed:', vendorsResult.reason);
 
     // If both failed, try edge function fallback
     if (services.length === 0 && vendors.length === 0) {
@@ -284,9 +275,8 @@ const fetchCombinedMarketplaceData = async (): Promise<MarketplaceData> => {
           'get-marketplace-data'
         );
         performanceMonitor.trackRequest('/functions/get-marketplace-data', 'INVOKE', performance.now() - tFallback, !fallbackError, false);
-
         if (fallbackError) throw fallbackError;
-        const combined = (fallbackData as any)?.data || fallbackData; // support possible shapes
+        const combined = (fallbackData as any)?.data || fallbackData;
         services = combined?.services || [];
         vendors = combined?.vendors || [];
       } catch (e) {
@@ -294,7 +284,6 @@ const fetchCombinedMarketplaceData = async (): Promise<MarketplaceData> => {
       }
     }
 
-    // Still nothing? Throw to trigger toast once
     if (services.length === 0 && vendors.length === 0) {
       throw new Error('All marketplace data sources failed');
     }
@@ -310,15 +299,50 @@ const fetchCombinedMarketplaceData = async (): Promise<MarketplaceData> => {
     }, 100);
 
     performanceMonitor.track('fetchCombinedMarketplaceData', performance.now() - overallStart, {
-      services: services.length,
-      vendors: vendors.length,
+      services: data.services.length,
+      vendors: data.vendors.length,
     });
 
     return data;
-  } catch (error) {
-    logger.error('Failed to fetch marketplace data:', error);
-    throw new Error(`Marketplace data fetch failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  };
+
+  // If forced fresh, bypass DB cache immediately
+  if (forceFresh) {
+    logger.log('⚡ Force fresh fetch activated');
+    return fetchLive();
   }
+
+  // Try database cache unless circuit breaker is OPEN
+  const canUseDbCache = marketplaceCircuitBreaker.getState() !== CircuitBreakerState.OPEN;
+  if (canUseDbCache) {
+    try {
+      const t0 = performance.now();
+      const { data: cacheData } = await marketplaceCircuitBreaker.execute(async () =>
+        await withTimeout(
+          supabase
+            .from('marketplace_cache')
+            .select('cache_data')
+            .eq('cache_key', 'marketplace_data')
+            .gt('expires_at', new Date().toISOString())
+            .maybeSingle(),
+          3000,
+          'marketplace_cache'
+        )
+      );
+      performanceMonitor.trackRequest('/marketplace_cache', 'SELECT', performance.now() - t0, true, true);
+      if (cacheData?.cache_data && typeof cacheData.cache_data === 'object') {
+        logger.log('✅ Retrieved marketplace data from database cache');
+        return cacheData.cache_data as unknown as MarketplaceData;
+      }
+    } catch (error) {
+      logger.log('⛔ Database cache unavailable, proceeding to live fetch', error);
+    }
+  } else {
+    logger.log('🚫 Skipping DB cache due to circuit breaker OPEN');
+  }
+
+  // Fallback to live fetch
+  return fetchLive();
 };
 
 /**
