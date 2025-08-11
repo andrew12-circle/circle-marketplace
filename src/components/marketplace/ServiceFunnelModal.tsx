@@ -928,56 +928,42 @@ export const ServiceFunnelModal = ({
 
                 {/* Right Column - Package Selection & Testimonials */}
                 <div className="space-y-6">
-                  {/* Package Selection */}
+                  {/* Pricing Section */}
                   <Card className="sticky top-6 shadow-lg border-0 bg-gradient-to-br from-white to-gray-50 animate-fade-in">
                     <CardContent className="p-6">
-                      <h3 className="text-xl font-bold text-gray-900 mb-4">Choose Your Package</h3>
-                      <div className="space-y-4">
-                        {packages.map((pkg) => (
-                          <div
-                            key={pkg.id}
-                            className={`p-4 rounded-xl border-2 cursor-pointer transition-all hover-scale ${
-                              selectedPackage === pkg.id
-                                ? 'border-blue-500 bg-blue-50'
-                                : 'border-gray-200 hover:border-gray-300'
-                            } ${pkg.popular ? 'ring-2 ring-blue-200' : ''}`}
-                            onClick={() => setSelectedPackage(pkg.id)}
-                          >
-                            {pkg.popular && (
-                              <Badge className="mb-2 bg-blue-500">Most Popular</Badge>
-                            )}
-                            <div className="flex justify-between items-start mb-2">
-                              <h4 className="font-semibold text-gray-900">{pkg.name}</h4>
-                              <div className="text-right">
-                                <div className="text-2xl font-bold text-gray-900">
-                                  ${pkg.requestPricing ? 'Quote' : pkg.price}
-                                </div>
-                                {pkg.originalPrice && !pkg.requestPricing && (
-                                  <div className="text-sm text-gray-500 line-through">
-                                    ${pkg.originalPrice}
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                            <p className="text-sm text-gray-600 mb-3">{pkg.description}</p>
-                            <div className="space-y-1">
-                              {pkg.features.slice(0, 3).map((feature, idx) => (
-                                <div key={idx} className="flex items-center gap-2 text-sm">
-                                  <CheckCircle className="w-4 h-4 text-green-500" />
-                                  <span className="text-gray-600">{feature}</span>
-                                </div>
-                              ))}
-                              {pkg.features.length > 3 && (
-                                <div className="text-sm text-gray-500">
-                                  +{pkg.features.length - 3} more features
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        ))}
+                      <h3 className="text-xl font-bold text-gray-900 mb-4">Pricing</h3>
+                      
+                      {/* Main Price Display */}
+                      <div className="text-center mb-6">
+                        <div className="text-4xl font-bold text-gray-900 mb-1">
+                          ${service.retail_price || '999'}
+                        </div>
+                        <div className="text-sm text-gray-600">One-time setup fee</div>
+                        {service.discount_percentage && (
+                          <Badge className="mt-2 bg-green-500">
+                            {service.discount_percentage}% Off
+                          </Badge>
+                        )}
                       </div>
 
-                      <div className="mt-6 space-y-3">
+                      {/* Key Features */}
+                      <div className="space-y-3 mb-6">
+                        <div className="flex items-center gap-3">
+                          <CheckCircle className="w-5 h-5 text-green-500" />
+                          <span className="text-gray-700">Complete setup & training</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <CheckCircle className="w-5 h-5 text-green-500" />
+                          <span className="text-gray-700">24/7 support included</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <CheckCircle className="w-5 h-5 text-green-500" />
+                          <span className="text-gray-700">30-day money back guarantee</span>
+                        </div>
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="space-y-3">
                         <Button 
                           onClick={() => setIsConsultationFlowOpen(true)}
                           className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all"
