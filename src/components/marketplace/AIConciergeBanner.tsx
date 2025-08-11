@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -20,14 +21,11 @@ export const AIConciergeBanner = () => {
   const [isAIModalOpen, setIsAIModalOpen] = useState(false);
   const [isGoalAssessmentOpen, setIsGoalAssessmentOpen] = useState(false);
   const [chatInput, setChatInput] = useState("");
-  const [placeholderText, setPlaceholderText] = useState("");
-  const [isInputFocused, setIsInputFocused] = useState(false);
   const [showRecommendationsDashboard, setShowRecommendationsDashboard] = useState(false);
   const {
     toast
   } = useToast();
   const navigate = useNavigate();
-  const placeholderQuestions = ["How can I help you today?", "What business goals are you working on?", "Need help finding the right services?", "How can I boost your sales this month?"];
 
   // Check if user needs goal assessment or show recommendations dashboard
   useEffect(() => {
@@ -44,6 +42,7 @@ export const AIConciergeBanner = () => {
       }
     }
   }, [user, profile]);
+
   const generateRecommendations = async () => {
     if (!user?.id || !(profile as any)?.onboarding_completed) return;
     try {
@@ -64,42 +63,6 @@ export const AIConciergeBanner = () => {
     }
   };
 
-  // Animated placeholder text effect
-  useEffect(() => {
-    if (isInputFocused || chatInput.trim().length > 0) {
-      setPlaceholderText("");
-      return;
-    }
-    let currentQuestionIndex = 0;
-    let currentCharIndex = 0;
-    let isDeleting = false;
-    const typeEffect = () => {
-      const currentQuestion = placeholderQuestions[currentQuestionIndex];
-      if (isDeleting) {
-        setPlaceholderText(currentQuestion.substring(0, currentCharIndex - 1));
-        currentCharIndex--;
-        if (currentCharIndex === 0) {
-          isDeleting = false;
-          currentQuestionIndex = (currentQuestionIndex + 1) % placeholderQuestions.length;
-          setTimeout(typeEffect, 1000);
-          return;
-        }
-      } else {
-        setPlaceholderText(currentQuestion.substring(0, currentCharIndex + 1));
-        currentCharIndex++;
-        if (currentCharIndex === currentQuestion.length) {
-          setTimeout(() => {
-            isDeleting = true;
-            typeEffect();
-          }, 3000);
-          return;
-        }
-      }
-      setTimeout(typeEffect, isDeleting ? 150 : 200);
-    };
-    const timeout = setTimeout(typeEffect, 1000);
-    return () => clearTimeout(timeout);
-  }, [isInputFocused, chatInput]);
   const handleSendMessage = () => {
     const query = chatInput.trim();
     if (!query) return;
@@ -155,7 +118,13 @@ export const AIConciergeBanner = () => {
             {!showRecommendationsDashboard && <div className="bg-card/30 backdrop-blur-sm border border-border/50 rounded-lg p-4">
                 <div className="flex items-center gap-3">
                   <div className="flex-1 relative">
-                    <Input value={chatInput} onChange={e => setChatInput(e.target.value)} onKeyPress={handleKeyPress} onFocus={() => setIsInputFocused(true)} onBlur={() => setIsInputFocused(false)} placeholder={placeholderText} className="bg-background/50 border-border/50 focus:bg-background" />
+                    <Input 
+                      value={chatInput} 
+                      onChange={e => setChatInput(e.target.value)} 
+                      onKeyPress={handleKeyPress} 
+                      placeholder="Ask me about marketing services, ROI strategies, or business growth..." 
+                      className="bg-background/50 border-border/50 focus:bg-background" 
+                    />
                   </div>
                   <Button onClick={handleSendMessage} size="sm" disabled={!chatInput.trim()}>
                     <Send className="h-4 w-4" />
