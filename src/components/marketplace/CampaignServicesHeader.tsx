@@ -27,7 +27,7 @@ export const CampaignServicesHeader = () => {
               Curated Solutions for Agents
             </h2>
             <p className="mt-1 text-muted-foreground">
-              Discover proven campaigns and services tailored to help agents grow.
+              See every option side-by-side, then save up to 80% on the tools you already use — with one-click co-pay and automatic vendor co-marketing.
             </p>
           </div>
           
