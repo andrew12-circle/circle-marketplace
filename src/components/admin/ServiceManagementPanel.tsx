@@ -19,7 +19,7 @@ import {
   ShoppingCart,
   CheckCircle
 } from 'lucide-react';
-import { ServiceFunnelEditorModal } from '@/components/marketplace/ServiceFunnelEditorModal';
+import { ServiceFunnelEditor } from './ServiceFunnelEditor';
 import { ServicePricingTiersEditor } from '@/components/marketplace/ServicePricingTiersEditor';
 import { ServiceFunnelModal } from '@/components/marketplace/ServiceFunnelModal';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -1013,51 +1013,45 @@ export const ServiceManagementPanel = () => {
               </TabsContent>
 
               <TabsContent value="funnel" className="space-y-4">
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <h3 className="text-lg font-semibold">Service Funnel Pages</h3>
-                    <div className="flex items-center gap-2">
-                      {lastFunnelSavedAt && (
-                        <div className="hidden sm:flex items-center gap-2 text-xs text-muted-foreground mr-2">
-                          <CheckCircle className="h-4 w-4" />
-                          <span>Last saved · {new Date(lastFunnelSavedAt).toLocaleTimeString()}</span>
-                        </div>
-                      )}
-                      <Button variant="outline" onClick={() => setShowFunnelPreview(true)}>
-                        <Eye className="h-4 w-4 mr-2" />
-                        Preview Funnel
-                      </Button>
-                      <Button onClick={() => setShowFunnelEditor(true)}>
-                        <Edit className="h-4 w-4 mr-2" />
-                        Edit Funnel
-                      </Button>
+                {showFunnelEditor ? (
+                  <ServiceFunnelEditor
+                    service={selectedService}
+                    onUpdate={(updatedService) => {
+                      setSelectedService(updatedService as Service);
+                      setServices(services.map(s => s.id === updatedService.id ? updatedService as Service : s));
+                      setShowFunnelEditor(false);
+                    }}
+                  />
+                ) : (
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <h3 className="text-lg font-semibold">Service Funnel Pages</h3>
+                      <div className="flex items-center gap-2">
+                        <Button variant="outline" onClick={() => setShowFunnelPreview(true)}>
+                          <Eye className="h-4 w-4 mr-2" />
+                          Preview Funnel
+                        </Button>
+                        <Button onClick={() => setShowFunnelEditor(true)}>
+                          <Edit className="h-4 w-4 mr-2" />
+                          Edit Funnel
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    <div className="text-center py-8 border rounded-lg">
+                      <p className="text-muted-foreground">Click "Edit Funnel" to customize this service's funnel pages</p>
+                      <p className="text-sm text-muted-foreground mt-2">
+                        Create compelling sales funnels with hero sections, testimonials, and call-to-actions
+                      </p>
                     </div>
                   </div>
-                  
-                  <div className="text-center py-8 border rounded-lg">
-                    <p className="text-muted-foreground">Click "Edit Funnel" to customize this service's funnel pages</p>
-                    <p className="text-sm text-muted-foreground mt-2">
-                      Create compelling sales funnels with hero sections, testimonials, and call-to-actions
-                    </p>
-                  </div>
-                </div>
+                )}
               </TabsContent>
             </Tabs>
           </CardContent>
         </Card>
       )}
 
-      {/* Service Funnel Editor Modal */}
-      <ServiceFunnelEditorModal
-        open={showFunnelEditor}
-        onOpenChange={setShowFunnelEditor}
-        funnelContent={funnelContent}
-        onChange={setFunnelContent}
-        onSave={handleFunnelSave}
-        serviceName={selectedService?.title || ''}
-        pricingTiers={pricingTiers}
-        onPricingTiersChange={setPricingTiers}
-      />
 
       {showFunnelPreview && selectedService && (
         <ServiceFunnelModal
