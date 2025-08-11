@@ -346,15 +346,16 @@ export const useMarketplaceData = () => {
     queryFn: fetchCombinedMarketplaceData,
     staleTime: 5 * 60 * 1000, // 5 minutes - longer cache
     gcTime: 15 * 60 * 1000, // 15 minutes cache
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
-    refetchOnReconnect: false,
-    retry: (failureCount, error) => {
-      // Circuit breaker pattern - don't retry timeouts
-      if (error.message.includes('timed out')) return false;
+    refetchOnWindowFocus: true, // auto-retry when user focuses tab
+    refetchOnMount: true,       // retry on mount if previous attempt failed/stale
+    refetchOnReconnect: true,   // retry when connection restores
+    retry: (failureCount, error: any) => {
+      // Circuit breaker pattern - limit retries but still allow a few
+      const isTimeout = typeof error?.message === 'string' && error.message.includes('timed out');
+      if (isTimeout) return failureCount < 1; // one retry for timeouts
       return failureCount < 2;
     },
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
     meta: {
       errorMessage: 'Failed to load marketplace data'
     }
