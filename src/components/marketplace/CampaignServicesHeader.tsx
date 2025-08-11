@@ -24,7 +24,7 @@ export const CampaignServicesHeader = () => {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
-              All Campaigns & Services  
+              Curated Solutions for Agents
             </h2>
           </div>
           
