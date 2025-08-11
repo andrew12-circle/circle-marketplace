@@ -723,21 +723,6 @@ export const ServiceFunnelModal = ({
               </div>
             )}
 
-            {fc?.socialProof?.testimonials?.length > 0 && (
-              <div className="space-y-3">
-                <h3 className="font-bold text-lg">What clients say</h3>
-                {fc.socialProof.testimonials.slice(0, 2).map((t: any, i: number) => (
-                  <Card key={i} className="p-4">
-                    <div className="flex items-center gap-2 mb-1">
-                      {renderStarRating(t.rating)}
-                      <span className="text-xs text-muted-foreground">{t.role}</span>
-                    </div>
-                    <p className="text-sm">"{t.content}"</p>
-                    <p className="text-xs text-muted-foreground mt-1">— {t.name}</p>
-                  </Card>
-                ))}
-              </div>
-            )}
 
             {showTimeInvestment && (
               <div className="bg-blue-50 p-4 rounded-lg border">
@@ -900,17 +885,33 @@ export const ServiceFunnelModal = ({
               <div className="space-y-4">
                 <h3 className="text-xl font-bold text-primary">Proof It Works</h3>
                 <div className="space-y-4">
-                  {/* Agent Reviews */}
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2">
-                      {renderStarRating(4.8, "sm")}
-                      <span className="text-sm font-medium">4.8/5 from 847+ agents</span>
+                  {/* Client Testimonials */}
+                  {fc?.socialProof?.testimonials?.length > 0 ? (
+                    <div className="space-y-3">
+                      <div className="text-sm font-medium">What clients say:</div>
+                      {fc.socialProof.testimonials.slice(0, 2).map((t: any, i: number) => (
+                        <div key={i} className="bg-gray-50 p-3 rounded-lg">
+                          <div className="flex items-center gap-2 mb-1">
+                            {renderStarRating(t.rating, "sm")}
+                            <span className="text-xs text-muted-foreground">{t.role}</span>
+                          </div>
+                          <p className="text-sm italic">&quot;{t.content}&quot;</p>
+                          <p className="text-xs text-muted-foreground mt-1">— {t.name}</p>
+                        </div>
+                      ))}
                     </div>
-                    <div className="bg-gray-50 p-3 rounded-lg">
-                      <p className="text-sm italic">&quot;Doubled my lead volume in 90 days. ROI paid for itself in month 2.&quot;</p>
-                      <p className="text-xs text-muted-foreground mt-1">— Sarah M., Keller Williams</p>
+                  ) : (
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        {renderStarRating(4.8, "sm")}
+                        <span className="text-sm font-medium">4.8/5 from 847+ agents</span>
+                      </div>
+                      <div className="bg-gray-50 p-3 rounded-lg">
+                        <p className="text-sm italic">&quot;Doubled my lead volume in 90 days. ROI paid for itself in month 2.&quot;</p>
+                        <p className="text-xs text-muted-foreground mt-1">— Sarah M., Keller Williams</p>
+                      </div>
                     </div>
-                  </div>
+                  )}
                   
                   {/* Case Study Snapshot */}
                   <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
