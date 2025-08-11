@@ -24,8 +24,8 @@ export const Pricing = () => {
         }
       } = await supabase.auth.getSession();
       if (!session) {
-        // Redirect to auth page for a smoother user experience
-        window.location.href = '/auth';
+        // Redirect to signup mode for a smoother user experience
+        window.location.href = '/auth?mode=signup';
         return;
       }
       const {
