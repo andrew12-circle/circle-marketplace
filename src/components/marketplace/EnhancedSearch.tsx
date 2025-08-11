@@ -132,7 +132,7 @@ export const EnhancedSearch = ({
   return (
     <div className="space-y-4">
       {/* Search Bar */}
-      <div className="relative">
+      <div className="relative w-full max-w-xl">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
         <Input
           placeholder={serviceCount && serviceCount > 0 ? `Search ${serviceCount} top realtor services or keywords...` : "Search services, vendors, or keywords..."}
