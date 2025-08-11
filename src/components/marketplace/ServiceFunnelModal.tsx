@@ -514,14 +514,6 @@ export const ServiceFunnelModal = ({
               )}
             </div>
 
-            {(fc?.heroDescription || service.description) && (
-              <div className="rounded-lg border bg-card p-4">
-                <h3 className="text-base font-semibold mb-2">Description</h3>
-                <p className="text-sm text-muted-foreground">
-                  {fc?.heroDescription || service.description}
-                </p>
-              </div>
-            )}
 
             {/* Thumbnail Gallery */}
             {(service.funnel_content as any)?.thumbnailGallery?.enabled && (
