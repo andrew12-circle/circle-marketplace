@@ -98,6 +98,19 @@ export const Auth = () => {
     setLoading(true);
     console.log('Starting Google sign-in...');
     
+    // Check if we're in Lovable preview environment
+    const isLovablePreview = window.location.hostname.includes('lovable.app');
+    
+    if (isLovablePreview) {
+      toast({
+        title: "Google Sign-In Unavailable",
+        description: "Google OAuth is not available in preview. Use email/password to test authentication.",
+        variant: "destructive",
+      });
+      setLoading(false);
+      return;
+    }
+    
     try {
       console.log('Redirect URL:', `${window.location.origin}/`);
       const { error } = await supabase.auth.signInWithOAuth({
