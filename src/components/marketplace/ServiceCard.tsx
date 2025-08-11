@@ -24,6 +24,7 @@ import { Service } from "@/hooks/useMarketplaceData";
 import { useActiveDisclaimer } from "@/hooks/useActiveDisclaimer";
 import { useServiceRatingFromBulk } from "@/hooks/useBulkServiceRatings";
 import { useProviderTracking } from "@/hooks/useProviderTracking";
+import { ToastAction } from "@/components/ui/toast";
 
 interface ServiceRatingStats {
   averageRating: number;
@@ -150,6 +151,20 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false, b
 
   const handleSave = (e: React.MouseEvent) => {
     e.stopPropagation();
+
+    if (!user) {
+      toast({
+        title: "Sign in to save",
+        description: "Sign in or create a free account to save favorites.",
+        action: (
+          <ToastAction altText="Go to sign in" onClick={() => navigate('/auth')}>
+            Sign in / Create account
+          </ToastAction>
+        ),
+      });
+      return;
+    }
+
     onSave?.(service.id);
     toast({
       title: isSaved ? "Removed from saved" : "Saved to favorites",
