@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Brain, Target, Send, Mic, Sparkles } from "lucide-react";
+import { Brain, Target, Send, Sparkles } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { AskCircleAIModal } from "./AskCircleAIModal";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
 import { GoalAssessmentModal } from "./GoalAssessmentModal";
 import { AIRecommendationsDashboard } from "./AIRecommendationsDashboard";
+
 export const AIConciergeBanner = () => {
   const {
     user,
@@ -156,19 +157,6 @@ export const AIConciergeBanner = () => {
                   <div className="flex-1 relative">
                     <Input value={chatInput} onChange={e => setChatInput(e.target.value)} onKeyPress={handleKeyPress} onFocus={() => setIsInputFocused(true)} onBlur={() => setIsInputFocused(false)} placeholder={placeholderText} className="bg-background/50 border-border/50 focus:bg-background" />
                   </div>
-                  <Button onClick={() => {
-                if (!user || !profile) {
-                  toast({
-                    title: "Create a free account",
-                    description: "Sign in to talk to Circle AI."
-                  });
-                  navigate("/auth");
-                  return;
-                }
-                setIsAIModalOpen(true);
-              }} size="sm" variant="outline" className="bg-background/50 hover:bg-background">
-                    <Mic className="h-4 w-4" />
-                  </Button>
                   <Button onClick={handleSendMessage} size="sm" disabled={!chatInput.trim()}>
                     <Send className="h-4 w-4" />
                   </Button>
