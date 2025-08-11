@@ -588,10 +588,8 @@ export const ServiceFunnelModal = ({
         <div className="grid grid-cols-1 lg:grid-cols-9 gap-6 p-6">
           {/* Main Middle Column - Service Overview Flow */}
           <div className="lg:col-span-6 space-y-6">
-
-
-
             {/* Content moved to bottom */}
+          </div>
             {(service.funnel_content as any)?.testimonialCards?.enabled && (
               <div className="space-y-4">
                 <h3 className="font-bold text-lg">
