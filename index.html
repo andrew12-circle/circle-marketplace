@@ -14,7 +14,15 @@
     <title>Circle Network</title>
     <meta name="description" content="Empowering real estate professionals to grow smarter with Circle's marketplace and academy." />
     <meta name="author" content="Circle" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap">
+    
+    <!-- Preload critical resources to eliminate render blocking -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"></noscript>
+    
+    <!-- Preconnect to font domains -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
     <link rel="icon" href="/src/assets/circle-logo.png" type="image/png">
 
     <meta property="og:title" content="circle-agent-growth" />
