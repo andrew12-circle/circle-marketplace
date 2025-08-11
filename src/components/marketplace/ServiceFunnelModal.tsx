@@ -468,7 +468,7 @@ export const ServiceFunnelModal = ({
                         <img
                           src={currentUrl || undefined}
                           alt={service.funnel_content?.headline || service.title}
-                          className="w-full h-full object-cover cursor-pointer"
+                          className="w-full h-auto object-contain p-5 cursor-pointer"
                           onClick={() => setActiveMediaUrl(currentUrl)}
                         />
                       );
