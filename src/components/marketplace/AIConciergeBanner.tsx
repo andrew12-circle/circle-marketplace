@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -104,11 +105,7 @@ export const AIConciergeBanner = () => {
     const query = chatInput.trim();
     if (!query) return;
     if (!user || !profile) {
-      toast({
-        title: "Create a free account",
-        description: "Sign in to get personalized, location-aware recommendations."
-      });
-      navigate("/auth");
+      navigate("/pricing");
       return;
     }
 
@@ -172,7 +169,7 @@ export const AIConciergeBanner = () => {
                   <Target className="h-4 w-4" />
                   <span>Get personalized recommendations based on your goals & data from 300,000 successful agents</span>
                 </div>
-                <Button onClick={() => navigate("/auth")} className="bg-primary hover:bg-primary/90">
+                <Button onClick={() => navigate("/pricing")} className="bg-primary hover:bg-primary/90">
                   Create Free Account
                 </Button>
               </div>}
