@@ -457,7 +457,7 @@ export const ServiceFunnelModal = ({
                               <img
                                 src={currentUrl || undefined}
                                 alt={service.funnel_content?.headline || service.title}
-                                className="w-full h-full object-contain hover-scale bg-white"
+                                className="w-full h-full object-contain hover-scale bg-white p-5"
                               />
                             );
                           }
