@@ -496,34 +496,11 @@ export const ServiceFunnelModal = ({
                       </CardContent>
                     </Card>
 
-                    {/* Question 2 */}
-                    <Card className="border-l-4 border-l-green-500 shadow-sm hover:shadow-md transition-shadow animate-fade-in">
-                      <CardContent className="p-6">
-                        <h3 className="text-xl font-bold text-gray-900 mb-3 flex items-center gap-2">
-                          <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-green-600 font-bold text-sm">2</div>
-                          How much will this cost me?
-                        </h3>
-                        <div className="space-y-3">
-                          {selectedPkg ? (
-                            <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-                              <div className="flex justify-between items-center">
-                                <span className="font-medium">{selectedPkg.name}:</span>
-                                <span className="text-2xl font-bold text-green-600">${selectedPkg.price}</span>
-                              </div>
-                              <p className="text-sm text-gray-600 mt-1">{selectedPkg.description}</p>
-                            </div>
-                          ) : (
-                            <div className="text-gray-600">Contact for custom pricing</div>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-
-                    {/* Question 3 - ROI */}
+                    {/* Question 2 - ROI */}
                     <Card className="border-l-4 border-l-purple-500 shadow-sm hover:shadow-md transition-shadow animate-fade-in">
                       <CardContent className="p-6">
                         <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                          <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 font-bold text-sm">3</div>
+                          <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 font-bold text-sm">2</div>
                           What's My ROI Potential?
                         </h3>
                         
@@ -540,11 +517,11 @@ export const ServiceFunnelModal = ({
                       </CardContent>
                     </Card>
 
-                    {/* Question 4 */}
+                    {/* Question 3 */}
                     <Card className="border-l-4 border-l-orange-500 shadow-sm hover:shadow-md transition-shadow animate-fade-in">
                       <CardContent className="p-6">
                         <h3 className="text-xl font-bold text-gray-900 mb-3 flex items-center gap-2">
-                          <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center text-orange-600 font-bold text-sm">4</div>
+                          <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center text-orange-600 font-bold text-sm">3</div>
                           How Soon Will I See Results?
                         </h3>
                         <div className="space-y-4">
@@ -579,11 +556,11 @@ export const ServiceFunnelModal = ({
                       </CardContent>
                     </Card>
 
-                    {/* Question 5 - What's Included */}
+                    {/* Question 4 - What's Included */}
                     <Card className="border-l-4 border-l-indigo-500 shadow-sm hover:shadow-md transition-shadow animate-fade-in">
                       <CardContent className="p-6">
                         <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                          <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold text-sm">5</div>
+                          <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold text-sm">4</div>
                           What's Included?
                         </h3>
                         
@@ -641,11 +618,11 @@ export const ServiceFunnelModal = ({
                       </CardContent>
                     </Card>
 
-                    {/* Question 6 - Proof It Works */}
+                    {/* Question 5 - Proof It Works */}
                     <Card className="border-l-4 border-l-emerald-500 shadow-sm hover:shadow-md transition-shadow animate-fade-in">
                       <CardContent className="p-6">
                         <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                          <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 font-bold text-sm">6</div>
+                          <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 font-bold text-sm">5</div>
                           Proof It Works
                         </h3>
                         
@@ -724,11 +701,11 @@ export const ServiceFunnelModal = ({
                       </CardContent>
                     </Card>
 
-                    {/* Question 7 - How to Get Started */}
+                    {/* Question 6 - How to Get Started */}
                     <Card className="border-l-4 border-l-blue-500 shadow-sm hover:shadow-md transition-shadow animate-fade-in">
                       <CardContent className="p-6">
                         <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                          <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold text-sm">7</div>
+                          <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold text-sm">6</div>
                           How Do I Get Started?
                         </h3>
                         
@@ -864,12 +841,12 @@ export const ServiceFunnelModal = ({
                 </div>
               </div>
 
-              {/* Section 8 - Full Width Pricing */}
+              {/* Section 7 - Full Width Pricing */}
               <div className="mt-12">
                 <Card className="border-l-4 border-l-green-500 shadow-sm hover:shadow-md transition-shadow animate-fade-in">
                   <CardContent className="p-8">
                     <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-                      <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-green-600 font-bold">8</div>
+                      <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-green-600 font-bold">7</div>
                       Choose Your Package
                     </h3>
                     
