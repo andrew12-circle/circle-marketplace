@@ -756,6 +756,54 @@ export const ServiceFunnelModal = ({
           <div className="lg:col-span-3 lg:order-3">
             <div className="space-y-4">
               <Card className="p-6 space-y-4">
+                <div className="flex justify-end">
+                  <Card className="p-4 max-w-xs">
+                    <h4 className="font-semibold mb-3 text-sm">Why Agents Trust Us</h4>
+                    <div className="space-y-2 text-xs text-muted-foreground">
+                      {fc?.trustIndicators && (fc.trustIndicators.guarantee || fc.trustIndicators.cancellation || fc.trustIndicators.certification) ? (
+                        <>
+                          {fc.trustIndicators.guarantee && (
+                            <div className="flex items-center gap-2">
+                              <CheckCircle className="w-3 h-3 text-green-500" />
+                              <span>{fc.trustIndicators.guarantee}</span>
+                            </div>
+                          )}
+                          {fc.trustIndicators.cancellation && (
+                            <div className="flex items-center gap-2">
+                              <CheckCircle className="w-3 h-3 text-green-500" />
+                              <span>{fc.trustIndicators.cancellation}</span>
+                            </div>
+                          )}
+                          {fc.trustIndicators.certification && (
+                            <div className="flex items-center gap-2">
+                              <CheckCircle className="w-3 h-3 text-green-500" />
+                              <span>{fc.trustIndicators.certification}</span>
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        <>
+                          <div className="flex items-center gap-2">
+                            <CheckCircle className="w-3 h-3 text-green-500" />
+                            <span>500+ successful implementations</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <CheckCircle className="w-3 h-3 text-green-500" />
+                            <span>99% client satisfaction rate</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <CheckCircle className="w-3 h-3 text-green-500" />
+                            <span>RESPA compliant & fully insured</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <CheckCircle className="w-3 h-3 text-green-500" />
+                            <span>Money-back guarantee</span>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </Card>
+                </div>
                 <div className="space-y-3">
                   {/* Show Add to Cart for services with pricing tiers that don't require pricing requests */}
                   {service.pricing_tiers?.length > 0 && !service.requires_quote && !selectedPkg?.requestPricing ? (
@@ -907,53 +955,6 @@ export const ServiceFunnelModal = ({
                 </div>
               </Card>
 
-              {/* Trust Signals */}
-              <Card className="p-4">
-                <h4 className="font-semibold mb-3 text-sm">Why Agents Trust Us</h4>
-                <div className="space-y-2 text-xs text-muted-foreground">
-                  {fc?.trustIndicators && (fc.trustIndicators.guarantee || fc.trustIndicators.cancellation || fc.trustIndicators.certification) ? (
-                    <>
-                      {fc.trustIndicators.guarantee && (
-                        <div className="flex items-center gap-2">
-                          <CheckCircle className="w-3 h-3 text-green-500" />
-                          <span>{fc.trustIndicators.guarantee}</span>
-                        </div>
-                      )}
-                      {fc.trustIndicators.cancellation && (
-                        <div className="flex items-center gap-2">
-                          <CheckCircle className="w-3 h-3 text-green-500" />
-                          <span>{fc.trustIndicators.cancellation}</span>
-                        </div>
-                      )}
-                      {fc.trustIndicators.certification && (
-                        <div className="flex items-center gap-2">
-                          <CheckCircle className="w-3 h-3 text-green-500" />
-                          <span>{fc.trustIndicators.certification}</span>
-                        </div>
-                      )}
-                    </>
-                  ) : (
-                    <>
-                      <div className="flex items-center gap-2">
-                        <CheckCircle className="w-3 h-3 text-green-500" />
-                        <span>500+ successful implementations</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <CheckCircle className="w-3 h-3 text-green-500" />
-                        <span>99% client satisfaction rate</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <CheckCircle className="w-3 h-3 text-green-500" />
-                        <span>RESPA compliant & fully insured</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <CheckCircle className="w-3 h-3 text-green-500" />
-                        <span>Money-back guarantee</span>
-                      </div>
-                    </>
-                  )}
-                </div>
-              </Card>
 
               {/* Save/Share */}
               <div className="flex gap-2">
