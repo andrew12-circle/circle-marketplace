@@ -28,6 +28,7 @@ import {
   Share2,
   Plus,
   Minus,
+  CreditCard,
   ThumbsUp,
   ThumbsDown,
   Verified,
@@ -402,8 +403,8 @@ export const ServiceFunnelModal = ({
           </Button>
           
           <div className="absolute inset-0 bg-black/20"></div>
-          <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-            <div className="space-y-4">
+          <div className="relative grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+            <div className="lg:col-span-2 space-y-4">
               <div className="flex items-center gap-2 mb-2">
                 {service.vendor?.is_verified && (
                   <Badge className="bg-green-500 text-white">
@@ -580,6 +581,118 @@ export const ServiceFunnelModal = ({
                   </div>
                 </div>
               )}
+            </div>
+
+            {/* Right Column - Choose Your Package (Sticky) */}
+            <div className="lg:col-span-1">
+              <div className="sticky top-4">
+                <Card className="p-6 space-y-4 bg-white/95 backdrop-blur-sm">
+                  <div className="space-y-3">
+                    {/* Show Add to Cart for services with pricing tiers that don't require pricing requests */}
+                    {service.pricing_tiers?.length > 0 && !service.requires_quote && !selectedPkg?.requestPricing ? (
+                      <>
+                        {/* Quantity Selector */}
+                        <div className="flex items-center justify-center gap-3">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                            disabled={quantity <= 1}
+                          >
+                            <Minus className="w-4 h-4" />
+                          </Button>
+                          <span className="w-12 text-center font-medium">Qty: {quantity}</span>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setQuantity(quantity + 1)}
+                          >
+                            <Plus className="w-4 h-4" />
+                          </Button>
+                        </div>
+                        
+                        <Button 
+                          className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold" 
+                          size="lg"
+                          onClick={handleAddToCart}
+                        >
+                          <ShoppingCart className="w-4 h-4 mr-2" />
+                          Add to Cart - ${(selectedPkg?.price || 0) * quantity}
+                        </Button>
+                        
+                        <Button 
+                          variant="outline" 
+                          className="w-full" 
+                          size="lg"
+                          onClick={() => setIsConsultationFlowOpen(true)}
+                        >
+                          <Phone className="w-4 h-4 mr-2" />
+                          {scheduleText}
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Button 
+                          className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold" 
+                          size="lg"
+                          onClick={() => setIsConsultationFlowOpen(true)}
+                        >
+                          <Phone className="w-4 h-4 mr-2" />
+                          {scheduleText}
+                        </Button>
+                        
+                        <Button 
+                          variant="outline" 
+                          className="w-full" 
+                          size="lg"
+                          onClick={() => setIsConsultationFlowOpen(true)}
+                        >
+                          <CreditCard className="w-4 h-4 mr-2" />
+                          Get Custom Quote
+                        </Button>
+                      </>
+                    )}
+                    
+                    {/* Package Selection */}
+                    {packages.length > 0 && (
+                      <div className="space-y-3 border-t pt-4">
+                        <div className="text-center">
+                          <h3 className="font-semibold text-lg">Choose Package</h3>
+                          <p className="text-sm text-muted-foreground">Select your plan</p>
+                        </div>
+                        <div className="space-y-2">
+                          {packages.map((pkg) => (
+                            <div
+                              key={pkg.id}
+                              className={`p-3 rounded-lg border cursor-pointer transition-all ${
+                                selectedPackage === pkg.id
+                                  ? 'border-primary bg-primary/5'
+                                  : 'border-gray-200 hover:border-gray-300'
+                              }`}
+                              onClick={() => setSelectedPackage(pkg.id)}
+                            >
+                              <div className="flex justify-between items-start">
+                                <div className="flex-1">
+                                  <h4 className="font-medium text-sm">{pkg.name}</h4>
+                                  <p className="text-xs text-muted-foreground mt-1">{pkg.description}</p>
+                                </div>
+                                <div className="text-right ml-2">
+                                  <div className="font-bold text-sm">${pkg.price}</div>
+                                  {pkg.originalPrice && pkg.originalPrice > pkg.price && (
+                                    <div className="text-xs text-muted-foreground line-through">
+                                      ${pkg.originalPrice}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </Card>
+              </div>
             </div>
           </div>
         </div>
@@ -939,199 +1052,6 @@ export const ServiceFunnelModal = ({
             </Card>
           </div>
 
-          {/* Right Column - Choose Your Package (Locked) */}
-          <div className="lg:col-span-3 lg:order-3">
-            <div className="space-y-4">
-              <Card className="p-6 space-y-4">
-                <div className="space-y-3">
-                  {/* Show Add to Cart for services with pricing tiers that don't require pricing requests */}
-                  {service.pricing_tiers?.length > 0 && !service.requires_quote && !selectedPkg?.requestPricing ? (
-                    <>
-                      {/* Quantity Selector */}
-                      <div className="flex items-center justify-center gap-3">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                          disabled={quantity <= 1}
-                        >
-                          <Minus className="w-4 h-4" />
-                        </Button>
-                        <span className="w-12 text-center font-medium">Qty: {quantity}</span>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setQuantity(quantity + 1)}
-                        >
-                          <Plus className="w-4 h-4" />
-                        </Button>
-                      </div>
-                      
-                      <Button 
-                        className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold" 
-                        size="lg"
-                        onClick={handleAddToCart}
-                      >
-                        <ShoppingCart className="w-4 h-4 mr-2" />
-                        Add to Cart - ${(selectedPkg?.price || 0) * quantity}
-                      </Button>
-                      
-                      <Button 
-                        variant="outline" 
-                        className="w-full" 
-                        size="lg"
-                        onClick={() => setIsConsultationFlowOpen(true)}
-                      >
-                        <Phone className="w-4 h-4 mr-2" />
-                        {scheduleText}
-                      </Button>
-                    </>
-                  ) : (
-                    <>
-                      <Button 
-                        className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold" 
-                        size="lg"
-                        onClick={() => setIsConsultationFlowOpen(true)}
-                      >
-                        <Phone className="w-4 h-4 mr-2" />
-                        {scheduleText}
-                      </Button>
-                      
-                      <Button 
-                        variant="outline" 
-                        className="w-full" 
-                        size="lg"
-                        onClick={() => setIsConsultationFlowOpen(true)}
-                      >
-                        <Mail className="w-4 h-4 mr-2" />
-                        Get Custom Quote
-                      </Button>
-                    </>
-                  )}
-                  
-                  {service.website_url && (
-                    <Button 
-                      variant="outline" 
-                      className="w-full" 
-                      size="lg"
-                      onClick={() => window.open(service.website_url, '_blank')}
-                    >
-                      <ArrowRight className="w-4 h-4 mr-2" />
-                      Visit Service Website
-                    </Button>
-                  )}
-                  
-                  
-                  {service.vendor?.website_url && (
-                    <Button 
-                      variant="outline" 
-                      className="w-full" 
-                      size="lg"
-                      onClick={() => window.open(service.vendor.website_url, '_blank')}
-                    >
-                      <Building className="w-4 h-4 mr-2" />
-                      Visit {service.vendor.name} Website
-                    </Button>
-                  )}
-
-                  <div className="text-center">
-                    <p className="text-xs text-muted-foreground">
-                      <span className="font-medium">Free consultation</span> • No obligation • Response within 2 hours
-                    </p>
-                  </div>
-                </div>
-
-                <Separator />
-
-                <div className="space-y-2">
-                  <h4 className="font-semibold text-sm">What happens next?</h4>
-                  <div className="space-y-2 text-xs text-muted-foreground">
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 bg-green-100 rounded-full flex items-center justify-center">
-                        <span className="text-green-600 font-bold text-xs">1</span>
-                      </div>
-                      <span>15-min discovery call to understand your goals</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 bg-green-100 rounded-full flex items-center justify-center">
-                        <span className="text-green-600 font-bold text-xs">2</span>
-                      </div>
-                      <span>Custom proposal with ROI projections</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 bg-green-100 rounded-full flex items-center justify-center">
-                        <span className="text-green-600 font-bold text-xs">3</span>
-                      </div>
-                      <span>Implementation starts within 48 hours</span>
-                    </div>
-                  </div>
-                </div>
-
-                <Separator />
-
-                <div className="text-center space-y-2">
-                  <div className="flex items-center justify-center gap-2">
-                    <div className={`w-2 h-2 rounded-full ${
-                      vendorAvailability?.is_available_now ? 'bg-green-500' : 'bg-yellow-500'
-                    }`}></div>
-                    <span className={`text-sm font-medium ${
-                      vendorAvailability?.is_available_now ? 'text-green-600' : 'text-yellow-600'
-                    }`}>
-                      {vendorAvailability?.is_available_now ? 'Available Now' : 'Available Soon'}
-                    </span>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    {vendorAvailability?.availability_message || 
-                     (vendorAvailability?.is_available_now ? 
-                      'Typically responds within 1 hour' : 
-                      'Will respond within 24 hours')}
-                  </p>
-                  {vendorAvailability?.next_available_slot && (
-                    <p className="text-xs text-muted-foreground">
-                      Next available: {new Date(vendorAvailability.next_available_slot).toLocaleDateString()}
-                    </p>
-                  )}
-                </div>
-              </Card>
-
-
-              {/* Save/Share */}
-              <div className="flex gap-2">
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="flex-1"
-                  onClick={() => {
-                    // Add to saved items logic here
-                    toast.success("Service saved to your favorites!");
-                  }}
-                >
-                  <Heart className="w-4 h-4 mr-1" />
-                  Save
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="flex-1"
-                  onClick={() => {
-                    if (navigator.share) {
-                      navigator.share({
-                        title: service?.title || 'Check out this service',
-                        text: service?.description || 'I found this great service on the marketplace',
-                        url: window.location.href
-                      });
-                    } else {
-                      navigator.clipboard.writeText(window.location.href);
-                      toast.success("Link copied to clipboard!");
-                    }
-                  }}
-                >
-                  <Share2 className="w-4 h-4 mr-1" />
-                  Share
-                </Button>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Choose Your Package Section - Full Width */}
