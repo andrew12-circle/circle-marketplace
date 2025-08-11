@@ -489,7 +489,7 @@ export const ServiceFunnelModal = ({
                       <AccordionTrigger className="text-xl font-bold text-gray-900 hover:no-underline border-l-4 border-l-blue-500 pl-4 bg-white rounded-t-lg shadow-sm">
                         <div className="flex items-center gap-2">
                           <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold text-sm">1</div>
-                          What is this and why should I care?
+                          Why should I care?
                         </div>
                       </AccordionTrigger>
                       <AccordionContent className="border-l-4 border-l-blue-500 pl-4 bg-white rounded-b-lg shadow-sm pt-0">
