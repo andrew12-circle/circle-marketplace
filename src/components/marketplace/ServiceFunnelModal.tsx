@@ -517,7 +517,7 @@ export const ServiceFunnelModal = ({
                       </AccordionTrigger>
                       <AccordionContent className="border-l-4 border-l-blue-500 pl-4 bg-white rounded-b-lg shadow-sm pt-0">
                         <div className="p-6 pt-0">
-                          <p className="text-gray-600 leading-relaxed">
+                          <p className="text-gray-600 leading-relaxed pt-[5px]">
                             {fc?.heroDescription || service.description || "All-in-one real estate lead generation & CRM platform designed to turn online leads into closings faster"}
                           </p>
                         </div>
