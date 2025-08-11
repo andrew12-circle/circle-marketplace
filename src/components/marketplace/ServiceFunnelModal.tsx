@@ -585,9 +585,9 @@ export const ServiceFunnelModal = ({
         </div>
 
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 p-6">
           {/* Left Column - Social Proof */}
-          <div className="lg:col-span-4 space-y-6">
+          <div className="lg:col-span-3 space-y-6">
 
 
 
@@ -647,7 +647,7 @@ export const ServiceFunnelModal = ({
 
           {/* Middle Column - Value Proposition */}
           {showMiddle && (
-          <div className="lg:col-span-4 space-y-6">
+          <div className="lg:col-span-3 space-y-6">
             {hasBenefits && (
               <div>
                 <h2 className="text-2xl font-bold mb-4">What You'll Get</h2>
@@ -711,7 +711,7 @@ export const ServiceFunnelModal = ({
           )}
 
           {/* Middle Column - Service Overview Flow */}
-          <div className="lg:col-span-5 lg:order-2 space-y-6">
+          <div className="lg:col-span-6 lg:order-2 space-y-6">
             {/* 1. What Is This and Why Should I Care? */}
             <Card className="p-6">
               <div className="space-y-4">
