@@ -281,6 +281,7 @@ export const Pricing = () => {
                 <div className="bg-muted/30 p-4 border-r border-b">
                   <span className="font-semibold text-foreground">Pro Pricing</span>
                   <div className="text-sm text-muted-foreground">(Avg. 20% off)</div>
+                  <div className="text-xs text-muted-foreground mt-1">Often, one purchase makes Pro cheaper than buying direct.</div>
                 </div>
                 <div className="p-4 border-r border-b text-center bg-card">
                   <X className="w-6 h-6 text-muted-foreground mx-auto" />
