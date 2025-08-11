@@ -105,9 +105,21 @@ const fetchServices = async (): Promise<Service[]> => {
   logger.log('🔄 Fetching services from Supabase...');
   
   // First, get total count for monitoring
-  const { count: totalCount } = await supabase
-    .from('services')
-    .select('*', { count: 'exact', head: true });
+  let totalCount = 0;
+  try {
+    const { count, error } = await withTimeout(
+      supabase
+        .from('services')
+        .select('*', { count: 'exact', head: true }),
+      1200,
+      'services-count'
+    );
+    if (!error && typeof count === 'number') {
+      totalCount = count;
+    }
+  } catch (_e) {
+    // Non-blocking: count fetch timed out or failed
+  }
   
   // Fetch services with increased limit to handle all available services
   const { data, error } = await withTimeout(
@@ -325,7 +337,7 @@ const fetchCombinedMarketplaceData = async (): Promise<MarketplaceData> => {
             .eq('cache_key', 'marketplace_data')
             .gt('expires_at', new Date().toISOString())
             .maybeSingle(),
-          3000,
+          1200,
           'marketplace_cache'
         )
       );

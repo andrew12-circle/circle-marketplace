@@ -20,7 +20,7 @@ import { Link } from "react-router-dom";
 import { CategoryMegaMenu } from "./CategoryMegaMenu";
 import { EnhancedSearch, SearchFilters } from "./EnhancedSearch";
 import { VendorCallToAction } from "./VendorCallToAction";
-import { useMarketplaceData, useSavedServices, type Service, type Vendor } from "@/hooks/useMarketplaceData";
+import { useMarketplaceData, useSavedServices, useInvalidateMarketplace, type Service, type Vendor } from "@/hooks/useMarketplaceData";
 import { useMarketplaceFilters } from "@/hooks/useMarketplaceFilters";
 import { useBulkServiceRatings } from "@/hooks/useBulkServiceRatings";
 import { logger } from "@/utils/logger";
@@ -53,7 +53,25 @@ export const MarketplaceGrid = () => {
   // Optimized data fetching with memoization
   const { data: marketplaceData, isLoading, error } = useMarketplaceData();
   const { data: savedServiceIds = [] } = useSavedServices();
-  
+  const { invalidateAll } = useInvalidateMarketplace();
+  const [showRecovery, setShowRecovery] = useState(false);
+  useEffect(() => {
+    if (isLoading && !marketplaceData) {
+      const id = window.setTimeout(() => setShowRecovery(true), 8000);
+      return () => window.clearTimeout(id);
+    }
+    setShowRecovery(false);
+  }, [isLoading, marketplaceData]);
+
+  const handleReloadDataQuick = useCallback(() => {
+    try { sessionStorage.setItem('forceFreshData', '1'); } catch {}
+    invalidateAll();
+  }, [invalidateAll]);
+
+  const handleHardRefresh = useCallback(() => {
+    try { sessionStorage.setItem('forceFreshData', '1'); } catch {}
+    window.location.reload();
+  }, []);
   // Memoize extracted data to prevent unnecessary re-renders
   const services = useMemo(() => 
     (marketplaceData as { services: Service[]; vendors: Vendor[] })?.services || [], 
@@ -404,6 +422,23 @@ export const MarketplaceGrid = () => {
             </div>
           </div>
         </div>
+
+        {showRecovery && (
+          <div className="fixed inset-x-0 bottom-0 z-50">
+            <div className="container mx-auto px-3 sm:px-4 pb-4">
+              <div className="rounded-lg border bg-card text-card-foreground shadow p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div>
+                  <p className="font-medium">Having trouble loading the marketplace?</p>
+                  <p className="text-sm text-muted-foreground">Reload fresh data or try again.</p>
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="outline" onClick={handleReloadDataQuick}>Reload data</Button>
+                  <Button onClick={handleHardRefresh}>Try again</Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
