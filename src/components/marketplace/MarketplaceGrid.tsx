@@ -27,7 +27,7 @@ import { logger } from "@/utils/logger";
 import { useQueryClient } from "@tanstack/react-query";
 import { marketplaceCircuitBreaker } from "@/utils/circuitBreaker";
 import { usePaginatedServices } from "@/hooks/usePaginatedServices";
-
+import { useABTest } from "@/hooks/useABTest";
 interface FilterState {
   category: string;
   priceRange: number[];
@@ -154,6 +154,8 @@ export const MarketplaceGrid = () => {
     location
   );
 // Paginated services (server-side filters + pagination)
+const { variant } = useABTest('ranking_v1', { holdout: 0.1 });
+const orderStrategy = variant === 'holdout' ? 'recent' : 'ranked';
 const {
   data: paginatedData,
   fetchNextPage,
@@ -166,6 +168,7 @@ const {
   featured: filters.featured,
   verified: filters.verified,
   coPayEligible: filters.coPayEligible,
+  orderStrategy,
 });
 
 const flattenServices = useMemo(() => {

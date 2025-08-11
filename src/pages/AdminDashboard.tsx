@@ -29,6 +29,7 @@ import { AdvancedSplitCalculator } from '@/components/admin/AdvancedSplitCalcula
 import { ServiceImportPanel } from '@/components/admin/ServiceImportPanel';
 import { ServiceManagementPanel } from '@/components/admin/ServiceManagementPanel';
 import { VendorImportPanel } from '@/components/admin/VendorImportPanel';
+import RankImpactMonitor from '@/components/admin/RankImpactMonitor';
 import { VendorManagementPanel } from '@/components/admin/VendorManagementPanel';
 import { VendorBudgetManager } from '@/components/admin/VendorBudgetManager';
 import { VendorRESPAManager } from '@/components/admin/VendorRESPAManager';
@@ -533,6 +534,13 @@ export default function AdminDashboard() {
                   <span className="hidden sm:inline">Analytics</span>
                 </TabsTrigger>
                 <TabsTrigger 
+                  value="ranking" 
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-md data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm"
+                >
+                  <Activity className="h-4 w-4" />
+                  <span className="hidden sm:inline">Ranking</span>
+                </TabsTrigger>
+                <TabsTrigger 
                   value="youtube" 
                   className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-md data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm"
                 >
@@ -890,6 +898,10 @@ export default function AdminDashboard() {
 
         <TabsContent value="analytics" className="space-y-6">
           <VendorActivityAnalytics />
+        </TabsContent>
+
+        <TabsContent value="ranking" className="space-y-6">
+          <RankImpactMonitor />
         </TabsContent>
 
         <TabsContent value="security" className="space-y-6">

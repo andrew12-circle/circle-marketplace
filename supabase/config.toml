@@ -56,3 +56,7 @@ verify_jwt = false
 
 [functions.get-marketplace-data]
 verify_jwt = false
+
+[functions.auto-rerank-services]
+verify_jwt = false
+schedule = "0 6 * * 1"

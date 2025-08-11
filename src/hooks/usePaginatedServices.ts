@@ -8,6 +8,7 @@ interface PaginatedFilters {
   featured?: boolean;
   verified?: boolean; // Note: applied client-side for now
   coPayEligible?: boolean;
+  orderStrategy?: 'ranked' | 'recent';
 }
 
 interface PaginatedPage {
@@ -32,10 +33,22 @@ async function fetchServicesPage(offset: number, filters: PaginatedFilters): Pro
         website_url,
         logo_url
       )
-    `, { count: 'exact' })
-    .order('sort_order', { ascending: true })
-    .order('created_at', { ascending: false })
-    .range(offset, offset + PAGE_SIZE - 1);
+    `, { count: 'exact' });
+
+  // Apply ordering strategy
+  const orderStrategy = filters.orderStrategy || 'ranked';
+  if (orderStrategy === 'recent') {
+    query = query
+      .order('created_at', { ascending: false })
+      .order('sort_order', { ascending: true });
+  } else {
+    query = query
+      .order('sort_order', { ascending: true })
+      .order('created_at', { ascending: false });
+  }
+
+  // Apply pagination at the end
+  query = query.range(offset, offset + PAGE_SIZE - 1);
 
   // Server-side filters
   const term = (filters.searchTerm || '').trim();
