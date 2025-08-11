@@ -20,7 +20,7 @@ interface TrackingMetrics {
   last_updated: string;
 }
 
-export const useProviderTracking = (serviceId: string, enabled: boolean = true) => {
+export const useProviderTracking = (serviceId: string, enabled: boolean = true, auto: boolean = true) => {
   const [metrics, setMetrics] = useState<TrackingMetrics | null>(null);
   const [isTracking, setIsTracking] = useState(false);
   const { user } = useAuth();
@@ -87,7 +87,7 @@ export const useProviderTracking = (serviceId: string, enabled: boolean = true) 
 
   // Track page view automatically with de-dup (15 min TTL)
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled || !auto) return;
     if (serviceId && !isTracking) {
       const key = `svc_view_${serviceId}`;
       const last = typeof sessionStorage !== 'undefined' ? Number(sessionStorage.getItem(key) || 0) : 0;
@@ -104,7 +104,7 @@ export const useProviderTracking = (serviceId: string, enabled: boolean = true) 
       }
       loadMetrics();
     }
-  }, [serviceId, trackEvent, loadMetrics, isTracking, enabled]);
+  }, [serviceId, trackEvent, loadMetrics, isTracking, enabled, auto]);
 
   // Track outbound link clicks
   const trackOutboundClick = useCallback(async (url: string, context?: string) => {

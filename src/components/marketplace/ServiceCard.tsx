@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { useServiceAnalytics } from "@/hooks/useServiceAnalytics";
+import { useServiceViewTracker } from "@/hooks/useServiceViewTracker";
 import { useCurrency } from "@/hooks/useCurrency";
 import { useServiceRatings } from "@/hooks/useServiceRatings";
 import { extractAndValidatePrice, validateCartPricing, safeFormatPrice } from "@/utils/priceValidation";
@@ -52,8 +52,8 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false, b
   const { toast } = useToast();
   const { addToCart } = useCart();
   const { profile, user } = useAuth();
-  const { trackServiceView } = useServiceAnalytics();
-  const { trackEvent } = useProviderTracking(service.id, true);
+  const { trackView } = useServiceViewTracker(service.id);
+  const { trackEvent } = useProviderTracking(service.id, true, false);
   const navigate = useNavigate();
   const { formatPrice } = useCurrency();
   const isProMember = profile?.is_pro_member || false;
@@ -170,7 +170,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false, b
       event_data: { context: 'service_card', action: 'open_funnel' }
     } as any);
     // Track the service view
-    await trackServiceView(service.id);
+    await trackView();
     console.log('Setting funnel modal to true');
     setIsFunnelModalOpen(true);
   };
@@ -209,7 +209,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false, b
     }
 
     // Track the service view
-    await trackServiceView(service.id);
+    await trackView();
 
     // Server-side price validation
     const isPriceValid = await validateCartPricing(service.id, finalPrice);
