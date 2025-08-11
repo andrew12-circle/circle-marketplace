@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Search, Filter, X, DollarSign, Star, ChevronDown } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -132,7 +131,7 @@ export const EnhancedSearch = ({
   return (
     <div className="space-y-4">
       {/* Search Bar + Filters */}
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex items-center gap-[5px]">
         <div className="relative w-full max-w-xl flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
           <Input
