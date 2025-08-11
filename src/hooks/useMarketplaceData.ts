@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { logger } from '@/utils/logger';
 import { performanceMonitor } from '@/utils/performanceMonitor';
+import { reportClientError } from '@/utils/errorReporting';
 import { marketplaceCircuitBreaker, CircuitBreakerState } from '@/utils/circuitBreaker';
 
 export interface Service {
@@ -85,7 +86,7 @@ export const QUERY_KEYS = {
 } as const;
 
 // Helper: timeout wrapper
-const withTimeout = async <T,>(promise: PromiseLike<T>, ms = 12000, label?: string): Promise<T> => {
+const withTimeout = async <T,>(promise: PromiseLike<T>, ms = 20000, label?: string): Promise<T> => {
   let timer: number | undefined;
   return Promise.race<T>([
     promise as Promise<T>,
@@ -111,7 +112,7 @@ const fetchServices = async (): Promise<Service[]> => {
       supabase
         .from('services')
         .select('*', { count: 'exact', head: true }),
-      1200,
+      3000,
       'services-count'
     );
     if (!error && typeof count === 'number') {
@@ -140,7 +141,7 @@ const fetchServices = async (): Promise<Service[]> => {
       .order('sort_order', { ascending: true })
       .order('created_at', { ascending: false })
       .limit(200), // Increased from 100 to 200 to accommodate all services
-      12000, // 12s timeout for services
+      20000, // 20s timeout for services
       'fetchServices'
     );
 
@@ -195,7 +196,7 @@ const fetchVendors = async (): Promise<Vendor[]> => {
       .order('sort_order', { ascending: true })
       .order('rating', { ascending: false })
       .limit(50),
-      15000, // 15s timeout for vendors
+      20000, // 20s timeout for vendors
       'fetchVendors'
     );
 
@@ -272,10 +273,28 @@ const fetchCombinedMarketplaceData = async (): Promise<MarketplaceData> => {
     let vendors: Vendor[] = [];
 
     if (servicesResult.status === 'fulfilled') services = servicesResult.value;
-    else logger.error('Services fetch failed:', servicesResult.reason);
+    else {
+      logger.error('Services fetch failed:', servicesResult.reason);
+      reportClientError({
+        error_type: 'network',
+        message: 'Services fetch failed',
+        component: 'useMarketplaceData',
+        section: 'marketplace',
+        metadata: { reason: String(servicesResult.reason) }
+      });
+    }
 
     if (vendorsResult.status === 'fulfilled') vendors = vendorsResult.value;
-    else logger.error('Vendors fetch failed:', vendorsResult.reason);
+    else {
+      logger.error('Vendors fetch failed:', vendorsResult.reason);
+      reportClientError({
+        error_type: 'network',
+        message: 'Vendors fetch failed',
+        component: 'useMarketplaceData',
+        section: 'marketplace',
+        metadata: { reason: String(vendorsResult.reason) }
+      });
+    }
 
     // If both failed, try edge function fallback
     if (services.length === 0 && vendors.length === 0) {
@@ -283,7 +302,7 @@ const fetchCombinedMarketplaceData = async (): Promise<MarketplaceData> => {
         const tFallback = performance.now();
         const { data: fallbackData, error: fallbackError } = await withTimeout(
           supabase.functions.invoke('get-marketplace-data'),
-          7000,
+          15000,
           'get-marketplace-data'
         );
         performanceMonitor.trackRequest('/functions/get-marketplace-data', 'INVOKE', performance.now() - tFallback, !fallbackError, false);
@@ -293,10 +312,23 @@ const fetchCombinedMarketplaceData = async (): Promise<MarketplaceData> => {
         vendors = combined?.vendors || [];
       } catch (e) {
         logger.error('Edge function fallback failed:', e);
+        reportClientError({
+          error_type: 'network',
+          message: 'Edge function fallback failed',
+          component: 'useMarketplaceData',
+          section: 'marketplace',
+          metadata: { error: String(e) }
+        });
       }
     }
 
     if (services.length === 0 && vendors.length === 0) {
+      reportClientError({
+        error_type: 'network',
+        message: 'All marketplace data sources failed',
+        component: 'useMarketplaceData',
+        section: 'marketplace'
+      });
       throw new Error('All marketplace data sources failed');
     }
 
@@ -337,7 +369,7 @@ const fetchCombinedMarketplaceData = async (): Promise<MarketplaceData> => {
             .eq('cache_key', 'marketplace_data')
             .gt('expires_at', new Date().toISOString())
             .maybeSingle(),
-          1200,
+          3000,
           'marketplace_cache'
         )
       );
@@ -382,13 +414,13 @@ export const useMarketplaceData = () => {
     queryFn: fetchCombinedMarketplaceData,
     staleTime: 5 * 60 * 1000, // 5 minutes - longer cache
     gcTime: 15 * 60 * 1000, // 15 minutes cache
-    refetchOnWindowFocus: true, // auto-retry when user focuses tab
+    refetchOnWindowFocus: false, // reduce refetch noise
     refetchOnMount: true,       // retry on mount if previous attempt failed/stale
     refetchOnReconnect: true,   // retry when connection restores
     retry: (failureCount, error: any) => {
       // Circuit breaker pattern - limit retries but still allow a few
       const isTimeout = typeof error?.message === 'string' && error.message.includes('timed out');
-      if (isTimeout) return failureCount < 1; // one retry for timeouts
+      if (isTimeout) return failureCount < 2; // allow up to 2 retries for timeouts
       return failureCount < 2;
     },
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
@@ -402,6 +434,12 @@ export const useMarketplaceData = () => {
   useEffect(() => {
     if (query.error && !errorShown.current) {
       logger.error('Marketplace data loading error:', query.error);
+      reportClientError({
+        error_type: 'network',
+        message: `Marketplace data loading error: ${query.error.message}`,
+        component: 'useMarketplaceData',
+        section: 'marketplace'
+      });
       toast({
         title: "Error loading data",
         description: `Failed to load marketplace data: ${query.error.message || 'Please try again.'}`,

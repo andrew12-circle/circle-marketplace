@@ -102,13 +102,13 @@ export class CircuitBreaker {
 
 // Global circuit breakers for different services
 export const marketplaceCircuitBreaker = new CircuitBreaker({
-  failureThreshold: 3,
-  resetTimeout: 30000, // 30 seconds
-  monitoringPeriod: 10000
+  failureThreshold: 6,
+  resetTimeout: 120000, // 2 minutes
+  monitoringPeriod: 20000
 });
 
 export const cacheCircuitBreaker = new CircuitBreaker({
-  failureThreshold: 5,
-  resetTimeout: 60000, // 1 minute
-  monitoringPeriod: 15000
+  failureThreshold: 8,
+  resetTimeout: 180000, // 3 minutes
+  monitoringPeriod: 30000
 });
