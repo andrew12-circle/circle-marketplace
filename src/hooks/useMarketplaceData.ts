@@ -112,7 +112,18 @@ const fetchServices = async (): Promise<Service[]> => {
   const { data, error } = await withTimeout(
     supabase
       .from('services')
-      .select('*')
+      .select(`
+        *,
+        vendors (
+          id,
+          name,
+          rating,
+          review_count,
+          is_verified,
+          website_url,
+          logo_url
+        )
+      `)
       .order('sort_order', { ascending: true })
       .order('created_at', { ascending: false })
       .limit(200), // Increased from 100 to 200 to accommodate all services
@@ -132,13 +143,15 @@ const fetchServices = async (): Promise<Service[]> => {
     ...service,
     discount_percentage: service.discount_percentage ? String(service.discount_percentage) : undefined,
     is_verified: service.is_verified || false,
-    vendor: {
-      id: service.vendor_id,
-      name: 'Service Provider',
-      rating: 4.5,
-      review_count: 0,
-      is_verified: true,
-    },
+    vendor: service.vendors ? {
+      id: service.vendors.id,
+      name: service.vendors.name,
+      rating: service.vendors.rating || 4.5,
+      review_count: service.vendors.review_count || 0,
+      is_verified: service.vendors.is_verified || false,
+      website_url: service.vendors.website_url,
+      logo_url: service.vendors.logo_url,
+    } : null,
   }));
 
   // Add monitoring for service count vs total available
