@@ -9,6 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { useServicePriceRange } from "@/hooks/useServicePriceRange";
+import { useServiceCount } from "@/hooks/useServiceCount";
 import { logger } from "@/utils/logger";
 
 interface EnhancedSearchProps {
@@ -61,6 +62,7 @@ export const EnhancedSearch = ({
     }
   }, [minPrice, maxPrice, priceRangeLoading]);
 
+  const { data: serviceCount } = useServiceCount();
   const [activeFiltersCount, setActiveFiltersCount] = useState(0);
 
   useEffect(() => {
@@ -133,7 +135,7 @@ export const EnhancedSearch = ({
       <div className="relative">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
         <Input
-          placeholder="Search services, vendors, or keywords..."
+          placeholder={serviceCount && serviceCount > 0 ? `Search ${serviceCount} top realtor services or keywords...` : "Search services, vendors, or keywords..."}
           value={filters.query}
           onChange={(e) => updateFilters('query', e.target.value)}
           className="pl-10 pr-4"
