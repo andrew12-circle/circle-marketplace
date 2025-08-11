@@ -671,39 +671,6 @@ export const ServiceFunnelModal = ({
 
             <Separator />
 
-            {/* ROI Calculator */}
-            {(service.funnel_content as any)?.roiCalculator?.enabled && (
-              <div className="bg-gradient-to-r from-green-50 to-blue-50 p-4 rounded-lg border">
-                <h3 className="font-bold text-lg mb-3">
-                  {(service.funnel_content as any).roiCalculator.title || 'ROI Calculator'}
-                </h3>
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-sm">Current monthly closings:</span>
-                    <span className="font-medium">{(service.funnel_content as any).roiCalculator.currentMonthlyClosings || 3} deals</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm">Average commission:</span>
-                    <span className="font-medium">${((service.funnel_content as any).roiCalculator.averageCommission || 8500).toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm">With our system ({(service.funnel_content as any).roiCalculator.increasePercentage || 150}% increase):</span>
-                    <span className="font-medium text-green-600">
-                      {(((service.funnel_content as any).roiCalculator.currentMonthlyClosings || 3) * ((service.funnel_content as any).roiCalculator.increasePercentage || 150) / 100 + ((service.funnel_content as any).roiCalculator.currentMonthlyClosings || 3)).toFixed(1)} deals
-                    </span>
-                  </div>
-                  <Separator />
-                  <div className="flex justify-between text-lg font-bold">
-                    <span>Additional monthly income:</span>
-                    <span className="text-green-600">+${((service.funnel_content as any).roiCalculator.calculatedAdditionalIncome || 38250).toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span>Annual increase:</span>
-                    <span className="text-green-600 font-semibold">+${((service.funnel_content as any).roiCalculator.calculatedAnnualIncrease || 459000).toLocaleString()}</span>
-                  </div>
-                </div>
-              </div>
-            )}
 
             {fc?.socialProof?.stats?.length > 0 && (
               <div className="bg-amber-50 p-4 rounded-lg border">
@@ -799,13 +766,49 @@ export const ServiceFunnelModal = ({
               <div className="space-y-4">
                 <h3 className="text-xl font-bold text-primary">What&apos;s My ROI Potential?</h3>
                 <div className="space-y-3">
-                  <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-                    <div className="text-2xl font-bold text-green-600">Average ROI: 600%</div>
-                    <div className="text-sm text-green-700">$1,600 in → $9,600+ out</div>
-                  </div>
-                  <p className="text-muted-foreground">
-                    1 extra closing per month covers your cost 5x over
-                  </p>
+                  {/* ROI Calculator Integration */}
+                  {(service.funnel_content as any)?.roiCalculator?.enabled ? (
+                    <div className="bg-gradient-to-r from-green-50 to-blue-50 p-4 rounded-lg border">
+                      <h4 className="font-bold text-lg mb-3">
+                        {(service.funnel_content as any).roiCalculator.title || 'Personal ROI Calculator'}
+                      </h4>
+                      <div className="space-y-3">
+                        <div className="flex justify-between">
+                          <span className="text-sm">Current monthly closings:</span>
+                          <span className="font-medium">{(service.funnel_content as any).roiCalculator.currentMonthlyClosings || 3} deals</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm">Average commission:</span>
+                          <span className="font-medium">${((service.funnel_content as any).roiCalculator.averageCommission || 8500).toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm">With our system ({(service.funnel_content as any).roiCalculator.increasePercentage || 150}% increase):</span>
+                          <span className="font-medium text-green-600">
+                            {(((service.funnel_content as any).roiCalculator.currentMonthlyClosings || 3) * ((service.funnel_content as any).roiCalculator.increasePercentage || 150) / 100 + ((service.funnel_content as any).roiCalculator.currentMonthlyClosings || 3)).toFixed(1)} deals
+                          </span>
+                        </div>
+                        <Separator />
+                        <div className="flex justify-between text-lg font-bold">
+                          <span>Additional monthly income:</span>
+                          <span className="text-green-600">+${((service.funnel_content as any).roiCalculator.calculatedAdditionalIncome || 38250).toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span>Annual increase:</span>
+                          <span className="text-green-600 font-semibold">+${((service.funnel_content as any).roiCalculator.calculatedAnnualIncrease || 459000).toLocaleString()}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                        <div className="text-2xl font-bold text-green-600">Average ROI: 600%</div>
+                        <div className="text-sm text-green-700">$1,600 in → $9,600+ out</div>
+                      </div>
+                      <p className="text-muted-foreground">
+                        1 extra closing per month covers your cost 5x over
+                      </p>
+                    </>
+                  )}
                 </div>
 
                 {/* Media Gallery */}
