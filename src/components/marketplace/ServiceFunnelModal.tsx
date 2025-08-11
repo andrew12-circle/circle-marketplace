@@ -170,6 +170,7 @@ export const ServiceFunnelModal = ({
   const [selectedPackage, setSelectedPackage] = useState<string>("");
   const [quantity, setQuantity] = useState(1);
   const [isConsultationFlowOpen, setIsConsultationFlowOpen] = useState(false);
+  const [activeMediaUrl, setActiveMediaUrl] = useState<string | null>(null);
   const [vendorAvailability, setVendorAvailability] = useState<{
     is_available_now: boolean;
     availability_message?: string;
@@ -460,13 +461,14 @@ export const ServiceFunnelModal = ({
             <div className="aspect-video bg-muted rounded-lg overflow-hidden relative flex items-center justify-center">
               {(service.funnel_content?.media?.[0]?.url || service.image_url) ? (
                 (() => {
-                  const mediaItem = service.funnel_content?.media?.[0];
-                  const mediaUrl = mediaItem?.url || service.image_url;
-                  const yt = getYouTubeEmbedUrl(mediaUrl);
-                  const isVideo = mediaItem?.type === 'video' || !!yt || (mediaUrl ? /\.(mp4|webm|ogg)$/i.test(mediaUrl) : false);
+                  const baseMediaItem = service.funnel_content?.media?.[0];
+                  const baseUrl = baseMediaItem?.url || service.image_url;
+                  const currentUrl = activeMediaUrl || baseUrl;
+                  const yt = getYouTubeEmbedUrl(currentUrl || undefined);
+                  const isVideo = !!yt || (currentUrl ? /\.(mp4|webm|ogg)$/i.test(currentUrl) : false);
                   if (isVideo) {
                     return yt ? (
-<iframe
+                      <iframe
                         src={yt}
                         title={service.funnel_content?.headline || service.title}
                         className="w-full h-full"
@@ -479,13 +481,13 @@ export const ServiceFunnelModal = ({
                       <video
                         controls
                         className="w-full h-full object-cover"
-                        src={mediaUrl}
+                        src={currentUrl || undefined}
                       />
                     );
                   }
                   return (
                     <img
-                      src={mediaUrl!}
+                      src={currentUrl || ''}
                       alt={service.funnel_content?.headline || service.title}
                       className="w-full h-auto object-contain"
                     />
@@ -523,14 +525,60 @@ export const ServiceFunnelModal = ({
                         { id: '4', label: "Results", icon: "trophy" }
                       ]
                   ).map((item: any, i: number) => (
-                    <div key={item.id || i} className="aspect-square bg-muted rounded border-2 border-transparent hover:border-primary cursor-pointer relative overflow-hidden">
-                      <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
-                        {item.icon === "video" && <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center"><div className="w-0 h-0 border-t-[6px] border-t-transparent border-l-[10px] border-l-white border-b-[6px] border-b-transparent ml-0.5"></div></div>}
-                        {item.icon === "chart" && <TrendingUp className="w-8 h-8 text-green-500" />}
-                        {item.icon === "book" && <Building className="w-8 h-8 text-blue-500" />}
-                        {item.icon === "trophy" && <Trophy className="w-8 h-8 text-yellow-500" />}
-                        <span className="text-xs text-center mt-1 px-1">{item.label}</span>
-                      </div>
+                    <div
+                      key={item.id || i}
+                      className="aspect-square bg-muted rounded border-2 border-transparent hover:border-primary cursor-pointer relative overflow-hidden"
+                      onClick={() => {
+                        const mediaUrl = item.mediaUrl || item.url;
+                        if (mediaUrl) setActiveMediaUrl(mediaUrl);
+                      }}
+                      role="button"
+                      aria-label={item.label ? `Open ${item.label}` : 'Open media'}
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          const mediaUrl = item.mediaUrl || item.url;
+                          if (mediaUrl) setActiveMediaUrl(mediaUrl);
+                        }
+                      }}
+                    >
+                      {(() => {
+                        const mediaUrl = item.mediaUrl || item.url;
+                        const ytId = mediaUrl ? getYouTubeId(mediaUrl) : null;
+                        const isImage = mediaUrl ? /\.(png|jpg|jpeg|webp|gif)$/i.test(mediaUrl) : false;
+                        const thumb = ytId ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : (isImage ? mediaUrl : null);
+                        return thumb ? (
+                          <>
+                            <img
+                              src={thumb}
+                              alt={item.label ? `${item.label} thumbnail` : 'Media thumbnail'}
+                              className="w-full h-full object-cover"
+                              loading="lazy"
+                              decoding="async"
+                            />
+                            {ytId && (
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center shadow-md">
+                                  <div className="w-0 h-0 border-t-[6px] border-t-transparent border-l-[10px] border-l-white border-b-[6px] border-b-transparent ml-0.5" />
+                                </div>
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
+                            {item.icon === 'video' && (
+                              <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
+                                <div className="w-0 h-0 border-t-[6px] border-t-transparent border-l-[10px] border-l-white border-b-[6px] border-b-transparent ml-0.5" />
+                              </div>
+                            )}
+                            {item.icon === 'chart' && <TrendingUp className="w-8 h-8 text-green-500" />}
+                            {item.icon === 'book' && <Building className="w-8 h-8 text-blue-500" />}
+                            {item.icon === 'trophy' && <Trophy className="w-8 h-8 text-yellow-500" />}
+                            <span className="text-xs text-center mt-1 px-1">{item.label}</span>
+                          </div>
+                        );
+                      })()}
                     </div>
                   ))}
                 </div>
