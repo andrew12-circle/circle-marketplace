@@ -861,7 +861,7 @@ export const ServiceFunnelModal = ({
                               >
                                 {pkg.popular && (
                                   <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                                    <Badge className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 py-1 text-sm font-semibold shadow-lg border-0 rounded-full">
+                                    <Badge className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-2 text-sm font-semibold shadow-lg border-0 rounded-full whitespace-nowrap">
                                       ⭐ Most Popular
                                     </Badge>
                                   </div>
