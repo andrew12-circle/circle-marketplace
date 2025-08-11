@@ -696,7 +696,7 @@ export const ServiceFunnelModal = ({
           )}
 
           {/* Right Column - Choose Your Package (Widened) */}
-          <div className="lg:col-span-4">
+          <div className="lg:col-span-4 lg:order-3">
             <div className="space-y-4">
               <Card className="p-6 space-y-4">
                 <div className="space-y-3">
