@@ -15,13 +15,20 @@
     <meta name="description" content="Empowering real estate professionals to grow smarter with Circle's marketplace and academy." />
     <meta name="author" content="Circle" />
     
-    <!-- Preload critical resources to eliminate render blocking -->
+    <!-- DNS prefetch and preconnect for performance -->
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Critical font loading with swap for immediate text display -->
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"></noscript>
     
-    <!-- Preconnect to font domains -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Inline critical font fallback to prevent layout shift -->
+    <style>
+      body { font-family: system-ui, -apple-system, sans-serif; }
+    </style>
     
     <link rel="icon" href="/src/assets/circle-logo.png" type="image/png">
 
