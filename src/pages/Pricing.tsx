@@ -24,8 +24,8 @@ export const Pricing = () => {
         }
       } = await supabase.auth.getSession();
       if (!session) {
-        // Redirect to signup mode for a smoother user experience
-        window.location.href = '/auth?mode=signup';
+        // Redirect to auth page for a smoother user experience
+        window.location.href = '/auth';
         return;
       }
       const {
@@ -73,7 +73,7 @@ export const Pricing = () => {
                     Login
                   </Link>
                   <Button asChild className="bg-gradient-to-r from-circle-primary to-circle-primary-light text-white">
-                    <Link to="/auth?mode=signup">Join Free & Explore</Link>
+                    <Link to="/auth">Join Free & Explore</Link>
                   </Button>
                 </>}
             </div>
@@ -85,10 +85,10 @@ export const Pricing = () => {
       <section className="py-12 md:py-20 text-center">
         <div className="container mx-auto px-4">
           <h1 className="text-3xl md:text-5xl font-bold mb-4 text-foreground">
-            The Smarter Way to Grow Your Real Estate Business
+            Marketing for Real Estate, Mastered.
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-8 md:mb-12">
-            Unlock exclusive vendor pricing, side-by-side comparisons, and curated services built for agents. Plus, get training and resources that meet you exactly where you are — all in one place.
+            Find vetted creative partners and manage your marketing with powerful tools designed to help you grow.
           </p>
           
           <div className="inline-block">
@@ -102,12 +102,7 @@ export const Pricing = () => {
       {/* Pricing Section */}
       <section className="pb-12 md:pb-20">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12 md:mb-16">
-            <h2 className="text-2xl md:text-4xl font-bold mb-4">Find the Plan That's Right for You</h2>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
-              Whether you're just getting started or scaling a top-producing team, Circle has a plan to help you grow.
-            </p>
-          </div>
+          
 
           <div className="max-w-6xl mx-auto">
             {/* Mobile: Stacked Pricing Cards */}
@@ -120,7 +115,7 @@ export const Pricing = () => {
                 {user ? <Button className="w-full bg-teal-600 hover:bg-teal-700 text-white" asChild>
                     <Link to="/">Go to Marketplace</Link>
                   </Button> : <Button className="w-full bg-teal-600 hover:bg-teal-700 text-white" asChild>
-                    <Link to="/auth?mode=signup">Create Free Account</Link>
+                    <Link to="/auth">Create Free Account</Link>
                   </Button>}
               </div>
 
@@ -152,7 +147,7 @@ export const Pricing = () => {
                   {user ? <Button className="w-full bg-teal-600 hover:bg-teal-700 text-white" asChild>
                       <Link to="/">Go to Marketplace</Link>
                     </Button> : <Button className="w-full bg-teal-600 hover:bg-teal-700 text-white" asChild>
-                      <Link to="/auth?mode=signup">Create Free Account</Link>
+                      <Link to="/auth">Create Free Account</Link>
                     </Button>}
                 </div>
 
