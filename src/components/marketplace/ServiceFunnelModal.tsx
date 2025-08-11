@@ -469,6 +469,30 @@ export const ServiceFunnelModal = ({
                       )}
                     </div>
 
+                    {/* Additional Media Grid */}
+                    <div className="grid grid-cols-2 gap-3 mt-4">
+                      <div className="aspect-video bg-white/10 backdrop-blur-sm rounded-lg overflow-hidden border border-white/20 cursor-pointer hover-scale">
+                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-600/20 to-purple-600/20">
+                          <Play className="w-8 h-8 text-white/60" />
+                        </div>
+                      </div>
+                      <div className="aspect-video bg-white/10 backdrop-blur-sm rounded-lg overflow-hidden border border-white/20 cursor-pointer hover-scale">
+                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-purple-600/20 to-pink-600/20">
+                          <TrendingUp className="w-8 h-8 text-white/60" />
+                        </div>
+                      </div>
+                      <div className="aspect-video bg-white/10 backdrop-blur-sm rounded-lg overflow-hidden border border-white/20 cursor-pointer hover-scale">
+                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-green-600/20 to-blue-600/20">
+                          <Users className="w-8 h-8 text-white/60" />
+                        </div>
+                      </div>
+                      <div className="aspect-video bg-white/10 backdrop-blur-sm rounded-lg overflow-hidden border border-white/20 cursor-pointer hover-scale">
+                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-orange-600/20 to-red-600/20">
+                          <Trophy className="w-8 h-8 text-white/60" />
+                        </div>
+                      </div>
+                    </div>
+
                     {/* Vendor Logo */}
                     {service.vendor?.logo_url && (
                       <div className="absolute -bottom-6 left-6">
