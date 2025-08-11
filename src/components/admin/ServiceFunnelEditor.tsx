@@ -25,6 +25,7 @@ import {
   HelpCircle,
   Settings
 } from "lucide-react";
+import { ServiceFunnelModal } from "@/components/marketplace/ServiceFunnelModal";
 
 interface Service {
   id: string;
@@ -32,6 +33,17 @@ interface Service {
   description: string;
   funnel_content?: any;
   pricing_tiers?: any[];
+  category?: string;
+  is_featured?: boolean;
+  is_top_pick?: boolean;
+  vendor?: {
+    name: string;
+    rating: number;
+    review_count: number;
+    is_verified: boolean;
+    website_url?: string;
+    logo_url?: string;
+  };
 }
 
 interface ServiceFunnelEditorProps {
@@ -165,6 +177,23 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
     setHasChanges(false);
   };
 
+  // Create preview service object with required fields
+  const previewService = {
+    ...service,
+    funnel_content: funnelData,
+    pricing_tiers: pricingTiers,
+    category: service.category || 'general',
+    is_featured: service.is_featured || false,
+    is_top_pick: service.is_top_pick || false,
+    vendor: service.vendor || { 
+      name: 'Preview Vendor', 
+      rating: 4.8, 
+      review_count: 127, 
+      is_verified: true, 
+      logo_url: '' 
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -186,25 +215,14 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
                   Unsaved Changes
                 </Badge>
               )}
-              <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
-                <DialogTrigger asChild>
-                  <Button variant="outline" size="sm">
-                    <Eye className="w-4 h-4 mr-2" />
-                    Preview
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden">
-                  <DialogHeader>
-                    <DialogTitle>Funnel Preview</DialogTitle>
-                  </DialogHeader>
-                  <div className="overflow-y-auto max-h-[80vh]">
-                    {/* Add ServiceFunnelModal preview here */}
-                    <div className="p-4 bg-gray-50 rounded-lg">
-                      Preview functionality coming soon...
-                    </div>
-                  </div>
-                </DialogContent>
-              </Dialog>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setIsPreviewOpen(true)}
+              >
+                <Eye className="w-4 h-4 mr-2" />
+                Preview
+              </Button>
               <Button 
                 variant="outline" 
                 size="sm" 
@@ -289,6 +307,13 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
           />
         </TabsContent>
       </Tabs>
+
+      {/* Preview Modal */}
+      <ServiceFunnelModal
+        isOpen={isPreviewOpen}
+        onClose={() => setIsPreviewOpen(false)}
+        service={previewService}
+      />
     </div>
   );
 };
