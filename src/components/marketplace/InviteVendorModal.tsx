@@ -224,14 +224,14 @@ export const InviteVendorModal = ({ open, onOpenChange }: InviteVendorModalProps
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto z-[110] bg-card/95 supports-[backdrop-filter]:bg-card/80 backdrop-blur border border-border rounded-xl sm:rounded-2xl shadow-2xl">
-        <DialogHeader className="text-center pb-4">
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-              <UserPlus className="w-5 h-5 text-green-600" />
+        <DialogHeader className="text-center -mx-6 -mt-6 px-6 pt-6 pb-4 bg-muted/40 border-b border-border rounded-t-xl">
+          <div className="flex items-center justify-center gap-3 mb-3">
+            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center shadow-sm">
+              <UserPlus className="w-6 h-6 text-primary" />
             </div>
           </div>
-          <DialogTitle className="text-xl font-semibold">Invite Your Vendor</DialogTitle>
-          <p className="text-sm text-muted-foreground">
+          <DialogTitle className="text-xl font-semibold tracking-tight text-foreground">Invite Your Vendor</DialogTitle>
+          <p className="text-sm text-muted-foreground mt-1">
             Add a vendor to the Circle marketplace to help other agents grow their business.
           </p>
         </DialogHeader>
