@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { useServiceReviews } from "@/hooks/useServiceReviews";
 import { 
@@ -248,41 +247,6 @@ export const ServiceFunnelModal = ({
       setSelectedPackage(popularPackage?.id || packages[0].id);
     }
   }, [packages, selectedPackage]);
-
-  // Fetch vendor availability on component mount
-  useEffect(() => {
-    const fetchVendorAvailability = async () => {
-      if (!service.vendor?.name) {
-        setVendorAvailability({ is_available_now: false });
-        return;
-      }
-
-      try {
-        const { data: vendor } = await supabase
-          .from('vendors')
-          .select('id')
-          .eq('name', service.vendor.name)
-          .single();
-
-        if (vendor) {
-          const { data: availability } = await supabase
-            .from('vendor_availability')
-            .select('is_available_now, availability_message, next_available_slot')
-            .eq('vendor_id', vendor.id)
-            .single();
-
-          setVendorAvailability(availability || { is_available_now: false });
-        }
-      } catch (error) {
-        console.error('Error fetching vendor availability:', error);
-        setVendorAvailability({ is_available_now: false });
-      }
-    };
-
-    if (isOpen) {
-      fetchVendorAvailability();
-    }
-  }, [isOpen, service.vendor?.name]);
 
   const handleAddToCart = () => {
     addToCart({
@@ -563,101 +527,16 @@ export const ServiceFunnelModal = ({
                           What's My ROI Potential?
                         </h3>
                         
-                        {/* ROI Calculator Integration */}
-                        {(service.funnel_content as any)?.roiCalculator?.enabled ? (
-                          <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-6 rounded-xl border border-purple-200">
-                            <h4 className="font-bold text-lg mb-4 text-purple-900">
-                              {(service.funnel_content as any).roiCalculator.title || 'Personal ROI Calculator'}
-                            </h4>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              <div className="space-y-3">
-                                <div className="flex justify-between">
-                                  <span className="text-sm text-gray-600">Current monthly closings:</span>
-                                  <span className="font-medium">{(service.funnel_content as any).roiCalculator.currentMonthlyClosings || 3} deals</span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span className="text-sm text-gray-600">Average commission:</span>
-                                  <span className="font-medium">${((service.funnel_content as any).roiCalculator.averageCommission || 8500).toLocaleString()}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span className="text-sm text-gray-600">With our system:</span>
-                                  <span className="font-medium text-green-600">
-                                    {(((service.funnel_content as any).roiCalculator.currentMonthlyClosings || 3) * ((service.funnel_content as any).roiCalculator.increasePercentage || 150) / 100 + ((service.funnel_content as any).roiCalculator.currentMonthlyClosings || 3)).toFixed(1)} deals
-                                  </span>
-                                </div>
-                              </div>
-                              <div className="bg-white/70 p-4 rounded-lg border">
-                                <div className="text-center">
-                                  <div className="text-3xl font-bold text-green-600">
-                                    +${((service.funnel_content as any).roiCalculator.calculatedAdditionalIncome || 38250).toLocaleString()}
-                                  </div>
-                                  <div className="text-sm text-gray-600">Additional Monthly Income</div>
-                                  <div className="text-lg font-semibold text-green-600 mt-2">
-                                    +${((service.funnel_content as any).roiCalculator.calculatedAnnualIncrease || 459000).toLocaleString()}/year
-                                  </div>
-                                </div>
-                              </div>
+                        <div className="bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-xl border border-green-200">
+                          <div className="text-center">
+                            <div className="text-4xl font-bold text-green-600 mb-2">600% ROI</div>
+                            <div className="text-gray-600 mb-4">Average return on investment</div>
+                            <div className="bg-white/70 p-4 rounded-lg">
+                              <div className="text-lg font-semibold">Investment: $1,600 → Returns: $9,600+</div>
+                              <div className="text-sm text-gray-600 mt-1">1 extra closing per month covers your cost 5x over</div>
                             </div>
                           </div>
-                        ) : (
-                          <div className="bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-xl border border-green-200">
-                            <div className="text-center">
-                              <div className="text-4xl font-bold text-green-600 mb-2">600% ROI</div>
-                              <div className="text-gray-600 mb-4">Average return on investment</div>
-                              <div className="bg-white/70 p-4 rounded-lg">
-                                <div className="text-lg font-semibold">Investment: $1,600 → Returns: $9,600+</div>
-                                <div className="text-sm text-gray-600 mt-1">1 extra closing per month covers your cost 5x over</div>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Media Gallery */}
-                        {(service.funnel_content as any)?.thumbnailGallery?.enabled && (
-                          <div className="mt-6">
-                            <h4 className="font-semibold mb-3 text-gray-900">See It In Action</h4>
-                            <div className="grid grid-cols-2 gap-3">
-                              {(service.funnel_content as any).thumbnailGallery.items?.map((item: any, index: number) => (
-                                <div
-                                  key={index}
-                                  className="aspect-video bg-gray-100 rounded-lg overflow-hidden border cursor-pointer hover:border-purple-400 transition-all hover-scale"
-                                  onClick={() => setActiveMediaUrl(item.url)}
-                                >
-                                  {(() => {
-                                    const thumb = item.thumbnail || item.url;
-                                    const ytId = thumb ? getYouTubeId(thumb) : null;
-                                    const ytThumb = ytId ? `https://img.youtube.com/vi/${ytId}/mqdefault.jpg` : null;
-                                    return ytThumb || thumb ? (
-                                      <div className="relative w-full h-full">
-                                        <img
-                                          src={ytThumb || thumb}
-                                          alt={item.label ? `${item.label} thumbnail` : 'Media thumbnail'}
-                                          className="w-full h-full object-cover"
-                                          loading="lazy"
-                                        />
-                                        {ytId && (
-                                          <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                                            <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center shadow-lg">
-                                              <Play className="w-4 h-4 text-white ml-0.5" />
-                                            </div>
-                                          </div>
-                                        )}
-                                      </div>
-                                    ) : (
-                                      <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
-                                        {item.icon === 'video' && <Play className="w-8 h-8 text-red-500" />}
-                                        {item.icon === 'chart' && <TrendingUp className="w-8 h-8 text-green-500" />}
-                                        {item.icon === 'book' && <Building className="w-8 h-8 text-blue-500" />}
-                                        {item.icon === 'trophy' && <Trophy className="w-8 h-8 text-yellow-500" />}
-                                        <span className="text-xs text-center mt-2 px-2 text-gray-600">{item.label}</span>
-                                      </div>
-                                    );
-                                  })()}
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
+                        </div>
                       </CardContent>
                     </Card>
 
@@ -920,7 +799,7 @@ export const ServiceFunnelModal = ({
                               Add to Cart
                             </Button>
                           </div>
-                         </div>
+                        </div>
                       </CardContent>
                     </Card>
                   </div>
@@ -982,59 +861,6 @@ export const ServiceFunnelModal = ({
                       </div>
                     </CardContent>
                   </Card>
-
-                  {/* Testimonials */}
-                  {(service.funnel_content as any)?.testimonialCards?.enabled && (
-                    <Card className="shadow-lg animate-fade-in">
-                      <CardContent className="p-6">
-                        <h3 className="font-bold text-lg mb-4 text-gray-900">
-                          {(service.funnel_content as any).testimonialCards.title || 'Success Stories'}
-                        </h3>
-                        <div className="space-y-4">
-                          {((service.funnel_content as any).testimonialCards.cards?.length > 0 
-                            ? (service.funnel_content as any).testimonialCards.cards 
-                            : [
-                                {
-                                  id: '1',
-                                  name: 'Sarah T.',
-                                  role: 'Keller Williams',
-                                  content: 'Increased my closings by 200% in just 3 months!',
-                                  rating: 5,
-                                  timeAgo: '2 weeks ago',
-                                  borderColor: 'green'
-                                },
-                                {
-                                  id: '2',
-                                  name: 'Mike R.',
-                                  role: 'RE/MAX',
-                                  content: 'ROI was 320% in the first quarter alone.',
-                                  rating: 5,
-                                  timeAgo: '1 week ago',
-                                  borderColor: 'blue'
-                                }
-                              ]
-                          ).map((card: any) => (
-                            <div key={card.id} className="p-4 bg-gray-50 rounded-xl border">
-                              <div className="flex items-start gap-3">
-                                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                                  {card.name.charAt(0)}
-                                </div>
-                                <div className="flex-1">
-                                  <div className="font-medium text-gray-900">{card.name}</div>
-                                  <div className="text-sm text-gray-600">{card.role}</div>
-                                  <p className="text-sm text-gray-700 mt-2 italic">"{card.content}"</p>
-                                  <div className="flex items-center gap-2 mt-2">
-                                    {renderStarRating(card.rating)}
-                                    <span className="text-xs text-gray-500">{card.timeAgo}</span>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )}
                 </div>
               </div>
 
@@ -1128,120 +954,6 @@ export const ServiceFunnelModal = ({
                     </div>
                   </CardContent>
                 </Card>
-              </div>
-                </div>
-
-                {/* Right Column - Package Selection & Testimonials */}
-                <div className="space-y-6">
-                  {/* Pricing Section */}
-                  <Card className="sticky top-6 shadow-lg border-0 bg-gradient-to-br from-white to-gray-50 animate-fade-in">
-                    <CardContent className="p-6">
-                      <h3 className="text-xl font-bold text-gray-900 mb-4">Pricing</h3>
-                      
-                      {/* Main Price Display */}
-                      <div className="text-center mb-6">
-                        <div className="text-4xl font-bold text-gray-900 mb-1">
-                          ${service.retail_price || '999'}
-                        </div>
-                        <div className="text-sm text-gray-600">One-time setup fee</div>
-                        {service.discount_percentage && (
-                          <Badge className="mt-2 bg-green-500">
-                            {service.discount_percentage}% Off
-                          </Badge>
-                        )}
-                      </div>
-
-                      {/* Key Features */}
-                      <div className="space-y-3 mb-6">
-                        <div className="flex items-center gap-3">
-                          <CheckCircle className="w-5 h-5 text-green-500" />
-                          <span className="text-gray-700">Complete setup & training</span>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <CheckCircle className="w-5 h-5 text-green-500" />
-                          <span className="text-gray-700">24/7 support included</span>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <CheckCircle className="w-5 h-5 text-green-500" />
-                          <span className="text-gray-700">30-day money back guarantee</span>
-                        </div>
-                      </div>
-
-                      {/* Action Buttons */}
-                      <div className="space-y-3">
-                        <Button 
-                          onClick={() => setIsConsultationFlowOpen(true)}
-                          className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all"
-                        >
-                          Get Started Now
-                          <ArrowRight className="w-5 h-5 ml-2" />
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          onClick={handleAddToCart}
-                          className="w-full border-2 border-gray-300 hover:border-gray-400 py-3 rounded-xl font-semibold"
-                        >
-                          <ShoppingCart className="w-4 h-4 mr-2" />
-                          Add to Cart
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* Testimonials */}
-                  {(service.funnel_content as any)?.testimonialCards?.enabled && (
-                    <Card className="shadow-lg animate-fade-in">
-                      <CardContent className="p-6">
-                        <h3 className="font-bold text-lg mb-4 text-gray-900">
-                          {(service.funnel_content as any).testimonialCards.title || 'Success Stories'}
-                        </h3>
-                        <div className="space-y-4">
-                          {((service.funnel_content as any).testimonialCards.cards?.length > 0 
-                            ? (service.funnel_content as any).testimonialCards.cards 
-                            : [
-                                {
-                                  id: '1',
-                                  name: 'Sarah T.',
-                                  role: 'Keller Williams',
-                                  content: 'Increased my closings by 200% in just 3 months!',
-                                  rating: 5,
-                                  timeAgo: '2 weeks ago',
-                                  borderColor: 'green'
-                                },
-                                {
-                                  id: '2',
-                                  name: 'Mike R.',
-                                  role: 'RE/MAX',
-                                  content: 'ROI was 320% in the first quarter alone.',
-                                  rating: 5,
-                                  timeAgo: '1 week ago',
-                                  borderColor: 'blue'
-                                }
-                              ]
-                          ).map((card: any) => (
-                            <div key={card.id} className="p-4 bg-gray-50 rounded-xl border">
-                              <div className="flex items-start gap-3">
-                                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                                  {card.name.charAt(0)}
-                                </div>
-                                <div className="flex-1">
-                                  <div className="font-medium text-gray-900">{card.name}</div>
-                                  <div className="text-sm text-gray-600">{card.role}</div>
-                                  <p className="text-sm text-gray-700 mt-2 italic">"{card.content}"</p>
-                                  <div className="flex items-center gap-2 mt-2">
-                                    {renderStarRating(card.rating)}
-                                    <span className="text-xs text-gray-500">{card.timeAgo}</span>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </CardContent>
-                  </Card>
-                </div>
-              </div>
-                </div>
               </div>
             </div>
           </div>
