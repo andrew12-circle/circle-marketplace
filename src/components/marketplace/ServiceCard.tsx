@@ -172,22 +172,26 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false, b
     });
   };
 
-  const handleViewDetails = async () => {
+  const handleViewDetails = () => {
     console.log('handleViewDetails called - modal states:', { isVendorSelectionModalOpen, isPricingChoiceModalOpen, isFunnelModalOpen, isClosingModal });
     // Don't open if other modals are already open OR if we're in the middle of closing
     if (isVendorSelectionModalOpen || isPricingChoiceModalOpen || isFunnelModalOpen || isClosingModal) {
       console.log('Blocked - modal already open or closing');
       return;
     }
-    // Track click on service card opening the funnel
-    await trackEvent({
-      event_type: 'click',
-      event_data: { context: 'service_card', action: 'open_funnel' }
-    } as any);
-    // Track the service view
-    await trackView();
+
+    // Open immediately for snappy UX; do not block on analytics
     console.log('Setting funnel modal to true');
     setIsFunnelModalOpen(true);
+
+    // Fire-and-forget tracking
+    Promise.allSettled([
+      trackEvent({
+        event_type: 'click',
+        event_data: { context: 'service_card', action: 'open_funnel' }
+      } as any),
+      trackView()
+    ]).catch((err) => console.error('Non-blocking tracking error:', err));
   };
 
   const handleAddToCart = async (e: React.MouseEvent) => {
