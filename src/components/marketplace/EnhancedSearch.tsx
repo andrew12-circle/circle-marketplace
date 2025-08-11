@@ -131,19 +131,18 @@ export const EnhancedSearch = ({
 
   return (
     <div className="space-y-4">
-      {/* Search Bar */}
-      <div className="relative w-full max-w-xl">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-        <Input
-          placeholder={serviceCount && serviceCount > 0 ? `Search ${serviceCount} top realtor services or keywords...` : "Search services, vendors, or keywords..."}
-          value={filters.query}
-          onChange={(e) => updateFilters('query', e.target.value)}
-          className="pl-10 pr-4"
-        />
-      </div>
+      {/* Search Bar + Filters */}
+      <div className="flex items-center justify-between gap-3">
+        <div className="relative w-full max-w-xl flex-1">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+          <Input
+            placeholder={serviceCount && serviceCount > 0 ? `Search ${serviceCount} top realtor services or keywords...` : "Search services, vendors, or keywords..."}
+            value={filters.query}
+            onChange={(e) => updateFilters('query', e.target.value)}
+            className="pl-10 pr-4"
+          />
+        </div>
 
-      {/* Filter Controls */}
-      <div className="flex items-center gap-2 flex-wrap">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm" className="gap-2">
@@ -254,8 +253,10 @@ export const EnhancedSearch = ({
             </div>
           </DropdownMenuContent>
         </DropdownMenu>
-
       </div>
+
+      {/* Filter Controls */}
+      {/* Filter Controls moved next to search bar above */}
 
       {/* Active Filters Display */}
       {activeFiltersCount > 0 && (
