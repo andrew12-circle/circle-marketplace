@@ -1,13 +1,11 @@
 import { useTranslation } from "react-i18next";
 import { Link, useLocation } from "react-router-dom";
-import { Suspense, lazy } from "react";
 import { NavigationTabs } from "@/components/NavigationTabs";
+import { Marketplace } from "./Marketplace";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Crown } from "lucide-react";
 const circleLogoUrl = "/lovable-uploads/97692497-6d98-46a8-b6fc-05cd68bdc160.png";
-
-const Marketplace = lazy(() => import("./Marketplace").then(m => ({ default: m.Marketplace })));
 
 import { CartDrawer } from "@/components/marketplace/CartDrawer";
 import { UserMenu } from "@/components/UserMenu";
@@ -154,9 +152,7 @@ const Index = () => {
 
         {/* Main Content */}
         <main>
-          <Suspense fallback={<div className="container mx-auto px-3 sm:px-4 py-6" aria-busy="true"><div className="sr-only">Loading marketplace…</div></div>}>
-            <Marketplace />
-          </Suspense>
+          <Marketplace />
         </main>
 
         {/* Legal Footer */}

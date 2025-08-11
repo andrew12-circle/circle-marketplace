@@ -265,6 +265,14 @@
     <!-- Preload and defer main CSS to eliminate render-blocking -->
     <link rel="preload" href="/assets/index-CouCvFNH.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="/assets/index-CouCvFNH.css"></noscript>
+    
+    <!-- Additional critical CSS for marketplace components -->
+    <style>
+      .marketplace-grid { display: grid; gap: 1rem; }
+      .service-card { background: hsl(var(--card)); border: 1px solid hsl(var(--border)); border-radius: calc(var(--radius) - 2px); }
+      .vendor-card { background: hsl(var(--card)); border: 1px solid hsl(var(--border)); border-radius: calc(var(--radius) - 2px); }
+      .marketplace-filters { background: hsl(var(--background)); position: sticky; top: 0; z-index: 10; }
+    </style>
 
     <meta property="og:title" content="circle-agent-growth" />
     <meta property="og:description" content="Lovable Generated Project" />
