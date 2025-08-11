@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -52,9 +52,10 @@ interface FutureGoals {
 interface AskCircleAIModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  initialPrompt?: string;
 }
 
-export const AskCircleAIModal = ({ open, onOpenChange }: AskCircleAIModalProps) => {
+export const AskCircleAIModal = ({ open, onOpenChange, initialPrompt }: AskCircleAIModalProps) => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("contextual");
   const [loading, setLoading] = useState(false);
@@ -64,6 +65,11 @@ export const AskCircleAIModal = ({ open, onOpenChange }: AskCircleAIModalProps) 
   
   // Quick assessment state
   const [prompt, setPrompt] = useState("");
+  useEffect(() => {
+    if (open && initialPrompt && initialPrompt.trim()) {
+      setPrompt(initialPrompt);
+    }
+  }, [open, initialPrompt]);
   
   // Detailed assessment state
   const [currentPerformance, setCurrentPerformance] = useState<CurrentPerformance>({
@@ -280,9 +286,9 @@ export const AskCircleAIModal = ({ open, onOpenChange }: AskCircleAIModalProps) 
             </div>
           </div>
           <DialogTitle className="text-xl font-semibold">Ask Circle AI</DialogTitle>
-          <p className="text-sm text-muted-foreground">
+          <DialogDescription className="text-sm text-muted-foreground">
             Get data-driven marketing recommendations for your area.
-          </p>
+          </DialogDescription>
         </DialogHeader>
 
         {!recommendation && !contextualResponse ? (

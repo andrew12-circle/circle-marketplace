@@ -198,7 +198,6 @@ export const AIConciergeBanner = () => {
     if (chatInput.trim()) {
       // Open the AI modal with the user's message
       setIsAIModalOpen(true);
-      setChatInput("");
     }
   };
 
