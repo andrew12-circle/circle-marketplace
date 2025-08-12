@@ -104,7 +104,7 @@ export const Pricing = () => {
       </section>
 
       {/* Pricing Section */}
-      <section className="pb-12 md:pb-20">
+      <section className="pb-6 md:pb-12">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12 md:mb-16">
             
