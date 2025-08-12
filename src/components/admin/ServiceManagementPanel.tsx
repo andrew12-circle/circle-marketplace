@@ -464,16 +464,17 @@ export const ServiceManagementPanel = () => {
     }
 
     try {
-        // Auto-calculate co_pay_price based on pro_price and SSP split percentage
-        let calculatedCoPayPrice: string | null = null;
-        if (editForm.pro_price && editForm.respa_split_limit) {
-          const proPrice = parseFloat(editForm.pro_price.replace(/[^\d.]/g, ''));
-          const splitPercentage = editForm.respa_split_limit;
-          if (!Number.isNaN(proPrice) && typeof splitPercentage === 'number') {
-            const coPayAmount = proPrice * (1 - (splitPercentage / 100));
-            calculatedCoPayPrice = coPayAmount.toFixed(2);
-          }
-        }
+      // Clamp numeric fields to avoid DB precision errors (e.g., numeric(4,2) < 100)
+      let roi = editForm.estimated_roi ?? null;
+      let respa = editForm.respa_split_limit ?? null;
+      let nonSsp = editForm.max_split_percentage_non_ssp ?? null;
+      const adjustments: string[] = [];
+      if (typeof roi === 'number' && roi >= 100) { roi = 99.99; adjustments.push('ROI capped at 99.99%'); }
+      if (typeof respa === 'number' && respa >= 100) { respa = 99.99; adjustments.push('RESPA split capped at 99.99%'); }
+      if (typeof nonSsp === 'number' && nonSsp >= 100) { nonSsp = 99.99; adjustments.push('Non-SSP split capped at 99.99%'); }
+      if (adjustments.length) {
+        toast({ title: 'Adjusted values', description: adjustments.join(' • ') });
+      }
 
       // Prepare update data with direct field mapping
       const updateData = {
@@ -481,7 +482,7 @@ export const ServiceManagementPanel = () => {
         description: editForm.description,
         category: editForm.category,
         duration: editForm.duration,
-        estimated_roi: editForm.estimated_roi || null,
+        estimated_roi: roi,
         sort_order: editForm.sort_order || null,
         is_featured: !!editForm.is_featured,
         is_top_pick: !!editForm.is_top_pick,
@@ -489,9 +490,8 @@ export const ServiceManagementPanel = () => {
         requires_quote: !!editForm.requires_quote,
         copay_allowed: !!editForm.copay_allowed, // Use database field name
         direct_purchase_enabled: !!editForm.direct_purchase_enabled,
-        respa_split_limit: editForm.respa_split_limit ?? null,
-        max_split_percentage_non_ssp: editForm.max_split_percentage_non_ssp ?? null,
-        co_pay_price: calculatedCoPayPrice,
+        respa_split_limit: respa,
+        max_split_percentage_non_ssp: nonSsp,
         updated_at: new Date().toISOString()
       };
 
@@ -558,11 +558,14 @@ export const ServiceManagementPanel = () => {
       const code = err?.code || err?.status || '';
       const details = err?.details || err?.hint || err?.message || 'Failed to update service';
       const permissionHint = (typeof details === 'string' && details.toLowerCase().includes('permission')) || code === '42501';
+      const isPrecisionError = code === '22003';
       toast({
         title: 'Error',
-        description: permissionHint
-          ? 'You do not have permission to update services. Please ensure you are signed in as an admin.'
-          : `${details}${code ? ` (code: ${code})` : ''}`,
+        description: isPrecisionError
+          ? 'Numeric limit exceeded: use percentages below 100 (e.g., 99.99) and valid 2‑decimal values.'
+          : permissionHint
+            ? 'You do not have permission to update services. Please ensure you are signed in as an admin.'
+            : `${details}${code ? ` (code: ${code})` : ''}`,
         variant: 'destructive',
       });
     }
