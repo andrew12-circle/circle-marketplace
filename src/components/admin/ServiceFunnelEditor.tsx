@@ -185,9 +185,7 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
             pricing_tiers: sanitizedPricing,
             updated_at: new Date().toISOString()
           })
-          .eq('id', service.id)
-          .select('id')
-          .maybeSingle(),
+          .eq('id', service.id),
         30000
       );
 
