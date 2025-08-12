@@ -40,6 +40,7 @@ import { AgentInvitationPanel } from '@/components/admin/AgentInvitationPanel';
 import VendorPointAllocationPanel from '@/components/admin/VendorPointAllocationPanel';
 import AntiScrapingSystem from '@/components/security/AntiScrapingSystem';
 import { CreatorPayoutDashboard } from '@/components/admin/CreatorPayoutDashboard';
+import BulkFAQGenerator from '@/components/admin/BulkFAQGenerator';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Upload, Building, Youtube, DollarSign, BarChart3, Coins, Shield as ShieldIcon, Users2, Send, BookOpen } from 'lucide-react';
@@ -871,6 +872,7 @@ export default function AdminDashboard() {
         <TabsContent value="services" className="space-y-6">
           <ServiceManagementPanel />
           <ServiceDisclaimerManager />
+          <BulkFAQGenerator />
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <ServiceImportPanel />
           </div>
