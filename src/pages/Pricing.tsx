@@ -86,7 +86,7 @@ export const Pricing = () => {
       </header>
 
       {/* Hero Section */}
-      <section className="py-12 md:py-20 text-center">
+      <section className="pt-12 md:pt-20 pb-6 md:pb-12 text-center">
         <div className="container mx-auto px-4">
           <h1 className="text-3xl md:text-5xl font-bold mb-4 text-foreground">
             The Smarter Way to Grow Your Real Estate Business
