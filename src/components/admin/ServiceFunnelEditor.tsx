@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useInvalidateMarketplace } from "@/hooks/useMarketplaceData";
 import { FunnelSectionEditor } from "./FunnelSectionEditor";
 import { FunnelMediaEditor } from "./FunnelMediaEditor";
 import { FunnelPricingEditor } from "./FunnelPricingEditor";
@@ -59,6 +60,7 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
+  const { invalidateAll } = useInvalidateMarketplace();
 
   // Initialize default funnel content if none exists
   useEffect(() => {
@@ -148,8 +150,10 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
             pricing_tiers: pricingTiers,
             updated_at: new Date().toISOString()
           })
-          .eq('id', service.id),
-        20000
+          .eq('id', service.id)
+          .select('id')
+          .maybeSingle(),
+        30000
       );
 
       if ((response as any)?.error) {
@@ -170,6 +174,9 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
         title: "Funnel Updated Successfully",
         description: "All changes have been saved to the service funnel.",
       });
+      // Warm server-side cache and invalidate client caches so the marketplace reflects changes
+      supabase.functions.invoke('warm-marketplace-cache').catch((e) => console.warn('Cache warm failed', e));
+      invalidateAll();
     } catch (error: any) {
       console.error('[Admin ServiceFunnelEditor] Error saving funnel:', error);
       toast({
