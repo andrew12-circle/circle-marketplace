@@ -528,6 +528,25 @@ export const ServiceManagementPanel = () => {
       setEditForm(updatedServiceData);
       setIsEditingDetails(false);
       
+      // Optimistically update marketplace cache so front-end reflects changes immediately
+      queryClient.setQueryData(QUERY_KEYS.marketplaceCombined, (prev: any) => {
+        if (!prev) return prev;
+        const updated = {
+          ...prev,
+          services: Array.isArray(prev.services)
+            ? prev.services.map((s: any) =>
+                s.id === selectedService.id
+                  ? { ...s, ...updatedServiceData }
+                  : s
+              )
+            : prev.services,
+        };
+        return updated;
+      });
+      // Warm the marketplace cache and invalidate queries (non-blocking)
+      supabase.functions.invoke('warm-marketplace-cache').catch((e) => console.warn('Cache warm failed', e));
+      invalidateCache.invalidateAll();
+      
       toast({
         title: 'Success',
         description: 'Service updated successfully',
