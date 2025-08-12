@@ -125,7 +125,7 @@ export const AIConciergeBanner = () => {
   };
   return <div className="mb-8 space-y-6">
       <Card className="bg-gradient-to-br from-primary/5 via-background to-accent/5 border-primary/20 shadow-lg">
-        <CardContent className="p-6">
+        <CardContent className="p-4 md:p-6">
           <div className="space-y-6">
             {/* Header */}
             <div className="flex items-center gap-3">
