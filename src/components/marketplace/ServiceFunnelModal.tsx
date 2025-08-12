@@ -562,81 +562,92 @@ export const ServiceFunnelModal = ({
                       </AccordionTrigger>
                       <AccordionContent className="border-l-4 border-l-orange-500 pl-4 bg-white rounded-b-lg shadow-sm pt-0">
                         <div className="p-6 pt-0">
-                          <div className="space-y-6">
-                            {/* Time Investment Overview */}
-                            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                              <h4 className="font-semibold text-blue-900 mb-3 flex items-center gap-2">
-                                <Clock className="w-5 h-5" />
-                                Your Time Investment
-                              </h4>
-                              <div className="grid grid-cols-2 gap-4">
-                                <div className="text-center">
-                                  <div className="text-2xl font-bold text-blue-600">2-3 hrs</div>
-                                  <div className="text-sm text-blue-700">Initial Setup</div>
+                          {(() => {
+                            const sections = Array.isArray((fc as any)?.faqSections) ? (fc as any).faqSections : [];
+                            const byId = sections.find((s: any) => s?.id === 'question-3');
+                            const byTitle = sections.find((s: any) => typeof s?.title === 'string' && s.title.toLowerCase().includes('soon'));
+                            const answer = byId?.content || byTitle?.content;
+                            if (answer) {
+                              return <SafeHTML html={answer} />;
+                            }
+                            return (
+                              <div className="space-y-6">
+                                {/* Time Investment Overview */}
+                                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                                  <h4 className="font-semibold text-blue-900 mb-3 flex items-center gap-2">
+                                    <Clock className="w-5 h-5" />
+                                    Your Time Investment
+                                  </h4>
+                                  <div className="grid grid-cols-2 gap-4">
+                                    <div className="text-center">
+                                      <div className="text-2xl font-bold text-blue-600">2-3 hrs</div>
+                                      <div className="text-sm text-blue-700">Initial Setup</div>
+                                    </div>
+                                    <div className="text-center">
+                                      <div className="text-2xl font-bold text-blue-600">15 min</div>
+                                      <div className="text-sm text-blue-700">Daily Maintenance</div>
+                                    </div>
+                                  </div>
                                 </div>
-                                <div className="text-center">
-                                  <div className="text-2xl font-bold text-blue-600">15 min</div>
-                                  <div className="text-sm text-blue-700">Daily Maintenance</div>
-                                </div>
-                              </div>
-                            </div>
 
-                            {/* Timeline with Energy Requirements */}
-                            <div className="space-y-4">
-                              <div className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
-                                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                                  <Clock className="w-5 h-5 text-blue-600" />
+                                {/* Timeline with Energy Requirements */}
+                                <div className="space-y-4">
+                                  <div className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
+                                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                      <Clock className="w-5 h-5 text-blue-600" />
+                                    </div>
+                                    <div className="flex-1">
+                                      <div className="font-medium">Setup: 24-48 hours</div>
+                                      <div className="text-sm text-gray-600">2-3 hours of your time + our team handles the rest</div>
+                                    </div>
+                                    <div className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">Low Effort</div>
+                                  </div>
+                                  <div className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
+                                    <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                                      <TrendingUp className="w-5 h-5 text-green-600" />
+                                    </div>
+                                    <div className="flex-1">
+                                      <div className="font-medium">First leads: 1-2 weeks</div>
+                                      <div className="text-sm text-gray-600">15 minutes daily lead follow-up</div>
+                                    </div>
+                                    <div className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">Low Effort</div>
+                                  </div>
+                                  <div className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
+                                    <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                                      <Trophy className="w-5 h-5 text-purple-600" />
+                                    </div>
+                                    <div className="flex-1">
+                                      <div className="font-medium">Closings: 30-90 days</div>
+                                      <div className="text-sm text-gray-600">Normal sales process - no extra work</div>
+                                    </div>
+                                    <div className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">No Extra Effort</div>
+                                  </div>
                                 </div>
-                                <div className="flex-1">
-                                  <div className="font-medium">Setup: 24-48 hours</div>
-                                  <div className="text-sm text-gray-600">2-3 hours of your time + our team handles the rest</div>
-                                </div>
-                                <div className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">Low Effort</div>
-                              </div>
-                              <div className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
-                                <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                                  <TrendingUp className="w-5 h-5 text-green-600" />
-                                </div>
-                                <div className="flex-1">
-                                  <div className="font-medium">First leads: 1-2 weeks</div>
-                                  <div className="text-sm text-gray-600">15 minutes daily lead follow-up</div>
-                                </div>
-                                <div className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">Low Effort</div>
-                              </div>
-                              <div className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
-                                <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                                  <Trophy className="w-5 h-5 text-purple-600" />
-                                </div>
-                                <div className="flex-1">
-                                  <div className="font-medium">Closings: 30-90 days</div>
-                                  <div className="text-sm text-gray-600">Normal sales process - no extra work</div>
-                                </div>
-                                <div className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">No Extra Effort</div>
-                              </div>
-                            </div>
 
-                            {/* Energy Breakdown */}
-                            <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-                              <h4 className="font-semibold text-green-900 mb-3">What You Actually Do:</h4>
-                              <div className="space-y-2">
-                                <div className="flex items-center gap-2 text-sm">
-                                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                                  <span>Answer phone calls from qualified leads</span>
-                                </div>
-                                <div className="flex items-center gap-2 text-sm">
-                                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                                  <span>Review system-generated follow-ups (5 min/day)</span>
-                                </div>
-                                <div className="flex items-center gap-2 text-sm">
-                                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                                  <span>Close deals (what you already do best!)</span>
+                                {/* Energy Breakdown */}
+                                <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                                  <h4 className="font-semibold text-green-900 mb-3">What You Actually Do:</h4>
+                                  <div className="space-y-2">
+                                    <div className="flex items-center gap-2 text-sm">
+                                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                      <span>Answer phone calls from qualified leads</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-sm">
+                                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                      <span>Review system-generated follow-ups (5 min/day)</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-sm">
+                                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                      <span>Close deals (what you already do best!)</span>
+                                    </div>
+                                  </div>
+                                  <div className="mt-3 text-sm text-green-700 font-medium">
+                                    ✅ The system handles: ads, landing pages, lead nurturing, appointment booking
+                                  </div>
                                 </div>
                               </div>
-                              <div className="mt-3 text-sm text-green-700 font-medium">
-                                ✅ The system handles: ads, landing pages, lead nurturing, appointment booking
-                              </div>
-                            </div>
-                          </div>
+                            );
+                          })()}
                         </div>
                       </AccordionContent>
                     </AccordionItem>
