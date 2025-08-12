@@ -172,150 +172,230 @@ export const Pricing = () => {
               </div>
             </div>
 
-            {/* Mobile: Enhanced Feature Comparison */}
-            <div className="md:hidden space-y-3">
-              <div className="text-center mb-8">
+            {/* Mobile: Table-Style Feature Comparison */}
+            <div className="md:hidden">
+              <div className="text-center mb-6">
                 <h3 className="text-2xl font-bold mb-2 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                   Compare Plans
                 </h3>
                 <p className="text-sm text-muted-foreground">See everything you get with Circle Pro</p>
               </div>
               
-              {[{
-              feature: "Marketplace Access",
-              starter: "✓",
-              pro: "✓",
-              category: "core"
-            }, {
-              feature: "Circle Coverage",
-              starter: "✗",
-              pro: "✓",
-              category: "core"
-            }, {
-              feature: "Pro Pricing (Avg. 20% off)",
-              starter: "✗",
-              pro: "✓",
-              category: "core"
-            }, {
-              feature: "CoPay Access (60% avg. discount)",
-              starter: "✗",
-              pro: "✓",
-              category: "core"
-            }, {
-              feature: "Circle Academy Access",
-              starter: "Limited",
-              pro: "Full Library",
-              category: "core"
-            }, {
-              feature: "Create & Sell Playbooks",
-              starter: "✗",
-              pro: "✓",
-              category: "business"
-            }, {
-              feature: "Earn Creator Revenue",
-              starter: "✗",
-              pro: "✓",
-              category: "business"
-            }, {
-              feature: "Analytics & Reporting",
-              starter: "✗",
-              pro: "Advanced",
-              category: "business"
-            }, {
-              feature: "Team Management",
-              starter: "✗",
-              pro: "✓",
-              category: "business"
-            }, {
-              feature: "Priority Support",
-              starter: "✗",
-              pro: "✓",
-              category: "business"
-            }, {
-              feature: "Fuel Discount — $0.15/gallon",
-              starter: "✗",
-              pro: "✓ ($180/year)",
-              category: "lifestyle",
-              badge: "Coming Soon"
-            }, {
-              feature: "Tire Discounts & Free Rotations",
-              starter: "✗",
-              pro: "✓ ($100/year)",
-              category: "lifestyle",
-              badge: "Coming Soon"
-            }, {
-              feature: "Car Maintenance Savings",
-              starter: "✗",
-              pro: "✓ ($75/year)",
-              category: "lifestyle",
-              badge: "Coming Soon"
-            }, {
-              feature: "Auto Insurance Discounts",
-              starter: "✗",
-              pro: "✓ ($120/year)",
-              category: "lifestyle",
-              badge: "Coming Soon"
-            }, {
-              feature: "Coffee Credits",
-              starter: "✗",
-              pro: "✓ ($300/year)",
-              category: "lifestyle",
-              badge: "Coming Soon"
-            }].map((item, index) => (
-                <div key={index} className="bg-gradient-to-r from-white to-gray-50/50 rounded-xl border border-gray-200/60 p-5 shadow-sm hover:shadow-md transition-all duration-300 animate-fade-in">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex-1">
-                      <h4 className="font-semibold text-gray-900 mb-1">{item.feature}</h4>
-                      {item.badge && (
-                        <span className="inline-block px-2 py-1 text-xs font-medium bg-amber-100 text-amber-700 rounded-full">
-                          {item.badge}
-                        </span>
-                      )}
-                    </div>
+              {/* Mobile Table Header */}
+              <div className="bg-white rounded-t-xl border border-gray-200 overflow-hidden shadow-sm">
+                <div className="grid grid-cols-[2fr_1fr_1fr] gap-0 bg-gradient-to-r from-gray-50 to-gray-100">
+                  <div className="p-4 border-r border-gray-200">
+                    <span className="font-bold text-sm text-gray-900">Features</span>
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="text-center p-3 bg-gray-50 rounded-lg border">
-                      <div className="text-xs font-medium text-gray-600 mb-2">Starter</div>
-                      <div className={`text-sm font-semibold ${
-                        item.starter === "✓" ? "text-emerald-600" : 
-                        item.starter === "✗" ? "text-gray-400" : 
-                        "text-gray-700"
-                      }`}>
-                        {item.starter === "✓" ? (
-                          <Check className="w-5 h-5 mx-auto" />
-                        ) : item.starter === "✗" ? (
-                          <X className="w-5 h-5 mx-auto" />
-                        ) : (
-                          item.starter
-                        )}
-                      </div>
-                    </div>
-                    <div className="text-center p-3 bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg border border-blue-200/60">
-                      <div className="text-xs font-medium text-blue-700 mb-2">Pro</div>
-                      <div className={`text-sm font-semibold ${
-                        item.pro.includes("✓") ? "text-emerald-600" : 
-                        item.pro === "✗" ? "text-gray-400" : 
-                        "text-blue-700"
-                      }`}>
-                        {item.pro.includes("✓") ? (
-                          <div className="flex flex-col items-center">
-                            <Check className="w-5 h-5 mb-1" />
-                            {item.pro.includes("(") && (
-                              <span className="text-xs text-blue-600 font-medium">
-                                {item.pro.match(/\((.*?)\)/)?.[1]}
-                              </span>
-                            )}
-                          </div>
-                        ) : item.pro === "✗" ? (
-                          <X className="w-5 h-5 mx-auto" />
-                        ) : (
-                          item.pro
-                        )}
-                      </div>
+                  <div className="p-4 border-r border-gray-200 text-center">
+                    <div className="font-bold text-sm text-gray-900">Starter</div>
+                    <div className="text-xs text-emerald-600 font-semibold">Free</div>
+                  </div>
+                  <div className="p-4 text-center bg-gradient-to-br from-blue-50 to-purple-50 relative">
+                    <div className="font-bold text-sm text-gray-900">Pro</div>
+                    <div className="text-xs text-blue-600 font-semibold">$97/month</div>
+                    <div className="absolute -top-1 left-1/2 transform -translate-x-1/2">
+                      <span className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-2 py-0.5 rounded-full text-xs font-semibold shadow-sm">
+                        POPULAR
+                      </span>
                     </div>
                   </div>
                 </div>
-              ))}
+
+                {/* Core Features Section */}
+                <div className="bg-gradient-to-r from-blue-50 to-purple-50 px-4 py-2 border-b border-gray-200">
+                  <span className="font-bold text-sm text-gray-900 flex items-center gap-2">
+                    <div className="w-4 h-4 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                      <span className="text-white text-xs font-bold">1</span>
+                    </div>
+                    Core Platform Features
+                  </span>
+                </div>
+
+                {[{
+                  feature: "Marketplace Access",
+                  starter: "✓",
+                  pro: "✓",
+                  description: "Browse and discover services"
+                }, {
+                  feature: "Circle Coverage",
+                  starter: "✗",
+                  pro: "✓",
+                  description: "Access premium features"
+                }, {
+                  feature: "Pro Pricing (Avg. 20% off)",
+                  starter: "✗",
+                  pro: "✓",
+                  description: "Often pays for itself with one purchase"
+                }, {
+                  feature: "CoPay Access (60% avg. discount)",
+                  starter: "✗",
+                  pro: "✓",
+                  description: "Select services with deep discounts"
+                }, {
+                  feature: "Circle Academy Access",
+                  starter: "Limited",
+                  pro: "Full Library",
+                  description: "Training and educational content"
+                }].map((item, index) => (
+                  <div key={index} className="grid grid-cols-[2fr_1fr_1fr] gap-0 border-b border-gray-200 hover:bg-gray-50/50 transition-colors">
+                    <div className="p-3 border-r border-gray-200">
+                      <div className="font-medium text-sm text-gray-900">{item.feature}</div>
+                      <div className="text-xs text-gray-600 mt-1">{item.description}</div>
+                    </div>
+                    <div className="p-3 border-r border-gray-200 text-center flex items-center justify-center">
+                      {item.starter === "✓" ? (
+                        <div className="w-5 h-5 bg-emerald-100 rounded-full flex items-center justify-center">
+                          <Check className="w-3 h-3 text-emerald-600" />
+                        </div>
+                      ) : item.starter === "✗" ? (
+                        <div className="w-5 h-5 bg-gray-100 rounded-full flex items-center justify-center">
+                          <X className="w-3 h-3 text-gray-400" />
+                        </div>
+                      ) : (
+                        <span className="text-xs font-medium text-gray-600 bg-gray-100 px-2 py-1 rounded-full">{item.starter}</span>
+                      )}
+                    </div>
+                    <div className="p-3 bg-gradient-to-br from-blue-50/30 to-purple-50/30 text-center flex items-center justify-center">
+                      {item.pro === "✓" ? (
+                        <div className="w-5 h-5 bg-emerald-100 rounded-full flex items-center justify-center">
+                          <Check className="w-3 h-3 text-emerald-600" />
+                        </div>
+                      ) : item.pro === "✗" ? (
+                        <div className="w-5 h-5 bg-gray-100 rounded-full flex items-center justify-center">
+                          <X className="w-3 h-3 text-gray-400" />
+                        </div>
+                      ) : (
+                        <span className="text-xs font-semibold text-blue-700 bg-blue-100 px-2 py-1 rounded-full">{item.pro}</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+
+                {/* Business Features Section */}
+                <div className="bg-gradient-to-r from-purple-50 to-pink-50 px-4 py-2 border-b border-gray-200">
+                  <span className="font-bold text-sm text-gray-900 flex items-center gap-2">
+                    <div className="w-4 h-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                      <span className="text-white text-xs font-bold">2</span>
+                    </div>
+                    Business Growth Features
+                  </span>
+                </div>
+
+                {[{
+                  feature: "Create & Sell Playbooks",
+                  starter: "✗",
+                  pro: "✓",
+                  description: "Share your expertise and earn"
+                }, {
+                  feature: "Earn Creator Revenue",
+                  starter: "✗",
+                  pro: "✓",
+                  description: "Monetize your content"
+                }, {
+                  feature: "Analytics & Reporting",
+                  starter: "✗",
+                  pro: "Advanced",
+                  description: "Track performance and ROI"
+                }, {
+                  feature: "Team Management",
+                  starter: "✗",
+                  pro: "✓",
+                  description: "Manage multiple team members"
+                }, {
+                  feature: "Priority Support",
+                  starter: "✗",
+                  pro: "✓",
+                  description: "Get help when you need it most"
+                }].map((item, index) => (
+                  <div key={index} className="grid grid-cols-[2fr_1fr_1fr] gap-0 border-b border-gray-200 hover:bg-gray-50/50 transition-colors">
+                    <div className="p-3 border-r border-gray-200">
+                      <div className="font-medium text-sm text-gray-900">{item.feature}</div>
+                      <div className="text-xs text-gray-600 mt-1">{item.description}</div>
+                    </div>
+                    <div className="p-3 border-r border-gray-200 text-center flex items-center justify-center">
+                      {item.starter === "✗" ? (
+                        <div className="w-5 h-5 bg-gray-100 rounded-full flex items-center justify-center">
+                          <X className="w-3 h-3 text-gray-400" />
+                        </div>
+                      ) : (
+                        <span className="text-xs font-medium text-gray-600">{item.starter}</span>
+                      )}
+                    </div>
+                    <div className="p-3 bg-gradient-to-br from-blue-50/30 to-purple-50/30 text-center flex items-center justify-center">
+                      {item.pro === "✓" ? (
+                        <div className="w-5 h-5 bg-emerald-100 rounded-full flex items-center justify-center">
+                          <Check className="w-3 h-3 text-emerald-600" />
+                        </div>
+                      ) : (
+                        <span className="text-xs font-semibold text-blue-700 bg-blue-100 px-2 py-1 rounded-full">{item.pro}</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+
+                {/* Lifestyle Benefits Section */}
+                <div className="bg-gradient-to-r from-amber-50 to-orange-50 px-4 py-2 border-b border-gray-200">
+                  <span className="font-bold text-sm text-gray-900 flex items-center gap-2">
+                    <div className="w-4 h-4 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full flex items-center justify-center">
+                      <span className="text-white text-xs font-bold">3</span>
+                    </div>
+                    Lifestyle Benefits
+                    <span className="ml-1 px-1.5 py-0.5 bg-amber-100 text-amber-700 text-xs font-medium rounded-full">Coming Soon</span>
+                  </span>
+                </div>
+
+                {[{
+                  feature: "Fuel Discount — $0.15/gallon",
+                  starter: "✗",
+                  pro: "✓ ($180/year)",
+                  description: "Save on every fill-up"
+                }, {
+                  feature: "Coffee Credits",
+                  starter: "✗",
+                  pro: "✓ ($300/year)",
+                  description: "Daily fuel for your business"
+                }, {
+                  feature: "Car Wash & Detailing",
+                  starter: "✗",
+                  pro: "✓ ($240/year)",
+                  description: "Keep your vehicle professional"
+                }, {
+                  feature: "Gym Membership Discounts",
+                  starter: "✗",
+                  pro: "✓ ($120/year)",
+                  description: "Stay healthy and energized"
+                }, {
+                  feature: "Hotel & Travel Discounts",
+                  starter: "✗",
+                  pro: "✓ ($450+/year)",
+                  description: "Business travel savings"
+                }].map((item, index, array) => (
+                  <div key={index} className={`grid grid-cols-[2fr_1fr_1fr] gap-0 hover:bg-gray-50/50 transition-colors ${
+                    index === array.length - 1 ? '' : 'border-b border-gray-200'
+                  }`}>
+                    <div className="p-3 border-r border-gray-200">
+                      <div className="font-medium text-sm text-gray-900">{item.feature}</div>
+                      <div className="text-xs text-gray-600 mt-1">{item.description}</div>
+                    </div>
+                    <div className="p-3 border-r border-gray-200 text-center flex items-center justify-center">
+                      <div className="w-5 h-5 bg-gray-100 rounded-full flex items-center justify-center">
+                        <X className="w-3 h-3 text-gray-400" />
+                      </div>
+                    </div>
+                    <div className="p-3 bg-gradient-to-br from-blue-50/30 to-purple-50/30 text-center flex items-center justify-center">
+                      <div className="flex flex-col items-center">
+                        <div className="w-5 h-5 bg-emerald-100 rounded-full flex items-center justify-center mb-1">
+                          <Check className="w-3 h-3 text-emerald-600" />
+                        </div>
+                        <span className="text-xs text-blue-600 font-medium">
+                          {item.pro.match(/\((.*?)\)/)?.[1]}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
 
             {/* Desktop: Enhanced Features Comparison Table */}
