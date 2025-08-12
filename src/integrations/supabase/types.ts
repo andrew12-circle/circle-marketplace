@@ -381,6 +381,66 @@ export type Database = {
           },
         ]
       }
+      ai_interaction_logs: {
+        Row: {
+          created_at: string | null
+          id: string
+          intent_type: string
+          interaction_timestamp: string
+          query_text: string
+          recommendation_text: string | null
+          result_type: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          intent_type: string
+          interaction_timestamp: string
+          query_text: string
+          recommendation_text?: string | null
+          result_type: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          intent_type?: string
+          interaction_timestamp?: string
+          query_text?: string
+          recommendation_text?: string | null
+          result_type?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      ai_query_patterns: {
+        Row: {
+          created_at: string | null
+          frequency: number | null
+          id: string
+          intent_type: string
+          keywords: string[]
+          last_seen: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          frequency?: number | null
+          id?: string
+          intent_type: string
+          keywords: string[]
+          last_seen?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          frequency?: number | null
+          id?: string
+          intent_type?: string
+          keywords?: string[]
+          last_seen?: string | null
+        }
+        Relationships: []
+      }
       ai_recommendation_log: {
         Row: {
           context_data: Json | null
@@ -3666,6 +3726,47 @@ export type Database = {
         }
         Relationships: []
       }
+      service_outcome_tracking: {
+        Row: {
+          agent_id: string | null
+          created_at: string | null
+          id: string
+          outcome_type: string
+          outcome_value: number | null
+          roi_percentage: number | null
+          service_id: string | null
+          tracked_at: string | null
+        }
+        Insert: {
+          agent_id?: string | null
+          created_at?: string | null
+          id?: string
+          outcome_type: string
+          outcome_value?: number | null
+          roi_percentage?: number | null
+          service_id?: string | null
+          tracked_at?: string | null
+        }
+        Update: {
+          agent_id?: string | null
+          created_at?: string | null
+          id?: string
+          outcome_type?: string
+          outcome_value?: number | null
+          roi_percentage?: number | null
+          service_id?: string | null
+          tracked_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_outcome_tracking_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       service_provider_availability: {
         Row: {
           availability_message: string | null
@@ -4644,6 +4745,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_ai_preferences: {
+        Row: {
+          created_at: string | null
+          frequency: number | null
+          id: string
+          intent_type: string
+          last_query: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          frequency?: number | null
+          id?: string
+          intent_type: string
+          last_query?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          frequency?: number | null
+          id?: string
+          intent_type?: string
+          last_query?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
       }
       vendor_agent_activities: {
         Row: {
