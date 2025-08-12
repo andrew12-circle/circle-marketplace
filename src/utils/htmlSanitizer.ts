@@ -15,49 +15,49 @@ const ALLOWED_ATTRIBUTES: Record<string, string[]> = {};
 
 // Simple HTML sanitizer that removes potentially dangerous content
 export const sanitizeHTML = (html: string): string => {
-  // Create a DOM parser
+  if (!html) return '';
   const parser = new DOMParser();
   const doc = parser.parseFromString(html, 'text/html');
-  
+  const root = doc.body; // Work only within body to avoid touching document/html/head
+
   // Remove script tags and event handlers
-  const scripts = doc.querySelectorAll('script');
-  scripts.forEach(script => script.remove());
-  
+  root.querySelectorAll('script').forEach((script) => script.remove());
+
   // Remove all elements with javascript: links
-  const links = doc.querySelectorAll('a[href^="javascript:"]');
-  links.forEach(link => link.remove());
-  
-  // Remove event handlers (onclick, onload, etc.)
-  const allElements = doc.querySelectorAll('*');
-  allElements.forEach(element => {
-    // Remove all event handler attributes
-    Array.from(element.attributes).forEach(attr => {
-      if (attr.name.startsWith('on')) {
-        element.removeAttribute(attr.name);
-      }
+  root.querySelectorAll('a[href^="javascript:"]').forEach((link) => link.remove());
+
+  // Sanitize all elements inside body only
+  const allElements = root.querySelectorAll('*');
+  allElements.forEach((element) => {
+    // Strip event handler attributes
+    Array.from(element.attributes).forEach((attr) => {
+      if (attr.name.startsWith('on')) element.removeAttribute(attr.name);
     });
-    
-    // Remove style attributes to prevent CSS injection
+
+    // Remove inline styles
     element.removeAttribute('style');
-    
+
+    const tag = element.tagName.toLowerCase();
     // Only allow specific tags
-    if (!ALLOWED_TAGS.includes(element.tagName.toLowerCase())) {
-      // For non-allowed tags, replace with their text content
+    if (!ALLOWED_TAGS.includes(tag)) {
       const textNode = doc.createTextNode(element.textContent || '');
-      element.parentNode?.replaceChild(textNode, element);
+      if (element.parentNode && element.parentNode.nodeType === Node.ELEMENT_NODE) {
+        element.parentNode.replaceChild(textNode, element);
+      } else {
+        // Fallback: if somehow no safe parent, just remove the element
+        element.remove();
+      }
       return;
     }
-    
+
     // Only allow specific attributes for allowed tags
-    const allowedAttrs = ALLOWED_ATTRIBUTES[element.tagName.toLowerCase() as keyof typeof ALLOWED_ATTRIBUTES] || [];
-    Array.from(element.attributes).forEach(attr => {
-      if (!allowedAttrs.includes(attr.name)) {
-        element.removeAttribute(attr.name);
-      }
+    const allowedAttrs = ALLOWED_ATTRIBUTES[tag as keyof typeof ALLOWED_ATTRIBUTES] || [];
+    Array.from(element.attributes).forEach((attr) => {
+      if (!allowedAttrs.includes(attr.name)) element.removeAttribute(attr.name);
     });
   });
-  
-  return doc.body.innerHTML;
+
+  return root.innerHTML;
 };
 
 // React component for safe HTML rendering
