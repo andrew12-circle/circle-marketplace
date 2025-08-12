@@ -459,26 +459,45 @@ export const ServiceFunnelModal = ({
 
                     {/* Additional Media Grid */}
                     <div className="grid grid-cols-4 gap-2 mt-3">
-                      <div className="aspect-video bg-white/10 backdrop-blur-sm rounded-lg overflow-hidden border border-white/20 cursor-pointer hover-scale">
-                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-600/20 to-purple-600/20">
-                          <Play className="w-8 h-8 text-white/60" />
-                        </div>
-                      </div>
-                      <div className="aspect-video bg-white/10 backdrop-blur-sm rounded-lg overflow-hidden border border-white/20 cursor-pointer hover-scale">
-                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-purple-600/20 to-pink-600/20">
-                          <TrendingUp className="w-8 h-8 text-white/60" />
-                        </div>
-                      </div>
-                      <div className="aspect-video bg-white/10 backdrop-blur-sm rounded-lg overflow-hidden border border-white/20 cursor-pointer hover-scale">
-                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-green-600/20 to-blue-600/20">
-                          <Users className="w-8 h-8 text-white/60" />
-                        </div>
-                      </div>
-                      <div className="aspect-video bg-white/10 backdrop-blur-sm rounded-lg overflow-hidden border border-white/20 cursor-pointer hover-scale">
-                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-orange-600/20 to-red-600/20">
-                          <Trophy className="w-8 h-8 text-white/60" />
-                        </div>
-                      </div>
+                      {(() => {
+                        const media: Array<{ url: string; type: 'image' | 'video'; title?: string }> = Array.isArray(fc?.media) ? fc.media : [];
+                        const thumbs = media.slice(1, 5); // show next up to 4 items (first is in the main player)
+                        if (!thumbs.length) return null;
+                        return thumbs.map((m, idx) => {
+                          const youTubeId = getYouTubeId(m.url);
+                          const isVideo = m.type === 'video' || !!youTubeId || /\.(mp4|webm|ogg)$/i.test(m.url || '');
+                          const thumbUrl = youTubeId
+                            ? `https://i.ytimg.com/vi/${youTubeId}/hqdefault.jpg`
+                            : m.url;
+                          return (
+                            <button
+                              key={`${m.url}-${idx}`}
+                              type="button"
+                              onClick={() => setActiveMediaUrl(m.url)}
+                              className="relative aspect-video bg-white/10 backdrop-blur-sm rounded-lg overflow-hidden border border-white/20 cursor-pointer hover-scale"
+                              aria-label={m.title || (isVideo ? 'Play video' : 'View image')}
+                            >
+                              {thumbUrl ? (
+                                <img
+                                  src={thumbUrl}
+                                  alt={m.title || (isVideo ? 'Video thumbnail' : 'Image thumbnail')}
+                                  className="w-full h-full object-cover"
+                                  loading="lazy"
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-600/20 to-purple-600/20">
+                                  <Play className="w-8 h-8 text-white/60" />
+                                </div>
+                              )}
+                              {isVideo && (
+                                <div className="absolute inset-0 flex items-center justify-center bg-black/0 hover:bg-black/10 transition-colors">
+                                  <Play className="w-7 h-7 text-white drop-shadow" />
+                                </div>
+                              )}
+                            </button>
+                          );
+                        });
+                      })()}
                     </div>
 
                     {/* Vendor Logo */}
