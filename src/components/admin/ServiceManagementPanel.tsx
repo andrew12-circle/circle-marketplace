@@ -505,6 +505,10 @@ export const ServiceManagementPanel = () => {
         direct_purchase_enabled: !!editForm.direct_purchase_enabled,
         respa_split_limit: respa,
         max_split_percentage_non_ssp: nonSsp,
+        retail_price: editForm.retail_price ?? null,
+        pro_price: editForm.pro_price ?? null,
+        price_duration: editForm.price_duration ?? null,
+        tags: Array.isArray(editForm.tags) ? editForm.tags : null,
         updated_at: new Date().toISOString()
       };
 
@@ -722,7 +726,7 @@ export const ServiceManagementPanel = () => {
   };
 
   // Track unsaved changes in Details form
-  const detailKeys = ['title','description','category','duration','estimated_roi','sort_order','is_featured','is_top_pick','is_verified','requires_quote','copay_allowed','direct_purchase_enabled','respa_split_limit','max_split_percentage_non_ssp'] as const;
+  const detailKeys = ['title','description','category','duration','estimated_roi','sort_order','is_featured','is_top_pick','is_verified','requires_quote','copay_allowed','direct_purchase_enabled','respa_split_limit','max_split_percentage_non_ssp','retail_price','pro_price','price_duration','tags'] as const;
   const isDetailsDirty = selectedService ? detailKeys.some((k) => (editForm as any)[k] !== (selectedService as any)[k]) : false;
 
   if (loading) {
@@ -961,7 +965,43 @@ export const ServiceManagementPanel = () => {
                       </div>
                     </div>
 
-                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+                    {/* Pricing and Tags */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">List Price</label>
+                        <Input
+                          value={editForm.retail_price ?? ''}
+                          onChange={(e) => setEditForm({ ...editForm, retail_price: e.target.value })}
+                          placeholder="$1,497.00"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Pro Price</label>
+                        <Input
+                          value={editForm.pro_price ?? ''}
+                          onChange={(e) => setEditForm({ ...editForm, pro_price: e.target.value })}
+                          placeholder="$1,347.00"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Price Duration</label>
+                        <Input
+                          value={editForm.price_duration ?? ''}
+                          onChange={(e) => setEditForm({ ...editForm, price_duration: e.target.value })}
+                          placeholder="mo"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Tags (comma-separated)</label>
+                      <Input
+                        value={(editForm.tags && Array.isArray(editForm.tags)) ? (editForm.tags as string[]).join(', ') : ''}
+                        onChange={(e) => setEditForm({ ...editForm, tags: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })}
+                        placeholder="Website, Branding, Luxury"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
                      <div className="flex items-center space-x-2">
                        <Switch
                          checked={editForm.is_verified || false}
