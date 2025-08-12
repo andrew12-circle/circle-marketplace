@@ -351,25 +351,75 @@ export const Pricing = () => {
                   pro: "✓ ($180/year)",
                   description: "Save on every fill-up"
                 }, {
-                  feature: "Coffee Credits",
+                  feature: "Tire Discounts & Free Rotations",
                   starter: "✗",
-                  pro: "✓ ($300/year)",
-                  description: "Daily fuel for your business"
+                  pro: "✓ ($100/year)",
+                  description: "Maintain your vehicle for less"
+                }, {
+                  feature: "Car Maintenance Savings",
+                  starter: "✗",
+                  pro: "✓ ($75/year)",
+                  description: "Discounted repairs and service"
+                }, {
+                  feature: "Auto Insurance Discounts",
+                  starter: "✗",
+                  pro: "✓ ($120/year)",
+                  description: "Lower premiums on coverage"
                 }, {
                   feature: "Car Wash & Detailing",
                   starter: "✗",
                   pro: "✓ ($240/year)",
                   description: "Keep your vehicle professional"
                 }, {
-                  feature: "Gym Membership Discounts",
+                  feature: "Roadside Assistance Coverage",
+                  starter: "✗",
+                  pro: "✓ ($75/year)",
+                  description: "Peace of mind on the road"
+                }, {
+                  feature: "Laptop & Device Discounts",
+                  starter: "✗",
+                  pro: "✓ ($150/year)",
+                  description: "Tech gear for your business"
+                }, {
+                  feature: "Phone Plan Discounts",
                   starter: "✗",
                   pro: "✓ ($120/year)",
-                  description: "Stay healthy and energized"
+                  description: "Save on your mobile service"
+                }, {
+                  feature: "Coworking Space Passes",
+                  starter: "✗",
+                  pro: "✓ ($200/year)",
+                  description: "Professional workspace access"
+                }, {
+                  feature: "Office Supply Discounts",
+                  starter: "✗",
+                  pro: "✓ ($100/year)",
+                  description: "Business essentials for less"
+                }, {
+                  feature: "Event Ticket Discounts",
+                  starter: "✗",
+                  pro: "✓ ($100/year)",
+                  description: "Entertainment and networking events"
+                }, {
+                  feature: "Floral Delivery Discounts",
+                  starter: "✗",
+                  pro: "✓ ($60/year)",
+                  description: "Client appreciation and gifts"
                 }, {
                   feature: "Hotel & Travel Discounts",
                   starter: "✗",
                   pro: "✓ ($450+/year)",
-                  description: "Business travel savings"
+                  description: "Business travel accommodations"
+                }, {
+                  feature: "Coffee Credits",
+                  starter: "✗",
+                  pro: "✓ ($300/year)",
+                  description: "Daily fuel for your business"
+                }, {
+                  feature: "Gym Membership Discounts",
+                  starter: "✗",
+                  pro: "✓ ($120/year)",
+                  description: "Stay healthy and energized"
                 }].map((item, index, array) => (
                   <div key={index} className={`grid grid-cols-[2fr_1fr_1fr] gap-0 hover:bg-gray-50/50 transition-colors ${
                     index === array.length - 1 ? '' : 'border-b border-gray-200'
