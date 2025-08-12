@@ -2448,6 +2448,60 @@ export type Database = {
           },
         ]
       }
+      goal_plans: {
+        Row: {
+          budget_max: number | null
+          budget_min: number | null
+          confidence: number | null
+          created_at: string
+          goal_description: string | null
+          goal_title: string
+          id: string
+          kpis: Json
+          model_used: string | null
+          plan: Json
+          recommended_service_ids: string[]
+          status: string
+          timeframe_weeks: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          budget_max?: number | null
+          budget_min?: number | null
+          confidence?: number | null
+          created_at?: string
+          goal_description?: string | null
+          goal_title: string
+          id?: string
+          kpis?: Json
+          model_used?: string | null
+          plan: Json
+          recommended_service_ids?: string[]
+          status?: string
+          timeframe_weeks?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          budget_max?: number | null
+          budget_min?: number | null
+          confidence?: number | null
+          created_at?: string
+          goal_description?: string | null
+          goal_title?: string
+          id?: string
+          kpis?: Json
+          model_used?: string | null
+          plan?: Json
+          recommended_service_ids?: string[]
+          status?: string
+          timeframe_weeks?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       image_cache: {
         Row: {
           cached_url: string
