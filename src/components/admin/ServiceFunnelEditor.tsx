@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -119,19 +120,41 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
     }
   }, [service]);
 
+  // Helper: enforce a max time to wait for save to complete
+  const saveWithTimeout = <T,>(promise: Promise<T>, ms = 20000): Promise<T> => {
+    let timeoutId: number | undefined;
+    const timeout = new Promise<never>((_, reject) => {
+      timeoutId = window.setTimeout(() => {
+        reject(new Error("Save timed out. Please try again."));
+      }, ms);
+    });
+    return Promise.race([promise, timeout]).finally(() => {
+      if (timeoutId) window.clearTimeout(timeoutId);
+    }) as Promise<T>;
+  };
+
   const handleSave = async () => {
+    console.log("[Admin ServiceFunnelEditor] Save started", {
+      serviceId: service.id,
+      hasChanges,
+    });
     setIsSaving(true);
     try {
-      const { error } = await supabase
-        .from('services')
-        .update({
-          funnel_content: funnelData,
-          pricing_tiers: pricingTiers,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', service.id);
+      const response = await saveWithTimeout(
+        supabase
+          .from('services')
+          .update({
+            funnel_content: funnelData,
+            pricing_tiers: pricingTiers,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', service.id),
+        20000
+      );
 
-      if (error) throw error;
+      if ((response as any)?.error) {
+        throw (response as any).error;
+      }
 
       const updatedService = {
         ...service,
@@ -141,20 +164,22 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
 
       onUpdate(updatedService);
       setHasChanges(false);
-      
+
+      console.log("[Admin ServiceFunnelEditor] Save success");
       toast({
         title: "Funnel Updated Successfully",
         description: "All changes have been saved to the service funnel.",
       });
-    } catch (error) {
-      console.error('Error saving funnel:', error);
+    } catch (error: any) {
+      console.error('[Admin ServiceFunnelEditor] Error saving funnel:', error);
       toast({
         title: "Save Failed",
-        description: "There was an error saving the funnel. Please try again.",
+        description: error?.message || "There was an error saving the funnel. Please try again.",
         variant: "destructive",
       });
     } finally {
       setIsSaving(false);
+      console.log("[Admin ServiceFunnelEditor] Save finished (spinner cleared)");
     }
   };
 
