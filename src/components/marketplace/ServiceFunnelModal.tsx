@@ -106,6 +106,7 @@ interface Service {
     requestPricing?: boolean;
   }>;
   vendor: {
+    id?: string;
     name: string;
     rating: number;
     review_count: number;
@@ -1051,20 +1052,20 @@ export const ServiceFunnelModal = ({
                            Book Consultation
                          </Button>
                          
-                          <Button 
-                            variant="outline" 
-                            onClick={() => {
-                              const rawUrl = service.vendor?.website_url || service.website_url;
-                              if (rawUrl) {
-                                trackWebsiteClick(rawUrl, undefined, 'vendor_website');
-                              }
-                            }}
-                            disabled={!service.vendor?.website_url && !service.website_url}
-                            className="w-full border-2 border-gray-300 hover:border-gray-400 py-3 rounded-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                             <Building className="w-5 h-5 mr-2" />
-                             {(service.vendor?.website_url || service.website_url) ? 'View Website' : 'Website Not Available'}
-                           </Button>
+                           <Button 
+                             variant="outline" 
+                             onClick={() => {
+                               const rawUrl = service.vendor?.website_url || service.website_url;
+                               if (rawUrl) {
+                                 trackWebsiteClick(rawUrl, service.vendor?.id, 'vendor_website');
+                               }
+                             }}
+                             disabled={!service.vendor?.website_url && !service.website_url}
+                             className="w-full border-2 border-gray-300 hover:border-gray-400 py-3 rounded-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                           >
+                              <Building className="w-5 h-5 mr-2" />
+                              {(service.vendor?.website_url || service.website_url) ? 'View Website' : 'Website Not Available'}
+                            </Button>
                          
                          
                              <Button 
