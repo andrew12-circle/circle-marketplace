@@ -220,7 +220,7 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
             updated_at: new Date().toISOString()
           })
           .eq('id', service.id),
-        30000
+        60000  // Increased timeout to 60 seconds
       );
 
       if ((response as any)?.error) {
@@ -332,10 +332,7 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
                 Reset
               </Button>
               <Button 
-                onClick={() => {
-                  console.log('[Debug] Save clicked, hasChanges:', hasChanges, 'isSaving:', isSaving);
-                  handleSave();
-                }} 
+                onClick={handleSave} 
                 disabled={!hasChanges || isSaving}
                 size="sm"
               >
