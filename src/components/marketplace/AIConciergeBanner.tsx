@@ -164,14 +164,14 @@ export const AIConciergeBanner = () => {
             {showRecommendationsDashboard && (profile as any)?.onboarding_completed && <AIRecommendationsDashboard />}
 
             {/* Call to Action for Non-Authenticated Users */}
-            {!user && <div className="text-center space-y-4">
-                <div className="flex items-center justify-center gap-2 text-muted-foreground">
+            {!user && <div className="text-center">
+                <div className="flex flex-wrap items-center justify-center gap-3 text-muted-foreground">
                   <Target className="h-4 w-4" />
                   <span>Get personalized recommendations based on your goals & data from 300,000 successful agents</span>
+                  <Button onClick={() => navigate("/pricing")} size="sm" className="bg-primary hover:bg-primary/90">
+                    Create Free Account
+                  </Button>
                 </div>
-                <Button onClick={() => navigate("/pricing")} className="bg-primary hover:bg-primary/90">
-                  Create Free Account
-                </Button>
               </div>}
           </div>
         </CardContent>
