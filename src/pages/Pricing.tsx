@@ -104,9 +104,6 @@ export const Pricing = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12 md:mb-16">
             
-            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
-              Whether you're just getting started or scaling a top-producing team, Circle has a plan to help you grow.
-            </p>
           </div>
 
           <div className="max-w-6xl mx-auto">
