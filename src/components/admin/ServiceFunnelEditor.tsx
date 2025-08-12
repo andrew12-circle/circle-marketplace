@@ -135,6 +135,36 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
     }) as Promise<T>;
   };
 
+  // Sanitize funnel payload to avoid non-serializable values and trim fields
+  const sanitizeFunnel = (data: any) => {
+    const prune = (val: any): any => {
+      if (val === null) return null;
+      if (typeof val === 'undefined') return null;
+      if (typeof val === 'function') return undefined;
+      if (val instanceof Date) return val.toISOString();
+      if (Array.isArray(val)) return val.map(prune).filter((v) => v !== undefined);
+      if (typeof val === 'object') {
+        const out: any = {};
+        for (const key of Object.keys(val)) {
+          const v = prune((val as any)[key]);
+          if (v !== undefined) out[key] = v;
+        }
+        return out;
+      }
+      return val;
+    };
+    const cleaned: any = prune(data) ?? {};
+    if (Array.isArray(cleaned.media)) {
+      cleaned.media = cleaned.media.map((m: any) => ({
+        url: m?.url ?? '',
+        type: m?.type === 'video' ? 'video' : 'image',
+        title: m?.title ?? '',
+        description: m?.description ?? ''
+      }));
+    }
+    return cleaned;
+  };
+
   const handleSave = async () => {
     console.log("[Admin ServiceFunnelEditor] Save started", {
       serviceId: service.id,
@@ -142,12 +172,17 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
     });
     setIsSaving(true);
     try {
+      const sanitizedFunnel = sanitizeFunnel(funnelData);
+      const sanitizedPricing = JSON.parse(JSON.stringify(pricingTiers || []));
+      const approxSizeKb = Math.round((JSON.stringify(sanitizedFunnel).length + JSON.stringify(sanitizedPricing).length) / 1024);
+      console.log("[Admin ServiceFunnelEditor] Payload size ~", approxSizeKb, "KB");
+
       const response = await saveWithTimeout(
         supabase
           .from('services')
           .update({
-            funnel_content: funnelData,
-            pricing_tiers: pricingTiers,
+            funnel_content: sanitizedFunnel,
+            pricing_tiers: sanitizedPricing,
             updated_at: new Date().toISOString()
           })
           .eq('id', service.id)
