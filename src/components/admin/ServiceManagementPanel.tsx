@@ -453,14 +453,26 @@ export const ServiceManagementPanel = () => {
   const handleServiceUpdate = async () => {
     if (!selectedService) return;
 
+    // Basic required field validation to prevent silent failures
+    if (!editForm.title || !editForm.category) {
+      toast({
+        title: 'Missing required fields',
+        description: 'Please provide both Title and Category before saving.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     try {
         // Auto-calculate co_pay_price based on pro_price and SSP split percentage
-        let calculatedCoPayPrice = null;
+        let calculatedCoPayPrice: string | null = null;
         if (editForm.pro_price && editForm.respa_split_limit) {
           const proPrice = parseFloat(editForm.pro_price.replace(/[^\d.]/g, ''));
           const splitPercentage = editForm.respa_split_limit;
-          const coPayAmount = proPrice * (1 - (splitPercentage / 100));
-          calculatedCoPayPrice = coPayAmount.toFixed(2);
+          if (!Number.isNaN(proPrice) && typeof splitPercentage === 'number') {
+            const coPayAmount = proPrice * (1 - (splitPercentage / 100));
+            calculatedCoPayPrice = coPayAmount.toFixed(2);
+          }
         }
 
       // Prepare update data with direct field mapping
@@ -471,14 +483,14 @@ export const ServiceManagementPanel = () => {
         duration: editForm.duration,
         estimated_roi: editForm.estimated_roi || null,
         sort_order: editForm.sort_order || null,
-        is_featured: editForm.is_featured || false,
-        is_top_pick: editForm.is_top_pick || false,
-        is_verified: editForm.is_verified || false,
-        requires_quote: editForm.requires_quote || false,
-        copay_allowed: editForm.copay_allowed || false, // Use database field name
-        direct_purchase_enabled: editForm.direct_purchase_enabled || false,
-        respa_split_limit: editForm.respa_split_limit || null,
-        max_split_percentage_non_ssp: editForm.max_split_percentage_non_ssp || null,
+        is_featured: !!editForm.is_featured,
+        is_top_pick: !!editForm.is_top_pick,
+        is_verified: !!editForm.is_verified,
+        requires_quote: !!editForm.requires_quote,
+        copay_allowed: !!editForm.copay_allowed, // Use database field name
+        direct_purchase_enabled: !!editForm.direct_purchase_enabled,
+        respa_split_limit: editForm.respa_split_limit ?? null,
+        max_split_percentage_non_ssp: editForm.max_split_percentage_non_ssp ?? null,
         co_pay_price: calculatedCoPayPrice
       };
 
@@ -517,14 +529,20 @@ export const ServiceManagementPanel = () => {
       setIsEditingDetails(false);
       
       toast({
-        title: "Success",
-        description: "Service updated successfully",
+        title: 'Success',
+        description: 'Service updated successfully',
       });
     } catch (error) {
       console.error('Error updating service:', error);
+      const err: any = error;
+      const code = err?.code || err?.status || '';
+      const details = err?.details || err?.hint || err?.message || 'Failed to update service';
+      const permissionHint = (typeof details === 'string' && details.toLowerCase().includes('permission')) || code === '42501';
       toast({
         title: 'Error',
-        description: 'Failed to update service',
+        description: permissionHint
+          ? 'You do not have permission to update services. Please ensure you are signed in as an admin.'
+          : `${details}${code ? ` (code: ${code})` : ''}`,
         variant: 'destructive',
       });
     }
