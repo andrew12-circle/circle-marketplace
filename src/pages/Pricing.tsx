@@ -351,14 +351,229 @@ export const Pricing = () => {
                   <Check className="w-6 h-6 text-emerald-500 mx-auto" />
                 </div>
 
-                <div className="bg-muted/30 p-4 border-r rounded-bl-xl">
+                <div className="bg-muted/30 p-4 border-r border-b">
                   <span className="font-semibold text-foreground">Priority Support</span>
+                </div>
+                <div className="p-4 border-r border-b text-center bg-card">
+                  <X className="w-6 h-6 text-muted-foreground mx-auto" />
+                </div>
+                <div className="p-4 border-b text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50">
+                  <Check className="w-6 h-6 text-emerald-500 mx-auto" />
+                </div>
+
+                {/* Coming Soon Features Section */}
+                <div className="bg-muted/20 p-4 border-r border-b col-span-3">
+                  <span className="font-bold text-lg text-foreground">Lifestyle Benefits (Coming Soon)</span>
+                </div>
+
+                <div className="bg-muted/30 p-4 border-r border-b">
+                  <span className="font-semibold text-foreground">Fuel Discount — $0.15 per gallon</span>
+                </div>
+                <div className="p-4 border-r border-b text-center bg-card">
+                  <X className="w-6 h-6 text-muted-foreground mx-auto" />
+                </div>
+                <div className="p-4 border-b text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50">
+                  <span className="text-foreground font-semibold">✓ (Est. $180/year)</span>
+                </div>
+
+                <div className="bg-muted/30 p-4 border-r border-b">
+                  <span className="font-semibold text-foreground">Nationwide Tire Discounts & Free Rotations</span>
+                </div>
+                <div className="p-4 border-r border-b text-center bg-card">
+                  <X className="w-6 h-6 text-muted-foreground mx-auto" />
+                </div>
+                <div className="p-4 border-b text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50">
+                  <span className="text-foreground font-semibold">✓ (Est. $100/year)</span>
+                </div>
+
+                <div className="bg-muted/30 p-4 border-r border-b">
+                  <span className="font-semibold text-foreground">Car Maintenance Savings</span>
+                </div>
+                <div className="p-4 border-r border-b text-center bg-card">
+                  <X className="w-6 h-6 text-muted-foreground mx-auto" />
+                </div>
+                <div className="p-4 border-b text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50">
+                  <span className="text-foreground font-semibold">✓ (Est. $75/year)</span>
+                </div>
+
+                <div className="bg-muted/30 p-4 border-r border-b">
+                  <span className="font-semibold text-foreground">Auto Insurance Discounts</span>
+                </div>
+                <div className="p-4 border-r border-b text-center bg-card">
+                  <X className="w-6 h-6 text-muted-foreground mx-auto" />
+                </div>
+                <div className="p-4 border-b text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50">
+                  <span className="text-foreground font-semibold">✓ (Est. $120/year)</span>
+                </div>
+
+                <div className="bg-muted/30 p-4 border-r border-b">
+                  <span className="font-semibold text-foreground">Car Wash & Detailing Memberships</span>
+                </div>
+                <div className="p-4 border-r border-b text-center bg-card">
+                  <X className="w-6 h-6 text-muted-foreground mx-auto" />
+                </div>
+                <div className="p-4 border-b text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50">
+                  <span className="text-foreground font-semibold">✓ (Est. $240/year)</span>
+                </div>
+
+                <div className="bg-muted/30 p-4 border-r border-b">
+                  <span className="font-semibold text-foreground">Roadside Assistance Coverage</span>
+                </div>
+                <div className="p-4 border-r border-b text-center bg-card">
+                  <X className="w-6 h-6 text-muted-foreground mx-auto" />
+                </div>
+                <div className="p-4 border-b text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50">
+                  <span className="text-foreground font-semibold">✓ (Est. $75/year)</span>
+                </div>
+
+                <div className="bg-muted/30 p-4 border-r border-b">
+                  <span className="font-semibold text-foreground">Laptop & Device Discounts</span>
+                </div>
+                <div className="p-4 border-r border-b text-center bg-card">
+                  <X className="w-6 h-6 text-muted-foreground mx-auto" />
+                </div>
+                <div className="p-4 border-b text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50">
+                  <span className="text-foreground font-semibold">✓ (Est. $150/year)</span>
+                </div>
+
+                <div className="bg-muted/30 p-4 border-r border-b">
+                  <span className="font-semibold text-foreground">Phone Plan Discounts</span>
+                </div>
+                <div className="p-4 border-r border-b text-center bg-card">
+                  <X className="w-6 h-6 text-muted-foreground mx-auto" />
+                </div>
+                <div className="p-4 border-b text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50">
+                  <span className="text-foreground font-semibold">✓ (Est. $120/year)</span>
+                </div>
+
+                <div className="bg-muted/30 p-4 border-r border-b">
+                  <span className="font-semibold text-foreground">Coworking Space Passes</span>
+                </div>
+                <div className="p-4 border-r border-b text-center bg-card">
+                  <X className="w-6 h-6 text-muted-foreground mx-auto" />
+                </div>
+                <div className="p-4 border-b text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50">
+                  <span className="text-foreground font-semibold">✓ (Est. $200/year)</span>
+                </div>
+
+                <div className="bg-muted/30 p-4 border-r border-b">
+                  <span className="font-semibold text-foreground">Office Supply Discounts</span>
+                </div>
+                <div className="p-4 border-r border-b text-center bg-card">
+                  <X className="w-6 h-6 text-muted-foreground mx-auto" />
+                </div>
+                <div className="p-4 border-b text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50">
+                  <span className="text-foreground font-semibold">✓ (Est. $100/year)</span>
+                </div>
+
+                <div className="bg-muted/30 p-4 border-r border-b">
+                  <span className="font-semibold text-foreground">Event Ticket Discounts</span>
+                </div>
+                <div className="p-4 border-r border-b text-center bg-card">
+                  <X className="w-6 h-6 text-muted-foreground mx-auto" />
+                </div>
+                <div className="p-4 border-b text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50">
+                  <span className="text-foreground font-semibold">✓ (Est. $100/year)</span>
+                </div>
+
+                <div className="bg-muted/30 p-4 border-r border-b">
+                  <span className="font-semibold text-foreground">Floral Delivery Discounts</span>
+                </div>
+                <div className="p-4 border-r border-b text-center bg-card">
+                  <X className="w-6 h-6 text-muted-foreground mx-auto" />
+                </div>
+                <div className="p-4 border-b text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50">
+                  <span className="text-foreground font-semibold">✓ (Est. $60/year)</span>
+                </div>
+
+                <div className="bg-muted/30 p-4 border-r border-b">
+                  <span className="font-semibold text-foreground">Hotel Discounts</span>
+                </div>
+                <div className="p-4 border-r border-b text-center bg-card">
+                  <X className="w-6 h-6 text-muted-foreground mx-auto" />
+                </div>
+                <div className="p-4 border-b text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50">
+                  <span className="text-foreground font-semibold">✓ (Est. $150/year)</span>
+                </div>
+
+                <div className="bg-muted/30 p-4 border-r border-b">
+                  <span className="font-semibold text-foreground">Airline Discounts</span>
+                </div>
+                <div className="p-4 border-r border-b text-center bg-card">
+                  <X className="w-6 h-6 text-muted-foreground mx-auto" />
+                </div>
+                <div className="p-4 border-b text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50">
+                  <span className="text-foreground font-semibold">✓ (Est. $150/year)</span>
+                </div>
+
+                <div className="bg-muted/30 p-4 border-r border-b">
+                  <span className="font-semibold text-foreground">Vacation Packages</span>
+                </div>
+                <div className="p-4 border-r border-b text-center bg-card">
+                  <X className="w-6 h-6 text-muted-foreground mx-auto" />
+                </div>
+                <div className="p-4 border-b text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50">
+                  <span className="text-foreground font-semibold">✓ (Est. $150/year)</span>
+                </div>
+
+                <div className="bg-muted/30 p-4 border-r border-b">
+                  <span className="font-semibold text-foreground">Theme Park Discounts</span>
+                </div>
+                <div className="p-4 border-r border-b text-center bg-card">
+                  <X className="w-6 h-6 text-muted-foreground mx-auto" />
+                </div>
+                <div className="p-4 border-b text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50">
+                  <span className="text-foreground font-semibold">✓ (Est. $100/year)</span>
+                </div>
+
+                <div className="bg-muted/30 p-4 border-r border-b">
+                  <span className="font-semibold text-foreground">Gym Membership Discounts</span>
+                </div>
+                <div className="p-4 border-r border-b text-center bg-card">
+                  <X className="w-6 h-6 text-muted-foreground mx-auto" />
+                </div>
+                <div className="p-4 border-b text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50">
+                  <span className="text-foreground font-semibold">✓ (Est. $120/year)</span>
+                </div>
+
+                <div className="bg-muted/30 p-4 border-r border-b">
+                  <span className="font-semibold text-foreground">Wellness App Subscriptions</span>
+                </div>
+                <div className="p-4 border-r border-b text-center bg-card">
+                  <X className="w-6 h-6 text-muted-foreground mx-auto" />
+                </div>
+                <div className="p-4 border-b text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50">
+                  <span className="text-foreground font-semibold">✓ (Est. $60/year)</span>
+                </div>
+
+                <div className="bg-muted/30 p-4 border-r border-b">
+                  <span className="font-semibold text-foreground">Coffee Credits</span>
+                </div>
+                <div className="p-4 border-r border-b text-center bg-card">
+                  <X className="w-6 h-6 text-muted-foreground mx-auto" />
+                </div>
+                <div className="p-4 border-b text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50">
+                  <span className="text-foreground font-semibold">✓ (Est. $300/year)</span>
+                </div>
+
+                <div className="bg-muted/30 p-4 border-r border-b">
+                  <span className="font-semibold text-foreground">EV Charging Credit Program</span>
+                </div>
+                <div className="p-4 border-r border-b text-center bg-card">
+                  <X className="w-6 h-6 text-muted-foreground mx-auto" />
+                </div>
+                <div className="p-4 border-b text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50">
+                  <span className="text-foreground font-semibold">✓ (Est. $150/year)</span>
+                </div>
+
+                <div className="bg-muted/30 p-4 border-r rounded-bl-xl">
+                  <span className="font-semibold text-foreground">Rental Car & Rideshare Discounts</span>
                 </div>
                 <div className="p-4 border-r text-center bg-card">
                   <X className="w-6 h-6 text-muted-foreground mx-auto" />
                 </div>
                 <div className="p-4 text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50 rounded-br-xl">
-                  <Check className="w-6 h-6 text-emerald-500 mx-auto" />
+                  <span className="text-foreground font-semibold">✓ (Est. $120/year)</span>
                 </div>
               </div>
             </div>
