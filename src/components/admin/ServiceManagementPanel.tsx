@@ -471,7 +471,7 @@ export const ServiceManagementPanel = () => {
       const adjustments: string[] = [];
       if (typeof roi === 'number') {
         const original = roi;
-        if (roi >= 100) roi = 99.99;
+        if (roi >= 1000) roi = 999.99;
         if (roi < 0) roi = 0;
         if (roi !== original) adjustments.push(`ROI normalized to ${roi}%`);
       }
@@ -579,7 +579,7 @@ export const ServiceManagementPanel = () => {
       toast({
         title: 'Error',
         description: isPrecisionError
-          ? 'Numeric limit exceeded: use percentages below 100 (e.g., 99.99) and valid 2‑decimal values.'
+          ? 'Numeric limit exceeded: use percentages below 1000 (e.g., 999.99) and valid 2‑decimal values.'
           : permissionHint
             ? 'You do not have permission to update services. Please ensure you are signed in as an admin.'
             : `${details}${code ? ` (code: ${code})` : ''}`,
@@ -951,6 +951,9 @@ export const ServiceManagementPanel = () => {
                         <label className="text-sm font-medium">ROI (%)</label>
                         <Input
                           type="number"
+                          min="0"
+                          max="1000"
+                          step="0.01"
                           value={editForm.estimated_roi || ''}
                           onChange={(e) => setEditForm({ ...editForm, estimated_roi: Number(e.target.value) })}
                         />
