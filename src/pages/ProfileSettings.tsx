@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { User, Upload, ArrowLeft, Crown, Building, Store } from "lucide-react";
+import { GoalAssessmentModal } from "@/components/marketplace/GoalAssessmentModal";
 
 export const ProfileSettings = () => {
   const { user, profile, updateProfile } = useAuth();
@@ -40,6 +41,8 @@ export const ProfileSettings = () => {
     vendor_description: "",
   });
 
+  const [isGoalAssessmentOpen, setIsGoalAssessmentOpen] = useState(false);
+  const [goals, setGoals] = useState<any | null>(null);
   useEffect(() => {
     if (!user) {
       navigate("/auth");
@@ -62,6 +65,15 @@ export const ProfileSettings = () => {
         vendor_type: (profile as any).vendor_type || "",
         vendor_company_name: (profile as any).vendor_company_name || "",
         vendor_description: (profile as any).vendor_description || "",
+      });
+
+      setGoals({
+        annual_goal_transactions: (profile as any).annual_goal_transactions ?? null,
+        annual_goal_volume: (profile as any).annual_goal_volume ?? null,
+        average_commission_per_deal: (profile as any).average_commission_per_deal ?? null,
+        primary_challenge: (profile as any).primary_challenge ?? null,
+        marketing_time_per_week: (profile as any).marketing_time_per_week ?? null,
+        budget_preference: (profile as any).budget_preference ?? null,
       });
     }
   }, [user, profile, navigate]);
@@ -410,6 +422,33 @@ export const ProfileSettings = () => {
             </CardContent>
           </Card>
 
+          {/* Business Goals */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Business Goals & Preferences</CardTitle>
+              <CardDescription>Review or update your goals to keep recommendations accurate</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {goals ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                  <div><span className="text-muted-foreground">Transactions:</span> <span className="font-medium">{goals.annual_goal_transactions ?? '—'}</span></div>
+                  <div><span className="text-muted-foreground">Volume:</span> <span className="font-medium">${goals.annual_goal_volume ? goals.annual_goal_volume.toLocaleString() : '—'}</span></div>
+                  <div><span className="text-muted-foreground">Avg Commission:</span> <span className="font-medium">${goals.average_commission_per_deal ? goals.average_commission_per_deal.toLocaleString() : '—'}</span></div>
+                  <div><span className="text-muted-foreground">Challenge:</span> <span className="font-medium">{goals.primary_challenge ?? '—'}</span></div>
+                  <div><span className="text-muted-foreground">Time/week:</span> <span className="font-medium">{goals.marketing_time_per_week ?? '—'} hrs</span></div>
+                  <div><span className="text-muted-foreground">Budget:</span> <span className="font-medium">{goals.budget_preference ?? '—'}</span></div>
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">No goals set yet.</p>
+              )}
+              <div className="pt-2">
+                <Button variant="outline" onClick={() => setIsGoalAssessmentOpen(true)}>
+                  Edit Goals
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Account Information */}
           <Card>
             <CardHeader>
@@ -549,6 +588,27 @@ export const ProfileSettings = () => {
           </Card>
         </div>
       </main>
+      <GoalAssessmentModal
+        open={isGoalAssessmentOpen}
+        onOpenChange={setIsGoalAssessmentOpen}
+        onComplete={async () => {
+          if (user) {
+            const { data } = await supabase
+              .from('profiles')
+              .select('annual_goal_transactions, annual_goal_volume, average_commission_per_deal, primary_challenge, marketing_time_per_week, budget_preference')
+              .eq('user_id', user.id)
+              .maybeSingle();
+            if (data) {
+              setGoals(data as any);
+            }
+            toast({
+              title: "Goals updated",
+              description: "Your recommendations will adapt to your new goals.",
+            });
+          }
+          setIsGoalAssessmentOpen(false);
+        }}
+      />
     </div>
   );
 };

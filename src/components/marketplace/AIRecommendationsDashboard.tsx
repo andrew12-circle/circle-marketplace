@@ -7,6 +7,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Target, TrendingUp, Clock, ShoppingCart, Eye, X, CheckCircle } from "lucide-react";
+import { GoalAssessmentModal } from "./GoalAssessmentModal";
 
 interface Recommendation {
   id: string;
@@ -40,6 +41,7 @@ export function AIRecommendationsDashboard() {
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [bundles, setBundles] = useState<ServiceBundle[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isGoalAssessmentOpen, setIsGoalAssessmentOpen] = useState(false);
 
   useEffect(() => {
     if (user?.id) {
@@ -170,11 +172,16 @@ export function AIRecommendationsDashboard() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h2 className="text-2xl font-bold tracking-tight">Your Personalized Recommendations</h2>
-        <p className="text-muted-foreground">
-          Based on your goals and market analysis
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight">Your Personalized Recommendations</h2>
+          <p className="text-muted-foreground">
+            Based on your goals and market analysis
+          </p>
+        </div>
+        <Button variant="outline" size="sm" onClick={() => setIsGoalAssessmentOpen(true)}>
+          Edit Goals
+        </Button>
       </div>
 
       {/* Goal Progress */}
@@ -355,6 +362,18 @@ export function AIRecommendationsDashboard() {
           </CardContent>
         </Card>
       )}
+      <GoalAssessmentModal
+        open={isGoalAssessmentOpen}
+        onOpenChange={setIsGoalAssessmentOpen}
+        onComplete={() => {
+          loadRecommendations();
+          toast({
+            title: "Goals updated",
+            description: "Recommendations will refresh based on your new goals.",
+          });
+          setIsGoalAssessmentOpen(false);
+        }}
+      />
     </div>
   );
 }

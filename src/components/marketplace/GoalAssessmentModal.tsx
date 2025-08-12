@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,6 +41,21 @@ export function GoalAssessmentModal({ open, onOpenChange, onComplete }: GoalAsse
     marketing_time_per_week: 5,
     budget_preference: 'balanced'
   });
+
+  // Prefill from existing profile when opening (for editing goals)
+  useEffect(() => {
+    if (open && profile) {
+      setFormData({
+        annual_goal_transactions: (profile as any).annual_goal_transactions ?? 12,
+        annual_goal_volume: (profile as any).annual_goal_volume ?? 3000000,
+        average_commission_per_deal: (profile as any).average_commission_per_deal ?? 5000,
+        primary_challenge: (profile as any).primary_challenge ?? '',
+        marketing_time_per_week: (profile as any).marketing_time_per_week ?? 5,
+        budget_preference: (profile as any).budget_preference ?? 'balanced',
+      });
+      setCurrentStep(1);
+    }
+  }, [open, profile]);
 
   const totalSteps = 4;
   const progress = (currentStep / totalSteps) * 100;
