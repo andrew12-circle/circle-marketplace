@@ -561,7 +561,7 @@ export const ServiceFunnelModal = ({
                         </div>
                       </AccordionTrigger>
                       <AccordionContent className="border-l-4 border-l-orange-500 pl-4 bg-white rounded-b-lg shadow-sm pt-0">
-                        <div className="p-6 pt-0">
+                        <div className="p-6 pt-[5px]">
                           {(() => {
                             const sections = Array.isArray((fc as any)?.faqSections) ? (fc as any).faqSections : [];
                             const byId = sections.find((s: any) => s?.id === 'question-3');
