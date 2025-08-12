@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Brain, Target, Send, Sparkles } from "lucide-react";
+import { Brain, Target, Send, Sparkles, ShoppingCart, TrendingUp, Eye } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { AskCircleAIModal } from "./AskCircleAIModal";
 import { Input } from "@/components/ui/input";
@@ -12,23 +12,28 @@ import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
 import { GoalAssessmentModal } from "./GoalAssessmentModal";
 import { AIRecommendationsDashboard } from "./AIRecommendationsDashboard";
+import { useEnhancedAI } from "@/hooks/useEnhancedAI";
 
 export const AIConciergeBanner = () => {
-  const {
-    user,
-    profile
-  } = useAuth();
+  const { user, profile } = useAuth();
   const [isAIModalOpen, setIsAIModalOpen] = useState(false);
   const [isGoalAssessmentOpen, setIsGoalAssessmentOpen] = useState(false);
   const [chatInput, setChatInput] = useState("");
   const [placeholderText, setPlaceholderText] = useState("");
   const [isInputFocused, setIsInputFocused] = useState(false);
   const [showRecommendationsDashboard, setShowRecommendationsDashboard] = useState(false);
-  const {
-    toast
-  } = useToast();
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [aiResults, setAiResults] = useState<any>(null);
+  const { toast } = useToast();
   const navigate = useNavigate();
-  const placeholderQuestions = ["How can I help you today?", "What business goals are you working on?", "Need help finding the right services?", "How can I boost your sales this month?"];
+  const { getRecommendation, isLoading } = useEnhancedAI();
+  
+  const placeholderQuestions = [
+    "I need a closing gift for a $400K first-time buyer couple, under $100",
+    "What marketing services give the best ROI in my area?", 
+    "Show me vendors who offer co-pay in Nashville",
+    "I want to increase my transaction volume by 30% this year"
+  ];
 
   // Check if user needs goal assessment or show recommendations dashboard
   useEffect(() => {
@@ -101,16 +106,108 @@ export const AIConciergeBanner = () => {
     const timeout = setTimeout(typeEffect, 1000);
     return () => clearTimeout(timeout);
   }, [isInputFocused, chatInput]);
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     const query = chatInput.trim();
     if (!query) return;
+    
     if (!user || !profile) {
       navigate("/pricing");
       return;
     }
 
-    // Deep-link into marketplace search with the typed query
-    navigate(`/marketplace?q=${encodeURIComponent(query)}`);
+    setIsProcessing(true);
+    
+    try {
+      // Parse query intent to determine if it needs AI processing or direct search
+      const intent = parseQueryIntent(query);
+      
+      if (intent.requiresAI) {
+        // Use AI Concierge for complex queries
+        const result = await processAIQuery(query, intent);
+        setAiResults(result);
+      } else {
+        // Direct marketplace search for simple queries
+        navigate(`/?q=${encodeURIComponent(query)}`);
+      }
+    } finally {
+      setIsProcessing(false);
+      setChatInput("");
+    }
+  };
+
+  const parseQueryIntent = (query: string) => {
+    const lowerQuery = query.toLowerCase();
+    
+    // Business outcome queries require AI processing
+    const businessOutcomeKeywords = ['roi', 'increase', 'boost', 'grow', 'revenue', 'transactions', 'leads', 'referrals'];
+    const contextualKeywords = ['best', 'recommend', 'should i', 'help me', 'strategy', 'plan'];
+    const specificConstraints = ['under $', 'in my area', 'my market', 'co-pay', 'marketing budget'];
+    
+    const requiresAI = businessOutcomeKeywords.some(keyword => lowerQuery.includes(keyword)) ||
+                      contextualKeywords.some(keyword => lowerQuery.includes(keyword)) ||
+                      specificConstraints.some(keyword => lowerQuery.includes(keyword));
+    
+    const type = lowerQuery.includes('gift') ? 'product_search' :
+                lowerQuery.includes('marketing') ? 'marketing_strategy' :
+                lowerQuery.includes('co-pay') ? 'copay_opportunity' :
+                lowerQuery.includes('vendor') ? 'vendor_search' : 'general_advice';
+    
+    return { requiresAI, type, originalQuery: query };
+  };
+
+  const processAIQuery = async (query: string, intent: any) => {
+    try {
+      const context = {
+        currentPage: 'ai_concierge',
+        searchQuery: query,
+        intentType: intent.type,
+        timestamp: new Date().toISOString()
+      };
+
+      const recommendation = await getRecommendation(query, context);
+      
+      if (recommendation) {
+        // Log the successful AI interaction for learning
+        await logAIInteraction(query, recommendation, intent.type);
+        
+        toast({
+          title: "AI Concierge Results",
+          description: "Found personalized recommendations based on your business goals.",
+        });
+        
+        return {
+          recommendation,
+          intent: intent.type,
+          timestamp: new Date().toISOString()
+        };
+      }
+    } catch (error) {
+      console.error('Error processing AI query:', error);
+      toast({
+        title: "Processing Error", 
+        description: "Let me search the marketplace for you instead.",
+        variant: "destructive"
+      });
+      navigate(`/?q=${encodeURIComponent(query)}`);
+    }
+    return null;
+  };
+
+  const logAIInteraction = async (query: string, recommendation: string, intentType: string) => {
+    try {
+      await supabase.functions.invoke('log-ai-interaction', {
+        body: {
+          userId: user?.id,
+          query,
+          recommendation,
+          intentType,
+          resultType: 'concierge_response',
+          timestamp: new Date().toISOString()
+        }
+      });
+    } catch (error) {
+      console.error('Error logging AI interaction:', error);
+    }
   };
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
@@ -148,17 +245,73 @@ export const AIConciergeBanner = () => {
               </div>
             </div>
 
-            {/* Chat Input */}
-            {!showRecommendationsDashboard && <div className="bg-card/30 backdrop-blur-sm border border-border/50 rounded-lg p-4">
+            {/* AI Concierge Input */}
+            {!showRecommendationsDashboard && (
+              <div className="bg-card/30 backdrop-blur-sm border border-border/50 rounded-lg p-4">
                 <div className="flex items-center gap-3">
                   <div className="flex-1 relative">
-                    <Input value={chatInput} onChange={e => setChatInput(e.target.value)} onKeyPress={handleKeyPress} onFocus={() => setIsInputFocused(true)} onBlur={() => setIsInputFocused(false)} placeholder={placeholderText} className="bg-background/50 border-border/50 focus:bg-background" />
+                    <Input 
+                      value={chatInput} 
+                      onChange={e => setChatInput(e.target.value)} 
+                      onKeyPress={handleKeyPress} 
+                      onFocus={() => setIsInputFocused(true)} 
+                      onBlur={() => setIsInputFocused(false)} 
+                      placeholder={placeholderText} 
+                      className="bg-background/50 border-border/50 focus:bg-background" 
+                      disabled={isProcessing || isLoading}
+                    />
+                    {(isProcessing || isLoading) && (
+                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                        <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full" />
+                      </div>
+                    )}
                   </div>
-                  <Button onClick={handleSendMessage} size="sm" disabled={!chatInput.trim()}>
-                    <Send className="h-4 w-4" />
+                  <Button 
+                    onClick={handleSendMessage} 
+                    size="sm" 
+                    disabled={!chatInput.trim() || isProcessing || isLoading}
+                  >
+                    {isProcessing ? (
+                      <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
+                    ) : (
+                      <Send className="h-4 w-4" />
+                    )}
                   </Button>
                 </div>
-              </div>}
+              </div>
+            )}
+
+            {/* AI Results Display */}
+            {aiResults && (
+              <div className="bg-gradient-to-r from-primary/5 to-accent/5 border border-primary/20 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 rounded-lg bg-primary/10">
+                    <Sparkles className="h-4 w-4 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-sm mb-2">AI Concierge Results</h4>
+                    <p className="text-sm text-muted-foreground mb-3">{aiResults.recommendation}</p>
+                    <div className="flex gap-2">
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => navigate(`/?q=${encodeURIComponent(aiResults.recommendation)}`)}
+                      >
+                        <Eye className="h-3 w-3 mr-1" />
+                        View Services
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => setAiResults(null)}
+                      >
+                        Clear
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Show AI Recommendations Dashboard or Goal Setup */}
             {showRecommendationsDashboard && (profile as any)?.onboarding_completed && <AIRecommendationsDashboard />}

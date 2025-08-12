@@ -121,6 +121,55 @@ export const useEnhancedAI = ({ onSuccess, onError }: UseEnhancedAIProps = {}) =
     );
   };
 
+  const getBusinessOutcomeRecommendation = async (
+    outcomeGoal: string, 
+    context?: AIRecommendationContext
+  ) => {
+    return getRecommendation(
+      `I want to ${outcomeGoal}. What specific services and vendor relationships would give me the best ROI based on my profile and current market conditions?`,
+      { ...context, currentPage: 'business_outcome_analysis' }
+    );
+  };
+
+  const getVendorRelationshipAdvice = async (
+    serviceCategory: string,
+    budget?: number,
+    context?: AIRecommendationContext
+  ) => {
+    const budgetContext = budget ? ` with a budget of $${budget}` : '';
+    return getRecommendation(
+      `I need ${serviceCategory} services${budgetContext}. Which vendors in my area offer the best combination of quality, co-pay opportunities, and business growth potential?`,
+      { ...context, currentPage: 'vendor_relationship_analysis' }
+    );
+  };
+
+  const getMarketIntelligence = async (context?: AIRecommendationContext) => {
+    if (!user?.id) return null;
+    
+    try {
+      setIsLoading(true);
+      const { data, error } = await supabase.functions.invoke('ai-market-intelligence', {
+        body: {
+          userId: user.id,
+          location: `${(user as any)?.city}, ${(user as any)?.state}`,
+          specialties: (user as any)?.specialties || ['real estate']
+        }
+      });
+
+      if (error) {
+        console.error('Market intelligence error:', error);
+        return null;
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Failed to get market intelligence:', error);
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return {
     isLoading,
     lastRecommendation,
@@ -130,5 +179,8 @@ export const useEnhancedAI = ({ onSuccess, onError }: UseEnhancedAIProps = {}) =
     getMarketOpportunities,
     getServiceRecommendations,
     analyzeROI,
+    getBusinessOutcomeRecommendation,
+    getVendorRelationshipAdvice,
+    getMarketIntelligence,
   };
 };
