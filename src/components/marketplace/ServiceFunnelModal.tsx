@@ -538,13 +538,17 @@ export const ServiceFunnelModal = ({
                         </div>
                       </AccordionTrigger>
                       <AccordionContent className="border-l-4 border-l-purple-500 pl-4 bg-white rounded-b-lg shadow-sm pt-0">
-                        <div className="p-6 pt-0">
-                          <AnswerDropdown
-                            items={faqSections.map((s: any) => ({ id: s.id || s.title, title: s.title, content: s.content }))}
-                            label="Select a topic"
-                            placeholder="Choose an answer"
-                          />
-                        </div>
+                          <div className="p-6 pt-0">
+                            {(() => {
+                              const sections = Array.isArray((fc as any)?.faqSections) ? (fc as any).faqSections : [];
+                              const byId = sections.find((s: any) => s?.id === 'question-2');
+                              const byTitle = sections.find((s: any) => typeof s?.title === 'string' && s.title.toLowerCase().includes('roi'));
+                              const roi = byId?.content || byTitle?.content || (typeof fc?.estimatedRoi === 'number'
+                                ? `Based on similar deployments, average ROI is ~${fc.estimatedRoi}% within ${fc?.duration || '30 days'}.`
+                                : '600% average return on investment with proper implementation');
+                              return <SafeHTML html={roi} />;
+                            })()}
+                          </div>
                       </AccordionContent>
                     </AccordionItem>
 
