@@ -332,7 +332,10 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
                 Reset
               </Button>
               <Button 
-                onClick={handleSave} 
+                onClick={() => {
+                  console.log('[Debug] Save clicked, hasChanges:', hasChanges, 'isSaving:', isSaving);
+                  handleSave();
+                }} 
                 disabled={!hasChanges || isSaving}
                 size="sm"
               >
