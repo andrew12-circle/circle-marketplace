@@ -41,7 +41,6 @@ const Index = () => {
                       height="40"
                       loading="eager"
                       decoding="async"
-                      fetchPriority="high"
                       style={{
                         imageRendering: 'crisp-edges'
                       }}
@@ -101,7 +100,7 @@ const Index = () => {
                     height="64"
                     loading="eager"
                     decoding="async"
-                    fetchPriority="high"
+                    
                     style={{
                       imageRendering: 'crisp-edges'
                     }}

@@ -258,6 +258,9 @@
       .js-loading .loading-placeholder {
         display: block;
       }
+      
+      /* Hide fallback critical content by default to prevent flash */
+      #critical-content { display: none; }
     </style>
     
     <link rel="icon" href="/src/assets/circle-logo.png" type="image/png">
@@ -365,18 +368,26 @@
       document.addEventListener('DOMContentLoaded', function() {
         const criticalContent = document.getElementById('critical-content');
         const root = document.getElementById('root');
+
+        // If React hasn't mounted, reveal the fallback after 800ms (prevents brief flash)
+        setTimeout(() => {
+          if (criticalContent && root && root.children.length === 0) {
+            criticalContent.style.display = 'block';
+          }
+        }, 800);
         
         // Hide critical content once React content is ready
         const observer = new MutationObserver(function(mutations) {
-          mutations.forEach(function(mutation) {
+          for (const mutation of mutations) {
             if (mutation.addedNodes.length > 0) {
-              setTimeout(() => {
-                if (criticalContent && root.children.length > 0) {
-                  criticalContent.style.display = 'none';
-                }
-              }, 100);
+              // Hide fallback quickly once React renders
+              if (criticalContent && root.children.length > 0) {
+                criticalContent.style.display = 'none';
+              }
+              observer.disconnect();
+              break;
             }
-          });
+          }
         });
         
         observer.observe(root, { childList: true, subtree: true });
