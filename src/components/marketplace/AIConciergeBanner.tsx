@@ -135,7 +135,7 @@ export const AIConciergeBanner = () => {
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
                   <h3 className="text-lg font-semibold">
-                    {getTimeOfDayGreeting()}, {user && profile ? profile.display_name || 'Agent' : 'Future Circle Member'}!
+                    {getTimeOfDayGreeting()}, {user && profile ? profile.display_name || 'Agent' : 'Future Member'}!
                   </h3>
                   <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
                     <Sparkles className="h-3 w-3 mr-1" />
