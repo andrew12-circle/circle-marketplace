@@ -338,7 +338,10 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
         <TabsContent value="content" className="space-y-4">
           <FunnelSectionEditor
             data={funnelData}
-            onChange={(data) => handleDataChange('', data)}
+            onChange={(data) => {
+              setFunnelData(data);
+              setHasChanges(true);
+            }}
           />
         </TabsContent>
 
