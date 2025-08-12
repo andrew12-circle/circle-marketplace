@@ -6,7 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { Target, TrendingUp, Clock, ShoppingCart, Eye, X, CheckCircle } from "lucide-react";
+import { Target, TrendingUp, Clock, ShoppingCart, Eye, X, CheckCircle, Sparkles } from "lucide-react";
 import { GoalAssessmentModal } from "./GoalAssessmentModal";
 import { BuildAIPlanButton } from "@/components/marketplace/BuildAIPlanButton";
 
@@ -43,6 +43,7 @@ export function AIRecommendationsDashboard() {
   const [bundles, setBundles] = useState<ServiceBundle[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isGoalAssessmentOpen, setIsGoalAssessmentOpen] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   useEffect(() => {
     if (user?.id) {
@@ -83,6 +84,55 @@ export function AIRecommendationsDashboard() {
       console.error('Error loading service bundles:', error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const generateAIRecommendations = async () => {
+    if (!user?.id) return;
+    try {
+      setIsGenerating(true);
+      const { data, error } = await supabase.functions.invoke('generate-ai-recommendations', {
+        body: { agent_id: user.id },
+      });
+
+      if (error) {
+        console.error('Error invoking generate-ai-recommendations:', error);
+        toast({
+          title: "Generation failed",
+          description: "We couldn't generate recommendations right now. Please try again shortly.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (data?.requires_assessment) {
+        toast({
+          title: "Assessment required",
+          description: "Please complete your goal assessment to get personalized recommendations.",
+          variant: "destructive",
+        });
+        setIsGoalAssessmentOpen(true);
+        return;
+      }
+
+      await loadRecommendations();
+
+      const count = data?.recommendations_count ?? undefined;
+      toast({
+        title: "Recommendations updated",
+        description: count !== undefined
+          ? `Generated ${count} new recommendation${count === 1 ? '' : 's'}.`
+          : "Your personalized recommendations are ready.",
+      });
+    } catch (e) {
+      console.error('Unexpected error generating recommendations:', e);
+      toast({
+        title: "Something went wrong",
+        description: "Please try generating recommendations again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -169,6 +219,8 @@ export function AIRecommendationsDashboard() {
       </div>
     );
   }
+
+  const hasCompletedAssessment = Boolean((profile as any)?.onboarding_completed);
 
   return (
     <div className="space-y-6">
@@ -355,26 +407,44 @@ export function AIRecommendationsDashboard() {
         </Card>
       )}
 
+      {/* Empty state with action */}
       {recommendations.length === 0 && bundles.length === 0 && (
         <Card>
-          <CardContent className="text-center py-8">
-            <Target className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="font-semibold mb-2">No Recommendations Yet</h3>
+          <CardContent className="text-center py-8 space-y-3">
+            <Target className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
+            <h3 className="font-semibold">
+              {hasCompletedAssessment ? "Ready for your first recommendations" : "No Recommendations Yet"}
+            </h3>
             <p className="text-muted-foreground">
-              Complete your goal assessment to get personalized recommendations.
+              {hasCompletedAssessment
+                ? "Generate personalized suggestions based on your saved goals."
+                : "Complete your goal assessment to get personalized recommendations."}
             </p>
+            <div className="flex justify-center gap-2 pt-2">
+              {hasCompletedAssessment ? (
+                <Button onClick={generateAIRecommendations} disabled={isGenerating}>
+                  {isGenerating ? "Generating..." : (
+                    <>
+                      <Sparkles className="h-4 w-4 mr-1" />
+                      Generate Recommendations
+                    </>
+                  )}
+                </Button>
+              ) : (
+                <Button variant="outline" onClick={() => setIsGoalAssessmentOpen(true)}>
+                  Complete Assessment
+                </Button>
+              )}
+            </div>
           </CardContent>
         </Card>
       )}
+
       <GoalAssessmentModal
         open={isGoalAssessmentOpen}
         onOpenChange={setIsGoalAssessmentOpen}
-        onComplete={() => {
-          loadRecommendations();
-          toast({
-            title: "Goals updated",
-            description: "Recommendations will refresh based on your new goals.",
-          });
+        onComplete={async () => {
+          await generateAIRecommendations();
           setIsGoalAssessmentOpen(false);
         }}
       />
