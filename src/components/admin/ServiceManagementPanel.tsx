@@ -464,14 +464,27 @@ export const ServiceManagementPanel = () => {
     }
 
     try {
-      // Clamp numeric fields to avoid DB precision errors (e.g., numeric(4,2) < 100)
+      // Normalize numeric fields to match DB constraints
       let roi = editForm.estimated_roi ?? null;
-      let respa = editForm.respa_split_limit ?? null;
-      let nonSsp = editForm.max_split_percentage_non_ssp ?? null;
+      let respa = editForm.respa_split_limit ?? null; // likely integer column
+      let nonSsp = editForm.max_split_percentage_non_ssp ?? null; // likely integer column
       const adjustments: string[] = [];
-      if (typeof roi === 'number' && roi >= 100) { roi = 99.99; adjustments.push('ROI capped at 99.99%'); }
-      if (typeof respa === 'number' && respa >= 100) { respa = 99.99; adjustments.push('RESPA split capped at 99.99%'); }
-      if (typeof nonSsp === 'number' && nonSsp >= 100) { nonSsp = 99.99; adjustments.push('Non-SSP split capped at 99.99%'); }
+      if (typeof roi === 'number') {
+        const original = roi;
+        if (roi >= 100) roi = 99.99;
+        if (roi < 0) roi = 0;
+        if (roi !== original) adjustments.push(`ROI normalized to ${roi}%`);
+      }
+      if (typeof respa === 'number') {
+        const original = respa;
+        respa = Math.min(99, Math.max(0, Math.round(respa)));
+        if (respa !== original) adjustments.push(`RESPA split normalized to ${respa}%`);
+      }
+      if (typeof nonSsp === 'number') {
+        const original = nonSsp;
+        nonSsp = Math.min(99, Math.max(0, Math.round(nonSsp)));
+        if (nonSsp !== original) adjustments.push(`Non-SSP split normalized to ${nonSsp}%`);
+      }
       if (adjustments.length) {
         toast({ title: 'Adjusted values', description: adjustments.join(' • ') });
       }
