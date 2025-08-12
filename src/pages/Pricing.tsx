@@ -103,7 +103,7 @@ export const Pricing = () => {
       <section className="pb-12 md:pb-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12 md:mb-16">
-            <h2 className="text-2xl md:text-4xl font-bold mb-4">Find the Plan That's Right for You</h2>
+            
             <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
               Whether you're just getting started or scaling a top-producing team, Circle has a plan to help you grow.
             </p>
