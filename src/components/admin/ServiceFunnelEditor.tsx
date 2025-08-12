@@ -121,14 +121,14 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
   }, [service]);
 
   // Helper: enforce a max time to wait for save to complete
-  const saveWithTimeout = <T,>(promise: Promise<T>, ms = 20000): Promise<T> => {
+  const saveWithTimeout = <T,>(promise: PromiseLike<T>, ms = 20000): Promise<T> => {
     let timeoutId: number | undefined;
     const timeout = new Promise<never>((_, reject) => {
       timeoutId = window.setTimeout(() => {
         reject(new Error("Save timed out. Please try again."));
       }, ms);
     });
-    return Promise.race([promise, timeout]).finally(() => {
+    return Promise.race([promise as Promise<any>, timeout]).finally(() => {
       if (timeoutId) window.clearTimeout(timeoutId);
     }) as Promise<T>;
   };
