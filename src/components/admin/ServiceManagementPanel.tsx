@@ -477,12 +477,12 @@ export const ServiceManagementPanel = () => {
       }
       if (typeof respa === 'number') {
         const original = respa;
-        respa = Math.min(99, Math.max(0, Math.round(respa)));
+        respa = Math.min(1000, Math.max(0, Math.round(respa)));
         if (respa !== original) adjustments.push(`RESPA split normalized to ${respa}%`);
       }
       if (typeof nonSsp === 'number') {
         const original = nonSsp;
-        nonSsp = Math.min(99, Math.max(0, Math.round(nonSsp)));
+        nonSsp = Math.min(1000, Math.max(0, Math.round(nonSsp)));
         if (nonSsp !== original) adjustments.push(`Non-SSP split normalized to ${nonSsp}%`);
       }
       if (adjustments.length) {
@@ -1011,26 +1011,36 @@ export const ServiceManagementPanel = () => {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                        <div className="space-y-2">
-                         <label className="text-sm font-medium">RESPA Split Limit %</label>
-                         <Input
-                           type="number"
-                           min="0"
-                           max="100"
-                           value={editForm.respa_split_limit || ''}
-                           onChange={(e) => setEditForm({ ...editForm, respa_split_limit: Number(e.target.value) })}
-                           placeholder="0-100"
-                         />
+                         <label className="text-sm font-medium">RESPA Split % (0–1000)</label>
+                         <div className="relative">
+                           <Input
+                             type="number"
+                             min="0"
+                             max="1000"
+                             step="1"
+                             className="pr-10"
+                             value={editForm.respa_split_limit ?? ''}
+                             onChange={(e) => setEditForm({ ...editForm, respa_split_limit: Number(e.target.value) })}
+                             placeholder="Enter percentage"
+                           />
+                           <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">%</span>
+                         </div>
                        </div>
                       <div className="space-y-2">
-                        <label className="text-sm font-medium">Non-SSP Split %</label>
-                        <Input
-                          type="number"
-                          min="0"
-                          max="100"
-                          value={editForm.max_split_percentage_non_ssp || ''}
-                          onChange={(e) => setEditForm({ ...editForm, max_split_percentage_non_ssp: Number(e.target.value) })}
-                          placeholder="0-100"
-                        />
+                        <label className="text-sm font-medium">Non-SSP Split % (0–1000)</label>
+                        <div className="relative">
+                          <Input
+                            type="number"
+                            min="0"
+                            max="1000"
+                            step="1"
+                            className="pr-10"
+                            value={editForm.max_split_percentage_non_ssp ?? ''}
+                            onChange={(e) => setEditForm({ ...editForm, max_split_percentage_non_ssp: Number(e.target.value) })}
+                            placeholder="Enter percentage"
+                          />
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">%</span>
+                        </div>
                       </div>
                     </div>
 
