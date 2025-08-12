@@ -471,7 +471,7 @@ export const ServiceManagementPanel = () => {
       const adjustments: string[] = [];
       if (typeof roi === 'number') {
         const original = roi;
-        if (roi >= 1000) roi = 999.99;
+        if (roi > 1000) roi = 1000;
         if (roi < 0) roi = 0;
         if (roi !== original) adjustments.push(`ROI normalized to ${roi}%`);
       }
