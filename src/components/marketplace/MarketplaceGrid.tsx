@@ -187,6 +187,7 @@ const flattenServices = useMemo(() => {
 }, [paginatedData, filters.priceRange, filters.verified]);
 
 const totalServicesCount = paginatedData?.pages?.[0]?.totalCount ?? 0;
+const baseForFilters = services.length ? services : flattenServices;
 
 // Memoize service IDs to prevent unnecessary re-fetching of ratings
 const serviceIds = useMemo(() => flattenServices.map(s => s.id), [flattenServices]);
@@ -445,7 +446,7 @@ const handleViewServiceDetails = useCallback((serviceId: string) => {
       'Expired Listing Data': ['expired listings', 'expired', 'listing data', 'prospect data']
     };
     const keywords = productMapping[productId] || [];
-    return services.filter(service => {
+    return baseForFilters.filter(service => {
       const title = service.title?.toLowerCase() || '';
       const description = service.description?.toLowerCase() || '';
       const category = service.category?.toLowerCase() || '';
@@ -453,40 +454,6 @@ const handleViewServiceDetails = useCallback((serviceId: string) => {
       return keywords.some(keyword => title.includes(keyword) || description.includes(keyword) || category.includes(keyword) || tags.some(tag => tag.includes(keyword)));
     });
   };
-  // Show minimal loading for initial load only
-  if (isLoading && !marketplaceData) {
-    return (
-      <div className="min-h-screen bg-background">
-        <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
-          <div className="animate-pulse space-y-6">
-            <div className="h-16 bg-gray-200 rounded-lg"></div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[...Array(6)].map((_, i) => (
-                <div key={i} className="h-64 bg-gray-200 rounded-lg"></div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {showRecovery && (
-          <div className="fixed inset-x-0 bottom-0 z-50">
-            <div className="container mx-auto px-3 sm:px-4 pb-4">
-              <div className="rounded-lg border bg-card text-card-foreground shadow p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <div>
-                  <p className="font-medium">Having trouble loading the marketplace?</p>
-                  <p className="text-sm text-muted-foreground">Reload fresh data or try again.</p>
-                </div>
-                <div className="flex gap-2">
-                  <Button variant="outline" onClick={handleReloadDataQuick}>Reload data</Button>
-                  <Button onClick={handleHardRefresh}>Try again</Button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  }
 
   return <>
       <div className="min-h-screen bg-background">
@@ -500,6 +467,30 @@ const handleViewServiceDetails = useCallback((serviceId: string) => {
           </div>
 
 
+          {/* Inline non-blocking banner */}
+          {(isLoading && !marketplaceData) && (
+            <div className="mb-4">
+              <div className="rounded-lg border bg-card text-card-foreground p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <span className="text-sm">Loading marketplace data… Services are available while we finish.</span>
+                <div className="flex gap-2">
+                  <Button variant="outline" onClick={handleReloadDataQuick}>Reload data</Button>
+                  <Button onClick={handleHardRefresh}>Try again</Button>
+                </div>
+              </div>
+            </div>
+          )}
+          {(error && !marketplaceData) && (
+            <div className="mb-4">
+              <div className="rounded-lg border bg-card text-card-foreground p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <span className="text-sm">Limited mode: services are available; vendors and categories will load when ready.</span>
+                <div className="flex gap-2">
+                  <Button variant="outline" onClick={handleReloadDataQuick}>Reload data</Button>
+                  <Button onClick={handleHardRefresh}>Try again</Button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Circle Pro Banner - Show for non-signed-in users and non-pro members */}
           {(!user || !profile?.is_pro_member) && <CircleProBanner />}
 
@@ -511,7 +502,7 @@ const handleViewServiceDetails = useCallback((serviceId: string) => {
 
            {/* Enhanced Search Component */}
           <div className="space-y-6">
-            <EnhancedSearch onSearchChange={handleEnhancedSearchChange} availableCategories={Array.from(new Set(services.map(service => service.category).filter(Boolean)))} availableTags={Array.from(new Set(services.flatMap(service => service.tags || [])))} />
+            <EnhancedSearch onSearchChange={handleEnhancedSearchChange} availableCategories={Array.from(new Set(baseForFilters.map(service => service.category).filter(Boolean)))} availableTags={Array.from(new Set(baseForFilters.flatMap(service => service.tags || [])))} />
             
             <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
             </div>
@@ -641,11 +632,27 @@ const handleViewServiceDetails = useCallback((serviceId: string) => {
     </div>
   )
 ) : (
-  <div className="mobile-grid gap-4 sm:gap-6">
-    {filteredVendors.map(vendor => (
-      <OptimizedVendorCard key={vendor.id} vendor={vendor} onConnect={handleConnectVendor} onViewProfile={handleViewVendorProfile} />
-    ))}
-  </div>
+  {
+    ((isLoading || error) && vendors.length === 0) ? (
+      <div className="space-y-4">
+        <div className="mobile-grid gap-4 sm:gap-6">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="h-48 bg-muted rounded-lg animate-pulse" />
+          ))}
+        </div>
+        <div className="flex items-center justify-center gap-2">
+          <Button variant="outline" onClick={handleReloadDataQuick}>Reload data</Button>
+          <Button onClick={handleHardRefresh}>Try again</Button>
+        </div>
+      </div>
+    ) : (
+      <div className="mobile-grid gap-4 sm:gap-6">
+        {filteredVendors.map(vendor => (
+          <OptimizedVendorCard key={vendor.id} vendor={vendor} onConnect={handleConnectVendor} onViewProfile={handleViewVendorProfile} />
+        ))}
+      </div>
+    )
+  }
 )}
 
 {/* Empty State */}
