@@ -491,7 +491,8 @@ export const ServiceManagementPanel = () => {
         direct_purchase_enabled: !!editForm.direct_purchase_enabled,
         respa_split_limit: editForm.respa_split_limit ?? null,
         max_split_percentage_non_ssp: editForm.max_split_percentage_non_ssp ?? null,
-        co_pay_price: calculatedCoPayPrice
+        co_pay_price: calculatedCoPayPrice,
+        updated_at: new Date().toISOString()
       };
 
       console.log('Updating service with data:', updateData);
@@ -704,6 +705,10 @@ export const ServiceManagementPanel = () => {
     setActiveTab(value);
   };
 
+  // Track unsaved changes in Details form
+  const detailKeys = ['title','description','category','duration','estimated_roi','sort_order','is_featured','is_top_pick','is_verified','requires_quote','copay_allowed','direct_purchase_enabled','respa_split_limit','max_split_percentage_non_ssp'] as const;
+  const isDetailsDirty = selectedService ? detailKeys.some((k) => (editForm as any)[k] !== (selectedService as any)[k]) : false;
+
   if (loading) {
     return <p>Loading services...</p>;
   }
@@ -886,7 +891,7 @@ export const ServiceManagementPanel = () => {
 
               <TabsContent value="details" className="space-y-4">
                 {isEditingDetails ? (
-                  <div className="space-y-4">
+                  <div className="space-y-4">{isDetailsDirty && (<Badge variant="outline" className="text-xs">Unsaved changes</Badge>)}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <label className="text-sm font-medium">Service Title</label>
@@ -1034,12 +1039,12 @@ export const ServiceManagementPanel = () => {
                     )}
 
                     <div className="flex gap-2">
-                      <Button onClick={handleServiceUpdate}>
+                      <Button onClick={handleServiceUpdate} disabled={!isDetailsDirty}>
                         Save Changes
                       </Button>
                       <Button 
                         variant="outline" 
-                        onClick={() => setIsEditingDetails(false)}
+                        onClick={() => { if (selectedService) setEditForm(selectedService); setIsEditingDetails(false); }}
                       >
                         Cancel
                       </Button>
@@ -1077,6 +1082,20 @@ export const ServiceManagementPanel = () => {
               </TabsContent>
 
               <TabsContent value="pricing" className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    {isPricingDirty && <Badge variant="outline" className="text-xs">Unsaved changes</Badge>}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" disabled={!isPricingDirty} onClick={() => {
+                      const base = ((selectedService as any)?.pricing_tiers) || [];
+                      setPricingTiers(Array.isArray(base) ? base : []);
+                    }}>
+                      Discard
+                    </Button>
+                    <Button onClick={handleFunnelSave} disabled={!isPricingDirty}>Save Pricing</Button>
+                  </div>
+                </div>
                 <ServicePricingTiersEditor 
                   tiers={pricingTiers}
                   onChange={setPricingTiers}
