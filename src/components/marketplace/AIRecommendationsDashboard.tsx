@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Target, TrendingUp, Clock, ShoppingCart, Eye, X, CheckCircle } from "lucide-react";
 import { GoalAssessmentModal } from "./GoalAssessmentModal";
+import { BuildAIPlanButton } from "@/components/marketplace/BuildAIPlanButton";
 
 interface Recommendation {
   id: string;
@@ -179,9 +180,12 @@ export function AIRecommendationsDashboard() {
             Based on your goals and market analysis
           </p>
         </div>
-        <Button variant="outline" size="sm" onClick={() => setIsGoalAssessmentOpen(true)}>
-          Edit Goals
-        </Button>
+        <div className="flex items-center gap-2">
+          <BuildAIPlanButton />
+          <Button variant="outline" size="sm" onClick={() => setIsGoalAssessmentOpen(true)}>
+            Edit Goals
+          </Button>
+        </div>
       </div>
 
       {/* Goal Progress */}
