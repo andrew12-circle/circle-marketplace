@@ -16,6 +16,7 @@ import { FunnelMediaEditor } from "./FunnelMediaEditor";
 import { FunnelPricingEditor } from "./FunnelPricingEditor";
 import { FunnelTestimonialsEditor } from "./FunnelTestimonialsEditor";
 import { FunnelFAQEditor } from "./FunnelFAQEditor";
+import { FunnelProofEditor } from "./FunnelProofEditor";
 import { 
   Eye, 
   Save, 
@@ -99,6 +100,39 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
           { value: "30", label: "Days Setup", icon: "Clock" },
           { value: "24/7", label: "Support", icon: "Trophy" }
         ],
+        proofItWorks: {
+          testimonials: {
+            enabled: true,
+            items: [
+              {
+                id: "testimonial-1",
+                name: "Sarah M.",
+                company: "Keller Williams",
+                content: "Doubled my leads in 60 days. The automation saves me 15 hours per week!",
+                rating: 5
+              }
+            ]
+          },
+          caseStudy: {
+            enabled: true,
+            data: {
+              beforeValue: 12,
+              afterValue: 85,
+              beforeLabel: "leads/month",
+              afterLabel: "leads/month",
+              percentageIncrease: 608,
+              timeframe: "90 Days",
+              description: "Real agent results from Q3 2024"
+            }
+          },
+          vendorVerification: {
+            enabled: true,
+            data: {
+              badges: ["Background checked", "Performance verified"],
+              description: "This vendor has been vetted and meets our quality standards."
+            }
+          }
+        },
         faqSections: [
           {
             id: "question-1",
@@ -312,7 +346,7 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
 
       {/* Main Editor Tabs */}
       <Tabs defaultValue="content" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="content" className="flex items-center gap-2">
             <FileText className="w-4 h-4" />
             Content
@@ -328,6 +362,10 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
           <TabsTrigger value="testimonials" className="flex items-center gap-2">
             <MessageSquare className="w-4 h-4" />
             Social Proof
+          </TabsTrigger>
+          <TabsTrigger value="proof" className="flex items-center gap-2">
+            <Settings className="w-4 h-4" />
+            Proof
           </TabsTrigger>
           <TabsTrigger value="faq" className="flex items-center gap-2">
             <HelpCircle className="w-4 h-4" />
@@ -364,6 +402,17 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
             testimonials={funnelData.testimonials || []}
             stats={funnelData.stats || []}
             onChange={(type, data) => handleDataChange(type, data)}
+          />
+        </TabsContent>
+
+        <TabsContent value="proof" className="space-y-4">
+          <FunnelProofEditor
+            proofData={funnelData.proofItWorks || {
+              testimonials: { enabled: false, items: [] },
+              caseStudy: { enabled: false, data: { beforeValue: 0, afterValue: 0, beforeLabel: "", afterLabel: "", percentageIncrease: 0, timeframe: "", description: "" } },
+              vendorVerification: { enabled: false, data: { badges: [], description: "" } }
+            }}
+            onChange={(data) => handleDataChange('proofItWorks', data)}
           />
         </TabsContent>
 

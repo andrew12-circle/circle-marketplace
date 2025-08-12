@@ -128,6 +128,38 @@ interface FunnelContent {
     enabled: boolean;
     message: string;
   };
+
+  proofItWorks: {
+    testimonials: {
+      enabled: boolean;
+      items: {
+        id: string;
+        name: string;
+        company: string;
+        content: string;
+        rating: number;
+      }[];
+    };
+    caseStudy: {
+      enabled: boolean;
+      data: {
+        beforeValue: number;
+        afterValue: number;
+        beforeLabel: string;
+        afterLabel: string;
+        percentageIncrease: number;
+        timeframe: string;
+        description: string;
+      };
+    };
+    vendorVerification: {
+      enabled: boolean;
+      data: {
+        badges: string[];
+        description: string;
+      };
+    };
+  };
 }
 
 interface PricingFeature {

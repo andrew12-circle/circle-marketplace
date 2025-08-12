@@ -158,6 +158,37 @@ interface Service {
       buttonText: string;
       buttonVariant?: 'default' | 'secondary' | 'outline';
     };
+    proofItWorks?: {
+      testimonials?: {
+        enabled: boolean;
+        items: {
+          id: string;
+          name: string;
+          company: string;
+          content: string;
+          rating: number;
+        }[];
+      };
+      caseStudy?: {
+        enabled: boolean;
+        data: {
+          beforeValue: number;
+          afterValue: number;
+          beforeLabel: string;
+          afterLabel: string;
+          percentageIncrease: number;
+          timeframe: string;
+          description: string;
+        };
+      };
+      vendorVerification?: {
+        enabled: boolean;
+        data: {
+          badges: string[];
+          description: string;
+        };
+      };
+    };
   };
 }
 
@@ -759,80 +790,158 @@ export const ServiceFunnelModal = ({
                         </div>
                       </AccordionTrigger>
                       <AccordionContent className="border-l-4 border-l-emerald-500 pl-4 bg-white rounded-b-lg shadow-sm pt-0">
-                        <div className="p-6 pt-0">
-                          <div className="space-y-6">
-                            {/* Agent Reviews */}
-                            <div>
-                              <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                                <Star className="w-5 h-5 text-yellow-500" />
-                                Agent Reviews
-                              </h4>
-                              <div className="space-y-3">
-                                <div className="bg-gray-50 p-4 rounded-lg border">
-                                  <div className="flex items-center gap-3 mb-2">
-                                    {renderStarRating(5)}
-                                    <span className="font-medium text-gray-900">Sarah M., Keller Williams</span>
-                                  </div>
-                                  <p className="text-gray-700 italic">"Doubled my leads in 60 days. The automation saves me 15 hours per week!"</p>
-                                </div>
-                                <div className="bg-gray-50 p-4 rounded-lg border">
-                                  <div className="flex items-center gap-3 mb-2">
-                                    {renderStarRating(5)}
-                                    <span className="font-medium text-gray-900">Mike R., RE/MAX</span>
-                                  </div>
-                                  <p className="text-gray-700 italic">"ROI was 400% in the first quarter. Game changer for my business."</p>
-                                </div>
-                              </div>
-                            </div>
+                         <div className="p-6 pt-0">
+                           <div className="space-y-6">
+                             {/* Agent Reviews */}
+                             {service.funnel_content?.proofItWorks?.testimonials?.enabled && service.funnel_content.proofItWorks.testimonials.items.length > 0 && (
+                               <div>
+                                 <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                                   <Star className="w-5 h-5 text-yellow-500" />
+                                   Agent Reviews
+                                 </h4>
+                                 <div className="space-y-3">
+                                   {service.funnel_content.proofItWorks.testimonials.items.map((testimonial) => (
+                                     <div key={testimonial.id} className="bg-gray-50 p-4 rounded-lg border">
+                                       <div className="flex items-center gap-3 mb-2">
+                                         {renderStarRating(testimonial.rating)}
+                                         <span className="font-medium text-gray-900">{testimonial.name}, {testimonial.company}</span>
+                                       </div>
+                                       <p className="text-gray-700 italic">"{testimonial.content}"</p>
+                                     </div>
+                                   ))}
+                                 </div>
+                               </div>
+                             )}
 
-                            {/* Case Study Snapshot */}
-                            <div>
-                              <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                                <TrendingUp className="w-5 h-5 text-green-500" />
-                                Case Study Results
-                              </h4>
-                              <div className="bg-gradient-to-r from-red-50 to-green-50 p-4 rounded-lg border">
-                                <div className="grid grid-cols-2 gap-4">
-                                  <div className="text-center">
-                                    <div className="text-sm text-gray-600 mb-1">Before</div>
-                                    <div className="text-2xl font-bold text-red-600">12</div>
-                                    <div className="text-xs text-gray-500">leads/month</div>
-                                  </div>
-                                  <div className="text-center">
-                                    <div className="text-sm text-gray-600 mb-1">After 90 Days</div>
-                                    <div className="text-2xl font-bold text-green-600">85</div>
-                                    <div className="text-xs text-gray-500">leads/month</div>
-                                  </div>
-                                </div>
-                                <div className="text-center mt-3">
-                                  <div className="text-lg font-semibold text-emerald-600">+608% Lead Increase</div>
-                                  <div className="text-sm text-gray-600">Real agent results from Q3 2024</div>
-                                </div>
-                              </div>
-                            </div>
+                             {/* Case Study Snapshot */}
+                             {service.funnel_content?.proofItWorks?.caseStudy?.enabled && (
+                               <div>
+                                 <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                                   <TrendingUp className="w-5 h-5 text-green-500" />
+                                   Case Study Results
+                                 </h4>
+                                 <div className="bg-gradient-to-r from-red-50 to-green-50 p-4 rounded-lg border">
+                                   <div className="grid grid-cols-2 gap-4">
+                                     <div className="text-center">
+                                       <div className="text-sm text-gray-600 mb-1">Before</div>
+                                       <div className="text-2xl font-bold text-red-600">{service.funnel_content.proofItWorks.caseStudy.data.beforeValue}</div>
+                                       <div className="text-xs text-gray-500">{service.funnel_content.proofItWorks.caseStudy.data.beforeLabel}</div>
+                                     </div>
+                                     <div className="text-center">
+                                       <div className="text-sm text-gray-600 mb-1">After {service.funnel_content.proofItWorks.caseStudy.data.timeframe}</div>
+                                       <div className="text-2xl font-bold text-green-600">{service.funnel_content.proofItWorks.caseStudy.data.afterValue}</div>
+                                       <div className="text-xs text-gray-500">{service.funnel_content.proofItWorks.caseStudy.data.afterLabel}</div>
+                                     </div>
+                                   </div>
+                                   <div className="text-center mt-3">
+                                     <div className="text-lg font-semibold text-emerald-600">+{service.funnel_content.proofItWorks.caseStudy.data.percentageIncrease}% Lead Increase</div>
+                                     <div className="text-sm text-gray-600">{service.funnel_content.proofItWorks.caseStudy.data.description}</div>
+                                   </div>
+                                 </div>
+                               </div>
+                             )}
 
-                            {/* Vendor Verification */}
-                            {service.vendor?.is_verified && (
-                              <div>
-                                <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                                  <Verified className="w-5 h-5 text-emerald-500" />
-                                  Vendor Verification
-                                </h4>
-                                <div className="bg-emerald-50 p-4 rounded-lg border border-emerald-200">
-                                  <div className="flex items-center gap-3">
-                                    <Badge className="bg-emerald-500/20 text-emerald-700 border border-emerald-400/30">
-                                      <Verified className="w-3 h-3 mr-1" />
-                                      Verified Provider
-                                    </Badge>
-                                    <span className="text-emerald-700 font-medium">✓ Background checked</span>
-                                    <span className="text-emerald-700 font-medium">✓ Performance verified</span>
-                                  </div>
-                                  <p className="text-emerald-600 text-sm mt-2">This vendor has been vetted and meets our quality standards.</p>
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        </div>
+                             {/* Vendor Verification */}
+                             {service.funnel_content?.proofItWorks?.vendorVerification?.enabled && service.vendor?.is_verified && (
+                               <div>
+                                 <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                                   <Verified className="w-5 h-5 text-emerald-500" />
+                                   Vendor Verification
+                                 </h4>
+                                 <div className="bg-emerald-50 p-4 rounded-lg border border-emerald-200">
+                                   <div className="flex items-center gap-3 flex-wrap">
+                                     <Badge className="bg-emerald-500/20 text-emerald-700 border border-emerald-400/30">
+                                       <Verified className="w-3 h-3 mr-1" />
+                                       Verified Provider
+                                     </Badge>
+                                     {service.funnel_content.proofItWorks.vendorVerification.data.badges.map((badge, index) => (
+                                       <span key={index} className="text-emerald-700 font-medium">✓ {badge}</span>
+                                     ))}
+                                   </div>
+                                   <p className="text-emerald-600 text-sm mt-2">{service.funnel_content.proofItWorks.vendorVerification.data.description}</p>
+                                 </div>
+                               </div>
+                             )}
+
+                             {/* Fallback for services without proof data */}
+                             {(!service.funnel_content?.proofItWorks?.testimonials?.enabled && 
+                               !service.funnel_content?.proofItWorks?.caseStudy?.enabled && 
+                               !service.funnel_content?.proofItWorks?.vendorVerification?.enabled) && (
+                               <>
+                                 {/* Default Agent Reviews */}
+                                 <div>
+                                   <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                                     <Star className="w-5 h-5 text-yellow-500" />
+                                     Agent Reviews
+                                   </h4>
+                                   <div className="space-y-3">
+                                     <div className="bg-gray-50 p-4 rounded-lg border">
+                                       <div className="flex items-center gap-3 mb-2">
+                                         {renderStarRating(5)}
+                                         <span className="font-medium text-gray-900">Sarah M., Keller Williams</span>
+                                       </div>
+                                       <p className="text-gray-700 italic">"Doubled my leads in 60 days. The automation saves me 15 hours per week!"</p>
+                                     </div>
+                                     <div className="bg-gray-50 p-4 rounded-lg border">
+                                       <div className="flex items-center gap-3 mb-2">
+                                         {renderStarRating(5)}
+                                         <span className="font-medium text-gray-900">Mike R., RE/MAX</span>
+                                       </div>
+                                       <p className="text-gray-700 italic">"ROI was 400% in the first quarter. Game changer for my business."</p>
+                                     </div>
+                                   </div>
+                                 </div>
+
+                                 {/* Default Case Study */}
+                                 <div>
+                                   <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                                     <TrendingUp className="w-5 h-5 text-green-500" />
+                                     Case Study Results
+                                   </h4>
+                                   <div className="bg-gradient-to-r from-red-50 to-green-50 p-4 rounded-lg border">
+                                     <div className="grid grid-cols-2 gap-4">
+                                       <div className="text-center">
+                                         <div className="text-sm text-gray-600 mb-1">Before</div>
+                                         <div className="text-2xl font-bold text-red-600">12</div>
+                                         <div className="text-xs text-gray-500">leads/month</div>
+                                       </div>
+                                       <div className="text-center">
+                                         <div className="text-sm text-gray-600 mb-1">After 90 Days</div>
+                                         <div className="text-2xl font-bold text-green-600">85</div>
+                                         <div className="text-xs text-gray-500">leads/month</div>
+                                       </div>
+                                     </div>
+                                     <div className="text-center mt-3">
+                                       <div className="text-lg font-semibold text-emerald-600">+608% Lead Increase</div>
+                                       <div className="text-sm text-gray-600">Real agent results from Q3 2024</div>
+                                     </div>
+                                   </div>
+                                 </div>
+
+                                 {/* Default Vendor Verification */}
+                                 {service.vendor?.is_verified && (
+                                   <div>
+                                     <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                                       <Verified className="w-5 h-5 text-emerald-500" />
+                                       Vendor Verification
+                                     </h4>
+                                     <div className="bg-emerald-50 p-4 rounded-lg border border-emerald-200">
+                                       <div className="flex items-center gap-3">
+                                         <Badge className="bg-emerald-500/20 text-emerald-700 border border-emerald-400/30">
+                                           <Verified className="w-3 h-3 mr-1" />
+                                           Verified Provider
+                                         </Badge>
+                                         <span className="text-emerald-700 font-medium">✓ Background checked</span>
+                                         <span className="text-emerald-700 font-medium">✓ Performance verified</span>
+                                       </div>
+                                       <p className="text-emerald-600 text-sm mt-2">This vendor has been vetted and meets our quality standards.</p>
+                                     </div>
+                                   </div>
+                                 )}
+                               </>
+                             )}
+                           </div>
+                         </div>
                       </AccordionContent>
                     </AccordionItem>
 

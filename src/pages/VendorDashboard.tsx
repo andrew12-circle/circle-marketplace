@@ -159,10 +159,35 @@ export const VendorDashboard = () => {
         website: ""
       }
     },
-    urgency: {
-      enabled: false,
-      message: ""
-    }
+          urgency: {
+            enabled: false,
+            message: ""
+          },
+          proofItWorks: {
+            testimonials: {
+              enabled: false,
+              items: []
+            },
+            caseStudy: {
+              enabled: false,
+              data: {
+                beforeValue: 0,
+                afterValue: 0,
+                beforeLabel: "",
+                afterLabel: "",
+                percentageIncrease: 0,
+                timeframe: "",
+                description: ""
+              }
+            },
+            vendorVerification: {
+              enabled: false,
+              data: {
+                badges: [],
+                description: ""
+              }
+            }
+          }
   });
   const [selectedService, setSelectedService] = useState<VendorService | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
