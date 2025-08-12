@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { lazy, Suspense } from "react";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 import { CSRFProvider } from "@/components/common/CSRFProtection";
@@ -10,7 +11,9 @@ import { SecurityHeaders } from "@/components/common/SecurityHeaders";
 import { EnhancedSecurityHeaders } from "@/components/security/EnhancedSecurityHeaders";
 import { SecurityStatusIndicator } from "@/components/security/SecurityEnhancementSystem";
 import RequestLogger from "@/components/security/RequestLogger";
-import Index from "./pages/Index";
+// Lazy-loaded heavy pages
+const Index = lazy(() => import("./pages/Index"));
+const Academy = lazy(() => import("./pages/Academy").then(m => ({ default: m.Academy })));
 import { Auth } from "./pages/Auth";
 import { OrderHistory } from "./pages/OrderHistory";
 import { PaymentSuccess } from "./pages/PaymentSuccess";
@@ -39,7 +42,7 @@ import { BuyerProtection } from "./pages/legal/BuyerProtection";
 import { ProhibitedItems } from "./pages/legal/ProhibitedItems";
 import CommandCenter from "./pages/CommandCenter";
 import { CommandCenterTest } from "./pages/CommandCenterTest";
-import { Academy } from "./pages/Academy";
+
 import CompliancePage from "./pages/CompliancePage";
 import AdminCommissions from "./pages/AdminCommissions";
 import { reportClientError } from "@/utils/errorReporting";
@@ -62,44 +65,44 @@ const App = () => {
                  <SecurityHeaders />
                  <EnhancedSecurityHeaders />
                  <RequestLogger />
-                 <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/academy" element={<Academy />} />
-                <Route path="/command-center" element={<CommandCenter />} />
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/orders" element={<OrderHistory />} />
-                <Route path="/pricing" element={<Pricing />} />
-                <Route path="/profile-settings" element={<ProfileSettings />} />
-                <Route path="/wallet" element={<AgentWallet />} />
-                <Route path="/saved" element={<SavedItems />} />
-                <Route path="/payment-success" element={<PaymentSuccess />} />
-                <Route path="/payment-canceled" element={<PaymentCanceled />} />
-                <Route path="/consultation-demo" element={<ConsultationDemo />} />
-                <Route path="/vendor-dashboard" element={<VendorDashboard />} />
-                <Route path="/vendor-analytics" element={<VendorAnalyticsDashboard />} />
-                <Route path="/vendor-registration" element={<VendorRegistration />} />
-                <Route path="/analytics" element={<AnalyticsDashboard />} />
-                <Route path="/health" element={<HealthStability />} />
-                <Route path="/support" element={<SupportDashboard />} />
-                <Route path="/advanced-features" element={<AdvancedFeaturesDashboard />} />
-                <Route path="/ai-dashboard" element={<AIDashboard />} />
-                 <Route path="/admin" element={<AdminDashboard />} />
-                 <Route path="/admin/accounting" element={<AdminAccounting />} />
-                 <Route path="/admin/commissions" element={<AdminCommissions />} />
-                 <Route path="/compliance" element={<CompliancePage />} />
-                
-                {/* Legal Pages */}
-                <Route path="/terms" element={<TermsOfService />} />
-                <Route path="/privacy" element={<PrivacyPolicy />} />
-                <Route path="/cookies" element={<CookiePolicy />} />
-                <Route path="/seller-agreement" element={<SellerAgreement />} />
-                <Route path="/buyer-protection" element={<BuyerProtection />} />
-                <Route path="/prohibited-items" element={<ProhibitedItems />} />
-                
-                {/* Catch-all route MUST be last */}
-                <Route path="*" element={<NotFound />} />
-                </Routes>
-              </BrowserRouter>
+                 <Suspense fallback={<div className="p-6 text-center text-muted-foreground">Loading...</div>}>
+                   <Routes>
+                     <Route path="/" element={<Index />} />
+                     <Route path="/academy" element={<Academy />} />
+                     <Route path="/command-center" element={<CommandCenter />} />
+                     <Route path="/auth" element={<Auth />} />
+                     <Route path="/orders" element={<OrderHistory />} />
+                     <Route path="/pricing" element={<Pricing />} />
+                     <Route path="/profile-settings" element={<ProfileSettings />} />
+                     <Route path="/wallet" element={<AgentWallet />} />
+                     <Route path="/saved" element={<SavedItems />} />
+                     <Route path="/payment-success" element={<PaymentSuccess />} />
+                     <Route path="/payment-canceled" element={<PaymentCanceled />} />
+                     <Route path="/consultation-demo" element={<ConsultationDemo />} />
+                     <Route path="/vendor-dashboard" element={<VendorDashboard />} />
+                     <Route path="/vendor-analytics" element={<VendorAnalyticsDashboard />} />
+                     <Route path="/vendor-registration" element={<VendorRegistration />} />
+                     <Route path="/analytics" element={<AnalyticsDashboard />} />
+                     <Route path="/health" element={<HealthStability />} />
+                     <Route path="/support" element={<SupportDashboard />} />
+                     <Route path="/advanced-features" element={<AdvancedFeaturesDashboard />} />
+                     <Route path="/ai-dashboard" element={<AIDashboard />} />
+                     <Route path="/admin" element={<AdminDashboard />} />
+                     <Route path="/admin/accounting" element={<AdminAccounting />} />
+                     <Route path="/admin/commissions" element={<AdminCommissions />} />
+                     <Route path="/compliance" element={<CompliancePage />} />
+                     {/* Legal Pages */}
+                     <Route path="/terms" element={<TermsOfService />} />
+                     <Route path="/privacy" element={<PrivacyPolicy />} />
+                     <Route path="/cookies" element={<CookiePolicy />} />
+                     <Route path="/seller-agreement" element={<SellerAgreement />} />
+                     <Route path="/buyer-protection" element={<BuyerProtection />} />
+                     <Route path="/prohibited-items" element={<ProhibitedItems />} />
+                     {/* Catch-all route MUST be last */}
+                     <Route path="*" element={<NotFound />} />
+                   </Routes>
+                 </Suspense>
+               </BrowserRouter>
             </AuthProvider>
           </CSRFProvider>
         </TooltipProvider>
