@@ -632,8 +632,7 @@ const handleViewServiceDetails = useCallback((serviceId: string) => {
     </div>
   )
 ) : (
-  {
-    ((isLoading || error) && vendors.length === 0) ? (
+  ((isLoading || error) && vendors.length === 0) ? (
       <div className="space-y-4">
         <div className="mobile-grid gap-4 sm:gap-6">
           {Array.from({ length: 6 }).map((_, i) => (
@@ -652,7 +651,6 @@ const handleViewServiceDetails = useCallback((serviceId: string) => {
         ))}
       </div>
     )
-  }
 )}
 
 {/* Empty State */}
