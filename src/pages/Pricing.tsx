@@ -185,14 +185,14 @@ export const Pricing = () => {
               {/* Mobile Table Header */}
               <div className="bg-white rounded-t-xl border border-gray-200 overflow-hidden shadow-sm">
                 <div className="grid grid-cols-[2fr_1fr_1fr] gap-0 bg-gradient-to-r from-gray-50 to-gray-100">
-                  <div className="p-4 border-r border-gray-200">
+                  <div className="p-4 border-r border-gray-200 flex items-center min-h-[80px]">
                     <span className="font-bold text-sm text-gray-900">Features</span>
                   </div>
-                  <div className="p-4 border-r border-gray-200 text-center">
+                  <div className="p-4 border-r border-gray-200 text-center flex flex-col justify-center min-h-[80px]">
                     <div className="font-bold text-sm text-gray-900">Starter</div>
                     <div className="text-xs text-emerald-600 font-semibold">Free</div>
                   </div>
-                  <div className="p-4 text-center bg-gradient-to-br from-blue-50 to-purple-50 relative">
+                  <div className="p-4 text-center bg-gradient-to-br from-blue-50 to-purple-50 relative flex flex-col justify-center min-h-[80px]">
                     <div className="font-bold text-sm text-gray-900">Pro</div>
                     <div className="text-xs text-blue-600 font-semibold">$97/month</div>
                     <div className="absolute -top-1 left-1/2 transform -translate-x-1/2">
