@@ -9,6 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Target, TrendingUp, Clock, ShoppingCart, Eye, X, CheckCircle, Sparkles } from "lucide-react";
 import { GoalAssessmentModal } from "./GoalAssessmentModal";
 import { BuildAIPlanButton } from "@/components/marketplace/BuildAIPlanButton";
+import { useGoalPlan } from "@/hooks/useGoalPlan";
 
 interface Recommendation {
   id: string;
@@ -43,7 +44,8 @@ export function AIRecommendationsDashboard() {
   const [bundles, setBundles] = useState<ServiceBundle[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isGoalAssessmentOpen, setIsGoalAssessmentOpen] = useState(false);
-  const [isGenerating, setIsGenerating] = useState(false);
+const [isGenerating, setIsGenerating] = useState(false);
+const { isBuilding, buildPlan } = useGoalPlan();
 
   useEffect(() => {
     if (user?.id) {
@@ -421,20 +423,30 @@ export function AIRecommendationsDashboard() {
                 : "Complete your goal assessment to get personalized recommendations."}
             </p>
             <div className="flex justify-center gap-2 pt-2">
-              {hasCompletedAssessment ? (
-                <Button onClick={generateAIRecommendations} disabled={isGenerating}>
-                  {isGenerating ? "Generating..." : (
-                    <>
-                      <Sparkles className="h-4 w-4 mr-1" />
-                      Generate Recommendations
-                    </>
-                  )}
-                </Button>
-              ) : (
-                <Button variant="outline" onClick={() => setIsGoalAssessmentOpen(true)}>
-                  Complete Assessment
-                </Button>
-              )}
+{hasCompletedAssessment ? (
+  <>
+    <Button onClick={generateAIRecommendations} disabled={isGenerating}>
+      {isGenerating ? "Generating..." : (
+        <>
+          <Sparkles className="h-4 w-4 mr-1" />
+          Generate Recommendations
+        </>
+      )}
+    </Button>
+    <Button variant="outline" onClick={async () => { await buildPlan(); }} disabled={isBuilding}>
+      {isBuilding ? "Contacting OpenAI..." : (
+        <>
+          <Sparkles className="h-4 w-4 mr-1" />
+          AI Strategy Guide
+        </>
+      )}
+    </Button>
+  </>
+) : (
+  <Button variant="outline" onClick={() => setIsGoalAssessmentOpen(true)}>
+    Complete Assessment
+  </Button>
+)}
             </div>
           </CardContent>
         </Card>
