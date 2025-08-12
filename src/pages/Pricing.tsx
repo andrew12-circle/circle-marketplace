@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Check, X } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Check, X, ChevronDown, ChevronUp } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,6 +10,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import circleLogo from "@/assets/circle-logo.png";
 export const Pricing = () => {
   const [loading, setLoading] = useState<string | null>(null);
+  const [coreOpen, setCoreOpen] = useState(true);
+  const [businessOpen, setBusinessOpen] = useState(true);
+  const [lifestyleOpen, setLifestyleOpen] = useState(true);
   const {
     toast
   } = useToast();
@@ -200,14 +204,21 @@ export const Pricing = () => {
                 </div>
 
                 {/* Core Features Section */}
-                <div className="bg-gradient-to-r from-blue-50 to-purple-50 px-4 py-2 border-b border-gray-200">
-                  <span className="font-bold text-sm text-gray-900 flex items-center gap-2">
-                    <div className="w-4 h-4 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
-                      <span className="text-white text-xs font-bold">1</span>
+                <Collapsible open={coreOpen} onOpenChange={setCoreOpen}>
+                  <CollapsibleTrigger className="w-full">
+                    <div className="bg-gradient-to-r from-blue-50 to-purple-50 px-4 py-2 border-b border-gray-200 hover:from-blue-100 hover:to-purple-100 transition-colors">
+                      <span className="font-bold text-sm text-gray-900 flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                          <div className="w-4 h-4 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                            <span className="text-white text-xs font-bold">1</span>
+                          </div>
+                          Core Platform Features
+                        </div>
+                        {coreOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                      </span>
                     </div>
-                    Core Platform Features
-                  </span>
-                </div>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
 
                 {[{
                   feature: "Marketplace Access",
@@ -265,19 +276,27 @@ export const Pricing = () => {
                       ) : (
                         <span className="text-xs font-semibold text-blue-700 bg-blue-100 px-2 py-1 rounded-full">{item.pro}</span>
                       )}
-                    </div>
-                  </div>
-                ))}
-
+                     </div>
+                   </div>
+                 ))}
+                   </CollapsibleContent>
+                 </Collapsible>
                 {/* Business Features Section */}
-                <div className="bg-gradient-to-r from-purple-50 to-pink-50 px-4 py-2 border-b border-gray-200">
-                  <span className="font-bold text-sm text-gray-900 flex items-center gap-2">
-                    <div className="w-4 h-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-                      <span className="text-white text-xs font-bold">2</span>
+                <Collapsible open={businessOpen} onOpenChange={setBusinessOpen}>
+                  <CollapsibleTrigger className="w-full">
+                    <div className="bg-gradient-to-r from-purple-50 to-pink-50 px-4 py-2 border-b border-gray-200 hover:from-purple-100 hover:to-pink-100 transition-colors">
+                      <span className="font-bold text-sm text-gray-900 flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                          <div className="w-4 h-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                            <span className="text-white text-xs font-bold">2</span>
+                          </div>
+                          Business Growth Features
+                        </div>
+                        {businessOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                      </span>
                     </div>
-                    Business Growth Features
-                  </span>
-                </div>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
 
                 {[{
                   feature: "Create & Sell Playbooks",
@@ -329,18 +348,27 @@ export const Pricing = () => {
                       )}
                     </div>
                   </div>
-                ))}
+                 ))}
+                   </CollapsibleContent>
+                 </Collapsible>
 
-                {/* Lifestyle Benefits Section */}
-                <div className="bg-gradient-to-r from-amber-50 to-orange-50 px-4 py-2 border-b border-gray-200">
-                  <span className="font-bold text-sm text-gray-900 flex items-center gap-2">
-                    <div className="w-4 h-4 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full flex items-center justify-center">
-                      <span className="text-white text-xs font-bold">3</span>
-                    </div>
-                    Lifestyle Benefits
-                    <span className="ml-1 px-1.5 py-0.5 bg-amber-100 text-amber-700 text-xs font-medium rounded-full">Coming Soon</span>
-                  </span>
-                </div>
+                 {/* Lifestyle Benefits Section */}
+                 <Collapsible open={lifestyleOpen} onOpenChange={setLifestyleOpen}>
+                   <CollapsibleTrigger className="w-full">
+                     <div className="bg-gradient-to-r from-amber-50 to-orange-50 px-4 py-2 border-b border-gray-200 hover:from-amber-100 hover:to-orange-100 transition-colors">
+                       <span className="font-bold text-sm text-gray-900 flex items-center justify-between gap-2">
+                         <div className="flex items-center gap-2">
+                           <div className="w-4 h-4 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full flex items-center justify-center">
+                             <span className="text-white text-xs font-bold">3</span>
+                           </div>
+                           Lifestyle Benefits
+                           <span className="ml-1 px-1.5 py-0.5 bg-amber-100 text-amber-700 text-xs font-medium rounded-full">Coming Soon</span>
+                         </div>
+                         {lifestyleOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                       </span>
+                     </div>
+                   </CollapsibleTrigger>
+                   <CollapsibleContent>
 
                 {[{
                   feature: "Fuel Discount — $0.15/gallon",
@@ -441,9 +469,11 @@ export const Pricing = () => {
                       </div>
                     </div>
                   </div>
-                ))}
-              </div>
-            </div>
+                 ))}
+                   </CollapsibleContent>
+                 </Collapsible>
+               </div>
+             </div>
 
             {/* Desktop: Enhanced Features Comparison Table */}
             <div className="hidden md:block bg-white rounded-2xl border border-gray-200/60 shadow-xl overflow-hidden">
