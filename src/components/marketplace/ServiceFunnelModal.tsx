@@ -348,10 +348,8 @@ export const ServiceFunnelModal = ({
 
         <div className="overflow-y-auto max-h-[90vh]">
           {/* Modern Hero Section */}
-          <div className="relative bg-gradient-to-b from-background to-muted/30 text-foreground overflow-hidden">
-            <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%239C92AC%22%20fill-opacity%3D%220.1%22%3E%3Ccircle%20cx%3D%2230%22%20cy%3D%2230%22%20r%3D%223%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-10"></div>
-            {/* Removed heavy white overlay for a cleaner, brighter feel */}
-            <div className="absolute inset-0 pointer-events-none hidden"></div>
+          <div className="relative bg-gradient-to-br from-slate-900 via-blue-900 to-purple-900 text-white overflow-hidden">
+            <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%239C92AC%22%20fill-opacity%3D%220.1%22%3E%3Ccircle%20cx%3D%2230%22%20cy%3D%2230%22%20r%3D%223%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-20"></div>
             
             <div className="relative p-8 lg:p-12">
               <div className="max-w-4xl mx-auto">
@@ -373,24 +371,24 @@ export const ServiceFunnelModal = ({
                 <div className="grid lg:grid-cols-2 gap-12 items-center">
                   {/* Left Content */}
                   <div className="space-y-6 animate-fade-in">
-                    <h1 className="text-3xl lg:text-4xl font-semibold tracking-tight text-foreground">
+                    <h1 className="text-2xl lg:text-3xl font-bold leading-tight bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
                       {service.funnel_content?.headline || service.title}
                     </h1>
                     
-                    <p className="text-base lg:text-lg text-muted-foreground leading-relaxed">
+                    <p className="text-base lg:text-lg text-blue-100 leading-relaxed">
                       {subHeadline || "Transform your real estate business with our proven system"}
                     </p>
 
                     {service.vendor && (
-                      <div className="flex items-center gap-4 p-4 bg-card/80 backdrop-blur-sm rounded-xl border border-border shadow-sm">
+                      <div className="flex items-center gap-4 p-4 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
                         <div className="flex items-center gap-2">
                           {renderStarRating(service.vendor.rating, "lg")}
                           <span className="text-lg font-medium">
                             {service.vendor.rating}
                           </span>
                         </div>
-                        <Separator orientation="vertical" className="h-6 bg-muted/40" />
-                        <span className="text-sm text-muted-foreground">
+                        <Separator orientation="vertical" className="h-6 bg-white/30" />
+                        <span className="text-sm text-blue-200">
                           {service.vendor.review_count}+ reviews
                         </span>
                       </div>
@@ -398,24 +396,24 @@ export const ServiceFunnelModal = ({
 
                     {/* Quick Stats */}
                     <div className="grid grid-cols-3 gap-4">
-                      <div className="text-center p-3 bg-card rounded-lg border border-border shadow-sm">
-                        <div className="text-2xl font-semibold text-foreground">600%</div>
-                        <div className="text-xs text-muted-foreground">Avg ROI</div>
+                      <div className="text-center p-3 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
+                        <div className="text-2xl font-bold">600%</div>
+                        <div className="text-xs text-blue-200">Avg ROI</div>
                       </div>
-                      <div className="text-center p-3 bg-card rounded-lg border border-border shadow-sm">
-                        <div className="text-2xl font-semibold text-foreground">30</div>
-                        <div className="text-xs text-muted-foreground">Days Setup</div>
+                      <div className="text-center p-3 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
+                        <div className="text-2xl font-bold">30</div>
+                        <div className="text-xs text-blue-200">Days Setup</div>
                       </div>
-                      <div className="text-center p-3 bg-card rounded-lg border border-border shadow-sm">
-                        <div className="text-2xl font-semibold text-foreground">24/7</div>
-                        <div className="text-xs text-muted-foreground">Support</div>
+                      <div className="text-center p-3 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
+                        <div className="text-2xl font-bold">24/7</div>
+                        <div className="text-xs text-blue-200">Support</div>
                       </div>
                     </div>
                   </div>
 
                   {/* Right Media */}
                   <div className="relative animate-fade-in">
-                    <div className="aspect-video bg-card rounded-2xl overflow-hidden border border-border shadow-xl">
+                    <div className="aspect-video bg-white/10 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/20 shadow-2xl">
                       {(service.funnel_content?.media?.[0]?.url || service.image_url) ? (
                         (() => {
                           const baseMediaItem = service.funnel_content?.media?.[0];
@@ -453,8 +451,8 @@ export const ServiceFunnelModal = ({
                           }
                         })()
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted/30 to-muted/50">
-                          <Play className="w-16 h-16 text-muted-foreground/60" />
+                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-600/20 to-purple-600/20">
+                          <Play className="w-16 h-16 text-white/60" />
                         </div>
                       )}
                     </div>
@@ -476,7 +474,7 @@ export const ServiceFunnelModal = ({
                               key={`${m.url}-${idx}`}
                               type="button"
                               onClick={() => setActiveMediaUrl(m.url)}
-                              className="relative aspect-video bg-card rounded-lg overflow-hidden border border-border cursor-pointer hover-scale shadow-sm"
+                              className="relative aspect-video bg-white/10 backdrop-blur-sm rounded-lg overflow-hidden border border-white/20 cursor-pointer hover-scale"
                               aria-label={m.title || (isVideo ? 'Play video' : 'View image')}
                             >
                               {thumbUrl ? (
@@ -487,13 +485,13 @@ export const ServiceFunnelModal = ({
                                   loading="lazy"
                                 />
                               ) : (
-                                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted/30 to-muted/50">
-                                  <Play className="w-8 h-8 text-muted-foreground/60" />
+                                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-600/20 to-purple-600/20">
+                                  <Play className="w-8 h-8 text-white/60" />
                                 </div>
                               )}
                               {isVideo && (
                                 <div className="absolute inset-0 flex items-center justify-center bg-black/0 hover:bg-black/10 transition-colors">
-                                  <Play className="w-7 h-7 text-foreground drop-shadow" />
+                                  <Play className="w-7 h-7 text-white drop-shadow" />
                                 </div>
                               )}
                             </button>
