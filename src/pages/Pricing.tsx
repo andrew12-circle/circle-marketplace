@@ -372,312 +372,259 @@ export const Pricing = () => {
                 </div>
 
 
-                <div className="bg-muted/30 p-4 border-r border-b">
-                  <span className="font-semibold text-foreground">Circle Coverage</span>
+                {/* Circle Coverage */}
+                <div className="bg-gray-50/50 p-6 border-r border-gray-200 border-b hover:bg-gray-50 transition-colors duration-200">
+                  <span className="font-semibold text-gray-900">Circle Coverage</span>
+                  <div className="text-sm text-gray-600 mt-1">Access premium features</div>
                 </div>
-                <div className="p-4 border-r border-b text-center bg-card">
-                  <X className="w-6 h-6 text-muted-foreground mx-auto" />
+                <div className="p-6 border-r border-gray-200 border-b text-center bg-white hover:bg-gray-50/50 transition-colors duration-200">
+                  <div className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full">
+                    <X className="w-5 h-5 text-gray-400" />
+                  </div>
                 </div>
-                <div className="p-4 border-b text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50">
-                  <Check className="w-6 h-6 text-emerald-500 mx-auto" />
-                </div>
-
-                <div className="bg-muted/30 p-4 border-r border-b">
-                  <span className="font-semibold text-foreground">Pro Pricing</span>
-                  <div className="text-sm text-muted-foreground">(Avg. 20% off)</div>
-                  <div className="text-xs text-muted-foreground mt-1">Often, one purchase makes Pro cheaper than buying direct.</div>
-                </div>
-                <div className="p-4 border-r border-b text-center bg-card">
-                  <X className="w-6 h-6 text-muted-foreground mx-auto" />
-                </div>
-                <div className="p-4 border-b text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50">
-                  <Check className="w-6 h-6 text-emerald-500 mx-auto" />
+                <div className="p-6 border-b border-gray-200 text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50 hover:from-blue-50 hover:to-purple-50 transition-colors duration-200">
+                  <div className="inline-flex items-center justify-center w-8 h-8 bg-emerald-100 rounded-full">
+                    <Check className="w-5 h-5 text-emerald-600" />
+                  </div>
                 </div>
 
-                <div className="bg-muted/30 p-4 border-r border-b">
-                  <span className="font-semibold text-foreground">CoPay Access</span>
-                  <div className="text-sm text-muted-foreground">(60% avg. discount)</div>
+                {/* Pro Pricing */}
+                <div className="bg-gray-50/50 p-6 border-r border-gray-200 border-b hover:bg-gray-50 transition-colors duration-200">
+                  <span className="font-semibold text-gray-900">Pro Pricing</span>
+                  <div className="text-sm text-gray-600 mt-1">Avg. 20% off retail rates</div>
+                  <div className="text-xs text-blue-600 mt-2 font-medium">Often pays for itself with one purchase</div>
                 </div>
-                <div className="p-4 border-r border-b text-center bg-card">
-                  <X className="w-6 h-6 text-muted-foreground mx-auto" />
+                <div className="p-6 border-r border-gray-200 border-b text-center bg-white hover:bg-gray-50/50 transition-colors duration-200">
+                  <div className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full">
+                    <X className="w-5 h-5 text-gray-400" />
+                  </div>
                 </div>
-                <div className="p-4 border-b text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50">
-                  <Check className="w-6 h-6 text-emerald-500 mx-auto" />
-                </div>
-
-                <div className="bg-muted/30 p-4 border-r border-b">
-                  <span className="font-semibold text-foreground">Circle Academy Access</span>
-                </div>
-                <div className="p-4 border-r border-b text-center bg-card">
-                  <span className="text-muted-foreground font-medium">Limited</span>
-                </div>
-                <div className="p-4 border-b text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50">
-                  <span className="text-foreground font-semibold">Full Library</span>
+                <div className="p-6 border-b border-gray-200 text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50 hover:from-blue-50 hover:to-purple-50 transition-colors duration-200">
+                  <div className="inline-flex items-center justify-center w-8 h-8 bg-emerald-100 rounded-full">
+                    <Check className="w-5 h-5 text-emerald-600" />
+                  </div>
                 </div>
 
-                <div className="bg-muted/30 p-4 border-r border-b">
-                  <span className="font-semibold text-foreground">Create & Sell Playbooks</span>
+                {/* CoPay Access */}
+                <div className="bg-gray-50/50 p-6 border-r border-gray-200 border-b hover:bg-gray-50 transition-colors duration-200">
+                  <span className="font-semibold text-gray-900">CoPay Access</span>
+                  <div className="text-sm text-gray-600 mt-1">60% avg. discount on select services</div>
                 </div>
-                <div className="p-4 border-r border-b text-center bg-card">
-                  <X className="w-6 h-6 text-muted-foreground mx-auto" />
+                <div className="p-6 border-r border-gray-200 border-b text-center bg-white hover:bg-gray-50/50 transition-colors duration-200">
+                  <div className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full">
+                    <X className="w-5 h-5 text-gray-400" />
+                  </div>
                 </div>
-                <div className="p-4 border-b text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50">
-                  <Check className="w-6 h-6 text-emerald-500 mx-auto" />
-                </div>
-
-                <div className="bg-muted/30 p-4 border-r border-b">
-                  <span className="font-semibold text-foreground">Earn Creator Revenue</span>
-                </div>
-                <div className="p-4 border-r border-b text-center bg-card">
-                  <X className="w-6 h-6 text-muted-foreground mx-auto" />
-                </div>
-                <div className="p-4 border-b text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50">
-                  <Check className="w-6 h-6 text-emerald-500 mx-auto" />
+                <div className="p-6 border-b border-gray-200 text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50 hover:from-blue-50 hover:to-purple-50 transition-colors duration-200">
+                  <div className="inline-flex items-center justify-center w-8 h-8 bg-emerald-100 rounded-full">
+                    <Check className="w-5 h-5 text-emerald-600" />
+                  </div>
                 </div>
 
-                <div className="bg-muted/30 p-4 border-r border-b">
-                  <span className="font-semibold text-foreground">Analytics & Reporting</span>
+                {/* Circle Academy Access */}
+                <div className="bg-gray-50/50 p-6 border-r border-gray-200 border-b hover:bg-gray-50 transition-colors duration-200">
+                  <span className="font-semibold text-gray-900">Circle Academy Access</span>
+                  <div className="text-sm text-gray-600 mt-1">Training and educational content</div>
                 </div>
-                <div className="p-4 border-r border-b text-center bg-card">
-                  <X className="w-6 h-6 text-muted-foreground mx-auto" />
+                <div className="p-6 border-r border-gray-200 border-b text-center bg-white hover:bg-gray-50/50 transition-colors duration-200">
+                  <span className="text-sm font-medium text-gray-600 bg-gray-100 px-3 py-1 rounded-full">Limited</span>
                 </div>
-                <div className="p-4 border-b text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50">
-                  <span className="text-foreground font-semibold">Advanced</span>
-                </div>
-
-                <div className="bg-muted/30 p-4 border-r border-b">
-                  <span className="font-semibold text-foreground">Team Management</span>
-                </div>
-                <div className="p-4 border-r border-b text-center bg-card">
-                  <X className="w-6 h-6 text-muted-foreground mx-auto" />
-                </div>
-                <div className="p-4 border-b text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50">
-                  <Check className="w-6 h-6 text-emerald-500 mx-auto" />
+                <div className="p-6 border-b border-gray-200 text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50 hover:from-blue-50 hover:to-purple-50 transition-colors duration-200">
+                  <span className="text-sm font-semibold text-blue-700 bg-blue-100 px-3 py-1 rounded-full">Full Library</span>
                 </div>
 
-                <div className="bg-muted/30 p-4 border-r border-b">
-                  <span className="font-semibold text-foreground">Priority Support</span>
-                </div>
-                <div className="p-4 border-r border-b text-center bg-card">
-                  <X className="w-6 h-6 text-muted-foreground mx-auto" />
-                </div>
-                <div className="p-4 border-b text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50">
-                  <Check className="w-6 h-6 text-emerald-500 mx-auto" />
-                </div>
-
-                {/* Coming Soon Features Section */}
-                <div className="bg-muted/20 p-4 border-r border-b col-span-3">
-                  <span className="font-bold text-lg text-foreground">Lifestyle Benefits (Coming Soon)</span>
+                {/* Business Features Section */}
+                <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-4 border-r border-gray-200 col-span-3">
+                  <span className="font-bold text-lg text-gray-900 flex items-center gap-2">
+                    <div className="w-6 h-6 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                      <span className="text-white text-xs font-bold">2</span>
+                    </div>
+                    Business Growth Features
+                  </span>
                 </div>
 
-                <div className="bg-muted/30 p-4 border-r border-b">
-                  <span className="font-semibold text-foreground">Fuel Discount — $0.15 per gallon</span>
+                {/* Create & Sell Playbooks */}
+                <div className="bg-gray-50/50 p-6 border-r border-gray-200 border-b hover:bg-gray-50 transition-colors duration-200">
+                  <span className="font-semibold text-gray-900">Create & Sell Playbooks</span>
+                  <div className="text-sm text-gray-600 mt-1">Share your expertise and earn</div>
                 </div>
-                <div className="p-4 border-r border-b text-center bg-card">
-                  <X className="w-6 h-6 text-muted-foreground mx-auto" />
+                <div className="p-6 border-r border-gray-200 border-b text-center bg-white hover:bg-gray-50/50 transition-colors duration-200">
+                  <div className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full">
+                    <X className="w-5 h-5 text-gray-400" />
+                  </div>
                 </div>
-                <div className="p-4 border-b text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50">
-                  <span className="text-foreground font-semibold">✓ (Est. $180/year)</span>
-                </div>
-
-                <div className="bg-muted/30 p-4 border-r border-b">
-                  <span className="font-semibold text-foreground">Nationwide Tire Discounts & Free Rotations</span>
-                </div>
-                <div className="p-4 border-r border-b text-center bg-card">
-                  <X className="w-6 h-6 text-muted-foreground mx-auto" />
-                </div>
-                <div className="p-4 border-b text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50">
-                  <span className="text-foreground font-semibold">✓ (Est. $100/year)</span>
+                <div className="p-6 border-b border-gray-200 text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50 hover:from-blue-50 hover:to-purple-50 transition-colors duration-200">
+                  <div className="inline-flex items-center justify-center w-8 h-8 bg-emerald-100 rounded-full">
+                    <Check className="w-5 h-5 text-emerald-600" />
+                  </div>
                 </div>
 
-                <div className="bg-muted/30 p-4 border-r border-b">
-                  <span className="font-semibold text-foreground">Car Maintenance Savings</span>
+                {/* Earn Creator Revenue */}
+                <div className="bg-gray-50/50 p-6 border-r border-gray-200 border-b hover:bg-gray-50 transition-colors duration-200">
+                  <span className="font-semibold text-gray-900">Earn Creator Revenue</span>
+                  <div className="text-sm text-gray-600 mt-1">Monetize your content and expertise</div>
                 </div>
-                <div className="p-4 border-r border-b text-center bg-card">
-                  <X className="w-6 h-6 text-muted-foreground mx-auto" />
+                <div className="p-6 border-r border-gray-200 border-b text-center bg-white hover:bg-gray-50/50 transition-colors duration-200">
+                  <div className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full">
+                    <X className="w-5 h-5 text-gray-400" />
+                  </div>
                 </div>
-                <div className="p-4 border-b text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50">
-                  <span className="text-foreground font-semibold">✓ (Est. $75/year)</span>
-                </div>
-
-                <div className="bg-muted/30 p-4 border-r border-b">
-                  <span className="font-semibold text-foreground">Auto Insurance Discounts</span>
-                </div>
-                <div className="p-4 border-r border-b text-center bg-card">
-                  <X className="w-6 h-6 text-muted-foreground mx-auto" />
-                </div>
-                <div className="p-4 border-b text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50">
-                  <span className="text-foreground font-semibold">✓ (Est. $120/year)</span>
+                <div className="p-6 border-b border-gray-200 text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50 hover:from-blue-50 hover:to-purple-50 transition-colors duration-200">
+                  <div className="inline-flex items-center justify-center w-8 h-8 bg-emerald-100 rounded-full">
+                    <Check className="w-5 h-5 text-emerald-600" />
+                  </div>
                 </div>
 
-                <div className="bg-muted/30 p-4 border-r border-b">
-                  <span className="font-semibold text-foreground">Car Wash & Detailing Memberships</span>
+                {/* Analytics & Reporting */}
+                <div className="bg-gray-50/50 p-6 border-r border-gray-200 border-b hover:bg-gray-50 transition-colors duration-200">
+                  <span className="font-semibold text-gray-900">Analytics & Reporting</span>
+                  <div className="text-sm text-gray-600 mt-1">Track performance and ROI</div>
                 </div>
-                <div className="p-4 border-r border-b text-center bg-card">
-                  <X className="w-6 h-6 text-muted-foreground mx-auto" />
+                <div className="p-6 border-r border-gray-200 border-b text-center bg-white hover:bg-gray-50/50 transition-colors duration-200">
+                  <div className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full">
+                    <X className="w-5 h-5 text-gray-400" />
+                  </div>
                 </div>
-                <div className="p-4 border-b text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50">
-                  <span className="text-foreground font-semibold">✓ (Est. $240/year)</span>
-                </div>
-
-                <div className="bg-muted/30 p-4 border-r border-b">
-                  <span className="font-semibold text-foreground">Roadside Assistance Coverage</span>
-                </div>
-                <div className="p-4 border-r border-b text-center bg-card">
-                  <X className="w-6 h-6 text-muted-foreground mx-auto" />
-                </div>
-                <div className="p-4 border-b text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50">
-                  <span className="text-foreground font-semibold">✓ (Est. $75/year)</span>
+                <div className="p-6 border-b border-gray-200 text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50 hover:from-blue-50 hover:to-purple-50 transition-colors duration-200">
+                  <span className="text-sm font-semibold text-blue-700 bg-blue-100 px-3 py-1 rounded-full">Advanced</span>
                 </div>
 
-                <div className="bg-muted/30 p-4 border-r border-b">
-                  <span className="font-semibold text-foreground">Laptop & Device Discounts</span>
+                {/* Team Management */}
+                <div className="bg-gray-50/50 p-6 border-r border-gray-200 border-b hover:bg-gray-50 transition-colors duration-200">
+                  <span className="font-semibold text-gray-900">Team Management</span>
+                  <div className="text-sm text-gray-600 mt-1">Manage multiple team members</div>
                 </div>
-                <div className="p-4 border-r border-b text-center bg-card">
-                  <X className="w-6 h-6 text-muted-foreground mx-auto" />
+                <div className="p-6 border-r border-gray-200 border-b text-center bg-white hover:bg-gray-50/50 transition-colors duration-200">
+                  <div className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full">
+                    <X className="w-5 h-5 text-gray-400" />
+                  </div>
                 </div>
-                <div className="p-4 border-b text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50">
-                  <span className="text-foreground font-semibold">✓ (Est. $150/year)</span>
-                </div>
-
-                <div className="bg-muted/30 p-4 border-r border-b">
-                  <span className="font-semibold text-foreground">Phone Plan Discounts</span>
-                </div>
-                <div className="p-4 border-r border-b text-center bg-card">
-                  <X className="w-6 h-6 text-muted-foreground mx-auto" />
-                </div>
-                <div className="p-4 border-b text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50">
-                  <span className="text-foreground font-semibold">✓ (Est. $120/year)</span>
+                <div className="p-6 border-b border-gray-200 text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50 hover:from-blue-50 hover:to-purple-50 transition-colors duration-200">
+                  <div className="inline-flex items-center justify-center w-8 h-8 bg-emerald-100 rounded-full">
+                    <Check className="w-5 h-5 text-emerald-600" />
+                  </div>
                 </div>
 
-                <div className="bg-muted/30 p-4 border-r border-b">
-                  <span className="font-semibold text-foreground">Coworking Space Passes</span>
+                {/* Priority Support */}
+                <div className="bg-gray-50/50 p-6 border-r border-gray-200 border-b hover:bg-gray-50 transition-colors duration-200">
+                  <span className="font-semibold text-gray-900">Priority Support</span>
+                  <div className="text-sm text-gray-600 mt-1">Get help when you need it most</div>
                 </div>
-                <div className="p-4 border-r border-b text-center bg-card">
-                  <X className="w-6 h-6 text-muted-foreground mx-auto" />
+                <div className="p-6 border-r border-gray-200 border-b text-center bg-white hover:bg-gray-50/50 transition-colors duration-200">
+                  <div className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full">
+                    <X className="w-5 h-5 text-gray-400" />
+                  </div>
                 </div>
-                <div className="p-4 border-b text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50">
-                  <span className="text-foreground font-semibold">✓ (Est. $200/year)</span>
-                </div>
-
-                <div className="bg-muted/30 p-4 border-r border-b">
-                  <span className="font-semibold text-foreground">Office Supply Discounts</span>
-                </div>
-                <div className="p-4 border-r border-b text-center bg-card">
-                  <X className="w-6 h-6 text-muted-foreground mx-auto" />
-                </div>
-                <div className="p-4 border-b text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50">
-                  <span className="text-foreground font-semibold">✓ (Est. $100/year)</span>
+                <div className="p-6 border-b border-gray-200 text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50 hover:from-blue-50 hover:to-purple-50 transition-colors duration-200">
+                  <div className="inline-flex items-center justify-center w-8 h-8 bg-emerald-100 rounded-full">
+                    <Check className="w-5 h-5 text-emerald-600" />
+                  </div>
                 </div>
 
-                <div className="bg-muted/30 p-4 border-r border-b">
-                  <span className="font-semibold text-foreground">Event Ticket Discounts</span>
-                </div>
-                <div className="p-4 border-r border-b text-center bg-card">
-                  <X className="w-6 h-6 text-muted-foreground mx-auto" />
-                </div>
-                <div className="p-4 border-b text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50">
-                  <span className="text-foreground font-semibold">✓ (Est. $100/year)</span>
-                </div>
-
-                <div className="bg-muted/30 p-4 border-r border-b">
-                  <span className="font-semibold text-foreground">Floral Delivery Discounts</span>
-                </div>
-                <div className="p-4 border-r border-b text-center bg-card">
-                  <X className="w-6 h-6 text-muted-foreground mx-auto" />
-                </div>
-                <div className="p-4 border-b text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50">
-                  <span className="text-foreground font-semibold">✓ (Est. $60/year)</span>
+                {/* Lifestyle Benefits Section */}
+                <div className="bg-gradient-to-r from-amber-50 to-orange-50 p-4 border-r border-gray-200 col-span-3">
+                  <span className="font-bold text-lg text-gray-900 flex items-center gap-2">
+                    <div className="w-6 h-6 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full flex items-center justify-center">
+                      <span className="text-white text-xs font-bold">3</span>
+                    </div>
+                    Lifestyle Benefits
+                    <span className="ml-2 px-2 py-1 bg-amber-100 text-amber-700 text-xs font-medium rounded-full">Coming Soon</span>
+                  </span>
                 </div>
 
-                <div className="bg-muted/30 p-4 border-r border-b">
-                  <span className="font-semibold text-foreground">Hotel Discounts</span>
+                {/* Fuel Discount */}
+                <div className="bg-gray-50/50 p-6 border-r border-gray-200 border-b hover:bg-gray-50 transition-colors duration-200">
+                  <span className="font-semibold text-gray-900">Fuel Discount — $0.15 per gallon</span>
+                  <div className="text-sm text-gray-600 mt-1">Save on every fill-up</div>
                 </div>
-                <div className="p-4 border-r border-b text-center bg-card">
-                  <X className="w-6 h-6 text-muted-foreground mx-auto" />
+                <div className="p-6 border-r border-gray-200 border-b text-center bg-white hover:bg-gray-50/50 transition-colors duration-200">
+                  <div className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full">
+                    <X className="w-5 h-5 text-gray-400" />
+                  </div>
                 </div>
-                <div className="p-4 border-b text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50">
-                  <span className="text-foreground font-semibold">✓ (Est. $150/year)</span>
-                </div>
-
-                <div className="bg-muted/30 p-4 border-r border-b">
-                  <span className="font-semibold text-foreground">Airline Discounts</span>
-                </div>
-                <div className="p-4 border-r border-b text-center bg-card">
-                  <X className="w-6 h-6 text-muted-foreground mx-auto" />
-                </div>
-                <div className="p-4 border-b text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50">
-                  <span className="text-foreground font-semibold">✓ (Est. $150/year)</span>
-                </div>
-
-                <div className="bg-muted/30 p-4 border-r border-b">
-                  <span className="font-semibold text-foreground">Vacation Packages</span>
-                </div>
-                <div className="p-4 border-r border-b text-center bg-card">
-                  <X className="w-6 h-6 text-muted-foreground mx-auto" />
-                </div>
-                <div className="p-4 border-b text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50">
-                  <span className="text-foreground font-semibold">✓ (Est. $150/year)</span>
+                <div className="p-6 border-b border-gray-200 text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50 hover:from-blue-50 hover:to-purple-50 transition-colors duration-200">
+                  <div className="flex flex-col items-center">
+                    <div className="inline-flex items-center justify-center w-8 h-8 bg-emerald-100 rounded-full mb-1">
+                      <Check className="w-5 h-5 text-emerald-600" />
+                    </div>
+                    <span className="text-xs text-blue-600 font-medium">Est. $180/year</span>
+                  </div>
                 </div>
 
-                <div className="bg-muted/30 p-4 border-r border-b">
-                  <span className="font-semibold text-foreground">Theme Park Discounts</span>
+                {/* Tire Discounts */}
+                <div className="bg-gray-50/50 p-6 border-r border-gray-200 border-b hover:bg-gray-50 transition-colors duration-200">
+                  <span className="font-semibold text-gray-900">Nationwide Tire Discounts & Free Rotations</span>
+                  <div className="text-sm text-gray-600 mt-1">Maintain your vehicle for less</div>
                 </div>
-                <div className="p-4 border-r border-b text-center bg-card">
-                  <X className="w-6 h-6 text-muted-foreground mx-auto" />
+                <div className="p-6 border-r border-gray-200 border-b text-center bg-white hover:bg-gray-50/50 transition-colors duration-200">
+                  <div className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full">
+                    <X className="w-5 h-5 text-gray-400" />
+                  </div>
                 </div>
-                <div className="p-4 border-b text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50">
-                  <span className="text-foreground font-semibold">✓ (Est. $100/year)</span>
-                </div>
-
-                <div className="bg-muted/30 p-4 border-r border-b">
-                  <span className="font-semibold text-foreground">Gym Membership Discounts</span>
-                </div>
-                <div className="p-4 border-r border-b text-center bg-card">
-                  <X className="w-6 h-6 text-muted-foreground mx-auto" />
-                </div>
-                <div className="p-4 border-b text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50">
-                  <span className="text-foreground font-semibold">✓ (Est. $120/year)</span>
-                </div>
-
-                <div className="bg-muted/30 p-4 border-r border-b">
-                  <span className="font-semibold text-foreground">Wellness App Subscriptions</span>
-                </div>
-                <div className="p-4 border-r border-b text-center bg-card">
-                  <X className="w-6 h-6 text-muted-foreground mx-auto" />
-                </div>
-                <div className="p-4 border-b text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50">
-                  <span className="text-foreground font-semibold">✓ (Est. $60/year)</span>
+                <div className="p-6 border-b border-gray-200 text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50 hover:from-blue-50 hover:to-purple-50 transition-colors duration-200">
+                  <div className="flex flex-col items-center">
+                    <div className="inline-flex items-center justify-center w-8 h-8 bg-emerald-100 rounded-full mb-1">
+                      <Check className="w-5 h-5 text-emerald-600" />
+                    </div>
+                    <span className="text-xs text-blue-600 font-medium">Est. $100/year</span>
+                  </div>
                 </div>
 
-                <div className="bg-muted/30 p-4 border-r border-b">
-                  <span className="font-semibold text-foreground">Coffee Credits</span>
+                {/* Car Maintenance */}
+                <div className="bg-gray-50/50 p-6 border-r border-gray-200 border-b hover:bg-gray-50 transition-colors duration-200">
+                  <span className="font-semibold text-gray-900">Car Maintenance Savings</span>
+                  <div className="text-sm text-gray-600 mt-1">Discounted repairs and service</div>
                 </div>
-                <div className="p-4 border-r border-b text-center bg-card">
-                  <X className="w-6 h-6 text-muted-foreground mx-auto" />
+                <div className="p-6 border-r border-gray-200 border-b text-center bg-white hover:bg-gray-50/50 transition-colors duration-200">
+                  <div className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full">
+                    <X className="w-5 h-5 text-gray-400" />
+                  </div>
                 </div>
-                <div className="p-4 border-b text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50">
-                  <span className="text-foreground font-semibold">✓ (Est. $300/year)</span>
+                <div className="p-6 border-b border-gray-200 text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50 hover:from-blue-50 hover:to-purple-50 transition-colors duration-200">
+                  <div className="flex flex-col items-center">
+                    <div className="inline-flex items-center justify-center w-8 h-8 bg-emerald-100 rounded-full mb-1">
+                      <Check className="w-5 h-5 text-emerald-600" />
+                    </div>
+                    <span className="text-xs text-blue-600 font-medium">Est. $75/year</span>
+                  </div>
                 </div>
 
-                <div className="bg-muted/30 p-4 border-r border-b">
-                  <span className="font-semibold text-foreground">EV Charging Credit Program</span>
+                {/* Auto Insurance */}
+                <div className="bg-gray-50/50 p-6 border-r border-gray-200 border-b hover:bg-gray-50 transition-colors duration-200">
+                  <span className="font-semibold text-gray-900">Auto Insurance Discounts</span>
+                  <div className="text-sm text-gray-600 mt-1">Lower premiums on coverage</div>
                 </div>
-                <div className="p-4 border-r border-b text-center bg-card">
-                  <X className="w-6 h-6 text-muted-foreground mx-auto" />
+                <div className="p-6 border-r border-gray-200 border-b text-center bg-white hover:bg-gray-50/50 transition-colors duration-200">
+                  <div className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full">
+                    <X className="w-5 h-5 text-gray-400" />
+                  </div>
                 </div>
-                <div className="p-4 border-b text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50">
-                  <span className="text-foreground font-semibold">✓ (Est. $150/year)</span>
+                <div className="p-6 border-b border-gray-200 text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50 hover:from-blue-50 hover:to-purple-50 transition-colors duration-200">
+                  <div className="flex flex-col items-center">
+                    <div className="inline-flex items-center justify-center w-8 h-8 bg-emerald-100 rounded-full mb-1">
+                      <Check className="w-5 h-5 text-emerald-600" />
+                    </div>
+                    <span className="text-xs text-blue-600 font-medium">Est. $120/year</span>
+                  </div>
                 </div>
 
-                <div className="bg-muted/30 p-4 border-r rounded-bl-xl">
-                  <span className="font-semibold text-foreground">Rental Car & Rideshare Discounts</span>
+                {/* Coffee Credits - Last row with rounded corners */}
+                <div className="bg-gray-50/50 p-6 border-r border-gray-200 rounded-bl-2xl hover:bg-gray-50 transition-colors duration-200">
+                  <span className="font-semibold text-gray-900">Coffee Credits</span>
+                  <div className="text-sm text-gray-600 mt-1">Daily fuel for your business</div>
                 </div>
-                <div className="p-4 border-r text-center bg-card">
-                  <X className="w-6 h-6 text-muted-foreground mx-auto" />
+                <div className="p-6 border-r border-gray-200 text-center bg-white hover:bg-gray-50/50 transition-colors duration-200">
+                  <div className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full">
+                    <X className="w-5 h-5 text-gray-400" />
+                  </div>
                 </div>
-                <div className="p-4 text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50 rounded-br-xl">
-                  <span className="text-foreground font-semibold">✓ (Est. $120/year)</span>
+                <div className="p-6 text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50 rounded-br-2xl hover:from-blue-50 hover:to-purple-50 transition-colors duration-200">
+                  <div className="flex flex-col items-center">
+                    <div className="inline-flex items-center justify-center w-8 h-8 bg-emerald-100 rounded-full mb-1">
+                      <Check className="w-5 h-5 text-emerald-600" />
+                    </div>
+                    <span className="text-xs text-blue-600 font-medium">Est. $300/year</span>
+                  </div>
                 </div>
               </div>
             </div>
