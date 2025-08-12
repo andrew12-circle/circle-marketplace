@@ -246,11 +246,11 @@ export const Pricing = () => {
                   pro: "Full Library",
                   description: "Training and educational content"
                 }].map((item, index) => (
-                  <div key={index} className="grid grid-cols-[2fr_1fr_1fr] gap-0 border-b border-gray-200 hover:bg-gray-50/50 transition-colors">
-                    <div className="p-3 border-r border-gray-200">
-                      <div className="font-medium text-sm text-gray-900">{item.feature}</div>
-                      <div className="text-xs text-gray-600 mt-1">{item.description}</div>
-                    </div>
+                   <div key={index} className="grid grid-cols-[2fr_1fr_1fr] gap-0 border-b border-gray-200 hover:bg-gray-50/50 transition-colors min-h-[60px]">
+                     <div className="p-3 border-r border-gray-200 flex flex-col justify-center">
+                       <div className="font-medium text-sm text-gray-900 leading-tight">{item.feature}</div>
+                       <div className="text-xs text-gray-600 mt-1 leading-tight">{item.description}</div>
+                     </div>
                     <div className="p-3 border-r border-gray-200 text-center flex items-center justify-center">
                       {item.starter === "✓" ? (
                         <div className="w-5 h-5 bg-emerald-100 rounded-full flex items-center justify-center">
@@ -324,11 +324,11 @@ export const Pricing = () => {
                   pro: "✓",
                   description: "Get help when you need it most"
                 }].map((item, index) => (
-                  <div key={index} className="grid grid-cols-[2fr_1fr_1fr] gap-0 border-b border-gray-200 hover:bg-gray-50/50 transition-colors">
-                    <div className="p-3 border-r border-gray-200">
-                      <div className="font-medium text-sm text-gray-900">{item.feature}</div>
-                      <div className="text-xs text-gray-600 mt-1">{item.description}</div>
-                    </div>
+                   <div key={index} className="grid grid-cols-[2fr_1fr_1fr] gap-0 border-b border-gray-200 hover:bg-gray-50/50 transition-colors min-h-[60px]">
+                     <div className="p-3 border-r border-gray-200 flex flex-col justify-center">
+                       <div className="font-medium text-sm text-gray-900 leading-tight">{item.feature}</div>
+                       <div className="text-xs text-gray-600 mt-1 leading-tight">{item.description}</div>
+                     </div>
                     <div className="p-3 border-r border-gray-200 text-center flex items-center justify-center">
                       {item.starter === "✗" ? (
                         <div className="w-5 h-5 bg-gray-100 rounded-full flex items-center justify-center">
@@ -446,13 +446,13 @@ export const Pricing = () => {
                   pro: "✓ ($120/year)",
                   description: "Stay healthy and energized"
                 }].map((item, index, array) => (
-                  <div key={index} className={`grid grid-cols-[2fr_1fr_1fr] gap-0 hover:bg-gray-50/50 transition-colors ${
-                    index === array.length - 1 ? '' : 'border-b border-gray-200'
-                  }`}>
-                    <div className="p-3 border-r border-gray-200">
-                      <div className="font-medium text-sm text-gray-900">{item.feature}</div>
-                      <div className="text-xs text-gray-600 mt-1">{item.description}</div>
-                    </div>
+                   <div key={index} className={`grid grid-cols-[2fr_1fr_1fr] gap-0 hover:bg-gray-50/50 transition-colors min-h-[60px] ${
+                     index === array.length - 1 ? '' : 'border-b border-gray-200'
+                   }`}>
+                     <div className="p-3 border-r border-gray-200 flex flex-col justify-center">
+                       <div className="font-medium text-sm text-gray-900 leading-tight">{item.feature}</div>
+                       <div className="text-xs text-gray-600 mt-1 leading-tight">{item.description}</div>
+                     </div>
                     <div className="p-3 border-r border-gray-200 text-center flex items-center justify-center">
                       <div className="w-5 h-5 bg-gray-100 rounded-full flex items-center justify-center">
                         <X className="w-3 h-3 text-gray-400" />
