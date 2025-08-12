@@ -608,10 +608,314 @@ export const Pricing = () => {
                   </div>
                 </div>
 
-                {/* Coffee Credits - Last row with rounded corners */}
-                <div className="bg-gray-50/50 p-6 border-r border-gray-200 rounded-bl-2xl hover:bg-gray-50 transition-colors duration-200">
+                {/* Car Wash & Detailing */}
+                <div className="bg-gray-50/50 p-6 border-r border-gray-200 border-b hover:bg-gray-50 transition-colors duration-200">
+                  <span className="font-semibold text-gray-900">Car Wash & Detailing Memberships</span>
+                  <div className="text-sm text-gray-600 mt-1">Keep your vehicle looking professional</div>
+                </div>
+                <div className="p-6 border-r border-gray-200 border-b text-center bg-white hover:bg-gray-50/50 transition-colors duration-200">
+                  <div className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full">
+                    <X className="w-5 h-5 text-gray-400" />
+                  </div>
+                </div>
+                <div className="p-6 border-b border-gray-200 text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50 hover:from-blue-50 hover:to-purple-50 transition-colors duration-200">
+                  <div className="flex flex-col items-center">
+                    <div className="inline-flex items-center justify-center w-8 h-8 bg-emerald-100 rounded-full mb-1">
+                      <Check className="w-5 h-5 text-emerald-600" />
+                    </div>
+                    <span className="text-xs text-blue-600 font-medium">Est. $240/year</span>
+                  </div>
+                </div>
+
+                {/* Roadside Assistance */}
+                <div className="bg-gray-50/50 p-6 border-r border-gray-200 border-b hover:bg-gray-50 transition-colors duration-200">
+                  <span className="font-semibold text-gray-900">Roadside Assistance Coverage</span>
+                  <div className="text-sm text-gray-600 mt-1">Peace of mind on the road</div>
+                </div>
+                <div className="p-6 border-r border-gray-200 border-b text-center bg-white hover:bg-gray-50/50 transition-colors duration-200">
+                  <div className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full">
+                    <X className="w-5 h-5 text-gray-400" />
+                  </div>
+                </div>
+                <div className="p-6 border-b border-gray-200 text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50 hover:from-blue-50 hover:to-purple-50 transition-colors duration-200">
+                  <div className="flex flex-col items-center">
+                    <div className="inline-flex items-center justify-center w-8 h-8 bg-emerald-100 rounded-full mb-1">
+                      <Check className="w-5 h-5 text-emerald-600" />
+                    </div>
+                    <span className="text-xs text-blue-600 font-medium">Est. $75/year</span>
+                  </div>
+                </div>
+
+                {/* Laptop & Device Discounts */}
+                <div className="bg-gray-50/50 p-6 border-r border-gray-200 border-b hover:bg-gray-50 transition-colors duration-200">
+                  <span className="font-semibold text-gray-900">Laptop & Device Discounts</span>
+                  <div className="text-sm text-gray-600 mt-1">Tech gear for your business</div>
+                </div>
+                <div className="p-6 border-r border-gray-200 border-b text-center bg-white hover:bg-gray-50/50 transition-colors duration-200">
+                  <div className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full">
+                    <X className="w-5 h-5 text-gray-400" />
+                  </div>
+                </div>
+                <div className="p-6 border-b border-gray-200 text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50 hover:from-blue-50 hover:to-purple-50 transition-colors duration-200">
+                  <div className="flex flex-col items-center">
+                    <div className="inline-flex items-center justify-center w-8 h-8 bg-emerald-100 rounded-full mb-1">
+                      <Check className="w-5 h-5 text-emerald-600" />
+                    </div>
+                    <span className="text-xs text-blue-600 font-medium">Est. $150/year</span>
+                  </div>
+                </div>
+
+                {/* Phone Plan Discounts */}
+                <div className="bg-gray-50/50 p-6 border-r border-gray-200 border-b hover:bg-gray-50 transition-colors duration-200">
+                  <span className="font-semibold text-gray-900">Phone Plan Discounts</span>
+                  <div className="text-sm text-gray-600 mt-1">Save on your mobile service</div>
+                </div>
+                <div className="p-6 border-r border-gray-200 border-b text-center bg-white hover:bg-gray-50/50 transition-colors duration-200">
+                  <div className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full">
+                    <X className="w-5 h-5 text-gray-400" />
+                  </div>
+                </div>
+                <div className="p-6 border-b border-gray-200 text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50 hover:from-blue-50 hover:to-purple-50 transition-colors duration-200">
+                  <div className="flex flex-col items-center">
+                    <div className="inline-flex items-center justify-center w-8 h-8 bg-emerald-100 rounded-full mb-1">
+                      <Check className="w-5 h-5 text-emerald-600" />
+                    </div>
+                    <span className="text-xs text-blue-600 font-medium">Est. $120/year</span>
+                  </div>
+                </div>
+
+                {/* Coworking Space Passes */}
+                <div className="bg-gray-50/50 p-6 border-r border-gray-200 border-b hover:bg-gray-50 transition-colors duration-200">
+                  <span className="font-semibold text-gray-900">Coworking Space Passes</span>
+                  <div className="text-sm text-gray-600 mt-1">Professional workspace access</div>
+                </div>
+                <div className="p-6 border-r border-gray-200 border-b text-center bg-white hover:bg-gray-50/50 transition-colors duration-200">
+                  <div className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full">
+                    <X className="w-5 h-5 text-gray-400" />
+                  </div>
+                </div>
+                <div className="p-6 border-b border-gray-200 text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50 hover:from-blue-50 hover:to-purple-50 transition-colors duration-200">
+                  <div className="flex flex-col items-center">
+                    <div className="inline-flex items-center justify-center w-8 h-8 bg-emerald-100 rounded-full mb-1">
+                      <Check className="w-5 h-5 text-emerald-600" />
+                    </div>
+                    <span className="text-xs text-blue-600 font-medium">Est. $200/year</span>
+                  </div>
+                </div>
+
+                {/* Office Supply Discounts */}
+                <div className="bg-gray-50/50 p-6 border-r border-gray-200 border-b hover:bg-gray-50 transition-colors duration-200">
+                  <span className="font-semibold text-gray-900">Office Supply Discounts</span>
+                  <div className="text-sm text-gray-600 mt-1">Business essentials for less</div>
+                </div>
+                <div className="p-6 border-r border-gray-200 border-b text-center bg-white hover:bg-gray-50/50 transition-colors duration-200">
+                  <div className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full">
+                    <X className="w-5 h-5 text-gray-400" />
+                  </div>
+                </div>
+                <div className="p-6 border-b border-gray-200 text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50 hover:from-blue-50 hover:to-purple-50 transition-colors duration-200">
+                  <div className="flex flex-col items-center">
+                    <div className="inline-flex items-center justify-center w-8 h-8 bg-emerald-100 rounded-full mb-1">
+                      <Check className="w-5 h-5 text-emerald-600" />
+                    </div>
+                    <span className="text-xs text-blue-600 font-medium">Est. $100/year</span>
+                  </div>
+                </div>
+
+                {/* Event Ticket Discounts */}
+                <div className="bg-gray-50/50 p-6 border-r border-gray-200 border-b hover:bg-gray-50 transition-colors duration-200">
+                  <span className="font-semibold text-gray-900">Event Ticket Discounts</span>
+                  <div className="text-sm text-gray-600 mt-1">Entertainment and networking events</div>
+                </div>
+                <div className="p-6 border-r border-gray-200 border-b text-center bg-white hover:bg-gray-50/50 transition-colors duration-200">
+                  <div className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full">
+                    <X className="w-5 h-5 text-gray-400" />
+                  </div>
+                </div>
+                <div className="p-6 border-b border-gray-200 text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50 hover:from-blue-50 hover:to-purple-50 transition-colors duration-200">
+                  <div className="flex flex-col items-center">
+                    <div className="inline-flex items-center justify-center w-8 h-8 bg-emerald-100 rounded-full mb-1">
+                      <Check className="w-5 h-5 text-emerald-600" />
+                    </div>
+                    <span className="text-xs text-blue-600 font-medium">Est. $100/year</span>
+                  </div>
+                </div>
+
+                {/* Floral Delivery Discounts */}
+                <div className="bg-gray-50/50 p-6 border-r border-gray-200 border-b hover:bg-gray-50 transition-colors duration-200">
+                  <span className="font-semibold text-gray-900">Floral Delivery Discounts</span>
+                  <div className="text-sm text-gray-600 mt-1">Client appreciation and gifts</div>
+                </div>
+                <div className="p-6 border-r border-gray-200 border-b text-center bg-white hover:bg-gray-50/50 transition-colors duration-200">
+                  <div className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full">
+                    <X className="w-5 h-5 text-gray-400" />
+                  </div>
+                </div>
+                <div className="p-6 border-b border-gray-200 text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50 hover:from-blue-50 hover:to-purple-50 transition-colors duration-200">
+                  <div className="flex flex-col items-center">
+                    <div className="inline-flex items-center justify-center w-8 h-8 bg-emerald-100 rounded-full mb-1">
+                      <Check className="w-5 h-5 text-emerald-600" />
+                    </div>
+                    <span className="text-xs text-blue-600 font-medium">Est. $60/year</span>
+                  </div>
+                </div>
+
+                {/* Hotel Discounts */}
+                <div className="bg-gray-50/50 p-6 border-r border-gray-200 border-b hover:bg-gray-50 transition-colors duration-200">
+                  <span className="font-semibold text-gray-900">Hotel Discounts</span>
+                  <div className="text-sm text-gray-600 mt-1">Business travel accommodations</div>
+                </div>
+                <div className="p-6 border-r border-gray-200 border-b text-center bg-white hover:bg-gray-50/50 transition-colors duration-200">
+                  <div className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full">
+                    <X className="w-5 h-5 text-gray-400" />
+                  </div>
+                </div>
+                <div className="p-6 border-b border-gray-200 text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50 hover:from-blue-50 hover:to-purple-50 transition-colors duration-200">
+                  <div className="flex flex-col items-center">
+                    <div className="inline-flex items-center justify-center w-8 h-8 bg-emerald-100 rounded-full mb-1">
+                      <Check className="w-5 h-5 text-emerald-600" />
+                    </div>
+                    <span className="text-xs text-blue-600 font-medium">Est. $150/year</span>
+                  </div>
+                </div>
+
+                {/* Airline Discounts */}
+                <div className="bg-gray-50/50 p-6 border-r border-gray-200 border-b hover:bg-gray-50 transition-colors duration-200">
+                  <span className="font-semibold text-gray-900">Airline Discounts</span>
+                  <div className="text-sm text-gray-600 mt-1">Travel savings for business trips</div>
+                </div>
+                <div className="p-6 border-r border-gray-200 border-b text-center bg-white hover:bg-gray-50/50 transition-colors duration-200">
+                  <div className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full">
+                    <X className="w-5 h-5 text-gray-400" />
+                  </div>
+                </div>
+                <div className="p-6 border-b border-gray-200 text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50 hover:from-blue-50 hover:to-purple-50 transition-colors duration-200">
+                  <div className="flex flex-col items-center">
+                    <div className="inline-flex items-center justify-center w-8 h-8 bg-emerald-100 rounded-full mb-1">
+                      <Check className="w-5 h-5 text-emerald-600" />
+                    </div>
+                    <span className="text-xs text-blue-600 font-medium">Est. $150/year</span>
+                  </div>
+                </div>
+
+                {/* Vacation Packages */}
+                <div className="bg-gray-50/50 p-6 border-r border-gray-200 border-b hover:bg-gray-50 transition-colors duration-200">
+                  <span className="font-semibold text-gray-900">Vacation Packages</span>
+                  <div className="text-sm text-gray-600 mt-1">Well-deserved getaways</div>
+                </div>
+                <div className="p-6 border-r border-gray-200 border-b text-center bg-white hover:bg-gray-50/50 transition-colors duration-200">
+                  <div className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full">
+                    <X className="w-5 h-5 text-gray-400" />
+                  </div>
+                </div>
+                <div className="p-6 border-b border-gray-200 text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50 hover:from-blue-50 hover:to-purple-50 transition-colors duration-200">
+                  <div className="flex flex-col items-center">
+                    <div className="inline-flex items-center justify-center w-8 h-8 bg-emerald-100 rounded-full mb-1">
+                      <Check className="w-5 h-5 text-emerald-600" />
+                    </div>
+                    <span className="text-xs text-blue-600 font-medium">Est. $150/year</span>
+                  </div>
+                </div>
+
+                {/* Theme Park Discounts */}
+                <div className="bg-gray-50/50 p-6 border-r border-gray-200 border-b hover:bg-gray-50 transition-colors duration-200">
+                  <span className="font-semibold text-gray-900">Theme Park Discounts</span>
+                  <div className="text-sm text-gray-600 mt-1">Family entertainment savings</div>
+                </div>
+                <div className="p-6 border-r border-gray-200 border-b text-center bg-white hover:bg-gray-50/50 transition-colors duration-200">
+                  <div className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full">
+                    <X className="w-5 h-5 text-gray-400" />
+                  </div>
+                </div>
+                <div className="p-6 border-b border-gray-200 text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50 hover:from-blue-50 hover:to-purple-50 transition-colors duration-200">
+                  <div className="flex flex-col items-center">
+                    <div className="inline-flex items-center justify-center w-8 h-8 bg-emerald-100 rounded-full mb-1">
+                      <Check className="w-5 h-5 text-emerald-600" />
+                    </div>
+                    <span className="text-xs text-blue-600 font-medium">Est. $100/year</span>
+                  </div>
+                </div>
+
+                {/* Gym Membership Discounts */}
+                <div className="bg-gray-50/50 p-6 border-r border-gray-200 border-b hover:bg-gray-50 transition-colors duration-200">
+                  <span className="font-semibold text-gray-900">Gym Membership Discounts</span>
+                  <div className="text-sm text-gray-600 mt-1">Stay healthy and energized</div>
+                </div>
+                <div className="p-6 border-r border-gray-200 border-b text-center bg-white hover:bg-gray-50/50 transition-colors duration-200">
+                  <div className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full">
+                    <X className="w-5 h-5 text-gray-400" />
+                  </div>
+                </div>
+                <div className="p-6 border-b border-gray-200 text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50 hover:from-blue-50 hover:to-purple-50 transition-colors duration-200">
+                  <div className="flex flex-col items-center">
+                    <div className="inline-flex items-center justify-center w-8 h-8 bg-emerald-100 rounded-full mb-1">
+                      <Check className="w-5 h-5 text-emerald-600" />
+                    </div>
+                    <span className="text-xs text-blue-600 font-medium">Est. $120/year</span>
+                  </div>
+                </div>
+
+                {/* Wellness App Subscriptions */}
+                <div className="bg-gray-50/50 p-6 border-r border-gray-200 border-b hover:bg-gray-50 transition-colors duration-200">
+                  <span className="font-semibold text-gray-900">Wellness App Subscriptions</span>
+                  <div className="text-sm text-gray-600 mt-1">Mental health and mindfulness</div>
+                </div>
+                <div className="p-6 border-r border-gray-200 border-b text-center bg-white hover:bg-gray-50/50 transition-colors duration-200">
+                  <div className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full">
+                    <X className="w-5 h-5 text-gray-400" />
+                  </div>
+                </div>
+                <div className="p-6 border-b border-gray-200 text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50 hover:from-blue-50 hover:to-purple-50 transition-colors duration-200">
+                  <div className="flex flex-col items-center">
+                    <div className="inline-flex items-center justify-center w-8 h-8 bg-emerald-100 rounded-full mb-1">
+                      <Check className="w-5 h-5 text-emerald-600" />
+                    </div>
+                    <span className="text-xs text-blue-600 font-medium">Est. $60/year</span>
+                  </div>
+                </div>
+
+                {/* Coffee Credits */}
+                <div className="bg-gray-50/50 p-6 border-r border-gray-200 border-b hover:bg-gray-50 transition-colors duration-200">
                   <span className="font-semibold text-gray-900">Coffee Credits</span>
                   <div className="text-sm text-gray-600 mt-1">Daily fuel for your business</div>
+                </div>
+                <div className="p-6 border-r border-gray-200 border-b text-center bg-white hover:bg-gray-50/50 transition-colors duration-200">
+                  <div className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full">
+                    <X className="w-5 h-5 text-gray-400" />
+                  </div>
+                </div>
+                <div className="p-6 border-b border-gray-200 text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50 hover:from-blue-50 hover:to-purple-50 transition-colors duration-200">
+                  <div className="flex flex-col items-center">
+                    <div className="inline-flex items-center justify-center w-8 h-8 bg-emerald-100 rounded-full mb-1">
+                      <Check className="w-5 h-5 text-emerald-600" />
+                    </div>
+                    <span className="text-xs text-blue-600 font-medium">Est. $300/year</span>
+                  </div>
+                </div>
+
+                {/* EV Charging Credit Program */}
+                <div className="bg-gray-50/50 p-6 border-r border-gray-200 border-b hover:bg-gray-50 transition-colors duration-200">
+                  <span className="font-semibold text-gray-900">EV Charging Credit Program</span>
+                  <div className="text-sm text-gray-600 mt-1">Electric vehicle charging savings</div>
+                </div>
+                <div className="p-6 border-r border-gray-200 border-b text-center bg-white hover:bg-gray-50/50 transition-colors duration-200">
+                  <div className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full">
+                    <X className="w-5 h-5 text-gray-400" />
+                  </div>
+                </div>
+                <div className="p-6 border-b border-gray-200 text-center bg-gradient-to-br from-blue-50/50 to-purple-50/50 hover:from-blue-50 hover:to-purple-50 transition-colors duration-200">
+                  <div className="flex flex-col items-center">
+                    <div className="inline-flex items-center justify-center w-8 h-8 bg-emerald-100 rounded-full mb-1">
+                      <Check className="w-5 h-5 text-emerald-600" />
+                    </div>
+                    <span className="text-xs text-blue-600 font-medium">Est. $150/year</span>
+                  </div>
+                </div>
+
+                {/* Rental Car & Rideshare Discounts - Last row with rounded corners */}
+                <div className="bg-gray-50/50 p-6 border-r border-gray-200 rounded-bl-2xl hover:bg-gray-50 transition-colors duration-200">
+                  <span className="font-semibold text-gray-900">Rental Car & Rideshare Discounts</span>
+                  <div className="text-sm text-gray-600 mt-1">Transportation savings</div>
                 </div>
                 <div className="p-6 border-r border-gray-200 text-center bg-white hover:bg-gray-50/50 transition-colors duration-200">
                   <div className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full">
@@ -623,7 +927,7 @@ export const Pricing = () => {
                     <div className="inline-flex items-center justify-center w-8 h-8 bg-emerald-100 rounded-full mb-1">
                       <Check className="w-5 h-5 text-emerald-600" />
                     </div>
-                    <span className="text-xs text-blue-600 font-medium">Est. $300/year</span>
+                    <span className="text-xs text-blue-600 font-medium">Est. $120/year</span>
                   </div>
                 </div>
               </div>
