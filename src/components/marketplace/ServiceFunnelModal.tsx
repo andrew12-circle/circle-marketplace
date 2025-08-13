@@ -1014,11 +1014,11 @@ export const ServiceFunnelModal = ({
                       </AccordionTrigger>
                       <AccordionContent className="border-l-4 border-l-violet-500 pl-4 bg-white rounded-b-lg shadow-sm pt-0" data-section="pricing">
                         <div className="p-6 pt-5">
-                          <div className={`grid gap-6 ${
-                            packages.length === 1 ? 'grid-cols-1 max-w-md mx-auto' :
-                            packages.length === 2 ? 'grid-cols-1 md:grid-cols-2 max-w-2xl mx-auto' :
-                            packages.length === 3 ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' :
-                            'grid-cols-1 md:grid-cols-2 lg:grid-cols-4'
+                          <div className={`grid gap-4 ${
+                            packages.length === 1 ? 'grid-cols-1 max-w-sm mx-auto' :
+                            packages.length === 2 ? 'grid-cols-1 sm:grid-cols-2 max-w-lg mx-auto' :
+                            packages.length === 3 ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' :
+                            'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
                           }`}>
                             {packages.slice(0, 4).map((pkg, index) => (
                               <div
