@@ -3187,6 +3187,30 @@ export type Database = {
           },
         ]
       }
+      prayers: {
+        Row: {
+          body: string
+          created_at: string | null
+          id: string
+          kind: string
+          meta: Json | null
+        }
+        Insert: {
+          body: string
+          created_at?: string | null
+          id?: string
+          kind: string
+          meta?: Json | null
+        }
+        Update: {
+          body?: string
+          created_at?: string | null
+          id?: string
+          kind?: string
+          meta?: Json | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           annual_goal_transactions: number | null
@@ -3633,6 +3657,30 @@ export type Database = {
           time_window_seconds?: number
           updated_at?: string
           updated_by?: string | null
+        }
+        Relationships: []
+      }
+      scriptures: {
+        Row: {
+          created_at: string | null
+          id: string
+          ref: string
+          tags: string[] | null
+          text: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          ref: string
+          tags?: string[] | null
+          text: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          ref?: string
+          tags?: string[] | null
+          text?: string
         }
         Relationships: []
       }
