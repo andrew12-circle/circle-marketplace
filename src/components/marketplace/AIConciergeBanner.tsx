@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Brain, Target, Send, Sparkles, ShoppingCart, TrendingUp, Eye } from "lucide-react";
+import { Brain, Target, Send, Sparkles, ShoppingCart, TrendingUp, Eye, Mic, MicOff, Volume2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { AskCircleAIModal } from "./AskCircleAIModal";
 import { Input } from "@/components/ui/input";
@@ -13,6 +13,7 @@ import { useNavigate } from "react-router-dom";
 import { GoalAssessmentModal } from "./GoalAssessmentModal";
 import { AIRecommendationsDashboard } from "./AIRecommendationsDashboard";
 import { useEnhancedAI } from "@/hooks/useEnhancedAI";
+import { useVoiceAssistant } from "@/hooks/useVoiceAssistant";
 
 export const AIConciergeBanner = () => {
   const { user, profile } = useAuth();
@@ -27,6 +28,21 @@ export const AIConciergeBanner = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { getRecommendation, isLoading } = useEnhancedAI();
+  const { 
+    isListening, 
+    isProcessing: voiceProcessing, 
+    isSpeaking, 
+    isSupported: voiceSupported,
+    startListening, 
+    stopListening, 
+    stopSpeaking,
+    speakText 
+  } = useVoiceAssistant({
+    onTranscript: (text) => {
+      setChatInput(text);
+      handleSendMessage();
+    }
+  });
   
   const placeholderQuestions = [
     "I need a closing gift for a $400K first-time buyer couple, under $100",
@@ -266,6 +282,22 @@ export const AIConciergeBanner = () => {
                       </div>
                     )}
                   </div>
+                  {voiceSupported && (
+                    <Button
+                      onClick={isListening ? stopListening : startListening}
+                      size="sm"
+                      variant={isListening ? "destructive" : "outline"}
+                      disabled={isProcessing || isLoading || voiceProcessing}
+                      className="mr-2"
+                    >
+                      {isListening ? (
+                        <MicOff className="h-4 w-4" />
+                      ) : (
+                        <Mic className="h-4 w-4" />
+                      )}
+                    </Button>
+                  )}
+                  
                   <Button 
                     onClick={handleSendMessage} 
                     size="sm" 
@@ -292,6 +324,17 @@ export const AIConciergeBanner = () => {
                     <h4 className="font-semibold text-sm mb-2">AI Concierge Results</h4>
                     <p className="text-sm text-muted-foreground mb-3">{aiResults.recommendation}</p>
                     <div className="flex gap-2">
+                      {voiceSupported && (
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => speakText(aiResults.recommendation)}
+                          disabled={isSpeaking}
+                        >
+                          <Volume2 className="h-3 w-3 mr-1" />
+                          {isSpeaking ? "Speaking..." : "Listen"}
+                        </Button>
+                      )}
                       <Button 
                         size="sm" 
                         variant="outline"
