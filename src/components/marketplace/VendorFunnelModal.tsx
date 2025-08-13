@@ -688,9 +688,11 @@ export const VendorFunnelModal = ({
         {/* Bottom Section - Tabs */}
         <div className="border-t bg-muted/20">
           <div className="p-6">
-            <Tabs defaultValue="reviews" className="w-full">
-              <TabsList className={`grid w-full ${isVendorOwner ? 'grid-cols-5' : 'grid-cols-4'}`}>
-                <TabsTrigger value="reviews">Agent Reviews</TabsTrigger>
+            <Tabs defaultValue={vendor.review_count > 0 ? 'reviews' : 'details'} className="w-full">
+              <TabsList className={`grid w-full ${isVendorOwner ? (vendor.review_count > 0 ? 'grid-cols-5' : 'grid-cols-4') : (vendor.review_count > 0 ? 'grid-cols-4' : 'grid-cols-3')}`}>
+                {vendor.review_count > 0 && (
+                  <TabsTrigger value="reviews">Agent Reviews</TabsTrigger>
+                )}
                 <TabsTrigger value="details">Company Details</TabsTrigger>
                 <TabsTrigger value="qa">Q&A</TabsTrigger>
                 <TabsTrigger value="related">Related Services</TabsTrigger>
@@ -723,82 +725,84 @@ export const VendorFunnelModal = ({
                 </div>
               </TabsContent>
               
-              <TabsContent value="reviews" className="mt-6">
-                <div className="space-y-6">
-                  <div className="flex items-center gap-4 mb-6">
-                    <div className="text-center">
-                      <div className="text-3xl font-bold">{vendor.rating}</div>
-                      {renderStarRating(vendor.rating, "lg")}
-                      <p className="text-sm text-muted-foreground">{vendor.review_count} global ratings</p>
-                    </div>
-                    <div className="flex-1 space-y-1">
-                      {[5, 4, 3, 2, 1].map((stars) => (
-                        <div key={stars} className="flex items-center gap-2 text-sm">
-                          <span>{stars} star</span>
-                          <div className="flex-1 bg-muted h-2 rounded-full overflow-hidden">
-                            <div 
-                              className="h-full bg-yellow-400" 
-                              style={{ width: `${stars === 5 ? 70 : stars === 4 ? 20 : 5}%` }}
-                            />
+              {vendor.review_count > 0 && (
+                <TabsContent value="reviews" className="mt-6">
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-4 mb-6">
+                      <div className="text-center">
+                        <div className="text-3xl font-bold">{vendor.rating}</div>
+                        {renderStarRating(vendor.rating, "lg")}
+                        <p className="text-sm text-muted-foreground">{vendor.review_count} global ratings</p>
+                      </div>
+                      <div className="flex-1 space-y-1">
+                        {[5, 4, 3, 2, 1].map((stars) => (
+                          <div key={stars} className="flex items-center gap-2 text-sm">
+                            <span>{stars} star</span>
+                            <div className="flex-1 bg-muted h-2 rounded-full overflow-hidden">
+                              <div 
+                                className="h-full bg-yellow-400" 
+                                style={{ width: `${stars === 5 ? 70 : stars === 4 ? 20 : 5}%` }}
+                              />
+                            </div>
+                            <span className="text-muted-foreground">{stars === 5 ? '70' : stars === 4 ? '20' : '5'}%</span>
                           </div>
-                          <span className="text-muted-foreground">{stars === 5 ? '70' : stars === 4 ? '20' : '5'}%</span>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Individual Reviews */}
+                    <div className="space-y-6">
+                      {reviews.map((review) => (
+                        <div key={review.id} className="border-b pb-4">
+                          <div className="flex items-start gap-3">
+                            <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center text-sm font-medium">
+                              {review.author.split(' ').map(n => n[0]).join('')}
+                            </div>
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="font-medium">{review.author}</span>
+                                {review.verified && (
+                                  <Badge variant="outline" className="text-xs">
+                                    ✓ Verified Purchase
+                                  </Badge>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-2 mb-2">
+                                {renderStarRating(review.rating)}
+                                <span className="text-sm text-muted-foreground">{review.date}</span>
+                              </div>
+                              <p className="text-sm mb-3">{review.review}</p>
+                              <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                                <button className="flex items-center gap-1 hover:text-foreground">
+                                  <ThumbsUp className="w-3 h-3" />
+                                  Helpful ({review.helpful})
+                                </button>
+                                <button className="flex items-center gap-1 hover:text-foreground">
+                                  <ThumbsDown className="w-3 h-3" />
+                                  Not helpful
+                                </button>
+                                <button className="hover:text-foreground">
+                                  Comment
+                                </button>
+                              </div>
+                              
+                              {/* Comments Section */}
+                              <div className="mt-3 ml-4 space-y-2">
+                                <div className="text-xs bg-muted/50 p-2 rounded">
+                                  <span className="font-medium">Mike T.</span> replied: "Completely agree! The ROI has been amazing for our team too."
+                                </div>
+                                <div className="text-xs bg-muted/50 p-2 rounded">
+                                  <span className="font-medium">Jennifer K.</span> replied: "How long did it take to see results?"
+                                </div>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       ))}
                     </div>
                   </div>
-
-                  {/* Individual Reviews */}
-                  <div className="space-y-6">
-                    {reviews.map((review) => (
-                      <div key={review.id} className="border-b pb-4">
-                        <div className="flex items-start gap-3">
-                          <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center text-sm font-medium">
-                            {review.author.split(' ').map(n => n[0]).join('')}
-                          </div>
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="font-medium">{review.author}</span>
-                              {review.verified && (
-                                <Badge variant="outline" className="text-xs">
-                                  ✓ Verified Purchase
-                                </Badge>
-                              )}
-                            </div>
-                            <div className="flex items-center gap-2 mb-2">
-                              {renderStarRating(review.rating)}
-                              <span className="text-sm text-muted-foreground">{review.date}</span>
-                            </div>
-                            <p className="text-sm mb-3">{review.review}</p>
-                            <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                              <button className="flex items-center gap-1 hover:text-foreground">
-                                <ThumbsUp className="w-3 h-3" />
-                                Helpful ({review.helpful})
-                              </button>
-                              <button className="flex items-center gap-1 hover:text-foreground">
-                                <ThumbsDown className="w-3 h-3" />
-                                Not helpful
-                              </button>
-                              <button className="hover:text-foreground">
-                                Comment
-                              </button>
-                            </div>
-                            
-                            {/* Comments Section */}
-                            <div className="mt-3 ml-4 space-y-2">
-                              <div className="text-xs bg-muted/50 p-2 rounded">
-                                <span className="font-medium">Mike T.</span> replied: "Completely agree! The ROI has been amazing for our team too."
-                              </div>
-                              <div className="text-xs bg-muted/50 p-2 rounded">
-                                <span className="font-medium">Jennifer K.</span> replied: "How long did it take to see results?"
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </TabsContent>
+                </TabsContent>
+              )}
               
               <TabsContent value="qa" className="mt-6">
                 <p className="text-muted-foreground">Questions & Answers section coming soon...</p>

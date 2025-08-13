@@ -219,10 +219,12 @@ export const ServiceDetailsModal = ({ service, isOpen, onClose }: ServiceDetails
               <p className="text-lg text-white/90 mb-4">{service.funnel_content?.heroDescription || service.description}</p>
               
               <div className="flex items-center gap-6 text-sm">
-                <div className="flex items-center gap-1">
-                  <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                  <span>{service.vendor.rating} ({service.vendor.review_count} reviews)</span>
-                </div>
+                {service.vendor.review_count > 0 && (
+                  <div className="flex items-center gap-1">
+                    <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                    <span>{service.vendor.rating} ({service.vendor.review_count} reviews)</span>
+                  </div>
+                )}
                 <div className="flex items-center gap-1">
                   <TrendingUp className="w-4 h-4" />
                   <span>{service.funnel_content?.estimatedRoi || 3}x ROI</span>
@@ -383,15 +385,19 @@ export const ServiceDetailsModal = ({ service, isOpen, onClose }: ServiceDetails
             </div>
           </div>
 
-          <Separator className="my-8" />
+          {service.vendor.review_count > 0 && (
+            <>
+              <Separator className="my-8" />
 
-          {/* Service Reviews */}
-          <div className="mb-8">
-            <h3 className="text-2xl font-bold mb-6">Customer Reviews</h3>
-            <ReviewRatingSystem serviceId={service.id} />
-          </div>
+              {/* Service Reviews */}
+              <div className="mb-8">
+                <h3 className="text-2xl font-bold mb-6">Customer Reviews</h3>
+                <ReviewRatingSystem serviceId={service.id} />
+              </div>
 
-          <Separator className="my-8" />
+              <Separator className="my-8" />
+            </>
+          )}
 
           {/* Call to Actions */}
           <div className="grid md:grid-cols-2 gap-6">
