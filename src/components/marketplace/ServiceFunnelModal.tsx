@@ -411,17 +411,17 @@ export const ServiceFunnelModal = ({
                       {subHeadline || "Transform your real estate business with our proven system"}
                     </p>
 
-                    {service.vendor && service.vendor.review_count > 0 && (
+                    {(reviews.length > 0) && (
                       <div className="flex items-center gap-4 p-4 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
                         <div className="flex items-center gap-2">
-                          {renderStarRating(service.vendor.rating, "lg")}
+                          {renderStarRating(service.vendor?.rating || 0, "lg")}
                           <span className="text-lg font-medium">
-                            {service.vendor.rating}
+                            {service.vendor?.rating}
                           </span>
                         </div>
                         <Separator orientation="vertical" className="h-6 bg-white/30" />
                         <span className="text-sm text-blue-200">
-                          {service.vendor.review_count}+ reviews
+                          {reviews.length} reviews
                         </span>
                       </div>
                     )}
@@ -793,7 +793,7 @@ export const ServiceFunnelModal = ({
                          <div className="p-6 pt-0">
                            <div className="space-y-6">
                              {/* Agent Reviews */}
-                             {service.funnel_content?.proofItWorks?.testimonials?.enabled && service.funnel_content.proofItWorks.testimonials.items.length > 0 && (
+                             {service.funnel_content?.proofItWorks?.testimonials?.enabled && service.funnel_content.proofItWorks.testimonials.items.length > 0 && reviews.length > 0 && (
                                <div>
                                  <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
                                    <Star className="w-5 h-5 text-yellow-500" />

@@ -151,14 +151,6 @@ export const EnhancedVendorCard = ({ vendor, onConnect, onViewProfile }: Enhance
             {getRiskBadge(riskLevel)}
           </div>
           
-          {/* Rating overlay */}
-          {vendor.rating > 0 && (
-            <div className="absolute bottom-3 left-3 flex items-center gap-1 bg-white/90 px-2 py-1 rounded">
-              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-              <span className="text-sm font-medium">{vendor.rating}</span>
-              <span className="text-xs text-muted-foreground">({vendor.review_count})</span>
-            </div>
-          )}
         </div>
 
         {/* Content Section */}

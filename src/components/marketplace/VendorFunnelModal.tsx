@@ -277,7 +277,7 @@ export const VendorFunnelModal = ({
 
   useEffect(() => {
     const loadReviews = async () => {
-      if (!vendor?.id || vendor.review_count <= 0) {
+      if (!vendor?.id) {
         setVendorReviews([]);
         return;
       }
@@ -316,7 +316,7 @@ export const VendorFunnelModal = ({
       }
     };
     loadReviews();
-  }, [vendor?.id, vendor?.review_count]);
+  }, [vendor?.id]);
 
   const handleRequestCoMarketing = () => {
     onRequestCoMarketing(vendor.id, selectedPackage, quantity);
@@ -698,9 +698,9 @@ export const VendorFunnelModal = ({
         {/* Bottom Section - Tabs */}
         <div className="border-t bg-muted/20">
           <div className="p-6">
-            <Tabs defaultValue={vendor.review_count > 0 ? 'reviews' : 'details'} className="w-full">
-              <TabsList className={`grid w-full ${isVendorOwner ? (vendor.review_count > 0 ? 'grid-cols-5' : 'grid-cols-4') : (vendor.review_count > 0 ? 'grid-cols-4' : 'grid-cols-3')}`}>
-                {vendor.review_count > 0 && (
+            <Tabs defaultValue={vendorReviews.length > 0 ? 'reviews' : 'details'} className="w-full">
+              <TabsList className={`grid w-full ${isVendorOwner ? (vendorReviews.length > 0 ? 'grid-cols-5' : 'grid-cols-4') : (vendorReviews.length > 0 ? 'grid-cols-4' : 'grid-cols-3')}`}>
+                {vendorReviews.length > 0 && (
                   <TabsTrigger value="reviews">Agent Reviews</TabsTrigger>
                 )}
                 <TabsTrigger value="details">Company Details</TabsTrigger>
@@ -735,14 +735,14 @@ export const VendorFunnelModal = ({
                 </div>
               </TabsContent>
               
-              {vendor.review_count > 0 && (
+              {vendorReviews.length > 0 && (
                 <TabsContent value="reviews" className="mt-6">
                   <div className="space-y-6">
                     <div className="flex items-center gap-4 mb-6">
                       <div className="text-center">
                         <div className="text-3xl font-bold">{vendor.rating}</div>
                         {renderStarRating(vendor.rating, "lg")}
-                        <p className="text-sm text-muted-foreground">{vendor.review_count} global ratings</p>
+                        <p className="text-sm text-muted-foreground">{vendorReviews.length} verified reviews</p>
                       </div>
                       <div className="flex-1 space-y-1">
                         {[5, 4, 3, 2, 1].map((stars) => (
