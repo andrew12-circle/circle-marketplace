@@ -71,10 +71,22 @@ export const useVoiceAssistant = ({ onTranscript, onResponse }: UseVoiceAssistan
       setIsListening(false);
       setIsProcessing(false);
       
-      if (event.error === 'not-allowed') {
+      if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
         toast({
-          title: "Microphone Access Denied",
-          description: "Please allow microphone access to use voice features.",
+          title: "Microphone Access Required",
+          description: "Please allow microphone access in your browser settings and refresh the page.",
+          variant: "destructive"
+        });
+      } else if (event.error === 'network') {
+        toast({
+          title: "Network Error",
+          description: "Please check your internet connection for voice recognition.",
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Voice Recognition Error",
+          description: `Error: ${event.error}. Please try again.`,
           variant: "destructive"
         });
       }
