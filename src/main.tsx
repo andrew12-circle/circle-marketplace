@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { SpiritualCoverageProvider } from "@/contexts/SpiritualCoverageContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { cacheManager } from "./utils/cacheManager";
 import "./index.css";
@@ -68,8 +69,9 @@ cacheManager.checkAndClearCache();
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <CartProvider>
+      <SpiritualCoverageProvider>
+        <AuthProvider>
+          <CartProvider>
           <BrowserRouter>
             <Suspense fallback={<RouteLoader />}>
               <Routes>
@@ -107,8 +109,9 @@ createRoot(document.getElementById("root")!).render(
             </Suspense>
             <Toaster />
           </BrowserRouter>
-        </CartProvider>
-      </AuthProvider>
+          </CartProvider>
+        </AuthProvider>
+      </SpiritualCoverageProvider>
     </QueryClientProvider>
   </StrictMode>
 );
