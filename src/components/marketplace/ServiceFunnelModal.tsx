@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
 import { Card, CardContent } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { toast } from "sonner";
@@ -209,6 +210,7 @@ export const ServiceFunnelModal = ({
   const [isConsultationFlowOpen, setIsConsultationFlowOpen] = useState(false);
   const [isPricingChoiceOpen, setIsPricingChoiceOpen] = useState(false);
   const [activeMediaUrl, setActiveMediaUrl] = useState<string | null>(null);
+  const [showSupportStats, setShowSupportStats] = useState(false); // Support toggle - off by default
   const [vendorAvailability, setVendorAvailability] = useState<{
     is_available_now: boolean;
     availability_message?: string;
@@ -379,6 +381,15 @@ export const ServiceFunnelModal = ({
           <X className="h-4 w-4 text-gray-700" />
         </Button>
 
+        {/* Support Stats Toggle - Admin Control */}
+        <div className="absolute top-4 right-16 z-50 flex items-center gap-2 bg-white/80 backdrop-blur-sm rounded-full px-3 py-1 shadow-lg border border-white/20">
+          <span className="text-xs text-gray-700">Support Stats</span>
+          <Switch
+            checked={showSupportStats}
+            onCheckedChange={setShowSupportStats}
+          />
+        </div>
+
         <div className="overflow-y-auto max-h-[90vh]">
           {/* Modern Hero Section */}
           <div className="relative bg-gradient-to-br from-slate-900 via-blue-900 to-purple-900 text-white overflow-hidden">
@@ -428,7 +439,7 @@ export const ServiceFunnelModal = ({
                     )}
 
                     {/* Quick Stats */}
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className={`grid ${showSupportStats ? 'grid-cols-3' : 'grid-cols-2'} gap-4`}>
                       <div className="text-center p-3 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
                         <div className="text-2xl font-bold">600%</div>
                         <div className="text-xs text-blue-200">Avg ROI</div>
@@ -437,10 +448,12 @@ export const ServiceFunnelModal = ({
                         <div className="text-2xl font-bold">30</div>
                         <div className="text-xs text-blue-200">Days Setup</div>
                       </div>
-                      <div className="text-center p-3 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
-                        <div className="text-2xl font-bold">{service.vendor?.support_hours || 'Business Hours'}</div>
-                        <div className="text-xs text-blue-200">Support</div>
-                      </div>
+                      {showSupportStats && (
+                        <div className="text-center p-3 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
+                          <div className="text-2xl font-bold">{service.vendor?.support_hours || 'Business Hours'}</div>
+                          <div className="text-xs text-blue-200">Support</div>
+                        </div>
+                      )}
                     </div>
                   </div>
 
