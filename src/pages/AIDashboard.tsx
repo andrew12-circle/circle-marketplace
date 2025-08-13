@@ -91,10 +91,6 @@ const AIDashboard = () => {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Badge variant="outline" className="bg-green-500/10 text-green-700 border-green-500/20">
-                <Shield className="h-4 w-4 mr-1" />
-                Protected
-              </Badge>
               <Button 
                 onClick={generateAIInsights}
                 disabled={isGeneratingInsights || isLoading}
