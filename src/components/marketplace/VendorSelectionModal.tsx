@@ -26,6 +26,7 @@ interface Vendor {
   campaigns_funded: number;
   service_states?: string[];
   vendor_type?: string;
+  parent_vendor_id?: string | null;
 }
 
 interface VendorSelectionModalProps {
@@ -62,6 +63,8 @@ export const VendorSelectionModal = ({
   const [funnelVendor, setFunnelVendor] = useState<Vendor | null>(null);
   const { toast } = useToast();
   const { location } = useLocation();
+  const [expandedCompanyId, setExpandedCompanyId] = useState<string | null>(null);
+  const [pledgedPointsMap, setPledgedPointsMap] = useState<Record<string, number>>({});
 
   useEffect(() => {
     if (isOpen) {
@@ -83,13 +86,44 @@ export const VendorSelectionModal = ({
     filterVendors();
   }, [searchQuery, vendors]);
 
+  // Load pledged points for the current agent across loaded vendors
+  useEffect(() => {
+    const fetchPledges = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user || vendors.length === 0) return;
+        const vendorIds = Array.from(new Set(vendors.map(v => v.id)));
+        const { data, error } = await supabase
+          .from('point_allocations')
+          .select('vendor_id, remaining_points, start_date, end_date, status')
+          .eq('agent_id', user.id)
+          .in('vendor_id', vendorIds)
+          .eq('status', 'active');
+        if (error) throw error;
+        const today = new Date();
+        const map: Record<string, number> = {};
+        (data || []).forEach((row: any) => {
+          const startOk = !row.start_date || new Date(row.start_date) <= today;
+          const endOk = !row.end_date || new Date(row.end_date) >= today;
+          if (startOk && endOk) {
+            map[row.vendor_id] = (map[row.vendor_id] || 0) + (row.remaining_points || 0);
+          }
+        });
+        setPledgedPointsMap(map);
+      } catch (e) {
+        console.error('VendorSelectionModal: Error loading pledged points', e);
+      }
+    };
+    fetchPledges();
+  }, [vendors]);
+
   const loadVendors = async () => {
     console.log('VendorSelectionModal: Starting to load vendors...');
     setIsLoading(true);
     try {
       const { data, error } = await supabase
         .from('vendors')
-        .select('id, name, description, logo_url, location, rating, review_count, is_verified, co_marketing_agents, campaigns_funded, service_states, vendor_type')
+        .select('id, name, description, logo_url, location, rating, review_count, is_verified, co_marketing_agents, campaigns_funded, service_states, vendor_type, parent_vendor_id')
         .eq('is_active', true)
         .order('sort_order', { ascending: true }) // Higher sort_order = higher priority
         .order('rating', { ascending: false })
@@ -406,104 +440,196 @@ export const VendorSelectionModal = ({
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {filteredVendors.map((vendor) => {
-                  const isCircleHomeLoan = vendor.name.toLowerCase().includes('circle home loan');
+                {(() => {
+                  const companies = filteredVendors.filter(v => !v.parent_vendor_id);
+                  const childrenByParent = filteredVendors.reduce((acc, v) => {
+                    if (v.parent_vendor_id) {
+                      (acc[v.parent_vendor_id] ||= []).push(v);
+                    }
+                    return acc;
+                  }, {} as Record<string, Vendor[]>);
+                  const orphanChildren = filteredVendors.filter(v => v.parent_vendor_id && !companies.find(c => c.id === v.parent_vendor_id));
+
                   return (
-                    <Card 
-                      key={vendor.id} 
-                      className={`cursor-pointer hover:shadow-md transition-shadow border ${
-                        isCircleHomeLoan 
-                          ? 'border-blue-500 bg-blue-50/50 shadow-lg shadow-blue-200/50 ring-2 ring-blue-200' 
-                          : ''
-                      }`}
-                      onClick={() => handleVendorSelect(vendor)}
-                    >
-                    <CardContent className="p-4">
-                      <div className="flex gap-3">
-                        {/* Logo */}
-                        <div className="w-16 h-16 bg-muted rounded-lg flex items-center justify-center flex-shrink-0">
-                          {vendor.logo_url ? (
-                            <img 
-                              src={vendor.logo_url} 
-                              alt={vendor.name}
-                              className="w-full h-full object-cover rounded-lg"
-                            />
-                          ) : (
-                            <Building className="w-8 h-8 text-muted-foreground" />
-                          )}
-                        </div>
+                    <>
+                      {companies.map((company) => {
+                        const children = childrenByParent[company.id] || [];
+                        const pledged = pledgedPointsMap[company.id] || 0;
+                        const isCircleHomeLoan = company.name.toLowerCase().includes('circle home loan');
+                        return (
+                          <Card 
+                            key={company.id} 
+                            className={`transition-shadow border ${
+                              isCircleHomeLoan 
+                                ? 'border-blue-500 bg-blue-50/50 shadow-lg shadow-blue-200/50 ring-2 ring-blue-200' 
+                                : ''
+                            }`}
+                          >
+                            <CardContent className="p-4">
+                              <div className="flex gap-3">
+                                <div className="w-16 h-16 bg-muted rounded-lg flex items-center justify-center flex-shrink-0">
+                                  {company.logo_url ? (
+                                    <img 
+                                      src={company.logo_url} 
+                                      alt={company.name}
+                                      className="w-full h-full object-cover rounded-lg"
+                                    />
+                                  ) : (
+                                    <Building className="w-8 h-8 text-muted-foreground" />
+                                  )}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-start justify-between mb-2">
+                                    <h3 className="font-semibold text-sm truncate">{company.name}</h3>
+                                    <div className="flex items-center gap-2">
+                                      {pledged > 0 && (
+                                        <Badge variant="outline" className="text-xs">Pledged: {pledged.toLocaleString()} pts</Badge>
+                                      )}
+                                      {company.is_verified && (
+                                        <Badge variant="outline" className="text-xs">✓ Verified</Badge>
+                                      )}
+                                    </div>
+                                  </div>
 
-                        {/* Content */}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between mb-2">
-                            <h3 className="font-semibold text-sm truncate">{vendor.name}</h3>
-                            {vendor.is_verified && (
-                              <Badge variant="outline" className="text-xs ml-2">
-                                ✓ Verified
-                              </Badge>
-                            )}
-                          </div>
+                                  {company.location && (
+                                    <div className="flex items-center gap-1 text-xs text-muted-foreground mb-2">
+                                      <MapPin className="h-3 w-3" />
+                                      <span className="truncate">{company.location}</span>
+                                    </div>
+                                  )}
 
-                          {vendor.location && (
-                            <div className="flex items-center gap-1 text-xs text-muted-foreground mb-2">
-                              <MapPin className="h-3 w-3" />
-                              <span className="truncate">{vendor.location}</span>
-                            </div>
-                          )}
+                                  <div className="space-y-1">
+                                    <div className="flex items-center gap-2 text-xs">
+                                      <Users className="w-3 h-3 text-muted-foreground" />
+                                      <span>{company.co_marketing_agents} agents • {company.campaigns_funded} campaigns</span>
+                                    </div>
+                                  </div>
 
-                          {vendor.rating > 0 && (
-                            <div className="flex items-center gap-1 mb-2">
-                              <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                              <span className="text-xs font-medium">{vendor.rating}</span>
-                              <span className="text-xs text-muted-foreground">({vendor.review_count})</span>
-                            </div>
-                          )}
+                                  {company.description && (
+                                    <p className="text-xs text-muted-foreground mt-2 line-clamp-2">
+                                      {company.description}
+                                    </p>
+                                  )}
 
-                          <div className="space-y-1">
-                            <div className="flex items-center gap-2 text-xs">
-                              <TrendingUp className="w-3 h-3 text-muted-foreground" />
-                              <span>Budget: {mockBudgetRange(vendor)}</span>
-                            </div>
-                            <div className="flex items-center gap-2 text-xs">
-                              <Users className="w-3 h-3 text-muted-foreground" />
-                              <span>{vendor.co_marketing_agents} agents • {vendor.campaigns_funded} campaigns</span>
-                            </div>
-                          </div>
+                                  <div className="flex gap-2 mt-3">
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={(e) => handleLearnMore(company, e)}
+                                      className="text-xs h-7"
+                                      disabled={isSelectingVendor}
+                                    >
+                                      Learn More
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleVendorSelect(company);
+                                      }}
+                                      className="text-xs h-7"
+                                      disabled={isSelectingVendor}
+                                    >
+                                      Select Company
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setExpandedCompanyId(expandedCompanyId === company.id ? null : company.id);
+                                      }}
+                                      className="text-xs h-7"
+                                    >
+                                      {expandedCompanyId === company.id ? 'Hide Loan Officers' : `View Loan Officers (${children.length})`}
+                                    </Button>
+                                  </div>
+                                </div>
+                              </div>
 
-                           {vendor.description && (
-                             <p className="text-xs text-muted-foreground mt-2 line-clamp-2">
-                               {vendor.description}
-                             </p>
-                           )}
+                              {expandedCompanyId === company.id && children.length > 0 && (
+                                <div className="mt-4 border-t pt-3 space-y-2 max-h-64 overflow-y-auto">
+                                  {children.map((officer) => {
+                                    const officerPledged = pledgedPointsMap[officer.id] || pledged;
+                                    return (
+                                      <div key={officer.id} className="flex items-start gap-3 p-2 rounded-md hover:bg-muted/50">
+                                        <div className="w-10 h-10 bg-muted rounded flex items-center justify-center flex-shrink-0">
+                                          {officer.logo_url ? (
+                                            <img src={officer.logo_url} alt={officer.name} className="w-full h-full object-cover rounded" />
+                                          ) : (
+                                            <Building className="w-5 h-5 text-muted-foreground" />
+                                          )}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                          <div className="flex items-center justify-between">
+                                            <div className="text-sm font-medium truncate">{officer.name}</div>
+                                            {officerPledged > 0 && (
+                                              <Badge variant="outline" className="text-xs">Pledged: {officerPledged.toLocaleString()} pts</Badge>
+                                            )}
+                                          </div>
+                                          <div className="flex gap-2 mt-2">
+                                            <Button size="sm" variant="outline" onClick={(e) => handleLearnMore(officer, e)} className="text-xs h-7">Learn</Button>
+                                            <Button size="sm" onClick={(e) => { e.stopPropagation(); handleVendorSelect(officer); }} className="text-xs h-7">Select Officer</Button>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              )}
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
 
-                            <div className="flex gap-2 mt-3">
-                               <Button
-                                 size="sm"
-                                 variant="outline"
-                                 onClick={(e) => handleLearnMore(vendor, e)}
-                                 className="flex-1 text-xs h-7"
-                                 disabled={isSelectingVendor}
-                               >
-                                 Learn More
-                               </Button>
-                               <Button
-                                 size="sm"
-                                 onClick={(e) => {
-                                   e.stopPropagation();
-                                   handleVendorSelect(vendor);
-                                 }}
-                                 className="flex-1 text-xs h-7"
-                                 disabled={isSelectingVendor}
-                               >
-                                 {isSelectingVendor ? "Sending..." : "Select Partner"}
-                               </Button>
-                            </div>
-                         </div>
-                       </div>
-                     </CardContent>
-                   </Card>
+                      {orphanChildren.map((vendor) => {
+                        const pledged = pledgedPointsMap[vendor.id] || 0;
+                        return (
+                          <Card key={vendor.id} className="cursor-pointer hover:shadow-md transition-shadow border" onClick={() => handleVendorSelect(vendor)}>
+                            <CardContent className="p-4">
+                              <div className="flex gap-3">
+                                <div className="w-16 h-16 bg-muted rounded-lg flex items-center justify-center flex-shrink-0">
+                                  {vendor.logo_url ? (
+                                    <img 
+                                      src={vendor.logo_url} 
+                                      alt={vendor.name}
+                                      className="w-full h-full object-cover rounded-lg"
+                                    />
+                                  ) : (
+                                    <Building className="w-8 h-8 text-muted-foreground" />
+                                  )}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-start justify-between mb-2">
+                                    <h3 className="font-semibold text-sm truncate">{vendor.name}</h3>
+                                    <div className="flex items-center gap-2">
+                                      {pledged > 0 && (
+                                        <Badge variant="outline" className="text-xs">Pledged: {pledged.toLocaleString()} pts</Badge>
+                                      )}
+                                      {vendor.is_verified && (
+                                        <Badge variant="outline" className="text-xs">✓ Verified</Badge>
+                                      )}
+                                    </div>
+                                  </div>
+                                  {vendor.location && (
+                                    <div className="flex items-center gap-1 text-xs text-muted-foreground mb-2">
+                                      <MapPin className="h-3 w-3" />
+                                      <span className="truncate">{vendor.location}</span>
+                                    </div>
+                                  )}
+                                  <div className="flex gap-2 mt-3">
+                                    <Button size="sm" variant="outline" onClick={(e) => handleLearnMore(vendor, e)} className="text-xs h-7">Learn More</Button>
+                                    <Button size="sm" onClick={(e) => { e.stopPropagation(); handleVendorSelect(vendor); }} className="text-xs h-7">Select Partner</Button>
+                                  </div>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
+                    </>
                   );
-                })}
+                })()}
               </div>
             )}
           </div>
