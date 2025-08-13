@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { VendorFunnelEditor } from './VendorFunnelEditor';
 import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -34,6 +34,7 @@ import {
   Handshake
 } from "lucide-react";
 import { getRiskBadge, getComplianceAlert, determineServiceRisk } from "./RESPAComplianceSystem";
+import { supabase } from "@/integrations/supabase/client";
 
 interface VendorFunnelModalProps {
   isOpen: boolean;
@@ -271,42 +272,51 @@ export const VendorFunnelModal = ({
 
   const selectedPkg = packages.find(pkg => pkg.id === selectedPackage) || packages[1];
 
-  // Mock reviews data
-  const reviews = [
-    {
-      id: 1,
-      author: "Sarah Johnson",
-      title: "Top Producer, Metro Realty",
-      rating: 5,
-      date: "December 15, 2024",
-      verified: true,
-      review: "Outstanding results! This co-marketing partnership increased my lead generation by 200% in just 3 months. The team is professional and the campaigns are well-executed.",
-      helpful: 24,
-      images: []
-    },
-    {
-      id: 2,
-      author: "Mike Chen",
-      title: "RE/MAX Premier",
-      rating: 5,
-      date: "November 28, 2024",
-      verified: true,
-      review: "Best investment I've made in my real estate business. The ROI has been incredible and the support team is always available to help optimize campaigns.",
-      helpful: 18,
-      images: []
-    },
-    {
-      id: 3,
-      author: "Lisa Rodriguez",
-      title: "Coldwell Banker",
-      rating: 4,
-      date: "November 10, 2024",
-      verified: true,
-      review: "Great partnership overall. Saw significant improvement in lead quality and conversion rates. Minor delays in campaign setup but worth the wait.",
-      helpful: 12,
-      images: []
-    }
-  ];
+  const [vendorReviews, setVendorReviews] = useState<Array<{ id: string; author: string; title?: string; rating: number; date: string; verified: boolean; review: string }>>([]);
+  const [vendorReviewsLoading, setVendorReviewsLoading] = useState(false);
+
+  useEffect(() => {
+    const loadReviews = async () => {
+      if (!vendor?.id || vendor.review_count <= 0) {
+        setVendorReviews([]);
+        return;
+      }
+      setVendorReviewsLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('service_reviews')
+          .select(`
+            id,
+            rating,
+            review,
+            created_at,
+            verified,
+            profiles:profiles!service_reviews_user_id_fkey (display_name, avatar_url),
+            services:services!service_reviews_service_id_fkey (vendor_id, title)
+          `)
+          .eq('services.vendor_id', vendor.id)
+          .order('created_at', { ascending: false })
+          .limit(10);
+        if (error) throw error;
+        const mapped = (data || []).map((r: any) => ({
+          id: r.id,
+          author: r.profiles?.display_name || 'Anonymous',
+          title: r.services?.title,
+          rating: r.rating,
+          date: new Date(r.created_at).toLocaleDateString(),
+          verified: !!r.verified,
+          review: r.review,
+        }));
+        setVendorReviews(mapped);
+      } catch (e) {
+        console.error('Failed to load vendor reviews', e);
+        setVendorReviews([]);
+      } finally {
+        setVendorReviewsLoading(false);
+      }
+    };
+    loadReviews();
+  }, [vendor?.id, vendor?.review_count]);
 
   const handleRequestCoMarketing = () => {
     onRequestCoMarketing(vendor.id, selectedPackage, quantity);
@@ -752,7 +762,13 @@ export const VendorFunnelModal = ({
 
                     {/* Individual Reviews */}
                     <div className="space-y-6">
-                      {reviews.map((review) => (
+                      {vendorReviewsLoading && (
+                        <div className="text-sm text-muted-foreground">Loading reviews...</div>
+                      )}
+                      {!vendorReviewsLoading && vendorReviews.length === 0 && (
+                        <div className="text-sm text-muted-foreground">No reviews available.</div>
+                      )}
+                      {vendorReviews.map((review) => (
                         <div key={review.id} className="border-b pb-4">
                           <div className="flex items-start gap-3">
                             <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center text-sm font-medium">
@@ -771,30 +787,10 @@ export const VendorFunnelModal = ({
                                 {renderStarRating(review.rating)}
                                 <span className="text-sm text-muted-foreground">{review.date}</span>
                               </div>
-                              <p className="text-sm mb-3">{review.review}</p>
-                              <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                                <button className="flex items-center gap-1 hover:text-foreground">
-                                  <ThumbsUp className="w-3 h-3" />
-                                  Helpful ({review.helpful})
-                                </button>
-                                <button className="flex items-center gap-1 hover:text-foreground">
-                                  <ThumbsDown className="w-3 h-3" />
-                                  Not helpful
-                                </button>
-                                <button className="hover:text-foreground">
-                                  Comment
-                                </button>
-                              </div>
-                              
-                              {/* Comments Section */}
-                              <div className="mt-3 ml-4 space-y-2">
-                                <div className="text-xs bg-muted/50 p-2 rounded">
-                                  <span className="font-medium">Mike T.</span> replied: "Completely agree! The ROI has been amazing for our team too."
-                                </div>
-                                <div className="text-xs bg-muted/50 p-2 rounded">
-                                  <span className="font-medium">Jennifer K.</span> replied: "How long did it take to see results?"
-                                </div>
-                              </div>
+                              <p className="text-sm mb-1">{review.review}</p>
+                              {review.title && (
+                                <p className="text-xs text-muted-foreground">Service: {review.title}</p>
+                              )}
                             </div>
                           </div>
                         </div>

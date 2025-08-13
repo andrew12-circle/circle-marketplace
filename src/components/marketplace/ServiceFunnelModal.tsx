@@ -411,7 +411,7 @@ export const ServiceFunnelModal = ({
                       {subHeadline || "Transform your real estate business with our proven system"}
                     </p>
 
-                    {service.vendor && (
+                    {service.vendor && service.vendor.review_count > 0 && (
                       <div className="flex items-center gap-4 p-4 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
                         <div className="flex items-center gap-2">
                           {renderStarRating(service.vendor.rating, "lg")}
@@ -868,29 +868,6 @@ export const ServiceFunnelModal = ({
                                !service.funnel_content?.proofItWorks?.caseStudy?.enabled && 
                                !service.funnel_content?.proofItWorks?.vendorVerification?.enabled) && (
                                <>
-                                 {/* Default Agent Reviews */}
-                                 <div>
-                                   <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                                     <Star className="w-5 h-5 text-yellow-500" />
-                                     Agent Reviews
-                                   </h4>
-                                   <div className="space-y-3">
-                                     <div className="bg-gray-50 p-4 rounded-lg border">
-                                       <div className="flex items-center gap-3 mb-2">
-                                         {renderStarRating(5)}
-                                         <span className="font-medium text-gray-900">Sarah M., Keller Williams</span>
-                                       </div>
-                                       <p className="text-gray-700 italic">"Doubled my leads in 60 days. The automation saves me 15 hours per week!"</p>
-                                     </div>
-                                     <div className="bg-gray-50 p-4 rounded-lg border">
-                                       <div className="flex items-center gap-3 mb-2">
-                                         {renderStarRating(5)}
-                                         <span className="font-medium text-gray-900">Mike R., RE/MAX</span>
-                                       </div>
-                                       <p className="text-gray-700 italic">"ROI was 400% in the first quarter. Game changer for my business."</p>
-                                     </div>
-                                   </div>
-                                 </div>
 
                                  {/* Default Case Study */}
                                  <div>

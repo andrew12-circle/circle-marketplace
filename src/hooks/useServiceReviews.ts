@@ -82,8 +82,7 @@ export const useServiceReviews = (serviceId: string) => {
             author_name: profile.display_name || profile.business_name || 'Anonymous User',
             author_company: profile.business_name,
             author_avatar: profile.avatar_url,
-            author_specialties: profile.specialties || [],
-            helpful_count: Math.floor(Math.random() * 30) + 1 // Mock helpful count for now
+            author_specialties: profile.specialties || []
           };
         });
 
