@@ -271,34 +271,41 @@ export const AgentWallet = () => {
 
         {/* Banking Navigation */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-7 h-12 bg-muted/50 rounded-xl p-1">
-            <TabsTrigger value="overview" className="text-sm font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:shadow-sm">
-              <Receipt className="h-4 w-4 mr-2" />
-              Overview
+          <TabsList className="grid w-full grid-cols-7 lg:grid-cols-7 sm:grid-cols-4 grid-cols-2 h-auto lg:h-12 gap-1 bg-muted/50 rounded-xl p-1">
+            <TabsTrigger value="overview" className="text-xs lg:text-sm font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:shadow-sm flex-col lg:flex-row p-2 lg:p-3 h-auto lg:h-auto">
+              <Receipt className="h-3 w-3 lg:h-4 lg:w-4 lg:mr-2 mb-1 lg:mb-0" />
+              <span className="hidden sm:inline">Overview</span>
+              <span className="sm:hidden">Over</span>
             </TabsTrigger>
-            <TabsTrigger value="transactions" className="text-sm font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:shadow-sm">
-              <History className="h-4 w-4 mr-2" />
-              Transactions
+            <TabsTrigger value="transactions" className="text-xs lg:text-sm font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:shadow-sm flex-col lg:flex-row p-2 lg:p-3 h-auto lg:h-auto">
+              <History className="h-3 w-3 lg:h-4 lg:w-4 lg:mr-2 mb-1 lg:mb-0" />
+              <span className="hidden sm:inline">Transactions</span>
+              <span className="sm:hidden">Trans</span>
             </TabsTrigger>
-            <TabsTrigger value="allocations" className="text-sm font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:shadow-sm">
-              <Building2 className="h-4 w-4 mr-2" />
-              Vendors
+            <TabsTrigger value="allocations" className="text-xs lg:text-sm font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:shadow-sm flex-col lg:flex-row p-2 lg:p-3 h-auto lg:h-auto">
+              <Building2 className="h-3 w-3 lg:h-4 lg:w-4 lg:mr-2 mb-1 lg:mb-0" />
+              <span className="hidden sm:inline">Vendors</span>
+              <span className="sm:hidden">Vend</span>
             </TabsTrigger>
-            <TabsTrigger value="copay" className="text-sm font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:shadow-sm">
-              <DollarSign className="h-4 w-4 mr-2" />
-              Co-Pay
+            <TabsTrigger value="copay" className="text-xs lg:text-sm font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:shadow-sm flex-col lg:flex-row p-2 lg:p-3 h-auto lg:h-auto">
+              <DollarSign className="h-3 w-3 lg:h-4 lg:w-4 lg:mr-2 mb-1 lg:mb-0" />
+              <span className="hidden sm:inline">Co-Pay</span>
+              <span className="sm:hidden">Pay</span>
             </TabsTrigger>
-            <TabsTrigger value="analytics" className="text-sm font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:shadow-sm">
-              <BarChart3 className="h-4 w-4 mr-2" />
-              Analytics
+            <TabsTrigger value="analytics" className="text-xs lg:text-sm font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:shadow-sm flex-col lg:flex-row p-2 lg:p-3 h-auto lg:h-auto sm:col-start-1 lg:col-start-auto">
+              <BarChart3 className="h-3 w-3 lg:h-4 lg:w-4 lg:mr-2 mb-1 lg:mb-0" />
+              <span className="hidden sm:inline">Analytics</span>
+              <span className="sm:hidden">Chart</span>
             </TabsTrigger>
-            <TabsTrigger value="earn" className="text-sm font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:shadow-sm">
-              <Plus className="h-4 w-4 mr-2" />
-              Earn
+            <TabsTrigger value="earn" className="text-xs lg:text-sm font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:shadow-sm flex-col lg:flex-row p-2 lg:p-3 h-auto lg:h-auto">
+              <Plus className="h-3 w-3 lg:h-4 lg:w-4 lg:mr-2 mb-1 lg:mb-0" />
+              <span className="hidden sm:inline">Earn</span>
+              <span className="sm:hidden">+</span>
             </TabsTrigger>
-            <TabsTrigger value="spend" className="text-sm font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:shadow-sm">
-              <Wallet className="h-4 w-4 mr-2" />
-              Spend
+            <TabsTrigger value="spend" className="text-xs lg:text-sm font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:shadow-sm flex-col lg:flex-row p-2 lg:p-3 h-auto lg:h-auto">
+              <Wallet className="h-3 w-3 lg:h-4 lg:w-4 lg:mr-2 mb-1 lg:mb-0" />
+              <span className="hidden sm:inline">Spend</span>
+              <span className="sm:hidden">$</span>
             </TabsTrigger>
           </TabsList>
 
