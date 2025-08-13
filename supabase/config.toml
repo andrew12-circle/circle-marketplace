@@ -9,6 +9,9 @@ verify_jwt = false
 [functions.deploy-dedication]
 verify_jwt = false
 
+[functions.deploy-webhook]
+verify_jwt = false
+
 [functions.auto-import-channels]
 verify_jwt = false
 

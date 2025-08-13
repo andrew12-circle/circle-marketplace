@@ -12,6 +12,7 @@ import { Users, Shield, Star, AlertTriangle, ArrowLeft, RefreshCw, ChevronDown, 
 import { Navigate, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { SecureAdminGuard } from '@/components/admin/SecureAdminGuard';
+import { SpiritualAdminGuard } from '@/components/admin/SpiritualAdminGuard';
 import { useSecureAdminOperations } from '@/hooks/useSecureAdminOperations';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ContentPromotionPanel } from '@/components/admin/ContentPromotionPanel';
@@ -402,7 +403,8 @@ export default function AdminDashboard() {
   }
 
   return (
-    <SecureAdminGuard requireElevatedPrivileges={true}>
+    <SpiritualAdminGuard operation="admin_dashboard_access">
+      <SecureAdminGuard requireElevatedPrivileges={true}>
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
         {/* Professional Header */}
         <div className="bg-white border-b border-slate-200 shadow-sm">
@@ -947,5 +949,6 @@ export default function AdminDashboard() {
         </div>
       </div>
     </SecureAdminGuard>
+    </SpiritualAdminGuard>
   );
 }

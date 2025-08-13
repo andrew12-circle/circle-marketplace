@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useUserRegistration } from "@/hooks/useUserRegistration";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -17,6 +18,7 @@ import { AccountLockoutAlert } from "@/components/auth/AccountLockoutAlert";
 const circleLogoUrl = "/lovable-uploads/97692497-6d98-46a8-b6fc-05cd68bdc160.png";
 
 export const Auth = () => {
+  useUserRegistration(); // Apply spiritual coverage for user registration
   const [isLogin, setIsLogin] = useState(() => {
     const params = new URLSearchParams(window.location.search);
     const mode = params.get('mode');
