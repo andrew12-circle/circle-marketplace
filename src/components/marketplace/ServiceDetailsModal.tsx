@@ -104,6 +104,7 @@ interface Service {
     rating: number;
     review_count: number;
     is_verified: boolean;
+    support_hours?: string;
   };
 }
 
@@ -155,7 +156,7 @@ export const ServiceDetailsModal = ({ service, isOpen, onClose }: ServiceDetails
     "Website & Landing Pages",
     "Social Media Marketing Tools",
     "Analytics & Reporting Dashboard",
-    "24/7 Customer Support",
+    `${service.vendor?.support_hours || 'Business Hours'} Customer Support`,
     "Mobile App Access"
   ];
 

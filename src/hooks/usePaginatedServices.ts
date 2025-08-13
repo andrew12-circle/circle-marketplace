@@ -31,7 +31,8 @@ async function fetchServicesPage(offset: number, filters: PaginatedFilters): Pro
         review_count,
         is_verified,
         website_url,
-        logo_url
+        logo_url,
+        support_hours
       )
     `, { count: 'exact' });
 
@@ -86,6 +87,7 @@ async function fetchServicesPage(offset: number, filters: PaginatedFilters): Pro
       is_verified: service.vendors.is_verified || false,
       website_url: service.vendors.website_url,
       logo_url: service.vendors.logo_url,
+      support_hours: service.vendors.support_hours || 'Business Hours',
     } : null,
   }));
 

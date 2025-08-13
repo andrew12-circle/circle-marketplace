@@ -1,0 +1,40 @@
+-- Fix security issues first
+
+-- Issue 1: Set search_path for existing functions to prevent search_path injection
+ALTER FUNCTION public.update_updated_at_column() SET search_path = 'public';
+ALTER FUNCTION public.validate_uuid_field(text) SET search_path = 'public';
+ALTER FUNCTION public.update_co_pay_updated_at() SET search_path = 'public';
+ALTER FUNCTION public.validate_channels_creator_id() SET search_path = 'public';
+ALTER FUNCTION public.validate_content_creator_id() SET search_path = 'public';
+ALTER FUNCTION public.clean_ip_address(text) SET search_path = 'public';
+ALTER FUNCTION public.cleanup_expired_cache() SET search_path = 'public';
+ALTER FUNCTION public.validate_ip_address() SET search_path = 'public';
+ALTER FUNCTION public.get_service_ratings_bulk(uuid[]) SET search_path = 'public';
+ALTER FUNCTION public.update_vendor_agent_counts() SET search_path = 'public';
+ALTER FUNCTION public.track_vendor_activity(uuid, text, jsonb) SET search_path = 'public';
+ALTER FUNCTION public.log_login_attempt(text, boolean, inet, text) SET search_path = 'public';
+ALTER FUNCTION public.validate_admin_session(text) SET search_path = 'public';
+ALTER FUNCTION public.notify_copay_status_change() SET search_path = 'public';
+ALTER FUNCTION public.handle_role_change() SET search_path = 'public';
+ALTER FUNCTION public.check_expiring_payment_schedules() SET search_path = 'public';
+ALTER FUNCTION public.audit_admin_changes_enhanced() SET search_path = 'public';
+ALTER FUNCTION public.get_service_rating_stats(uuid) SET search_path = 'public';
+ALTER FUNCTION public.link_youtube_channel_to_user(uuid, text, text) SET search_path = 'public';
+ALTER FUNCTION public.validate_password_strength(text) SET search_path = 'public';
+ALTER FUNCTION public.update_agent_spending() SET search_path = 'public';
+ALTER FUNCTION public.validate_profile_security_update() SET search_path = 'public';
+ALTER FUNCTION public.check_admin_operation_rate_limit_enhanced() SET search_path = 'public';
+ALTER FUNCTION public.expire_co_pay_requests() SET search_path = 'public';
+ALTER FUNCTION public.check_and_update_lockout(text, text) SET search_path = 'public';
+ALTER FUNCTION public.clear_failed_attempts(text, text) SET search_path = 'public';
+ALTER FUNCTION public.log_compliance_workflow_change() SET search_path = 'public';
+ALTER FUNCTION public.handle_copay_status_change() SET search_path = 'public';
+ALTER FUNCTION public.calculate_vendor_active_agents(uuid) SET search_path = 'public';
+ALTER FUNCTION public.prevent_privilege_escalation() SET search_path = 'public';
+ALTER FUNCTION public.process_automatic_copay(uuid, uuid, uuid, numeric, integer, uuid) SET search_path = 'public';
+ALTER FUNCTION public.check_admin_operation_rate_limit() SET search_path = 'public';
+ALTER FUNCTION public.cleanup_old_security_events() SET search_path = 'public';
+ALTER FUNCTION public.get_agent_points_summary(uuid) SET search_path = 'public';
+ALTER FUNCTION public.process_real_time_charge(uuid, uuid, uuid, uuid, integer, numeric) SET search_path = 'public';
+ALTER FUNCTION public.backup_financial_data(text) SET search_path = 'public';
+ALTER FUNCTION public.create_data_checksum(jsonb) SET search_path = 'public';

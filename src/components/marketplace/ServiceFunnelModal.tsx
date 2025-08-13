@@ -113,6 +113,7 @@ interface Service {
     is_verified: boolean;
     website_url?: string;
     logo_url?: string;
+    support_hours?: string;
   } | null;
   funnel_content?: {
     headline?: string;
@@ -271,7 +272,7 @@ export const ServiceFunnelModal = ({
         price: parseFloat(service.retail_price || "100") * 1.5,
         originalPrice: parseFloat(service.retail_price || "100") * 2,
         description: "Full-service solution with dedicated support",
-        features: ["Everything in Standard", "Dedicated account manager", "24/7 support", "Custom integrations"],
+        features: ["Everything in Standard", "Dedicated account manager", `${service.vendor?.support_hours || 'Business Hours'} support`, "Custom integrations"], // Dynamic support hours
         requestPricing: false
       }
     ];
@@ -437,7 +438,7 @@ export const ServiceFunnelModal = ({
                         <div className="text-xs text-blue-200">Days Setup</div>
                       </div>
                       <div className="text-center p-3 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
-                        <div className="text-2xl font-bold">24/7</div>
+                        <div className="text-2xl font-bold">{service.vendor?.support_hours || 'Business Hours'}</div>
                         <div className="text-xs text-blue-200">Support</div>
                       </div>
                     </div>

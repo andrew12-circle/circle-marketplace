@@ -46,7 +46,10 @@ export interface Service {
     rating: number;
     review_count: number;
     is_verified: boolean;
-  };
+    website_url?: string;
+    logo_url?: string;
+    support_hours?: string;
+  } | null;
 }
 
 export interface Vendor {
@@ -135,7 +138,8 @@ const fetchServices = async (): Promise<Service[]> => {
           review_count,
           is_verified,
           website_url,
-          logo_url
+          logo_url,
+          support_hours
         )
       `)
       .order('sort_order', { ascending: true })
@@ -165,6 +169,7 @@ const fetchServices = async (): Promise<Service[]> => {
       is_verified: service.vendors.is_verified || false,
       website_url: service.vendors.website_url,
       logo_url: service.vendors.logo_url,
+      support_hours: service.vendors.support_hours || 'Business Hours',
     } : null,
   }));
 
