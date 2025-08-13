@@ -60,3 +60,21 @@ verify_jwt = false
 [functions.auto-rerank-services]
 verify_jwt = false
 schedule = "0 6 * * 1"
+
+[functions.customer-portal]
+verify_jwt = false
+
+[functions.pause-subscription]
+verify_jwt = false
+
+[functions.apply-discount]
+verify_jwt = false
+
+[functions.downgrade-plan]
+verify_jwt = false
+
+[functions.cancel-subscription]
+verify_jwt = false
+
+[functions.resume-subscription]
+verify_jwt = false

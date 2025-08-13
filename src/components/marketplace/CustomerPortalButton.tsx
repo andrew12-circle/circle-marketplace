@@ -4,13 +4,15 @@ import { CreditCard } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import { ManageSubscriptionModal } from "./ManageSubscriptionModal";
 
 export const CustomerPortalButton = forwardRef<HTMLDivElement>((props, ref) => {
   const [loading, setLoading] = useState(false);
+  const [showManageModal, setShowManageModal] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
 
-  const handleManageSubscription = async () => {
+  const handleManageSubscription = () => {
     if (!user) {
       toast({
         title: "Authentication Required",
@@ -20,43 +22,39 @@ export const CustomerPortalButton = forwardRef<HTMLDivElement>((props, ref) => {
       return;
     }
 
-    setLoading(true);
+    setShowManageModal(true);
+  };
+
+  const handleManageModalSuccess = async () => {
+    // Refresh subscription status after changes
     try {
-      const { data, error } = await supabase.functions.invoke('customer-portal', {
+      await supabase.functions.invoke('check-subscription', {
         headers: {
           Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
         },
       });
-
-      if (error) throw error;
-
-      if (data?.url) {
-        // Open in new tab
-        window.open(data.url, '_blank');
-      } else {
-        throw new Error('No portal URL received');
-      }
     } catch (error) {
-      console.error('Error accessing customer portal:', error);
-      toast({
-        title: "Error",
-        description: "Failed to access customer portal. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
+      console.error('Error refreshing subscription status:', error);
     }
   };
 
   return (
-    <div 
-      ref={ref}
-      className="flex items-center cursor-pointer"
-      onClick={handleManageSubscription}
-      {...props}
-    >
-      <CreditCard className="mr-2 h-4 w-4" />
-      <span>{loading ? "Loading..." : "Manage Subscription"}</span>
-    </div>
+    <>
+      <div 
+        ref={ref}
+        className="flex items-center cursor-pointer"
+        onClick={handleManageSubscription}
+        {...props}
+      >
+        <CreditCard className="mr-2 h-4 w-4" />
+        <span>Manage Subscription</span>
+      </div>
+
+      <ManageSubscriptionModal
+        isOpen={showManageModal}
+        onClose={() => setShowManageModal(false)}
+        onSuccess={handleManageModalSuccess}
+      />
+    </>
   );
 });
