@@ -43,7 +43,8 @@ import { CreatorPayoutDashboard } from '@/components/admin/CreatorPayoutDashboar
 import BulkFAQGenerator from '@/components/admin/BulkFAQGenerator';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Upload, Building, Youtube, DollarSign, BarChart3, Coins, Shield as ShieldIcon, Users2, Send, BookOpen } from 'lucide-react';
+import { Upload, Building, Youtube, DollarSign, BarChart3, Coins, Shield as ShieldIcon, Users2, Send, BookOpen, Heart } from 'lucide-react';
+import { SpiritualDashboard } from '@/components/admin/SpiritualDashboard';
 
 interface UserProfile {
   id: string;
@@ -556,6 +557,13 @@ export default function AdminDashboard() {
                   <span className="hidden sm:inline">Invites</span>
                 </TabsTrigger>
                 <TabsTrigger 
+                  value="spiritual" 
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-md data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm"
+                >
+                  <Heart className="h-4 w-4" />
+                  <span className="hidden sm:inline">Spiritual</span>
+                </TabsTrigger>
+                <TabsTrigger 
                   value="respa" 
                   className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-md data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm"
                 >
@@ -926,6 +934,10 @@ export default function AdminDashboard() {
           <RESPAServiceManager />
           <RESPAComplianceManager />
           <RESPADocumentationViewer />
+        </TabsContent>
+
+        <TabsContent value="spiritual" className="space-y-6">
+          <SpiritualDashboard />
         </TabsContent>
 
         <TabsContent value="calculator" className="space-y-6">

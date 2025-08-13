@@ -8,6 +8,7 @@ import { ShoppingCart, Check, Calendar, Crown, Users } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSpiritualCoverage } from "@/contexts/SpiritualCoverageContext";
 import { useCurrency } from "@/hooks/useCurrency";
 import { extractAndValidatePrice } from "@/utils/priceValidation";
 import { supabase } from "@/integrations/supabase/client";
@@ -51,6 +52,7 @@ export const DirectPurchaseModal = ({
   const { toast } = useToast();
   const { addToCart } = useCart();
   const { profile, user } = useAuth();
+  const { applyGuard } = useSpiritualCoverage();
   const { formatPrice } = useCurrency();
   const isProMember = profile?.is_pro_member || false;
 
@@ -132,6 +134,13 @@ export const DirectPurchaseModal = ({
 
   const handleDirectPurchase = async () => {
     setIsProcessing(true);
+    
+    // Apply spiritual covering before purchase
+    await applyGuard('CHECKOUT', { 
+      serviceId: service.id, 
+      amount: getSelectedPrice(),
+      option: selectedOption
+    });
     
     try {
       const selectedPrice = getSelectedPrice();

@@ -10,6 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Building, User, MapPin, Phone, Mail, Globe, CreditCard, Download, Upload, FileSpreadsheet, Calendar, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useSpiritualCoverage } from "@/contexts/SpiritualCoverageContext";
 import { supabase } from "@/integrations/supabase/client";
 
 const SERVICE_PROVIDER_TYPES = [
@@ -53,6 +54,7 @@ export const VendorRegistration = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { applyGuard } = useSpiritualCoverage();
   const registrationType = searchParams.get("type") || "service_provider";
   
   const [formData, setFormData] = useState({
@@ -289,6 +291,13 @@ export const VendorRegistration = () => {
     
     console.log("Validation passed, submitting...");
     setIsSubmitting(true);
+    
+    // Apply spiritual covering for vendor onboarding
+    await applyGuard('VENDOR_ONBOARDING', {
+      businessType: formData.businessType,
+      companyName: formData.companyName,
+      email: formData.email
+    });
     
     try {
       // Step 1: Create user account
