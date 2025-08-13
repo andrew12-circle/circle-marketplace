@@ -210,7 +210,10 @@ export const ServiceFunnelModal = ({
   const [isConsultationFlowOpen, setIsConsultationFlowOpen] = useState(false);
   const [isPricingChoiceOpen, setIsPricingChoiceOpen] = useState(false);
   const [activeMediaUrl, setActiveMediaUrl] = useState<string | null>(null);
-  const [showSupportStats, setShowSupportStats] = useState(false); // Support toggle - off by default
+  // Get support stats visibility from service funnel content
+  const showSupportStats = service.funnel_content && typeof service.funnel_content === 'object' && 'showSupportStats' in service.funnel_content 
+    ? service.funnel_content.showSupportStats 
+    : false;
   const [vendorAvailability, setVendorAvailability] = useState<{
     is_available_now: boolean;
     availability_message?: string;
@@ -381,14 +384,6 @@ export const ServiceFunnelModal = ({
           <X className="h-4 w-4 text-gray-700" />
         </Button>
 
-        {/* Support Stats Toggle - Admin Control */}
-        <div className="absolute top-4 right-16 z-50 flex items-center gap-2 bg-white/80 backdrop-blur-sm rounded-full px-3 py-1 shadow-lg border border-white/20">
-          <span className="text-xs text-gray-700">Support Stats</span>
-          <Switch
-            checked={showSupportStats}
-            onCheckedChange={setShowSupportStats}
-          />
-        </div>
 
         <div className="overflow-y-auto max-h-[90vh]">
           {/* Modern Hero Section */}

@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -398,11 +399,32 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
         </TabsContent>
 
         <TabsContent value="testimonials" className="space-y-4">
-          <FunnelTestimonialsEditor
-            testimonials={funnelData.testimonials || []}
-            stats={funnelData.stats || []}
-            onChange={(type, data) => handleDataChange(type, data)}
-          />
+          <div className="space-y-4">
+            {/* Support Stats Display Toggle */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm">Display Settings</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label className="text-sm font-medium">Show Support Stats</Label>
+                    <p className="text-xs text-muted-foreground">Display support hours in the funnel stats section</p>
+                  </div>
+                  <Switch
+                    checked={funnelData.showSupportStats ?? false}
+                    onCheckedChange={(checked) => handleDataChange('showSupportStats', checked)}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+            
+            <FunnelTestimonialsEditor
+              testimonials={funnelData.testimonials || []}
+              stats={funnelData.stats || []}
+              onChange={(type, data) => handleDataChange(type, data)}
+            />
+          </div>
         </TabsContent>
 
         <TabsContent value="proof" className="space-y-4">
