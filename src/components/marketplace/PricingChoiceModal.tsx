@@ -55,10 +55,12 @@ export const PricingChoiceModal = ({
     setLoadingPoints(true);
     try {
       // Get agent points summary
+      console.log('Loading points for user ID:', user.id);
       const { data: pointsData, error: pointsError } = await supabase.rpc('get_agent_points_summary', {
         p_agent_id: user.id
       });
 
+      console.log('Points data response:', pointsData, 'Error:', pointsError);
       if (pointsError) throw pointsError;
       setAgentPoints(pointsData);
 
