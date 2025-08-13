@@ -278,11 +278,6 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false, b
         >
           {/* Top Badges */}
           <div className="absolute top-3 left-3 z-10 flex gap-2">
-            {service.is_verified && (
-              <Badge className="bg-green-600 text-white text-xs font-medium">
-                Verified
-              </Badge>
-            )}
             {service.is_featured && (
               <Badge className="bg-circle-primary text-primary-foreground text-xs font-medium">
                 {t('featured')}
