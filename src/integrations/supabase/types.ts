@@ -5252,6 +5252,7 @@ export type Database = {
           service_states: string[] | null
           service_zip_codes: string[] | null
           sort_order: number | null
+          support_hours: string | null
           updated_at: string
           value_statement: string | null
           vendor_type: string | null
@@ -5306,6 +5307,7 @@ export type Database = {
           service_states?: string[] | null
           service_zip_codes?: string[] | null
           sort_order?: number | null
+          support_hours?: string | null
           updated_at?: string
           value_statement?: string | null
           vendor_type?: string | null
@@ -5360,6 +5362,7 @@ export type Database = {
           service_states?: string[] | null
           service_zip_codes?: string[] | null
           sort_order?: number | null
+          support_hours?: string | null
           updated_at?: string
           value_statement?: string | null
           vendor_type?: string | null
