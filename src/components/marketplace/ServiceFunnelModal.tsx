@@ -83,6 +83,7 @@ interface Service {
   tags?: string[];
   is_featured: boolean;
   is_top_pick: boolean;
+  is_verified?: boolean;
   estimated_roi?: number;
   duration?: string;
   requires_quote?: boolean;
@@ -228,8 +229,8 @@ export const ServiceFunnelModal = ({
   const [openItem, setOpenItem] = useState<string | undefined>(undefined);
   const pricingRef = useRef<HTMLDivElement | null>(null);
   
-  // Use real verification status from database
-  const isVerified = service.vendor?.is_verified;
+  // Use service verification status from database  
+  const isVerified = service.is_verified;
   
   // Fetch real reviews for this service
   const { reviews, loading: reviewsLoading, error: reviewsError } = useServiceReviews(service.id);
