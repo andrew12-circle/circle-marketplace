@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { 
   Star, 
   TrendingUp, 
@@ -31,7 +32,10 @@ import {
   Verified,
   Shield,
   Award,
-  Handshake
+  Handshake,
+  X,
+  Play,
+  Crown
 } from "lucide-react";
 import { getRiskBadge, getComplianceAlert, determineServiceRisk } from "./RESPAComplianceSystem";
 import { supabase } from "@/integrations/supabase/client";
@@ -58,8 +62,8 @@ interface VendorFunnelModalProps {
     nmls_id?: string;
   };
   onCoMarketingRequest?: (vendorId: string) => void;
-  isVendorView?: boolean; // New prop to indicate if vendor is viewing their own modal
-  currentUserId?: string; // To check if current user is the vendor
+  isVendorView?: boolean;
+  currentUserId?: string;
 }
 
 export const VendorFunnelModal = ({ 
@@ -76,7 +80,9 @@ export const VendorFunnelModal = ({
   const [selectedPackage, setSelectedPackage] = useState("standard");
   const [quantity, setQuantity] = useState(1);
   const [isEditingFunnel, setIsEditingFunnel] = useState(false);
-  const riskLevel = determineServiceRisk(vendor.name, vendor.description);
+  const [vendorReviews, setVendorReviews] = useState<any[]>([]);
+  const [vendorReviewsLoading, setVendorReviewsLoading] = useState(false);
+  const [openItem, setOpenItem] = useState<string>("question-1");
 
   // Check if current user is the vendor owner
   const isVendorOwner = currentUserId === vendor.id || isVendorView;
@@ -84,16 +90,6 @@ export const VendorFunnelModal = ({
   // Industry-specific configurations
   const industryConfig = {
     mortgage: {
-      teamTitle: "Our Loan Officers",
-      partnerLabel: "Agent Partners",
-      processLabel: "Closings",
-      mainMetric: "On-Time Closings Guaranteed",
-      successLabel: "Agent Success Stories",
-      reviewLabel: "Real Estate Agent Reviews",
-      teamMembers: [
-        { title: "Senior Loan Officer", metric: "closings", description: "Years of mortgage expertise" },
-        { title: "Loan Officer", metric: "closings", description: "Dedicated loan processing" }
-      ],
       benefits: [
         { title: "Shared Marketing Costs", desc: "Split advertising expenses 50/50" },
         { title: "Co-Branded Materials", desc: "Professional marketing assets" },
@@ -102,183 +98,76 @@ export const VendorFunnelModal = ({
         { title: "Premium Placement", desc: "Priority in referral systems" },
         { title: "Training & Support", desc: "Ongoing partner education" }
       ],
-      statsLabels: {
-        primary: "Campaigns Successfully Funded",
-        secondary: "On-Time Closing Rate", 
-        rating: "Agent Rating",
-        response: "Average Response Time"
-      }
-    },
-    insurance: {
-      teamTitle: "Our Insurance Specialists",
-      partnerLabel: "Agent Partners", 
-      processLabel: "policies",
-      mainMetric: "Claims Processing Excellence",
-      successLabel: "Agent Success Stories",
-      reviewLabel: "Insurance Agent Reviews",
-      teamMembers: [
-        { title: "Senior Insurance Specialist", metric: "policies", description: "Years of insurance expertise" },
-        { title: "Insurance Agent", metric: "policies", description: "Comprehensive coverage solutions" }
-      ],
-      benefits: [
-        { title: "Shared Marketing Costs", desc: "Split advertising expenses 50/50" },
-        { title: "Co-Branded Materials", desc: "Professional marketing assets" },
-        { title: "Lead Generation", desc: "Access to our client database" },
-        { title: "Fast Claims Processing", desc: "Quick and reliable service" },
-        { title: "Premium Placement", desc: "Priority in referral systems" },
-        { title: "Training & Support", desc: "Ongoing partner education" }
-      ],
-      statsLabels: {
-        primary: "Campaigns Successfully Funded",
-        secondary: "Claims Approval Rate",
-        rating: "Agent Rating", 
-        response: "Average Response Time"
-      }
-    },
-    legal: {
-      teamTitle: "Our Legal Team",
-      partnerLabel: "Attorney Partners",
-      processLabel: "cases",
-      mainMetric: "Successful Case Resolution",
-      successLabel: "Attorney Success Stories", 
-      reviewLabel: "Attorney Reviews",
-      teamMembers: [
-        { title: "Senior Attorney", metric: "cases", description: "Years of legal experience" },
-        { title: "Associate Attorney", metric: "cases", description: "Specialized legal expertise" }
-      ],
-      benefits: [
-        { title: "Shared Marketing Costs", desc: "Split advertising expenses 50/50" },
-        { title: "Co-Branded Materials", desc: "Professional marketing assets" },
-        { title: "Lead Generation", desc: "Access to our client database" },
-        { title: "Case Management", desc: "Efficient case processing" },
-        { title: "Premium Placement", desc: "Priority in referral systems" },
-        { title: "Training & Support", desc: "Ongoing partner education" }
-      ],
-      statsLabels: {
-        primary: "Campaigns Successfully Funded",
-        secondary: "Case Success Rate",
-        rating: "Attorney Rating",
-        response: "Average Response Time"
-      }
-    },
-    accounting: {
-      teamTitle: "Our Accounting Team",
-      partnerLabel: "CPA Partners",
-      processLabel: "returns",
-      mainMetric: "Accurate Tax Processing",
-      successLabel: "CPA Success Stories",
-      reviewLabel: "CPA Reviews", 
-      teamMembers: [
-        { title: "Senior CPA", metric: "returns", description: "Years of accounting expertise" },
-        { title: "Tax Specialist", metric: "returns", description: "Tax preparation excellence" }
-      ],
-      benefits: [
-        { title: "Shared Marketing Costs", desc: "Split advertising expenses 50/50" },
-        { title: "Co-Branded Materials", desc: "Professional marketing assets" },
-        { title: "Lead Generation", desc: "Access to our client database" },
-        { title: "Tax Preparation", desc: "Accurate and timely service" },
-        { title: "Premium Placement", desc: "Priority in referral systems" },
-        { title: "Training & Support", desc: "Ongoing partner education" }
-      ],
-      statsLabels: {
-        primary: "Campaigns Successfully Funded",
-        secondary: "Filing Accuracy Rate",
-        rating: "CPA Rating",
-        response: "Average Response Time"
-      }
-    },
-    'real-estate': {
-      teamTitle: "Our Real Estate Team",
-      partnerLabel: "Agent Partners",
-      processLabel: "transactions",
-      mainMetric: "Successful Transactions",
-      successLabel: "Agent Success Stories",
-      reviewLabel: "Real Estate Agent Reviews",
-      teamMembers: [
-        { title: "Senior Real Estate Agent", metric: "transactions", description: "Years of real estate expertise" },
-        { title: "Real Estate Agent", metric: "transactions", description: "Market knowledge and expertise" }
-      ],
-      benefits: [
-        { title: "Shared Marketing Costs", desc: "Split advertising expenses 50/50" },
-        { title: "Co-Branded Materials", desc: "Professional marketing assets" },
-        { title: "Lead Generation", desc: "Access to our client database" },
-        { title: "Transaction Support", desc: "End-to-end transaction management" },
-        { title: "Premium Placement", desc: "Priority in referral systems" },
-        { title: "Training & Support", desc: "Ongoing partner education" }
-      ],
-      statsLabels: {
-        primary: "Campaigns Successfully Funded", 
-        secondary: "Transaction Success Rate",
-        rating: "Agent Rating",
-        response: "Average Response Time"
-      }
+      reviewLabel: "Real Estate Agent Reviews"
     },
     general: {
-      teamTitle: "Our Team",
-      partnerLabel: "Partners",
-      processLabel: "projects",
-      mainMetric: "Service Excellence",
-      successLabel: "Partner Success Stories",
-      reviewLabel: "Partner Reviews",
-      teamMembers: [
-        { title: "Senior Specialist", metric: "projects", description: "Years of industry expertise" },
-        { title: "Specialist", metric: "projects", description: "Professional service delivery" }
-      ],
       benefits: [
-        { title: "Shared Marketing Costs", desc: "Split advertising expenses 50/50" },
-        { title: "Co-Branded Materials", desc: "Professional marketing assets" },
-        { title: "Lead Generation", desc: "Access to our client database" },
-        { title: "Service Excellence", desc: "High-quality service delivery" },
-        { title: "Premium Placement", desc: "Priority in referral systems" },
-        { title: "Training & Support", desc: "Ongoing partner education" }
+        { title: "Partnership Benefits", desc: "Mutual business growth" },
+        { title: "Resource Sharing", desc: "Access to tools and expertise" },
+        { title: "Network Expansion", desc: "Broader client reach" },
+        { title: "Quality Service", desc: "Proven track record" },
+        { title: "Ongoing Support", desc: "Continuous partnership" }
       ],
-      statsLabels: {
-        primary: "Campaigns Successfully Funded",
-        secondary: "Service Success Rate",
-        rating: "Partner Rating", 
-        response: "Average Response Time"
-      }
+      reviewLabel: "Client Reviews"
     }
   };
 
-  const config = industryConfig[industry];
-  
-  // Mock services/packages data (like Amazon product variations)
+  const config = industryConfig[industry] || industryConfig.general;
+
+  // Mock packages for co-marketing
   const packages = [
     {
       id: "basic",
-      name: "Basic Co-Marketing Package",
-      price: 299,
-      originalPrice: 399,
-      description: "Essential marketing support for new partnerships",
-      features: ["Social media campaign", "Email marketing template", "Basic analytics"]
+      name: "Basic Co-Marketing",
+      price: 250,
+      originalPrice: 400,
+      description: "Essential co-marketing partnership to get started",
+      features: [
+        "50/50 marketing cost split",
+        "Co-branded marketing materials", 
+        "Monthly performance reports",
+        "Email support"
+      ],
+      popular: false
     },
     {
-      id: "standard",
-      name: "Standard Co-Marketing Package", 
-      price: 599,
-      originalPrice: 799,
-      description: "Complete marketing solution for serious growth",
-      features: ["Everything in Basic", "Paid advertising campaigns", "Custom landing pages", "Advanced analytics"],
+      id: "standard", 
+      name: "Standard Partnership",
+      price: 500,
+      originalPrice: 750,
+      description: "Complete partnership solution for most agents",
+      features: [
+        "Everything in Basic",
+        "Priority lead sharing",
+        "Dedicated account manager",
+        "Phone & email support",
+        "Custom marketing campaigns"
+      ],
       popular: true
     },
     {
       id: "premium",
-      name: "Premium Co-Marketing Package",
-      price: 999,
-      originalPrice: 1299,
-      description: "Full-service marketing partnership with dedicated support",
-      features: ["Everything in Standard", "Dedicated account manager", "Video marketing", "Priority support"]
+      name: "Premium Alliance",
+      price: 1000,
+      originalPrice: 1500,
+      description: "Full partnership with dedicated support",
+      features: [
+        "Everything in Standard",
+        "Exclusive territory rights",
+        "White-label solutions",
+        "24/7 priority support",
+        "Custom integrations",
+        "Quarterly strategy sessions"
+      ],
+      popular: false
     }
   ];
 
   const selectedPkg = packages.find(pkg => pkg.id === selectedPackage) || packages[1];
 
-  const [vendorReviews, setVendorReviews] = useState<Array<{ id: string; author: string; title?: string; rating: number; date: string; verified: boolean; review: string }>>([]);
-  const [vendorReviewsLoading, setVendorReviewsLoading] = useState(false);
-
+  // Load vendor reviews
   useEffect(() => {
-    const loadReviews = async () => {
+    const loadVendorReviews = async () => {
       if (!vendor?.id) {
         setVendorReviews([]);
         return;
@@ -339,15 +228,18 @@ export const VendorFunnelModal = ({
           review: r.review,
         }));
         setVendorReviews(mapped);
-      } catch (e) {
-        console.error('Failed to load vendor reviews', e);
+      } catch (error) {
+        console.error('Failed to load vendor reviews:', error);
         setVendorReviews([]);
       } finally {
         setVendorReviewsLoading(false);
       }
     };
-    loadReviews();
-  }, [vendor?.id]);
+
+    if (isOpen) {
+      loadVendorReviews();
+    }
+  }, [vendor?.id, isOpen]);
 
   const handleRequestCoMarketing = () => {
     if (onCoMarketingRequest) {
@@ -356,605 +248,512 @@ export const VendorFunnelModal = ({
     onClose();
   };
 
-  const handleSaveFunnel = (content: any) => {
-    console.log('Saving funnel content for vendor:', vendor.id, content);
-    // Here you would save the funnel content to your database
-    setIsEditingFunnel(false);
-  };
-
-  const handleCancelFunnelEdit = () => {
-    setIsEditingFunnel(false);
-  };
-
   const renderStarRating = (rating: number, size = "sm") => {
+    const sizeClasses = {
+      sm: "w-3 h-3",
+      md: "w-4 h-4", 
+      lg: "w-5 h-5"
+    };
+    
     return (
       <div className="flex items-center gap-1">
-        {[...Array(5)].map((_, i) => {
-          const isFullStar = i < Math.floor(rating);
-          const isPartialStar = i === Math.floor(rating) && rating % 1 !== 0;
-          const fillPercentage = isPartialStar ? (rating <= 4.9 ? 50 : (rating % 1) * 100) : 0;
-          
-          return (
-            <div key={i} className={`relative ${size === "lg" ? "h-5 w-5" : "h-4 w-4"}`}>
-              <Star className={`${size === "lg" ? "h-5 w-5" : "h-4 w-4"} text-gray-300 absolute`} />
-              {isFullStar && (
-                <Star className={`${size === "lg" ? "h-5 w-5" : "h-4 w-4"} fill-yellow-400 text-yellow-400 absolute`} />
-              )}
-              {isPartialStar && (
-                <div 
-                  className="overflow-hidden absolute"
-                  style={{ width: `${fillPercentage}%` }}
-                >
-                  <Star className={`${size === "lg" ? "h-5 w-5" : "h-4 w-4"} fill-yellow-400 text-yellow-400`} />
-                </div>
-              )}
-            </div>
-          );
-        })}
+        {[...Array(5)].map((_, i) => (
+          <Star
+            key={i}
+            className={`${sizeClasses[size as keyof typeof sizeClasses]} ${
+              i < rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'
+            }`}
+          />
+        ))}
       </div>
     );
   };
 
+  if (!isOpen) return null;
+
+  const isVerified = vendor.is_verified;
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl max-h-[95vh] overflow-y-auto p-0 z-[110]">
-        <DialogHeader className="sr-only">
-          <span>Vendor Partnership Details</span>
-        </DialogHeader>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-6">
-          {/* Column 1: Media & Videos */}
-          <div className="lg:col-span-4">
-            <div className="space-y-4">
-              {/* Main Media */}
-              <div className="relative h-48 rounded-lg overflow-hidden bg-gray-900 border border-gray-200">
-                {/* This could be either video or image - using vendor logo by default */}
-                <img 
-                  src={vendor.logo_url || "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=800&h=400&fit=crop"}
-                  alt={vendor.name}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute bottom-2 left-2">
-                  <Badge className="bg-black/70 text-white text-xs">
-                    {vendor.name}
-                  </Badge>
-                </div>
-                {/* Play button overlay for videos - only show if vendor has uploaded a video */}
-                {vendor.logo_url && vendor.logo_url.includes('video') && (
-                  <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity cursor-pointer">
-                    <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center">
-                      <div className="w-0 h-0 border-l-[16px] border-l-blue-600 border-t-[12px] border-t-transparent border-b-[12px] border-b-transparent ml-1"></div>
-                    </div>
-                  </div>
-                )}
-              </div>
-              
-              {/* 4 smaller media items below */}
-              <div className="grid grid-cols-2 gap-2">
-                {[
-                  { 
-                    src: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=300&h=200&fit=crop", 
-                    alt: "Agent Success Story", 
-                    type: "video",
-                    title: "Agent Success Stories"
-                  },
-                  { 
-                    src: "https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?w=300&h=200&fit=crop", 
-                    alt: "Closing Process", 
-                    type: "video",
-                    title: "Our Closing Process"
-                  },
-                  { 
-                    src: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=300&h=200&fit=crop", 
-                    alt: "Communication Process", 
-                    type: "image",
-                    title: "Communication Tools"
-                  },
-                  { 
-                    src: vendor.logo_url || "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=300&h=200&fit=crop", 
-                    alt: vendor.name, 
-                    type: "image",
-                    title: "Company Overview"
-                  }
-                ].map((media, index) => (
-                  <div key={index} className="relative h-24 rounded-lg overflow-hidden bg-gray-100 border border-gray-200 cursor-pointer hover:opacity-80 transition-opacity">
-                    <img
-                      src={media.src}
-                      alt={media.alt}
-                      className="w-full h-full object-cover"
-                    />
-                    {media.type === 'video' && (
-                      <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-                        <div className="w-6 h-6 rounded-full bg-white/80 flex items-center justify-center">
-                          <div className="w-0 h-0 border-l-[6px] border-l-blue-600 border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent ml-1"></div>
-                        </div>
-                      </div>
+      <DialogContent className="max-w-7xl w-[95vw] h-[95vh] p-0 overflow-hidden bg-white">
+        <div className="flex flex-col h-full overflow-hidden">
+          
+          {/* Hero Section */}
+          <div className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-purple-600 to-blue-800">
+            <div className="absolute inset-0 bg-black/20"></div>
+            <div className="relative z-10">
+              <div className="px-6 pt-8 pb-16">
+                <div className="max-w-6xl mx-auto">
+                  {/* Badges */}
+                  <div className="flex flex-wrap items-center gap-3 mb-6 animate-fade-in">
+                    {isVerified ? (
+                      <Badge className="bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 backdrop-blur-sm">
+                        <Verified className="w-3 h-3 mr-1" />
+                        Verified Vendor
+                      </Badge>
+                    ) : (
+                      <Badge className="bg-amber-500/20 text-amber-300 border border-amber-400/30 backdrop-blur-sm">
+                        <X className="w-3 h-3 mr-1" />
+                        Not Verified
+                      </Badge>
                     )}
-                    <div className="absolute bottom-1 left-1 right-1">
-                      <div className="bg-black/70 text-white text-[10px] px-1 py-0.5 rounded truncate">
-                        {media.title}
-                      </div>
-                    </div>
-                    {index === 3 && vendor.is_verified && (
-                      <div className="absolute top-1 right-1">
-                        <Badge className="bg-green-600 text-white text-xs">
-                          <Shield className="w-2 h-2 mr-1" />
-                          Verified
-                        </Badge>
-                      </div>
+                    {vendor.co_marketing_agents && vendor.co_marketing_agents > 5 && (
+                      <Badge className="bg-purple-500/20 text-purple-300 border border-purple-400/30 backdrop-blur-sm">
+                        <Trophy className="w-3 h-3 mr-1" />
+                        Top Partner
+                      </Badge>
                     )}
                   </div>
-                ))}
-              </div>
-              
-              {/* Representatives Section */}
-              <div className="bg-white border border-gray-200 rounded-lg p-4">
-                <h3 className="font-semibold text-gray-900 mb-3 flex items-center">
-                  <Users className="w-4 h-4 mr-2 text-blue-600" />
-                  {config.teamTitle}
-                </h3>
-                <div className="max-h-48 overflow-y-auto space-y-3 pr-2">
-                  {[
-                    { name: "Sarah Johnson", experience: "8 years", metric: "200+" },
-                    { name: "Mike Rodriguez", experience: "5 years", metric: "150+" },
-                    { name: "Jennifer Chen", experience: "10 years", metric: "300+" },
-                    { name: "David Smith", experience: "6 years", metric: "180+" },
-                    { name: "Lisa Martinez", experience: "12 years", metric: "400+" },
-                    { name: "Tom Wilson", experience: "4 years", metric: "120+" },
-                    { name: "Amanda Brown", experience: "9 years", metric: "250+" },
-                    { name: "Kevin Lee", experience: "7 years", metric: "190+" }
-                  ].map((rep, index) => {
-                    const memberType = config.teamMembers[index % 2]; // Alternate between the two team member types
-                    const emailDomain = vendor.name.toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '') + '.com';
-                    const email = `${rep.name.toLowerCase().replace(/\s+/g, '.')}@${emailDomain}`;
-                    const phone = `(555) ${(123 + index * 111).toString().slice(0,3)}-${(4567 + index * 11).toString().slice(0,4)}`;
-                    
-                    return (
-                      <div key={index} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                        <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
-                          {rep.name.split(' ').map(n => n[0]).join('')}
+
+                  {/* Main Content Grid */}
+                  <div className="grid lg:grid-cols-2 gap-12 items-center">
+                    {/* Left Content */}
+                    <div className="space-y-6 animate-fade-in">
+                      <h1 className="text-2xl lg:text-3xl font-bold leading-tight bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
+                        Partner with {vendor.name}
+                      </h1>
+                      
+                      <p className="text-base lg:text-lg text-blue-100 leading-relaxed">
+                        {vendor.description || "Join our exclusive co-marketing program and grow your business together"}
+                      </p>
+
+                      {vendor.rating && (
+                        <div className="flex items-center gap-4 p-4 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
+                          <div className="flex items-center gap-2">
+                            {renderStarRating(vendor.rating, "lg")}
+                            <span className="text-lg font-medium text-white">
+                              {vendor.rating}
+                            </span>
+                          </div>
+                          <Separator orientation="vertical" className="h-6 bg-white/30" />
+                          <span className="text-sm text-blue-200">
+                            {vendor.review_count || vendorReviews.length} reviews
+                          </span>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <p className="font-medium text-gray-900 text-sm">{rep.name}</p>
-                              <p className="text-xs text-gray-600">{memberType.title}</p>
-                            </div>
-                            <div className="text-right">
-                              <p className="text-xs text-green-600 font-medium">{rep.metric} {config.processLabel}</p>
-                              <p className="text-xs text-gray-500">{rep.experience} exp</p>
-                            </div>
-                          </div>
-                          <div className="flex gap-4 mt-1">
-                            <a href={`tel:${phone}`} className="text-xs text-blue-600 hover:underline">{phone}</a>
-                            <a href={`mailto:${email}`} className="text-xs text-blue-600 hover:underline truncate">{email}</a>
-                          </div>
+                      )}
+
+                      {/* Quick Stats */}
+                      <div className="grid grid-cols-3 gap-4">
+                        <div className="text-center p-3 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
+                          <div className="text-2xl font-bold text-white">{vendor.co_marketing_agents || 12}</div>
+                          <div className="text-xs text-blue-200">Active Partners</div>
+                        </div>
+                        <div className="text-center p-3 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
+                          <div className="text-2xl font-bold text-white">{vendor.campaigns_funded || 48}</div>
+                          <div className="text-xs text-blue-200">Campaigns Funded</div>
+                        </div>
+                        <div className="text-center p-3 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
+                          <div className="text-2xl font-bold text-white">{vendor.service_radius_miles || '50'}mi</div>
+                          <div className="text-xs text-blue-200">Service Area</div>
                         </div>
                       </div>
-                    );
-                  })}
-                </div>
-              </div>
-              
-
-            </div>
-          </div>
-
-          {/* Column 2: Partnership Details */}
-          <div className="lg:col-span-5">
-            <div className="space-y-6">
-              <div>
-                <h2 className="text-3xl font-bold text-gray-900">{vendor.name}</h2>
-                <p className="text-xl text-blue-600 font-medium mt-1">Strategic Partnership Opportunity</p>
-                <div className="flex items-center gap-2 mt-3">
-                  {getRiskBadge(riskLevel)}
-                  <Badge variant="outline" className="text-green-600 border-green-600">
-                    {vendor.nmls_id ? `NMLS #${vendor.nmls_id}` : 'NMLS Licensed'}
-                  </Badge>
-                </div>
-              </div>
-
-              <div className="prose prose-sm">
-                <p className="text-gray-700 leading-relaxed">
-                  {vendor?.description || "A trusted partner in the real estate industry, committed to providing exceptional service and building lasting relationships with our clients and partners."}
-                </p>
-              </div>
-
-              {/* Service Coverage */}
-              <div className="bg-white border border-gray-200 rounded-lg p-4">
-                <h3 className="font-semibold text-gray-900 mb-3 flex items-center">
-                  <MapPin className="w-4 h-4 mr-2 text-blue-600" />
-                  Service Coverage
-                </h3>
-                <div className="space-y-2">
-                  {vendor.location && (
-                    <div>
-                      <span className="text-sm font-medium text-gray-900">Location:</span>
-                      <span className="text-sm text-gray-600 ml-2">{vendor.location}</span>
                     </div>
-                  )}
-                  
-                  {vendor.service_states && vendor.service_states.length > 0 && (
-                    <div>
-                      <span className="text-sm font-medium text-gray-900">States:</span>
-                      <div className="flex flex-wrap gap-1 mt-1">
-                        {vendor.service_states.map((state, index) => (
-                          <Badge key={index} variant="outline" className="text-xs text-blue-600 border-blue-200">
-                            {state}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  
-                  {vendor.mls_areas && vendor.mls_areas.length > 0 && (
-                    <div>
-                      <span className="text-sm font-medium text-gray-900">MLS Areas:</span>
-                      <div className="flex flex-wrap gap-1 mt-1">
-                        {vendor.mls_areas.slice(0, 4).map((area, index) => (
-                          <Badge key={index} variant="outline" className="text-xs text-green-600 border-green-200">
-                            {area}
-                          </Badge>
-                        ))}
-                        {vendor.mls_areas.length > 4 && (
-                          <Badge variant="outline" className="text-xs text-gray-600 border-gray-200">
-                            +{vendor.mls_areas.length - 4} more
-                          </Badge>
+
+                    {/* Right Media/Logo */}
+                    <div className="relative animate-fade-in">
+                      <div className="aspect-video bg-white/10 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/20 shadow-2xl flex items-center justify-center">
+                        {vendor.logo_url ? (
+                          <img
+                            src={vendor.logo_url}
+                            alt={`${vendor.name} logo`}
+                            className="max-w-full max-h-full object-contain p-8"
+                          />
+                        ) : (
+                          <div className="text-center space-y-4">
+                            <Building className="w-24 h-24 text-white/60 mx-auto" />
+                            <p className="text-white/80 text-lg font-medium">{vendor.name}</p>
+                          </div>
                         )}
                       </div>
                     </div>
-                  )}
-                  
-                  {vendor.service_radius_miles && (
-                    <div className="flex items-center">
-                      <span className="text-sm font-medium text-gray-900">Radius:</span>
-                      <span className="text-sm text-gray-600 ml-2">{vendor.service_radius_miles} miles</span>
-                    </div>
-                  )}
-                  
-                  {(!vendor.location) && 
-                   (!vendor.service_states || vendor.service_states.length === 0) && 
-                   (!vendor.mls_areas || vendor.mls_areas.length === 0) && 
-                   !vendor.service_radius_miles && (
-                    <div className="text-center py-2">
-                      <p className="text-sm text-gray-500">Coverage details available upon contact</p>
-                    </div>
-                  )}
+                  </div>
                 </div>
-              </div>
-
-               {/* Partnership Benefits */}
-               <div className="bg-white border border-gray-200 rounded-lg p-5">
-                 <h3 className="font-bold text-gray-900 mb-4 flex items-center">
-                   <Handshake className="w-5 h-5 mr-2 text-blue-600" />
-                   Partnership Benefits
-                 </h3>
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                   {config.benefits.map((benefit, index) => (
-                     <div key={index} className="flex items-start space-x-3">
-                       <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
-                       <div>
-                         <p className="font-medium text-gray-900">{benefit.title}</p>
-                         <p className="text-sm text-gray-600">{benefit.desc}</p>
-                       </div>
-                     </div>
-                   ))}
-                 </div>
-               </div>
-
-            </div>
-          </div>
-
-          {/* Column 3: Performance Stats & Contact */}
-          <div className="lg:col-span-3">
-            <div className="bg-white border border-gray-200 rounded-lg p-6 sticky top-6 shadow-lg">
-              <div className="space-y-6">
-                <div className="text-center">
-                  <h3 className="text-lg font-bold text-gray-900">Partnership Performance</h3>
-                  <p className="text-sm text-gray-600 mt-1">Why agents choose us</p>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="space-y-3">
-                  <Button
-                    onClick={handleRequestCoMarketing}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                    size="lg"
-                  >
-                    <Handshake className="w-4 h-4 mr-2" />
-                    Request Partnership
-                  </Button>
-                  
-                  <Button
-                    variant="outline"
-                    className="w-full border-blue-600 text-blue-600 hover:bg-blue-50"
-                    size="lg"
-                  >
-                    <Calendar className="w-4 h-4 mr-2" />
-                    Schedule Consultation
-                  </Button>
-                  
-                  {vendor.website_url && (
-                    <Button
-                      variant="outline"
-                      className="w-full border-gray-300 text-gray-700 hover:bg-gray-50"
-                      size="lg"
-                      onClick={() => window.open(vendor.website_url, '_blank')}
-                    >
-                      <Building className="w-4 h-4 mr-2" />
-                      Visit Website
-                    </Button>
-                  )}
-                  
-                  <Button
-                    variant="ghost"
-                    className="w-full text-gray-600 hover:text-gray-800"
-                    size="sm"
-                  >
-                    <Users className="w-4 h-4 mr-2" />
-                    View Agent Testimonials
-                  </Button>
-                </div>
-
-                 {/* Key Stats - Only show if vendor has meaningful numbers */}
-                 {(vendor.co_marketing_agents >= 10 && vendor.campaigns_funded >= 20) && (
-                   <div className="space-y-4">
-                     <div className="text-center p-4 bg-green-50 rounded-lg border border-green-200">
-                       <div className="text-2xl font-bold text-green-700">{vendor.campaigns_funded}</div>
-                       <div className="text-sm text-green-600">{config.statsLabels.primary}</div>
-                     </div>
-                     
-                     <div className="grid grid-cols-2 gap-3">
-                       <div className="text-center p-3 bg-blue-50 rounded-lg border border-blue-200">
-                         <div className="text-xl font-bold text-blue-700">98%</div>
-                         <div className="text-xs text-blue-600">{config.statsLabels.secondary}</div>
-                       </div>
-                       <div className="text-center p-3 bg-purple-50 rounded-lg border border-purple-200">
-                         <div className="text-xl font-bold text-purple-700">4.9★</div>
-                         <div className="text-xs text-purple-600">{config.statsLabels.rating}</div>
-                       </div>
-                     </div>
-                     
-                     <div className="text-center p-3 bg-orange-50 rounded-lg border border-orange-200">
-                       <div className="text-xl font-bold text-orange-700">24hr</div>
-                       <div className="text-xs text-orange-600">{config.statsLabels.response}</div>
-                     </div>
-                   </div>
-                 )}
-
-
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Bottom Section - Tabs */}
-        <div className="border-t bg-muted/20">
-          <div className="p-6">
-            <Tabs defaultValue={vendorReviews.length > 0 ? 'reviews' : 'details'} className="w-full">
-              <TabsList className={`grid w-full ${isVendorOwner ? (vendorReviews.length > 0 ? 'grid-cols-5' : 'grid-cols-4') : (vendorReviews.length > 0 ? 'grid-cols-4' : 'grid-cols-3')}`}>
-                {vendorReviews.length > 0 && (
-                  <TabsTrigger value="reviews">Agent Reviews</TabsTrigger>
-                )}
-                <TabsTrigger value="details">Company Details</TabsTrigger>
-                <TabsTrigger value="qa">Q&A</TabsTrigger>
-                <TabsTrigger value="related">Related Services</TabsTrigger>
-                {isVendorOwner && (
-                  <TabsTrigger value="edit-funnel">Edit Funnel</TabsTrigger>
-                )}
-              </TabsList>
-              
-              <TabsContent value="details" className="mt-6 space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <h3 className="font-semibold mb-3">Partnership Benefits</h3>
-                    <ul className="space-y-2 text-sm">
-                      <li>• Split marketing costs 50/50</li>
-                      <li>• Access to established client network</li>
-                      <li>• Professional campaign management</li>
-                      <li>• Real-time analytics and reporting</li>
-                      <li>• Dedicated account support</li>
-                    </ul>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold mb-3">Service Coverage</h3>
-                    <div className="space-y-2 text-sm">
-                      <p><strong>Location:</strong> {vendor.location || "Multiple markets"}</p>
-                      <p><strong>Radius:</strong> {vendor.service_radius_miles || 50} miles</p>
-                      <p><strong>Active Partners:</strong> {vendor.co_marketing_agents}</p>
-                      <p><strong>Campaigns Completed:</strong> {vendor.campaigns_funded}</p>
-                    </div>
-                  </div>
-                </div>
-              </TabsContent>
-              
-              {vendorReviews.length > 0 && (
-                <TabsContent value="reviews" className="mt-6">
-                  <div className="space-y-6">
-                    <div className="flex items-center gap-4 mb-6">
-                      <div className="text-center">
-                        <div className="text-3xl font-bold">{vendor.rating || 0}</div>
-                        {renderStarRating(vendor.rating || 0, "lg")}
-                        <p className="text-sm text-muted-foreground">{vendorReviews.length} verified reviews</p>
-                      </div>
-                      <div className="flex-1 space-y-1">
-                        {[5, 4, 3, 2, 1].map((stars) => (
-                          <div key={stars} className="flex items-center gap-2 text-sm">
-                            <span>{stars} star</span>
-                            <div className="flex-1 bg-muted h-2 rounded-full overflow-hidden">
-                              <div 
-                                className="h-full bg-yellow-400" 
-                                style={{ width: `${stars === 5 ? 70 : stars === 4 ? 20 : 5}%` }}
-                              />
-                            </div>
-                            <span className="text-muted-foreground">{stars === 5 ? '70' : stars === 4 ? '20' : '5'}%</span>
+          {/* Main Content Section */}
+          <div className="flex-1 overflow-auto bg-gray-50/50">
+            <div className="py-12">
+              <div className="max-w-6xl mx-auto px-6">
+                <div className="grid lg:grid-cols-3 gap-8">
+                  
+                  {/* Left Column - Collapsible Questions */}
+                  <div className="lg:col-span-2">
+                    <Accordion type="single" collapsible value={openItem} onValueChange={setOpenItem} className="space-y-4">
+                      {/* Question 1 - Why Partner */}
+                      <AccordionItem value="question-1">
+                        <AccordionTrigger className="text-xl font-bold text-gray-900 hover:no-underline border-l-4 border-l-blue-500 pl-4 bg-white rounded-t-lg shadow-sm">
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold text-sm">1</div>
+                            Why Partner With {vendor.name}?
                           </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Individual Reviews */}
-                    <div className="space-y-6">
-                      {vendorReviewsLoading && (
-                        <div className="text-sm text-muted-foreground">Loading reviews...</div>
-                      )}
-                      {!vendorReviewsLoading && vendorReviews.length === 0 && (
-                        <div className="text-sm text-muted-foreground">No reviews available.</div>
-                      )}
-                      {vendorReviews.map((review) => (
-                        <div key={review.id} className="border-b pb-4">
-                          <div className="flex items-start gap-3">
-                            <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center text-sm font-medium">
-                              {review.author.split(' ').map(n => n[0]).join('')}
+                        </AccordionTrigger>
+                        <AccordionContent className="border-l-4 border-l-blue-500 pl-4 bg-white rounded-b-lg shadow-sm pt-0">
+                          <div className="p-6 pt-0">
+                            <p className="text-gray-600 leading-relaxed pt-[5px]">
+                              {vendor.description || `${vendor.name} is a trusted partner in the real estate industry, offering co-marketing opportunities that help grow your business. With proven track record and dedicated support, we help agents like you succeed.`}
+                            </p>
+                            
+                            {/* Benefits Grid */}
+                            <div className="grid md:grid-cols-2 gap-4 mt-6">
+                              {config.benefits.map((benefit, index) => (
+                                <div key={index} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                                  <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
+                                  <div>
+                                    <h4 className="font-medium text-gray-900">{benefit.title}</h4>
+                                    <p className="text-sm text-gray-600">{benefit.desc}</p>
+                                  </div>
+                                </div>
+                              ))}
                             </div>
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-1">
-                                <span className="font-medium">{review.author}</span>
-                                {review.verified && (
-                                  <Badge variant="outline" className="text-xs">
-                                    ✓ Verified Purchase
-                                  </Badge>
-                                )}
+                          </div>
+                        </AccordionContent>
+                      </AccordionItem>
+
+                      {/* Question 2 - How It Works */}
+                      <AccordionItem value="question-2">
+                        <AccordionTrigger className="text-xl font-bold text-gray-900 hover:no-underline border-l-4 border-l-green-500 pl-4 bg-white rounded-t-lg shadow-sm">
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-green-600 font-bold text-sm">2</div>
+                            How Does Co-Marketing Work?
+                          </div>
+                        </AccordionTrigger>
+                        <AccordionContent className="border-l-4 border-l-green-500 pl-4 bg-white rounded-b-lg shadow-sm pt-0">
+                          <div className="p-6 pt-0">
+                            <div className="space-y-6 pt-[5px]">
+                              <p className="text-gray-600 leading-relaxed">
+                                Our co-marketing program is designed to be mutually beneficial, helping both parties grow their business through shared marketing efforts and lead generation.
+                              </p>
+                              
+                              <div className="grid md:grid-cols-3 gap-4">
+                                <div className="text-center p-4 bg-blue-50 rounded-lg">
+                                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                    <Handshake className="w-6 h-6 text-blue-600" />
+                                  </div>
+                                  <h4 className="font-medium text-gray-900 mb-2">1. Partnership Setup</h4>
+                                  <p className="text-sm text-gray-600">We establish partnership terms and co-marketing agreements</p>
+                                </div>
+                                
+                                <div className="text-center p-4 bg-green-50 rounded-lg">
+                                  <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                    <Target className="w-6 h-6 text-green-600" />
+                                  </div>
+                                  <h4 className="font-medium text-gray-900 mb-2">2. Campaign Launch</h4>
+                                  <p className="text-sm text-gray-600">Joint marketing campaigns with shared costs and branding</p>
+                                </div>
+                                
+                                <div className="text-center p-4 bg-purple-50 rounded-lg">
+                                  <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                    <TrendingUp className="w-6 h-6 text-purple-600" />
+                                  </div>
+                                  <h4 className="font-medium text-gray-900 mb-2">3. Mutual Growth</h4>
+                                  <p className="text-sm text-gray-600">Track results and optimize for continued success</p>
+                                </div>
                               </div>
-                              <div className="flex items-center gap-2 mb-2">
-                                {renderStarRating(review.rating)}
-                                <span className="text-sm text-muted-foreground">{review.date}</span>
+                            </div>
+                          </div>
+                        </AccordionContent>
+                      </AccordionItem>
+
+                      {/* Question 3 - Pricing & Packages */}
+                      <AccordionItem value="question-3">
+                        <AccordionTrigger className="text-xl font-bold text-gray-900 hover:no-underline border-l-4 border-l-purple-500 pl-4 bg-white rounded-t-lg shadow-sm">
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 font-bold text-sm">3</div>
+                            Partnership Packages & Investment
+                          </div>
+                        </AccordionTrigger>
+                        <AccordionContent className="border-l-4 border-l-purple-500 pl-4 bg-white rounded-b-lg shadow-sm pt-0">
+                          <div className="p-6 pt-0">
+                            <p className="text-gray-600 leading-relaxed pt-[5px] mb-6">
+                              Choose the partnership level that best fits your business goals and marketing budget.
+                            </p>
+                            
+                            <div className="grid md:grid-cols-3 gap-6">
+                              {packages.map((pkg) => (
+                                <div key={pkg.id} className={`relative p-6 border-2 rounded-xl transition-all ${
+                                  pkg.popular 
+                                    ? 'border-blue-500 bg-blue-50' 
+                                    : 'border-gray-200 bg-white hover:border-gray-300'
+                                }`}>
+                                  {pkg.popular && (
+                                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                                      <Badge className="bg-blue-500 text-white">Most Popular</Badge>
+                                    </div>
+                                  )}
+                                  
+                                  <div className="text-center mb-4">
+                                    <h3 className="font-bold text-lg text-gray-900">{pkg.name}</h3>
+                                    <p className="text-sm text-gray-600 mt-1">{pkg.description}</p>
+                                  </div>
+                                  
+                                  <div className="text-center mb-6">
+                                    <div className="flex items-center justify-center gap-2">
+                                      <span className="text-3xl font-bold text-gray-900">${pkg.price}</span>
+                                      <span className="text-lg text-gray-400 line-through">${pkg.originalPrice}</span>
+                                    </div>
+                                    <p className="text-sm text-gray-600 mt-1">per month</p>
+                                  </div>
+                                  
+                                  <ul className="space-y-3 mb-6">
+                                    {pkg.features.map((feature, idx) => (
+                                      <li key={idx} className="flex items-start gap-2">
+                                        <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                                        <span className="text-sm text-gray-600">{feature}</span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                  
+                                  <Button 
+                                    className={`w-full ${pkg.popular ? 'bg-blue-600 hover:bg-blue-700' : ''}`}
+                                    variant={pkg.popular ? 'default' : 'outline'}
+                                    onClick={() => setSelectedPackage(pkg.id)}
+                                  >
+                                    {selectedPackage === pkg.id ? 'Selected' : 'Choose Plan'}
+                                  </Button>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </AccordionContent>
+                      </AccordionItem>
+
+                      {/* Question 4 - Reviews */}
+                      <AccordionItem value="question-4">
+                        <AccordionTrigger className="text-xl font-bold text-gray-900 hover:no-underline border-l-4 border-l-orange-500 pl-4 bg-white rounded-t-lg shadow-sm">
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center text-orange-600 font-bold text-sm">4</div>
+                            {config.reviewLabel}
+                          </div>
+                        </AccordionTrigger>
+                        <AccordionContent className="border-l-4 border-l-orange-500 pl-4 bg-white rounded-b-lg shadow-sm pt-0">
+                          <div className="p-6 pt-0">
+                            {vendorReviewsLoading ? (
+                              <div className="text-center py-8">
+                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                                <p className="text-gray-500 mt-2">Loading reviews...</p>
                               </div>
-                              <p className="text-sm mb-1">{review.review}</p>
-                              {review.title && (
-                                <p className="text-xs text-muted-foreground">Service: {review.title}</p>
+                            ) : vendorReviews.length > 0 ? (
+                              <div className="space-y-4 pt-[5px]">
+                                {vendorReviews.slice(0, 3).map((review) => (
+                                  <div key={review.id} className="p-4 bg-gray-50 rounded-lg">
+                                    <div className="flex items-start justify-between mb-2">
+                                      <div>
+                                        <div className="flex items-center gap-2 mb-1">
+                                          {renderStarRating(review.rating)}
+                                          <span className="text-sm font-medium text-gray-900">{review.author}</span>
+                                          {review.verified && <Badge variant="outline" className="text-xs">Verified</Badge>}
+                                        </div>
+                                        <p className="text-xs text-gray-500">{review.date}</p>
+                                      </div>
+                                    </div>
+                                    <p className="text-gray-700 text-sm leading-relaxed">{review.review}</p>
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <div className="text-center py-8">
+                                <Star className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                                <p className="text-gray-500">No reviews available yet</p>
+                                <p className="text-sm text-gray-400 mt-1">Be the first to partner and leave a review!</p>
+                              </div>
+                            )}
+                          </div>
+                        </AccordionContent>
+                      </AccordionItem>
+                    </Accordion>
+                  </div>
+
+                  {/* Right Column - Action Panel */}
+                  <div className="lg:col-span-1">
+                    <div className="sticky top-8">
+                      <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-blue-50">
+                        <CardContent className="p-6">
+                          <div className="text-center mb-6">
+                            <h3 className="text-xl font-bold text-gray-900 mb-2">Ready to Partner?</h3>
+                            <p className="text-gray-600 text-sm">Join {vendor.co_marketing_agents || 12} other successful partners</p>
+                          </div>
+
+                          {/* Package Selection */}
+                          <div className="space-y-4 mb-6">
+                            <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                              <div className="flex justify-between items-center mb-2">
+                                <span className="font-medium text-gray-900">Selected Plan:</span>
+                                <Badge>{selectedPkg.name}</Badge>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-2xl font-bold text-blue-600">${selectedPkg.price}</span>
+                                <span className="text-sm text-gray-500 line-through">${selectedPkg.originalPrice}</span>
+                                <span className="text-sm text-gray-600">/ month</span>
+                              </div>
+                            </div>
+
+                            {/* Quantity Selector */}
+                            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                              <span className="text-sm font-medium text-gray-700">Markets/Territories:</span>
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="h-8 w-8 p-0"
+                                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                                >
+                                  <Minus className="w-3 h-3" />
+                                </Button>
+                                <span className="w-8 text-center font-medium">{quantity}</span>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="h-8 w-8 p-0"
+                                  onClick={() => setQuantity(quantity + 1)}
+                                >
+                                  <Plus className="w-3 h-3" />
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Action Buttons */}
+                          <div className="space-y-3">
+                            <Button 
+                              onClick={handleRequestCoMarketing}
+                              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-3"
+                              size="lg"
+                            >
+                              <Handshake className="w-4 h-4 mr-2" />
+                              Request Partnership
+                            </Button>
+                            
+                            {vendor.website_url && (
+                              <Button 
+                                variant="outline" 
+                                className="w-full"
+                                onClick={() => window.open(vendor.website_url, '_blank')}
+                              >
+                                <Building className="w-4 h-4 mr-2" />
+                                Visit Website
+                              </Button>
+                            )}
+                          </div>
+
+                          {/* Trust Indicators */}
+                          <div className="mt-6 pt-6 border-t border-gray-200">
+                            <div className="space-y-3">
+                              {isVerified && (
+                                <div className="flex items-center gap-2 text-sm">
+                                  <Shield className="w-4 h-4 text-green-500" />
+                                  <span className="text-gray-600">Verified Vendor</span>
+                                </div>
+                              )}
+                              {vendor.service_states && vendor.service_states.length > 0 && (
+                                <div className="flex items-center gap-2 text-sm">
+                                  <MapPin className="w-4 h-4 text-blue-500" />
+                                  <span className="text-gray-600">Licensed in {vendor.service_states.length} states</span>
+                                </div>
+                              )}
+                              {vendor.co_marketing_agents && vendor.co_marketing_agents > 0 && (
+                                <div className="flex items-center gap-2 text-sm">
+                                  <Users className="w-4 h-4 text-purple-500" />
+                                  <span className="text-gray-600">{vendor.co_marketing_agents} active partners</span>
+                                </div>
                               )}
                             </div>
                           </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </TabsContent>
-              )}
-              
-              <TabsContent value="qa" className="mt-6">
-                <p className="text-muted-foreground">Questions & Answers section coming soon...</p>
-              </TabsContent>
-              
-              <TabsContent value="related" className="mt-6">
-                <div className="space-y-6">
-                  {/* More Products Section */}
-                  <div>
-                    <h3 className="font-semibold mb-4">More Products from {vendor.name}</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      {[1, 2, 3].map((i) => (
-                        <Card key={i} className="p-4">
-                          <div className="aspect-square bg-muted rounded mb-3">
-                            <div className="w-full h-full flex items-center justify-center">
-                              <Building className="w-12 h-12 text-muted-foreground" />
-                            </div>
-                          </div>
-                          <h4 className="font-medium mb-2">Digital Marketing Package {i}</h4>
-                          <p className="text-sm text-muted-foreground mb-2">Complete online presence solution</p>
-                          <div className="flex items-center justify-between">
-                            <span className="font-bold">${299 + (i * 200)}</span>
-                            <Button size="sm">View Details</Button>
-                          </div>
-                        </Card>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Videos Section */}
-                  <div>
-                    <h3 className="font-semibold mb-4">Product Videos</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {[1, 2, 3, 4].map((i) => (
-                        <Card key={i} className="p-4">
-                          <div className="aspect-video bg-muted rounded mb-3 relative cursor-pointer hover:bg-muted/80 transition-colors">
-                            <div className="w-full h-full flex items-center justify-center">
-                              <div className="w-16 h-16 bg-black/20 rounded-full flex items-center justify-center">
-                                <div className="w-0 h-0 border-l-[16px] border-l-white border-t-[10px] border-t-transparent border-b-[10px] border-b-transparent ml-1"></div>
-                              </div>
-                            </div>
-                            <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
-                              {i}:3{i}
-                            </div>
-                          </div>
-                          <h4 className="font-medium mb-1">How Co-Marketing Works - Part {i}</h4>
-                          <p className="text-sm text-muted-foreground">Learn about our partnership process</p>
-                        </Card>
-                      ))}
+                        </CardContent>
+                      </Card>
                     </div>
                   </div>
                 </div>
-              </TabsContent>
-
-              {/* Edit Funnel Tab - Only visible to vendor owners */}
-              {isVendorOwner && (
-                <TabsContent value="edit-funnel" className="mt-6">
-                  {isEditingFunnel ? (
-                    <VendorFunnelEditor
-                      vendorId={vendor.id}
-                      onSave={handleSaveFunnel}
-                      onCancel={handleCancelFunnelEdit}
-                    />
-                  ) : (
-                    <div className="space-y-6">
-                      <div className="text-center p-8 border-2 border-dashed border-gray-300 rounded-lg">
-                        <div className="space-y-4">
-                          <div className="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
-                            <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                            </svg>
-                          </div>
-                          <div>
-                            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                              Customize Your Funnel Page
-                            </h3>
-                            <p className="text-gray-600 mb-4 max-w-md mx-auto">
-                              Create a compelling funnel page that showcases your services, builds trust, and converts visitors into partners.
-                            </p>
-                          </div>
-                          <div className="space-y-3">
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
-                              <div className="flex items-center justify-center p-3 bg-gray-50 rounded-lg">
-                                <CheckCircle className="w-4 h-4 mr-2 text-green-600" />
-                                Hero Section
-                              </div>
-                              <div className="flex items-center justify-center p-3 bg-gray-50 rounded-lg">
-                                <CheckCircle className="w-4 h-4 mr-2 text-green-600" />
-                                Benefits & Features
-                              </div>
-                              <div className="flex items-center justify-center p-3 bg-gray-50 rounded-lg">
-                                <CheckCircle className="w-4 h-4 mr-2 text-green-600" />
-                                Media Gallery
-                              </div>
-                              <div className="flex items-center justify-center p-3 bg-gray-50 rounded-lg">
-                                <CheckCircle className="w-4 h-4 mr-2 text-green-600" />
-                                Pricing Packages
-                              </div>
-                              <div className="flex items-center justify-center p-3 bg-gray-50 rounded-lg">
-                                <CheckCircle className="w-4 h-4 mr-2 text-green-600" />
-                                Social Proof
-                              </div>
-                              <div className="flex items-center justify-center p-3 bg-gray-50 rounded-lg">
-                                <CheckCircle className="w-4 h-4 mr-2 text-green-600" />
-                                Call to Action
-                              </div>
-                            </div>
-                            <Button 
-                              onClick={() => setIsEditingFunnel(true)}
-                              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-2"
-                            >
-                              Start Editing Funnel
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </TabsContent>
-              )}
-            </Tabs>
+              </div>
+            </div>
           </div>
         </div>
+
+        {/* Vendor Dashboard Tabs (only for vendor owners) */}
+        {isVendorOwner && (
+          <Tabs defaultValue="overview" className="border-t bg-white">
+            <TabsList className="w-full justify-start rounded-none border-b bg-transparent p-0">
+              <TabsTrigger 
+                value="overview" 
+                className="rounded-none border-b-2 border-transparent data-[state=active]:border-blue-500 data-[state=active]:bg-transparent"
+              >
+                Overview
+              </TabsTrigger>
+              <TabsTrigger 
+                value="edit"
+                className="rounded-none border-b-2 border-transparent data-[state=active]:border-blue-500 data-[state=active]:bg-transparent"
+              >
+                Edit Funnel
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="overview" className="p-6">
+              <div className="grid md:grid-cols-3 gap-6">
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-blue-100 rounded-lg">
+                        <Users className="w-6 h-6 text-blue-600" />
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600">Active Partners</p>
+                        <p className="text-2xl font-bold">{vendor.co_marketing_agents || 0}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-green-100 rounded-lg">
+                        <TrendingUp className="w-6 h-6 text-green-600" />
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600">Campaigns Funded</p>
+                        <p className="text-2xl font-bold">{vendor.campaigns_funded || 0}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-yellow-100 rounded-lg">
+                        <Star className="w-6 h-6 text-yellow-600" />
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600">Average Rating</p>
+                        <p className="text-2xl font-bold">{vendor.rating || 'N/A'}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="edit" className="p-6">
+              {isEditingFunnel ? (
+                <VendorFunnelEditor
+                  vendor={vendor}
+                  onSave={() => setIsEditingFunnel(false)}
+                  onCancel={() => setIsEditingFunnel(false)}
+                />
+              ) : (
+                <div className="text-center py-12">
+                  <Building className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">Customize Your Partnership Funnel</h3>
+                  <p className="text-gray-600 mb-6">Edit your partnership offerings, pricing, and marketing content</p>
+                  <Button onClick={() => setIsEditingFunnel(true)}>
+                    Start Editing
+                  </Button>
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
+        )}
       </DialogContent>
     </Dialog>
   );
