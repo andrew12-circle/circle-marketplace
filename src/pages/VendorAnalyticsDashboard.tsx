@@ -27,7 +27,7 @@ import { useNavigate } from "react-router-dom";
 import { VendorProfileEditor } from "@/components/marketplace/VendorProfileEditor";
 import { VendorFunnelEditor } from "@/components/marketplace/VendorFunnelEditor";
 import { VendorAnalytics } from "@/components/marketplace/VendorAnalytics";
-import { VendorCardPreview } from "@/components/marketplace/VendorCardPreview";
+import { PreviewVendorCard } from "@/components/marketplace/PreviewVendorCard";
 import { CoMarketingManager } from "@/components/vendor/CoMarketingManager";
 
 interface VendorData {
@@ -719,7 +719,25 @@ export const VendorAnalyticsDashboard = () => {
               </CardHeader>
               <CardContent>
                 <div className="max-w-md mx-auto">
-                  <VendorCardPreview vendorData={vendorData} />
+                  <PreviewVendorCard
+                    vendor={{
+                      id: vendorData.id,
+                      name: vendorData.name,
+                      description: vendorData.description,
+                      rating: vendorData.rating,
+                      review_count: vendorData.review_count,
+                      location: vendorData.location,
+                      phone: vendorData.phone,
+                      contact_email: vendorData.contact_email,
+                      website_url: vendorData.website_url,
+                      logo_url: vendorData.logo_url,
+                      is_verified: vendorData.is_verified,
+                      co_marketing_agents: vendorData.co_marketing_agents,
+                      campaigns_funded: vendorData.campaigns_funded,
+                      vendor_type: vendorData.vendor_type,
+                      specialties: []
+                    }}
+                  />
                 </div>
               </CardContent>
             </Card>

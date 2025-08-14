@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "@/hooks/useLocation";
 import { InviteVendorModal } from "./InviteVendorModal";
 import { VendorFunnelModal } from "./VendorFunnelModal";
+import { CoPayVendorCard } from "./CoPayVendorCard";
 
 interface Vendor {
   id: string;
@@ -750,7 +751,7 @@ export const VendorSelectionModal = ({
           setFunnelVendor(null);
         }}
         vendor={funnelVendor}
-        onRequestCoMarketing={handleCoMarketingRequest}
+        onCoMarketingRequest={handleCoMarketingRequest}
       />
     )}
     </>

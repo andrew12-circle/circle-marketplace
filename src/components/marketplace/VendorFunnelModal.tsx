@@ -43,21 +43,21 @@ interface VendorFunnelModalProps {
   vendor: {
     id: string;
     name: string;
-    description: string;
+    description?: string;
     logo_url?: string;
     website_url?: string;
     location?: string;
-    rating: number;
-    review_count: number;
-    is_verified: boolean;
-    co_marketing_agents: number;
-    campaigns_funded: number;
+    rating?: number;
+    review_count?: number;
+    is_verified?: boolean;
+    co_marketing_agents?: number;
+    campaigns_funded?: number;
     service_states?: string[];
     mls_areas?: string[];
     service_radius_miles?: number;
     nmls_id?: string;
   };
-  onRequestCoMarketing: (vendorId: string, packageType: string, duration: number) => void;
+  onCoMarketingRequest?: (vendorId: string) => void;
   isVendorView?: boolean; // New prop to indicate if vendor is viewing their own modal
   currentUserId?: string; // To check if current user is the vendor
 }
@@ -67,7 +67,7 @@ export const VendorFunnelModal = ({
   onClose, 
   industry = 'general',
   vendor, 
-  onRequestCoMarketing,
+  onCoMarketingRequest,
   isVendorView = false,
   currentUserId
 }: VendorFunnelModalProps) => {
@@ -319,7 +319,9 @@ export const VendorFunnelModal = ({
   }, [vendor?.id]);
 
   const handleRequestCoMarketing = () => {
-    onRequestCoMarketing(vendor.id, selectedPackage, quantity);
+    if (onCoMarketingRequest) {
+      onCoMarketingRequest(vendor.id);
+    }
     onClose();
   };
 
@@ -740,8 +742,8 @@ export const VendorFunnelModal = ({
                   <div className="space-y-6">
                     <div className="flex items-center gap-4 mb-6">
                       <div className="text-center">
-                        <div className="text-3xl font-bold">{vendor.rating}</div>
-                        {renderStarRating(vendor.rating, "lg")}
+                        <div className="text-3xl font-bold">{vendor.rating || 0}</div>
+                        {renderStarRating(vendor.rating || 0, "lg")}
                         <p className="text-sm text-muted-foreground">{vendorReviews.length} verified reviews</p>
                       </div>
                       <div className="flex-1 space-y-1">

@@ -316,7 +316,7 @@ export const EnhancedVendorCard = ({ vendor, onConnect, onViewProfile }: Enhance
         isOpen={isFunnelModalOpen}
         onClose={() => setIsFunnelModalOpen(false)}
         vendor={vendor}
-        onRequestCoMarketing={onConnect || (() => {})}
+        onCoMarketingRequest={onConnect || (() => {})}
       />
     </>
   );

@@ -7,7 +7,9 @@ export type ActivityType =
   | 'service_purchase' 
   | 'funnel_view' 
   | 'contact_request' 
-  | 'co_pay_request';
+  | 'co_pay_request'
+  | 'vendor_profile_view'
+  | 'vendor_contact';
 
 interface ActivityData {
   [key: string]: any;

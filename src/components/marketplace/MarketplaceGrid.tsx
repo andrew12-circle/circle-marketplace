@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { OptimizedServiceCard } from "./OptimizedServiceCard";
-import { OptimizedVendorCard } from "./OptimizedVendorCard";
+import { MarketplaceVendorCard } from "./MarketplaceVendorCard";
 import { MarketplaceFilters } from "./MarketplaceFilters";
 import { CampaignServicesHeader } from "./CampaignServicesHeader";
 import { CircleProBanner } from "./CircleProBanner";
@@ -647,7 +647,7 @@ const handleViewServiceDetails = useCallback((serviceId: string) => {
     ) : (
       <div className="mobile-grid gap-4 sm:gap-6">
         {filteredVendors.map(vendor => (
-          <OptimizedVendorCard key={vendor.id} vendor={vendor} onConnect={handleConnectVendor} onViewProfile={handleViewVendorProfile} />
+          <MarketplaceVendorCard key={vendor.id} vendor={vendor} onConnect={handleConnectVendor} onViewProfile={handleViewVendorProfile} />
         ))}
       </div>
     )
