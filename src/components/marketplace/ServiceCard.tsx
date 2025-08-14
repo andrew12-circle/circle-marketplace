@@ -524,30 +524,6 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false, b
               )}
             </div>
 
-            {/* Single discount badge for both Pro and Non-Pro views */}
-            {calculateDiscountPercentage() && (
-              <div className="flex justify-end mb-3">
-                <Badge className="bg-destructive text-destructive-foreground text-xs hover:bg-green-600 hover:text-white transition-colors">
-                  {calculateDiscountPercentage()}% OFF
-                </Badge>
-              </div>
-            )}
-
-            {/* ROI and Duration - Fixed height */}
-            <div className="h-4 mb-4">
-              {(service.estimated_roi || service.duration) && (
-                <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  {service.estimated_roi && (
-                     <span>
-                       Est. ROI: {service.is_verified ? `${service.estimated_roi}x` : 'TBD'}
-                     </span>
-                  )}
-                  {service.duration && (
-                    <span>{service.duration}</span>
-                  )}
-                </div>
-              )}
-            </div>
 
             {/* Action Buttons - Fixed at bottom */}
             <div className="flex gap-2 mt-auto">
