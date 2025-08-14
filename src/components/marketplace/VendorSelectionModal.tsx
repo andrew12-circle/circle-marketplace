@@ -544,7 +544,7 @@ export const VendorSelectionModal = ({
                                       size="sm"
                                       variant="outline"
                                       onClick={(e) => handleLearnMore(company, e)}
-                                      className="text-xs h-7"
+                                      className="text-xs h-7 flex-1"
                                       disabled={isSelectingVendor}
                                     >
                                       Learn More
@@ -555,12 +555,12 @@ export const VendorSelectionModal = ({
                                         e.stopPropagation();
                                         handleVendorSelect(company);
                                       }}
-                                      className="text-xs h-7"
+                                      className="text-xs h-7 flex-1"
                                       disabled={isSelectingVendor}
                                     >
                                       Request Copay
                                     </Button>
-                                    <div className="bg-muted/50 rounded-md p-1 border border-border hover:bg-muted transition-colors">
+                                    <div className="bg-muted/50 rounded-md p-1 border border-border hover:bg-muted transition-colors flex-1">
                                       <Button
                                         size="sm"
                                         variant="ghost"
@@ -568,7 +568,7 @@ export const VendorSelectionModal = ({
                                           e.stopPropagation();
                                           setExpandedCompanyId(expandedCompanyId === company.id ? null : company.id);
                                         }}
-                                        className="text-xs h-7"
+                                        className="text-xs h-7 w-full"
                                       >
                                         {expandedCompanyId === company.id ? 'Hide Loan Officers' : `View Loan Officers (${children.length})`}
                                       </Button>
