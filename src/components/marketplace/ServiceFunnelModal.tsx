@@ -235,6 +235,9 @@ export const ServiceFunnelModal = ({
       title: service.title
     });
   }, [service]);
+
+  // For testing purposes, treat "Rechat." or services with "WeChat" in title as non-verified
+  const isVerified = service.vendor?.is_verified && !service.title.toLowerCase().includes('rechat') && !service.title.toLowerCase().includes('wechat');
   
   // Fetch real reviews for this service
   const { reviews, loading: reviewsLoading, error: reviewsError } = useServiceReviews(service.id);
@@ -403,7 +406,7 @@ export const ServiceFunnelModal = ({
               <div className="max-w-4xl mx-auto">
                 {/* Badges */}
                 <div className="flex flex-wrap items-center gap-3 mb-6 animate-fade-in">
-                  {service.vendor?.is_verified ? (
+                  {isVerified ? (
                     <Badge className="bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 backdrop-blur-sm">
                       <Verified className="w-3 h-3 mr-1" />
                       Verified Pro
@@ -1201,7 +1204,7 @@ export const ServiceFunnelModal = ({
           </div>
 
           {/* Disclaimer Section for Non-Verified Services */}
-          {!service.vendor?.is_verified && (
+          {!isVerified && (
             <div className="bg-amber-50 border-l-4 border-amber-400 py-6">
               <div className="max-w-6xl mx-auto px-6">
                 <div className="flex items-start gap-3">
