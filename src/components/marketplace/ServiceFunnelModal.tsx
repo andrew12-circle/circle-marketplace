@@ -235,9 +235,11 @@ export const ServiceFunnelModal = ({
   useEffect(() => {
     console.log('ServiceFunnelModal - Verification check:', {
       vendor: service.vendor?.name,
+      vendor_id: service.vendor?.id,
       is_verified: service.vendor?.is_verified,
       isVerified: isVerified,
-      title: service.title
+      title: service.title,
+      full_vendor_object: service.vendor
     });
   }, [service, isVerified]);
   
