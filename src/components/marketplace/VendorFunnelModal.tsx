@@ -283,6 +283,23 @@ export const VendorFunnelModal = ({
       }
       setVendorReviewsLoading(true);
       try {
+        // First get services for this vendor
+        const { data: servicesData, error: servicesError } = await supabase
+          .from('services')
+          .select('id, title')
+          .eq('vendor_id', vendor.id);
+
+        if (servicesError) throw servicesError;
+        
+        if (!servicesData || servicesData.length === 0) {
+          setVendorReviews([]);
+          setVendorReviewsLoading(false);
+          return;
+        }
+
+        const serviceIds = servicesData.map(s => s.id);
+
+        // Then get reviews for those services
         const { data, error } = await supabase
           .from('service_reviews')
           .select(`
@@ -291,17 +308,29 @@ export const VendorFunnelModal = ({
             review,
             created_at,
             verified,
-            profiles:profiles!service_reviews_user_id_fkey (display_name, avatar_url),
-            services:services!service_reviews_service_id_fkey (vendor_id, title)
+            service_id,
+            user_id
           `)
-          .eq('services.vendor_id', vendor.id)
+          .in('service_id', serviceIds)
           .order('created_at', { ascending: false })
           .limit(10);
+
         if (error) throw error;
+
+        // Get user profiles separately
+        const userIds = [...new Set(data?.map(r => r.user_id) || [])];
+        const { data: profilesData } = await supabase
+          .from('profiles')
+          .select('user_id, display_name, avatar_url')
+          .in('user_id', userIds);
+
+        const profilesMap = new Map(profilesData?.map(p => [p.user_id, p]) || []);
+        const servicesMap = new Map(servicesData.map(s => [s.id, s]));
+
         const mapped = (data || []).map((r: any) => ({
           id: r.id,
-          author: r.profiles?.display_name || 'Anonymous',
-          title: r.services?.title,
+          author: profilesMap.get(r.user_id)?.display_name || 'Anonymous',
+          title: servicesMap.get(r.service_id)?.title || 'Service',
           rating: r.rating,
           date: new Date(r.created_at).toLocaleDateString(),
           verified: !!r.verified,
