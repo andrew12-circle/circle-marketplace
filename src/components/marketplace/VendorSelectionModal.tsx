@@ -558,7 +558,7 @@ export const VendorSelectionModal = ({
                                       className="text-xs h-7"
                                       disabled={isSelectingVendor}
                                     >
-                                      Select Company
+                                      Request Copay
                                     </Button>
                                     <Button
                                       size="sm"
