@@ -36,7 +36,8 @@ import {
   Verified,
   Crown,
   X,
-  Play
+  Play,
+  Shield
 } from "lucide-react";
 import { getRiskBadge, getComplianceAlert, determineServiceRisk } from "./RESPAComplianceSystem";
 import { useCart } from "@/contexts/CartContext";
@@ -1220,6 +1221,32 @@ export const ServiceFunnelModal = ({
                       We do not endorse or have independently verified the pricing, service details, or company capabilities listed. 
                       All information and recommendations are derived from our analysis and should be independently verified. 
                       Circle Marketplace bears no responsibility for the accuracy of vendor claims or service delivery quality.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Verified Service Disclaimer */}
+          {isVerified && (
+            <div className="border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/50 rounded-lg p-4 mt-6">
+              <div className="flex items-start space-x-3">
+                <Shield className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+                <div>
+                  <div className="flex items-center space-x-2 mb-2">
+                    <h4 className="text-sm font-semibold text-blue-900 dark:text-blue-100">
+                      Verified Pricing Disclaimer
+                    </h4>
+                  </div>
+                  <div className="text-xs text-blue-800 dark:text-blue-200 space-y-2">
+                    <p>
+                      This service has verified pricing through our verification process. However, pricing is subject to change 
+                      and vendors may not have updated their information since changes occurred.
+                    </p>
+                    <p>
+                      Circle Marketplace cannot guarantee service quality, satisfaction, or discounts as we are a marketplace 
+                      platform that represents other companies to make shopping easier. Please verify all details directly with the vendor.
                     </p>
                   </div>
                 </div>
