@@ -42,11 +42,13 @@ export const MarketplaceVendorCard = memo<MarketplaceVendorCardProps>(
     };
 
     const handleViewFunnel = () => {
+      console.log('Opening funnel for vendor:', vendor.name, vendor.id);
       trackActivity(vendor.id, 'vendor_profile_view', {
         vendor_name: vendor.name,
         source: 'marketplace_card'
       });
       setIsFunnelModalOpen(true);
+      console.log('Modal state set to true');
     };
 
     const handleConnect = (vendorId: string) => {

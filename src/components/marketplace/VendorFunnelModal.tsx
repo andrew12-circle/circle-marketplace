@@ -71,6 +71,8 @@ export const VendorFunnelModal = ({
   isVendorView = false,
   currentUserId
 }: VendorFunnelModalProps) => {
+  console.log('VendorFunnelModal render:', { isOpen, vendor: vendor.name, vendorId: vendor.id });
+  
   const [selectedPackage, setSelectedPackage] = useState("standard");
   const [quantity, setQuantity] = useState(1);
   const [isEditingFunnel, setIsEditingFunnel] = useState(false);
