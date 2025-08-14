@@ -231,18 +231,6 @@ export const ServiceFunnelModal = ({
   // Use real verification status from database
   const isVerified = service.vendor?.is_verified;
   
-  // Debug logging to check verification status
-  useEffect(() => {
-    console.log('ServiceFunnelModal - Verification check:', {
-      vendor: service.vendor?.name,
-      vendor_id: service.vendor?.id,
-      is_verified: service.vendor?.is_verified,
-      isVerified: isVerified,
-      title: service.title,
-      full_vendor_object: service.vendor
-    });
-  }, [service, isVerified]);
-  
   // Fetch real reviews for this service
   const { reviews, loading: reviewsLoading, error: reviewsError } = useServiceReviews(service.id);
 
@@ -458,10 +446,10 @@ export const ServiceFunnelModal = ({
 
                     {/* Quick Stats */}
                     <div className={`grid ${showSupportStats ? 'grid-cols-3' : 'grid-cols-2'} gap-4`}>
-                      <div className="text-center p-3 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
-                        <div className="text-2xl font-bold">600%</div>
-                        <div className="text-xs text-blue-200">Avg ROI</div>
-                      </div>
+                       <div className="text-center p-3 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
+                         <div className="text-2xl font-bold">{isVerified ? '600%' : 'TBD'}</div>
+                         <div className="text-xs text-blue-200">Avg ROI</div>
+                       </div>
                       <div className="text-center p-3 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
                         <div className="text-2xl font-bold">30</div>
                         <div className="text-xs text-blue-200">Days Setup</div>
@@ -626,9 +614,12 @@ export const ServiceFunnelModal = ({
                               const sections = Array.isArray((fc as any)?.faqSections) ? (fc as any).faqSections : [];
                               const byId = sections.find((s: any) => s?.id === 'question-2');
                               const byTitle = sections.find((s: any) => typeof s?.title === 'string' && s.title.toLowerCase().includes('roi'));
-                              const roi = byId?.content || byTitle?.content || (typeof fc?.estimatedRoi === 'number'
-                                ? `Based on similar deployments, average ROI is ~${fc.estimatedRoi}% within ${fc?.duration || '30 days'}.`
-                                : '600% average return on investment with proper implementation');
+                              const roi = byId?.content || byTitle?.content || 
+                                (isVerified && typeof fc?.estimatedRoi === 'number'
+                                  ? `Based on similar deployments, average ROI is ~${fc.estimatedRoi}% within ${fc?.duration || '30 days'}.`
+                                  : isVerified 
+                                    ? '600% average return on investment with proper implementation'
+                                    : 'ROI data is not available for non-verified vendors. Contact the vendor directly for performance information.');
                               return <SafeHTML html={roi} />;
                             })()}
                           </div>

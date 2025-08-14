@@ -538,7 +538,9 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false, b
               {(service.estimated_roi || service.duration) && (
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
                   {service.estimated_roi && (
-                    <span>Est. ROI: {service.estimated_roi}x</span>
+                    <span>
+                      Est. ROI: {service.vendor?.is_verified ? `${service.estimated_roi}x` : 'TBD'}
+                    </span>
                   )}
                   {service.duration && (
                     <span>{service.duration}</span>

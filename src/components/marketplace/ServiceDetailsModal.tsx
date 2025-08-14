@@ -228,7 +228,7 @@ export const ServiceDetailsModal = ({ service, isOpen, onClose }: ServiceDetails
                 )}
                 <div className="flex items-center gap-1">
                   <TrendingUp className="w-4 h-4" />
-                  <span>{service.funnel_content?.estimatedRoi || 3}x ROI</span>
+                  <span>{service.vendor?.is_verified ? `${service.funnel_content?.estimatedRoi || 3}x ROI` : 'ROI: TBD'}</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <Clock className="w-4 h-4" />
@@ -288,7 +288,7 @@ export const ServiceDetailsModal = ({ service, isOpen, onClose }: ServiceDetails
                   <Card>
                     <CardContent className="p-4 text-center">
                       <TrendingUp className="w-8 h-8 text-circle-primary mx-auto mb-2" />
-                      <h4 className="font-semibold mb-1">{service.estimated_roi}x ROI Guaranteed</h4>
+                      <h4 className="font-semibold mb-1">{service.vendor?.is_verified ? `${service.estimated_roi}x ROI Guaranteed` : 'ROI: TBD'}</h4>
                       <p className="text-sm text-muted-foreground">See results within {service.duration}</p>
                     </CardContent>
                   </Card>
