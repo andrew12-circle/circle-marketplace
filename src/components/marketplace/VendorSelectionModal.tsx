@@ -244,8 +244,8 @@ export const VendorSelectionModal = ({
 
             return {
               ...vendor,
-              co_marketing_agents: statsData?.co_marketing_agents || 0,
-              campaigns_funded: statsData?.campaigns_funded || 0
+              co_marketing_agents: (statsData as any)?.co_marketing_agents || 0,
+              campaigns_funded: (statsData as any)?.campaigns_funded || 0
             };
           } catch (err) {
             console.error('Error processing vendor stats:', err);
@@ -642,8 +642,8 @@ export const VendorSelectionModal = ({
                                             )}
                                           </div>
                                           <div className="flex gap-2 mt-2">
-                                            <Button size="sm" variant="outline" onClick={(e) => handleLearnMore(officer, e)} className="text-xs h-7">Learn</Button>
-                                            <Button size="sm" onClick={(e) => { e.stopPropagation(); handleVendorSelect(officer); }} className="text-xs h-7">Select Officer</Button>
+                                            <Button size="sm" variant="outline" onClick={(e) => handleLearnMore(officer, e)} className="text-xs h-7 flex-1">Learn</Button>
+                                            <Button size="sm" onClick={(e) => { e.stopPropagation(); handleVendorSelect(officer); }} className="text-xs h-7 flex-1">Select Officer</Button>
                                           </div>
                                         </div>
                                       </div>
