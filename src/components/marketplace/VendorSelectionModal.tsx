@@ -198,6 +198,12 @@ export const VendorSelectionModal = ({
     console.log('VendorSelectionModal: Starting to load vendors...');
     setIsLoading(true);
     try {
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError || !user) {
+        console.error('Authentication error:', userError);
+        return;
+      }
+
       // Query vendors with calculated real-time stats
       const { data, error } = await supabase
         .from('vendors')
@@ -226,40 +232,55 @@ export const VendorSelectionModal = ({
         throw error;
       }
 
-      // Calculate real-time stats for each vendor
-      const vendorsWithStats = await Promise.all(
+      // Filter vendors based on agent profile and calculate real-time stats
+      const vendorsWithStatsAndFiltering = await Promise.all(
         (data || []).map(async (vendor) => {
           try {
+            // Check if agent matches vendor criteria
+            const { data: matchResult, error: matchError } = await supabase
+              .rpc('check_agent_vendor_match', { 
+                p_agent_id: user.id, 
+                p_vendor_id: vendor.id 
+              });
+            
+            if (matchError) {
+              console.error('Error checking agent match for vendor:', vendor.id, matchError);
+              // If match check fails, include vendor by default
+            }
+
+            // Calculate real-time stats
             const { data: statsData, error: statsError } = await supabase
               .rpc('calculate_vendor_stats', { vendor_uuid: vendor.id });
             
             if (statsError) {
               console.error('Error calculating stats for vendor:', vendor.id, statsError);
-              return {
-                ...vendor,
-                co_marketing_agents: 0,
-                campaigns_funded: 0
-              };
             }
 
             return {
               ...vendor,
               co_marketing_agents: (statsData as any)?.co_marketing_agents || 0,
-              campaigns_funded: (statsData as any)?.campaigns_funded || 0
+              campaigns_funded: (statsData as any)?.campaigns_funded || 0,
+              matches_agent_profile: matchResult !== false // Include if match check failed
             };
           } catch (err) {
-            console.error('Error processing vendor stats:', err);
+            console.error('Error processing vendor:', err);
             return {
               ...vendor,
               co_marketing_agents: 0,
-              campaigns_funded: 0
+              campaigns_funded: 0,
+              matches_agent_profile: true // Include by default on error
             };
           }
         })
       );
 
-      setVendors(vendorsWithStats);
-      console.log('VendorSelectionModal: Vendors set successfully with live stats, count:', vendorsWithStats.length);
+      // Filter out vendors that don't match agent criteria
+      const filteredVendors = vendorsWithStatsAndFiltering.filter(vendor => 
+        vendor.matches_agent_profile
+      );
+
+      setVendors(filteredVendors);
+      console.log('VendorSelectionModal: Vendors set successfully with live stats and filtering, count:', filteredVendors.length);
     } catch (error) {
       console.error('VendorSelectionModal: Error loading vendors:', error);
       toast({

@@ -4893,6 +4893,78 @@ export type Database = {
           },
         ]
       }
+      vendor_agent_criteria: {
+        Row: {
+          allowed_agent_tiers: string[] | null
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          max_annual_volume: number | null
+          max_years_experience: number | null
+          min_annual_volume: number | null
+          min_average_commission: number | null
+          min_conversion_rate: number | null
+          min_transactions_closed: number | null
+          min_years_experience: number | null
+          requires_nmls: boolean | null
+          target_markets: string[] | null
+          target_states: string[] | null
+          updated_at: string | null
+          vendor_id: string
+        }
+        Insert: {
+          allowed_agent_tiers?: string[] | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          max_annual_volume?: number | null
+          max_years_experience?: number | null
+          min_annual_volume?: number | null
+          min_average_commission?: number | null
+          min_conversion_rate?: number | null
+          min_transactions_closed?: number | null
+          min_years_experience?: number | null
+          requires_nmls?: boolean | null
+          target_markets?: string[] | null
+          target_states?: string[] | null
+          updated_at?: string | null
+          vendor_id: string
+        }
+        Update: {
+          allowed_agent_tiers?: string[] | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          max_annual_volume?: number | null
+          max_years_experience?: number | null
+          min_annual_volume?: number | null
+          min_average_commission?: number | null
+          min_conversion_rate?: number | null
+          min_transactions_closed?: number | null
+          min_years_experience?: number | null
+          requires_nmls?: boolean | null
+          target_markets?: string[] | null
+          target_states?: string[] | null
+          updated_at?: string | null
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_agent_criteria_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: true
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_agent_criteria_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: true
+            referencedRelation: "vendors_with_local_reps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vendor_analytics_cache: {
         Row: {
           avg_rating: number
@@ -5894,6 +5966,10 @@ export type Database = {
       }
       check_admin_operation_rate_limit_strict: {
         Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      check_agent_vendor_match: {
+        Args: { p_agent_id: string; p_vendor_id: string }
         Returns: boolean
       }
       check_and_update_lockout: {
