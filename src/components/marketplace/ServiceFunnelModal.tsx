@@ -231,6 +231,16 @@ export const ServiceFunnelModal = ({
   // Use real verification status from database
   const isVerified = service.vendor?.is_verified;
   
+  // Debug logging to check verification status
+  useEffect(() => {
+    console.log('ServiceFunnelModal - Verification check:', {
+      vendor: service.vendor?.name,
+      is_verified: service.vendor?.is_verified,
+      isVerified: isVerified,
+      title: service.title
+    });
+  }, [service, isVerified]);
+  
   // Fetch real reviews for this service
   const { reviews, loading: reviewsLoading, error: reviewsError } = useServiceReviews(service.id);
 
