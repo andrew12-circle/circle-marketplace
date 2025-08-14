@@ -226,6 +226,15 @@ export const ServiceFunnelModal = ({
   const { trackBooking, trackPurchase, trackOutboundClick, trackEvent, trackWebsiteClick } = useProviderTracking(service.id, isOpen);
   const [openItem, setOpenItem] = useState<string | undefined>(undefined);
   const pricingRef = useRef<HTMLDivElement | null>(null);
+
+  // Debug logging
+  useEffect(() => {
+    console.log('ServiceFunnelModal - Service data:', {
+      vendor: service.vendor,
+      is_verified: service.vendor?.is_verified,
+      title: service.title
+    });
+  }, [service]);
   
   // Fetch real reviews for this service
   const { reviews, loading: reviewsLoading, error: reviewsError } = useServiceReviews(service.id);
