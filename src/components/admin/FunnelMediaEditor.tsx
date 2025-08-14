@@ -6,11 +6,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Trash2, Image, Video, ExternalLink } from "lucide-react";
+import { Plus, Trash2, Image, Video, ExternalLink, FileText } from "lucide-react";
 
 interface MediaItem {
   url: string;
-  type: 'image' | 'video';
+  type: 'image' | 'video' | 'document';
   title?: string;
   description?: string;
 }
@@ -82,6 +82,18 @@ export const FunnelMediaEditor = ({ media, onChange }: FunnelMediaEditorProps) =
           controls={false}
         />
       );
+    } else if (item.type === 'document') {
+      return (
+        <div className="w-full h-32 bg-gray-100 flex flex-col items-center justify-center rounded border-2 border-dashed border-gray-300">
+          <FileText className="w-8 h-8 text-blue-500 mb-2" />
+          <span className="text-sm text-gray-600 font-medium">
+            {item.title || 'Document'}
+          </span>
+          <span className="text-xs text-gray-500">
+            {item.url.split('.').pop()?.toUpperCase() || 'PDF/DOC'}
+          </span>
+        </div>
+      );
     }
     return null;
   };
@@ -110,8 +122,10 @@ export const FunnelMediaEditor = ({ media, onChange }: FunnelMediaEditorProps) =
                       <div className="w-full h-32 bg-gray-100 flex items-center justify-center">
                         {item.type === 'image' ? (
                           <Image className="w-8 h-8 text-gray-400" />
-                        ) : (
+                        ) : item.type === 'video' ? (
                           <Video className="w-8 h-8 text-gray-400" />
+                        ) : (
+                          <FileText className="w-8 h-8 text-gray-400" />
                         )}
                       </div>
                     )}
@@ -125,7 +139,7 @@ export const FunnelMediaEditor = ({ media, onChange }: FunnelMediaEditorProps) =
                       <Label>Media Type</Label>
                       <Select
                         value={item.type}
-                        onValueChange={(value: 'image' | 'video') => 
+                        onValueChange={(value: 'image' | 'video' | 'document') => 
                           updateMediaItem(index, 'type', value)
                         }
                       >
@@ -135,6 +149,7 @@ export const FunnelMediaEditor = ({ media, onChange }: FunnelMediaEditorProps) =
                         <SelectContent>
                           <SelectItem value="image">Image</SelectItem>
                           <SelectItem value="video">Video</SelectItem>
+                          <SelectItem value="document">Document</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -154,7 +169,11 @@ export const FunnelMediaEditor = ({ media, onChange }: FunnelMediaEditorProps) =
                       <Input
                         value={item.url}
                         onChange={(e) => updateMediaItem(index, 'url', e.target.value)}
-                        placeholder="https://example.com/media.jpg or YouTube URL"
+                        placeholder={
+                          item.type === 'document' 
+                            ? "https://example.com/document.pdf or Google Drive link"
+                            : "https://example.com/media.jpg or YouTube URL"
+                        }
                       />
                       {item.url && (
                         <Button
@@ -196,7 +215,7 @@ export const FunnelMediaEditor = ({ media, onChange }: FunnelMediaEditorProps) =
               <div className="flex flex-col items-center gap-2">
                 <Image className="w-12 h-12 text-gray-300" />
                 <p>No media added yet. Click "Add Media" to get started.</p>
-                <p className="text-sm">Supports images, videos, and YouTube links.</p>
+                <p className="text-sm">Supports images, videos, documents, and YouTube links.</p>
               </div>
             </div>
           )}
@@ -216,6 +235,10 @@ export const FunnelMediaEditor = ({ media, onChange }: FunnelMediaEditorProps) =
           <div className="flex items-center gap-2">
             <Badge variant="outline">Videos</Badge>
             <span className="text-sm text-gray-600">YouTube links, MP4, WebM - Keep under 2 minutes for best engagement</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Badge variant="outline">Documents</Badge>
+            <span className="text-sm text-gray-600">PDFs, Word docs, Google Drive links - Useful for guides, contracts, and resources</span>
           </div>
           <div className="flex items-center gap-2">
             <Badge variant="outline">YouTube</Badge>
