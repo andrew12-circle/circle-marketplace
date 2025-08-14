@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Search, MapPin, Star, Users, TrendingUp, Building, Plus, CheckCircle } from "lucide-react";
 import confirmationImage from "@/assets/confirmation-image.png";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "@/hooks/useLocation";
@@ -52,7 +52,6 @@ export const VendorSelectionModal = ({
   service 
 }: VendorSelectionModalProps) => {
   const [vendors, setVendors] = useState<Vendor[]>([]);
-  const [filteredVendors, setFilteredVendors] = useState<Vendor[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSelectingVendor, setIsSelectingVendor] = useState(false);
@@ -66,56 +65,131 @@ export const VendorSelectionModal = ({
   const [expandedCompanyId, setExpandedCompanyId] = useState<string | null>(null);
   const [pledgedPointsMap, setPledgedPointsMap] = useState<Record<string, number>>({});
 
+  // Memoized filtered vendors to avoid re-computation
+  const filteredVendors = useMemo(() => {
+    console.log('VendorSelectionModal: Filtering vendors...', { 
+      totalVendors: vendors.length, 
+      searchQuery, 
+      userLocation: location?.state 
+    });
+
+    let filtered = [...vendors]; // Create a copy to avoid mutating original array
+
+    // Apply location filter if available - but be more lenient
+    if (location?.state && vendors.length > 0) {
+      const locationFiltered = filtered.filter(vendor => {
+        // Check service_states array
+        if (vendor.service_states?.includes(location.state)) return true;
+        // Check location string
+        if (vendor.location?.toLowerCase().includes(location.state.toLowerCase())) return true;
+        // Check for state abbreviations (e.g., "TN" for Tennessee)
+        const stateAbbrev = getStateAbbreviation(location.state);
+        if (stateAbbrev && vendor.service_states?.includes(stateAbbrev)) return true;
+        return false;
+      });
+      
+      // Only apply location filter if we have matches, otherwise show all
+      if (locationFiltered.length > 0) {
+        filtered = locationFiltered;
+        console.log('VendorSelectionModal: Applied location filter, found matches:', locationFiltered.length);
+      } else {
+        console.log('VendorSelectionModal: No location matches, showing all vendors');
+      }
+    }
+
+    // Apply search filter
+    if (searchQuery.trim()) {
+      const searchLower = searchQuery.toLowerCase();
+      filtered = filtered.filter(vendor =>
+        vendor.name.toLowerCase().includes(searchLower) ||
+        vendor.description?.toLowerCase().includes(searchLower) ||
+        vendor.location?.toLowerCase().includes(searchLower) ||
+        vendor.service_states?.some(state => 
+          state.toLowerCase().includes(searchLower)
+        )
+      );
+    }
+
+    console.log('VendorSelectionModal: Filtering complete', { 
+      filteredCount: filtered.length,
+      originalCount: vendors.length 
+    });
+
+    return filtered;
+  }, [vendors, searchQuery, location?.state]);
+
+  // Helper function to get state abbreviation
+  const getStateAbbreviation = (stateName: string) => {
+    const stateMap: { [key: string]: string } = {
+      'Alabama': 'AL', 'Alaska': 'AK', 'Arizona': 'AZ', 'Arkansas': 'AR', 'California': 'CA',
+      'Colorado': 'CO', 'Connecticut': 'CT', 'Delaware': 'DE', 'Florida': 'FL', 'Georgia': 'GA',
+      'Hawaii': 'HI', 'Idaho': 'ID', 'Illinois': 'IL', 'Indiana': 'IN', 'Iowa': 'IA',
+      'Kansas': 'KS', 'Kentucky': 'KY', 'Louisiana': 'LA', 'Maine': 'ME', 'Maryland': 'MD',
+      'Massachusetts': 'MA', 'Michigan': 'MI', 'Minnesota': 'MN', 'Mississippi': 'MS', 'Missouri': 'MO',
+      'Montana': 'MT', 'Nebraska': 'NE', 'Nevada': 'NV', 'New Hampshire': 'NH', 'New Jersey': 'NJ',
+      'New Mexico': 'NM', 'New York': 'NY', 'North Carolina': 'NC', 'North Dakota': 'ND', 'Ohio': 'OH',
+      'Oklahoma': 'OK', 'Oregon': 'OR', 'Pennsylvania': 'PA', 'Rhode Island': 'RI', 'South Carolina': 'SC',
+      'South Dakota': 'SD', 'Tennessee': 'TN', 'Texas': 'TX', 'Utah': 'UT', 'Vermont': 'VT',
+      'Virginia': 'VA', 'Washington': 'WA', 'West Virginia': 'WV', 'Wisconsin': 'WI', 'Wyoming': 'WY'
+    };
+    return stateMap[stateName];
+  };
+
   useEffect(() => {
     if (isOpen) {
       console.log('VendorSelectionModal: Modal opened, loading vendors...');
-      setVendors([]); // Reset vendors to ensure clean state
-      setFilteredVendors([]);
-      loadVendors();
-    } else {
-      console.log('VendorSelectionModal: Modal closed, resetting state...');
+      // Reset state immediately when modal opens
+      setVendors([]);
       setSearchQuery("");
       setSelectedVendor(null);
       setShowConfirmation(false);
       setShowFunnelModal(false);
       setFunnelVendor(null);
+      setExpandedCompanyId(null);
+      setPledgedPointsMap({});
+      
+      loadVendors();
+    } else {
+      console.log('VendorSelectionModal: Modal closed, resetting state...');
     }
   }, [isOpen]);
 
+  // Load pledged points when vendors change
   useEffect(() => {
-    filterVendors();
-  }, [searchQuery, vendors]);
-
-  // Load pledged points for the current agent across loaded vendors
-  useEffect(() => {
-    const fetchPledges = async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user || vendors.length === 0) return;
-        const vendorIds = Array.from(new Set(vendors.map(v => v.id)));
-        const { data, error } = await supabase
-          .from('point_allocations')
-          .select('vendor_id, remaining_points, start_date, end_date, status')
-          .eq('agent_id', user.id)
-          .in('vendor_id', vendorIds)
-          .eq('status', 'active');
-        if (error) throw error;
-        const today = new Date();
-        const map: Record<string, number> = {};
-        (data || []).forEach((row: any) => {
-          const startOk = !row.start_date || new Date(row.start_date) <= today;
-          const endOk = !row.end_date || new Date(row.end_date) >= today;
-          if (startOk && endOk) {
-            map[row.vendor_id] = (map[row.vendor_id] || 0) + (row.remaining_points || 0);
-          }
-        });
-        setPledgedPointsMap(map);
-      } catch (e) {
-        console.error('VendorSelectionModal: Error loading pledged points', e);
-      }
-    };
-    fetchPledges();
+    if (vendors.length > 0) {
+      fetchPledges();
+    }
   }, [vendors]);
+
+  const fetchPledges = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user || vendors.length === 0) return;
+      
+      const vendorIds = Array.from(new Set(vendors.map(v => v.id)));
+      const { data, error } = await supabase
+        .from('point_allocations')
+        .select('vendor_id, remaining_points, start_date, end_date, status')
+        .eq('agent_id', user.id)
+        .in('vendor_id', vendorIds)
+        .eq('status', 'active');
+        
+      if (error) throw error;
+      
+      const today = new Date();
+      const map: Record<string, number> = {};
+      (data || []).forEach((row: any) => {
+        const startOk = !row.start_date || new Date(row.start_date) <= today;
+        const endOk = !row.end_date || new Date(row.end_date) >= today;
+        if (startOk && endOk) {
+          map[row.vendor_id] = (map[row.vendor_id] || 0) + (row.remaining_points || 0);
+        }
+      });
+      setPledgedPointsMap(map);
+    } catch (e) {
+      console.error('VendorSelectionModal: Error loading pledged points', e);
+    }
+  };
 
   const loadVendors = async () => {
     console.log('VendorSelectionModal: Starting to load vendors...');
@@ -125,9 +199,9 @@ export const VendorSelectionModal = ({
         .from('vendors')
         .select('id, name, description, logo_url, location, rating, review_count, is_verified, co_marketing_agents, campaigns_funded, service_states, vendor_type, parent_vendor_id')
         .eq('is_active', true)
-        .order('sort_order', { ascending: true }) // Higher sort_order = higher priority
+        .order('sort_order', { ascending: true })
         .order('rating', { ascending: false })
-        .limit(20); // Limit initial results for faster loading
+        .limit(20);
 
       console.log('VendorSelectionModal: Supabase response:', { data, error, dataLength: data?.length });
 
@@ -135,8 +209,10 @@ export const VendorSelectionModal = ({
         console.error('VendorSelectionModal: Supabase error details:', error);
         throw error;
       }
-      setVendors(data || []);
-      console.log('VendorSelectionModal: Vendors set successfully, count:', (data || []).length);
+
+      const vendorsData = data || [];
+      setVendors(vendorsData);
+      console.log('VendorSelectionModal: Vendors set successfully, count:', vendorsData.length);
     } catch (error) {
       console.error('VendorSelectionModal: Error loading vendors:', error);
       toast({
@@ -150,55 +226,12 @@ export const VendorSelectionModal = ({
     }
   };
 
-  const filterVendors = () => {
-    let filtered = vendors;
-    console.log('VendorSelectionModal: Filtering vendors...', { 
-      totalVendors: vendors.length, 
-      searchQuery, 
-      userLocation: location?.state 
-    });
-
-    // Filter by location if available - but don't filter out ALL vendors
-    if (location?.state) {
-      const locationFiltered = filtered.filter(vendor => 
-        vendor.service_states?.includes(location.state) ||
-        vendor.location?.toLowerCase().includes(location.state.toLowerCase())
-      );
-      // Only apply location filter if we still have vendors, otherwise show all
-      if (locationFiltered.length > 0) {
-        filtered = locationFiltered;
-      } else {
-        console.log('VendorSelectionModal: No vendors found for location, showing all vendors');
-      }
-    }
-
-    // Apply search filter
-    if (searchQuery.trim()) {
-      filtered = filtered.filter(vendor =>
-        vendor.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        vendor.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        vendor.location?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        vendor.service_states?.some(state => 
-          state.toLowerCase().includes(searchQuery.toLowerCase())
-        )
-      );
-    }
-
-    console.log('VendorSelectionModal: Filtering complete', { 
-      filteredCount: filtered.length,
-      originalCount: vendors.length 
-    });
-    setFilteredVendors(filtered);
-  };
-
   const handleVendorSelect = async (vendor: Vendor) => {
-    // Prevent multiple clicks while processing
     if (isSelectingVendor) return;
     
     try {
       setIsSelectingVendor(true);
       
-      // Get current user
       const { data: { user }, error: userError } = await supabase.auth.getUser();
       if (userError || !user) {
         console.error('Authentication error:', userError);
@@ -210,18 +243,15 @@ export const VendorSelectionModal = ({
         return;
       }
       
-      // Immediately show success state for better UX
       setSelectedVendor(vendor);
       setShowConfirmation(true);
       onVendorSelect(vendor);
       
-      // Show success feedback immediately
       toast({
         title: "Request Sent!",
         description: `Co-pay request sent to ${vendor.name}`,
       });
 
-      // Create co-pay request in database in background
       const coPayRequestPromise = supabase
         .from('co_pay_requests')
         .insert({
@@ -235,13 +265,11 @@ export const VendorSelectionModal = ({
         .select('id')
         .single();
 
-      // Handle database operation in background
       try {
         const { data: coPayRequest, error } = await coPayRequestPromise;
 
         if (error) {
           console.error('Error creating co-pay request:', error);
-          // Revert UI state if database operation fails
           setShowConfirmation(false);
           setSelectedVendor(null);
           toast({
@@ -252,7 +280,6 @@ export const VendorSelectionModal = ({
           return;
         }
         
-        // Add to cart context with the actual request data
         const cartItem = {
           id: coPayRequest.id,
           type: 'co-pay-request',
@@ -269,14 +296,12 @@ export const VendorSelectionModal = ({
           createdAt: new Date().toISOString()
         };
 
-        // Dispatch custom event to add to cart
         const addToCartEvent = new CustomEvent('addCoPayToCart', { 
           detail: cartItem 
         });
         window.dispatchEvent(addToCartEvent);
       } catch (backgroundError) {
         console.error('Background database error:', backgroundError);
-        // Don't disrupt user experience, just log the error
       }
     } catch (error) {
       console.error('Error in vendor selection:', error);
@@ -291,7 +316,7 @@ export const VendorSelectionModal = ({
   };
 
   const handleLearnMore = (vendor: Vendor, e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent triggering vendor selection
+    e.stopPropagation();
     setFunnelVendor(vendor);
     setShowFunnelModal(true);
   };
@@ -307,14 +332,12 @@ export const VendorSelectionModal = ({
   const handleSendAnotherRequest = () => {
     setShowConfirmation(false);
     setSelectedVendor(null);
-    // Keep modal open for another selection
   };
 
   const handleFinish = () => {
     setShowConfirmation(false);
     setSelectedVendor(null);
     onClose();
-    // Open cart to show pending vendor approval items
     const cartEvent = new CustomEvent('openCart');
     window.dispatchEvent(cartEvent);
   };
@@ -386,7 +409,6 @@ export const VendorSelectionModal = ({
           </div>
         ) : (
           <div className="space-y-4">
-            {/* Search */}
             <div className="flex gap-2">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
@@ -399,9 +421,7 @@ export const VendorSelectionModal = ({
               </div>
             </div>
 
-           {/* Vendor Grid */}
-          <div className="max-h-[60vh] overflow-y-auto relative">
-            {/* Loading Overlay for Vendor Selection */}
+           <div className="max-h-[60vh] overflow-y-auto relative">
             {isSelectingVendor && (
               <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-10 rounded-lg">
                 <div className="flex flex-col items-center gap-3">
@@ -435,7 +455,12 @@ export const VendorSelectionModal = ({
             ) : filteredVendors.length === 0 ? (
               <div className="text-center py-8">
                 <div className="text-sm text-muted-foreground">
-                  {searchQuery ? "No vendors found matching your search." : "No vendors available."}
+                  {vendors.length === 0 
+                    ? "Loading vendors..." 
+                    : searchQuery 
+                      ? "No vendors found matching your search." 
+                      : "No vendors available."
+                  }
                 </div>
               </div>
             ) : (
@@ -655,7 +680,6 @@ export const VendorSelectionModal = ({
         onClose={() => {
           setShowFunnelModal(false);
           setFunnelVendor(null);
-          // Don't close the parent modal automatically
         }}
         vendor={funnelVendor}
         onRequestCoMarketing={handleCoMarketingRequest}
