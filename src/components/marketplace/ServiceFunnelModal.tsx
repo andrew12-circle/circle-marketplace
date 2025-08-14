@@ -394,10 +394,15 @@ export const ServiceFunnelModal = ({
               <div className="max-w-4xl mx-auto">
                 {/* Badges */}
                 <div className="flex flex-wrap items-center gap-3 mb-6 animate-fade-in">
-                  {service.vendor?.is_verified && (
+                  {service.vendor?.is_verified ? (
                     <Badge className="bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 backdrop-blur-sm">
                       <Verified className="w-3 h-3 mr-1" />
                       Verified Pro
+                    </Badge>
+                  ) : (
+                    <Badge className="bg-amber-500/20 text-amber-300 border border-amber-400/30 backdrop-blur-sm">
+                      <X className="w-3 h-3 mr-1" />
+                      Not Verified
                     </Badge>
                   )}
                   <Badge className="bg-amber-500/20 text-amber-300 border border-amber-400/30 backdrop-blur-sm">
