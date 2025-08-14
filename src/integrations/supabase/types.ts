@@ -984,13 +984,6 @@ export type Database = {
             foreignKeyName: "fk_co_pay_requests_vendor"
             columns: ["vendor_id"]
             isOneToOne: false
-            referencedRelation: "vendors_with_live_stats"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_co_pay_requests_vendor"
-            columns: ["vendor_id"]
-            isOneToOne: false
             referencedRelation: "vendors_with_local_reps"
             referencedColumns: ["id"]
           },
@@ -4313,13 +4306,6 @@ export type Database = {
             foreignKeyName: "services_vendor_id_fkey"
             columns: ["vendor_id"]
             isOneToOne: false
-            referencedRelation: "vendors_with_live_stats"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "services_vendor_id_fkey"
-            columns: ["vendor_id"]
-            isOneToOne: false
             referencedRelation: "vendors_with_local_reps"
             referencedColumns: ["id"]
           },
@@ -4902,13 +4888,6 @@ export type Database = {
             foreignKeyName: "vendor_agent_activities_vendor_id_fkey"
             columns: ["vendor_id"]
             isOneToOne: false
-            referencedRelation: "vendors_with_live_stats"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "vendor_agent_activities_vendor_id_fkey"
-            columns: ["vendor_id"]
-            isOneToOne: false
             referencedRelation: "vendors_with_local_reps"
             referencedColumns: ["id"]
           },
@@ -5092,13 +5071,6 @@ export type Database = {
             foreignKeyName: "vendor_commissions_vendor_id_fkey"
             columns: ["vendor_id"]
             isOneToOne: false
-            referencedRelation: "vendors_with_live_stats"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "vendor_commissions_vendor_id_fkey"
-            columns: ["vendor_id"]
-            isOneToOne: false
             referencedRelation: "vendors_with_local_reps"
             referencedColumns: ["id"]
           },
@@ -5252,13 +5224,6 @@ export type Database = {
             foreignKeyName: "vendor_qa_vendor_id_fkey"
             columns: ["vendor_id"]
             isOneToOne: false
-            referencedRelation: "vendors_with_live_stats"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "vendor_qa_vendor_id_fkey"
-            columns: ["vendor_id"]
-            isOneToOne: false
             referencedRelation: "vendors_with_local_reps"
             referencedColumns: ["id"]
           },
@@ -5298,13 +5263,6 @@ export type Database = {
             columns: ["vendor_id"]
             isOneToOne: false
             referencedRelation: "vendors"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "vendor_user_associations_vendor_id_fkey"
-            columns: ["vendor_id"]
-            isOneToOne: false
-            referencedRelation: "vendors_with_live_stats"
             referencedColumns: ["id"]
           },
           {
@@ -5488,13 +5446,6 @@ export type Database = {
             columns: ["parent_vendor_id"]
             isOneToOne: false
             referencedRelation: "vendors"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "vendors_parent_vendor_id_fkey"
-            columns: ["parent_vendor_id"]
-            isOneToOne: false
-            referencedRelation: "vendors_with_live_stats"
             referencedColumns: ["id"]
           },
           {
@@ -5741,209 +5692,6 @@ export type Database = {
             foreignKeyName: "services_vendor_id_fkey"
             columns: ["vendor_id"]
             isOneToOne: false
-            referencedRelation: "vendors_with_live_stats"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "services_vendor_id_fkey"
-            columns: ["vendor_id"]
-            isOneToOne: false
-            referencedRelation: "vendors_with_local_reps"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      vendors_with_live_stats: {
-        Row: {
-          ad_budget_max: number | null
-          ad_budget_min: number | null
-          agreement_documents: Json | null
-          agreement_notes: string | null
-          agreement_renewal_date: string | null
-          agreement_start_date: string | null
-          brand_colors: Json | null
-          budget_currency: string | null
-          campaigns_funded: number | null
-          circle_commission_percentage: number | null
-          co_marketing_agents: number | null
-          commission_notes: string | null
-          commission_type: string | null
-          contact_email: string | null
-          created_at: string | null
-          custom_cta_text: string | null
-          description: string | null
-          funnel_enabled: boolean | null
-          funnel_template_id: string | null
-          hero_banner_url: string | null
-          id: string | null
-          individual_email: string | null
-          individual_license_number: string | null
-          individual_name: string | null
-          individual_phone: string | null
-          individual_title: string | null
-          is_active: boolean | null
-          is_respa_regulated: boolean | null
-          is_verified: boolean | null
-          latitude: number | null
-          license_states: string[] | null
-          live_campaigns_funded: number | null
-          live_co_marketing_agents: number | null
-          location: string | null
-          logo_url: string | null
-          longitude: number | null
-          minimum_commission_amount: number | null
-          mls_areas: string[] | null
-          name: string | null
-          nmls_id: string | null
-          parent_vendor_id: string | null
-          payment_terms: string | null
-          phone: string | null
-          rating: number | null
-          respa_risk_level: string | null
-          review_count: number | null
-          service_radius_miles: number | null
-          service_states: string[] | null
-          service_zip_codes: string[] | null
-          sort_order: number | null
-          support_hours: string | null
-          updated_at: string | null
-          value_statement: string | null
-          vendor_type: string | null
-          website_url: string | null
-        }
-        Insert: {
-          ad_budget_max?: number | null
-          ad_budget_min?: number | null
-          agreement_documents?: Json | null
-          agreement_notes?: string | null
-          agreement_renewal_date?: string | null
-          agreement_start_date?: string | null
-          brand_colors?: Json | null
-          budget_currency?: string | null
-          campaigns_funded?: number | null
-          circle_commission_percentage?: number | null
-          co_marketing_agents?: number | null
-          commission_notes?: string | null
-          commission_type?: string | null
-          contact_email?: string | null
-          created_at?: string | null
-          custom_cta_text?: string | null
-          description?: string | null
-          funnel_enabled?: boolean | null
-          funnel_template_id?: string | null
-          hero_banner_url?: string | null
-          id?: string | null
-          individual_email?: string | null
-          individual_license_number?: string | null
-          individual_name?: string | null
-          individual_phone?: string | null
-          individual_title?: string | null
-          is_active?: boolean | null
-          is_respa_regulated?: boolean | null
-          is_verified?: boolean | null
-          latitude?: number | null
-          license_states?: string[] | null
-          live_campaigns_funded?: never
-          live_co_marketing_agents?: never
-          location?: string | null
-          logo_url?: string | null
-          longitude?: number | null
-          minimum_commission_amount?: number | null
-          mls_areas?: string[] | null
-          name?: string | null
-          nmls_id?: string | null
-          parent_vendor_id?: string | null
-          payment_terms?: string | null
-          phone?: string | null
-          rating?: number | null
-          respa_risk_level?: string | null
-          review_count?: number | null
-          service_radius_miles?: number | null
-          service_states?: string[] | null
-          service_zip_codes?: string[] | null
-          sort_order?: number | null
-          support_hours?: string | null
-          updated_at?: string | null
-          value_statement?: string | null
-          vendor_type?: string | null
-          website_url?: string | null
-        }
-        Update: {
-          ad_budget_max?: number | null
-          ad_budget_min?: number | null
-          agreement_documents?: Json | null
-          agreement_notes?: string | null
-          agreement_renewal_date?: string | null
-          agreement_start_date?: string | null
-          brand_colors?: Json | null
-          budget_currency?: string | null
-          campaigns_funded?: number | null
-          circle_commission_percentage?: number | null
-          co_marketing_agents?: number | null
-          commission_notes?: string | null
-          commission_type?: string | null
-          contact_email?: string | null
-          created_at?: string | null
-          custom_cta_text?: string | null
-          description?: string | null
-          funnel_enabled?: boolean | null
-          funnel_template_id?: string | null
-          hero_banner_url?: string | null
-          id?: string | null
-          individual_email?: string | null
-          individual_license_number?: string | null
-          individual_name?: string | null
-          individual_phone?: string | null
-          individual_title?: string | null
-          is_active?: boolean | null
-          is_respa_regulated?: boolean | null
-          is_verified?: boolean | null
-          latitude?: number | null
-          license_states?: string[] | null
-          live_campaigns_funded?: never
-          live_co_marketing_agents?: never
-          location?: string | null
-          logo_url?: string | null
-          longitude?: number | null
-          minimum_commission_amount?: number | null
-          mls_areas?: string[] | null
-          name?: string | null
-          nmls_id?: string | null
-          parent_vendor_id?: string | null
-          payment_terms?: string | null
-          phone?: string | null
-          rating?: number | null
-          respa_risk_level?: string | null
-          review_count?: number | null
-          service_radius_miles?: number | null
-          service_states?: string[] | null
-          service_zip_codes?: string[] | null
-          sort_order?: number | null
-          support_hours?: string | null
-          updated_at?: string | null
-          value_statement?: string | null
-          vendor_type?: string | null
-          website_url?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "vendors_parent_vendor_id_fkey"
-            columns: ["parent_vendor_id"]
-            isOneToOne: false
-            referencedRelation: "vendors"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "vendors_parent_vendor_id_fkey"
-            columns: ["parent_vendor_id"]
-            isOneToOne: false
-            referencedRelation: "vendors_with_live_stats"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "vendors_parent_vendor_id_fkey"
-            columns: ["parent_vendor_id"]
-            isOneToOne: false
             referencedRelation: "vendors_with_local_reps"
             referencedColumns: ["id"]
           },
@@ -6058,13 +5806,6 @@ export type Database = {
             columns: ["parent_vendor_id"]
             isOneToOne: false
             referencedRelation: "vendors"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "vendors_parent_vendor_id_fkey"
-            columns: ["parent_vendor_id"]
-            isOneToOne: false
-            referencedRelation: "vendors_with_live_stats"
             referencedColumns: ["id"]
           },
           {

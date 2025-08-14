@@ -198,9 +198,22 @@ export const VendorSelectionModal = ({
     console.log('VendorSelectionModal: Starting to load vendors...');
     setIsLoading(true);
     try {
+      // Query vendors with calculated real-time stats
       const { data, error } = await supabase
         .from('vendors')
-        .select('id, name, description, logo_url, location, rating, review_count, is_verified, co_marketing_agents, campaigns_funded, service_states, vendor_type, parent_vendor_id')
+        .select(`
+          id, 
+          name, 
+          description, 
+          logo_url, 
+          location, 
+          rating, 
+          review_count, 
+          is_verified, 
+          service_states, 
+          vendor_type, 
+          parent_vendor_id
+        `)
         .eq('is_active', true)
         .order('sort_order', { ascending: true })
         .order('rating', { ascending: false })
@@ -213,9 +226,40 @@ export const VendorSelectionModal = ({
         throw error;
       }
 
-      const vendorsData = data || [];
-      setVendors(vendorsData);
-      console.log('VendorSelectionModal: Vendors set successfully, count:', vendorsData.length);
+      // Calculate real-time stats for each vendor
+      const vendorsWithStats = await Promise.all(
+        (data || []).map(async (vendor) => {
+          try {
+            const { data: statsData, error: statsError } = await supabase
+              .rpc('calculate_vendor_stats', { vendor_uuid: vendor.id });
+            
+            if (statsError) {
+              console.error('Error calculating stats for vendor:', vendor.id, statsError);
+              return {
+                ...vendor,
+                co_marketing_agents: 0,
+                campaigns_funded: 0
+              };
+            }
+
+            return {
+              ...vendor,
+              co_marketing_agents: statsData?.co_marketing_agents || 0,
+              campaigns_funded: statsData?.campaigns_funded || 0
+            };
+          } catch (err) {
+            console.error('Error processing vendor stats:', err);
+            return {
+              ...vendor,
+              co_marketing_agents: 0,
+              campaigns_funded: 0
+            };
+          }
+        })
+      );
+
+      setVendors(vendorsWithStats);
+      console.log('VendorSelectionModal: Vendors set successfully with live stats, count:', vendorsWithStats.length);
     } catch (error) {
       console.error('VendorSelectionModal: Error loading vendors:', error);
       toast({
