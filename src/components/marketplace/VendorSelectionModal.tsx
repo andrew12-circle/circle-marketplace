@@ -127,6 +127,9 @@ export const VendorSelectionModal = ({
       );
     }
 
+    // Preserve the original sort order from the database query
+    // The vendors were already sorted by sort_order ASC, then rating DESC
+    // No additional sorting needed - just maintain the order from the original array
     console.log('VendorSelectionModal: Filtering complete', { 
       filteredCount: filtered.length,
       originalCount: vendors.length 
