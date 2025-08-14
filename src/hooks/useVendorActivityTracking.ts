@@ -24,13 +24,27 @@ export const useVendorActivityTracking = () => {
     activityData: ActivityData = {}
   ) => {
     try {
+      // Check if user is authenticated
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        // Don't track activity for unauthenticated users
+        return null;
+      }
+
       const { data, error } = await supabase.rpc('track_vendor_activity', {
         p_vendor_id: vendorId,
         p_activity_type: activityType,
         p_activity_data: activityData
       });
 
-      if (error) throw error;
+      if (error) {
+        // If the error is due to agent_id constraint, just skip tracking
+        if (error.code === '23502' && error.message.includes('agent_id')) {
+          console.log('No agent profile found for tracking, skipping');
+          return null;
+        }
+        throw error;
+      }
 
       console.log(`Tracked activity: ${activityType} for vendor ${vendorId}`, activityData);
       return data;
