@@ -568,7 +568,7 @@ export const VendorSelectionModal = ({
                                           e.stopPropagation();
                                           setExpandedCompanyId(expandedCompanyId === company.id ? null : company.id);
                                         }}
-                                        className="text-xs h-7 w-full"
+                                        className="text-xs h-7"
                                       >
                                         {expandedCompanyId === company.id ? 'Hide Loan Officers' : `View Loan Officers (${children.length})`}
                                       </Button>
