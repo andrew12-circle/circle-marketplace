@@ -559,32 +559,6 @@ export const ServiceFunnelModal = ({
             </div>
           </div>
 
-          {/* Disclaimer Section for Non-Verified Services */}
-          {!service.vendor?.is_verified && (
-            <div className="bg-amber-50 border-l-4 border-amber-400 py-6">
-              <div className="max-w-6xl mx-auto px-6">
-                <div className="flex items-start gap-3">
-                  <div className="flex-shrink-0">
-                    <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center">
-                      <Zap className="w-4 h-4 text-amber-600" />
-                    </div>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-sm font-semibold text-amber-800 mb-2">
-                      Circle Marketplace Disclaimer
-                    </h3>
-                    <p className="text-sm text-amber-700 leading-relaxed">
-                      This service listing represents Circle Marketplace's opinion based on publicly available data. 
-                      We do not endorse or have independently verified the pricing, service details, or company capabilities listed. 
-                      All information and recommendations are derived from our analysis and should be independently verified. 
-                      Circle Marketplace bears no responsibility for the accuracy of vendor claims or service delivery quality.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
           {/* Main Content Section */}
           <div className="bg-gray-50/50 py-12">
             <div className="max-w-6xl mx-auto px-6">
@@ -1211,6 +1185,32 @@ export const ServiceFunnelModal = ({
 
             </div>
           </div>
+
+          {/* Disclaimer Section for Non-Verified Services */}
+          {!service.vendor?.is_verified && (
+            <div className="bg-amber-50 border-l-4 border-amber-400 py-6">
+              <div className="max-w-6xl mx-auto px-6">
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0">
+                    <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center">
+                      <Zap className="w-4 h-4 text-amber-600" />
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-sm font-semibold text-amber-800 mb-2">
+                      Circle Marketplace Disclaimer
+                    </h3>
+                    <p className="text-sm text-amber-700 leading-relaxed">
+                      This service listing represents Circle Marketplace's opinion based on publicly available data. 
+                      We do not endorse or have independently verified the pricing, service details, or company capabilities listed. 
+                      All information and recommendations are derived from our analysis and should be independently verified. 
+                      Circle Marketplace bears no responsibility for the accuracy of vendor claims or service delivery quality.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Consultation Flow Modal */}
