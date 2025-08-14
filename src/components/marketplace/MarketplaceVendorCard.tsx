@@ -68,11 +68,12 @@ export const MarketplaceVendorCard = memo<MarketplaceVendorCardProps>(
     };
 
     const handleCardClick = () => {
+      console.log('Card clicked - opening funnel for:', vendor.name);
       trackActivity(vendor.id, 'vendor_profile_view', {
         vendor_name: vendor.name,
         source: 'marketplace_card'
       });
-      handleViewProfile(vendor.id);
+      handleViewFunnel(); // Changed this to open funnel instead of profile
     };
 
     const handleArrowClick = (e: React.MouseEvent) => {
@@ -107,12 +108,12 @@ export const MarketplaceVendorCard = memo<MarketplaceVendorCardProps>(
             isHovered ? 'shadow-lg scale-[1.02]' : ''
           }`}
           onConnect={handleConnect}
-          onViewProfile={handleViewProfile}
-          onLearnMore={handleViewFunnel}
+          onViewProfile={handleViewFunnel} // Changed this to open funnel
+          onLearnMore={undefined} // Remove learn more since main click opens funnel
           localRepresentative={vendor.local_representative}
           showStats={true}
           showSpecialties={true}
-          showArrow={true}
+          showArrow={false} // Remove arrow since main click opens funnel
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
         >
