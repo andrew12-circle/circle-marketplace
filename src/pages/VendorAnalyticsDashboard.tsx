@@ -372,7 +372,7 @@ export const VendorAnalyticsDashboard = () => {
               </Button>
               <Button 
                 onClick={() => setIsEditingProfile(true)} 
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+                className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground border-0 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
               >
                 <Edit className="w-4 h-4 mr-2" />
                 Edit Profile
@@ -667,28 +667,11 @@ export const VendorAnalyticsDashboard = () => {
 
           <TabsContent value="profile" className="space-y-6">
             <div className="rounded-xl border-0 shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm p-6">
-              {isEditingProfile ? (
-                <VendorProfileEditor
-                  vendorData={vendorData}
-                  onSave={handleProfileSave}
-                  onCancel={handleProfileCancel}
-                />
-              ) : (
-                <div className="text-center py-12">
-                  <div className="w-16 h-16 mx-auto bg-gradient-to-br from-primary/10 to-accent/10 rounded-full flex items-center justify-center mb-4">
-                    <Edit className="w-8 h-8 text-primary" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-foreground mb-2">Edit Your Profile</h3>
-                  <p className="text-muted-foreground mb-6">Update your vendor information and settings</p>
-                  <Button 
-                    onClick={() => setIsEditingProfile(true)}
-                    className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90"
-                  >
-                    <Edit className="w-4 h-4 mr-2" />
-                    Start Editing
-                  </Button>
-                </div>
-              )}
+              <VendorProfileEditor
+                vendorData={vendorData}
+                onSave={handleProfileSave}
+                onCancel={handleProfileCancel}
+              />
             </div>
           </TabsContent>
 
