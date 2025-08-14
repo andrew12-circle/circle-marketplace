@@ -112,6 +112,7 @@ interface Service {
     rating: number;
     review_count: number;
     is_verified: boolean;
+    is_premium_provider?: boolean;
     website_url?: string;
     logo_url?: string;
     support_hours?: string;
@@ -226,18 +227,9 @@ export const ServiceFunnelModal = ({
   const { trackBooking, trackPurchase, trackOutboundClick, trackEvent, trackWebsiteClick } = useProviderTracking(service.id, isOpen);
   const [openItem, setOpenItem] = useState<string | undefined>(undefined);
   const pricingRef = useRef<HTMLDivElement | null>(null);
-
-  // Debug logging
-  useEffect(() => {
-    console.log('ServiceFunnelModal - Service data:', {
-      vendor: service.vendor,
-      is_verified: service.vendor?.is_verified,
-      title: service.title
-    });
-  }, [service]);
-
-  // For testing purposes, treat "Rechat." or services with "WeChat" in title as non-verified
-  const isVerified = service.vendor?.is_verified && !service.title.toLowerCase().includes('rechat') && !service.title.toLowerCase().includes('wechat');
+  
+  // Use real verification status from database
+  const isVerified = service.vendor?.is_verified;
   
   // Fetch real reviews for this service
   const { reviews, loading: reviewsLoading, error: reviewsError } = useServiceReviews(service.id);
@@ -417,10 +409,12 @@ export const ServiceFunnelModal = ({
                       Not Verified
                     </Badge>
                   )}
-                  <Badge className="bg-amber-500/20 text-amber-300 border border-amber-400/30 backdrop-blur-sm">
-                    <Trophy className="w-3 h-3 mr-1" />
-                    Premium Provider
-                  </Badge>
+                  {service.vendor?.is_premium_provider && (
+                    <Badge className="bg-amber-500/20 text-amber-300 border border-amber-400/30 backdrop-blur-sm">
+                      <Trophy className="w-3 h-3 mr-1" />
+                      Premium Provider
+                    </Badge>
+                  )}
                 </div>
 
                 {/* Main Content Grid */}

@@ -16,7 +16,9 @@ import {
   Users,
   DollarSign,
   Shield,
-  ShieldCheck
+  ShieldCheck,
+  Trophy,
+  Crown
 } from 'lucide-react';
 import { VendorProfileEditor } from '@/components/marketplace/VendorProfileEditor';
 import { VendorFunnelEditor } from '@/components/marketplace/VendorFunnelEditor';
@@ -34,6 +36,7 @@ interface Vendor {
   rating: number;
   review_count: number;
   is_verified: boolean;
+  is_premium_provider?: boolean;
   service_radius_miles?: number;
   service_states?: string[];
   license_states?: string[];
@@ -186,6 +189,38 @@ export const VendorManagementPanel = () => {
     }
   };
 
+  const handlePremiumProviderToggle = async (vendorId: string, currentStatus: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('vendors')
+        .update({ is_premium_provider: !currentStatus })
+        .eq('id', vendorId);
+
+      if (error) throw error;
+
+      // Update local state
+      setVendors(vendors.map(v => 
+        v.id === vendorId ? { ...v, is_premium_provider: !currentStatus } : v
+      ));
+      
+      if (selectedVendor?.id === vendorId) {
+        setSelectedVendor({ ...selectedVendor, is_premium_provider: !currentStatus });
+      }
+
+      toast({
+        title: 'Success',
+        description: `Vendor ${!currentStatus ? 'marked as premium provider' : 'removed from premium providers'} successfully`,
+      });
+    } catch (error) {
+      console.error('Error updating premium provider status:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update premium provider status',
+        variant: 'destructive',
+      });
+    }
+  };
+
   if (loading) {
     return <p>Loading vendors...</p>;
   }
@@ -270,20 +305,26 @@ export const VendorManagementPanel = () => {
                              </div>
                            </div>
                          </div>
-                         <div className="flex items-center gap-1 mt-1">
-                           {vendor.is_verified && (
-                             <Badge variant="default" className="text-xs bg-green-100 text-green-800 hover:bg-green-200">
-                               <ShieldCheck className="h-3 w-3 mr-1" />
-                               Verified
-                             </Badge>
-                           )}
-                           {vendor.location && (
-                             <p className="text-xs text-muted-foreground flex items-center gap-1">
-                               <MapPin className="h-3 w-3" />
-                               {vendor.location}
-                             </p>
-                           )}
-                         </div>
+                          <div className="flex items-center gap-1 mt-1">
+                            {vendor.is_verified && (
+                              <Badge variant="default" className="text-xs bg-green-100 text-green-800 hover:bg-green-200">
+                                <ShieldCheck className="h-3 w-3 mr-1" />
+                                Verified
+                              </Badge>
+                            )}
+                            {vendor.is_premium_provider && (
+                              <Badge variant="default" className="text-xs bg-amber-100 text-amber-800 hover:bg-amber-200">
+                                <Trophy className="h-3 w-3 mr-1" />
+                                Premium
+                              </Badge>
+                            )}
+                            {vendor.location && (
+                              <p className="text-xs text-muted-foreground flex items-center gap-1">
+                                <MapPin className="h-3 w-3" />
+                                {vendor.location}
+                              </p>
+                            )}
+                          </div>
                         <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
                           <span className="flex items-center gap-1">
                             <Users className="h-3 w-3" />
@@ -387,7 +428,35 @@ export const VendorManagementPanel = () => {
                              onCheckedChange={() => handleVerificationToggle(selectedVendor.id, selectedVendor.is_verified)}
                            />
                          </div>
-                       </div>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 border rounded-lg bg-amber-50/50">
+                          <div className="flex items-center gap-3">
+                            {selectedVendor.is_premium_provider ? (
+                              <Trophy className="h-5 w-5 text-amber-600" />
+                            ) : (
+                              <Crown className="h-5 w-5 text-muted-foreground" />
+                            )}
+                            <div>
+                              <h4 className="font-medium">Premium Provider Status</h4>
+                              <p className="text-sm text-muted-foreground">
+                                {selectedVendor.is_premium_provider ? 'This vendor is marked as a premium provider' : 'This vendor is not a premium provider'}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge 
+                              variant={selectedVendor.is_premium_provider ? "default" : "secondary"}
+                              className={selectedVendor.is_premium_provider ? "bg-amber-100 text-amber-800" : ""}
+                            >
+                              {selectedVendor.is_premium_provider ? 'Premium Provider' : 'Standard Provider'}
+                            </Badge>
+                            <Switch
+                              checked={selectedVendor.is_premium_provider || false}
+                              onCheckedChange={() => handlePremiumProviderToggle(selectedVendor.id, selectedVendor.is_premium_provider || false)}
+                            />
+                          </div>
+                        </div>
 
                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border rounded-lg">
                          <div>

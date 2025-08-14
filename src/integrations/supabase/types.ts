@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.12 (cd3cf9e)"
@@ -5375,6 +5375,7 @@ export type Database = {
           individual_phone: string | null
           individual_title: string | null
           is_active: boolean | null
+          is_premium_provider: boolean | null
           is_respa_regulated: boolean | null
           is_verified: boolean | null
           latitude: number | null
@@ -5430,6 +5431,7 @@ export type Database = {
           individual_phone?: string | null
           individual_title?: string | null
           is_active?: boolean | null
+          is_premium_provider?: boolean | null
           is_respa_regulated?: boolean | null
           is_verified?: boolean | null
           latitude?: number | null
@@ -5485,6 +5487,7 @@ export type Database = {
           individual_phone?: string | null
           individual_title?: string | null
           is_active?: boolean | null
+          is_premium_provider?: boolean | null
           is_respa_regulated?: boolean | null
           is_verified?: boolean | null
           latitude?: number | null
@@ -5904,19 +5907,19 @@ export type Database = {
         Returns: number
       }
       calculate_distance: {
-        Args: { lat1: number; lon1: number; lat2: number; lon2: number }
+        Args: { lat1: number; lat2: number; lon1: number; lon2: number }
         Returns: number
       }
       calculate_distance_miles: {
-        Args: { lat1: number; lon1: number; lat2: number; lon2: number }
+        Args: { lat1: number; lat2: number; lon1: number; lon2: number }
         Returns: number
       }
       calculate_engagement_quality_score: {
         Args: {
-          p_content_type: string
           p_completion_percentage: number
-          p_watch_time_seconds: number
+          p_content_type: string
           p_total_content_duration?: number
+          p_watch_time_seconds: number
         }
         Returns: number
       }
@@ -5930,8 +5933,8 @@ export type Database = {
       }
       calculate_respa_compliant_usage: {
         Args: {
-          p_service_id: string
           p_agent_id: string
+          p_service_id: string
           p_total_amount: number
         }
         Returns: Json
@@ -5953,7 +5956,7 @@ export type Database = {
         Returns: number
       }
       check_account_lockout: {
-        Args: { user_email: string; client_ip?: unknown }
+        Args: { client_ip?: unknown; user_email: string }
         Returns: Json
       }
       check_admin_operation_rate_limit: {
@@ -5973,7 +5976,7 @@ export type Database = {
         Returns: boolean
       }
       check_and_update_lockout: {
-        Args: { p_identifier: string; p_attempt_type: string }
+        Args: { p_attempt_type: string; p_identifier: string }
         Returns: Json
       }
       check_expiring_payment_schedules: {
@@ -5997,7 +6000,7 @@ export type Database = {
         Returns: undefined
       }
       clear_failed_attempts: {
-        Args: { p_identifier: string; p_attempt_type?: string }
+        Args: { p_attempt_type?: string; p_identifier: string }
         Returns: undefined
       }
       create_data_checksum: {
@@ -6024,8 +6027,8 @@ export type Database = {
         Args: { p_content_id: string }
         Returns: {
           creator_type: string
-          display_name: string
           display_avatar: string
+          display_name: string
           display_subscribers: number
           display_verified: boolean
           platform_bio: string
@@ -6035,55 +6038,55 @@ export type Database = {
       get_optimized_marketplace_data: {
         Args: Record<PropertyKey, never>
         Returns: {
-          service_id: string
-          service_title: string
-          service_description: string
           service_category: string
-          service_discount_percentage: string
-          service_retail_price: string
-          service_pro_price: string
           service_co_pay_price: string
+          service_copay_allowed: boolean
+          service_description: string
+          service_discount_percentage: string
+          service_duration: string
+          service_estimated_roi: number
+          service_id: string
           service_image_url: string
-          service_tags: string[]
           service_is_featured: boolean
           service_is_top_pick: boolean
-          service_estimated_roi: number
-          service_duration: string
+          service_pro_price: string
           service_requires_quote: boolean
+          service_retail_price: string
           service_sort_order: number
-          service_copay_allowed: boolean
+          service_tags: string[]
+          service_title: string
+          vendor_campaigns_funded: number
+          vendor_co_marketing_agents: number
+          vendor_description: string
           vendor_id: string
+          vendor_is_verified: boolean
+          vendor_latitude: number
+          vendor_license_states: string[]
+          vendor_local_representatives: Json
+          vendor_location: string
+          vendor_logo_url: string
+          vendor_longitude: number
+          vendor_mls_areas: string[]
           vendor_name: string
           vendor_rating: number
           vendor_review_count: number
-          vendor_is_verified: boolean
-          vendor_description: string
-          vendor_logo_url: string
-          vendor_website_url: string
-          vendor_location: string
-          vendor_co_marketing_agents: number
-          vendor_campaigns_funded: number
-          vendor_service_states: string[]
-          vendor_mls_areas: string[]
           vendor_service_radius_miles: number
-          vendor_license_states: string[]
-          vendor_latitude: number
-          vendor_longitude: number
+          vendor_service_states: string[]
           vendor_type: string
-          vendor_local_representatives: Json
+          vendor_website_url: string
         }[]
       }
       get_public_profile: {
         Args: { profile_id: string }
         Returns: {
-          id: string
-          display_name: string
+          avatar_url: string
           business_name: string
+          display_name: string
+          id: string
           location: string
           specialties: string[]
-          years_experience: number
           website_url: string
-          avatar_url: string
+          years_experience: number
         }[]
       }
       get_service_rating_stats: {
@@ -6096,8 +6099,8 @@ export type Database = {
       get_service_ratings_bulk: {
         Args: { p_service_ids: string[] }
         Returns: {
-          service_id: string
           average_rating: number
+          service_id: string
           total_reviews: number
         }[]
       }
@@ -6118,7 +6121,7 @@ export type Database = {
         Returns: undefined
       }
       increment_failed_attempts: {
-        Args: { p_identifier: string; p_attempt_type?: string }
+        Args: { p_attempt_type?: string; p_identifier: string }
         Returns: undefined
       }
       increment_video_views: {
@@ -6135,38 +6138,38 @@ export type Database = {
       }
       log_admin_operation_secure: {
         Args: {
+          operation_data?: Json
           operation_type: string
           target_user_id: string
-          operation_data?: Json
         }
         Returns: boolean
       }
       log_login_attempt: {
         Args: {
-          user_email: string
-          success: boolean
           client_ip?: unknown
           client_user_agent?: string
+          success: boolean
+          user_email: string
         }
         Returns: undefined
       }
       mint_referral_token: {
         Args: {
-          p_user_id: string
-          p_vendor_id: string
           p_service_id: string
           p_ttl_minutes?: number
+          p_user_id: string
+          p_vendor_id: string
         }
         Returns: string
       }
       process_automatic_copay: {
         Args: {
           p_agent_id: string
-          p_service_id: string
-          p_vendor_id: string
-          p_total_amount: number
           p_coverage_percentage: number
           p_order_id?: string
+          p_service_id: string
+          p_total_amount: number
+          p_vendor_id: string
         }
         Returns: Json
       }
@@ -6176,22 +6179,22 @@ export type Database = {
       }
       process_real_time_charge: {
         Args: {
+          p_agent_id: string
           p_allocation_id: string
+          p_amount_to_charge: number
+          p_points_used: number
           p_transaction_id: string
           p_vendor_id: string
-          p_agent_id: string
-          p_points_used: number
-          p_amount_to_charge: number
         }
         Returns: Json
       }
       process_respa_compliant_transaction: {
         Args: {
-          p_service_id: string
           p_agent_id: string
-          p_vendor_id: string
-          p_total_amount: number
           p_order_id?: string
+          p_service_id: string
+          p_total_amount: number
+          p_vendor_id: string
         }
         Returns: Json
       }
@@ -6209,9 +6212,9 @@ export type Database = {
       }
       track_vendor_activity: {
         Args: {
-          p_vendor_id: string
-          p_activity_type: string
           p_activity_data?: Json
+          p_activity_type: string
+          p_vendor_id: string
         }
         Returns: string
       }
