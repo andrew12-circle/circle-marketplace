@@ -625,19 +625,17 @@ export const VendorSelectionModal = ({
                                     >
                                       Request Copay
                                     </Button>
-                                    <div className="bg-muted/50 rounded-md p-1 border border-border hover:bg-muted transition-colors flex-1">
-                                      <Button
-                                        size="sm"
-                                        variant="ghost"
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          setExpandedCompanyId(expandedCompanyId === company.id ? null : company.id);
-                                        }}
-                                        className="text-xs h-7 w-full"
-                                      >
-                                        {expandedCompanyId === company.id ? 'Hide Loan Officers' : `View Loan Officers (${children.length})`}
-                                      </Button>
-                                    </div>
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setExpandedCompanyId(expandedCompanyId === company.id ? null : company.id);
+                                      }}
+                                      className="text-xs h-7 flex-1"
+                                    >
+                                      {expandedCompanyId === company.id ? 'Hide Loan Officers' : `View Loan Officers (${children.length})`}
+                                    </Button>
                                   </div>
                                 </div>
                               </div>
