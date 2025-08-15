@@ -310,7 +310,7 @@ export const VendorFunnelModal = ({
           <div className="relative bg-gradient-to-br from-blue-600 via-purple-600 to-blue-800">
             <div className="absolute inset-0 bg-black/20"></div>
             <div className="relative z-10">
-          <div className="px-6 pt-8 pb-16">
+          <div className="px-6 pt-6 pb-8">
                 <div className="max-w-6xl mx-auto">
                   {/* Badges */}
                   <div className="flex flex-wrap items-center gap-3 mb-6 animate-fade-in">
