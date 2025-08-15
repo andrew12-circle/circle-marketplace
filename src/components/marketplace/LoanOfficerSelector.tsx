@@ -31,6 +31,7 @@ interface LoanOfficer {
   rating?: number;
   reviews_count?: number;
   website?: string;
+  profile_picture_url?: string;
 }
 
 interface Vendor {
@@ -123,7 +124,8 @@ export const LoanOfficerSelector = ({ vendor, onSelect, selected }: LoanOfficerS
               years_experience: 8,
               rating: 4.9,
               reviews_count: 42,
-              website: 'https://sarahjohnsonmortgages.com'
+              website: 'https://sarahjohnsonmortgages.com',
+              profile_picture_url: 'https://images.unsplash.com/photo-1494790108755-2616b612b47c?w=150&h=150&fit=crop&crop=face'
             },
             {
               id: `${vendor.id}-example-2`,
@@ -136,7 +138,8 @@ export const LoanOfficerSelector = ({ vendor, onSelect, selected }: LoanOfficerS
               specialties: ['VA Loans', 'Jumbo Loans'],
               years_experience: 5,
               rating: 4.7,
-              reviews_count: 28
+              reviews_count: 28,
+              profile_picture_url: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'
             }
           ];
         }
@@ -205,9 +208,17 @@ export const LoanOfficerSelector = ({ vendor, onSelect, selected }: LoanOfficerS
         {selectedOfficer && (
           <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg mb-4">
             <div className="flex items-start gap-3">
-              <div className="w-12 h-12 bg-blue-100 text-blue-600 font-medium rounded-full flex items-center justify-center">
-                {selectedOfficer.name.split(' ').map(n => n[0]).join('')}
-              </div>
+              {selectedOfficer.profile_picture_url ? (
+                <img
+                  src={selectedOfficer.profile_picture_url}
+                  alt={selectedOfficer.name}
+                  className="w-12 h-12 rounded-full object-cover border-2 border-blue-200"
+                />
+              ) : (
+                <div className="w-12 h-12 bg-blue-100 text-blue-600 font-medium rounded-full flex items-center justify-center">
+                  {selectedOfficer.name.split(' ').map(n => n[0]).join('')}
+                </div>
+              )}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
                   <h4 className="font-medium text-gray-900 truncate">{selectedOfficer.name}</h4>
@@ -306,9 +317,17 @@ export const LoanOfficerSelector = ({ vendor, onSelect, selected }: LoanOfficerS
                     }}
                   >
                     <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 bg-gray-100 text-gray-600 text-sm rounded-full flex items-center justify-center">
-                        {officer.name.split(' ').map(n => n[0]).join('')}
-                      </div>
+                      {officer.profile_picture_url ? (
+                        <img
+                          src={officer.profile_picture_url}
+                          alt={officer.name}
+                          className="w-10 h-10 rounded-full object-cover border border-gray-200"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 bg-gray-100 text-gray-600 text-sm rounded-full flex items-center justify-center">
+                          {officer.name.split(' ').map(n => n[0]).join('')}
+                        </div>
+                      )}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
                           <h5 className="text-sm font-medium text-gray-900 truncate">{officer.name}</h5>
