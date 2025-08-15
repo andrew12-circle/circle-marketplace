@@ -53,7 +53,7 @@ export const MarketplaceVendorCard = memo<MarketplaceVendorCardProps>(
           {...props}
           vendor={vendor}
           onConnect={handleConnect}
-          onViewProfile={(vendorId) => onViewProfile(vendorId)}
+          onViewProfile={handleViewFunnel}
           localRepresentative={vendor.local_representative}
         />
 
