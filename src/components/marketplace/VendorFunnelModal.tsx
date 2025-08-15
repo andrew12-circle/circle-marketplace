@@ -541,6 +541,11 @@ export const VendorFunnelModal = ({
                   {/* Right Column - Simple Action Panel */}
                   <div className="lg:col-span-1">
                     <div className="sticky top-8 space-y-4">
+                      {/* Ready to Connect Header */}
+                      <div className="text-center mb-4">
+                        <h3 className="text-lg font-semibold text-foreground">Ready to connect</h3>
+                      </div>
+                      
                       {/* Loan Officer Selection */}
                       <LoanOfficerSelector vendor={vendor} />
                       
