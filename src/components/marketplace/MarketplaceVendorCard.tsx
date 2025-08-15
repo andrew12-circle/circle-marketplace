@@ -121,12 +121,6 @@ export const MarketplaceVendorCard = memo<MarketplaceVendorCardProps>(
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
-                <Badge 
-                  variant="outline" 
-                  className={`text-xs px-2 py-1 ${getRiskBadgeColor(serviceRisk)}`}
-                >
-                  {serviceRisk.charAt(0).toUpperCase() + serviceRisk.slice(1)} Risk
-                </Badge>
                 {vendor.licensed_states && vendor.licensed_states.length > 0 && (
                   <span className="text-xs text-muted-foreground">
                     Licensed in {vendor.licensed_states.length} states
