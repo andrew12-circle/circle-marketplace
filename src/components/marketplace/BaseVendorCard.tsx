@@ -129,11 +129,6 @@ export const BaseVendorCard = ({
             Verified
           </Badge>
         )}
-        {vendor_type && (
-          <Badge variant="outline" className="text-xs bg-background/80 backdrop-blur-sm">
-            {vendor_type}
-          </Badge>
-        )}
       </div>
 
       {/* Logo Image - Fixed height like service cards */}
