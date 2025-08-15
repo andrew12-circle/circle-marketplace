@@ -731,10 +731,34 @@ export const VendorFunnelModal = ({
                 </Card>
               </div>
             </div>
-          )}
-        </div>
-        
-        {/* Vendor Dashboard Tabs (only for vendor owners) */}
+           )}
+
+           {/* General Disclaimer */}
+           <div className="mx-6 mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+             <div className="flex items-start gap-3">
+               <AlertTriangle className="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" />
+               <div className="text-sm text-gray-600 leading-relaxed">
+                 <p className="font-medium text-gray-800 mb-1">Important Disclaimer</p>
+                 <div className="space-y-2">
+                   <p>
+                     Circle Network is not a settlement service provider or broker. We connect real estate professionals with settlement service providers or non-settlement service providers for the purpose of establishing business co-marketing relationships only. We are a directory and you must verify any information yourself.
+                   </p>
+                   <p>
+                     <strong>Non-Endorsement Statement:</strong> Inclusion in the Circle Network Marketplace does not imply endorsement, partnership, or recommendation. Service quality, pricing, and results are the sole responsibility of the vendor.
+                   </p>
+                   <p>
+                     <strong>Due Diligence Responsibility:</strong> Real estate professionals are encouraged to perform their own due diligence before engaging with any vendor listed on this platform.
+                   </p>
+                   <p>
+                     <strong>Compensation Disclosure:</strong> Circle Network may receive compensation from vendors for featured placement, introductions, or other marketing services. This compensation does not influence our presentation of information.
+                   </p>
+                 </div>
+               </div>
+             </div>
+           </div>
+         </div>
+         
+         {/* Vendor Dashboard Tabs (only for vendor owners) */}
         {isVendorOwner && (
           <Tabs defaultValue="overview" className="border-t bg-white">
             <TabsList className="w-full justify-start rounded-none border-b bg-transparent p-0">
@@ -819,29 +843,6 @@ export const VendorFunnelModal = ({
           </Tabs>
         )}
 
-        {/* General Disclaimer */}
-        <div className="mx-6 mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-          <div className="flex items-start gap-3">
-            <AlertTriangle className="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" />
-            <div className="text-sm text-gray-600 leading-relaxed">
-              <p className="font-medium text-gray-800 mb-1">Important Disclaimer</p>
-              <div className="space-y-2">
-                <p>
-                  Circle Network is not a settlement service provider or broker. We connect real estate professionals with settlement service providers or non-settlement service providers for the purpose of establishing business co-marketing relationships only. We are a directory and you must verify any information yourself.
-                </p>
-                <p>
-                  <strong>Non-Endorsement Statement:</strong> Inclusion in the Circle Network Marketplace does not imply endorsement, partnership, or recommendation. Service quality, pricing, and results are the sole responsibility of the vendor.
-                </p>
-                <p>
-                  <strong>Due Diligence Responsibility:</strong> Real estate professionals are encouraged to perform their own due diligence before engaging with any vendor listed on this platform.
-                </p>
-                <p>
-                  <strong>Compensation Disclosure:</strong> Circle Network may receive compensation from vendors for featured placement, introductions, or other marketing services. This compensation does not influence our presentation of information.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
       </DialogContent>
     </Dialog>
   );
