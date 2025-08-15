@@ -276,6 +276,15 @@ export const VendorFunnelModal = ({
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-7xl w-[95vw] h-[95vh] p-0 overflow-hidden bg-white">
+        {/* Close button */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 z-50 p-2 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm transition-colors"
+          aria-label="Close modal"
+        >
+          <X className="w-5 h-5 text-white" />
+        </button>
+        
         <div className="flex flex-col h-full overflow-hidden">
           
           {/* Hero Section */}
