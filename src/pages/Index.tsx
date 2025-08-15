@@ -26,7 +26,7 @@ const Index = () => {
     <div className="min-h-screen bg-background">
         {/* Mobile-Optimized Header */}
         <header className="border-b bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/50 sticky top-0 z-50">
-          <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4">
+          <div className="container mx-auto px-3 sm:px-4 py-2 sm:py-3">
             {isMobile ? (
               // Mobile Header Layout
               <div className="space-y-3">
@@ -95,9 +95,9 @@ const Index = () => {
                   <img 
                     src={circleLogoUrl}
                     alt="Circle Logo" 
-                    className="w-12 h-12 sm:w-16 sm:h-16 object-contain"
-                    width="64"
-                    height="64"
+                    className="w-16 h-16 sm:w-20 sm:h-20 object-contain"
+                    width="80"
+                    height="80"
                     loading="eager"
                     decoding="async"
                     
