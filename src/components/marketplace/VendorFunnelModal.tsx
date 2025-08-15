@@ -619,6 +619,23 @@ export const VendorFunnelModal = ({
             </div>
           </div>
 
+          {/* General Disclaimer */}
+          <div className="bg-gray-50/50 border-t">
+            <div className="max-w-6xl mx-auto px-6 py-6">
+              <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" />
+                  <div className="text-sm text-gray-600 leading-relaxed">
+                    <p className="font-medium text-gray-800 mb-1">Important Disclaimer</p>
+                    <p>
+                      Circle Network is not a settlement service provider or broker. We connect real estate professionals with settlement service providers or non-settlement service providers for the purpose of establishing business co-marketing relationships only. We are a directory and you must verify any information yourself.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Licenses and Disclaimers Section for Regulated Industries */}
           {(vendor.vendor_type === 'mortgage' || vendor.vendor_type === 'insurance' || vendor.vendor_type === 'title' || vendor.nmls_id || vendor.license_states?.length) && (
             <div className="bg-gray-50/50 border-t">
@@ -818,19 +835,6 @@ export const VendorFunnelModal = ({
             </TabsContent>
           </Tabs>
         )}
-
-        {/* General Disclaimer */}
-        <div className="mx-6 mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-          <div className="flex items-start gap-3">
-            <AlertTriangle className="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" />
-            <div className="text-sm text-gray-600 leading-relaxed">
-              <p className="font-medium text-gray-800 mb-1">Important Disclaimer</p>
-              <p>
-                Circle Network is not a settlement service provider or broker. We connect real estate professionals with settlement service providers or non-settlement service providers for the purpose of establishing business co-marketing relationships only. We are a directory and you must verify any information yourself.
-              </p>
-            </div>
-          </div>
-        </div>
       </DialogContent>
     </Dialog>
   );
