@@ -275,20 +275,20 @@ export const VendorFunnelModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-7xl w-[95vw] h-[95vh] p-0 overflow-hidden bg-white">
+      <DialogContent className="max-w-7xl w-[95vw] h-[95vh] p-0 overflow-y-auto bg-white">
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-50 p-2 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm transition-colors"
+          className="fixed top-4 right-4 z-50 p-2 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm transition-colors"
           aria-label="Close modal"
         >
           <X className="w-5 h-5 text-white" />
         </button>
         
-        <div className="flex flex-col h-full overflow-hidden">
+        <div className="flex flex-col min-h-full">
           
           {/* Hero Section */}
-          <div className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-purple-600 to-blue-800">
+          <div className="relative bg-gradient-to-br from-blue-600 via-purple-600 to-blue-800">
             <div className="absolute inset-0 bg-black/20"></div>
             <div className="relative z-10">
               <div className="px-6 pt-8 pb-16">
