@@ -303,7 +303,9 @@ export const VendorFunnelModal = ({
                           </div>
                           <Separator orientation="vertical" className="h-6 bg-white/30" />
                           <span className="text-sm text-blue-200">
-                            {vendor.review_count || vendorReviews.length} reviews
+                            {(vendor.review_count || vendorReviews.length || 0) > 0 
+                              ? `${vendor.review_count || vendorReviews.length} reviews`
+                              : 'No reviews yet'}
                           </span>
                         </div>
                       )}
