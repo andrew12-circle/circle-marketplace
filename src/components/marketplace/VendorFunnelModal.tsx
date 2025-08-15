@@ -37,7 +37,9 @@ import {
   X,
   Play,
   Crown,
-  AlertTriangle
+  AlertTriangle,
+  Image,
+  FileText
 } from "lucide-react";
 import { getRiskBadge, getComplianceAlert, determineServiceRisk } from "./RESPAComplianceSystem";
 import { ServiceRepresentativeSelector } from "./ServiceRepresentativeSelector";
@@ -89,6 +91,7 @@ export const VendorFunnelModal = ({
   const [vendorReviews, setVendorReviews] = useState<any[]>([]);
   const [vendorReviewsLoading, setVendorReviewsLoading] = useState(false);
   const [openItem, setOpenItem] = useState<string>("question-1");
+  const [vendorContent, setVendorContent] = useState<any[]>([]);
   const { questions: vendorQuestions, loading: questionsLoading } = useVendorQuestions(vendor?.id);
 
   // Check if current user is the vendor owner
@@ -192,8 +195,31 @@ export const VendorFunnelModal = ({
       }
     };
 
+    const loadVendorContent = async () => {
+      if (!vendor?.id) {
+        setVendorContent([]);
+        return;
+      }
+      try {
+        const { data, error } = await supabase
+          .from('vendor_content')
+          .select('*')
+          .eq('vendor_id', vendor.id)
+          .eq('is_active', true)
+          .order('display_order', { ascending: true })
+          .limit(4);
+
+        if (error) throw error;
+        setVendorContent(data || []);
+      } catch (error) {
+        console.error('Failed to load vendor content:', error);
+        setVendorContent([]);
+      }
+    };
+
     if (isOpen) {
       loadVendorReviews();
+      loadVendorContent();
     }
   }, [vendor?.id, isOpen]);
 
@@ -342,37 +368,70 @@ export const VendorFunnelModal = ({
 
                       {/* 4 Content Spots - Below Main Image */}
                       <div className="grid grid-cols-4 gap-2">
-                        {/* Content Spot 1 */}
-                        <div className="bg-white/10 backdrop-blur-sm rounded-lg aspect-video flex items-center justify-center group hover:bg-white/20 transition-colors cursor-pointer border border-white/20">
-                          <div className="text-center">
-                            <Play className="w-5 h-5 text-white mx-auto mb-1 group-hover:scale-110 transition-transform" />
-                            <p className="text-xs text-white/90 font-medium">Video</p>
-                          </div>
-                        </div>
-
-                        {/* Content Spot 2 */}
-                        <div className="bg-white/10 backdrop-blur-sm rounded-lg aspect-video flex items-center justify-center group hover:bg-white/20 transition-colors cursor-pointer border border-white/20">
-                          <div className="text-center">
-                            <Trophy className="w-5 h-5 text-white mx-auto mb-1 group-hover:scale-110 transition-transform" />
-                            <p className="text-xs text-white/90 font-medium">Success</p>
-                          </div>
-                        </div>
-
-                        {/* Content Spot 3 */}
-                        <div className="bg-white/10 backdrop-blur-sm rounded-lg aspect-video flex items-center justify-center group hover:bg-white/20 transition-colors cursor-pointer border border-white/20">
-                          <div className="text-center">
-                            <Users className="w-5 h-5 text-white mx-auto mb-1 group-hover:scale-110 transition-transform" />
-                            <p className="text-xs text-white/90 font-medium">Reviews</p>
-                          </div>
-                        </div>
-
-                        {/* Content Spot 4 */}
-                        <div className="bg-white/10 backdrop-blur-sm rounded-lg aspect-video flex items-center justify-center group hover:bg-white/20 transition-colors cursor-pointer border border-white/20">
-                          <div className="text-center">
-                            <Target className="w-5 h-5 text-white mx-auto mb-1 group-hover:scale-110 transition-transform" />
-                            <p className="text-xs text-white/90 font-medium">Resources</p>
-                          </div>
-                        </div>
+                        {vendorContent.length > 0 ? (
+                          vendorContent.slice(0, 4).map((item, index) => (
+                            <div 
+                              key={item.id} 
+                              className="bg-white/10 backdrop-blur-sm rounded-lg aspect-video flex items-center justify-center group hover:bg-white/20 transition-colors cursor-pointer border border-white/20 overflow-hidden relative"
+                              onClick={() => {
+                                if (item.content_type === 'video_youtube' || item.content_type === 'video_vimeo') {
+                                  window.open(item.content_url, '_blank');
+                                } else if (item.content_type === 'image' || item.content_type === 'document') {
+                                  window.open(item.content_url, '_blank');
+                                }
+                              }}
+                            >
+                              {item.thumbnail_url ? (
+                                <img 
+                                  src={item.thumbnail_url} 
+                                  alt={item.title}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <div className="text-center">
+                                  {item.content_type === 'video_youtube' && <Play className="w-5 h-5 text-white mx-auto mb-1 group-hover:scale-110 transition-transform" />}
+                                  {item.content_type === 'video_vimeo' && <Play className="w-5 h-5 text-white mx-auto mb-1 group-hover:scale-110 transition-transform" />}
+                                  {item.content_type === 'image' && <Image className="w-5 h-5 text-white mx-auto mb-1 group-hover:scale-110 transition-transform" />}
+                                  {item.content_type === 'document' && <FileText className="w-5 h-5 text-white mx-auto mb-1 group-hover:scale-110 transition-transform" />}
+                                  <p className="text-xs text-white/90 font-medium truncate px-1">{item.title}</p>
+                                </div>
+                              )}
+                              {item.is_featured && (
+                                <div className="absolute top-1 right-1">
+                                  <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
+                                </div>
+                              )}
+                            </div>
+                          ))
+                        ) : (
+                          // Fallback to placeholders if no content
+                          <>
+                            <div className="bg-white/10 backdrop-blur-sm rounded-lg aspect-video flex items-center justify-center group hover:bg-white/20 transition-colors cursor-pointer border border-white/20">
+                              <div className="text-center">
+                                <Play className="w-5 h-5 text-white mx-auto mb-1 group-hover:scale-110 transition-transform" />
+                                <p className="text-xs text-white/90 font-medium">Video</p>
+                              </div>
+                            </div>
+                            <div className="bg-white/10 backdrop-blur-sm rounded-lg aspect-video flex items-center justify-center group hover:bg-white/20 transition-colors cursor-pointer border border-white/20">
+                              <div className="text-center">
+                                <Trophy className="w-5 h-5 text-white mx-auto mb-1 group-hover:scale-110 transition-transform" />
+                                <p className="text-xs text-white/90 font-medium">Success</p>
+                              </div>
+                            </div>
+                            <div className="bg-white/10 backdrop-blur-sm rounded-lg aspect-video flex items-center justify-center group hover:bg-white/20 transition-colors cursor-pointer border border-white/20">
+                              <div className="text-center">
+                                <Users className="w-5 h-5 text-white mx-auto mb-1 group-hover:scale-110 transition-transform" />
+                                <p className="text-xs text-white/90 font-medium">Reviews</p>
+                              </div>
+                            </div>
+                            <div className="bg-white/10 backdrop-blur-sm rounded-lg aspect-video flex items-center justify-center group hover:bg-white/20 transition-colors cursor-pointer border border-white/20">
+                              <div className="text-center">
+                                <Target className="w-5 h-5 text-white mx-auto mb-1 group-hover:scale-110 transition-transform" />
+                                <p className="text-xs text-white/90 font-medium">Resources</p>
+                              </div>
+                            </div>
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>

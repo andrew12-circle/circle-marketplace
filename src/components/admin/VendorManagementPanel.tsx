@@ -21,6 +21,7 @@ import {
   Crown
 } from 'lucide-react';
 import { StreamlinedVendorEditor } from './StreamlinedVendorEditor';
+import { VendorContentManager } from './VendorContentManager';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface Vendor {
@@ -376,96 +377,112 @@ export const VendorManagementPanel = () => {
             </div>
           </CardHeader>
           <CardContent>
-            {isEditingProfile ? (
-              <StreamlinedVendorEditor
-                vendorData={selectedVendor}
-                onSave={handleProfileSave}
-                onCancel={handleProfileCancel}
-              />
-            ) : (
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <h3 className="text-lg font-semibold">Vendor Profile</h3>
-                  <Button onClick={() => setIsEditingProfile(true)}>
-                    <Edit className="h-4 w-4 mr-2" />
-                    Edit Profile
-                  </Button>
-                </div>
-                
+          <Tabs defaultValue="profile" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="profile">Profile & Settings</TabsTrigger>
+              <TabsTrigger value="content">Content Manager</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="profile" className="space-y-4">
+              {isEditingProfile ? (
+                <StreamlinedVendorEditor
+                  vendorData={selectedVendor}
+                  onSave={handleProfileSave}
+                  onCancel={handleProfileCancel}
+                />
+              ) : (
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/20">
-                    <div className="flex items-center gap-3">
-                      {selectedVendor.is_verified ? (
-                        <ShieldCheck className="h-5 w-5 text-green-600" />
-                      ) : (
-                        <Shield className="h-5 w-5 text-muted-foreground" />
-                      )}
-                      <div>
-                        <h4 className="font-medium">Verification Status</h4>
-                        <p className="text-sm text-muted-foreground">
-                          {selectedVendor.is_verified ? 'This vendor is verified' : 'This vendor is not verified'}
-                        </p>
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-lg font-semibold">Vendor Profile</h3>
+                    <Button onClick={() => setIsEditingProfile(true)}>
+                      <Edit className="h-4 w-4 mr-2" />
+                      Edit Profile
+                    </Button>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/20">
+                      <div className="flex items-center gap-3">
+                        {selectedVendor.is_verified ? (
+                          <ShieldCheck className="h-5 w-5 text-green-600" />
+                        ) : (
+                          <Shield className="h-5 w-5 text-muted-foreground" />
+                        )}
+                        <div>
+                          <h4 className="font-medium">Verification Status</h4>
+                          <p className="text-sm text-muted-foreground">
+                            {selectedVendor.is_verified ? 'This vendor is verified' : 'This vendor is not verified'}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge 
+                          variant={selectedVendor.is_verified ? "default" : "secondary"}
+                          className={selectedVendor.is_verified ? "bg-green-100 text-green-800" : ""}
+                        >
+                          {selectedVendor.is_verified ? 'Verified' : 'Unverified'}
+                        </Badge>
+                        <Switch
+                          checked={selectedVendor.is_verified}
+                          onCheckedChange={() => handleVerificationToggle(selectedVendor.id, selectedVendor.is_verified)}
+                        />
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Badge 
-                        variant={selectedVendor.is_verified ? "default" : "secondary"}
-                        className={selectedVendor.is_verified ? "bg-green-100 text-green-800" : ""}
-                      >
-                        {selectedVendor.is_verified ? 'Verified' : 'Unverified'}
-                      </Badge>
-                      <Switch
-                        checked={selectedVendor.is_verified}
-                        onCheckedChange={() => handleVerificationToggle(selectedVendor.id, selectedVendor.is_verified)}
-                      />
-                    </div>
-                  </div>
 
-                  <div className="flex items-center justify-between p-4 border rounded-lg bg-amber-50/50">
-                    <div className="flex items-center gap-3">
-                      {selectedVendor.is_premium_provider ? (
-                        <Trophy className="h-5 w-5 text-amber-600" />
-                      ) : (
-                        <Crown className="h-5 w-5 text-muted-foreground" />
-                      )}
-                      <div>
-                        <h4 className="font-medium">Premium Provider Status</h4>
-                        <p className="text-sm text-muted-foreground">
-                          {selectedVendor.is_premium_provider ? 'This vendor is marked as a premium provider' : 'This vendor is not a premium provider'}
-                        </p>
+                    <div className="flex items-center justify-between p-4 border rounded-lg bg-amber-50/50">
+                      <div className="flex items-center gap-3">
+                        {selectedVendor.is_premium_provider ? (
+                          <Trophy className="h-5 w-5 text-amber-600" />
+                        ) : (
+                          <Crown className="h-5 w-5 text-muted-foreground" />
+                        )}
+                        <div>
+                          <h4 className="font-medium">Premium Provider Status</h4>
+                          <p className="text-sm text-muted-foreground">
+                            {selectedVendor.is_premium_provider ? 'This vendor is marked as a premium provider' : 'This vendor is not a premium provider'}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge 
+                          variant={selectedVendor.is_premium_provider ? "default" : "secondary"}
+                          className={selectedVendor.is_premium_provider ? "bg-amber-100 text-amber-800" : ""}
+                        >
+                          {selectedVendor.is_premium_provider ? 'Premium Provider' : 'Standard Provider'}
+                        </Badge>
+                        <Switch
+                          checked={selectedVendor.is_premium_provider || false}
+                          onCheckedChange={() => handlePremiumProviderToggle(selectedVendor.id, selectedVendor.is_premium_provider || false)}
+                        />
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Badge 
-                        variant={selectedVendor.is_premium_provider ? "default" : "secondary"}
-                        className={selectedVendor.is_premium_provider ? "bg-amber-100 text-amber-800" : ""}
-                      >
-                        {selectedVendor.is_premium_provider ? 'Premium Provider' : 'Standard Provider'}
-                      </Badge>
-                      <Switch
-                        checked={selectedVendor.is_premium_provider || false}
-                        onCheckedChange={() => handlePremiumProviderToggle(selectedVendor.id, selectedVendor.is_premium_provider || false)}
-                      />
-                    </div>
-                  </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border rounded-lg">
-                    <div>
-                      <h4 className="font-medium">Company Information</h4>
-                      <p className="text-sm text-muted-foreground">Name: {selectedVendor.name}</p>
-                      <p className="text-sm text-muted-foreground">Location: {selectedVendor.location || 'Not set'}</p>
-                      <p className="text-sm text-muted-foreground">Type: {selectedVendor.vendor_type || 'company'}</p>
-                    </div>
-                    <div>
-                      <h4 className="font-medium">Contact Information</h4>
-                      <p className="text-sm text-muted-foreground">Email: {selectedVendor.contact_email || 'Not set'}</p>
-                      <p className="text-sm text-muted-foreground">Phone: {selectedVendor.phone || 'Not set'}</p>
-                      <p className="text-sm text-muted-foreground">Website: {selectedVendor.website_url || 'Not set'}</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border rounded-lg">
+                      <div>
+                        <h4 className="font-medium">Company Information</h4>
+                        <p className="text-sm text-muted-foreground">Name: {selectedVendor.name}</p>
+                        <p className="text-sm text-muted-foreground">Location: {selectedVendor.location || 'Not set'}</p>
+                        <p className="text-sm text-muted-foreground">Type: {selectedVendor.vendor_type || 'company'}</p>
+                      </div>
+                      <div>
+                        <h4 className="font-medium">Contact Information</h4>
+                        <p className="text-sm text-muted-foreground">Email: {selectedVendor.contact_email || 'Not set'}</p>
+                        <p className="text-sm text-muted-foreground">Phone: {selectedVendor.phone || 'Not set'}</p>
+                        <p className="text-sm text-muted-foreground">Website: {selectedVendor.website_url || 'Not set'}</p>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
+            </TabsContent>
+            
+            <TabsContent value="content">
+              <VendorContentManager 
+                vendorId={selectedVendor.id} 
+                vendorName={selectedVendor.name} 
+              />
+            </TabsContent>
+          </Tabs>
           </CardContent>
         </Card>
       )}
