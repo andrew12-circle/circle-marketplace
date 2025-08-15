@@ -119,7 +119,11 @@ export const BaseVendorCard = ({
   return (
     <>
       <Card
-      className="group relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 bg-card border border-border/50 h-full flex flex-col cursor-pointer"
+      className={`group relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 bg-card h-full flex flex-col cursor-pointer ${
+        name === "Circle Home Loans" 
+          ? "border-2 border-blue-500 shadow-lg shadow-blue-500/25" 
+          : "border border-border/50"
+      }`}
       onClick={handleCardClick}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
