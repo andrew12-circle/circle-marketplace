@@ -294,7 +294,7 @@ export const VendorFunnelModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-7xl w-[95vw] h-[95vh] p-0 bg-white overflow-y-auto">
+      <DialogContent className="max-w-[90vw] lg:max-w-6xl max-h-[90vh] overflow-hidden p-0 bg-white">
         {/* Close button */}
         <button
           onClick={onClose}
