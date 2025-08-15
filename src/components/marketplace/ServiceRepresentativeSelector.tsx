@@ -189,7 +189,29 @@ export const ServiceRepresentativeSelector: React.FC<ServiceRepresentativeSelect
                   {selectedRepresentative.license_number && (
                     <div className="flex items-center gap-1">
                       <Award className="h-3 w-3" />
-                      <span>Licensed</span>
+                      <span>License: {selectedRepresentative.license_number}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Contact Information */}
+                <div className="flex flex-wrap gap-3 mt-3 text-xs text-muted-foreground">
+                  {selectedRepresentative.email && (
+                    <div className="flex items-center gap-1">
+                      <Mail className="h-3 w-3" />
+                      <span>{selectedRepresentative.email}</span>
+                    </div>
+                  )}
+                  {selectedRepresentative.phone && (
+                    <div className="flex items-center gap-1">
+                      <Phone className="h-3 w-3" />
+                      <span>{selectedRepresentative.phone}</span>
+                    </div>
+                  )}
+                  {selectedRepresentative.website && (
+                    <div className="flex items-center gap-1">
+                      <Globe className="h-3 w-3" />
+                      <span>{selectedRepresentative.website}</span>
                     </div>
                   )}
                 </div>
