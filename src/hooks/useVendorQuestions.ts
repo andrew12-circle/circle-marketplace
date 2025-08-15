@@ -7,6 +7,9 @@ interface VendorQuestion {
   vendor_id: string;
   question_number: number;
   question_text: string;
+  answer_text?: string;
+  ai_generated?: boolean;
+  manually_updated?: boolean;
   created_at: string;
   updated_at: string;
 }

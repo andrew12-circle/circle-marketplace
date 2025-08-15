@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -25,6 +25,7 @@ export const VendorQuestionsManager = () => {
   const [loading, setLoading] = useState(true);
   const [generatingQuestions, setGeneratingQuestions] = useState(false);
   const [bulkGenerating, setBulkGenerating] = useState(false);
+  const [savingAnswers, setSavingAnswers] = useState<Set<number>>(new Set());
 
   const { questions, loading: questionsLoading, updateQuestion, refetch } = useVendorQuestions(selectedVendor || undefined);
 
@@ -116,6 +117,54 @@ export const VendorQuestionsManager = () => {
       setBulkGenerating(false);
     }
   };
+
+  const handleAnswerChange = useCallback(
+    async (questionNumber: number, answerText: string) => {
+      if (!selectedVendor) return;
+
+      // Add to saving set
+      setSavingAnswers(prev => new Set(prev).add(questionNumber));
+
+      try {
+        const { error } = await supabase
+          .from('vendor_questions')
+          .update({ 
+            answer_text: answerText,
+            manually_updated: true
+          })
+          .eq('vendor_id', selectedVendor)
+          .eq('question_number', questionNumber);
+
+        if (error) throw error;
+
+        // Update local state
+        refetch();
+      } catch (err) {
+        console.error('Error saving answer:', err);
+        toast.error('Failed to save answer');
+      } finally {
+        // Remove from saving set
+        setSavingAnswers(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(questionNumber);
+          return newSet;
+        });
+      }
+    },
+    [selectedVendor, refetch]
+  );
+
+  // Debounced answer update
+  const debouncedAnswerUpdate = useCallback(
+    (questionNumber: number, answerText: string) => {
+      const timeoutId = setTimeout(() => {
+        handleAnswerChange(questionNumber, answerText);
+      }, 1000); // Save after 1 second of no typing
+
+      return () => clearTimeout(timeoutId);
+    },
+    [handleAnswerChange]
+  );
 
   if (loading) {
     return (
@@ -250,6 +299,39 @@ export const VendorQuestionsManager = () => {
                         {question.question_text}
                       </p>
                     )}
+                    
+                    {/* Answer Section */}
+                    <div className="space-y-2 border-t pt-3">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-sm font-medium text-primary">Answer</Label>
+                        {savingAnswers.has(question.question_number) && (
+                          <span className="text-xs text-muted-foreground">Saving...</span>
+                        )}
+                      </div>
+                      <Textarea
+                        value={question.answer_text || ''}
+                        onChange={(e) => {
+                          // Update local state immediately for responsiveness
+                          const newValue = e.target.value;
+                          // Call debounced save
+                          debouncedAnswerUpdate(question.question_number, newValue);
+                        }}
+                        placeholder="Enter the answer for this question..."
+                        className="min-h-[100px] bg-background"
+                      />
+                      {question.ai_generated && (
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <Sparkles className="h-3 w-3" />
+                          AI Generated
+                        </div>
+                      )}
+                      {question.manually_updated && (
+                        <div className="flex items-center gap-1 text-xs text-blue-600">
+                          <Edit className="h-3 w-3" />
+                          Manually Updated
+                        </div>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
