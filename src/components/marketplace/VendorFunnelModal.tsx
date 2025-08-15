@@ -274,7 +274,7 @@ export const VendorFunnelModal = ({
   const isVerified = vendor.is_verified;
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-7xl w-[95vw] h-[95vh] p-0 overflow-hidden bg-white">
         <div className="flex flex-col h-full overflow-hidden">
           
