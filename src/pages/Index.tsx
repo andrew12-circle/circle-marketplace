@@ -5,7 +5,7 @@ import { Marketplace } from "./Marketplace";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Crown } from "lucide-react";
-const circleLogoUrl = "/new-circle-logo.png";
+const circleLogoUrl = "/circle-logo-updated.png";
 
 import { CartDrawer } from "@/components/marketplace/CartDrawer";
 import { UserMenu } from "@/components/UserMenu";
