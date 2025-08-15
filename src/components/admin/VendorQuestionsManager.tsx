@@ -94,8 +94,8 @@ export const VendorQuestionsManager = ({ vendorId, vendorName }: VendorQuestions
 
         if (error) throw error;
 
-        // Update local state
-        refetch();
+        // Force immediate refetch to update UI
+        await refetch();
       } catch (err) {
         console.error('Error saving answer:', err);
         toast.error('Failed to save answer');
@@ -221,12 +221,11 @@ export const VendorQuestionsManager = ({ vendorId, vendorName }: VendorQuestions
                         )}
                       </div>
                       <Textarea
+                        key={`answer-${question.id}-${question.updated_at}`}
                         value={question.answer_text || ''}
                         onChange={(e) => {
-                          // Update local state immediately for responsiveness
-                          const newValue = e.target.value;
-                          // Call debounced save
-                          debouncedAnswerUpdate(question.question_number, newValue);
+                          // Call immediate save instead of debounced
+                          handleAnswerChange(question.question_number, e.target.value);
                         }}
                         placeholder="Enter the answer for this question..."
                         className="min-h-[100px] bg-background"
