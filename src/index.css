@@ -206,13 +206,7 @@ All colors MUST be HSL.
     }
   }
   
-  @media screen and (min-width: 768px) {
-    .mobile-grid {
-      grid-template-columns: repeat(3, 1fr);
-    }
-  }
-  
-  @media screen and (min-width: 1200px) {
+  @media screen and (min-width: 1024px) {
     .mobile-grid {
       grid-template-columns: repeat(4, 1fr);
     }

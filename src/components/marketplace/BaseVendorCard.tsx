@@ -109,14 +109,8 @@ export const BaseVendorCard: React.FC<BaseVendorCardProps> = ({
   };
 
   const getCardSize = () => {
-    switch (variant) {
-      case 'compact':
-        return 'max-w-sm';
-      case 'detailed':
-        return 'max-w-lg';
-      default:
-        return 'max-w-md';
-    }
+    // Remove max-width constraints to allow grid to control sizing
+    return '';
   };
 
   const getLogoSize = () => {
