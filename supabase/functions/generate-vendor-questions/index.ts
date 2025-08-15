@@ -133,7 +133,7 @@ Verified Status: ${vendor.is_verified ? 'Verified' : 'Not verified'}
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-5-mini-2025-08-07', // Use the more cost-effective model
+        model: 'gpt-4o-mini', // Use the more cost-effective model
         messages: [
           {
             role: 'system',
