@@ -17,7 +17,7 @@ serve(async (req) => {
   }
 
   try {
-    const { vendorId, vendorData } = await req.json();
+    const { vendorId } = await req.json();
     
     if (!vendorId) {
       throw new Error('Vendor ID is required');
@@ -44,7 +44,22 @@ serve(async (req) => {
       throw new Error('Vendor not found');
     }
 
-    console.log('Generating questions for vendor:', vendor.name);
+    console.log('Generating AI answers for vendor:', vendor.name);
+
+    // Get standardized questions for this vendor
+    const { data: questions, error: questionsError } = await supabase
+      .from('vendor_questions')
+      .select('*')
+      .eq('vendor_id', vendorId)
+      .order('question_number');
+
+    if (questionsError) {
+      throw new Error(`Failed to fetch questions: ${questionsError.message}`);
+    }
+
+    if (!questions || questions.length === 0) {
+      throw new Error('No questions found for vendor. Questions should be auto-created.');
+    }
 
     // Fetch website content if available
     let websiteContent = '';
@@ -85,7 +100,7 @@ Website Content Preview: ${websiteContent || 'No website content available'}
 
     console.log('Vendor context prepared, calling OpenAI...');
 
-    // Generate intelligent questions using OpenAI
+    // Generate intelligent answers using OpenAI
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -97,34 +112,41 @@ Website Content Preview: ${websiteContent || 'No website content available'}
         messages: [
           {
             role: 'system',
-            content: `You are an expert in real estate services and vendor evaluation. Generate exactly 7 highly specific, intelligent evaluation questions for the given vendor based on their actual business, services, and industry. 
+            content: `You are a professional business analyst specializing in vendor assessment. Based on the provided vendor information, generate specific, professional answers for each of the 8 standardized vendor evaluation categories. Each answer should be 1-2 sentences, factual, and based on the available information.
 
-The questions should be:
-1. Specific to their actual business model and services
-2. Relevant to what agents would really want to know
-3. Professional and actionable
-4. Different from generic questions
-5. Based on their website content and business details when available
-
-Return ONLY a JSON array of exactly 7 questions in this format:
-[
-  "Question 1 text here?",
-  "Question 2 text here?",
-  "Question 3 text here?",
-  "Question 4 text here?",
-  "Question 5 text here?",
-  "Question 6 text here?",
-  "Question 7 text here?"
-]
-
-Focus on practical concerns like: service delivery, communication, coverage areas, pricing structure, technology tools, track record, and unique value propositions.`
+Return your response as a JSON object with question numbers as keys and answers as values:
+{
+  "1": "Answer for Service & Reliability",
+  "2": "Answer for Communication & Availability", 
+  "3": "Answer for Coverage & Licensing",
+  "4": "Answer for Product & Offering",
+  "5": "Answer for Reputation & Proof",
+  "6": "Answer for Local Presence",
+  "7": "Answer for Value Add & Differentiators",
+  "8": "Answer for Compliance & Professionalism"
+}`
           },
           {
             role: 'user',
-            content: `Generate 7 intelligent evaluation questions for this vendor:\n\n${vendorContext}`
+            content: `Based on this vendor information, provide specific answers for the 8 vendor evaluation categories:
+
+${vendorContext}
+
+The 8 categories are:
+1. Service & Reliability - What services do they provide and how reliable are they?
+2. Communication & Availability - How do they communicate and what are their availability hours?
+3. Coverage & Licensing - What geographic areas do they serve and what licenses do they hold?
+4. Product & Offering - What specific products or services do they offer?
+5. Reputation & Proof - What evidence is there of their reputation and track record?
+6. Local Presence - Do they have local presence in specific markets?
+7. Value Add & Differentiators - What makes them unique or different from competitors?
+8. Compliance & Professionalism - How do they demonstrate compliance and professionalism?
+
+Please provide factual, professional answers based on the available information.`
           }
         ],
-        max_completion_tokens: 1000
+        max_completion_tokens: 1000,
+        response_format: { type: "json_object" }
       }),
     });
 
@@ -135,43 +157,39 @@ Focus on practical concerns like: service delivery, communication, coverage area
       throw new Error(`OpenAI API error: ${aiData.error?.message || 'Unknown error'}`);
     }
 
-    const generatedQuestions = JSON.parse(aiData.choices[0].message.content);
+    const generatedAnswers = JSON.parse(aiData.choices[0].message.content);
     
-    if (!Array.isArray(generatedQuestions) || generatedQuestions.length !== 7) {
-      throw new Error('Invalid response format from AI');
+    console.log('Generated answers:', Object.keys(generatedAnswers).length, 'answers');
+
+    // Update questions with AI-generated answers
+    const updates = [];
+    for (const question of questions) {
+      const answerKey = question.question_number.toString();
+      if (generatedAnswers[answerKey]) {
+        updates.push(
+          supabase
+            .from('vendor_questions')
+            .update({
+              answer_text: generatedAnswers[answerKey],
+              ai_generated: true,
+              manually_updated: false,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', question.id)
+        );
+      }
     }
 
-    console.log('Generated questions:', generatedQuestions);
-
-    // Delete existing questions for this vendor
-    await supabase
-      .from('vendor_questions')
-      .delete()
-      .eq('vendor_id', vendorId);
-
-    // Insert new questions
-    const questionsData = generatedQuestions.map((question, index) => ({
-      vendor_id: vendorId,
-      question_number: index + 1,
-      question_text: question
-    }));
-
-    const { error: insertError } = await supabase
-      .from('vendor_questions')
-      .insert(questionsData);
-
-    if (insertError) {
-      console.error('Database insert error:', insertError);
-      throw new Error(`Failed to save questions: ${insertError.message}`);
+    if (updates.length > 0) {
+      await Promise.all(updates);
+      console.log('Successfully updated', updates.length, 'question answers');
     }
-
-    console.log('Successfully generated and saved questions for vendor:', vendor.name);
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: `Generated ${generatedQuestions.length} intelligent questions for ${vendor.name}`,
-        questions: generatedQuestions
+        message: `Generated AI answers for ${updates.length} questions for ${vendor.name}`,
+        answers: generatedAnswers
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

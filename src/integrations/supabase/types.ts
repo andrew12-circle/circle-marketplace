@@ -5387,24 +5387,33 @@ export type Database = {
       }
       vendor_questions: {
         Row: {
+          ai_generated: boolean | null
+          answer_text: string | null
           created_at: string
           id: string
+          manually_updated: boolean | null
           question_number: number
           question_text: string
           updated_at: string
           vendor_id: string
         }
         Insert: {
+          ai_generated?: boolean | null
+          answer_text?: string | null
           created_at?: string
           id?: string
+          manually_updated?: boolean | null
           question_number: number
           question_text: string
           updated_at?: string
           vendor_id: string
         }
         Update: {
+          ai_generated?: boolean | null
+          answer_text?: string | null
           created_at?: string
           id?: string
+          manually_updated?: boolean | null
           question_number?: number
           question_text?: string
           updated_at?: string
@@ -6323,6 +6332,10 @@ export type Database = {
       secure_profile_update: {
         Args: { target_user_id: string; update_data: Json }
         Returns: Json
+      }
+      seed_standardized_vendor_questions: {
+        Args: { p_vendor_id: string }
+        Returns: undefined
       }
       seed_vendor_questions: {
         Args: { p_vendor_id: string }
