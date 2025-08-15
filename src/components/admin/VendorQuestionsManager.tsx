@@ -17,39 +17,19 @@ interface Vendor {
   is_verified?: boolean;
 }
 
-export const VendorQuestionsManager = () => {
-  const [vendors, setVendors] = useState<Vendor[]>([]);
-  const [selectedVendor, setSelectedVendor] = useState<string>('');
+interface VendorQuestionsManagerProps {
+  vendorId: string;
+  vendorName: string;
+}
+
+export const VendorQuestionsManager = ({ vendorId, vendorName }: VendorQuestionsManagerProps) => {
   const [editingQuestion, setEditingQuestion] = useState<number | null>(null);
   const [tempQuestionText, setTempQuestionText] = useState('');
-  const [loading, setLoading] = useState(true);
   const [generatingQuestions, setGeneratingQuestions] = useState(false);
-  const [bulkGenerating, setBulkGenerating] = useState(false);
   const [savingAnswers, setSavingAnswers] = useState<Set<number>>(new Set());
 
-  const { questions, loading: questionsLoading, updateQuestion, refetch } = useVendorQuestions(selectedVendor || undefined);
+  const { questions, loading: questionsLoading, updateQuestion, refetch } = useVendorQuestions(vendorId);
 
-  useEffect(() => {
-    fetchVendors();
-  }, []);
-
-  const fetchVendors = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('vendors')
-        .select('id, name, is_verified')
-        .eq('is_active', true)
-        .order('name');
-
-      if (error) throw error;
-      setVendors(data || []);
-    } catch (err) {
-      console.error('Error fetching vendors:', err);
-      toast.error('Failed to fetch vendors');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleEditClick = (questionNumber: number, currentText: string) => {
     setEditingQuestion(questionNumber);
@@ -69,7 +49,7 @@ export const VendorQuestionsManager = () => {
     setTempQuestionText('');
   };
 
-  const generateAIQuestions = async (vendorId: string) => {
+  const generateAIQuestions = async () => {
     if (!vendorId) return;
     
     setGeneratingQuestions(true);
@@ -94,33 +74,10 @@ export const VendorQuestionsManager = () => {
     }
   };
 
-  const bulkGenerateQuestions = async () => {
-    setBulkGenerating(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('bulk-generate-vendor-questions');
-
-      if (error) throw error;
-
-      if (data.success) {
-        toast.success(`Bulk generation complete! Processed ${data.summary.processed} vendors`);
-        if (data.summary.errors > 0) {
-          toast.error(`${data.summary.errors} vendors had errors`);
-        }
-        refetch();
-      } else {
-        throw new Error(data.error || 'Failed to bulk generate questions');
-      }
-    } catch (err) {
-      console.error('Error bulk generating questions:', err);
-      toast.error('Failed to bulk generate questions');
-    } finally {
-      setBulkGenerating(false);
-    }
-  };
 
   const handleAnswerChange = useCallback(
     async (questionNumber: number, answerText: string) => {
-      if (!selectedVendor) return;
+      if (!vendorId) return;
 
       // Add to saving set
       setSavingAnswers(prev => new Set(prev).add(questionNumber));
@@ -132,7 +89,7 @@ export const VendorQuestionsManager = () => {
             answer_text: answerText,
             manually_updated: true
           })
-          .eq('vendor_id', selectedVendor)
+          .eq('vendor_id', vendorId)
           .eq('question_number', questionNumber);
 
         if (error) throw error;
@@ -151,7 +108,7 @@ export const VendorQuestionsManager = () => {
         });
       }
     },
-    [selectedVendor, refetch]
+    [vendorId, refetch]
   );
 
   // Debounced answer update
@@ -166,94 +123,49 @@ export const VendorQuestionsManager = () => {
     [handleAnswerChange]
   );
 
-  if (loading) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Loading...</CardTitle>
-        </CardHeader>
-      </Card>
-    );
-  }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Vendor Questions Manager</CardTitle>
-        <div className="flex items-center gap-2">
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-lg font-medium">Vendor Questions & Answers</h3>
           <p className="text-sm text-muted-foreground">
-            Manage the 7 evaluation questions that appear on vendor profile cards
+            Manage the 8 evaluation questions for {vendorName}
           </p>
+        </div>
+        <div className="flex gap-2">
           <Button
-            onClick={bulkGenerateQuestions}
-            disabled={bulkGenerating}
             variant="outline"
             size="sm"
+            onClick={generateAIQuestions}
+            disabled={questionsLoading || generatingQuestions}
           >
-            <Sparkles className={`h-4 w-4 mr-2 ${bulkGenerating ? 'animate-spin' : ''}`} />
-            {bulkGenerating ? 'Generating...' : 'Bulk Generate AI Questions'}
+            <Sparkles className={`h-4 w-4 mr-2 ${generatingQuestions ? 'animate-spin' : ''}`} />
+            {generatingQuestions ? 'Generating...' : 'Generate AI Answers'}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={refetch}
+            disabled={questionsLoading}
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${questionsLoading ? 'animate-spin' : ''}`} />
+            Refresh
           </Button>
         </div>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div>
-          <Label htmlFor="vendor-select">Select Vendor</Label>
-          <Select value={selectedVendor} onValueChange={setSelectedVendor}>
-            <SelectTrigger>
-              <SelectValue placeholder="Choose a vendor to manage their questions" />
-            </SelectTrigger>
-            <SelectContent>
-              {vendors.map((vendor) => (
-                <SelectItem key={vendor.id} value={vendor.id}>
-                  <div className="flex items-center gap-2">
-                    {vendor.name}
-                    {vendor.is_verified && (
-                      <Badge variant="secondary" className="text-xs">Verified</Badge>
-                    )}
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+      </div>
+
+      {questionsLoading ? (
+        <div className="text-center py-8">
+          <p className="text-muted-foreground">Loading questions...</p>
         </div>
-
-        {selectedVendor && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-medium">Vendor Evaluation Questions</h3>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => generateAIQuestions(selectedVendor)}
-                  disabled={questionsLoading || generatingQuestions}
-                >
-                  <Sparkles className={`h-4 w-4 mr-2 ${generatingQuestions ? 'animate-spin' : ''}`} />
-                  {generatingQuestions ? 'Generating...' : 'Generate AI Questions'}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={refetch}
-                  disabled={questionsLoading}
-                >
-                  <RefreshCw className={`h-4 w-4 mr-2 ${questionsLoading ? 'animate-spin' : ''}`} />
-                  Refresh
-                </Button>
-              </div>
-            </div>
-
-            {questionsLoading ? (
-              <div className="text-center py-8">
-                <p className="text-muted-foreground">Loading questions...</p>
-              </div>
-            ) : questions.length === 0 ? (
-              <div className="text-center py-8">
-                <p className="text-muted-foreground">No questions found for this vendor</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {questions.map((question) => (
+      ) : questions.length === 0 ? (
+        <div className="text-center py-8">
+          <p className="text-muted-foreground">No questions found for this vendor</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {questions.map((question) => (
                   <div key={question.id} className="border rounded-lg p-4 space-y-3">
                     <div className="flex items-center justify-between">
                       <Label className="font-medium">
@@ -336,9 +248,6 @@ export const VendorQuestionsManager = () => {
                 ))}
               </div>
             )}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+    </div>
   );
 };

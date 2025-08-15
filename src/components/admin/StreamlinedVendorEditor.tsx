@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { VendorQuestionsManager } from './VendorQuestionsManager';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -258,6 +259,22 @@ export const StreamlinedVendorEditor = ({ vendorData, onSave, onCancel }: Stream
               Verified Vendor
             </Label>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Vendor Questions & Answers */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <Star className="w-5 h-5 mr-2" />
+            Questions & Answers
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <VendorQuestionsManager 
+            vendorId={vendorData.id} 
+            vendorName={vendorData.name}
+          />
         </CardContent>
       </Card>
 

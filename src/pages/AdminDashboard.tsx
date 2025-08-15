@@ -903,7 +903,7 @@ export default function AdminDashboard() {
         <TabsContent value="vendors" className="space-y-6">
           <div className="space-y-6">
             <VendorManagementPanel />
-            <VendorQuestionsManager />
+            
           </div>
           <VendorSSPManager />
           <VendorInvitationPanel />
