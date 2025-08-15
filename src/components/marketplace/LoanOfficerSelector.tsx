@@ -249,6 +249,44 @@ export const LoanOfficerSelector = ({ vendor, onSelect, selected }: LoanOfficerS
                     ))}
                   </div>
                 )}
+                
+                {/* Connect Button */}
+                <div className="flex gap-2 mt-3">
+                  {selectedOfficer.email && (
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => window.open(`mailto:${selectedOfficer.email}`, '_blank')}
+                      className="text-xs"
+                    >
+                      <Mail className="w-3 h-3 mr-1" />
+                      Email
+                    </Button>
+                  )}
+                  {selectedOfficer.phone && (
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => window.open(`tel:${selectedOfficer.phone}`, '_blank')}
+                      className="text-xs"
+                    >
+                      <Phone className="w-3 h-3 mr-1" />
+                      Call
+                    </Button>
+                  )}
+                  <Button 
+                    size="sm" 
+                    className="text-xs bg-blue-600 hover:bg-blue-700"
+                    onClick={() => {
+                      // For now, open the company website or use a generic mortgage inquiry
+                      const subject = encodeURIComponent(`Mortgage Inquiry - ${selectedOfficer.name}`);
+                      const body = encodeURIComponent(`Hi ${selectedOfficer.name},\n\nI'm interested in discussing mortgage options. Please let me know a good time to connect.\n\nThank you!`);
+                      window.open(`mailto:${selectedOfficer.email}?subject=${subject}&body=${body}`, '_blank');
+                    }}
+                  >
+                    Connect Now
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
