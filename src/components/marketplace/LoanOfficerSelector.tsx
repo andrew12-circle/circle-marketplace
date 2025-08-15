@@ -234,7 +234,12 @@ export const LoanOfficerSelector = ({ vendor, onSelect, selected }: LoanOfficerS
                   {selectedOfficer.phone && (
                     <div className="flex items-center gap-1">
                       <Phone className="w-3 h-3" />
-                      <span>{selectedOfficer.phone}</span>
+                      <span 
+                        className="text-blue-600 hover:text-blue-800 cursor-pointer underline"
+                        onClick={() => window.open(`tel:${selectedOfficer.phone}`, '_blank')}
+                      >
+                        {selectedOfficer.phone}
+                      </span>
                     </div>
                   )}
                   {selectedOfficer.license_number && (
@@ -256,17 +261,6 @@ export const LoanOfficerSelector = ({ vendor, onSelect, selected }: LoanOfficerS
                 )}
                 
                 <div className="flex gap-2 mt-3">
-                  {selectedOfficer.phone && (
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      onClick={() => window.open(`tel:${selectedOfficer.phone}`, '_blank')}
-                      className="text-xs"
-                    >
-                      <Phone className="w-3 h-3 mr-1" />
-                      Call
-                    </Button>
-                  )}
                   <Button 
                     size="sm" 
                     className="text-xs bg-blue-600 hover:bg-blue-700"
