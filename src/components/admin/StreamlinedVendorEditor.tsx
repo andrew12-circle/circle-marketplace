@@ -90,6 +90,7 @@ export const StreamlinedVendorEditor = ({ vendorData, onSave, onCancel }: Stream
   const [newSpecialty, setNewSpecialty] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [justSaved, setJustSaved] = useState(false);
 
   const handleInputChange = (field: string, value: any) => {
     setFormData(prev => ({
@@ -181,7 +182,15 @@ export const StreamlinedVendorEditor = ({ vendorData, onSave, onCancel }: Stream
 
       if (error) throw error;
 
-      toast.success('Vendor updated successfully');
+      setJustSaved(true);
+      toast.success('✅ Vendor data saved successfully!', {
+        duration: 4000,
+        position: 'top-center',
+      });
+      
+      // Reset the "just saved" indicator after 2 seconds
+      setTimeout(() => setJustSaved(false), 2000);
+      
       onSave(updatedData);
     } catch (error) {
       console.error('Error saving vendor:', error);
@@ -504,9 +513,13 @@ export const StreamlinedVendorEditor = ({ vendorData, onSave, onCancel }: Stream
           <Button variant="outline" onClick={onCancel}>
             Cancel
           </Button>
-          <Button onClick={handleSave} disabled={isSaving}>
+          <Button 
+            onClick={handleSave} 
+            disabled={isSaving}
+            className={justSaved ? "bg-green-600 hover:bg-green-700 text-white" : ""}
+          >
             <Save className="w-4 h-4 mr-2" />
-            {isSaving ? 'Saving...' : 'Save Changes'}
+            {isSaving ? 'Saving...' : justSaved ? '✅ Saved!' : 'Save Changes'}
           </Button>
         </div>
       </div>
