@@ -380,9 +380,7 @@ export const VendorFunnelModal = ({
                                   <div className="space-y-4 pt-[5px]">
                                     <div className="space-y-3">
                                       {question.answer_text ? (
-                                        <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-lg">
-                                          <p className="text-gray-800 leading-relaxed">{question.answer_text}</p>
-                                        </div>
+                                        <p className="text-gray-800 leading-relaxed">{question.answer_text}</p>
                                       ) : (
                                         <p className="text-gray-600 text-sm">
                                           This is an important question to consider when evaluating {vendor.name} as a potential partner.
