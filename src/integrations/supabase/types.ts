@@ -5385,6 +5385,33 @@ export type Database = {
           },
         ]
       }
+      vendor_questions: {
+        Row: {
+          created_at: string
+          id: string
+          question_number: number
+          question_text: string
+          updated_at: string
+          vendor_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          question_number: number
+          question_text: string
+          updated_at?: string
+          vendor_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          question_number?: number
+          question_text?: string
+          updated_at?: string
+          vendor_id?: string
+        }
+        Relationships: []
+      }
       vendor_user_associations: {
         Row: {
           created_at: string | null
@@ -6296,6 +6323,10 @@ export type Database = {
       secure_profile_update: {
         Args: { target_user_id: string; update_data: Json }
         Returns: Json
+      }
+      seed_vendor_questions: {
+        Args: { p_vendor_id: string }
+        Returns: undefined
       }
       track_vendor_activity: {
         Args: {

@@ -42,6 +42,7 @@ import {
 import { getRiskBadge, getComplianceAlert, determineServiceRisk } from "./RESPAComplianceSystem";
 import { ServiceRepresentativeSelector } from "./ServiceRepresentativeSelector";
 import { supabase } from "@/integrations/supabase/client";
+import { useVendorQuestions } from "@/hooks/useVendorQuestions";
 
 interface VendorFunnelModalProps {
   isOpen: boolean;
@@ -88,6 +89,7 @@ export const VendorFunnelModal = ({
   const [vendorReviews, setVendorReviews] = useState<any[]>([]);
   const [vendorReviewsLoading, setVendorReviewsLoading] = useState(false);
   const [openItem, setOpenItem] = useState<string>("question-1");
+  const { questions: vendorQuestions, loading: questionsLoading } = useVendorQuestions(vendor?.id);
 
   // Check if current user is the vendor owner
   const isVendorOwner = currentUserId === vendor.id || isVendorView;
@@ -348,193 +350,87 @@ export const VendorFunnelModal = ({
               <div className="max-w-6xl mx-auto px-6">
                 <div className="grid lg:grid-cols-3 gap-8">
                   
-                  {/* Left Column - Collapsible Questions */}
+                  {/* Left Column - Dynamic Questions */}
                   <div className="lg:col-span-2">
-                    <Accordion type="single" collapsible value={openItem} onValueChange={setOpenItem} className="space-y-4">
-                      {/* Question 1 - Service & Reliability */}
-                      <AccordionItem value="question-1">
-                        <AccordionTrigger className="text-xl font-bold text-gray-900 hover:no-underline border-l-4 border-l-blue-500 pl-4 bg-white rounded-t-lg shadow-sm">
-                          <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold text-sm">1</div>
-                            Service & Reliability
-                          </div>
-                        </AccordionTrigger>
-                        <AccordionContent className="border-l-4 border-l-blue-500 pl-4 bg-white rounded-b-lg shadow-sm pt-0">
-                          <div className="p-6 pt-0">
-                            <div className="space-y-4 pt-[5px]">
-                              <div className="space-y-3">
-                                <p className="font-medium text-gray-900">Do you consistently close on time?</p>
-                                <p className="font-medium text-gray-900">What is your on-time closing percentage?</p>
-                                <p className="font-medium text-gray-900">How do you handle unexpected delays?</p>
-                                <p className="font-medium text-gray-900">What's your average turn time from application to closing?</p>
-                              </div>
-                            </div>
-                          </div>
-                        </AccordionContent>
-                      </AccordionItem>
-
-                      {/* Question 2 - Communication & Availability */}
-                      <AccordionItem value="question-2">
-                        <AccordionTrigger className="text-xl font-bold text-gray-900 hover:no-underline border-l-4 border-l-green-500 pl-4 bg-white rounded-t-lg shadow-sm">
-                          <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-green-600 font-bold text-sm">2</div>
-                            Communication & Availability
-                          </div>
-                        </AccordionTrigger>
-                        <AccordionContent className="border-l-4 border-l-green-500 pl-4 bg-white rounded-b-lg shadow-sm pt-0">
-                          <div className="p-6 pt-0">
-                            <div className="space-y-4 pt-[5px]">
-                              <div className="space-y-3">
-                                <p className="font-medium text-gray-900">How quickly do you respond to calls, texts, and emails?</p>
-                                <p className="font-medium text-gray-900">Do you work evenings and weekends?</p>
-                                <p className="font-medium text-gray-900">Who will be my primary contact, and how do I reach them?</p>
-                                <p className="font-medium text-gray-900">Do you provide milestone updates to agents and clients?</p>
-                              </div>
-                            </div>
-                          </div>
-                        </AccordionContent>
-                      </AccordionItem>
-
-                      {/* Question 3 - Coverage & Licensing */}
-                      <AccordionItem value="question-3">
-                        <AccordionTrigger className="text-xl font-bold text-gray-900 hover:no-underline border-l-4 border-l-purple-500 pl-4 bg-white rounded-t-lg shadow-sm">
-                          <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 font-bold text-sm">3</div>
-                            Coverage & Licensing
-                          </div>
-                        </AccordionTrigger>
-                        <AccordionContent className="border-l-4 border-l-purple-500 pl-4 bg-white rounded-b-lg shadow-sm pt-0">
-                          <div className="p-6 pt-0">
-                            <div className="space-y-4 pt-[5px]">
-                              <div className="space-y-3">
-                                <p className="font-medium text-gray-900">What states are you licensed in?</p>
-                                <p className="font-medium text-gray-900">Can you work with clients relocating between states?</p>
-                                <p className="font-medium text-gray-900">Are there geographic areas or property types you do not serve?</p>
-                              </div>
-                            </div>
-                          </div>
-                        </AccordionContent>
-                      </AccordionItem>
-
-                      {/* Question 4 - Product & Offering */}
-                      <AccordionItem value="question-4">
-                        <AccordionTrigger className="text-xl font-bold text-gray-900 hover:no-underline border-l-4 border-l-orange-500 pl-4 bg-white rounded-t-lg shadow-sm">
-                          <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center text-orange-600 font-bold text-sm">4</div>
-                            Product & Offering
-                          </div>
-                        </AccordionTrigger>
-                        <AccordionContent className="border-l-4 border-l-orange-500 pl-4 bg-white rounded-b-lg shadow-sm pt-0">
-                          <div className="p-6 pt-0">
-                            <div className="space-y-4 pt-[5px]">
-                              <div className="space-y-3">
-                                <p className="font-medium text-gray-900">What types of loans do you offer? (Conventional, FHA, VA, USDA, jumbo, non-QM, renovation, etc.)</p>
-                                <p className="font-medium text-gray-900">Do you offer down payment assistance or special programs for first-time buyers?</p>
-                                <p className="font-medium text-gray-900">Are you a broker, retail lender, bank, or credit union?</p>
-                                <p className="font-medium text-gray-900">Do you have in-house underwriting?</p>
-                                <p className="font-medium text-gray-900">What makes your company different from other mortgage providers?</p>
-                              </div>
-                            </div>
-                          </div>
-                        </AccordionContent>
-                      </AccordionItem>
-
-                      {/* Question 5 - Reputation & Proof */}
-                      <AccordionItem value="question-5">
-                        <AccordionTrigger className="text-xl font-bold text-gray-900 hover:no-underline border-l-4 border-l-red-500 pl-4 bg-white rounded-t-lg shadow-sm">
-                          <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center text-red-600 font-bold text-sm">5</div>
-                            Reputation & Proof
-                          </div>
-                        </AccordionTrigger>
-                        <AccordionContent className="border-l-4 border-l-red-500 pl-4 bg-white rounded-b-lg shadow-sm pt-0">
-                          <div className="p-6 pt-0">
-                            <div className="space-y-4 pt-[5px]">
-                              <div className="space-y-3">
-                                <p className="font-medium text-gray-900">What do verified agent reviews in the Circle Network say about you?</p>
-                                <p className="font-medium text-gray-900">What do your client reviews say?</p>
-                                <p className="font-medium text-gray-900">Can I speak to other agents you currently work with?</p>
-                                <p className="font-medium text-gray-900">Do you have case studies or testimonials showing how you've helped agents close deals?</p>
-                              </div>
-                              
-                              {/* Show actual reviews if available */}
-                              {vendorReviewsLoading ? (
-                                <div className="text-center py-4">
-                                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"></div>
-                                  <p className="text-gray-500 mt-2 text-sm">Loading reviews...</p>
+                    {questionsLoading ? (
+                      <div className="text-center py-8">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                        <p className="text-gray-600">Loading vendor questions...</p>
+                      </div>
+                    ) : vendorQuestions && vendorQuestions.length > 0 ? (
+                      <Accordion type="single" collapsible value={openItem} onValueChange={setOpenItem} className="space-y-4">
+                        {vendorQuestions.map((question, index) => {
+                          const colors = [
+                            'blue', 'green', 'purple', 'orange', 'red', 'yellow', 'indigo'
+                          ];
+                          const colorClass = colors[index % colors.length];
+                          
+                          return (
+                            <AccordionItem key={question.id} value={`question-${question.question_number}`}>
+                              <AccordionTrigger className={`text-xl font-bold text-gray-900 hover:no-underline border-l-4 border-l-${colorClass}-500 pl-4 bg-white rounded-t-lg shadow-sm`}>
+                                <div className="flex items-center gap-2">
+                                  <div className={`w-8 h-8 bg-${colorClass}-100 rounded-full flex items-center justify-center text-${colorClass}-600 font-bold text-sm`}>
+                                    {question.question_number}
+                                  </div>
+                                  <span className="text-left">{question.question_text}</span>
                                 </div>
-                              ) : vendorReviews.length > 0 ? (
-                                <div className="space-y-3 mt-4">
-                                  <h4 className="font-medium text-gray-900">Recent Reviews:</h4>
-                                  {vendorReviews.slice(0, 3).map((review) => (
-                                    <div key={review.id} className="p-3 bg-gray-50 rounded-lg">
-                                      <div className="flex items-start justify-between mb-2">
-                                        <div>
-                                          <div className="flex items-center gap-2 mb-1">
-                                            {renderStarRating(review.rating)}
-                                            <span className="text-sm font-medium text-gray-900">{review.author}</span>
-                                            {review.verified && <Badge variant="outline" className="text-xs">Verified</Badge>}
-                                          </div>
-                                          <p className="text-xs text-gray-500">{review.date}</p>
-                                        </div>
-                                      </div>
-                                      <p className="text-gray-700 text-sm leading-relaxed">{review.review}</p>
+                              </AccordionTrigger>
+                              <AccordionContent className={`border-l-4 border-l-${colorClass}-500 pl-4 bg-white rounded-b-lg shadow-sm pt-0`}>
+                                <div className="p-6 pt-0">
+                                  <div className="space-y-4 pt-[5px]">
+                                    <div className="space-y-3">
+                                      <p className="text-gray-600 text-sm">
+                                        This is an important question to consider when evaluating {vendor.name} as a potential partner.
+                                      </p>
+                                      
+                                      {/* Show reviews for question 5 (reputation/proof) */}
+                                      {question.question_number === 5 && (
+                                        <>
+                                          {vendorReviewsLoading ? (
+                                            <div className="text-center py-4">
+                                              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"></div>
+                                              <p className="text-gray-500 mt-2 text-sm">Loading reviews...</p>
+                                            </div>
+                                          ) : vendorReviews.length > 0 ? (
+                                            <div className="space-y-3 mt-4">
+                                              <h4 className="font-medium text-gray-900">Recent Reviews:</h4>
+                                              {vendorReviews.slice(0, 3).map((review) => (
+                                                <div key={review.id} className="p-3 bg-gray-50 rounded-lg">
+                                                  <div className="flex items-start justify-between mb-2">
+                                                    <div>
+                                                      <div className="flex items-center gap-2 mb-1">
+                                                        {renderStarRating(review.rating)}
+                                                        <span className="text-sm font-medium text-gray-900">{review.author}</span>
+                                                        {review.verified && <Badge variant="outline" className="text-xs">Verified</Badge>}
+                                                      </div>
+                                                      <p className="text-xs text-gray-500">{review.date}</p>
+                                                    </div>
+                                                  </div>
+                                                  <p className="text-gray-700 text-sm leading-relaxed">{review.review}</p>
+                                                </div>
+                                              ))}
+                                            </div>
+                                          ) : (
+                                            <div className="text-center py-4">
+                                              <Star className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                                              <p className="text-gray-500 text-sm">No reviews available yet</p>
+                                            </div>
+                                          )}
+                                        </>
+                                      )}
                                     </div>
-                                  ))}
+                                  </div>
                                 </div>
-                              ) : (
-                                <div className="text-center py-4">
-                                  <Star className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-                                  <p className="text-gray-500 text-sm">No reviews available yet</p>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </AccordionContent>
-                      </AccordionItem>
-
-                      {/* Question 6 - Local Presence */}
-                      <AccordionItem value="question-6">
-                        <AccordionTrigger className="text-xl font-bold text-gray-900 hover:no-underline border-l-4 border-l-yellow-500 pl-4 bg-white rounded-t-lg shadow-sm">
-                          <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center text-yellow-600 font-bold text-sm">6</div>
-                            Local Presence
-                          </div>
-                        </AccordionTrigger>
-                        <AccordionContent className="border-l-4 border-l-yellow-500 pl-4 bg-white rounded-b-lg shadow-sm pt-0">
-                          <div className="p-6 pt-0">
-                            <div className="space-y-4 pt-[5px]">
-                              <div className="space-y-3">
-                                <p className="font-medium text-gray-900">Do you have a local loan officer for my market?</p>
-                                <p className="font-medium text-gray-900">How do you assign loan officers to agents?</p>
-                                <p className="font-medium text-gray-900">If I don't click with my assigned LO, can I request someone else?</p>
-                              </div>
-                            </div>
-                          </div>
-                        </AccordionContent>
-                      </AccordionItem>
-
-                      {/* Question 7 - Value Add & Differentiators */}
-                      <AccordionItem value="question-7">
-                        <AccordionTrigger className="text-xl font-bold text-gray-900 hover:no-underline border-l-4 border-l-indigo-500 pl-4 bg-white rounded-t-lg shadow-sm">
-                          <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold text-sm">7</div>
-                            Value Add & Differentiators
-                          </div>
-                        </AccordionTrigger>
-                        <AccordionContent className="border-l-4 border-l-indigo-500 pl-4 bg-white rounded-b-lg shadow-sm pt-0">
-                          <div className="p-6 pt-0">
-                            <div className="space-y-4 pt-[5px]">
-                              <div className="space-y-3">
-                                <p className="font-medium text-gray-900">Do you co-market with agents or provide marketing support?</p>
-                                <p className="font-medium text-gray-900">What tools, reports, or client education resources do you provide?</p>
-                                <p className="font-medium text-gray-900">How do you help agents win offers and keep deals together?</p>
-                              </div>
-                            </div>
-                          </div>
-                        </AccordionContent>
-                      </AccordionItem>
-                    </Accordion>
+                              </AccordionContent>
+                            </AccordionItem>
+                          );
+                        })}
+                      </Accordion>
+                    ) : (
+                      <div className="text-center py-8">
+                        <div className="text-gray-600">No evaluation questions available for this vendor</div>
+                      </div>
+                    )}
                   </div>
 
                   {/* Right Column - Simple Action Panel */}

@@ -42,6 +42,7 @@ import VendorPointAllocationPanel from '@/components/admin/VendorPointAllocation
 import AntiScrapingSystem from '@/components/security/AntiScrapingSystem';
 import { CreatorPayoutDashboard } from '@/components/admin/CreatorPayoutDashboard';
 import BulkFAQGenerator from '@/components/admin/BulkFAQGenerator';
+import { VendorQuestionsManager } from '@/components/admin/VendorQuestionsManager';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Upload, Building, Youtube, DollarSign, BarChart3, Coins, Shield as ShieldIcon, Users2, Send, BookOpen, Heart } from 'lucide-react';
@@ -893,9 +894,12 @@ export default function AdminDashboard() {
         </TabsContent>
 
         <TabsContent value="vendors" className="space-y-6">
+          <div className="space-y-6">
+            <VendorManagementPanel />
+            <VendorQuestionsManager />
+          </div>
           <VendorSSPManager />
           <VendorInvitationPanel />
-          <VendorManagementPanel />
           <VendorSortOrderManager />
           <VendorRESPAManager />
           <VendorBudgetManager />
