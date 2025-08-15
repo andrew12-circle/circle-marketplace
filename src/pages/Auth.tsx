@@ -15,7 +15,7 @@ import { commonRules, checkAccountLockout, clearFailedAttempts } from "@/hooks/u
 import { PasswordStrengthIndicator } from "@/components/auth/PasswordStrengthIndicator";
 import { AccountLockoutAlert } from "@/components/auth/AccountLockoutAlert";
 
-const circleLogoUrl = "/lovable-uploads/97692497-6d98-46a8-b6fc-05cd68bdc160.png";
+const circleLogoUrl = "/circle-logo-updated.png";
 
 export const Auth = () => {
   useUserRegistration(); // Apply spiritual coverage for user registration
@@ -300,11 +300,11 @@ export const Auth = () => {
           {/* Logo */}
           <div className="flex justify-center">
             <img 
-              src={circleLogoUrl}
+              src="/circle-logo-updated.png"
               alt="Circle Logo" 
-              className="w-16 h-16 object-contain"
-              width="64"
-              height="64"
+              className="w-16 h-16 sm:w-20 sm:h-20 object-contain"
+              width="80"
+              height="80"
               style={{
                 imageRendering: 'crisp-edges'
               }}
