@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { VendorQuestionsManager } from './VendorQuestionsManager';
+import { PreviewVendorCard } from '@/components/marketplace/PreviewVendorCard';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -189,8 +190,40 @@ export const StreamlinedVendorEditor = ({ vendorData, onSave, onCancel }: Stream
   };
 
   return (
-    <div className="space-y-6">
-      {/* Basic Information */}
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Live Preview */}
+      <div className="lg:col-span-1">
+        <Card className="sticky top-4">
+          <CardHeader>
+            <CardTitle>Live Preview</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <PreviewVendorCard
+              vendor={{
+                id: vendorData.id,
+                name: formData.name || 'Company Name',
+                description: formData.description || 'Company description...',
+                logo_url: formData.logo_url,
+                website_url: formData.website_url,
+                location: formData.location,
+                contact_email: formData.contact_email,
+                phone: formData.phone,
+                vendor_type: formData.vendor_type || 'company',
+                is_verified: formData.is_verified,
+                specialties: formData.specialties,
+                rating: 4.8, // Mock rating for preview
+                review_count: 124, // Mock review count for preview
+                co_marketing_agents: 5, // Mock agents for preview
+                campaigns_funded: 2 // Mock campaigns for preview
+              }}
+            />
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Editing Forms */}
+      <div className="lg:col-span-2 space-y-6">
+        {/* Basic Information */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center">
@@ -451,15 +484,16 @@ export const StreamlinedVendorEditor = ({ vendorData, onSave, onCancel }: Stream
         </CardContent>
       </Card>
 
-      {/* Action Buttons */}
-      <div className="flex justify-end space-x-3 pt-4 border-t">
-        <Button variant="outline" onClick={onCancel}>
-          Cancel
-        </Button>
-        <Button onClick={handleSave} disabled={isSaving}>
-          <Save className="w-4 h-4 mr-2" />
-          {isSaving ? 'Saving...' : 'Save Changes'}
-        </Button>
+        {/* Action Buttons */}
+        <div className="flex justify-end space-x-3 pt-4 border-t">
+          <Button variant="outline" onClick={onCancel}>
+            Cancel
+          </Button>
+          <Button onClick={handleSave} disabled={isSaving}>
+            <Save className="w-4 h-4 mr-2" />
+            {isSaving ? 'Saving...' : 'Save Changes'}
+          </Button>
+        </div>
       </div>
     </div>
   );
