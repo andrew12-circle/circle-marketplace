@@ -257,115 +257,6 @@ export const VendorFunnelModal = ({
             <div className="absolute inset-0 bg-black/20"></div>
             <div className="relative z-10">
           <div className="px-6 pt-8 pb-16">
-            {/* Licenses and Disclaimers Section for Regulated Industries */}
-            {(vendor.vendor_type === 'mortgage' || vendor.vendor_type === 'insurance' || vendor.vendor_type === 'title' || vendor.nmls_id || vendor.license_states?.length) && (
-              <Card className="mb-8 border-amber-200 bg-amber-50">
-                <CardContent className="p-6">
-                  <div className="flex items-start gap-3">
-                    <Shield className="h-6 w-6 text-amber-600 mt-1 flex-shrink-0" />
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-amber-800 mb-3">
-                        Licenses & Regulatory Information
-                      </h3>
-                      
-                      <div className="space-y-4">
-                        {/* NMLS License */}
-                        {vendor.nmls_id && (
-                          <div className="bg-white rounded-lg p-4 border border-amber-200">
-                            <div className="flex items-center gap-2 mb-2">
-                              <Award className="h-4 w-4 text-amber-600" />
-                              <span className="font-medium text-amber-800">NMLS License</span>
-                            </div>
-                            <p className="text-sm text-gray-700">
-                              NMLS ID: <span className="font-mono font-semibold">{vendor.nmls_id}</span>
-                            </p>
-                          </div>
-                        )}
-
-                        {/* Licensed States */}
-                        {vendor.license_states && vendor.license_states.length > 0 && (
-                          <div className="bg-white rounded-lg p-4 border border-amber-200">
-                            <div className="flex items-center gap-2 mb-2">
-                              <MapPin className="h-4 w-4 text-amber-600" />
-                              <span className="font-medium text-amber-800">Licensed States</span>
-                            </div>
-                            <div className="flex flex-wrap gap-1">
-                              {vendor.license_states.map((state, index) => (
-                                <Badge key={index} variant="outline" className="text-xs">
-                                  {state}
-                                </Badge>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Industry-Specific Disclaimers */}
-                        {vendor.vendor_type === 'mortgage' && (
-                          <div className="bg-white rounded-lg p-4 border border-amber-200">
-                            <div className="flex items-center gap-2 mb-2">
-                              <AlertTriangle className="h-4 w-4 text-amber-600" />
-                              <span className="font-medium text-amber-800">Important Disclosures</span>
-                            </div>
-                            <div className="text-xs text-gray-600 space-y-2">
-                              <p>
-                                <strong>Equal Housing Lender:</strong> We are committed to fair lending practices and equal housing opportunities for all qualified applicants.
-                              </p>
-                              <p>
-                                <strong>RESPA Notice:</strong> This referral may result in compensation to Circle Network. All fees and terms will be clearly disclosed before any commitment.
-                              </p>
-                              <p>
-                                <strong>Rate Disclosure:</strong> Rates and terms are subject to change and depend on individual creditworthiness and property characteristics.
-                              </p>
-                            </div>
-                          </div>
-                        )}
-
-                        {vendor.vendor_type === 'insurance' && (
-                          <div className="bg-white rounded-lg p-4 border border-amber-200">
-                            <div className="flex items-center gap-2 mb-2">
-                              <AlertTriangle className="h-4 w-4 text-amber-600" />
-                              <span className="font-medium text-amber-800">Insurance Disclosures</span>
-                            </div>
-                            <div className="text-xs text-gray-600 space-y-2">
-                              <p>
-                                <strong>Coverage Disclaimer:</strong> Insurance coverage is subject to policy terms, conditions, and exclusions. Review all policy documents carefully.
-                              </p>
-                              <p>
-                                <strong>Licensing:</strong> All insurance products are offered through licensed agents in accordance with state regulations.
-                              </p>
-                            </div>
-                          </div>
-                        )}
-
-                        {vendor.vendor_type === 'title' && (
-                          <div className="bg-white rounded-lg p-4 border border-amber-200">
-                            <div className="flex items-center gap-2 mb-2">
-                              <AlertTriangle className="h-4 w-4 text-amber-600" />
-                              <span className="font-medium text-amber-800">Title Service Disclosures</span>
-                            </div>
-                            <div className="text-xs text-gray-600 space-y-2">
-                              <p>
-                                <strong>RESPA Compliance:</strong> Settlement services are provided in compliance with the Real Estate Settlement Procedures Act.
-                              </p>
-                              <p>
-                                <strong>Title Insurance:</strong> Title insurance policies are subject to terms, conditions, and exclusions outlined in the policy.
-                              </p>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* General Regulatory Footer */}
-                        <div className="pt-2 border-t border-amber-200">
-                          <p className="text-xs text-gray-500">
-                            For questions about licensing, regulations, or consumer rights, please contact the appropriate state regulatory agency or visit our website for complete disclosure information.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
                 <div className="max-w-6xl mx-auto">
                   {/* Badges */}
                   <div className="flex flex-wrap items-center gap-3 mb-6 animate-fade-in">
@@ -727,6 +618,120 @@ export const VendorFunnelModal = ({
               </div>
             </div>
           </div>
+
+          {/* Licenses and Disclaimers Section for Regulated Industries */}
+          {(vendor.vendor_type === 'mortgage' || vendor.vendor_type === 'insurance' || vendor.vendor_type === 'title' || vendor.nmls_id || vendor.license_states?.length) && (
+            <div className="bg-gray-50/50 border-t">
+              <div className="max-w-6xl mx-auto px-6 py-8">
+                <Card className="border-amber-200 bg-amber-50">
+                  <CardContent className="p-6">
+                    <div className="flex items-start gap-3">
+                      <Shield className="h-6 w-6 text-amber-600 mt-1 flex-shrink-0" />
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold text-amber-800 mb-3">
+                          Licenses & Regulatory Information
+                        </h3>
+                        
+                        <div className="space-y-4">
+                          {/* NMLS License */}
+                          {vendor.nmls_id && (
+                            <div className="bg-white rounded-lg p-4 border border-amber-200">
+                              <div className="flex items-center gap-2 mb-2">
+                                <Award className="h-4 w-4 text-amber-600" />
+                                <span className="font-medium text-amber-800">NMLS License</span>
+                              </div>
+                              <p className="text-sm text-gray-700">
+                                NMLS ID: <span className="font-mono font-semibold">{vendor.nmls_id}</span>
+                              </p>
+                            </div>
+                          )}
+
+                          {/* Licensed States */}
+                          {vendor.license_states && vendor.license_states.length > 0 && (
+                            <div className="bg-white rounded-lg p-4 border border-amber-200">
+                              <div className="flex items-center gap-2 mb-2">
+                                <MapPin className="h-4 w-4 text-amber-600" />
+                                <span className="font-medium text-amber-800">Licensed States</span>
+                              </div>
+                              <div className="flex flex-wrap gap-1">
+                                {vendor.license_states.map((state, index) => (
+                                  <Badge key={index} variant="outline" className="text-xs">
+                                    {state}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Industry-Specific Disclaimers */}
+                          {vendor.vendor_type === 'mortgage' && (
+                            <div className="bg-white rounded-lg p-4 border border-amber-200">
+                              <div className="flex items-center gap-2 mb-2">
+                                <AlertTriangle className="h-4 w-4 text-amber-600" />
+                                <span className="font-medium text-amber-800">Important Disclosures</span>
+                              </div>
+                              <div className="text-xs text-gray-600 space-y-2">
+                                <p>
+                                  <strong>Equal Housing Lender:</strong> We are committed to fair lending practices and equal housing opportunities for all qualified applicants.
+                                </p>
+                                <p>
+                                  <strong>RESPA Notice:</strong> This referral may result in compensation to Circle Network. All fees and terms will be clearly disclosed before any commitment.
+                                </p>
+                                <p>
+                                  <strong>Rate Disclosure:</strong> Rates and terms are subject to change and depend on individual creditworthiness and property characteristics.
+                                </p>
+                              </div>
+                            </div>
+                          )}
+
+                          {vendor.vendor_type === 'insurance' && (
+                            <div className="bg-white rounded-lg p-4 border border-amber-200">
+                              <div className="flex items-center gap-2 mb-2">
+                                <AlertTriangle className="h-4 w-4 text-amber-600" />
+                                <span className="font-medium text-amber-800">Insurance Disclosures</span>
+                              </div>
+                              <div className="text-xs text-gray-600 space-y-2">
+                                <p>
+                                  <strong>Coverage Disclaimer:</strong> Insurance coverage is subject to policy terms, conditions, and exclusions. Review all policy documents carefully.
+                                </p>
+                                <p>
+                                  <strong>Licensing:</strong> All insurance products are offered through licensed agents in accordance with state regulations.
+                                </p>
+                              </div>
+                            </div>
+                          )}
+
+                          {vendor.vendor_type === 'title' && (
+                            <div className="bg-white rounded-lg p-4 border border-amber-200">
+                              <div className="flex items-center gap-2 mb-2">
+                                <AlertTriangle className="h-4 w-4 text-amber-600" />
+                                <span className="font-medium text-amber-800">Title Service Disclosures</span>
+                              </div>
+                              <div className="text-xs text-gray-600 space-y-2">
+                                <p>
+                                  <strong>RESPA Compliance:</strong> Settlement services are provided in compliance with the Real Estate Settlement Procedures Act.
+                                </p>
+                                <p>
+                                  <strong>Title Insurance:</strong> Title insurance policies are subject to terms, conditions, and exclusions outlined in the policy.
+                                </p>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* General Regulatory Footer */}
+                          <div className="pt-2 border-t border-amber-200">
+                            <p className="text-xs text-gray-500">
+                              For questions about licensing, regulations, or consumer rights, please contact the appropriate state regulatory agency or visit our website for complete disclosure information.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          )}
         </div>
         
         {/* Vendor Dashboard Tabs (only for vendor owners) */}
