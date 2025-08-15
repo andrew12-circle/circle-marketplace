@@ -11,13 +11,11 @@ export const PreviewVendorCard = memo<PreviewVendorCardProps>(
       <BaseVendorCard
         {...props}
         vendor={vendor}
-        variant="standard"
+        variant="default"
         className="mx-auto"
         showStats={true}
         showContact={true}
         showSpecialties={true}
-        connectButtonText="View Profile"
-        viewButtonText="Visit Website"
       />
     );
   },
