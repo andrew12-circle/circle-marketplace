@@ -312,7 +312,7 @@ export const VendorFunnelModal = ({
                     {/* Left Content */}
                     <div className="space-y-6 animate-fade-in">
                       <h1 className="text-2xl lg:text-3xl font-bold leading-tight bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
-                        Partner with {vendor.name}
+                        {vendor.name}
                       </h1>
                       
                       <p className="text-base lg:text-lg text-blue-100 leading-relaxed">
