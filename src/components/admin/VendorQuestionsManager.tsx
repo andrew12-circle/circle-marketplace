@@ -69,15 +69,16 @@ export const VendorQuestionsManager = ({ vendorId, vendorName }: VendorQuestions
 
       if (error) throw error;
 
-      if (data.success) {
-        toast.success(`Generated ${data.questions.length} intelligent questions!`);
-        refetch();
+      if (data?.success) {
+        toast.success(`Generated AI answers for all 8 questions!`);
+        // Refresh the questions to show the new AI-generated answers
+        await refetch();
       } else {
-        throw new Error(data.error || 'Failed to generate questions');
+        throw new Error(data?.error || 'Failed to generate AI answers');
       }
     } catch (err) {
-      console.error('Error generating questions:', err);
-      toast.error('Failed to generate AI questions');
+      console.error('Error generating AI answers:', err);
+      toast.error('Failed to generate AI answers');
     } finally {
       setGeneratingQuestions(false);
     }
