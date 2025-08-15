@@ -197,22 +197,33 @@ export const ServiceRepresentativeSelector: React.FC<ServiceRepresentativeSelect
                 {/* Contact Information */}
                 <div className="flex flex-wrap gap-3 mt-3 text-xs text-muted-foreground">
                   {selectedRepresentative.email && (
-                    <div className="flex items-center gap-1">
+                    <a
+                      href={`mailto:${selectedRepresentative.email}`}
+                      className="flex items-center gap-1 hover:text-primary transition-colors cursor-pointer"
+                    >
                       <Mail className="h-3 w-3" />
                       <span>{selectedRepresentative.email}</span>
-                    </div>
+                    </a>
                   )}
                   {selectedRepresentative.phone && (
-                    <div className="flex items-center gap-1">
+                    <a
+                      href={`tel:${selectedRepresentative.phone}`}
+                      className="flex items-center gap-1 hover:text-primary transition-colors cursor-pointer"
+                    >
                       <Phone className="h-3 w-3" />
                       <span>{selectedRepresentative.phone}</span>
-                    </div>
+                    </a>
                   )}
                   {selectedRepresentative.website && (
-                    <div className="flex items-center gap-1">
+                    <a
+                      href={selectedRepresentative.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1 hover:text-primary transition-colors cursor-pointer"
+                    >
                       <Globe className="h-3 w-3" />
                       <span>{selectedRepresentative.website}</span>
-                    </div>
+                    </a>
                   )}
                 </div>
 
