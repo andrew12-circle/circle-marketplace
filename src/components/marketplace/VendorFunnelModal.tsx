@@ -341,7 +341,7 @@ export const VendorFunnelModal = ({
                       </div>
 
                       {/* 4 Content Spots - Below Main Image */}
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="grid grid-cols-4 gap-2">
                         {/* Content Spot 1 */}
                         <div className="bg-white/10 backdrop-blur-sm rounded-lg aspect-video flex items-center justify-center group hover:bg-white/20 transition-colors cursor-pointer border border-white/20">
                           <div className="text-center">
