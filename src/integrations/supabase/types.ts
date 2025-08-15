@@ -5232,6 +5232,60 @@ export type Database = {
           },
         ]
       }
+      vendor_content: {
+        Row: {
+          content_type: string
+          content_url: string
+          created_at: string
+          description: string | null
+          display_order: number | null
+          file_size: number | null
+          id: string
+          is_active: boolean | null
+          is_featured: boolean | null
+          metadata: Json | null
+          mime_type: string | null
+          thumbnail_url: string | null
+          title: string
+          updated_at: string
+          vendor_id: string
+        }
+        Insert: {
+          content_type: string
+          content_url: string
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          file_size?: number | null
+          id?: string
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          metadata?: Json | null
+          mime_type?: string | null
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string
+          vendor_id: string
+        }
+        Update: {
+          content_type?: string
+          content_url?: string
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          file_size?: number | null
+          id?: string
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          metadata?: Json | null
+          mime_type?: string | null
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string
+          vendor_id?: string
+        }
+        Relationships: []
+      }
       vendor_copay_rules: {
         Row: {
           auto_approve_threshold: number | null
