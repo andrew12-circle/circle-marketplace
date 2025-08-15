@@ -382,7 +382,7 @@ export const VendorFunnelModal = ({
                           <img
                             src={vendor.logo_url}
                             alt={`${vendor.name} logo`}
-                            className="max-w-full max-h-full object-contain p-8"
+                            className="max-w-full max-h-full object-contain p-2"
                           />
                         ) : (
                           <div className="text-center space-y-4">
