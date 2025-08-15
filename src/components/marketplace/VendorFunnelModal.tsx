@@ -351,7 +351,7 @@ export const VendorFunnelModal = ({
 
                     {/* Right Media/Logo */}
                     <div className="relative animate-fade-in">
-                      <div className="aspect-video bg-white/10 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/20 shadow-2xl flex items-center justify-center">
+                      <div className="aspect-video bg-white backdrop-blur-sm rounded-2xl overflow-hidden border border-white/20 shadow-2xl flex items-center justify-center">
                         {vendor.logo_url ? (
                           <img
                             src={vendor.logo_url}
