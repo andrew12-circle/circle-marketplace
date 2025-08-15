@@ -463,28 +463,53 @@ export const VendorContentManager = ({ vendorId, vendorName }: VendorContentMana
               )}
 
               {(formData.content_type === 'image' || formData.content_type === 'document') && (
-                <div>
-                  <Label>Upload File</Label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                    <input
-                      type="file"
-                      accept={formData.content_type === 'image' ? 'image/*' : '.pdf,.doc,.docx,.ppt,.pptx'}
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) handleFileUpload(file);
-                      }}
-                      className="hidden"
-                      id="file-upload"
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="content_url">URL (Optional)</Label>
+                    <Input
+                      id="content_url"
+                      value={formData.content_url}
+                      onChange={(e) => setFormData(prev => ({ ...prev, content_url: e.target.value }))}
+                      placeholder={
+                        formData.content_type === 'image' 
+                          ? "https://example.com/image.jpg" 
+                          : "https://example.com/document.pdf"
+                      }
                     />
-                    <label htmlFor="file-upload" className="cursor-pointer">
-                      <Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" />
-                      <p className="text-sm text-gray-600">
-                        Click to upload {formData.content_type === 'image' ? 'an image' : 'a document'}
-                      </p>
-                    </label>
-                    {formData.content_url && (
-                      <p className="text-sm text-green-600 mt-2">File uploaded successfully</p>
-                    )}
+                  </div>
+                  
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <span className="w-full border-t" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                      <span className="bg-white px-2 text-gray-500">Or upload file</span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label>Upload File</Label>
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                      <input
+                        type="file"
+                        accept={formData.content_type === 'image' ? 'image/*' : '.pdf,.doc,.docx,.ppt,.pptx'}
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleFileUpload(file);
+                        }}
+                        className="hidden"
+                        id="file-upload"
+                      />
+                      <label htmlFor="file-upload" className="cursor-pointer">
+                        <Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                        <p className="text-sm text-gray-600">
+                          Click to upload {formData.content_type === 'image' ? 'an image' : 'a document'}
+                        </p>
+                      </label>
+                      {formData.content_url && formData.content_url.startsWith('https://ihzyuyfawapweamqzzlj.supabase.co') && (
+                        <p className="text-sm text-green-600 mt-2">File uploaded successfully</p>
+                      )}
+                    </div>
                   </div>
                 </div>
               )}
