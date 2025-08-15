@@ -474,139 +474,113 @@ export default function AdminDashboard() {
           {/* Modern Tab Navigation */}
           <Tabs defaultValue="users" className="w-full space-y-8">
           <div className="bg-card rounded-xl border border-border shadow-sm p-4 space-y-4">
-            {/* Main Categories */}
-            <div className="space-y-3">
-              <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider px-1">
-                User Management
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <TabsTrigger 
-                  value="users" 
-                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg border border-border/50 bg-background hover:bg-accent hover:text-accent-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary data-[state=active]:shadow-sm transition-all"
-                >
-                  <Users className="h-4 w-4" />
-                  <span>Users</span>
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="creators" 
-                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg border border-border/50 bg-background hover:bg-accent hover:text-accent-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary data-[state=active]:shadow-sm transition-all"
-                >
-                  <Users2 className="h-4 w-4" />
-                  <span>Creators</span>
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="agent-invites" 
-                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg border border-border/50 bg-background hover:bg-accent hover:text-accent-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary data-[state=active]:shadow-sm transition-all"
-                >
-                  <BookOpen className="h-4 w-4" />
-                  <span>Invites</span>
-                </TabsTrigger>
-              </div>
-            </div>
+            <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 xl:grid-cols-12 gap-1 bg-muted/50 p-1 rounded-lg h-auto">
+              {/* User Management Group */}
+              <TabsTrigger 
+                value="users" 
+                className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
+              >
+                <Users className="h-4 w-4" />
+                <span className="hidden sm:inline">Users</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="creators" 
+                className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
+              >
+                <Users2 className="h-4 w-4" />
+                <span className="hidden sm:inline">Creators</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="agent-invites" 
+                className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
+              >
+                <BookOpen className="h-4 w-4" />
+                <span className="hidden sm:inline">Invites</span>
+              </TabsTrigger>
 
-            {/* Content & Services */}
-            <div className="space-y-3">
-              <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider px-1">
-                Content & Services
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <TabsTrigger 
-                  value="content" 
-                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg border border-border/50 bg-background hover:bg-accent hover:text-accent-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary data-[state=active]:shadow-sm transition-all"
-                >
-                  <Star className="h-4 w-4" />
-                  <span>Content</span>
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="services" 
-                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg border border-border/50 bg-background hover:bg-accent hover:text-accent-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary data-[state=active]:shadow-sm transition-all"
-                >
-                  <Upload className="h-4 w-4" />
-                  <span>Services</span>
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="reviews" 
-                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg border border-border/50 bg-background hover:bg-accent hover:text-accent-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary data-[state=active]:shadow-sm transition-all"
-                >
-                  <MessageSquare className="h-4 w-4" />
-                  <span>Reviews</span>
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="vendors" 
-                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg border border-border/50 bg-background hover:bg-accent hover:text-accent-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary data-[state=active]:shadow-sm transition-all"
-                >
-                  <Building className="h-4 w-4" />
-                  <span>Vendors</span>
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="youtube" 
-                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg border border-border/50 bg-background hover:bg-accent hover:text-accent-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary data-[state=active]:shadow-sm transition-all"
-                >
-                  <Youtube className="h-4 w-4" />
-                  <span>YouTube</span>
-                </TabsTrigger>
-              </div>
-            </div>
+              {/* Content & Services Group */}
+              <TabsTrigger 
+                value="content" 
+                className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
+              >
+                <Star className="h-4 w-4" />
+                <span className="hidden sm:inline">Content</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="services" 
+                className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
+              >
+                <Upload className="h-4 w-4" />
+                <span className="hidden sm:inline">Services</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="reviews" 
+                className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
+              >
+                <MessageSquare className="h-4 w-4" />
+                <span className="hidden sm:inline">Reviews</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="vendors" 
+                className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
+              >
+                <Building className="h-4 w-4" />
+                <span className="hidden sm:inline">Vendors</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="youtube" 
+                className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
+              >
+                <Youtube className="h-4 w-4" />
+                <span className="hidden sm:inline">YouTube</span>
+              </TabsTrigger>
 
-            {/* Analytics & Operations */}
-            <div className="space-y-3">
-              <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider px-1">
-                Analytics & Operations
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <TabsTrigger 
-                  value="analytics" 
-                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg border border-border/50 bg-background hover:bg-accent hover:text-accent-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary data-[state=active]:shadow-sm transition-all"
-                >
-                  <BarChart3 className="h-4 w-4" />
-                  <span>Analytics</span>
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="ranking" 
-                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg border border-border/50 bg-background hover:bg-accent hover:text-accent-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary data-[state=active]:shadow-sm transition-all"
-                >
-                  <Activity className="h-4 w-4" />
-                  <span>Ranking</span>
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="points" 
-                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg border border-border/50 bg-background hover:bg-accent hover:text-accent-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary data-[state=active]:shadow-sm transition-all"
-                >
-                  <Coins className="h-4 w-4" />
-                  <span>Points</span>
-                </TabsTrigger>
-              </div>
-            </div>
+              {/* Analytics & Operations Group */}
+              <TabsTrigger 
+                value="analytics" 
+                className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
+              >
+                <BarChart3 className="h-4 w-4" />
+                <span className="hidden sm:inline">Analytics</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="ranking" 
+                className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
+              >
+                <Activity className="h-4 w-4" />
+                <span className="hidden sm:inline">Ranking</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="points" 
+                className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
+              >
+                <Coins className="h-4 w-4" />
+                <span className="hidden sm:inline">Points</span>
+              </TabsTrigger>
 
-            {/* Security & Compliance */}
-            <div className="space-y-3">
-              <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider px-1">
-                Security & Compliance
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <TabsTrigger 
-                  value="security" 
-                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg border border-border/50 bg-background hover:bg-accent hover:text-accent-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary data-[state=active]:shadow-sm transition-all"
-                >
-                  <Lock className="h-4 w-4" />
-                  <span>Security</span>
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="respa" 
-                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg border border-border/50 bg-background hover:bg-accent hover:text-accent-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary data-[state=active]:shadow-sm transition-all"
-                >
-                  <ShieldIcon className="h-4 w-4" />
-                  <span>RESPA</span>
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="spiritual" 
-                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg border border-border/50 bg-background hover:bg-accent hover:text-accent-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary data-[state=active]:shadow-sm transition-all"
-                >
-                  <Heart className="h-4 w-4" />
-                  <span>Spiritual</span>
-                </TabsTrigger>
-              </div>
-            </div>
+              {/* Security & Compliance Group */}
+              <TabsTrigger 
+                value="security" 
+                className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
+              >
+                <Lock className="h-4 w-4" />
+                <span className="hidden sm:inline">Security</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="respa" 
+                className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
+              >
+                <ShieldIcon className="h-4 w-4" />
+                <span className="hidden sm:inline">RESPA</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="spiritual" 
+                className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
+              >
+                <Heart className="h-4 w-4" />
+                <span className="hidden sm:inline">Spiritual</span>
+              </TabsTrigger>
+            </TabsList>
           </div>
 
         <TabsContent value="creators" className="space-y-6">
