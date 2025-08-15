@@ -8,6 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { toast } from "sonner";
 import { 
   Star, 
   TrendingUp, 
@@ -230,9 +231,34 @@ export const VendorFunnelModal = ({
     onClose();
   };
 
-  const handleBookConsultation = () => {
-    // TODO: Implement consultation booking
-    console.log('Book consultation with vendor:', vendor.id);
+  const handleBookConsultation = async () => {
+    try {
+      // Check if vendor has a calendar link in vendor_availability
+      const { data: availabilityData, error } = await supabase
+        .from('vendor_availability')
+        .select('calendar_link')
+        .eq('vendor_id', vendor.id)
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error fetching vendor availability:', error);
+      }
+
+      if (availabilityData?.calendar_link) {
+        window.open(availabilityData.calendar_link, '_blank');
+        return;
+      }
+
+      // Fallback: show message about setting up calendar link
+      toast.error('No consultation link configured', {
+        description: 'This vendor needs to set up their consultation calendar link in their vendor settings.'
+      });
+    } catch (error) {
+      console.error('Error handling consultation booking:', error);
+      toast.error('Unable to book consultation', {
+        description: 'Please try again or contact the vendor directly.'
+      });
+    }
   };
 
   const handleViewWebsite = () => {

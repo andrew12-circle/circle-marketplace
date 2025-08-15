@@ -40,6 +40,7 @@ interface StreamlinedVendorEditorProps {
     is_premium_provider?: boolean;
     specialties?: string[];
     funnel_content?: any;
+    calendar_link?: string;
   };
   onSave: (updatedData: any) => void;
   onCancel: () => void;
@@ -75,6 +76,7 @@ export const StreamlinedVendorEditor = ({ vendorData, onSave, onCancel }: Stream
     is_verified: vendorData.is_verified || false,
     is_premium_provider: vendorData.is_premium_provider || false,
     specialties: vendorData.specialties || [],
+    calendar_link: vendorData.calendar_link || '',
     funnel_content: vendorData.funnel_content || {
       headline: '',
       subheadline: '',
@@ -181,6 +183,22 @@ export const StreamlinedVendorEditor = ({ vendorData, onSave, onCancel }: Stream
         .eq('id', vendorData.id);
 
       if (error) throw error;
+
+      // Also save calendar link to vendor_availability table
+      if (formData.calendar_link) {
+        const { error: availabilityError } = await supabase
+          .from('vendor_availability')
+          .upsert({
+            vendor_id: vendorData.id,
+            calendar_link: formData.calendar_link,
+            is_available_now: true,
+            updated_at: new Date().toISOString()
+          });
+
+        if (availabilityError) {
+          console.error('Error saving calendar link:', availabilityError);
+        }
+      }
 
       setJustSaved(true);
       toast.success('✅ Vendor data saved successfully!', {
@@ -375,6 +393,20 @@ export const StreamlinedVendorEditor = ({ vendorData, onSave, onCancel }: Stream
               onChange={(e) => handleInputChange('website_url', e.target.value)}
               placeholder="https://www.company.com"
             />
+          </div>
+
+          <div>
+            <Label htmlFor="calendar_link">Consultation Calendar Link</Label>
+            <Input
+              id="calendar_link"
+              type="url"
+              value={formData.calendar_link}
+              onChange={(e) => handleInputChange('calendar_link', e.target.value)}
+              placeholder="https://calendly.com/yourname or your booking link"
+            />
+            <p className="text-sm text-gray-500 mt-1">
+              Agents will be redirected here when they click "Book Consultation"
+            </p>
           </div>
 
           <div>
