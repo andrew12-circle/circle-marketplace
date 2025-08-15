@@ -546,73 +546,73 @@ export const VendorFunnelModal = ({
                         <h3 className="text-lg font-semibold text-foreground">Ready to connect</h3>
                       </div>
                       
-                      {/* Loan Officer Selection */}
-                      <LoanOfficerSelector vendor={vendor} />
-                      
-                      <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-blue-50">
-                        <CardContent className="p-6">
-                          <div className="text-center mb-6">
-                            <h3 className="text-xl font-bold text-gray-900 mb-2">Ready to Connect?</h3>
-                            <p className="text-gray-600 text-sm">Take the next step with {vendor.name}</p>
-                          </div>
+                       <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-blue-50">
+                         <CardContent className="p-6">
+                           <div className="text-center mb-6">
+                             <h3 className="text-xl font-bold text-gray-900 mb-2">Ready to Connect?</h3>
+                             <p className="text-gray-600 text-sm">Take the next step with {vendor.name}</p>
+                           </div>
 
-                          {/* Action Buttons */}
-                          <div className="space-y-3">
-                            <Button 
-                              onClick={handleBookConsultation}
-                              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-3"
-                              size="lg"
-                            >
-                              <Calendar className="w-4 h-4 mr-2" />
-                              Book Consultation
-                            </Button>
-                            
-                            {vendor.website_url && (
-                              <Button 
-                                variant="outline" 
-                                className="w-full"
-                                onClick={handleViewWebsite}
-                              >
-                                <Building className="w-4 h-4 mr-2" />
-                                View Website
-                              </Button>
-                            )}
+                           {/* Action Buttons */}
+                           <div className="space-y-3">
+                             <Button 
+                               onClick={handleBookConsultation}
+                               className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-3"
+                               size="lg"
+                             >
+                               <Calendar className="w-4 h-4 mr-2" />
+                               Book Consultation
+                             </Button>
+                             
+                             {vendor.website_url && (
+                               <Button 
+                                 variant="outline" 
+                                 className="w-full"
+                                 onClick={handleViewWebsite}
+                               >
+                                 <Building className="w-4 h-4 mr-2" />
+                                 View Website
+                               </Button>
+                             )}
 
-                            <Button 
-                              onClick={handleRequestCoMarketing}
-                              variant="outline"
-                              className="w-full"
-                            >
-                              <Handshake className="w-4 h-4 mr-2" />
-                              Request Partnership
-                            </Button>
-                          </div>
+                             <Button 
+                               onClick={handleRequestCoMarketing}
+                               variant="outline"
+                               className="w-full"
+                             >
+                               <Handshake className="w-4 h-4 mr-2" />
+                               Request Partnership
+                             </Button>
+                           </div>
 
-                          {/* Trust Indicators */}
-                          <div className="mt-6 pt-6 border-t border-gray-200">
-                            <div className="space-y-3">
-                              {isVerified && (
-                                <div className="flex items-center gap-2 text-sm">
-                                  <Shield className="w-4 h-4 text-green-500" />
-                                  <span className="text-gray-600">Verified Vendor</span>
-                                </div>
-                              )}
-                              {vendor.service_states && vendor.service_states.length > 0 && (
-                                <div className="flex items-center gap-2 text-sm">
-                                  <MapPin className="w-4 h-4 text-blue-500" />
-                                  <span className="text-gray-600">Licensed in {vendor.service_states.length} states</span>
-                                </div>
-                              )}
-                              {vendor.co_marketing_agents && vendor.co_marketing_agents > 0 && (
-                                <div className="flex items-center gap-2 text-sm">
-                                  <Users className="w-4 h-4 text-purple-500" />
-                                  <span className="text-gray-600">{vendor.co_marketing_agents} active partners</span>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
+                           {/* Trust Indicators */}
+                           <div className="mt-6 pt-6 border-t border-gray-200">
+                             <div className="space-y-3">
+                               {isVerified && (
+                                 <div className="flex items-center gap-2 text-sm">
+                                   <Shield className="w-4 h-4 text-green-500" />
+                                   <span className="text-gray-600">Verified Vendor</span>
+                                 </div>
+                               )}
+                               {vendor.service_states && vendor.service_states.length > 0 && (
+                                 <div className="flex items-center gap-2 text-sm">
+                                   <MapPin className="w-4 h-4 text-blue-500" />
+                                   <span className="text-gray-600">Licensed in {vendor.service_states.length} states</span>
+                                 </div>
+                               )}
+                               {vendor.co_marketing_agents && vendor.co_marketing_agents > 0 && (
+                                 <div className="flex items-center gap-2 text-sm">
+                                   <Users className="w-4 h-4 text-purple-500" />
+                                   <span className="text-gray-600">{vendor.co_marketing_agents} active partners</span>
+                                 </div>
+                               )}
+                             </div>
+                           </div>
+                         </CardContent>
+                       </Card>
+
+                       {/* Loan Officer Selection */}
+                       <LoanOfficerSelector vendor={vendor} />
                     </div>
                   </div>
                 </div>
