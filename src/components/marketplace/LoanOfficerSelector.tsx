@@ -43,11 +43,13 @@ interface Vendor {
 
 interface LoanOfficerSelectorProps {
   vendor: Vendor;
+  onSelect?: (officer: LoanOfficer | null) => void;
+  selected?: LoanOfficer | null;
 }
 
-export const LoanOfficerSelector = ({ vendor }: LoanOfficerSelectorProps) => {
+export const LoanOfficerSelector = ({ vendor, onSelect, selected }: LoanOfficerSelectorProps) => {
   const [loanOfficers, setLoanOfficers] = useState<LoanOfficer[]>([]);
-  const [selectedOfficer, setSelectedOfficer] = useState<LoanOfficer | null>(null);
+  const [selectedOfficer, setSelectedOfficer] = useState<LoanOfficer | null>(selected || null);
   const [loading, setLoading] = useState(false);
   const [showAll, setShowAll] = useState(false);
 
@@ -137,8 +139,10 @@ export const LoanOfficerSelector = ({ vendor }: LoanOfficerSelectorProps) => {
         }
 
         setLoanOfficers(officers);
-        if (officers.length > 0) {
-          setSelectedOfficer(officers[0]);
+        if (officers.length > 0 && !selected) {
+          const defaultOfficer = officers[0];
+          setSelectedOfficer(defaultOfficer);
+          onSelect?.(defaultOfficer);
         }
       } catch (error) {
         console.error('Failed to load loan officers:', error);
@@ -150,7 +154,12 @@ export const LoanOfficerSelector = ({ vendor }: LoanOfficerSelectorProps) => {
     if (vendor.id) {
       loadLoanOfficers();
     }
-  }, [vendor.id]);
+  }, [vendor.id, selected, onSelect]);
+
+  // Sync with external selected state
+  useEffect(() => {
+    setSelectedOfficer(selected || null);
+  }, [selected]);
 
   const displayedOfficers = showAll ? loanOfficers : loanOfficers.slice(0, 3);
 
@@ -264,7 +273,10 @@ export const LoanOfficerSelector = ({ vendor }: LoanOfficerSelectorProps) => {
                         ? 'border-blue-300 bg-blue-50'
                         : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                     }`}
-                    onClick={() => setSelectedOfficer(officer)}
+                    onClick={() => {
+                      setSelectedOfficer(officer);
+                      onSelect?.(officer);
+                    }}
                   >
                     <div className="flex items-start gap-3">
                       <div className="w-10 h-10 bg-gray-100 text-gray-600 text-sm rounded-full flex items-center justify-center">

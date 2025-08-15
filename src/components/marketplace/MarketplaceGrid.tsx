@@ -8,6 +8,7 @@ import { CircleProBanner } from "./CircleProBanner";
 import { ServiceDetailsModal } from "./ServiceDetailsModal";
 import { AIConciergeBanner } from "./AIConciergeBanner";
 import { AddProductModal } from "./AddProductModal";
+import { VendorSelectionModal } from "./VendorSelectionModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Filter, Sparkles, Zap, Facebook, Globe, Mail, Share2, Monitor, TrendingUp, Database, Camera, Video, Printer, ArrowRight, BookOpen } from "lucide-react";
@@ -363,11 +364,34 @@ const handleViewServiceDetails = useCallback((serviceId: string) => {
     setIsServiceModalOpen(false);
     setSelectedService(null);
   };
+  const [showVendorSelection, setShowVendorSelection] = useState(false);
+  const [selectedServiceForCoPay, setSelectedServiceForCoPay] = useState<Service | null>(null);
+
   const handleConnectVendor = (vendorId: string) => {
-    toast({
-      title: "Connect with Vendor",
-      description: "Connection feature coming soon!"
-    });
+    const vendor = vendors.find(v => v.id === vendorId);
+    if (!vendor) {
+      toast({
+        title: "Error",
+        description: "Vendor not found. Please try again.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Find a representative service for this vendor or create a default one
+    const vendorService = services.find(s => s.vendor?.id === vendorId) || {
+      id: `mock-${vendorId}`,
+      title: `Partnership with ${vendor.name}`,
+      vendor: { id: vendorId, name: vendor.name },
+      respa_split_limit: 50,
+      co_pay_price: "Contact for pricing",
+      retail_price: "Contact for pricing",
+      pro_price: "Contact for pricing",
+      image_url: vendor.logo_url
+    };
+
+    setSelectedServiceForCoPay(vendorService as Service);
+    setShowVendorSelection(true);
   };
   const handleViewVendorProfile = (vendorId: string) => {
     toast({

@@ -1,6 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useState } from "react";
+import { ConnectVendorModal } from "./ConnectVendorModal";
 import { 
   Building, 
   MapPin, 
@@ -77,6 +79,8 @@ export const BaseVendorCard = ({
   localRepresentative,
   className = ""
 }: BaseVendorCardProps) => {
+  const [showConnectModal, setShowConnectModal] = useState(false);
+  
   const {
     id,
     name,
@@ -102,9 +106,7 @@ export const BaseVendorCard = ({
 
   const handleConnectClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (onConnect && !disabled) {
-      onConnect(vendor, e);
-    }
+    setShowConnectModal(true);
   };
 
   const handleLearnMoreClick = (e: React.MouseEvent) => {
@@ -115,7 +117,8 @@ export const BaseVendorCard = ({
   };
 
   return (
-    <Card 
+    <>
+      <Card
       className="group relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 bg-card border border-border/50 h-full flex flex-col cursor-pointer"
       onClick={handleCardClick}
       onMouseEnter={onMouseEnter}
@@ -299,6 +302,25 @@ export const BaseVendorCard = ({
           )}
         </div>
       </CardContent>
-    </Card>
+      </Card>
+
+      <ConnectVendorModal
+        isOpen={showConnectModal}
+        onClose={() => setShowConnectModal(false)}
+        vendor={{
+          ...vendor,
+          rating: rating,
+          review_count: review_count,
+          co_marketing_agents: co_marketing_agents,
+          campaigns_funded: campaigns_funded,
+          is_verified: is_verified || false
+        }}
+        onRequestSent={() => {
+          if (onConnect) {
+            onConnect(vendor);
+          }
+        }}
+      />
+    </>
   );
 };
