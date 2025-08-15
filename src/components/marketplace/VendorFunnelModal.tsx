@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { VendorFunnelEditor } from './VendorFunnelEditor';
 import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog";
@@ -114,57 +115,6 @@ export const VendorFunnelModal = ({
 
   const config = industryConfig[industry] || industryConfig.general;
 
-  // Mock packages for co-marketing
-  const packages = [
-    {
-      id: "basic",
-      name: "Basic Co-Marketing",
-      price: 250,
-      originalPrice: 400,
-      description: "Essential co-marketing partnership to get started",
-      features: [
-        "50/50 marketing cost split",
-        "Co-branded marketing materials", 
-        "Monthly performance reports",
-        "Email support"
-      ],
-      popular: false
-    },
-    {
-      id: "standard", 
-      name: "Standard Partnership",
-      price: 500,
-      originalPrice: 750,
-      description: "Complete partnership solution for most agents",
-      features: [
-        "Everything in Basic",
-        "Priority lead sharing",
-        "Dedicated account manager",
-        "Phone & email support",
-        "Custom marketing campaigns"
-      ],
-      popular: true
-    },
-    {
-      id: "premium",
-      name: "Premium Alliance",
-      price: 1000,
-      originalPrice: 1500,
-      description: "Full partnership with dedicated support",
-      features: [
-        "Everything in Standard",
-        "Exclusive territory rights",
-        "White-label solutions",
-        "24/7 priority support",
-        "Custom integrations",
-        "Quarterly strategy sessions"
-      ],
-      popular: false
-    }
-  ];
-
-  const selectedPkg = packages.find(pkg => pkg.id === selectedPackage) || packages[1];
-
   // Load vendor reviews
   useEffect(() => {
     const loadVendorReviews = async () => {
@@ -246,6 +196,17 @@ export const VendorFunnelModal = ({
       onCoMarketingRequest(vendor.id);
     }
     onClose();
+  };
+
+  const handleBookConsultation = () => {
+    // TODO: Implement consultation booking
+    console.log('Book consultation with vendor:', vendor.id);
+  };
+
+  const handleViewWebsite = () => {
+    if (vendor.website_url) {
+      window.open(vendor.website_url, '_blank');
+    }
   };
 
   const renderStarRating = (rating: number, size = "sm") => {
@@ -576,76 +537,46 @@ export const VendorFunnelModal = ({
                     </Accordion>
                   </div>
 
-                  {/* Right Column - Action Panel */}
+                  {/* Right Column - Simple Action Panel */}
                   <div className="lg:col-span-1">
                     <div className="sticky top-8">
                       <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-blue-50">
                         <CardContent className="p-6">
                           <div className="text-center mb-6">
-                            <h3 className="text-xl font-bold text-gray-900 mb-2">Ready to Partner?</h3>
-                            <p className="text-gray-600 text-sm">Join {vendor.co_marketing_agents || 12} other successful partners</p>
-                          </div>
-
-                          {/* Package Selection */}
-                          <div className="space-y-4 mb-6">
-                            <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                              <div className="flex justify-between items-center mb-2">
-                                <span className="font-medium text-gray-900">Selected Plan:</span>
-                                <Badge>{selectedPkg.name}</Badge>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <span className="text-2xl font-bold text-blue-600">${selectedPkg.price}</span>
-                                <span className="text-sm text-gray-500 line-through">${selectedPkg.originalPrice}</span>
-                                <span className="text-sm text-gray-600">/ month</span>
-                              </div>
-                            </div>
-
-                            {/* Quantity Selector */}
-                            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                              <span className="text-sm font-medium text-gray-700">Markets/Territories:</span>
-                              <div className="flex items-center gap-2">
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="h-8 w-8 p-0"
-                                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                                >
-                                  <Minus className="w-3 h-3" />
-                                </Button>
-                                <span className="w-8 text-center font-medium">{quantity}</span>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="h-8 w-8 p-0"
-                                  onClick={() => setQuantity(quantity + 1)}
-                                >
-                                  <Plus className="w-3 h-3" />
-                                </Button>
-                              </div>
-                            </div>
+                            <h3 className="text-xl font-bold text-gray-900 mb-2">Ready to Connect?</h3>
+                            <p className="text-gray-600 text-sm">Take the next step with {vendor.name}</p>
                           </div>
 
                           {/* Action Buttons */}
                           <div className="space-y-3">
                             <Button 
-                              onClick={handleRequestCoMarketing}
+                              onClick={handleBookConsultation}
                               className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-3"
                               size="lg"
                             >
-                              <Handshake className="w-4 h-4 mr-2" />
-                              Request Partnership
+                              <Calendar className="w-4 h-4 mr-2" />
+                              Book Consultation
                             </Button>
                             
                             {vendor.website_url && (
                               <Button 
                                 variant="outline" 
                                 className="w-full"
-                                onClick={() => window.open(vendor.website_url, '_blank')}
+                                onClick={handleViewWebsite}
                               >
                                 <Building className="w-4 h-4 mr-2" />
-                                Visit Website
+                                View Website
                               </Button>
                             )}
+
+                            <Button 
+                              onClick={handleRequestCoMarketing}
+                              variant="outline"
+                              className="w-full"
+                            >
+                              <Handshake className="w-4 h-4 mr-2" />
+                              Request Partnership
+                            </Button>
                           </div>
 
                           {/* Trust Indicators */}
