@@ -132,7 +132,7 @@ export const BaseVendorCard: React.FC<BaseVendorCardProps> = ({
 
   return (
     <Card 
-      className={`${getCardSize()} ${onViewProfile && !disabled ? 'cursor-pointer hover:shadow-md transition-shadow' : ''} ${disabled ? 'opacity-50 cursor-not-allowed' : ''} ${className}`}
+      className={`h-full flex flex-col ${getCardSize()} ${onViewProfile && !disabled ? 'cursor-pointer hover:shadow-md transition-shadow' : ''} ${disabled ? 'opacity-50 cursor-not-allowed' : ''} ${className}`}
       onClick={handleCardClick}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
@@ -196,7 +196,7 @@ export const BaseVendorCard: React.FC<BaseVendorCardProps> = ({
         )}
       </CardHeader>
 
-      <CardContent className="space-y-4">
+      <CardContent className="flex-1 flex flex-col justify-between space-y-4">
         {description && variant !== 'compact' && (
           <p className="text-sm text-muted-foreground line-clamp-3">
             {description}
