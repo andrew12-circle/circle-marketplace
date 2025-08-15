@@ -65,26 +65,46 @@ serve(async (req) => {
     let websiteContent = '';
     if (vendor.website_url) {
       try {
-        console.log('Fetching website content from:', vendor.website_url);
-        const websiteResponse = await fetch(vendor.website_url, {
+        let url = vendor.website_url;
+        // Ensure URL has protocol
+        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+          url = 'https://' + url;
+        }
+        
+        console.log('Fetching website content from:', url);
+        const websiteResponse = await fetch(url, {
           headers: {
-            'User-Agent': 'Mozilla/5.0 (compatible; QuestionGenerator/1.0)'
-          }
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+          },
+          // Add timeout
+          signal: AbortSignal.timeout(10000) // 10 second timeout
         });
         
         if (websiteResponse.ok) {
           const htmlContent = await websiteResponse.text();
-          // Extract text content from HTML (simple approach)
+          // Extract text content from HTML (more robust approach)
           websiteContent = htmlContent
             .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
             .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+            .replace(/<nav[^>]*>[\s\S]*?<\/nav>/gi, '')
+            .replace(/<footer[^>]*>[\s\S]*?<\/footer>/gi, '')
+            .replace(/<header[^>]*>[\s\S]*?<\/header>/gi, '')
             .replace(/<[^>]*>/g, ' ')
             .replace(/\s+/g, ' ')
+            .replace(/[^\w\s.,!?-]/g, '') // Remove special characters
             .trim()
-            .substring(0, 3000); // Limit to first 3000 chars
+            .substring(0, 4000); // Increase to 4000 chars for better context
+          
+          console.log('Successfully fetched website content, length:', websiteContent.length);
+        } else {
+          console.log('Website response not ok:', websiteResponse.status, websiteResponse.statusText);
         }
       } catch (error) {
         console.log('Could not fetch website content:', error.message);
+        // If direct fetch fails, try to get basic info from the URL structure
+        if (vendor.website_url.includes('.com') || vendor.website_url.includes('.org') || vendor.website_url.includes('.net')) {
+          websiteContent = `Company website: ${vendor.website_url}`;
+        }
       }
     }
 
@@ -92,10 +112,15 @@ serve(async (req) => {
     const vendorContext = `
 Vendor Name: ${vendor.name}
 Description: ${vendor.description || 'No description available'}
-Industry: ${vendor.vendor_type || 'General'}
+Industry/Type: ${vendor.vendor_type || 'General'}
 Location: ${vendor.location || 'Not specified'}
+Contact Email: ${vendor.contact_email || 'Not specified'}
+Phone: ${vendor.phone || 'Not specified'}
 States Served: ${vendor.license_states?.join(', ') || vendor.service_states?.join(', ') || 'Not specified'}
-Website Content Preview: ${websiteContent || 'No website content available'}
+Website: ${vendor.website_url || 'Not specified'}
+Website Content: ${websiteContent || 'No website content available'}
+Services/Specialties: ${vendor.specialties?.join(', ') || 'Not specified'}
+Verified Status: ${vendor.is_verified ? 'Verified' : 'Not verified'}
     `.trim();
 
     console.log('Vendor context prepared, calling OpenAI...');
@@ -108,41 +133,48 @@ Website Content Preview: ${websiteContent || 'No website content available'}
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4.1-2025-04-14',
+        model: 'gpt-5-mini-2025-08-07', // Use the more cost-effective model
         messages: [
           {
             role: 'system',
-            content: `You are a professional business analyst specializing in vendor assessment. Based on the provided vendor information, generate specific, professional answers for each of the 8 standardized vendor evaluation categories. Each answer should be 1-2 sentences, factual, and based on the available information.
+            content: `You are a professional business analyst specializing in vendor assessment for real estate professionals. Based on the provided vendor information and website content, generate specific, professional, and detailed answers for each of the 8 standardized vendor evaluation categories.
 
-Return your response as a JSON object with question numbers as keys and answers as values:
+Requirements:
+- Each answer should be 2-3 sentences that provide meaningful, actionable information
+- Base answers on actual information provided, not generic statements
+- If specific information isn't available, indicate "Based on available information" and provide what you can determine
+- Focus on what would be most valuable for real estate agents to know
+- Be specific about geographic coverage, services, and capabilities when mentioned
+
+Return your response as a JSON object with question numbers as keys and detailed answers as values:
 {
-  "1": "Answer for Service & Reliability",
-  "2": "Answer for Communication & Availability", 
-  "3": "Answer for Coverage & Licensing",
-  "4": "Answer for Product & Offering",
-  "5": "Answer for Reputation & Proof",
-  "6": "Answer for Local Presence",
-  "7": "Answer for Value Add & Differentiators",
-  "8": "Answer for Compliance & Professionalism"
+  "1": "Detailed answer for Service & Reliability based on vendor info",
+  "2": "Detailed answer for Communication & Availability based on vendor info", 
+  "3": "Detailed answer for Coverage & Licensing based on vendor info",
+  "4": "Detailed answer for Product & Offering based on vendor info",
+  "5": "Detailed answer for Reputation & Proof based on vendor info",
+  "6": "Detailed answer for Local Presence based on vendor info",
+  "7": "Detailed answer for Value Add & Differentiators based on vendor info",
+  "8": "Detailed answer for Compliance & Professionalism based on vendor info"
 }`
           },
           {
             role: 'user',
-            content: `Based on this vendor information, provide specific answers for the 8 vendor evaluation categories:
+            content: `Based on this vendor information and their website content, provide specific and detailed answers for the 8 vendor evaluation categories:
 
 ${vendorContext}
 
-The 8 categories are:
-1. Service & Reliability - What services do they provide and how reliable are they?
-2. Communication & Availability - How do they communicate and what are their availability hours?
-3. Coverage & Licensing - What geographic areas do they serve and what licenses do they hold?
-4. Product & Offering - What specific products or services do they offer?
-5. Reputation & Proof - What evidence is there of their reputation and track record?
-6. Local Presence - Do they have local presence in specific markets?
-7. Value Add & Differentiators - What makes them unique or different from competitors?
-8. Compliance & Professionalism - How do they demonstrate compliance and professionalism?
+The 8 categories with specific guidance:
+1. Service & Reliability - What specific services do they provide? What evidence of reliability (years in business, track record, guarantees)?
+2. Communication & Availability - How can they be contacted? What are their response times? Available hours/days?
+3. Coverage & Licensing - What geographic areas do they serve? What states are they licensed in? Any restrictions?
+4. Product & Offering - What specific products, services, or solutions do they offer? Price ranges if mentioned?
+5. Reputation & Proof - What evidence of their reputation? Reviews, testimonials, awards, certifications, case studies?
+6. Local Presence - Do they have local offices, representatives, or presence in specific markets? Local knowledge?
+7. Value Add & Differentiators - What makes them unique? Special programs, exclusive offers, unique processes or technologies?
+8. Compliance & Professionalism - Evidence of professional standards, certifications, industry compliance, associations?
 
-Please provide factual, professional answers based on the available information.`
+Provide detailed, factual answers based on the available vendor information and website content. If specific information isn't available, indicate what is known and what would need verification.`
           }
         ],
         max_completion_tokens: 1000,
