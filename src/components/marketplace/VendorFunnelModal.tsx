@@ -341,44 +341,40 @@ export const VendorFunnelModal = ({
                       </div>
                     </div>
                   </div>
-                </div>
-              </div>
-            </div>
-          </div>
 
-          {/* 4 Content Spots Section */}
-          <div className="bg-white border-b border-gray-200">
-            <div className="max-w-6xl mx-auto px-6 py-8">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {/* Content Spot 1 */}
-                <div className="bg-gray-100 rounded-lg aspect-video flex items-center justify-center group hover:bg-gray-200 transition-colors cursor-pointer">
-                  <div className="text-center">
-                    <Play className="w-8 h-8 text-gray-600 mx-auto mb-2 group-hover:text-gray-700" />
-                    <p className="text-xs text-gray-600 font-medium">Featured Video</p>
-                  </div>
-                </div>
+                  {/* 4 Content Spots - Below Main Content */}
+                  <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {/* Content Spot 1 */}
+                    <div className="bg-white/10 backdrop-blur-sm rounded-lg aspect-video flex items-center justify-center group hover:bg-white/20 transition-colors cursor-pointer border border-white/20">
+                      <div className="text-center">
+                        <Play className="w-6 h-6 text-white mx-auto mb-1 group-hover:scale-110 transition-transform" />
+                        <p className="text-xs text-white/90 font-medium">Featured Video</p>
+                      </div>
+                    </div>
 
-                {/* Content Spot 2 */}
-                <div className="bg-gray-100 rounded-lg aspect-video flex items-center justify-center group hover:bg-gray-200 transition-colors cursor-pointer">
-                  <div className="text-center">
-                    <Trophy className="w-8 h-8 text-gray-600 mx-auto mb-2 group-hover:text-gray-700" />
-                    <p className="text-xs text-gray-600 font-medium">Success Stories</p>
-                  </div>
-                </div>
+                    {/* Content Spot 2 */}
+                    <div className="bg-white/10 backdrop-blur-sm rounded-lg aspect-video flex items-center justify-center group hover:bg-white/20 transition-colors cursor-pointer border border-white/20">
+                      <div className="text-center">
+                        <Trophy className="w-6 h-6 text-white mx-auto mb-1 group-hover:scale-110 transition-transform" />
+                        <p className="text-xs text-white/90 font-medium">Success Stories</p>
+                      </div>
+                    </div>
 
-                {/* Content Spot 3 */}
-                <div className="bg-gray-100 rounded-lg aspect-video flex items-center justify-center group hover:bg-gray-200 transition-colors cursor-pointer">
-                  <div className="text-center">
-                    <Users className="w-8 h-8 text-gray-600 mx-auto mb-2 group-hover:text-gray-700" />
-                    <p className="text-xs text-gray-600 font-medium">Testimonials</p>
-                  </div>
-                </div>
+                    {/* Content Spot 3 */}
+                    <div className="bg-white/10 backdrop-blur-sm rounded-lg aspect-video flex items-center justify-center group hover:bg-white/20 transition-colors cursor-pointer border border-white/20">
+                      <div className="text-center">
+                        <Users className="w-6 h-6 text-white mx-auto mb-1 group-hover:scale-110 transition-transform" />
+                        <p className="text-xs text-white/90 font-medium">Testimonials</p>
+                      </div>
+                    </div>
 
-                {/* Content Spot 4 */}
-                <div className="bg-gray-100 rounded-lg aspect-video flex items-center justify-center group hover:bg-gray-200 transition-colors cursor-pointer">
-                  <div className="text-center">
-                    <Target className="w-8 h-8 text-gray-600 mx-auto mb-2 group-hover:text-gray-700" />
-                    <p className="text-xs text-gray-600 font-medium">Resources</p>
+                    {/* Content Spot 4 */}
+                    <div className="bg-white/10 backdrop-blur-sm rounded-lg aspect-video flex items-center justify-center group hover:bg-white/20 transition-colors cursor-pointer border border-white/20">
+                      <div className="text-center">
+                        <Target className="w-6 h-6 text-white mx-auto mb-1 group-hover:scale-110 transition-transform" />
+                        <p className="text-xs text-white/90 font-medium">Resources</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
