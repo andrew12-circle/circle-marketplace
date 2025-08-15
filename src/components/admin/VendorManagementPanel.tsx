@@ -290,20 +290,32 @@ export const VendorManagementPanel = () => {
                        <div className="flex-1 min-w-0">
                          <div className="flex items-center justify-between mb-1">
                            <h3 className="font-semibold truncate">{vendor.name}</h3>
-                           <div className="flex items-center gap-2">
-                             <div className="flex items-center gap-1">
-                               {vendor.is_verified ? (
-                                 <ShieldCheck className="h-3 w-3 text-green-600" />
-                               ) : (
-                                 <Shield className="h-3 w-3 text-muted-foreground" />
-                               )}
+                            <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-1">
+                                {vendor.is_verified ? (
+                                  <ShieldCheck className="h-3 w-3 text-green-600" />
+                                ) : (
+                                  <Shield className="h-3 w-3 text-muted-foreground" />
+                                )}
+                                 <Switch
+                                   checked={vendor.is_verified}
+                                   onCheckedChange={() => handleVerificationToggle(vendor.id, vendor.is_verified)}
+                                   className="scale-75"
+                                 />
+                              </div>
+                              <div className="flex items-center gap-1">
+                                {vendor.is_premium_provider ? (
+                                  <Trophy className="h-3 w-3 text-amber-600" />
+                                ) : (
+                                  <Crown className="h-3 w-3 text-muted-foreground" />
+                                )}
                                 <Switch
-                                  checked={vendor.is_verified}
-                                  onCheckedChange={() => handleVerificationToggle(vendor.id, vendor.is_verified)}
+                                  checked={vendor.is_premium_provider || false}
+                                  onCheckedChange={() => handlePremiumProviderToggle(vendor.id, vendor.is_premium_provider || false)}
                                   className="scale-75"
                                 />
-                             </div>
-                           </div>
+                              </div>
+                            </div>
                          </div>
                           <div className="flex items-center gap-1 mt-1">
                             {vendor.is_verified && (

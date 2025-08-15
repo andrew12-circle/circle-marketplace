@@ -37,6 +37,7 @@ interface StreamlinedVendorEditorProps {
     phone?: string;
     vendor_type?: string;
     is_verified?: boolean;
+    is_premium_provider?: boolean;
     specialties?: string[];
     funnel_content?: any;
   };
@@ -72,6 +73,7 @@ export const StreamlinedVendorEditor = ({ vendorData, onSave, onCancel }: Stream
     phone: vendorData.phone || '',
     vendor_type: vendorData.vendor_type || 'company',
     is_verified: vendorData.is_verified || false,
+    is_premium_provider: vendorData.is_premium_provider || false,
     specialties: vendorData.specialties || [],
     funnel_content: vendorData.funnel_content || {
       headline: '',
@@ -281,16 +283,29 @@ export const StreamlinedVendorEditor = ({ vendorData, onSave, onCancel }: Stream
             />
           </div>
 
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="is_verified"
-              checked={formData.is_verified}
-              onCheckedChange={(checked) => handleInputChange('is_verified', checked)}
-            />
-            <Label htmlFor="is_verified" className="flex items-center">
-              <Award className="w-4 h-4 mr-1" />
-              Verified Vendor
-            </Label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="is_verified"
+                checked={formData.is_verified}
+                onCheckedChange={(checked) => handleInputChange('is_verified', checked)}
+              />
+              <Label htmlFor="is_verified" className="flex items-center">
+                <Award className="w-4 h-4 mr-1" />
+                Verified Vendor
+              </Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="is_premium_provider"
+                checked={formData.is_premium_provider || false}
+                onCheckedChange={(checked) => handleInputChange('is_premium_provider', checked)}
+              />
+              <Label htmlFor="is_premium_provider" className="flex items-center">
+                <Star className="w-4 h-4 mr-1" />
+                Premium Provider
+              </Label>
+            </div>
           </div>
         </CardContent>
       </Card>
