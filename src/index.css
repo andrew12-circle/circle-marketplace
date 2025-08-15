@@ -198,6 +198,12 @@ All colors MUST be HSL.
     grid-template-columns: 1fr;
     gap: 1rem;
     align-items: stretch;
+    width: 100%;
+  }
+  
+  .mobile-grid > * {
+    width: 100%;
+    min-width: 0;
   }
   
   @media screen and (min-width: 640px) {
