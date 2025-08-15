@@ -307,7 +307,7 @@ export const VendorFunnelModal = ({
         <div className="h-full overflow-y-auto">
           
           {/* Hero Section */}
-          <div className="relative bg-gradient-to-br from-slate-900 via-blue-900 to-purple-900 text-white overflow-hidden">
+          <div className="relative bg-gradient-to-br from-slate-900 via-blue-900 to-purple-900 text-white">
             <div className="absolute inset-0 bg-black/20"></div>
             <div className="relative z-10">
           <div className="px-6 pt-6 pb-8">
