@@ -5535,6 +5535,7 @@ export type Database = {
           co_marketing_agents: number | null
           commission_notes: string | null
           commission_type: string | null
+          computed_co_marketing_agents: number | null
           contact_email: string | null
           created_at: string
           custom_cta_text: string | null
@@ -5568,6 +5569,10 @@ export type Database = {
           rating: number | null
           respa_risk_level: string | null
           review_count: number | null
+          seed_active: boolean | null
+          seed_expires_at: string | null
+          seed_notes: string | null
+          seeded_co_marketing_agents: number | null
           service_radius_miles: number | null
           service_states: string[] | null
           service_zip_codes: string[] | null
@@ -5592,6 +5597,7 @@ export type Database = {
           co_marketing_agents?: number | null
           commission_notes?: string | null
           commission_type?: string | null
+          computed_co_marketing_agents?: number | null
           contact_email?: string | null
           created_at?: string
           custom_cta_text?: string | null
@@ -5625,6 +5631,10 @@ export type Database = {
           rating?: number | null
           respa_risk_level?: string | null
           review_count?: number | null
+          seed_active?: boolean | null
+          seed_expires_at?: string | null
+          seed_notes?: string | null
+          seeded_co_marketing_agents?: number | null
           service_radius_miles?: number | null
           service_states?: string[] | null
           service_zip_codes?: string[] | null
@@ -5649,6 +5659,7 @@ export type Database = {
           co_marketing_agents?: number | null
           commission_notes?: string | null
           commission_type?: string | null
+          computed_co_marketing_agents?: number | null
           contact_email?: string | null
           created_at?: string
           custom_cta_text?: string | null
@@ -5682,6 +5693,10 @@ export type Database = {
           rating?: number | null
           respa_risk_level?: string | null
           review_count?: number | null
+          seed_active?: boolean | null
+          seed_expires_at?: string | null
+          seed_notes?: string | null
+          seeded_co_marketing_agents?: number | null
           service_radius_miles?: number | null
           service_states?: string[] | null
           service_zip_codes?: string[] | null
