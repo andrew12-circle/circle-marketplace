@@ -236,8 +236,7 @@ export const VendorFunnelModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-7xl w-[95vw] h-[95vh] p-0 bg-white">
-        <div className="flex flex-col h-full overflow-hidden">
+      <DialogContent className="max-w-7xl w-[95vw] h-[95vh] p-0 bg-white overflow-hidden">
         {/* Close button */}
         <button
           onClick={onClose}
@@ -247,7 +246,7 @@ export const VendorFunnelModal = ({
           <X className="w-5 h-5 text-white" />
         </button>
         
-        <div className="flex flex-col h-full">
+        <div className="h-full overflow-y-auto">
           
           {/* Hero Section */}
           <div className="relative bg-gradient-to-br from-blue-600 via-purple-600 to-blue-800">
@@ -610,7 +609,6 @@ export const VendorFunnelModal = ({
                 </div>
               </div>
             </div>
-          </div>
           </div>
         </div>
         
