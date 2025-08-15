@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Save, Edit, X, Check } from 'lucide-react';
+import { Save, Edit, X, Check, Sparkles, RefreshCw } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useVendorQuestions } from '@/hooks/useVendorQuestions';
@@ -23,6 +23,8 @@ export const VendorQuestionsManager = () => {
   const [editingQuestion, setEditingQuestion] = useState<number | null>(null);
   const [tempQuestionText, setTempQuestionText] = useState('');
   const [loading, setLoading] = useState(true);
+  const [generatingQuestions, setGeneratingQuestions] = useState(false);
+  const [bulkGenerating, setBulkGenerating] = useState(false);
 
   const { questions, loading: questionsLoading, updateQuestion, refetch } = useVendorQuestions(selectedVendor || undefined);
 
@@ -66,6 +68,55 @@ export const VendorQuestionsManager = () => {
     setTempQuestionText('');
   };
 
+  const generateAIQuestions = async (vendorId: string) => {
+    if (!vendorId) return;
+    
+    setGeneratingQuestions(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-vendor-questions', {
+        body: { vendorId }
+      });
+
+      if (error) throw error;
+
+      if (data.success) {
+        toast.success(`Generated ${data.questions.length} intelligent questions!`);
+        refetch();
+      } else {
+        throw new Error(data.error || 'Failed to generate questions');
+      }
+    } catch (err) {
+      console.error('Error generating questions:', err);
+      toast.error('Failed to generate AI questions');
+    } finally {
+      setGeneratingQuestions(false);
+    }
+  };
+
+  const bulkGenerateQuestions = async () => {
+    setBulkGenerating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('bulk-generate-vendor-questions');
+
+      if (error) throw error;
+
+      if (data.success) {
+        toast.success(`Bulk generation complete! Processed ${data.summary.processed} vendors`);
+        if (data.summary.errors > 0) {
+          toast.error(`${data.summary.errors} vendors had errors`);
+        }
+        refetch();
+      } else {
+        throw new Error(data.error || 'Failed to bulk generate questions');
+      }
+    } catch (err) {
+      console.error('Error bulk generating questions:', err);
+      toast.error('Failed to bulk generate questions');
+    } finally {
+      setBulkGenerating(false);
+    }
+  };
+
   if (loading) {
     return (
       <Card>
@@ -80,9 +131,20 @@ export const VendorQuestionsManager = () => {
     <Card>
       <CardHeader>
         <CardTitle>Vendor Questions Manager</CardTitle>
-        <p className="text-sm text-muted-foreground">
-          Manage the 7 evaluation questions that appear on vendor profile cards
-        </p>
+        <div className="flex items-center gap-2">
+          <p className="text-sm text-muted-foreground">
+            Manage the 7 evaluation questions that appear on vendor profile cards
+          </p>
+          <Button
+            onClick={bulkGenerateQuestions}
+            disabled={bulkGenerating}
+            variant="outline"
+            size="sm"
+          >
+            <Sparkles className={`h-4 w-4 mr-2 ${bulkGenerating ? 'animate-spin' : ''}`} />
+            {bulkGenerating ? 'Generating...' : 'Bulk Generate AI Questions'}
+          </Button>
+        </div>
       </CardHeader>
       <CardContent className="space-y-6">
         <div>
@@ -110,14 +172,26 @@ export const VendorQuestionsManager = () => {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-medium">Vendor Evaluation Questions</h3>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={refetch}
-                disabled={questionsLoading}
-              >
-                Refresh
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => generateAIQuestions(selectedVendor)}
+                  disabled={questionsLoading || generatingQuestions}
+                >
+                  <Sparkles className={`h-4 w-4 mr-2 ${generatingQuestions ? 'animate-spin' : ''}`} />
+                  {generatingQuestions ? 'Generating...' : 'Generate AI Questions'}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={refetch}
+                  disabled={questionsLoading}
+                >
+                  <RefreshCw className={`h-4 w-4 mr-2 ${questionsLoading ? 'animate-spin' : ''}`} />
+                  Refresh
+                </Button>
+              </div>
             </div>
 
             {questionsLoading ? (
