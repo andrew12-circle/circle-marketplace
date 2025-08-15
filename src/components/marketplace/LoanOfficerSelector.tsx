@@ -223,7 +223,12 @@ export const LoanOfficerSelector = ({ vendor, onSelect, selected }: LoanOfficerS
                   {selectedOfficer.email && (
                     <div className="flex items-center gap-1">
                       <Mail className="w-3 h-3" />
-                      <span className="truncate">{selectedOfficer.email}</span>
+                      <span 
+                        className="truncate text-blue-600 hover:text-blue-800 cursor-pointer underline"
+                        onClick={() => window.open(`mailto:${selectedOfficer.email}`, '_blank')}
+                      >
+                        {selectedOfficer.email}
+                      </span>
                     </div>
                   )}
                   {selectedOfficer.phone && (
@@ -250,19 +255,7 @@ export const LoanOfficerSelector = ({ vendor, onSelect, selected }: LoanOfficerS
                   </div>
                 )}
                 
-                {/* Connect Button */}
                 <div className="flex gap-2 mt-3">
-                  {selectedOfficer.email && (
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      onClick={() => window.open(`mailto:${selectedOfficer.email}`, '_blank')}
-                      className="text-xs"
-                    >
-                      <Mail className="w-3 h-3 mr-1" />
-                      Email
-                    </Button>
-                  )}
                   {selectedOfficer.phone && (
                     <Button 
                       size="sm" 
