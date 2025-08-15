@@ -554,18 +554,6 @@ export const ServiceFunnelModal = ({
                       })()}
                     </div>
 
-                    {/* Vendor Logo */}
-                    {service.vendor?.logo_url && (
-                      <div className="absolute -bottom-6 left-6">
-                        <div className="bg-white rounded-xl p-3 shadow-lg border border-gray-200">
-                          <img
-                            src={service.vendor.logo_url}
-                            alt={`${service.vendor?.name || 'Vendor'} logo`}
-                            className="h-8 w-auto object-contain"
-                          />
-                        </div>
-                      </div>
-                    )}
                   </div>
                 </div>
               </div>
