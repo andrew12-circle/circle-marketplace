@@ -346,6 +346,45 @@ export const VendorFunnelModal = ({
             </div>
           </div>
 
+          {/* 4 Content Spots Section */}
+          <div className="bg-white border-b border-gray-200">
+            <div className="max-w-6xl mx-auto px-6 py-8">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {/* Content Spot 1 */}
+                <div className="bg-gray-100 rounded-lg aspect-video flex items-center justify-center group hover:bg-gray-200 transition-colors cursor-pointer">
+                  <div className="text-center">
+                    <Play className="w-8 h-8 text-gray-600 mx-auto mb-2 group-hover:text-gray-700" />
+                    <p className="text-xs text-gray-600 font-medium">Featured Video</p>
+                  </div>
+                </div>
+
+                {/* Content Spot 2 */}
+                <div className="bg-gray-100 rounded-lg aspect-video flex items-center justify-center group hover:bg-gray-200 transition-colors cursor-pointer">
+                  <div className="text-center">
+                    <Trophy className="w-8 h-8 text-gray-600 mx-auto mb-2 group-hover:text-gray-700" />
+                    <p className="text-xs text-gray-600 font-medium">Success Stories</p>
+                  </div>
+                </div>
+
+                {/* Content Spot 3 */}
+                <div className="bg-gray-100 rounded-lg aspect-video flex items-center justify-center group hover:bg-gray-200 transition-colors cursor-pointer">
+                  <div className="text-center">
+                    <Users className="w-8 h-8 text-gray-600 mx-auto mb-2 group-hover:text-gray-700" />
+                    <p className="text-xs text-gray-600 font-medium">Testimonials</p>
+                  </div>
+                </div>
+
+                {/* Content Spot 4 */}
+                <div className="bg-gray-100 rounded-lg aspect-video flex items-center justify-center group hover:bg-gray-200 transition-colors cursor-pointer">
+                  <div className="text-center">
+                    <Target className="w-8 h-8 text-gray-600 mx-auto mb-2 group-hover:text-gray-700" />
+                    <p className="text-xs text-gray-600 font-medium">Resources</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Main Content Section - Scrollable */}
           <div className="flex-1 overflow-auto bg-gray-50/50">
             <div className="py-12">
