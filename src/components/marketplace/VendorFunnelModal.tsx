@@ -316,10 +316,6 @@ export const VendorFunnelModal = ({
                           <div className="text-2xl font-bold text-white">{vendor.campaigns_funded || 48}</div>
                           <div className="text-xs text-blue-200">Campaigns Funded</div>
                         </div>
-                        <div className="text-center p-3 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
-                          <div className="text-2xl font-bold text-white">{vendor.service_radius_miles || '50'}mi</div>
-                          <div className="text-xs text-blue-200">Service Area</div>
-                        </div>
                       </div>
                     </div>
 
