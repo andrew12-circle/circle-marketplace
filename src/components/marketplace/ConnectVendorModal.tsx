@@ -9,7 +9,28 @@ import { Star, Building, Users, TrendingUp, Award } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { LoanOfficerSelector } from "./LoanOfficerSelector";
+import { ServiceRepresentativeSelector } from "./ServiceRepresentativeSelector";
+
+interface ServiceRepresentative {
+  id: string;
+  vendor_id: string;
+  name: string;
+  title?: string;
+  email?: string;
+  phone?: string;
+  license_number?: string;
+  profile_picture_url?: string;
+  bio?: string;
+  location?: string;
+  specialties?: string[];
+  years_experience?: number;
+  website?: string;
+  rating: number;
+  reviews_count: number;
+  is_primary: boolean;
+  is_active: boolean;
+  sort_order: number;
+}
 
 interface Vendor {
   id: string;
@@ -21,10 +42,7 @@ interface Vendor {
   is_verified: boolean;
   co_marketing_agents: number;
   campaigns_funded: number;
-  individual_name?: string;
-  individual_title?: string;
-  individual_phone?: string;
-  individual_email?: string;
+  vendor_type?: string;
 }
 
 interface Service {
@@ -54,7 +72,7 @@ export const ConnectVendorModal = ({
 }: ConnectVendorModalProps) => {
   const [coPayPercentage, setCoPayPercentage] = useState([service?.respa_split_limit || 50]);
   const [notes, setNotes] = useState("");
-  const [selectedLoanOfficer, setSelectedLoanOfficer] = useState<any>(null);
+  const [selectedRepresentative, setSelectedRepresentative] = useState<ServiceRepresentative | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
@@ -101,7 +119,7 @@ export const ConnectVendorModal = ({
         },
         status: 'pending-approval',
         requestedSplit: coPayPercentage[0],
-        selectedLoanOfficer: selectedLoanOfficer,
+        selectedRepresentative: selectedRepresentative,
         createdAt: new Date().toISOString()
       };
 
@@ -218,16 +236,16 @@ export const ConnectVendorModal = ({
             </Card>
           )}
 
-          {/* Loan Officer Selection */}
+          {/* Service Representative Selection */}
           <div>
-            <Label className="text-base font-medium">Select Loan Officer (Optional)</Label>
+            <Label className="text-base font-medium">Select Representative (Optional)</Label>
             <p className="text-sm text-muted-foreground mb-3">
-              Choose a specific loan officer to work with
+              Choose a specific representative to work with
             </p>
-            <LoanOfficerSelector
+            <ServiceRepresentativeSelector
               vendor={vendor}
-              onSelect={setSelectedLoanOfficer}
-              selected={selectedLoanOfficer}
+              onSelect={setSelectedRepresentative}
+              selected={selectedRepresentative}
             />
           </div>
 

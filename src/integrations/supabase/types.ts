@@ -4037,6 +4037,90 @@ export type Database = {
           },
         ]
       }
+      service_representatives: {
+        Row: {
+          bio: string | null
+          created_at: string | null
+          email: string | null
+          id: string
+          is_active: boolean | null
+          is_primary: boolean | null
+          license_number: string | null
+          location: string | null
+          name: string
+          phone: string | null
+          profile_picture_url: string | null
+          rating: number | null
+          reviews_count: number | null
+          sort_order: number | null
+          specialties: string[] | null
+          title: string | null
+          updated_at: string | null
+          vendor_id: string
+          website: string | null
+          years_experience: number | null
+        }
+        Insert: {
+          bio?: string | null
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_primary?: boolean | null
+          license_number?: string | null
+          location?: string | null
+          name: string
+          phone?: string | null
+          profile_picture_url?: string | null
+          rating?: number | null
+          reviews_count?: number | null
+          sort_order?: number | null
+          specialties?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+          vendor_id: string
+          website?: string | null
+          years_experience?: number | null
+        }
+        Update: {
+          bio?: string | null
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_primary?: boolean | null
+          license_number?: string | null
+          location?: string | null
+          name?: string
+          phone?: string | null
+          profile_picture_url?: string | null
+          rating?: number | null
+          reviews_count?: number | null
+          sort_order?: number | null
+          specialties?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+          vendor_id?: string
+          website?: string | null
+          years_experience?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_representatives_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_representatives_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors_with_local_reps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       service_reviews: {
         Row: {
           admin_notes: string | null

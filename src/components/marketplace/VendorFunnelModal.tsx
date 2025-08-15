@@ -39,7 +39,7 @@ import {
   Crown
 } from "lucide-react";
 import { getRiskBadge, getComplianceAlert, determineServiceRisk } from "./RESPAComplianceSystem";
-import { LoanOfficerSelector } from "./LoanOfficerSelector";
+import { ServiceRepresentativeSelector } from "./ServiceRepresentativeSelector";
 import { supabase } from "@/integrations/supabase/client";
 
 interface VendorFunnelModalProps {
@@ -607,8 +607,8 @@ export const VendorFunnelModal = ({
                          </CardContent>
                        </Card>
 
-                       {/* Loan Officer Selection */}
-                       <LoanOfficerSelector vendor={vendor} />
+                        {/* Service Representative Selection */}
+                        <ServiceRepresentativeSelector vendor={vendor} />
                     </div>
                   </div>
                 </div>
