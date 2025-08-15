@@ -413,7 +413,6 @@ const { isBuilding, buildPlan } = useGoalPlan();
       {recommendations.length === 0 && bundles.length === 0 && (
         <Card>
           <CardContent className="text-center py-4 space-y-2">
-            <Target className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
             <h3 className="font-semibold">
               {hasCompletedAssessment ? "Ready for your first recommendations" : "No Recommendations Yet"}
             </h3>
