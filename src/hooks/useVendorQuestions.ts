@@ -32,6 +32,8 @@ export const useVendorQuestions = (vendorId: string | undefined) => {
       setLoading(true);
       setError(null);
 
+      console.log('Fetching questions for vendor:', vendorId);
+
       const { data, error: fetchError } = await supabase
         .from('vendor_questions')
         .select('*')
@@ -40,13 +42,17 @@ export const useVendorQuestions = (vendorId: string | undefined) => {
 
       if (fetchError) throw fetchError;
 
+      console.log('Questions fetched:', data);
+
       // If no questions exist, seed default questions
       if (!data || data.length === 0) {
+        console.log('No questions found, seeding default questions...');
         await seedDefaultQuestions();
         return;
       }
 
       setQuestions(data);
+      console.log('Questions set in state:', data);
     } catch (err) {
       console.error('Error fetching vendor questions:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch questions');
