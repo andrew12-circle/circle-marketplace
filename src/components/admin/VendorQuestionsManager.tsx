@@ -27,9 +27,18 @@ export const VendorQuestionsManager = ({ vendorId, vendorName }: VendorQuestions
   const [tempQuestionText, setTempQuestionText] = useState('');
   const [generatingQuestions, setGeneratingQuestions] = useState(false);
   const [savingAnswers, setSavingAnswers] = useState<Set<number>>(new Set());
+  const [localAnswers, setLocalAnswers] = useState<Record<number, string>>({});
 
   const { questions, loading: questionsLoading, updateQuestion, refetch } = useVendorQuestions(vendorId);
 
+  // Initialize local answers when questions change
+  useEffect(() => {
+    const answers: Record<number, string> = {};
+    questions.forEach(q => {
+      answers[q.question_number] = q.answer_text || '';
+    });
+    setLocalAnswers(answers);
+  }, [questions]);
 
   const handleEditClick = (questionNumber: number, currentText: string) => {
     setEditingQuestion(questionNumber);
@@ -94,11 +103,14 @@ export const VendorQuestionsManager = ({ vendorId, vendorName }: VendorQuestions
 
         if (error) throw error;
 
-        // Force immediate refetch to update UI
-        await refetch();
       } catch (err) {
         console.error('Error saving answer:', err);
         toast.error('Failed to save answer');
+        // Revert local state on error
+        setLocalAnswers(prev => ({
+          ...prev,
+          [questionNumber]: questions.find(q => q.question_number === questionNumber)?.answer_text || ''
+        }));
       } finally {
         // Remove from saving set
         setSavingAnswers(prev => {
@@ -108,7 +120,7 @@ export const VendorQuestionsManager = ({ vendorId, vendorName }: VendorQuestions
         });
       }
     },
-    [vendorId, refetch]
+    [vendorId, questions]
   );
 
   // Debounced answer update
@@ -122,6 +134,17 @@ export const VendorQuestionsManager = ({ vendorId, vendorName }: VendorQuestions
     },
     [handleAnswerChange]
   );
+
+  const handleLocalAnswerChange = (questionNumber: number, value: string) => {
+    // Update local state immediately
+    setLocalAnswers(prev => ({
+      ...prev,
+      [questionNumber]: value
+    }));
+    
+    // Debounce the actual save
+    debouncedAnswerUpdate(questionNumber, value);
+  };
 
 
   return (
@@ -221,11 +244,10 @@ export const VendorQuestionsManager = ({ vendorId, vendorName }: VendorQuestions
                         )}
                       </div>
                       <Textarea
-                        key={`answer-${question.id}-${question.updated_at}`}
-                        value={question.answer_text || ''}
+                        key={`answer-${question.id}`}
+                        value={localAnswers[question.question_number] || ''}
                         onChange={(e) => {
-                          // Call immediate save instead of debounced
-                          handleAnswerChange(question.question_number, e.target.value);
+                          handleLocalAnswerChange(question.question_number, e.target.value);
                         }}
                         placeholder="Enter the answer for this question..."
                         className="min-h-[100px] bg-background"
