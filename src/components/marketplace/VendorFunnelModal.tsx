@@ -370,32 +370,64 @@ export const VendorFunnelModal = ({
                       <div className="grid grid-cols-4 gap-2">
                         {vendorContent.length > 0 ? (
                           vendorContent.slice(0, 4).map((item, index) => (
-                            <div 
-                              key={item.id} 
-                              className="bg-white/10 backdrop-blur-sm rounded-lg aspect-video flex items-center justify-center group hover:bg-white/20 transition-colors cursor-pointer border border-white/20 overflow-hidden relative"
-                              onClick={() => {
-                                if (item.content_type === 'video_youtube' || item.content_type === 'video_vimeo') {
-                                  window.open(item.content_url, '_blank');
-                                } else if (item.content_type === 'image' || item.content_type === 'document') {
-                                  window.open(item.content_url, '_blank');
-                                }
-                              }}
-                            >
-                              {item.thumbnail_url ? (
-                                <img 
-                                  src={item.thumbnail_url} 
-                                  alt={item.title}
-                                  className="w-full h-full object-cover"
-                                />
-                              ) : (
-                                <div className="text-center">
-                                  {item.content_type === 'video_youtube' && <Play className="w-5 h-5 text-white mx-auto mb-1 group-hover:scale-110 transition-transform" />}
-                                  {item.content_type === 'video_vimeo' && <Play className="w-5 h-5 text-white mx-auto mb-1 group-hover:scale-110 transition-transform" />}
-                                  {item.content_type === 'image' && <Image className="w-5 h-5 text-white mx-auto mb-1 group-hover:scale-110 transition-transform" />}
-                                  {item.content_type === 'document' && <FileText className="w-5 h-5 text-white mx-auto mb-1 group-hover:scale-110 transition-transform" />}
-                                  <p className="text-xs text-white/90 font-medium truncate px-1">{item.title}</p>
-                                </div>
-                              )}
+                             <div 
+                               key={item.id} 
+                               className="rounded-lg aspect-video flex items-center justify-center group hover:opacity-90 transition-opacity cursor-pointer overflow-hidden relative"
+                               onClick={() => {
+                                 if (item.content_type === 'video_youtube' || item.content_type === 'video_vimeo') {
+                                   window.open(item.content_url, '_blank');
+                                 } else if (item.content_type === 'image' || item.content_type === 'document') {
+                                   window.open(item.content_url, '_blank');
+                                 }
+                               }}
+                             >
+                               {item.content_type === 'image' && item.content_url ? (
+                                 <img 
+                                   src={item.content_url} 
+                                   alt={item.title}
+                                   className="w-full h-full object-cover rounded-lg"
+                                 />
+                               ) : item.thumbnail_url ? (
+                                 <div className="relative w-full h-full">
+                                   <img 
+                                     src={item.thumbnail_url} 
+                                     alt={item.title}
+                                     className="w-full h-full object-cover rounded-lg"
+                                   />
+                                   {(item.content_type === 'video_youtube' || item.content_type === 'video_vimeo') && (
+                                     <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-lg">
+                                       <div className="bg-white/90 rounded-full p-2 group-hover:scale-110 transition-transform">
+                                         <Play className="w-4 h-4 text-gray-800 ml-0.5" fill="currentColor" />
+                                       </div>
+                                     </div>
+                                   )}
+                                 </div>
+                               ) : (
+                                 <div className="bg-white/10 backdrop-blur-sm w-full h-full rounded-lg flex items-center justify-center border border-white/20">
+                                   <div className="text-center">
+                                     {item.content_type === 'video_youtube' && (
+                                       <>
+                                         <div className="bg-white/90 rounded-full p-2 mx-auto mb-1 group-hover:scale-110 transition-transform">
+                                           <Play className="w-4 h-4 text-gray-800 ml-0.5" fill="currentColor" />
+                                         </div>
+                                         <p className="text-xs text-white/90 font-medium truncate px-1">{item.title}</p>
+                                       </>
+                                     )}
+                                     {item.content_type === 'video_vimeo' && (
+                                       <>
+                                         <div className="bg-white/90 rounded-full p-2 mx-auto mb-1 group-hover:scale-110 transition-transform">
+                                           <Play className="w-4 h-4 text-gray-800 ml-0.5" fill="currentColor" />
+                                         </div>
+                                         <p className="text-xs text-white/90 font-medium truncate px-1">{item.title}</p>
+                                       </>
+                                     )}
+                                     {item.content_type === 'image' && <Image className="w-5 h-5 text-white mx-auto mb-1 group-hover:scale-110 transition-transform" />}
+                                     {item.content_type === 'document' && <FileText className="w-5 h-5 text-white mx-auto mb-1 group-hover:scale-110 transition-transform" />}
+                                     {item.content_type === 'image' && <p className="text-xs text-white/90 font-medium truncate px-1">{item.title}</p>}
+                                     {item.content_type === 'document' && <p className="text-xs text-white/90 font-medium truncate px-1">{item.title}</p>}
+                                   </div>
+                                 </div>
+                               )}
                               {item.is_featured && (
                                 <div className="absolute top-1 right-1">
                                   <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
