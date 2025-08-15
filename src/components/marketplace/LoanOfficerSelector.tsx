@@ -42,6 +42,7 @@ interface Vendor {
   individual_email?: string;
   individual_phone?: string;
   individual_license_number?: string;
+  individual_profile_picture_url?: string;
 }
 
 interface LoanOfficerSelectorProps {
@@ -85,7 +86,8 @@ export const LoanOfficerSelector = ({ vendor, onSelect, selected }: LoanOfficerS
             location: 'Primary Representative',
             specialties: ['Primary Contact'],
             rating: 4.8,
-            reviews_count: 25
+            reviews_count: 25,
+            profile_picture_url: vendor.individual_profile_picture_url
           });
         }
 

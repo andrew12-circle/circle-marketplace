@@ -5373,6 +5373,7 @@ export type Database = {
           individual_license_number: string | null
           individual_name: string | null
           individual_phone: string | null
+          individual_profile_picture_url: string | null
           individual_title: string | null
           is_active: boolean | null
           is_premium_provider: boolean | null
@@ -5429,6 +5430,7 @@ export type Database = {
           individual_license_number?: string | null
           individual_name?: string | null
           individual_phone?: string | null
+          individual_profile_picture_url?: string | null
           individual_title?: string | null
           is_active?: boolean | null
           is_premium_provider?: boolean | null
@@ -5485,6 +5487,7 @@ export type Database = {
           individual_license_number?: string | null
           individual_name?: string | null
           individual_phone?: string | null
+          individual_profile_picture_url?: string | null
           individual_title?: string | null
           is_active?: boolean | null
           is_premium_provider?: boolean | null
