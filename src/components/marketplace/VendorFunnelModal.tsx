@@ -382,11 +382,11 @@ export const VendorFunnelModal = ({
                                }}
                              >
                                {item.content_type === 'image' && item.content_url ? (
-                                 <img 
-                                   src={item.content_url} 
-                                   alt={item.title}
-                                   className="w-full h-full object-cover rounded-lg"
-                                 />
+                                  <img 
+                                    src={item.content_url} 
+                                    alt={item.title}
+                                    className="w-full h-full object-contain rounded-lg bg-white"
+                                  />
                                ) : item.thumbnail_url ? (
                                  <div className="relative w-full h-full">
                                    <img 
