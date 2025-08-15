@@ -12,7 +12,8 @@ import {
   Star,
   Shield,
   Search,
-  ChevronDown
+  ChevronDown,
+  Globe
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -29,6 +30,7 @@ interface LoanOfficer {
   photo_url?: string;
   rating?: number;
   reviews_count?: number;
+  website?: string;
 }
 
 interface Vendor {
@@ -120,7 +122,8 @@ export const LoanOfficerSelector = ({ vendor, onSelect, selected }: LoanOfficerS
               specialties: ['First-time Buyers', 'Refinancing'],
               years_experience: 8,
               rating: 4.9,
-              reviews_count: 42
+              reviews_count: 42,
+              website: 'https://sarahjohnsonmortgages.com'
             },
             {
               id: `${vendor.id}-example-2`,
@@ -260,20 +263,19 @@ export const LoanOfficerSelector = ({ vendor, onSelect, selected }: LoanOfficerS
                   </div>
                 )}
                 
-                <div className="flex gap-2 mt-3">
-                  <Button 
-                    size="sm" 
-                    className="text-xs bg-blue-600 hover:bg-blue-700"
-                    onClick={() => {
-                      // For now, open the company website or use a generic mortgage inquiry
-                      const subject = encodeURIComponent(`Mortgage Inquiry - ${selectedOfficer.name}`);
-                      const body = encodeURIComponent(`Hi ${selectedOfficer.name},\n\nI'm interested in discussing mortgage options. Please let me know a good time to connect.\n\nThank you!`);
-                      window.open(`mailto:${selectedOfficer.email}?subject=${subject}&body=${body}`, '_blank');
-                    }}
-                  >
-                    Connect Now
-                  </Button>
-                </div>
+                {selectedOfficer.website && (
+                  <div className="flex gap-2 mt-3">
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      className="text-xs"
+                      onClick={() => window.open(selectedOfficer.website, '_blank')}
+                    >
+                      <Globe className="w-3 h-3 mr-1" />
+                      Visit Website
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
           </div>
