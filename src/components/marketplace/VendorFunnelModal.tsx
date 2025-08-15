@@ -737,7 +737,7 @@ export const VendorFunnelModal = ({
             <TabsContent value="edit" className="p-6">
               {isEditingFunnel ? (
                 <VendorFunnelEditor
-                  vendor={vendor}
+                  vendorId={vendor.id}
                   onSave={() => setIsEditingFunnel(false)}
                   onCancel={() => setIsEditingFunnel(false)}
                 />
