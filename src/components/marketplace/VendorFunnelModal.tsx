@@ -324,7 +324,7 @@ export const VendorFunnelModal = ({
                     </div>
 
                     {/* Right Media/Logo */}
-                    <div className="relative animate-fade-in">
+                    <div className="relative animate-fade-in space-y-4">
                       <div className="aspect-video bg-white backdrop-blur-sm rounded-2xl overflow-hidden border border-white/20 shadow-2xl flex items-center justify-center">
                         {vendor.logo_url ? (
                           <img
@@ -339,43 +339,44 @@ export const VendorFunnelModal = ({
                           </div>
                         )}
                       </div>
+
+                      {/* 4 Content Spots - Below Main Image */}
+                      <div className="grid grid-cols-2 gap-2">
+                        {/* Content Spot 1 */}
+                        <div className="bg-white/10 backdrop-blur-sm rounded-lg aspect-video flex items-center justify-center group hover:bg-white/20 transition-colors cursor-pointer border border-white/20">
+                          <div className="text-center">
+                            <Play className="w-5 h-5 text-white mx-auto mb-1 group-hover:scale-110 transition-transform" />
+                            <p className="text-xs text-white/90 font-medium">Video</p>
+                          </div>
+                        </div>
+
+                        {/* Content Spot 2 */}
+                        <div className="bg-white/10 backdrop-blur-sm rounded-lg aspect-video flex items-center justify-center group hover:bg-white/20 transition-colors cursor-pointer border border-white/20">
+                          <div className="text-center">
+                            <Trophy className="w-5 h-5 text-white mx-auto mb-1 group-hover:scale-110 transition-transform" />
+                            <p className="text-xs text-white/90 font-medium">Success</p>
+                          </div>
+                        </div>
+
+                        {/* Content Spot 3 */}
+                        <div className="bg-white/10 backdrop-blur-sm rounded-lg aspect-video flex items-center justify-center group hover:bg-white/20 transition-colors cursor-pointer border border-white/20">
+                          <div className="text-center">
+                            <Users className="w-5 h-5 text-white mx-auto mb-1 group-hover:scale-110 transition-transform" />
+                            <p className="text-xs text-white/90 font-medium">Reviews</p>
+                          </div>
+                        </div>
+
+                        {/* Content Spot 4 */}
+                        <div className="bg-white/10 backdrop-blur-sm rounded-lg aspect-video flex items-center justify-center group hover:bg-white/20 transition-colors cursor-pointer border border-white/20">
+                          <div className="text-center">
+                            <Target className="w-5 h-5 text-white mx-auto mb-1 group-hover:scale-110 transition-transform" />
+                            <p className="text-xs text-white/90 font-medium">Resources</p>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
 
-                  {/* 4 Content Spots - Below Main Content */}
-                  <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {/* Content Spot 1 */}
-                    <div className="bg-white/10 backdrop-blur-sm rounded-lg aspect-video flex items-center justify-center group hover:bg-white/20 transition-colors cursor-pointer border border-white/20">
-                      <div className="text-center">
-                        <Play className="w-6 h-6 text-white mx-auto mb-1 group-hover:scale-110 transition-transform" />
-                        <p className="text-xs text-white/90 font-medium">Featured Video</p>
-                      </div>
-                    </div>
-
-                    {/* Content Spot 2 */}
-                    <div className="bg-white/10 backdrop-blur-sm rounded-lg aspect-video flex items-center justify-center group hover:bg-white/20 transition-colors cursor-pointer border border-white/20">
-                      <div className="text-center">
-                        <Trophy className="w-6 h-6 text-white mx-auto mb-1 group-hover:scale-110 transition-transform" />
-                        <p className="text-xs text-white/90 font-medium">Success Stories</p>
-                      </div>
-                    </div>
-
-                    {/* Content Spot 3 */}
-                    <div className="bg-white/10 backdrop-blur-sm rounded-lg aspect-video flex items-center justify-center group hover:bg-white/20 transition-colors cursor-pointer border border-white/20">
-                      <div className="text-center">
-                        <Users className="w-6 h-6 text-white mx-auto mb-1 group-hover:scale-110 transition-transform" />
-                        <p className="text-xs text-white/90 font-medium">Testimonials</p>
-                      </div>
-                    </div>
-
-                    {/* Content Spot 4 */}
-                    <div className="bg-white/10 backdrop-blur-sm rounded-lg aspect-video flex items-center justify-center group hover:bg-white/20 transition-colors cursor-pointer border border-white/20">
-                      <div className="text-center">
-                        <Target className="w-6 h-6 text-white mx-auto mb-1 group-hover:scale-110 transition-transform" />
-                        <p className="text-xs text-white/90 font-medium">Resources</p>
-                      </div>
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>
