@@ -3,7 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { SpiritualCoverageProvider } from "@/contexts/SpiritualCoverageContext";
@@ -14,6 +14,8 @@ import { EnhancedSecurityHeaders } from "@/components/security/EnhancedSecurityH
 import { SecurityStatusIndicator } from "@/components/security/SecurityEnhancementSystem";
 import RequestLogger from "@/components/security/RequestLogger";
 import { OnboardingRedirect } from "@/components/onboarding/OnboardingRedirect";
+import { OutageBanner } from "@/components/common/OutageBanner";
+import { globalErrorMonitor } from "@/utils/globalErrorMonitor";
 // Lazy-loaded heavy pages
 const Index = lazy(() => import("./pages/Index"));
 const Academy = lazy(() => import("./pages/Academy").then(m => ({ default: m.Academy })));
@@ -53,28 +55,17 @@ import AdminCommissions from "./pages/AdminCommissions";
 import { reportClientError } from "@/utils/errorReporting";
 const queryClient = new QueryClient();
 
-const App = () => {
-  console.log("App component rendering");
+const AppContent = () => {
+  useEffect(() => {
+    // Initialize global error monitoring
+    globalErrorMonitor.initialize();
+  }, []);
+
   return (
-    <ErrorBoundary section="Application" onError={(error, info) => { reportClientError({ error_type: 'runtime', message: error.message, stack: error.stack, section: 'Application', component: 'App', metadata: { componentStack: (info as any)?.componentStack } }); }}>
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <CSRFProvider>
-            <SpiritualCoverageProvider>
-              <AuthProvider>
-                <CartProvider>
-              <Toaster />
-              <Sonner />
-              <div className="fixed top-4 right-4 z-50">
-                <SecurityStatusIndicator />
-              </div>
-                 <BrowserRouter>
-                 <SecurityHeaders />
-                 <EnhancedSecurityHeaders />
-                 <RequestLogger />
-                 <OnboardingRedirect />
-                 <Suspense fallback={<div className="p-6 text-center text-muted-foreground">Loading...</div>}>
-                   <Routes>
+    <>
+      <OutageBanner />
+      <Suspense fallback={<div className="p-6 text-center text-muted-foreground">Loading...</div>}>
+        <Routes>
                      <Route path="/" element={<Index />} />
                      <Route path="/academy" element={<Academy />} />
                      <Route path="/command-center" element={<CommandCenter />} />
@@ -112,15 +103,40 @@ const App = () => {
                      <Route path="*" element={<NotFound />} />
                    </Routes>
                  </Suspense>
-                 </BrowserRouter>
-                </CartProvider>
-              </AuthProvider>
-            </SpiritualCoverageProvider>
-          </CSRFProvider>
-        </TooltipProvider>
-      </QueryClientProvider>
-    </ErrorBoundary>
-  );
-};
+                 </>
+               );
+             };
+
+             const App = () => {
+               console.log("App component rendering");
+               return (
+                 <ErrorBoundary section="Application" onError={(error, info) => { reportClientError({ error_type: 'runtime', message: error.message, stack: error.stack, section: 'Application', component: 'App', metadata: { componentStack: (info as any)?.componentStack } }); }}>
+                   <QueryClientProvider client={queryClient}>
+                     <TooltipProvider>
+                       <CSRFProvider>
+                         <SpiritualCoverageProvider>
+                           <AuthProvider>
+                             <CartProvider>
+                               <Toaster />
+                               <Sonner />
+                               <div className="fixed top-4 right-4 z-50">
+                                 <SecurityStatusIndicator />
+                               </div>
+                               <BrowserRouter>
+                                 <SecurityHeaders />
+                                 <EnhancedSecurityHeaders />
+                                 <RequestLogger />
+                                 <OnboardingRedirect />
+                                 <AppContent />
+                               </BrowserRouter>
+                             </CartProvider>
+                           </AuthProvider>
+                         </SpiritualCoverageProvider>
+                       </CSRFProvider>
+                     </TooltipProvider>
+                   </QueryClientProvider>
+                 </ErrorBoundary>
+               );
+             };
 
 export default App;
