@@ -70,6 +70,19 @@ export const SERVICE_CATEGORIES: ServiceCategory[] = [
       'Sign Companies',
       'Web Developers'
     ]
+  },
+  {
+    id: 'coaching-training',
+    name: 'Coaching & Training',
+    riskLevel: 'low',
+    respaType: 'non-respa',
+    subcategories: [
+      'Business Coaching',
+      'Sales Training',
+      'Real Estate Education',
+      'Professional Development',
+      'Leadership Training'
+    ]
   }
 ];
 
