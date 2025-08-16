@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { StreamlinedVendorEditor } from './StreamlinedVendorEditor';
 import { VendorContentManager } from './VendorContentManager';
+import { VendorApprovalsManager } from './VendorApprovalsManager';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface Vendor {
@@ -390,8 +391,9 @@ export const VendorManagementPanel = () => {
           </CardHeader>
           <CardContent>
           <Tabs defaultValue="profile" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="profile">Profile & Settings</TabsTrigger>
+              <TabsTrigger value="approvals">Approvals</TabsTrigger>
               <TabsTrigger value="content">Content Manager</TabsTrigger>
             </TabsList>
             
@@ -486,6 +488,10 @@ export const VendorManagementPanel = () => {
                   </div>
                 </div>
               )}
+            </TabsContent>
+            
+            <TabsContent value="approvals">
+              <VendorApprovalsManager />
             </TabsContent>
             
             <TabsContent value="content">

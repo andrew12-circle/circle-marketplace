@@ -142,6 +142,7 @@ const fetchServices = async (): Promise<Service[]> => {
           support_hours
         )
       `)
+      .eq('is_active', true)
       .order('sort_order', { ascending: true })
       .order('created_at', { ascending: false })
       .limit(200), // Increased from 100 to 200 to accommodate all services
@@ -198,6 +199,8 @@ const fetchVendors = async (): Promise<Vendor[]> => {
     supabase
       .from('vendors')
       .select('*')
+      .eq('is_active', true)
+      .in('approval_status', ['approved', 'auto_approved'])
       .order('sort_order', { ascending: true })
       .order('rating', { ascending: false })
       .limit(50),
