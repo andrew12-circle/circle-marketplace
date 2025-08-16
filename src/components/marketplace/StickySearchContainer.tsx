@@ -72,7 +72,7 @@ export const StickySearchContainer = ({ children, className }: StickySearchConta
           className
         )}
         style={{
-          top: isSticky ? `${totalOffset + 7}px` : undefined,
+          top: isSticky ? `${totalOffset + 14}px` : undefined,
           transform: isSticky ? "translateY(0)" : undefined,
         }}
       >
