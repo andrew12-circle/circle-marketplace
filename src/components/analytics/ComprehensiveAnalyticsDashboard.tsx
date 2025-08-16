@@ -11,6 +11,7 @@ import { useServiceAnalytics } from '@/hooks/useServiceAnalytics';
 import { VendorAnalytics } from '@/components/marketplace/VendorAnalytics';
 import { VendorActivityAnalytics } from '@/components/admin/VendorActivityAnalytics';
 import SecurityMonitoringPanel from '@/components/admin/SecurityMonitoringPanel';
+import { TrafficAnalytics } from '@/components/analytics/TrafficAnalytics';
 
 interface PlatformMetrics {
   totalUsers: number;
@@ -151,6 +152,7 @@ export const ComprehensiveAnalyticsDashboard = () => {
       <Tabs defaultValue="overview" className="space-y-4">
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="traffic">Traffic</TabsTrigger>
           <TabsTrigger value="vendors">Vendor Analytics</TabsTrigger>
           <TabsTrigger value="activity">Activity Tracking</TabsTrigger>
           <TabsTrigger value="security">Security</TabsTrigger>
@@ -263,6 +265,10 @@ export const ComprehensiveAnalyticsDashboard = () => {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="traffic">
+          <TrafficAnalytics />
         </TabsContent>
 
         <TabsContent value="vendors">
