@@ -414,14 +414,6 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false, b
                           {formatPrice(extractNumericPrice(service.pro_price), service.price_duration || 'mo')}
                         </span>
                       </div>
-                      
-                      {discountPercentage && discountPercentage > 0 && (
-                        <div className="flex justify-end">
-                          <Badge className="bg-red-500 text-white text-xs font-medium">
-                            {discountPercentage}% OFF
-                          </Badge>
-                        </div>
-                      )}
                     </div>
                   )}
                   
@@ -460,6 +452,13 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false, b
                              {service.respa_split_limit}% vendor support
                            </Badge>
                         </div>
+                        {discountPercentage && discountPercentage > 0 && (
+                          <div className="flex justify-end mt-1">
+                            <Badge className="bg-red-500 text-white text-xs font-medium">
+                              {discountPercentage}% OFF
+                            </Badge>
+                          </div>
+                        )}
                     </div>
                   )}
                   
