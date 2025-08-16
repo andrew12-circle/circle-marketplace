@@ -4594,6 +4594,7 @@ export type Database = {
           funnel_content: Json | null
           id: string
           image_url: string | null
+          is_active: boolean | null
           is_featured: boolean | null
           is_respa_regulated: boolean | null
           is_top_pick: boolean | null
@@ -4637,6 +4638,7 @@ export type Database = {
           funnel_content?: Json | null
           id?: string
           image_url?: string | null
+          is_active?: boolean | null
           is_featured?: boolean | null
           is_respa_regulated?: boolean | null
           is_top_pick?: boolean | null
@@ -4680,6 +4682,7 @@ export type Database = {
           funnel_content?: Json | null
           id?: string
           image_url?: string | null
+          is_active?: boolean | null
           is_featured?: boolean | null
           is_respa_regulated?: boolean | null
           is_top_pick?: boolean | null
@@ -5908,6 +5911,11 @@ export type Database = {
           agreement_notes: string | null
           agreement_renewal_date: string | null
           agreement_start_date: string | null
+          approval_status: string | null
+          approved_at: string | null
+          approved_by: string | null
+          auto_score: number | null
+          automated_checks: Json | null
           brand_colors: Json | null
           budget_currency: string | null
           campaigns_funded: number | null
@@ -5962,6 +5970,7 @@ export type Database = {
           updated_at: string
           value_statement: string | null
           vendor_type: string | null
+          verification_notes: string | null
           website_url: string | null
         }
         Insert: {
@@ -5971,6 +5980,11 @@ export type Database = {
           agreement_notes?: string | null
           agreement_renewal_date?: string | null
           agreement_start_date?: string | null
+          approval_status?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          auto_score?: number | null
+          automated_checks?: Json | null
           brand_colors?: Json | null
           budget_currency?: string | null
           campaigns_funded?: number | null
@@ -6025,6 +6039,7 @@ export type Database = {
           updated_at?: string
           value_statement?: string | null
           vendor_type?: string | null
+          verification_notes?: string | null
           website_url?: string | null
         }
         Update: {
@@ -6034,6 +6049,11 @@ export type Database = {
           agreement_notes?: string | null
           agreement_renewal_date?: string | null
           agreement_start_date?: string | null
+          approval_status?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          auto_score?: number | null
+          automated_checks?: Json | null
           brand_colors?: Json | null
           budget_currency?: string | null
           campaigns_funded?: number | null
@@ -6088,6 +6108,7 @@ export type Database = {
           updated_at?: string
           value_statement?: string | null
           vendor_type?: string | null
+          verification_notes?: string | null
           website_url?: string | null
         }
         Relationships: [
