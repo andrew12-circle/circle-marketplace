@@ -267,6 +267,8 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false, b
     }
   };
 
+  const discountPercentage = calculateDiscountPercentage();
+
   return (
     <TooltipProvider>
       <div className="relative">
@@ -286,6 +288,11 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false, b
             {service.is_top_pick && (
               <Badge className="bg-circle-accent text-foreground text-xs font-medium">
                 {t('topPick')}
+              </Badge>
+            )}
+            {discountPercentage && discountPercentage > 0 && (
+              <Badge className="bg-red-500 text-white text-xs font-medium animate-pulse">
+                {discountPercentage}% OFF
               </Badge>
             )}
           </div>
