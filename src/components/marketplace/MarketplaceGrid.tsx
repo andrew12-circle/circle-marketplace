@@ -20,6 +20,7 @@ import { determineServiceRisk } from "./RESPAComplianceSystem";
 import { Link } from "react-router-dom";
 import { CategoryMegaMenu } from "./CategoryMegaMenu";
 import { EnhancedSearch, SearchFilters } from "./EnhancedSearch";
+import { StickySearchContainer } from "./StickySearchContainer";
 import { VendorCallToAction } from "./VendorCallToAction";
 import { useMarketplaceData, useSavedServices, useInvalidateMarketplace, type Service, type Vendor } from "@/hooks/useMarketplaceData";
 import { useMarketplaceFilters } from "@/hooks/useMarketplaceFilters";
@@ -279,13 +280,26 @@ const { data: bulkRatings } = useBulkServiceRatings(serviceIds);
   // Combine saved services from hook and local state
   const allSavedServiceIds = [...savedServiceIds, ...localSavedServiceIds];
 
-  // Get categories based on view mode
+  // Get categories and tags based on view mode
   const getCategories = () => {
     switch (viewMode) {
       case 'services':
         return categories;
       case 'vendors':
+        return Array.from(new Set(vendors.map(v => v.name).filter(Boolean)));
+      case 'products':
+        return PRODUCT_CATEGORIES.map(p => p.name);
+      default:
         return [];
+    }
+  };
+
+  const getTags = () => {
+    switch (viewMode) {
+      case 'services':
+        return Array.from(new Set(flattenServices.flatMap(s => s.tags || []).filter(Boolean)));
+      case 'vendors':
+        return Array.from(new Set(vendors.map(v => v.description).filter(Boolean)));
       case 'products':
         return [];
       default:
@@ -524,13 +538,15 @@ const handleViewServiceDetails = useCallback((serviceId: string) => {
           {/* Campaign Services Header */}
           <CampaignServicesHeader />
 
-           {/* Enhanced Search Component */}
-          <div className="space-y-6">
-            <EnhancedSearch onSearchChange={handleEnhancedSearchChange} availableCategories={Array.from(new Set(baseForFilters.map(service => service.category).filter(Boolean)))} availableTags={Array.from(new Set(baseForFilters.flatMap(service => service.tags || [])))} />
-            
-            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-            </div>
-          </div>
+           {/* Sticky Enhanced Search Component */}
+          <StickySearchContainer>
+            <EnhancedSearch 
+              onSearchChange={handleEnhancedSearchChange} 
+              availableCategories={getCategories()} 
+              availableTags={getTags()}
+              viewMode={viewMode}
+            />
+          </StickySearchContainer>
 
           {/* View Mode Toggle */}
           <div className="flex gap-2 mb-6">

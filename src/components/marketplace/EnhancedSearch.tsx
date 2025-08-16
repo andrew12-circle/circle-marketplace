@@ -15,6 +15,7 @@ interface EnhancedSearchProps {
   onSearchChange: (filters: SearchFilters) => void;
   availableCategories: string[];
   availableTags: string[];
+  viewMode?: 'services' | 'products' | 'vendors';
 }
 
 export interface SearchFilters {
@@ -37,7 +38,8 @@ const FEATURE_OPTIONS = [
 export const EnhancedSearch = ({ 
   onSearchChange, 
   availableCategories, 
-  availableTags 
+  availableTags,
+  viewMode = 'services'
 }: EnhancedSearchProps) => {
   const { min: minPrice, max: maxPrice, isLoading: priceRangeLoading } = useServicePriceRange();
   
@@ -63,6 +65,22 @@ export const EnhancedSearch = ({
 
   const { data: serviceCount } = useServiceCount();
   const [activeFiltersCount, setActiveFiltersCount] = useState(0);
+
+  // Dynamic placeholder based on view mode
+  const getSearchPlaceholder = () => {
+    switch (viewMode) {
+      case 'services':
+        return serviceCount && serviceCount > 0 
+          ? `Search ${serviceCount} top realtor services or keywords...` 
+          : "Search services or keywords...";
+      case 'products':
+        return "Search product categories...";
+      case 'vendors':
+        return "Search vendors or companies...";
+      default:
+        return "Search...";
+    }
+  };
 
   useEffect(() => {
     // Count active filters
@@ -135,7 +153,7 @@ export const EnhancedSearch = ({
         <div className="relative w-full max-w-xl flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
           <Input
-            placeholder={serviceCount && serviceCount > 0 ? `Search ${serviceCount} top realtor services or keywords...` : "Search services, vendors, or keywords..."}
+            placeholder={getSearchPlaceholder()}
             value={filters.query}
             onChange={(e) => updateFilters('query', e.target.value)}
             className="pl-10 pr-4"
