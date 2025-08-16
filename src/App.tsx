@@ -17,7 +17,6 @@ import { OnboardingRedirect } from "@/components/onboarding/OnboardingRedirect";
 import { OutageBanner } from "@/components/common/OutageBanner";
 import { globalErrorMonitor } from "@/utils/globalErrorMonitor";
 import { HelpWidget } from "@/components/help/HelpWidget";
-import { HelpWidgetTest } from "@/components/help/HelpWidgetTest";
 // Lazy-loaded heavy pages
 const Index = lazy(() => import("./pages/Index"));
 const Academy = lazy(() => import("./pages/Academy").then(m => ({ default: m.Academy })));
@@ -130,7 +129,7 @@ const AppContent = () => {
                                  <RequestLogger />
                                   <OnboardingRedirect />
                                   <AppContent />
-                                  <HelpWidgetTest />
+                                  <HelpWidget />
                                 </BrowserRouter>
                              </CartProvider>
                            </AuthProvider>
