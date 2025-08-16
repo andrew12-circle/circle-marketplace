@@ -2,6 +2,8 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+const RESEND_FROM_EMAIL = Deno.env.get("RESEND_FROM_EMAIL") || "notifications@resend.dev";
+const RESEND_FROM_NAME = Deno.env.get("RESEND_FROM_NAME") || "Circle Network";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -137,7 +139,7 @@ const handler = async (req: Request): Promise<Response> => {
     const emailSubject = subject || template.subject;
 
     const emailResponse = await resend.emails.send({
-      from: "Circle Network <notifications@resend.dev>",
+      from: `${RESEND_FROM_NAME} <${RESEND_FROM_EMAIL}>`,
       to: [to],
       subject: emailSubject,
       html: template.html,

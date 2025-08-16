@@ -6,6 +6,8 @@ import { renderAsync } from "npm:@react-email/components@0.0.22";
 import { MonthlyStatementEmail } from "./_templates/monthly-statement.tsx";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+const RESEND_FROM_EMAIL = Deno.env.get("RESEND_FROM_EMAIL") || "statements@resend.dev";
+const RESEND_FROM_NAME = Deno.env.get("RESEND_FROM_NAME") || "Circle Platform";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -120,7 +122,7 @@ const handler = async (req: Request): Promise<Response> => {
         );
 
         const emailResult = await resend.emails.send({
-          from: "Circle Platform <statements@resend.dev>",
+          from: `${RESEND_FROM_NAME} <${RESEND_FROM_EMAIL}>`,
           to: [agentData.email],
           subject: `Your ${monthName} Points Statement - Circle Platform`,
           html,

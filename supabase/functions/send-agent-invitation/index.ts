@@ -2,6 +2,8 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { corsHeaders } from "../_shared/cors.ts";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+const RESEND_FROM_EMAIL = Deno.env.get("RESEND_FROM_EMAIL") || "invitations@circleplatform.com";
+const RESEND_FROM_NAME = Deno.env.get("RESEND_FROM_NAME") || "Circle Network";
 
 interface AgentInvitationRequest {
   agent_email: string;
@@ -31,7 +33,7 @@ const handler = async (req: Request): Promise<Response> => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "Circle Network <invitations@circleplatform.com>",
+        from: `${RESEND_FROM_NAME} <${RESEND_FROM_EMAIL}>`,
         to: [agent_email],
         subject: `${agent_name}, Exclusive Invitation: Share Your Success & Earn $69.30 Per Sale`,
         html: `
