@@ -1,10 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
-// Calculate header height dynamically
-const getHeaderHeight = () => {
-  const header = document.querySelector('header');
-  return header ? header.offsetHeight : 76; // fallback to 76px
+// Calculate total offset including header and navigation tabs
+const getTotalOffset = () => {
+  const header = document.querySelector('header') as HTMLElement;
+  const navTabs = document.querySelector('[class*="NavigationTabs"], .navigation-tabs, [class*="rounded-xl"][class*="mx-auto"]') as HTMLElement;
+  
+  const headerHeight = header ? header.offsetHeight : 76;
+  const navTabsHeight = navTabs ? navTabs.offsetHeight : 52; // typical tab height
+  const spacing = 16; // spacing below nav tabs
+  
+  return headerHeight + navTabsHeight + spacing;
 };
 
 interface StickySearchContainerProps {
@@ -14,20 +20,20 @@ interface StickySearchContainerProps {
 
 export const StickySearchContainer = ({ children, className }: StickySearchContainerProps) => {
   const [isSticky, setIsSticky] = useState(false);
-  const [headerHeight, setHeaderHeight] = useState(76);
+  const [totalOffset, setTotalOffset] = useState(144); // default fallback
   const containerRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Update header height on mount and resize
-    const updateHeaderHeight = () => {
-      setHeaderHeight(getHeaderHeight());
+    // Update total offset on mount and resize
+    const updateTotalOffset = () => {
+      setTotalOffset(getTotalOffset());
     };
     
-    updateHeaderHeight();
-    window.addEventListener('resize', updateHeaderHeight);
+    updateTotalOffset();
+    window.addEventListener('resize', updateTotalOffset);
     
-    return () => window.removeEventListener('resize', updateHeaderHeight);
+    return () => window.removeEventListener('resize', updateTotalOffset);
   }, []);
 
   useEffect(() => {
@@ -40,7 +46,7 @@ export const StickySearchContainer = ({ children, className }: StickySearchConta
         setIsSticky(!entry.isIntersecting);
       },
       {
-        rootMargin: `-${headerHeight}px 0px -1px 0px`, // Account for header height
+        rootMargin: `-${totalOffset}px 0px -1px 0px`, // Account for total offset
         threshold: 0
       }
     );
@@ -50,7 +56,7 @@ export const StickySearchContainer = ({ children, className }: StickySearchConta
     return () => {
       observer.disconnect();
     };
-  }, [headerHeight]);
+  }, [totalOffset]);
 
   return (
     <>
@@ -66,7 +72,7 @@ export const StickySearchContainer = ({ children, className }: StickySearchConta
           className
         )}
         style={{
-          top: isSticky ? `${headerHeight + 15}px` : undefined,
+          top: isSticky ? `${totalOffset}px` : undefined,
           transform: isSticky ? "translateY(0)" : undefined,
         }}
       >
