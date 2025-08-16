@@ -12,7 +12,8 @@ import {
   Users, 
   TrendingUp, 
   ArrowRight,
-  Award
+  Award,
+  MessageCircle
 } from "lucide-react";
 
 export interface BaseVendorData {
@@ -129,13 +130,27 @@ export const BaseVendorCard = ({
       onMouseLeave={onMouseLeave}
     >
       {/* Top Badges */}
-      <div className="absolute top-3 left-3 z-10 flex gap-2">
+      <div className="absolute top-3 left-3 z-10 flex gap-2 flex-col">
         {is_verified && (
           <Badge className="bg-emerald-500 text-white text-xs font-medium flex items-center gap-1">
             <Award className="w-3 h-3" />
             Verified
           </Badge>
         )}
+        {/* Open to Partner Badge */}
+        <Badge className="bg-blue-500 text-white text-xs font-medium flex items-center gap-1 animate-pulse">
+          <MessageCircle className="w-3 h-3" />
+          Open to Partner
+        </Badge>
+      </div>
+
+      {/* Partnership Message */}
+      <div className="absolute top-3 right-3 z-10">
+        <div className="bg-white/95 backdrop-blur-sm border border-border/50 rounded-lg px-3 py-2 shadow-lg max-w-48">
+          <p className="text-xs text-foreground font-medium leading-tight">
+            {name} is open to conversations and would love to help you grow your business!
+          </p>
+        </div>
       </div>
 
       {/* Logo Image - Fixed height like service cards */}
