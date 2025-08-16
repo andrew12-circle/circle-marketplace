@@ -449,11 +449,11 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false, b
                           <Badge className="bg-green-600 text-white text-xs">
                             {service.respa_split_limit}% vendor support
                           </Badge>
-                          {discountPercentage && discountPercentage > 0 && (
-                            <Badge className="bg-red-500 text-white text-xs font-medium animate-pulse">
-                              {discountPercentage}% OFF
-                            </Badge>
-                          )}
+                           {discountPercentage && discountPercentage > 0 && (
+                             <Badge className="bg-red-500 text-white text-xs font-medium">
+                               {discountPercentage}% OFF
+                             </Badge>
+                           )}
                        </div>
                     </div>
                   )}
@@ -534,7 +534,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false, b
             {/* Discount Badge - Always show if available */}
             {discountPercentage && discountPercentage > 0 && (
               <div className="flex justify-end mb-3">
-                <Badge className="bg-red-500 text-white text-xs font-medium animate-pulse">
+                <Badge className="bg-red-500 text-white text-xs font-medium">
                   {discountPercentage}% OFF
                 </Badge>
               </div>
