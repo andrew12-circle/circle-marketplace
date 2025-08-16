@@ -49,7 +49,7 @@ const resources = {
       // First Visit Intro
       intro: {
         newBadge: "New",
-        headline: "Welcome to Circle — Where Top Agents Thrive",
+        headline: "Welcome to Circle Network - Where Top Agents Thrive",
         subheadline: "Join thousands of agents saving money and growing their business with our curated marketplace.",
         benefit1Title: "Massive Savings",
         benefit1Desc: "Save 40-80% on tools you already use",
