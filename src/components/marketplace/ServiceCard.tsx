@@ -475,7 +475,7 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false, b
                     </div>
                   )}
                   
-                  {service.is_verified && service.pro_price && (
+                   {service.is_verified && service.pro_price && (
                     <div className="space-y-1">
                       <Tooltip>
                         <TooltipTrigger asChild>
@@ -495,6 +495,13 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false, b
                           <p className="text-xs text-muted-foreground mt-1">Click to upgrade →</p>
                         </TooltipContent>
                       </Tooltip>
+                      {discountPercentage && discountPercentage > 0 && (
+                        <div className="flex justify-end">
+                          <Badge className="bg-red-500 text-white text-xs font-medium">
+                            {discountPercentage}% OFF
+                          </Badge>
+                        </div>
+                      )}
                     </div>
                   )}
                   
