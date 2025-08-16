@@ -115,9 +115,29 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => window.removeEventListener('addCoPayToCart', handleAddCoPayToCart as EventListener);
   }, []);
 
-  // Save cart to localStorage whenever it changes
+  const checkAuthAndRedirect = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session?.user) {
+      toast({
+        title: "Sign in required",
+        description: "Create a free account or sign in to add items to your cart.",
+      });
+      
+      // Redirect to auth page
+      setTimeout(() => {
+        window.location.href = '/auth?mode=signup';
+      }, 1000);
+      return false;
+    }
+    
+    return true;
+  };
 
-  const addToCart = (item: Omit<CartItem, 'quantity'>) => {
+  const addToCart = async (item: Omit<CartItem, 'quantity'>) => {
+    const isAuthed = await checkAuthAndRedirect();
+    if (!isAuthed) return;
+
     setCartItems(prev => {
       const existingItem = prev.find(cartItem => cartItem.id === item.id);
       
@@ -186,31 +206,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const getCartCount = () => {
     return cartItems.reduce((count, item) => count + item.quantity, 0);
-  };
-
-  const addCoPayRequest = (coPayItem: any) => {
-    const cartItem: CartItem = {
-      id: coPayItem.id,
-      title: `${coPayItem.service.title}`,
-      image_url: coPayItem.service.image_url,
-      price: 0,
-      vendor: coPayItem.vendor,
-      quantity: 1,
-      type: 'co-pay-request',
-      status: coPayItem.status,
-      requestedSplit: coPayItem.requestedSplit,
-      vendorName: coPayItem.vendor.name,
-      serviceName: coPayItem.service.title,
-      createdAt: coPayItem.createdAt,
-      requiresQuote: false,
-      description: JSON.stringify({
-        retail_price: coPayItem.service.retail_price,
-        pro_price: coPayItem.service.pro_price,
-        co_pay_price: coPayItem.service.co_pay_price
-      })
-    };
-    
-    addToCart(cartItem);
   };
 
   const value: CartContextType = {

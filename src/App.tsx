@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { CartProvider } from "@/contexts/CartContext";
 import { SpiritualCoverageProvider } from "@/contexts/SpiritualCoverageContext";
 import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 import { CSRFProvider } from "@/components/common/CSRFProtection";
@@ -58,6 +59,7 @@ const App = () => {
           <CSRFProvider>
             <SpiritualCoverageProvider>
               <AuthProvider>
+                <CartProvider>
               <Toaster />
               <Sonner />
               <div className="fixed top-4 right-4 z-50">
@@ -104,7 +106,8 @@ const App = () => {
                      <Route path="*" element={<NotFound />} />
                    </Routes>
                  </Suspense>
-                </BrowserRouter>
+                 </BrowserRouter>
+                </CartProvider>
               </AuthProvider>
             </SpiritualCoverageProvider>
           </CSRFProvider>

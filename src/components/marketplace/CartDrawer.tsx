@@ -7,6 +7,8 @@ import { ShoppingCart, Plus, Minus, Trash2, CreditCard, MessageCircle, Calendar 
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 import { ConsultationSequenceFlow } from "./ConsultationSequenceFlow";
 
 export const CartDrawer = () => {
@@ -24,6 +26,8 @@ export const CartDrawer = () => {
   
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [isConsultationFlowOpen, setIsConsultationFlowOpen] = useState(false);
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const { toast } = useToast();
 
   // Listen for openCart event
@@ -37,6 +41,16 @@ export const CartDrawer = () => {
   }, [setIsOpen]);
 
   const handleCheckout = async () => {
+    if (!user) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to complete your purchase.",
+        variant: "destructive",
+      });
+      navigate('/auth');
+      return;
+    }
+
     const purchasableItems = cartItems.filter(item => !item.requiresQuote && item.type !== 'co-pay-request');
     const coPayItems = cartItems.filter(item => item.type === 'co-pay-request' && item.status === 'approved');
     const quoteItems = cartItems.filter(item => item.requiresQuote);
@@ -144,6 +158,16 @@ export const CartDrawer = () => {
   };
 
   const handleRequestQuotes = () => {
+    if (!user) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to schedule consultations.",
+        variant: "destructive",
+      });
+      navigate('/auth');
+      return;
+    }
+
     const quoteItems = cartItems.filter(item => item.requiresQuote);
     if (quoteItems.length > 0) {
       setIsConsultationFlowOpen(true);

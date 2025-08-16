@@ -31,7 +31,8 @@ export const Auth = () => {
     email: '',
     password: '',
     displayName: '',
-    isCreator: false
+    isCreator: false,
+    isProMember: false
   });
   const [lockoutStatus, setLockoutStatus] = useState({
     isLocked: false,
@@ -67,7 +68,7 @@ export const Auth = () => {
     return data;
   };
 
-  const handleSignUp = async (email: string, password: string, displayName: string, isCreator: boolean) => {
+  const handleSignUp = async (email: string, password: string, displayName: string, isCreator: boolean, isProMember: boolean) => {
     const redirectUrl = `${window.location.origin}/`;
     
     const { data, error } = await supabase.auth.signUp({
@@ -76,8 +77,9 @@ export const Auth = () => {
       options: {
         emailRedirectTo: redirectUrl,
         data: {
-          full_name: displayName,
-          is_creator: isCreator
+          display_name: displayName,
+          is_creator: isCreator,
+          is_pro_member: isProMember
         }
       }
     });
@@ -197,13 +199,16 @@ export const Auth = () => {
           data.email, 
           data.password, 
           data.displayName || '',
-          data.isCreator === 'true'
+          data.isCreator === 'true',
+          data.isProMember === 'true'
         );
         
         if (user) {
           toast({
             title: "Account created!",
-            description: data.isCreator === 'true'
+            description: data.isProMember === 'true'
+              ? "Welcome to Circle Pro! Check your email to verify your account and access exclusive pricing."
+              : data.isCreator === 'true'
               ? "Welcome to the creator platform! Check your email to verify your account."
               : "Welcome! Check your email to verify your account.",
           });
@@ -288,7 +293,7 @@ export const Auth = () => {
   const toggleMode = () => {
     setIsLogin(!isLogin);
     setShowForgotPassword(false);
-    setFormData({ email: '', password: '', displayName: '', isCreator: false });
+    setFormData({ email: '', password: '', displayName: '', isCreator: false, isProMember: false });
   };
 
   return (
@@ -463,28 +468,59 @@ export const Auth = () => {
               </div>
             )}
 
-            {/* Creator Toggle (Signup only) */}
+            {/* Account Type Toggles (Signup only) */}
             {!isLogin && (
-              <div className="flex items-center space-x-2 p-3 bg-muted/30 rounded-lg">
-                <Briefcase className="w-4 h-4 text-muted-foreground" />
-                <div className="flex-1">
-                  <Label htmlFor="isCreator" className="text-sm font-medium">
-                    I'm a creator
-                  </Label>
-                  <p className="text-xs text-muted-foreground">
-                    Upload and monetize your content
-                  </p>
+              <div className="space-y-3">
+                <div className="flex items-center space-x-2 p-3 bg-muted/30 rounded-lg">
+                  <Briefcase className="w-4 h-4 text-muted-foreground" />
+                  <div className="flex-1">
+                    <Label htmlFor="isCreator" className="text-sm font-medium">
+                      I'm a creator
+                    </Label>
+                    <p className="text-xs text-muted-foreground">
+                      Upload and monetize your content
+                    </p>
+                  </div>
+                  <input
+                    type="hidden"
+                    name="isCreator"
+                    value={formData.isCreator.toString()}
+                  />
+                  <Switch
+                    id="isCreator"
+                    checked={formData.isCreator}
+                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isCreator: checked }))}
+                  />
                 </div>
-                <input
-                  type="hidden"
-                  name="isCreator"
-                  value={formData.isCreator.toString()}
-                />
-                <Switch
-                  id="isCreator"
-                  checked={formData.isCreator}
-                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isCreator: checked }))}
-                />
+
+                <div className="flex items-center space-x-2 p-3 bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-lg">
+                  <div className="text-amber-600">
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M9.663 17h4.673a1.5 1.5 0 001.5-1.5v-6h-8v6a1.5 1.5 0 001.5 1.5h.327zM11 3a1 1 0 011 1v.5h3.5a.5.5 0 01.5.5v1a.5.5 0 01-.5.5H4.5a.5.5 0 01-.5-.5v-1a.5.5 0 01.5-.5H8V4a1 1 0 011-1h2z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <Label htmlFor="isProMember" className="text-sm font-medium text-amber-800">
+                      Circle Pro Member
+                    </Label>
+                    <p className="text-xs text-amber-700">
+                      {formData.isProMember 
+                        ? "Get pro pricing, co-pay access & priority support" 
+                        : "Upgrade for exclusive benefits and better pricing"
+                      }
+                    </p>
+                  </div>
+                  <input
+                    type="hidden"
+                    name="isProMember"
+                    value={formData.isProMember.toString()}
+                  />
+                  <Switch
+                    id="isProMember"
+                    checked={formData.isProMember}
+                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isProMember: checked }))}
+                  />
+                </div>
               </div>
             )}
 
