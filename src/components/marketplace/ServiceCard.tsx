@@ -404,14 +404,24 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false, b
                   )}
                   
                   {service.is_verified && service.pro_price && (
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1">
-                        <span className="text-sm font-medium text-circle-primary">Circle Pro Price:</span>
-                        <Crown className="w-4 h-4 text-circle-primary" />
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1">
+                          <span className="text-sm font-medium text-circle-primary">Circle Pro Price:</span>
+                          <Crown className="w-4 h-4 text-circle-primary" />
+                        </div>
+                        <span className="text-xl font-bold text-circle-primary">
+                          {formatPrice(extractNumericPrice(service.pro_price), service.price_duration || 'mo')}
+                        </span>
                       </div>
-                      <span className="text-xl font-bold text-circle-primary">
-                        {formatPrice(extractNumericPrice(service.pro_price), service.price_duration || 'mo')}
-                      </span>
+                      
+                      {discountPercentage && discountPercentage > 0 && (
+                        <div className="flex justify-end">
+                          <Badge className="bg-red-500 text-white text-xs font-medium">
+                            {discountPercentage}% OFF
+                          </Badge>
+                        </div>
+                      )}
                     </div>
                   )}
                   
