@@ -13,6 +13,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { LocationSwitcher } from "@/components/LocationSwitcher";
 import { LegalFooter } from "@/components/LegalFooter";
+import { FirstVisitIntro } from "@/components/marketing/FirstVisitIntro";
 import { Building, Store, BookOpen } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -156,6 +157,9 @@ const Index = () => {
 
         {/* Legal Footer */}
         <LegalFooter />
+        
+        {/* First Visit Intro Modal */}
+        <FirstVisitIntro />
       </div>
     );
 };

@@ -44,7 +44,22 @@ const resources = {
       signUp: "Sign Up",
       
       // Currency
-      currency: "USD"
+      currency: "USD",
+      
+      // First Visit Intro
+      intro: {
+        newBadge: "New",
+        headline: "Welcome to Circle — Where Top Agents Thrive",
+        subheadline: "Join thousands of agents saving money and growing their business with our curated marketplace.",
+        benefit1Title: "Massive Savings",
+        benefit1Desc: "Save 40-80% on tools you already use",
+        benefit2Title: "AI-Powered Growth",
+        benefit2Desc: "Get personalized recommendations to boost your ROI",
+        benefit3Title: "Agent-Verified",
+        benefit3Desc: "Every service is tested by successful agents like you",
+        learnMore: "Explore First",
+        getStarted: "Get Started Free"
+      }
     }
   },
   es: {
