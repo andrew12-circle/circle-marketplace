@@ -1,6 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
+// Calculate header height dynamically
+const getHeaderHeight = () => {
+  const header = document.querySelector('header');
+  return header ? header.offsetHeight : 76; // fallback to 76px
+};
+
 interface StickySearchContainerProps {
   children: React.ReactNode;
   className?: string;
@@ -8,8 +14,21 @@ interface StickySearchContainerProps {
 
 export const StickySearchContainer = ({ children, className }: StickySearchContainerProps) => {
   const [isSticky, setIsSticky] = useState(false);
+  const [headerHeight, setHeaderHeight] = useState(76);
   const containerRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // Update header height on mount and resize
+    const updateHeaderHeight = () => {
+      setHeaderHeight(getHeaderHeight());
+    };
+    
+    updateHeaderHeight();
+    window.addEventListener('resize', updateHeaderHeight);
+    
+    return () => window.removeEventListener('resize', updateHeaderHeight);
+  }, []);
 
   useEffect(() => {
     const sentinel = sentinelRef.current;
@@ -21,7 +40,7 @@ export const StickySearchContainer = ({ children, className }: StickySearchConta
         setIsSticky(!entry.isIntersecting);
       },
       {
-        rootMargin: "0px 0px -1px 0px", // Trigger just before leaving viewport
+        rootMargin: `-${headerHeight}px 0px -1px 0px`, // Account for header height
         threshold: 0
       }
     );
@@ -31,7 +50,7 @@ export const StickySearchContainer = ({ children, className }: StickySearchConta
     return () => {
       observer.disconnect();
     };
-  }, []);
+  }, [headerHeight]);
 
   return (
     <>
@@ -42,11 +61,12 @@ export const StickySearchContainer = ({ children, className }: StickySearchConta
       <div
         ref={containerRef}
         className={cn(
-          "sticky top-0 z-40 bg-background/95 backdrop-blur-sm transition-all duration-200",
+          "sticky z-40 bg-background/95 backdrop-blur-sm transition-all duration-200",
           isSticky && "border-b border-border shadow-sm",
           className
         )}
         style={{
+          top: isSticky ? `${headerHeight}px` : undefined,
           transform: isSticky ? "translateY(0)" : undefined,
         }}
       >
