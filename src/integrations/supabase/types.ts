@@ -524,6 +524,36 @@ export type Database = {
         }
         Relationships: []
       }
+      app_config: {
+        Row: {
+          created_at: string
+          force_cache_bust_after: string | null
+          id: string
+          maintenance_message: string | null
+          maintenance_mode: boolean | null
+          min_build_version: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          force_cache_bust_after?: string | null
+          id?: string
+          maintenance_message?: string | null
+          maintenance_mode?: boolean | null
+          min_build_version?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          force_cache_bust_after?: string | null
+          id?: string
+          maintenance_message?: string | null
+          maintenance_mode?: boolean | null
+          min_build_version?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       audit_log: {
         Row: {
           id: string
@@ -2644,6 +2674,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      incidents: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          details: Json | null
+          id: string
+          resolved_at: string | null
+          severity: string
+          started_at: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          details?: Json | null
+          id?: string
+          resolved_at?: string | null
+          severity?: string
+          started_at?: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          details?: Json | null
+          id?: string
+          resolved_at?: string | null
+          severity?: string
+          started_at?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       lenders: {
         Row: {
