@@ -66,7 +66,7 @@ export const StickySearchContainer = ({ children, className }: StickySearchConta
           className
         )}
         style={{
-          top: isSticky ? `${headerHeight}px` : undefined,
+          top: isSticky ? `${headerHeight + 15}px` : undefined,
           transform: isSticky ? "translateY(0)" : undefined,
         }}
       >
