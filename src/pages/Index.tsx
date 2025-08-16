@@ -17,6 +17,7 @@ import { FirstVisitIntro } from "@/components/marketing/FirstVisitIntro";
 import { OnboardingResumeBanner } from "@/components/onboarding/OnboardingResumeBanner";
 import { SmartHelpOrchestrator } from "@/components/help/SmartHelpOrchestrator";
 import { EnhancedHelpWidget } from "@/components/help/EnhancedHelpWidget";
+import { ProactiveHelpMonitor } from "@/components/help/ProactiveHelpMonitor";
 import { TourDiscoveryButton } from "@/components/marketplace/TourDiscoveryButton";
 import { Building, Store, BookOpen } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";

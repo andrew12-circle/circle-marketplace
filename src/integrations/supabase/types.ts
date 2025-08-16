@@ -2592,6 +2592,42 @@ export type Database = {
         }
         Relationships: []
       }
+      help_ai_learning: {
+        Row: {
+          ai_response: string
+          context_data: Json | null
+          created_at: string
+          follow_up_questions: string[] | null
+          id: string
+          learning_points: Json | null
+          resolution_achieved: boolean | null
+          user_feedback: string | null
+          user_query: string
+        }
+        Insert: {
+          ai_response: string
+          context_data?: Json | null
+          created_at?: string
+          follow_up_questions?: string[] | null
+          id?: string
+          learning_points?: Json | null
+          resolution_achieved?: boolean | null
+          user_feedback?: string | null
+          user_query: string
+        }
+        Update: {
+          ai_response?: string
+          context_data?: Json | null
+          created_at?: string
+          follow_up_questions?: string[] | null
+          id?: string
+          learning_points?: Json | null
+          resolution_achieved?: boolean | null
+          user_feedback?: string | null
+          user_query?: string
+        }
+        Relationships: []
+      }
       help_analytics: {
         Row: {
           context_data: Json | null
@@ -2618,6 +2654,141 @@ export type Database = {
           guide_id?: string | null
           id?: string
           route?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      help_issues: {
+        Row: {
+          ai_confidence_score: number | null
+          auto_resolved: boolean | null
+          context_data: Json | null
+          created_at: string
+          description: string | null
+          escalated_to_human: boolean | null
+          id: string
+          issue_type: string
+          resolution: string | null
+          resolution_steps: Json | null
+          resolved_at: string | null
+          severity: string
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+          user_satisfaction: number | null
+        }
+        Insert: {
+          ai_confidence_score?: number | null
+          auto_resolved?: boolean | null
+          context_data?: Json | null
+          created_at?: string
+          description?: string | null
+          escalated_to_human?: boolean | null
+          id?: string
+          issue_type: string
+          resolution?: string | null
+          resolution_steps?: Json | null
+          resolved_at?: string | null
+          severity?: string
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+          user_satisfaction?: number | null
+        }
+        Update: {
+          ai_confidence_score?: number | null
+          auto_resolved?: boolean | null
+          context_data?: Json | null
+          created_at?: string
+          description?: string | null
+          escalated_to_human?: boolean | null
+          id?: string
+          issue_type?: string
+          resolution?: string | null
+          resolution_steps?: Json | null
+          resolved_at?: string | null
+          severity?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+          user_satisfaction?: number | null
+        }
+        Relationships: []
+      }
+      help_knowledge_base: {
+        Row: {
+          category: string
+          content: string
+          created_at: string
+          effectiveness_score: number | null
+          id: string
+          last_updated: string
+          search_vectors: unknown | null
+          subcategory: string | null
+          tags: string[] | null
+          title: string
+          usage_count: number | null
+        }
+        Insert: {
+          category: string
+          content: string
+          created_at?: string
+          effectiveness_score?: number | null
+          id?: string
+          last_updated?: string
+          search_vectors?: unknown | null
+          subcategory?: string | null
+          tags?: string[] | null
+          title: string
+          usage_count?: number | null
+        }
+        Update: {
+          category?: string
+          content?: string
+          created_at?: string
+          effectiveness_score?: number | null
+          id?: string
+          last_updated?: string
+          search_vectors?: unknown | null
+          subcategory?: string | null
+          tags?: string[] | null
+          title?: string
+          usage_count?: number | null
+        }
+        Relationships: []
+      }
+      help_proactive_triggers: {
+        Row: {
+          created_at: string
+          help_accepted: boolean | null
+          help_offered: boolean | null
+          id: string
+          resolution_successful: boolean | null
+          trigger_data: Json
+          trigger_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          help_accepted?: boolean | null
+          help_offered?: boolean | null
+          id?: string
+          resolution_successful?: boolean | null
+          trigger_data: Json
+          trigger_type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          help_accepted?: boolean | null
+          help_offered?: boolean | null
+          id?: string
+          resolution_successful?: boolean | null
+          trigger_data?: Json
+          trigger_type?: string
           user_id?: string
         }
         Relationships: []
