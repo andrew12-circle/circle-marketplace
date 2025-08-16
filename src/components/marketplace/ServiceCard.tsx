@@ -290,11 +290,6 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false, b
                 {t('topPick')}
               </Badge>
             )}
-            {discountPercentage && discountPercentage > 0 && (
-              <Badge className="bg-red-500 text-white text-xs font-medium animate-pulse">
-                {discountPercentage}% OFF
-              </Badge>
-            )}
           </div>
 
           {/* Save Button */}
@@ -449,12 +444,17 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false, b
                             service.price_duration || 'mo'
                           )}
                         </span>
-                      </div>
-                      <div className="flex justify-end">
-                         <Badge className="bg-green-600 text-white text-xs">
-                           {service.respa_split_limit}% vendor support
-                         </Badge>
-                      </div>
+                       </div>
+                       <div className="flex justify-between items-center">
+                          <Badge className="bg-green-600 text-white text-xs">
+                            {service.respa_split_limit}% vendor support
+                          </Badge>
+                          {discountPercentage && discountPercentage > 0 && (
+                            <Badge className="bg-red-500 text-white text-xs font-medium animate-pulse">
+                              {discountPercentage}% OFF
+                            </Badge>
+                          )}
+                       </div>
                     </div>
                   )}
                   
