@@ -71,7 +71,7 @@ export const UserMenu = () => {
   if (!user) {
     return (
       <Button asChild variant="outline">
-        <Link to="/auth">Sign In</Link>
+        <Link to="/auth?mode=signup">Get Started Free</Link>
       </Button>
     );
   }

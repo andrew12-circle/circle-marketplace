@@ -58,7 +58,7 @@ export function FirstVisitIntro() {
 
   const handleSignUp = () => {
     handleClose();
-    navigate('/auth');
+    navigate('/auth?mode=signup');
   };
 
   const handleLearnMore = () => {
