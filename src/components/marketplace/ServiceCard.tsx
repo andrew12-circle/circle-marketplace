@@ -476,68 +476,68 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false, b
                   )}
                   
                    {service.is_verified && service.pro_price && (
-                    <div className="space-y-1">
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <div className="flex items-center justify-between p-2 bg-circle-primary/5 rounded-lg border border-circle-primary/20 opacity-75 cursor-pointer">
-                            <div className="flex items-center gap-1">
-                              <Lock className="w-3 h-3 text-circle-primary" />
-                              <span className="text-sm font-medium text-circle-primary">Circle Pro Price:</span>
-                              <Crown className="w-4 h-4 text-circle-primary" />
-                            </div>
-                            <span className="text-lg font-bold text-circle-primary">
-                              {formatPrice(extractNumericPrice(service.pro_price), service.price_duration || 'mo')}
-                            </span>
-                          </div>
-                        </TooltipTrigger>
-                        <TooltipContent className="w-40 sm:w-48 p-3 cursor-pointer" onClick={handleUpgradeClick}>
-                          <p className="text-sm leading-relaxed">Join Circle Pro membership to unlock this price</p>
-                          <p className="text-xs text-muted-foreground mt-1">Click to upgrade →</p>
-                        </TooltipContent>
-                      </Tooltip>
-                      {discountPercentage && discountPercentage > 0 && (
-                        <div className="flex justify-end">
-                          <Badge className="bg-red-500 text-white text-xs font-medium">
-                            {discountPercentage}% OFF
-                          </Badge>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                  
-                   {service.copay_allowed && service.respa_split_limit && ((service.is_verified && service.pro_price) || (!service.is_verified && service.retail_price)) && (
-                    <div className="space-y-1">
-                      <Tooltip delayDuration={0}>
-                        <TooltipTrigger asChild>
-                          <div className="flex items-center justify-between p-2 bg-green-50 rounded-lg border border-green-200 opacity-75 cursor-pointer hover:opacity-100 transition-opacity">
-                            <div className="flex items-center gap-1">
-                              <Lock className="w-3 h-3 text-green-600" />
-                              <span className="text-sm font-medium text-green-600">Potential Co-Pay:</span>
-                              <button 
-                                className="w-3 h-3 rounded-full bg-green-600 flex items-center justify-center cursor-help hover:bg-green-700 transition-colors"
-                                onMouseEnter={() => {
-                                  setShowOverlay(true);
-                                  ensureDisclaimerLoaded();
-                                }}
-                                onMouseLeave={() => setShowOverlay(false)}
-                              >
-                                <span className="text-xs text-white">i</span>
-                              </button>
-                            </div>
-                            <span className="text-lg font-bold text-green-600">
-                              {formatPrice(
-                                (service.is_verified 
-                                  ? extractNumericPrice(service.pro_price!) 
-                                  : extractNumericPrice(service.retail_price!)
-                                ) * (1 - (service.respa_split_limit / 100)), 
-                                service.price_duration || 'mo'
-                              )}
-                            </span>
-                          </div>
-                        </TooltipTrigger>
-                      </Tooltip>
-                    </div>
-                  )}
+                     <div className="space-y-1">
+                       <Tooltip>
+                         <TooltipTrigger asChild>
+                           <div className="flex items-center justify-between p-2 bg-circle-primary/5 rounded-lg border border-circle-primary/20 opacity-75 cursor-pointer">
+                             <div className="flex items-center gap-1">
+                               <Lock className="w-3 h-3 text-circle-primary" />
+                               <span className="text-sm font-medium text-circle-primary">Circle Pro Price:</span>
+                               <Crown className="w-4 h-4 text-circle-primary" />
+                             </div>
+                             <span className="text-lg font-bold text-circle-primary">
+                               {formatPrice(extractNumericPrice(service.pro_price), service.price_duration || 'mo')}
+                             </span>
+                           </div>
+                         </TooltipTrigger>
+                         <TooltipContent className="w-40 sm:w-48 p-3 cursor-pointer" onClick={handleUpgradeClick}>
+                           <p className="text-sm leading-relaxed">Join Circle Pro membership to unlock this price</p>
+                           <p className="text-xs text-muted-foreground mt-1">Click to upgrade →</p>
+                         </TooltipContent>
+                       </Tooltip>
+                     </div>
+                   )}
+                   
+                    {service.copay_allowed && service.respa_split_limit && ((service.is_verified && service.pro_price) || (!service.is_verified && service.retail_price)) && (
+                     <div className="space-y-1">
+                       <Tooltip delayDuration={0}>
+                         <TooltipTrigger asChild>
+                           <div className="flex items-center justify-between p-2 bg-green-50 rounded-lg border border-green-200 opacity-75 cursor-pointer hover:opacity-100 transition-opacity">
+                             <div className="flex items-center gap-1">
+                               <Lock className="w-3 h-3 text-green-600" />
+                               <span className="text-sm font-medium text-green-600">Potential Co-Pay:</span>
+                               <button 
+                                 className="w-3 h-3 rounded-full bg-green-600 flex items-center justify-center cursor-help hover:bg-green-700 transition-colors"
+                                 onMouseEnter={() => {
+                                   setShowOverlay(true);
+                                   ensureDisclaimerLoaded();
+                                 }}
+                                 onMouseLeave={() => setShowOverlay(false)}
+                               >
+                                 <span className="text-xs text-white">i</span>
+                               </button>
+                             </div>
+                             <span className="text-lg font-bold text-green-600">
+                               {formatPrice(
+                                 (service.is_verified 
+                                   ? extractNumericPrice(service.pro_price!) 
+                                   : extractNumericPrice(service.retail_price!)
+                                 ) * (1 - (service.respa_split_limit / 100)), 
+                                 service.price_duration || 'mo'
+                               )}
+                             </span>
+                           </div>
+                         </TooltipTrigger>
+                       </Tooltip>
+                       {discountPercentage && discountPercentage > 0 && (
+                         <div className="flex justify-end">
+                           <Badge className="bg-red-500 text-white text-xs font-medium">
+                             {discountPercentage}% OFF
+                           </Badge>
+                         </div>
+                       )}
+                     </div>
+                   )}
                 </>
               )}
             </div>
