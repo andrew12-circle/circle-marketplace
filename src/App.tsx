@@ -13,6 +13,7 @@ import { SecurityHeaders } from "@/components/common/SecurityHeaders";
 import { EnhancedSecurityHeaders } from "@/components/security/EnhancedSecurityHeaders";
 import { SecurityStatusIndicator } from "@/components/security/SecurityEnhancementSystem";
 import RequestLogger from "@/components/security/RequestLogger";
+import { OnboardingRedirect } from "@/components/onboarding/OnboardingRedirect";
 // Lazy-loaded heavy pages
 const Index = lazy(() => import("./pages/Index"));
 const Academy = lazy(() => import("./pages/Academy").then(m => ({ default: m.Academy })));
@@ -45,6 +46,7 @@ import { ProhibitedItems } from "./pages/legal/ProhibitedItems";
 import CommandCenter from "./pages/CommandCenter";
 import { CommandCenterTest } from "./pages/CommandCenterTest";
 import CreatorOnboardingPage from "./pages/CreatorOnboarding";
+import Welcome from "./pages/Welcome";
 
 import CompliancePage from "./pages/CompliancePage";
 import AdminCommissions from "./pages/AdminCommissions";
@@ -66,10 +68,11 @@ const App = () => {
               <div className="fixed top-4 right-4 z-50">
                 <SecurityStatusIndicator />
               </div>
-               <BrowserRouter>
+                 <BrowserRouter>
                  <SecurityHeaders />
                  <EnhancedSecurityHeaders />
                  <RequestLogger />
+                 <OnboardingRedirect />
                  <Suspense fallback={<div className="p-6 text-center text-muted-foreground">Loading...</div>}>
                    <Routes>
                      <Route path="/" element={<Index />} />
@@ -95,8 +98,9 @@ const App = () => {
                       <Route path="/admin" element={<AdminDashboard />} />
                       <Route path="/admin/accounting" element={<AdminAccounting />} />
                       <Route path="/admin/commissions" element={<AdminCommissions />} />
-                      <Route path="/creator-onboarding" element={<CreatorOnboardingPage />} />
-                      <Route path="/compliance" element={<CompliancePage />} />
+                       <Route path="/creator-onboarding" element={<CreatorOnboardingPage />} />
+                       <Route path="/welcome" element={<Welcome />} />
+                       <Route path="/compliance" element={<CompliancePage />} />
                      {/* Legal Pages */}
                      <Route path="/terms" element={<TermsOfService />} />
                      <Route path="/privacy" element={<PrivacyPolicy />} />

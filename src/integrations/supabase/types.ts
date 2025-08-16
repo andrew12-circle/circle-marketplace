@@ -4932,6 +4932,45 @@ export type Database = {
         }
         Relationships: []
       }
+      user_onboarding_states: {
+        Row: {
+          created_at: string
+          current_step: string
+          dismissed: boolean
+          id: string
+          is_completed: boolean
+          last_seen_at: string
+          steps: Json
+          updated_at: string
+          user_id: string
+          version: number
+        }
+        Insert: {
+          created_at?: string
+          current_step?: string
+          dismissed?: boolean
+          id?: string
+          is_completed?: boolean
+          last_seen_at?: string
+          steps?: Json
+          updated_at?: string
+          user_id: string
+          version?: number
+        }
+        Update: {
+          created_at?: string
+          current_step?: string
+          dismissed?: boolean
+          id?: string
+          is_completed?: boolean
+          last_seen_at?: string
+          steps?: Json
+          updated_at?: string
+          user_id?: string
+          version?: number
+        }
+        Relationships: []
+      }
       vendor_agent_activities: {
         Row: {
           activity_data: Json | null
