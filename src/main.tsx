@@ -26,7 +26,7 @@ const SavedItems = lazy(() => import("./pages/SavedItems").then(m => ({ default:
 const OrderHistory = lazy(() => import("./pages/OrderHistory").then(m => ({ default: m.OrderHistory })));
 const AgentWallet = lazy(() => import("./pages/AgentWallet").then(m => ({ default: m.AgentWallet })));
 const Pricing = lazy(() => import("./pages/Pricing").then(m => ({ default: m.Pricing })));
-const PaymentSuccess = lazy(() => import("./pages/PaymentSuccess").then(m => ({ default: m.PaymentSuccess })));
+const PaymentSuccess = lazy(() => import("./pages/PaymentSuccess"));
 const PaymentCanceled = lazy(() => import("./pages/PaymentCanceled").then(m => ({ default: m.PaymentCanceled })));
 const ConsultationDemo = lazy(() => import("./pages/ConsultationDemo").then(m => ({ default: m.ConsultationDemo })));
 const VendorRegistration = lazy(() => import("./pages/VendorRegistration").then(m => ({ default: m.VendorRegistration })));

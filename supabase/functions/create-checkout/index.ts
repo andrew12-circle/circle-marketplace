@@ -7,42 +7,62 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const logStep = (step: string, details?: any) => {
+  const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
+  console.log(`[CREATE-CHECKOUT] ${step}${detailsStr}`);
+};
+
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    // Parse request body
-    const { items } = await req.json();
+    logStep("Function started");
+
+    const { items, metadata = {} } = await req.json();
     
     if (!items || !Array.isArray(items) || items.length === 0) {
-      throw new Error("No items provided for checkout");
+      throw new Error("Items array is required and must not be empty");
     }
+
+    logStep("Received items", { itemCount: items.length, metadata });
 
     // Initialize Stripe
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
       apiVersion: "2023-10-16",
     });
 
-    // Create Supabase client
-    const supabaseClient = createClient(
+    // Initialize Supabase with service role for writes
+    const supabaseService = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_ANON_KEY") ?? ""
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+      { auth: { persistSession: false } }
     );
 
-    // Get user if authenticated (optional for guest checkout)
-    let user = null;
+    // Get authenticated user (for user attribution)
     const authHeader = req.headers.get("Authorization");
+    let user = null;
+    let userEmail = "guest@example.com";
+
     if (authHeader) {
-      try {
-        const token = authHeader.replace("Bearer ", "");
-        const { data } = await supabaseClient.auth.getUser(token);
-        user = data.user;
-      } catch (error) {
-        console.log("No authenticated user, proceeding with guest checkout");
-      }
+      const token = authHeader.replace("Bearer ", "");
+      const { data: userData } = await supabaseService.auth.getUser(token);
+      user = userData.user;
+      userEmail = user?.email || userEmail;
+      logStep("User authenticated", { userId: user?.id, email: userEmail });
+    } else {
+      logStep("No authentication - proceeding as guest");
+    }
+
+    // Check if customer exists in Stripe
+    const customers = await stripe.customers.list({ email: userEmail, limit: 1 });
+    let customerId;
+    if (customers.data.length > 0) {
+      customerId = customers.data[0].id;
+      logStep("Found existing Stripe customer", { customerId });
+    } else {
+      logStep("No existing customer found");
     }
 
     // Convert cart items to Stripe line items
@@ -51,66 +71,92 @@ serve(async (req) => {
         currency: "usd",
         product_data: {
           name: item.title,
-          description: `by ${item.vendor}`,
-          images: item.image_url ? [item.image_url] : [],
+          description: item.description || "",
+          metadata: {
+            item_id: item.id,
+            item_type: item.type || 'service',
+            vendor_id: item.vendor_id || '',
+          }
         },
-        unit_amount: Math.round(item.price * 100), // Convert to cents
+        unit_amount: Math.round((item.price || 0) * 100), // Convert to cents
       },
-      quantity: item.quantity,
+      quantity: item.quantity || 1,
     }));
 
-    // Check if customer exists for authenticated users
-    let customerId;
-    if (user?.email) {
-      const customers = await stripe.customers.list({ email: user.email, limit: 1 });
-      if (customers.data.length > 0) {
-        customerId = customers.data[0].id;
-      }
-    }
+    logStep("Created line items", { lineItemCount: lineItems.length });
+
+    // Calculate total amount
+    const totalAmount = items.reduce((sum: number, item: any) => 
+      sum + (item.price || 0) * (item.quantity || 1), 0
+    );
 
     // Create checkout session
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
-      customer_email: customerId ? undefined : user?.email || "guest@circle.com",
+      customer_email: customerId ? undefined : userEmail,
       line_items: lineItems,
       mode: "payment",
       success_url: `${req.headers.get("origin")}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${req.headers.get("origin")}/payment-canceled`,
       metadata: {
-        user_id: user?.id || "guest",
+        user_id: user?.id || '',
+        total_amount: totalAmount.toString(),
         item_count: items.length.toString(),
-      },
+        ...metadata
+      }
     });
 
-    // Optional: Store order in database
-    if (user) {
-      const supabaseService = createClient(
-        Deno.env.get("SUPABASE_URL") ?? "",
-        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-        { auth: { persistSession: false } }
-      );
+    logStep("Stripe session created", { sessionId: session.id, amount: totalAmount });
 
-      try {
-        const totalAmount = items.reduce((sum: number, item: any) => sum + (item.price * item.quantity), 0);
-        
-        await supabaseService.from("orders").insert({
-          user_id: user.id,
-          stripe_session_id: session.id,
-          amount: Math.round(totalAmount * 100), // Store in cents
-          currency: "usd",
-          status: "pending",
-        });
-      } catch (dbError) {
-        console.error("Failed to store order in database:", dbError);
-        // Continue with checkout even if DB fails
-      }
+    // Create order record in Supabase
+    const { data: orderData, error: orderError } = await supabaseService
+      .from('orders')
+      .insert({
+        user_id: user?.id,
+        stripe_session_id: session.id,
+        amount: Math.round(totalAmount * 100), // Store in cents
+        currency: 'usd',
+        status: 'pending',
+      })
+      .select()
+      .single();
+
+    if (orderError) {
+      logStep("Failed to create order", { error: orderError });
+      throw new Error(`Failed to create order: ${orderError.message}`);
+    }
+
+    logStep("Order created", { orderId: orderData.id });
+
+    // Create order items for tracking
+    const orderItems = items.map((item: any) => ({
+      order_id: orderData.id,
+      service_id: item.id,
+      vendor_id: item.vendor_id,
+      item_type: item.type || 'service',
+      item_title: item.title,
+      item_price: item.price || 0,
+      quantity: item.quantity || 1,
+      vendor_commission_percentage: item.vendor_commission_percentage || 0,
+    }));
+
+    const { error: itemsError } = await supabaseService
+      .from('order_items')
+      .insert(orderItems);
+
+    if (itemsError) {
+      logStep("Failed to create order items", { error: itemsError });
+      // Don't throw here - order is created, items are optional for checkout
+    } else {
+      logStep("Order items created", { itemCount: orderItems.length });
     }
 
     return new Response(
       JSON.stringify({ 
         url: session.url,
-        sessionId: session.id 
-      }), 
+        session_id: session.id,
+        order_id: orderData.id
+      }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
@@ -118,11 +164,11 @@ serve(async (req) => {
     );
 
   } catch (error) {
-    console.error("Checkout error:", error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    logStep("ERROR in create-checkout", { message: errorMessage });
+    
     return new Response(
-      JSON.stringify({ 
-        error: error.message || "Failed to create checkout session" 
-      }), 
+      JSON.stringify({ error: errorMessage }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 500,

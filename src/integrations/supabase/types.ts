@@ -3128,6 +3128,77 @@ export type Database = {
         }
         Relationships: []
       }
+      order_items: {
+        Row: {
+          created_at: string
+          id: string
+          item_price: number
+          item_title: string
+          item_type: string
+          order_id: string | null
+          quantity: number
+          service_id: string | null
+          updated_at: string
+          vendor_commission_percentage: number | null
+          vendor_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          item_price?: number
+          item_title: string
+          item_type?: string
+          order_id?: string | null
+          quantity?: number
+          service_id?: string | null
+          updated_at?: string
+          vendor_commission_percentage?: number | null
+          vendor_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          item_price?: number
+          item_title?: string
+          item_type?: string
+          order_id?: string | null
+          quantity?: number
+          service_id?: string | null
+          updated_at?: string
+          vendor_commission_percentage?: number | null
+          vendor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_items_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_items_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_items_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors_with_local_reps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       orders: {
         Row: {
           amount: number | null

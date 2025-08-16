@@ -22,7 +22,7 @@ const Index = lazy(() => import("./pages/Index"));
 const Academy = lazy(() => import("./pages/Academy").then(m => ({ default: m.Academy })));
 import { Auth } from "./pages/Auth";
 import { OrderHistory } from "./pages/OrderHistory";
-import { PaymentSuccess } from "./pages/PaymentSuccess";
+import PaymentSuccess from "./pages/PaymentSuccess";
 import { PaymentCanceled } from "./pages/PaymentCanceled";
 import { Pricing } from "./pages/Pricing";
 import { ProfileSettings } from "./pages/ProfileSettings";
