@@ -30,8 +30,7 @@ export const Auth = () => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    displayName: '',
-    isCreator: false
+    displayName: ''
   });
   const [lockoutStatus, setLockoutStatus] = useState({
     isLocked: false,
@@ -67,7 +66,7 @@ export const Auth = () => {
     return data;
   };
 
-  const handleSignUp = async (email: string, password: string, displayName: string, isCreator: boolean) => {
+  const handleSignUp = async (email: string, password: string, displayName: string) => {
     const redirectUrl = `${window.location.origin}/`;
     
     const { data, error } = await supabase.auth.signUp({
@@ -76,8 +75,7 @@ export const Auth = () => {
       options: {
         emailRedirectTo: redirectUrl,
         data: {
-          display_name: displayName,
-          is_creator: isCreator
+          display_name: displayName
         }
       }
     });
@@ -196,16 +194,13 @@ export const Auth = () => {
         const { user } = await handleSignUp(
           data.email, 
           data.password, 
-          data.displayName || '',
-          data.isCreator === 'true'
+          data.displayName || ''
         );
         
         if (user) {
           toast({
             title: "Account created!",
-            description: data.isCreator === 'true'
-              ? "Welcome to the creator platform! Check your email to verify your account."
-              : "Welcome! Check your email to verify your account.",
+            description: "Welcome! Check your email to verify your account.",
           });
         }
       }
@@ -288,7 +283,7 @@ export const Auth = () => {
   const toggleMode = () => {
     setIsLogin(!isLogin);
     setShowForgotPassword(false);
-    setFormData({ email: '', password: '', displayName: '', isCreator: false });
+    setFormData({ email: '', password: '', displayName: '' });
   };
 
   return (
@@ -463,30 +458,6 @@ export const Auth = () => {
               </div>
             )}
 
-            {/* Creator Toggle (Signup only) */}
-            {!isLogin && (
-              <div className="flex items-center space-x-2 p-3 bg-muted/30 rounded-lg">
-                <Briefcase className="w-4 h-4 text-muted-foreground" />
-                <div className="flex-1">
-                  <Label htmlFor="isCreator" className="text-sm font-medium">
-                    I'm a creator
-                  </Label>
-                  <p className="text-xs text-muted-foreground">
-                    Upload and monetize your content
-                  </p>
-                </div>
-                <input
-                  type="hidden"
-                  name="isCreator"
-                  value={formData.isCreator.toString()}
-                />
-                <Switch
-                  id="isCreator"
-                  checked={formData.isCreator}
-                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isCreator: checked }))}
-                />
-              </div>
-            )}
 
             {/* Submit Button */}
             <Button 

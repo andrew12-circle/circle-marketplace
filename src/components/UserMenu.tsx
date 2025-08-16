@@ -151,13 +151,23 @@ export const UserMenu = () => {
         
         <DropdownMenuSeparator />
         
-        {/* Creator Dashboard Link */}
-        {profile?.is_creator && (
+        {/* Creator Links */}
+        {profile?.is_creator ? (
           <>
             <DropdownMenuItem asChild>
               <Link to="/creator-dashboard" className="flex items-center">
                 <BarChart3 className="mr-2 h-4 w-4" />
                 <span>Creator Dashboard</span>
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+          </>
+        ) : (
+          <>
+            <DropdownMenuItem asChild>
+              <Link to="/creator-onboarding" className="flex items-center">
+                <Briefcase className="mr-2 h-4 w-4" />
+                <span>Become a Creator</span>
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />

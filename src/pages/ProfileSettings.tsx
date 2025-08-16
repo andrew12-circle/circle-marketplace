@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { User, Upload, ArrowLeft, Crown, Building, Store } from "lucide-react";
+import { User, Upload, ArrowLeft, Crown, Building, Store, Briefcase } from "lucide-react";
 import { GoalAssessmentModal } from "@/components/marketplace/GoalAssessmentModal";
 
 export const ProfileSettings = () => {
@@ -489,6 +489,37 @@ export const ProfileSettings = () => {
               </div>
             </CardContent>
           </Card>
+
+          {/* Creator Onboarding Section */}
+          {!profile.is_creator && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Briefcase className="w-5 h-5" />
+                  Creator Program
+                </CardTitle>
+                <CardDescription>
+                  Join our creator program to upload and monetize your content
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="bg-muted/30 p-4 rounded-lg space-y-3">
+                  <h4 className="font-medium">Become a Creator</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Share your knowledge and expertise with real estate professionals while earning revenue from your content.
+                  </p>
+                  <ul className="text-sm text-muted-foreground space-y-1">
+                    <li>• Upload videos, courses, and educational content</li>
+                    <li>• Set your own pricing and earn revenue</li>
+                    <li>• Build your brand as an industry expert</li>
+                  </ul>
+                  <Button asChild>
+                    <Link to="/creator-onboarding">Become a Creator</Link>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Vendor Access Control */}
           <Card>
