@@ -141,8 +141,11 @@ const PRODUCT_CATEGORIES = [
     id: 'education-training',
     name: 'Education & Training',
     subcategories: [
+      'Business Coaching',
       'Sales Training Courses',
+      'Leadership Training',
       'Market Expertise Training',
+      'Real Estate Coaching',
       'Legal Compliance Training',
       'Technology Training',
       'Negotiation Skills',
