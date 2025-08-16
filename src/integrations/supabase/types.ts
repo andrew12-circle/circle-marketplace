@@ -5551,6 +5551,7 @@ export type Database = {
           individual_profile_picture_url: string | null
           individual_title: string | null
           is_active: boolean | null
+          is_open_to_partner: boolean | null
           is_premium_provider: boolean | null
           is_respa_regulated: boolean | null
           is_verified: boolean | null
@@ -5613,6 +5614,7 @@ export type Database = {
           individual_profile_picture_url?: string | null
           individual_title?: string | null
           is_active?: boolean | null
+          is_open_to_partner?: boolean | null
           is_premium_provider?: boolean | null
           is_respa_regulated?: boolean | null
           is_verified?: boolean | null
@@ -5675,6 +5677,7 @@ export type Database = {
           individual_profile_picture_url?: string | null
           individual_title?: string | null
           is_active?: boolean | null
+          is_open_to_partner?: boolean | null
           is_premium_provider?: boolean | null
           is_respa_regulated?: boolean | null
           is_verified?: boolean | null

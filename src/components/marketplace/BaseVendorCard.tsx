@@ -26,6 +26,7 @@ export interface BaseVendorData {
   rating?: number;
   review_count?: number;
   is_verified?: boolean;
+  is_open_to_partner?: boolean;
   co_marketing_agents?: number;
   campaigns_funded?: number;
   vendor_type?: string;
@@ -93,6 +94,7 @@ export const BaseVendorCard = ({
     contact_email,
     logo_url,
     is_verified,
+    is_open_to_partner = false,
     co_marketing_agents = 0,
     campaigns_funded = 0,
     vendor_type,
@@ -137,21 +139,25 @@ export const BaseVendorCard = ({
             Verified
           </Badge>
         )}
-        {/* Open to Partner Badge */}
-        <Badge className="bg-blue-500 text-white text-xs font-medium flex items-center gap-1 animate-pulse">
-          <MessageCircle className="w-3 h-3" />
-          Open to Partner
-        </Badge>
+        {/* Open to Partner Badge - Only show if enabled */}
+        {is_open_to_partner && (
+          <Badge className="bg-blue-500 text-white text-xs font-medium flex items-center gap-1 animate-pulse">
+            <MessageCircle className="w-3 h-3" />
+            Open to Partner
+          </Badge>
+        )}
       </div>
 
-      {/* Partnership Message */}
-      <div className="absolute top-3 right-3 z-10">
-        <div className="bg-white/95 backdrop-blur-sm border border-border/50 rounded-lg px-3 py-2 shadow-lg max-w-48">
-          <p className="text-xs text-foreground font-medium leading-tight">
-            {name} is open to conversations and would love to help you grow your business!
-          </p>
+      {/* Partnership Message - Only show if enabled */}
+      {is_open_to_partner && (
+        <div className="absolute top-3 right-3 z-10">
+          <div className="bg-white/95 backdrop-blur-sm border border-border/50 rounded-lg px-3 py-2 shadow-lg max-w-48">
+            <p className="text-xs text-foreground font-medium leading-tight">
+              {name} is open to conversations and would love to help you grow your business!
+            </p>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Logo Image - Fixed height like service cards */}
       <div className="relative h-48 overflow-hidden bg-white flex-shrink-0 p-4">
