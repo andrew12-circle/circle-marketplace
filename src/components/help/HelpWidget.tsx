@@ -76,7 +76,7 @@ export const HelpWidget: React.FC<HelpWidgetProps> = ({ onClose }) => {
 
       {/* Help Widget */}
       {isOpen ? (
-        <div className="fixed bottom-6 right-6 z-50 w-80 h-96 animate-in slide-in-from-bottom-4">
+        <div className="fixed bottom-6 right-6 z-[9998] w-80 h-96 animate-in slide-in-from-bottom-4">
           <Card className="h-full flex flex-col shadow-2xl">
             <div className="flex items-center justify-between p-4 border-b">
               <div className="flex items-center gap-2">
@@ -126,10 +126,11 @@ export const HelpWidget: React.FC<HelpWidgetProps> = ({ onClose }) => {
       ) : (
         <Button
           onClick={() => handleOpen()}
-          className="fixed bottom-6 right-6 z-40 w-12 h-12 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 bg-primary hover:bg-primary/90"
+          className="fixed bottom-6 right-6 z-[9999] w-12 h-12 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 bg-primary hover:bg-primary/90 touch-target"
           size="icon"
+          style={{ position: 'fixed', zIndex: 9999 }}
         >
-          <HelpCircle className="w-6 h-6" />
+          <HelpCircle className="w-6 h-6 text-primary-foreground" />
         </Button>
       )}
     </>
