@@ -104,24 +104,50 @@ export const HelpWidget: React.FC = () => {
     <>
       {/* Help Button - Blue Bubble */}
       {!isOpen && (
-        <div
+        <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-blue-500 hover:bg-blue-600 rounded-full shadow-lg cursor-pointer flex items-center justify-center transition-all duration-200 hover:scale-110"
-          style={{ 
+          style={{
             position: 'fixed',
             bottom: '24px',
             right: '24px',
-            zIndex: 9999,
-            backgroundColor: '#3b82f6'
+            zIndex: 99999,
+            width: '56px',
+            height: '56px',
+            backgroundColor: '#3b82f6',
+            borderRadius: '50%',
+            border: 'none',
+            boxShadow: '0 4px 12px rgba(59, 130, 246, 0.4)',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            transition: 'all 0.2s ease',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = '#2563eb';
+            e.currentTarget.style.transform = 'scale(1.1)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = '#3b82f6';
+            e.currentTarget.style.transform = 'scale(1)';
           }}
         >
-          <HelpCircle className="w-7 h-7 text-white" />
-        </div>
+          <HelpCircle style={{ width: '28px', height: '28px', color: 'white' }} />
+        </button>
       )}
 
       {/* Help Panel */}
       {isOpen && (
-        <div className="fixed bottom-6 right-6 z-50 w-80 h-96 animate-in slide-in-from-bottom-4">
+        <div
+          style={{
+            position: 'fixed',
+            bottom: '24px',
+            right: '24px',
+            zIndex: 99999,
+            width: '320px',
+            height: '384px',
+          }}
+        >
           <Card className="h-full flex flex-col shadow-2xl border-blue-200">
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
