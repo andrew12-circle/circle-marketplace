@@ -304,7 +304,7 @@ export const VendorFunnelModal = ({
           <X className="w-5 h-5 text-white" />
         </button>
         
-        <div className="h-full overflow-y-auto">
+        <div className="h-full overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/20 hover:scrollbar-thumb-white/40">
           
           {/* Hero Section */}
           <div className="relative bg-gradient-to-br from-slate-900 via-blue-900 to-purple-900 text-white">
