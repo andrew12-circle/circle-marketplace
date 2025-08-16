@@ -66,6 +66,7 @@ export const StickySearchContainer = ({ children, className }: StickySearchConta
       {/* Sticky search container */}
       <div
         ref={containerRef}
+        data-tour="search-container"
         className={cn(
           "sticky z-40 bg-background/95 backdrop-blur-sm transition-all duration-200",
           isSticky && "border-b border-border shadow-sm",

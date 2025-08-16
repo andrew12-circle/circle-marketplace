@@ -21,6 +21,7 @@ export const NavigationTabs = ({ activeTab, onTabChange }: NavigationTabsProps) 
       <Button
         asChild
         variant="ghost"
+        data-tour="marketplace-tab"
         className={`rounded-lg px-6 py-2 font-medium transition-all duration-200 ${
           currentTab === "marketplace" 
             ? "bg-background text-foreground shadow-sm" 
@@ -32,6 +33,7 @@ export const NavigationTabs = ({ activeTab, onTabChange }: NavigationTabsProps) 
       <Button
         asChild
         variant="ghost"
+        data-tour="academy-tab"
         className={`rounded-lg px-6 py-2 font-medium transition-all duration-200 ${
           currentTab === "academy" 
             ? "bg-background text-foreground shadow-sm" 

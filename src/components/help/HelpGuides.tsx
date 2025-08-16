@@ -8,9 +8,10 @@ import { GuideTour } from './GuideTour';
 
 interface HelpGuidesProps {
   currentRoute: string;
+  onStartTour?: (guide: Guide) => void;
 }
 
-export const HelpGuides: React.FC<HelpGuidesProps> = ({ currentRoute }) => {
+export const HelpGuides: React.FC<HelpGuidesProps> = ({ currentRoute, onStartTour }) => {
   const [activeTour, setActiveTour] = useState<Guide | null>(null);
 
   // Get context-aware guides
@@ -20,7 +21,11 @@ export const HelpGuides: React.FC<HelpGuidesProps> = ({ currentRoute }) => {
   );
 
   const handleStartTour = (guide: Guide) => {
-    setActiveTour(guide);
+    if (onStartTour) {
+      onStartTour(guide);
+    } else {
+      setActiveTour(guide);
+    }
   };
 
   const handleEndTour = () => {

@@ -30,6 +30,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { marketplaceCircuitBreaker } from "@/utils/circuitBreaker";
 import { usePaginatedServices } from "@/hooks/usePaginatedServices";
 import { useABTest } from "@/hooks/useABTest";
+import { TourDiscoveryButton } from "./TourDiscoveryButton";
 interface FilterState {
   category: string;
   priceRange: number[];
@@ -693,39 +694,70 @@ const handleViewServiceDetails = useCallback((serviceId: string) => {
     )
 )}
 
-{/* Empty State */}
+{/* Enhanced Empty State */}
 {(
   (viewMode === "services" && flattenServices.length === 0) ||
   (viewMode === "vendors" && filteredVendors.length === 0) ||
   (viewMode === "products" && !selectedProductCategory && filteredProducts.length === 0) ||
   (viewMode === "products" && selectedProductCategory && getServicesForProduct(selectedProductCategory).length === 0)
 ) && (
-  <div className="text-center py-12">
+  <div className="text-center py-12 space-y-6">
     <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
       <Search className="w-8 h-8 text-muted-foreground" />
     </div>
-    <h3 className="text-lg font-semibold text-foreground mb-2">
-      {t('noResultsFound', { type: viewMode })}
-    </h3>
-    <p className="text-muted-foreground mb-4">
-      {t('tryAdjustingFilters')}
-    </p>
-    <Button
-      variant="outline"
-      onClick={() => {
-        setSearchTerm("");
-        setFilters({
-          category: "all",
-          priceRange: [0, 2000],
-          verified: false,
-          featured: false,
-          coPayEligible: false,
-          locationFilter: false,
-        });
-      }}
-    >
-      {t('clearAll')} filters
-    </Button>
+    <div>
+      <h3 className="text-lg font-semibold text-foreground mb-2">
+        {t('noResultsFound', { type: viewMode })}
+      </h3>
+      <p className="text-muted-foreground mb-4">
+        {t('tryAdjustingFilters')}
+      </p>
+    </div>
+    
+    {/* Popular Search Suggestions */}
+    {viewMode === "services" && (
+      <div className="space-y-3">
+        <p className="text-sm text-muted-foreground">Try searching for:</p>
+        <div className="flex flex-wrap justify-center gap-2">
+          {['Facebook Ads', 'SEO', 'Photography', 'Direct Mail', 'CRM'].map((term) => (
+            <Button
+              key={term}
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setSearchTerm(term);
+                setSearchFilters(prev => ({ ...prev, query: term }));
+              }}
+              className="h-8 text-xs"
+            >
+              {term}
+            </Button>
+          ))}
+        </div>
+      </div>
+    )}
+    
+    <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+      <Button
+        variant="outline"
+        onClick={() => {
+          setSearchTerm("");
+          setFilters({
+            category: "all",
+            priceRange: [0, 2000],
+            verified: false,
+            featured: false,
+            coPayEligible: false,
+            locationFilter: false,
+          });
+        }}
+      >
+        {t('clearAll')} filters
+      </Button>
+      
+      {/* Quick Tour Button */}
+      <TourDiscoveryButton />
+    </div>
   </div>
 )}
         </div>

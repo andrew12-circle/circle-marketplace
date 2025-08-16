@@ -14,6 +14,9 @@ import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { LocationSwitcher } from "@/components/LocationSwitcher";
 import { LegalFooter } from "@/components/LegalFooter";
 import { FirstVisitIntro } from "@/components/marketing/FirstVisitIntro";
+import { OnboardingResumeBanner } from "@/components/onboarding/OnboardingResumeBanner";
+import { SmartHelpOrchestrator } from "@/components/help/SmartHelpOrchestrator";
+import { EnhancedHelpWidget } from "@/components/help/EnhancedHelpWidget";
 import { Building, Store, BookOpen } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -67,6 +70,7 @@ const Index = () => {
                   <div className="flex bg-muted rounded-full p-1 w-full max-w-xs">
                     <Link
                       to="/"
+                      data-tour="marketplace-tab"
                       className={`flex-1 text-xs py-1.5 px-3 rounded-full font-medium transition-all text-center ${
                         location.pathname === "/" 
                           ? "bg-background text-foreground shadow-sm" 
@@ -77,6 +81,7 @@ const Index = () => {
                     </Link>
                     <Link
                       to="/academy"
+                      data-tour="academy-tab"
                       className={`flex-1 text-xs py-1.5 px-3 rounded-full font-medium transition-all text-center ${
                         location.pathname === "/academy" 
                           ? "bg-background text-foreground shadow-sm" 
@@ -152,6 +157,11 @@ const Index = () => {
 
         {/* Main Content */}
         <main>
+          {/* Onboarding Resume Banner */}
+          <div className="container mx-auto px-3 sm:px-4 pt-6">
+            <OnboardingResumeBanner />
+          </div>
+          
           <Marketplace />
         </main>
 
@@ -160,6 +170,10 @@ const Index = () => {
         
         {/* First Visit Intro Modal */}
         <FirstVisitIntro />
+        
+        {/* Smart Help System */}
+        <SmartHelpOrchestrator />
+        <EnhancedHelpWidget />
       </div>
     );
 };

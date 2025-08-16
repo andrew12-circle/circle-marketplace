@@ -18,13 +18,15 @@ interface OptimizedServiceCardProps {
 export const OptimizedServiceCard = memo<OptimizedServiceCardProps>(
   ({ service, isSaved, onSave, onViewDetails, bulkRatings }) => {
     return (
-      <ServiceCard
-        service={service}
-        isSaved={isSaved}
-        onSave={onSave}
-        onViewDetails={onViewDetails}
-        bulkRatings={bulkRatings}
-      />
+      <div data-tour="service-card">
+        <ServiceCard
+          service={service}
+          isSaved={isSaved}
+          onSave={onSave}
+          onViewDetails={onViewDetails}
+          bulkRatings={bulkRatings}
+        />
+      </div>
     );
   },
   (prevProps, nextProps) => {

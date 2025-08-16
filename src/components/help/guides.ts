@@ -34,28 +34,28 @@ export const guides: Guide[] = [
         id: 'step-1',
         title: 'Open the Marketplace',
         content: 'First, navigate to the Marketplace to see all available services.',
-        selector: 'nav a[href="/marketplace"]',
+        selector: '[data-tour="marketplace-tab"]',
         position: 'bottom'
       },
       {
         id: 'step-2',
         title: 'Use Search & Filters',
         content: 'Use the search bar and filters to find services that match your needs.',
-        selector: '[data-testid="marketplace-search"]',
+        selector: '[data-tour="search-container"]',
         position: 'bottom'
       },
       {
         id: 'step-3',
         title: 'Browse Service Cards',
         content: 'Each service card shows key information like price, rating, and provider details.',
-        selector: '.marketplace-grid .vendor-card:first-child',
+        selector: '[data-tour="service-card"]:first-child',
         position: 'top'
       },
       {
         id: 'step-4',
         title: 'View Service Details',
         content: 'Click on a service to see full details, reviews, and booking options.',
-        selector: '.marketplace-grid .vendor-card:first-child',
+        selector: '[data-tour="service-card"]:first-child',
         position: 'top',
         action: { type: 'click' }
       }
@@ -73,7 +73,7 @@ export const guides: Guide[] = [
         id: 'step-1',
         title: 'Navigate to Academy',
         content: 'Go to the Academy section to explore available courses and content.',
-        selector: 'nav a[href="/academy"]',
+        selector: '[data-tour="academy-tab"]',
         position: 'bottom'
       },
       {
