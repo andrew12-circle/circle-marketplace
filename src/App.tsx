@@ -129,7 +129,25 @@ const AppContent = () => {
                                  <RequestLogger />
                                   <OnboardingRedirect />
                                   <AppContent />
-                                  <HelpWidget />
+                                   <HelpWidget />
+                                   {/* Debug test - simple visible element */}
+                                   <div style={{
+                                     position: 'fixed',
+                                     bottom: '100px',
+                                     right: '24px',
+                                     zIndex: 99999,
+                                     width: '60px',
+                                     height: '60px',
+                                     backgroundColor: 'red',
+                                     borderRadius: '50%',
+                                     display: 'flex',
+                                     alignItems: 'center',
+                                     justifyContent: 'center',
+                                     color: 'white',
+                                     fontSize: '12px'
+                                   }}>
+                                     TEST
+                                   </div>
                                 </BrowserRouter>
                              </CartProvider>
                            </AuthProvider>
