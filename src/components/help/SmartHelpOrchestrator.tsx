@@ -28,8 +28,17 @@ export const SmartHelpOrchestrator: React.FC = () => {
     if (!user?.id) return;
     
     try {
-      // Log to user activity for now since help_analytics table doesn't exist yet
-      console.log('Tour event:', { eventType, guideId, route: location.pathname });
+      await supabase.from('help_analytics').insert({
+        user_id: user.id,
+        event_type: eventType,
+        guide_id: guideId,
+        route: location.pathname,
+        context_data: {
+          timeOnPage: context.metrics.timeOnPage,
+          errorCount: context.metrics.errorCount,
+          userBehavior: context.userBehavior
+        }
+      });
     } catch (error) {
       console.error('Failed to log tour event:', error);
     }

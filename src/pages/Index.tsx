@@ -17,6 +17,7 @@ import { FirstVisitIntro } from "@/components/marketing/FirstVisitIntro";
 import { OnboardingResumeBanner } from "@/components/onboarding/OnboardingResumeBanner";
 import { SmartHelpOrchestrator } from "@/components/help/SmartHelpOrchestrator";
 import { EnhancedHelpWidget } from "@/components/help/EnhancedHelpWidget";
+import { TourDiscoveryButton } from "@/components/marketplace/TourDiscoveryButton";
 import { Building, Store, BookOpen } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -114,8 +115,9 @@ const Index = () => {
                 </div>
                 
                 {/* Navigation Tabs - Desktop */}
-                <div className="flex flex-1 justify-center">
+                <div className="flex flex-1 justify-center items-center gap-4">
                   <NavigationTabs activeTab="marketplace" />
+                  <TourDiscoveryButton />
                 </div>
                 
                 <div className="flex items-center gap-2 sm:gap-4">

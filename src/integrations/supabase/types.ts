@@ -2592,6 +2592,36 @@ export type Database = {
         }
         Relationships: []
       }
+      help_analytics: {
+        Row: {
+          context_data: Json | null
+          created_at: string
+          event_type: string
+          guide_id: string | null
+          id: string
+          route: string
+          user_id: string
+        }
+        Insert: {
+          context_data?: Json | null
+          created_at?: string
+          event_type: string
+          guide_id?: string | null
+          id?: string
+          route: string
+          user_id: string
+        }
+        Update: {
+          context_data?: Json | null
+          created_at?: string
+          event_type?: string
+          guide_id?: string | null
+          id?: string
+          route?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       image_cache: {
         Row: {
           cached_url: string
