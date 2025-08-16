@@ -13,7 +13,7 @@ const corsHeaders = {
 interface NotificationRequest {
   to: string;
   subject: string;
-  type: 'welcome' | 'consultation_booked' | 'consultation_reminder' | 'co_pay_approved' | 'co_pay_denied' | 'generic';
+  type: 'welcome' | 'consultation_booked' | 'consultation_reminder' | 'co_pay_approved' | 'co_pay_denied' | 'billing_support' | 'generic';
   data?: Record<string, any>;
 }
 
@@ -115,6 +115,28 @@ const getEmailTemplate = (type: string, data: Record<string, any> = {}) => {
         `
       };
 
+    case 'billing_support':
+      return {
+        subject: 'Billing Support Request Received',
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h1 style="color: #333;">Billing Support Request</h1>
+            <p>We've received your billing support request and our team will respond within 24 hours.</p>
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h3>Your Request:</h3>
+              <p><strong>Category:</strong> ${data.category || 'Billing'}</p>
+              <p><strong>Subject:</strong> ${data.subject || 'N/A'}</p>
+              <p><strong>Message:</strong> ${data.message || 'N/A'}</p>
+            </div>
+            <p>If this is urgent, you can also manage your subscription directly through your account settings.</p>
+            <a href="${data.platformUrl || 'https://ihzyuyfawapweamqzzlj.lovable.app'}" 
+               style="background: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px;">
+              Manage Subscription
+            </a>
+          </div>
+        `
+      };
+
     default:
       return {
         subject: data.subject || 'Notification from Circle Network',
@@ -138,9 +160,18 @@ const handler = async (req: Request): Promise<Response> => {
     const template = getEmailTemplate(type, data || {});
     const emailSubject = subject || template.subject;
 
+    // For billing support requests, also notify support team
+    const recipients = [to];
+    if (type === 'billing_support') {
+      const alertEmails = Deno.env.get("ALERT_EMAILS");
+      if (alertEmails) {
+        recipients.push(...alertEmails.split(',').map(email => email.trim()));
+      }
+    }
+
     const emailResponse = await resend.emails.send({
       from: `${RESEND_FROM_NAME} <${RESEND_FROM_EMAIL}>`,
-      to: [to],
+      to: recipients,
       subject: emailSubject,
       html: template.html,
     });

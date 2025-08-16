@@ -39,6 +39,10 @@ serve(async (req) => {
     if (!user?.email) throw new Error("User not authenticated or email not available");
     logStep("User authenticated", { userId: user.id, email: user.email });
 
+    // Parse request body for cancellation feedback
+    const body = await req.json().catch(() => ({}));
+    const { reason, feedback } = body;
+
     const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
     
@@ -83,14 +87,16 @@ serve(async (req) => {
       updated_at: new Date().toISOString(),
     }, { onConflict: 'email' });
 
-    // Log retention event
+    // Log retention event with feedback
     await supabaseClient.from("retention_events").insert({
       user_id: user.id,
       event_type: "subscription_canceled",
       event_data: {
         subscription_id: subscription.id,
         canceled_at: new Date().toISOString(),
-        ends_at: new Date(subscription.current_period_end * 1000).toISOString()
+        ends_at: new Date(subscription.current_period_end * 1000).toISOString(),
+        cancellation_reason: reason || null,
+        cancellation_feedback: feedback || null
       }
     });
 

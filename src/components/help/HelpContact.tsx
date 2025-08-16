@@ -79,17 +79,22 @@ export const HelpContact: React.FC<HelpContactProps> = ({ currentRoute }) => {
         }
       };
 
+      // Determine notification type based on category
+      const notificationType = form.category === 'Billing' ? 'billing_support' : 'generic';
+      
       // Send notification via edge function
       const { error } = await supabase.functions.invoke('send-notification', {
         body: {
-          type: 'support_request',
+          to: form.email,
+          subject: `Support Request: ${form.subject}`,
+          type: notificationType,
           data: {
             category: form.category,
             subject: form.subject,
             message: form.message,
-            userEmail: form.email,
-            userName: form.name,
-            context: contextData
+            name: form.name,
+            currentRoute,
+            platformUrl: window.location.origin
           }
         }
       });

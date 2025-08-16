@@ -3,9 +3,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Pause, DollarSign, TrendingDown, X, AlertTriangle } from "lucide-react";
+import { Pause, DollarSign, TrendingDown, X, AlertTriangle, ExternalLink } from "lucide-react";
 
 interface ManageSubscriptionModalProps {
   isOpen: boolean;
@@ -14,8 +17,10 @@ interface ManageSubscriptionModalProps {
 }
 
 export const ManageSubscriptionModal = ({ isOpen, onClose, onSuccess }: ManageSubscriptionModalProps) => {
-  const [step, setStep] = useState<'initial' | 'pause' | 'discount' | 'downgrade' | 'cancel'>('initial');
+  const [step, setStep] = useState<'initial' | 'pause' | 'discount' | 'downgrade' | 'cancel' | 'survey'>('initial');
   const [isLoading, setIsLoading] = useState(false);
+  const [cancelReason, setCancelReason] = useState('');
+  const [cancelFeedback, setCancelFeedback] = useState('');
   const { toast } = useToast();
 
   const handlePauseSubscription = async () => {
@@ -114,6 +119,10 @@ export const ManageSubscriptionModal = ({ isOpen, onClose, onSuccess }: ManageSu
       const { error } = await supabase.functions.invoke('cancel-subscription', {
         headers: {
           Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+        },
+        body: {
+          reason: cancelReason,
+          feedback: cancelFeedback
         }
       });
 
@@ -130,6 +139,30 @@ export const ManageSubscriptionModal = ({ isOpen, onClose, onSuccess }: ManageSu
       toast({
         title: "Error",
         description: "Failed to cancel subscription. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleOpenCustomerPortal = async () => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('customer-portal', {
+        headers: {
+          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+        }
+      });
+
+      if (error) throw error;
+
+      window.open(data.url, '_blank');
+      onClose();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to open customer portal. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -183,12 +216,25 @@ export const ManageSubscriptionModal = ({ isOpen, onClose, onSuccess }: ManageSu
           </div>
         </Button>
 
+        <Button
+          variant="outline"
+          className="w-full h-auto p-4 justify-start space-x-3"
+          onClick={handleOpenCustomerPortal}
+          disabled={isLoading}
+        >
+          <ExternalLink className="h-5 w-5 text-blue-500" />
+          <div className="text-left">
+            <div className="font-medium">Payment methods & invoices</div>
+            <div className="text-sm text-muted-foreground">Manage billing via Stripe portal</div>
+          </div>
+        </Button>
+
         <Separator />
 
         <Button
           variant="destructive"
           className="w-full"
-          onClick={() => setStep('cancel')}
+          onClick={() => setStep('survey')}
         >
           <X className="h-4 w-4 mr-2" />
           Cancel Subscription
@@ -287,6 +333,74 @@ export const ManageSubscriptionModal = ({ isOpen, onClose, onSuccess }: ManageSu
     </div>
   );
 
+  const renderSurveyStep = () => (
+    <div className="space-y-4">
+      <div className="text-center">
+        <X className="h-12 w-12 text-destructive mx-auto mb-4" />
+        <h3 className="text-lg font-semibold mb-2">Before you go...</h3>
+        <p className="text-muted-foreground">
+          Help us improve by sharing why you're canceling.
+        </p>
+      </div>
+
+      <div className="space-y-4">
+        <div>
+          <Label className="text-sm font-medium">What's the main reason for canceling?</Label>
+          <RadioGroup value={cancelReason} onValueChange={setCancelReason} className="mt-2">
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="too_expensive" id="too_expensive" />
+              <Label htmlFor="too_expensive">Too expensive</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="not_using" id="not_using" />
+              <Label htmlFor="not_using">Not using it enough</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="found_alternative" id="found_alternative" />
+              <Label htmlFor="found_alternative">Found a better alternative</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="missing_features" id="missing_features" />
+              <Label htmlFor="missing_features">Missing features I need</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="technical_issues" id="technical_issues" />
+              <Label htmlFor="technical_issues">Technical issues</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="other" id="other" />
+              <Label htmlFor="other">Other</Label>
+            </div>
+          </RadioGroup>
+        </div>
+
+        <div>
+          <Label htmlFor="feedback" className="text-sm font-medium">Additional feedback (optional)</Label>
+          <Textarea
+            id="feedback"
+            placeholder="What could we have done better?"
+            value={cancelFeedback}
+            onChange={(e) => setCancelFeedback(e.target.value)}
+            className="mt-2"
+          />
+        </div>
+      </div>
+
+      <div className="flex gap-2">
+        <Button variant="outline" onClick={() => setStep('initial')} className="flex-1">
+          Back
+        </Button>
+        <Button 
+          onClick={() => setStep('cancel')} 
+          className="flex-1"
+          disabled={!cancelReason}
+        >
+          Continue
+        </Button>
+      </div>
+    </div>
+  );
+
   const renderCancelStep = () => (
     <div className="space-y-4">
       <div className="text-center">
@@ -305,7 +419,7 @@ export const ManageSubscriptionModal = ({ isOpen, onClose, onSuccess }: ManageSu
       </Alert>
 
       <div className="flex gap-2">
-        <Button variant="outline" onClick={() => setStep('initial')} className="flex-1">
+        <Button variant="outline" onClick={() => setStep('survey')} className="flex-1">
           Back
         </Button>
         <Button variant="destructive" onClick={handleCancel} disabled={isLoading} className="flex-1">
@@ -320,6 +434,7 @@ export const ManageSubscriptionModal = ({ isOpen, onClose, onSuccess }: ManageSu
       case 'pause': return renderPauseStep();
       case 'discount': return renderDiscountStep();
       case 'downgrade': return renderDowngradeStep();
+      case 'survey': return renderSurveyStep();
       case 'cancel': return renderCancelStep();
       default: return renderInitialStep();
     }

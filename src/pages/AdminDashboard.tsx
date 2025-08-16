@@ -44,6 +44,7 @@ import { CreatorPayoutDashboard } from '@/components/admin/CreatorPayoutDashboar
 import BulkFAQGenerator from '@/components/admin/BulkFAQGenerator';
 import { VendorQuestionsManager } from '@/components/admin/VendorQuestionsManager';
 import { AdminHealthDashboard } from '@/components/admin/AdminHealthDashboard';
+import { RetentionAnalyticsDashboard } from '@/components/admin/RetentionAnalyticsDashboard';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Upload, Building, Youtube, DollarSign, BarChart3, Coins, Shield as ShieldIcon, Users2, Send, BookOpen, Heart, MessageSquare } from 'lucide-react';
@@ -961,9 +962,13 @@ export default function AdminDashboard() {
           <RESPADocumentationViewer />
         </TabsContent>
 
-        <TabsContent value="spiritual" className="space-y-6">
-          <SpiritualDashboard />
-        </TabsContent>
+            <TabsContent value="spiritual" className="space-y-6">
+              <SpiritualDashboard />
+            </TabsContent>
+
+            <TabsContent value="retention" className="space-y-6">
+              <RetentionAnalyticsDashboard />
+            </TabsContent>
 
         <TabsContent value="calculator" className="space-y-6">
           <AdvancedSplitCalculator />
