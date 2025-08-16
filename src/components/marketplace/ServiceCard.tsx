@@ -536,14 +536,6 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false, b
               )}
             </div>
 
-            {/* Discount Badge - Always show if available */}
-            {discountPercentage && discountPercentage > 0 && (
-              <div className="flex justify-end mb-3">
-                <Badge className="bg-red-500 text-white text-xs font-medium">
-                  {discountPercentage}% OFF
-                </Badge>
-              </div>
-            )}
 
             {/* Action Buttons - Fixed at bottom */}
             <div className="flex gap-2 mt-auto">
