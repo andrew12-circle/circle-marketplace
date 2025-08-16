@@ -108,8 +108,9 @@ const AppContent = () => {
                );
              };
 
-             const App = () => {
-               console.log("App component rendering");
+              const App = () => {
+                console.log("App component rendering - DEBUG MODE");
+                console.log("Window location:", window.location.href);
                return (
                  <ErrorBoundary section="Application" onError={(error, info) => { reportClientError({ error_type: 'runtime', message: error.message, stack: error.stack, section: 'Application', component: 'App', metadata: { componentStack: (info as any)?.componentStack } }); }}>
                    <QueryClientProvider client={queryClient}>
@@ -130,7 +131,23 @@ const AppContent = () => {
                                   <OnboardingRedirect />
                                   <AppContent />
                                    <HelpWidget />
-                                   {/* Debug test - simple visible element */}
+                                   {/* Multiple debug tests */}
+                                   <div style={{
+                                     position: 'absolute',
+                                     top: '10px',
+                                     left: '10px',
+                                     zIndex: 99999,
+                                     width: '100px',
+                                     height: '40px',
+                                     backgroundColor: 'red',
+                                     color: 'white',
+                                     fontSize: '12px',
+                                     display: 'flex',
+                                     alignItems: 'center',
+                                     justifyContent: 'center'
+                                   }}>
+                                     TEST TOP
+                                   </div>
                                    <div style={{
                                      position: 'fixed',
                                      bottom: '100px',
@@ -138,7 +155,7 @@ const AppContent = () => {
                                      zIndex: 99999,
                                      width: '60px',
                                      height: '60px',
-                                     backgroundColor: 'red',
+                                     backgroundColor: 'green',
                                      borderRadius: '50%',
                                      display: 'flex',
                                      alignItems: 'center',
@@ -146,7 +163,7 @@ const AppContent = () => {
                                      color: 'white',
                                      fontSize: '12px'
                                    }}>
-                                     TEST
+                                     FIXED
                                    </div>
                                 </BrowserRouter>
                              </CartProvider>
