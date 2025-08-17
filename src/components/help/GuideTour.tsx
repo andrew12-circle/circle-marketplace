@@ -145,7 +145,7 @@ export const GuideTour: React.FC<GuideTourProps> = ({
       <Card style={{
       top: tooltipPosition.top,
       left: tooltipPosition.left
-    }} className="absolute w-80 shadow-2xl border-primary/20 py-[10px]">
+    }} className="absolute w-80 shadow-2xl border-primary/20 py-[30px]">
         <CardContent className="p-4">
           {/* Header */}
           <div className="flex items-center justify-between mb-3">
