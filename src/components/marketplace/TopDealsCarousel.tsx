@@ -129,8 +129,10 @@ export const TopDealsCarousel = ({ services, serviceRatings, onServiceClick }: T
             
             let discountPct = 0;
             if (service.discount_percentage) {
-              discountPct = parsePrice(service.discount_percentage);
-            } else if (retailPrice > 0 && proPrice > 0) {
+              // If discount_percentage is already stored as a number, use it directly
+              discountPct = Math.round(parsePrice(service.discount_percentage));
+            } else if (retailPrice > 0 && proPrice > 0 && proPrice < retailPrice) {
+              // Calculate discount: what % off the retail price
               discountPct = Math.round(((retailPrice - proPrice) / retailPrice) * 100);
             }
 
