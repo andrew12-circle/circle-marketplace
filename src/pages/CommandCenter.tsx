@@ -1,19 +1,15 @@
 
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
 import { LegalFooter } from "@/components/LegalFooter";
 import { RealtorView } from "@/components/command-center/RealtorView";
-import { SSPView } from "@/components/command-center/SSPView";
-import { User, Search, ArrowLeft, Shield } from "lucide-react";
+import { ArrowLeft, Shield } from "lucide-react";
 
 const CommandCenter = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [activeView, setActiveView] = useState<'realtor' | 'ssp'>('realtor');
 
   // Require authentication
   if (!user) {
@@ -54,39 +50,14 @@ const CommandCenter = () => {
           </p>
         </div>
 
-        {/* View Toggle */}
-        <Tabs value={activeView} onValueChange={(value) => setActiveView(value as 'realtor' | 'ssp')} className="w-full">
-          <TabsList className="grid w-full max-w-md grid-cols-2 mb-8">
-            <TabsTrigger value="realtor" className="flex items-center gap-2">
-              <User className="h-4 w-4" />
-              🧑‍💼 Realtor View
-            </TabsTrigger>
-            <TabsTrigger value="ssp" className="flex items-center gap-2">
-              <Search className="h-4 w-4" />
-              🔎 SSP View
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="realtor" className="space-y-6">
-            <div className="mb-4">
-              <h2 className="text-xl font-semibold mb-2">Self Performance Dashboard</h2>
-              <p className="text-muted-foreground text-sm">
-                Comprehensive view of your transaction history, performance metrics, and professional network
-              </p>
-            </div>
-            <RealtorView />
-          </TabsContent>
-
-          <TabsContent value="ssp" className="space-y-6">
-            <div className="mb-4">
-              <h2 className="text-xl font-semibold mb-2">Search, Sort & Profile (SSP)</h2>
-              <p className="text-muted-foreground text-sm">
-                Advanced agent search and analysis tools for competitive intelligence and prospecting
-              </p>
-            </div>
-            <SSPView />
-          </TabsContent>
-        </Tabs>
+        {/* Performance Dashboard */}
+        <div className="mb-4">
+          <h2 className="text-xl font-semibold mb-2">Self Performance Dashboard</h2>
+          <p className="text-muted-foreground text-sm">
+            Comprehensive view of your transaction history, performance metrics, and professional network
+          </p>
+        </div>
+        <RealtorView />
       </div>
 
       <LegalFooter />
