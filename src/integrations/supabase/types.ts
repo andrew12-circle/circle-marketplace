@@ -134,6 +134,7 @@ export type Database = {
           average_commission: number | null
           conversion_rate: number | null
           created_at: string
+          data_source: string | null
           id: string
           lead_generation_score: number | null
           month_year: string
@@ -146,6 +147,7 @@ export type Database = {
           average_commission?: number | null
           conversion_rate?: number | null
           created_at?: string
+          data_source?: string | null
           id?: string
           lead_generation_score?: number | null
           month_year: string
@@ -158,6 +160,7 @@ export type Database = {
           average_commission?: number | null
           conversion_rate?: number | null
           created_at?: string
+          data_source?: string | null
           id?: string
           lead_generation_score?: number | null
           month_year?: string
@@ -199,6 +202,47 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      agent_quiz_responses: {
+        Row: {
+          agent_id: string
+          avg_price: number
+          buyers_count: number
+          created_at: string
+          id: string
+          notes: string | null
+          period_months: number
+          sellers_count: number
+        }
+        Insert: {
+          agent_id: string
+          avg_price?: number
+          buyers_count?: number
+          created_at?: string
+          id?: string
+          notes?: string | null
+          period_months?: number
+          sellers_count?: number
+        }
+        Update: {
+          agent_id?: string
+          avg_price?: number
+          buyers_count?: number
+          created_at?: string
+          id?: string
+          notes?: string | null
+          period_months?: number
+          sellers_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_quiz_responses_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       agent_relationships: {
         Row: {
@@ -249,6 +293,62 @@ export type Database = {
           },
         ]
       }
+      agent_transactions: {
+        Row: {
+          agent_id: string
+          close_date: string | null
+          created_at: string
+          external_id: string | null
+          id: string
+          lender: string | null
+          property_city: string | null
+          property_state: string | null
+          role: string
+          sale_price: number
+          source: string
+          title_company: string | null
+          updated_at: string
+        }
+        Insert: {
+          agent_id: string
+          close_date?: string | null
+          created_at?: string
+          external_id?: string | null
+          id?: string
+          lender?: string | null
+          property_city?: string | null
+          property_state?: string | null
+          role: string
+          sale_price?: number
+          source?: string
+          title_company?: string | null
+          updated_at?: string
+        }
+        Update: {
+          agent_id?: string
+          close_date?: string | null
+          created_at?: string
+          external_id?: string | null
+          id?: string
+          lender?: string | null
+          property_city?: string | null
+          property_state?: string | null
+          role?: string
+          sale_price?: number
+          source?: string
+          title_company?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_transactions_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       agents: {
         Row: {
           address: string | null
@@ -256,7 +356,10 @@ export type Database = {
           brokerage: string | null
           city: string | null
           created_at: string
+          data_feed_active: boolean | null
+          data_feed_last_sync: string | null
           email: string
+          feed_provider: string | null
           first_name: string
           id: string
           is_active: boolean | null
@@ -281,7 +384,10 @@ export type Database = {
           brokerage?: string | null
           city?: string | null
           created_at?: string
+          data_feed_active?: boolean | null
+          data_feed_last_sync?: string | null
           email: string
+          feed_provider?: string | null
           first_name: string
           id?: string
           is_active?: boolean | null
@@ -306,7 +412,10 @@ export type Database = {
           brokerage?: string | null
           city?: string | null
           created_at?: string
+          data_feed_active?: boolean | null
+          data_feed_last_sync?: string | null
           email?: string
+          feed_provider?: string | null
           first_name?: string
           id?: string
           is_active?: boolean | null

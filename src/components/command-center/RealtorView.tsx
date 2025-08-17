@@ -1,14 +1,15 @@
+
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAgentData } from '@/hooks/useAgentData';
+import { AgentQuiz } from './AgentQuiz';
 import { 
   Facebook, Instagram, Linkedin, Youtube, Globe,
-  Search, ShoppingCart, Upload, MapPin, DollarSign,
-  TrendingUp, Building, Users
+  Search, ShoppingCart, Upload, Building, AlertCircle,
+  Wifi, WifiOff
 } from 'lucide-react';
 import { PerformanceSnapshot } from './PerformanceSnapshot';
 import { LoanTypeChart } from './LoanTypeChart';
@@ -21,7 +22,7 @@ import { GeographicHeatMap } from './GeographicHeatMap';
 
 export const RealtorView = () => {
   const [timeRange, setTimeRange] = useState(12);
-  const { agent, transactions, stats, loading, error } = useAgentData(timeRange);
+  const { agent, transactions, stats, loading, error, submitQuizResponse } = useAgentData(timeRange);
 
   if (loading) {
     return (
@@ -42,6 +43,7 @@ export const RealtorView = () => {
       <Card>
         <CardContent className="flex items-center justify-center h-64">
           <div className="text-center">
+            <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
             <p className="text-muted-foreground mb-4">Error loading agent data</p>
             <p className="text-sm text-destructive">{error}</p>
           </div>
@@ -55,11 +57,21 @@ export const RealtorView = () => {
       <Card>
         <CardContent className="flex items-center justify-center h-64">
           <div className="text-center">
+            <AlertCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <p className="text-muted-foreground mb-4">No agent profile found</p>
             <p className="text-sm">Please create your agent profile to view performance data</p>
           </div>
         </CardContent>
       </Card>
+    );
+  }
+
+  // Show quiz if needed
+  if (stats?.needsQuiz) {
+    return (
+      <div className="max-w-2xl mx-auto">
+        <AgentQuiz onSubmit={submitQuizResponse} />
+      </div>
     );
   }
 
@@ -86,6 +98,16 @@ export const RealtorView = () => {
                 {agent.brokerage}
               </p>
             )}
+            
+            {/* Data Feed Status */}
+            <div className={`flex items-center justify-center gap-2 px-3 py-1 rounded-full text-xs ${
+              stats?.hasDataFeed 
+                ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300' 
+                : 'bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300'
+            }`}>
+              {stats?.hasDataFeed ? <Wifi className="h-3 w-3" /> : <WifiOff className="h-3 w-3" />}
+              {stats?.hasDataFeed ? 'Live Data Feed' : 'Self-Reported Data'}
+            </div>
           </CardHeader>
           <CardContent className="space-y-4">
             {/* Contact Info */}
@@ -157,7 +179,7 @@ export const RealtorView = () => {
         </Card>
       </div>
 
-      {/* Right Column - Main Summary */}
+      {/* Right Column - Main Dashboard */}
       <div className="lg:col-span-2 space-y-6">
         {/* Time Range Toggle */}
         <Card>
@@ -185,14 +207,16 @@ export const RealtorView = () => {
         {/* Performance Snapshot */}
         {stats && <PerformanceSnapshot stats={stats} />}
 
-        {/* Charts Section */}
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-          <LoanTypeChart transactions={transactions} />
-          <DealFlowChart transactions={transactions} />
-        </div>
+        {/* Charts Section - Only show if we have data feed */}
+        {stats?.hasDataFeed && (
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            <LoanTypeChart transactions={transactions} />
+            <DealFlowChart transactions={transactions} />
+          </div>
+        )}
 
-        {/* Map View */}
-        <TransactionMap transactions={transactions} />
+        {/* Map View - Only show if we have data feed */}
+        {stats?.hasDataFeed && <TransactionMap transactions={transactions} />}
 
         {/* Active Deals Pipeline */}
         <DealsTable deals={[]} onDealUpdate={() => {}} />
@@ -200,11 +224,30 @@ export const RealtorView = () => {
         {/* Geographic Analysis */}
         <GeographicHeatMap deals={[]} />
 
-        {/* Tables Section */}
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-          <LenderTable lenders={stats?.lenders || []} />
-          <TitleCompanyTable titleCompanies={stats?.titleCompanies || []} />
-        </div>
+        {/* Tables Section - Only show if we have data feed */}
+        {stats?.hasDataFeed && (
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            <LenderTable lenders={stats?.lenders || []} />
+            <TitleCompanyTable titleCompanies={stats?.titleCompanies || []} />
+          </div>
+        )}
+
+        {/* Data Feed Notice for Self-Reported Data */}
+        {!stats?.hasDataFeed && (
+          <Card>
+            <CardContent className="text-center py-8">
+              <WifiOff className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="font-semibold mb-2">Limited Data View</h3>
+              <p className="text-muted-foreground text-sm mb-4">
+                You're seeing basic performance metrics based on your self-reported data. 
+                Connect a data feed to unlock detailed transaction analysis, lender relationships, and geographic insights.
+              </p>
+              <Button variant="outline">
+                Connect Data Feed
+              </Button>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );

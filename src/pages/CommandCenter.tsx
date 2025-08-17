@@ -1,18 +1,39 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
 import { LegalFooter } from "@/components/LegalFooter";
 import { RealtorView } from "@/components/command-center/RealtorView";
 import { SSPView } from "@/components/command-center/SSPView";
-import { User, Search, ArrowLeft } from "lucide-react";
+import { User, Search, ArrowLeft, Shield } from "lucide-react";
 
 const CommandCenter = () => {
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [activeView, setActiveView] = useState<'realtor' | 'ssp'>('realtor');
+
+  // Require authentication
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Card className="max-w-md mx-auto">
+          <CardContent className="text-center py-8">
+            <Shield className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <h2 className="text-xl font-semibold mb-2">Authentication Required</h2>
+            <p className="text-muted-foreground mb-4">
+              Please sign in to access the Command Center
+            </p>
+            <Button onClick={() => navigate('/auth')}>
+              Sign In
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">

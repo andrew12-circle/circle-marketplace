@@ -1,22 +1,24 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
 export interface Transaction {
   id: string;
-  property_address: string;
-  city: string;
-  state: string;
-  zip_code: string;
+  property_address?: string;
+  city?: string;
+  state?: string;
+  zip_code?: string;
   latitude?: number;
   longitude?: number;
   close_date: string;
   price: number;
   side: 'buyer' | 'seller';
-  property_type: 'SFH' | 'TH' | 'Condo' | 'Commercial';
+  property_type?: 'SFH' | 'TH' | 'Condo' | 'Commercial';
   loan_type?: 'Conventional' | 'FHA' | 'VA' | 'Other' | 'Cash';
   lender_name?: string;
   title_company_name?: string;
+  source: 'feed' | 'self_report';
 }
 
 export interface Agent {
@@ -33,6 +35,9 @@ export interface Agent {
   social_linkedin?: string;
   social_youtube?: string;
   social_zillow?: string;
+  data_feed_active: boolean;
+  data_feed_last_sync?: string;
+  feed_provider?: string;
 }
 
 export interface AgentStats {
@@ -44,56 +49,9 @@ export interface AgentStats {
   loanTypes: Record<string, number>;
   lenders: Array<{ name: string; count: number; percentage: number }>;
   titleCompanies: Array<{ name: string; count: number; percentage: number }>;
+  hasDataFeed: boolean;
+  needsQuiz: boolean;
 }
-
-// Mock data for demonstration - will be replaced with real data later
-const generateMockData = (timeRange: number) => {
-  // Mock agent data
-  const mockAgent: Agent = {
-    id: '1',
-    first_name: 'Sarah',
-    last_name: 'Johnson',
-    email: 'sarah.johnson@example.com',
-    phone: '(555) 123-4567',
-    photo_url: 'https://api.dicebear.com/7.x/initials/svg?seed=Sarah Johnson',
-    brokerage: 'Keller Williams Realty',
-    years_active: 8,
-    social_facebook: 'https://facebook.com/sarahjohnsonrealtor',
-    social_instagram: 'https://instagram.com/sarahjohnsonrealtor',
-    social_linkedin: 'https://linkedin.com/in/sarahjohnsonrealtor',
-    social_zillow: 'https://zillow.com/profile/sarahjohnson',
-  };
-
-  // Generate mock transactions
-  const mockTransactions: Transaction[] = [];
-  const propertyTypes: Array<'SFH' | 'TH' | 'Condo' | 'Commercial'> = ['SFH', 'TH', 'Condo', 'Commercial'];
-  const loanTypes: Array<'Conventional' | 'FHA' | 'VA' | 'Other' | 'Cash'> = ['Conventional', 'FHA', 'VA', 'Other', 'Cash'];
-  const sides: Array<'buyer' | 'seller'> = ['buyer', 'seller'];
-
-  for (let i = 0; i < 45; i++) {
-    const closeDate = new Date();
-    closeDate.setMonth(closeDate.getMonth() - Math.random() * timeRange);
-    
-    mockTransactions.push({
-      id: `transaction-${i}`,
-      property_address: `${Math.floor(Math.random() * 9999)} ${['Main St', 'Oak Ave', 'Pine Rd', 'Elm Dr', 'Maple Ln'][Math.floor(Math.random() * 5)]}`,
-      city: ['Franklin', 'Nashville', 'Brentwood', 'Cool Springs', 'Murfreesboro'][Math.floor(Math.random() * 5)],
-      state: 'TN',
-      zip_code: `${37000 + Math.floor(Math.random() * 999)}`,
-      latitude: 35.9250 + (Math.random() - 0.5) * 0.5,
-      longitude: -86.8689 + (Math.random() - 0.5) * 0.5,
-      close_date: closeDate.toISOString().split('T')[0],
-      price: Math.floor(Math.random() * 800000) + 200000,
-      side: sides[Math.floor(Math.random() * sides.length)],
-      property_type: propertyTypes[Math.floor(Math.random() * propertyTypes.length)],
-      loan_type: loanTypes[Math.floor(Math.random() * loanTypes.length)],
-      lender_name: ['First Heritage Mortgage', 'CMG Mortgage', 'Wells Fargo', 'Rocket Mortgage', 'SunTrust Bank'][Math.floor(Math.random() * 5)],
-      title_company_name: ['Universal Title', 'Champion Title', 'First American', 'Stewart Title', 'Old Republic'][Math.floor(Math.random() * 5)],
-    });
-  }
-
-  return { mockAgent, mockTransactions };
-};
 
 export const useAgentData = (timeRange: number = 12) => {
   const { user } = useAuth();
@@ -104,51 +62,129 @@ export const useAgentData = (timeRange: number = 12) => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Use mock data for now
-    setTimeout(() => {
-      const { mockAgent, mockTransactions } = generateMockData(timeRange);
-      setAgent(mockAgent);
-      setTransactions(mockTransactions);
-      calculateStats(mockTransactions);
+    if (user) {
+      fetchAgentData();
+    } else {
       setLoading(false);
-    }, 1000);
-  }, [timeRange]);
+    }
+  }, [user, timeRange]);
 
   const fetchAgentData = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      // This will be used when real data is available
       if (!user) {
-        const { mockAgent, mockTransactions } = generateMockData(timeRange);
-        setAgent(mockAgent);
-        setTransactions(mockTransactions);
-        calculateStats(mockTransactions);
+        setAgent(null);
+        setTransactions([]);
+        setStats(null);
         setLoading(false);
         return;
       }
 
-      // This would be the real implementation when data is available
-      const { mockAgent, mockTransactions } = generateMockData(timeRange);
-      setAgent(mockAgent);
-      setTransactions(mockTransactions);
-      calculateStats(mockTransactions);
-      setLoading(false);
-      return;
+      // 1. Get agent profile
+      const { data: agentData, error: agentError } = await supabase
+        .from('agents')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
 
-      // Real data implementation would be here
-      // For now, we'll continue using mock data
+      if (agentError && agentError.code !== 'PGRST116') {
+        throw agentError;
+      }
+
+      if (!agentData) {
+        // No agent profile found - user is not an agent
+        setAgent(null);
+        setTransactions([]);
+        setStats(null);
+        setLoading(false);
+        return;
+      }
+
+      setAgent(agentData);
+
+      // 2. Get transactions from data feed
+      const cutoffDate = new Date();
+      cutoffDate.setMonth(cutoffDate.getMonth() - timeRange);
+
+      const { data: transactionData, error: transactionError } = await supabase
+        .from('agent_transactions')
+        .select('*')
+        .eq('agent_id', agentData.id)
+        .gte('close_date', cutoffDate.toISOString().split('T')[0])
+        .order('close_date', { ascending: false });
+
+      if (transactionError) {
+        throw transactionError;
+      }
+
+      // Convert to our Transaction format
+      const formattedTransactions: Transaction[] = (transactionData || []).map(t => ({
+        id: t.id,
+        property_address: `${t.property_city || 'Unknown'}, ${t.property_state || 'Unknown'}`,
+        city: t.property_city,
+        state: t.property_state,
+        close_date: t.close_date,
+        price: Number(t.sale_price),
+        side: t.role as 'buyer' | 'seller',
+        lender_name: t.lender,
+        title_company_name: t.title_company,
+        source: t.source as 'feed' | 'self_report'
+      }));
+
+      // 3. If no transactions from feed, check for quiz responses
+      let finalTransactions = formattedTransactions;
+      let hasDataFeed = agentData.data_feed_active && formattedTransactions.length > 0;
+      let needsQuiz = false;
+
+      if (!hasDataFeed) {
+        // Check for existing quiz response
+        const { data: quizData } = await supabase
+          .from('agent_quiz_responses')
+          .select('*')
+          .eq('agent_id', agentData.id)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single();
+
+        if (quizData) {
+          // Generate transactions from quiz data for stats calculation
+          const buyerTransactions: Transaction[] = Array.from({ length: quizData.buyers_count }, (_, i) => ({
+            id: `quiz-buyer-${i}`,
+            close_date: new Date(Date.now() - Math.random() * timeRange * 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            price: Number(quizData.avg_price),
+            side: 'buyer' as const,
+            source: 'self_report' as const
+          }));
+
+          const sellerTransactions: Transaction[] = Array.from({ length: quizData.sellers_count }, (_, i) => ({
+            id: `quiz-seller-${i}`,
+            close_date: new Date(Date.now() - Math.random() * timeRange * 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            price: Number(quizData.avg_price),
+            side: 'seller' as const,
+            source: 'self_report' as const
+          }));
+
+          finalTransactions = [...buyerTransactions, ...sellerTransactions];
+          hasDataFeed = false;
+        } else {
+          needsQuiz = true;
+        }
+      }
+
+      setTransactions(finalTransactions);
+      calculateStats(finalTransactions, hasDataFeed, needsQuiz);
+      setLoading(false);
 
     } catch (err) {
       console.error('Error fetching agent data:', err);
       setError(err instanceof Error ? err.message : 'An error occurred');
-    } finally {
       setLoading(false);
     }
   };
 
-  const calculateStats = (transactions: Transaction[]) => {
+  const calculateStats = (transactions: Transaction[], hasDataFeed: boolean, needsQuiz: boolean) => {
     const buyerTransactions = transactions.filter(t => t.side === 'buyer');
     const sellerTransactions = transactions.filter(t => t.side === 'seller');
 
@@ -162,21 +198,25 @@ export const useAgentData = (timeRange: number = 12) => {
 
     const totalVolume = transactions.reduce((sum, t) => sum + t.price, 0);
 
-    // Calculate loan types
+    // Calculate loan types (only available with data feed)
     const loanTypes: Record<string, number> = {};
-    transactions.forEach(t => {
-      if (t.loan_type) {
-        loanTypes[t.loan_type] = (loanTypes[t.loan_type] || 0) + 1;
-      }
-    });
+    if (hasDataFeed) {
+      transactions.forEach(t => {
+        if (t.loan_type) {
+          loanTypes[t.loan_type] = (loanTypes[t.loan_type] || 0) + 1;
+        }
+      });
+    }
 
-    // Calculate lender statistics
+    // Calculate lender statistics (only available with data feed)
     const lenderCounts: Record<string, number> = {};
-    transactions.forEach(t => {
-      if (t.lender_name) {
-        lenderCounts[t.lender_name] = (lenderCounts[t.lender_name] || 0) + 1;
-      }
-    });
+    if (hasDataFeed) {
+      transactions.forEach(t => {
+        if (t.lender_name) {
+          lenderCounts[t.lender_name] = (lenderCounts[t.lender_name] || 0) + 1;
+        }
+      });
+    }
 
     const lenders = Object.entries(lenderCounts)
       .map(([name, count]) => ({
@@ -186,13 +226,15 @@ export const useAgentData = (timeRange: number = 12) => {
       }))
       .sort((a, b) => b.count - a.count);
 
-    // Calculate title company statistics
+    // Calculate title company statistics (only available with data feed)
     const titleCounts: Record<string, number> = {};
-    transactions.forEach(t => {
-      if (t.title_company_name) {
-        titleCounts[t.title_company_name] = (titleCounts[t.title_company_name] || 0) + 1;
-      }
-    });
+    if (hasDataFeed) {
+      transactions.forEach(t => {
+        if (t.title_company_name) {
+          titleCounts[t.title_company_name] = (titleCounts[t.title_company_name] || 0) + 1;
+        }
+      });
+    }
 
     const titleCompanies = Object.entries(titleCounts)
       .map(([name, count]) => ({
@@ -210,8 +252,34 @@ export const useAgentData = (timeRange: number = 12) => {
       totalVolume,
       loanTypes,
       lenders,
-      titleCompanies
+      titleCompanies,
+      hasDataFeed,
+      needsQuiz
     });
+  };
+
+  const submitQuizResponse = async (buyers: number, sellers: number, avgPrice: number) => {
+    if (!agent) return;
+
+    try {
+      const { error } = await supabase
+        .from('agent_quiz_responses')
+        .insert({
+          agent_id: agent.id,
+          buyers_count: buyers,
+          sellers_count: sellers,
+          avg_price: avgPrice,
+          period_months: timeRange
+        });
+
+      if (error) throw error;
+
+      // Refresh data after quiz submission
+      await fetchAgentData();
+    } catch (err) {
+      console.error('Error submitting quiz response:', err);
+      throw err;
+    }
   };
 
   return {
@@ -220,6 +288,7 @@ export const useAgentData = (timeRange: number = 12) => {
     stats,
     loading,
     error,
-    refetch: fetchAgentData
+    refetch: fetchAgentData,
+    submitQuizResponse
   };
 };
