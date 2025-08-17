@@ -18,6 +18,10 @@ export const TourDiscoveryButton: React.FC = () => {
     setActiveTour(null);
   };
 
+  return null;
+  
+  // Temporarily disabled - will rebuild later
+  /*
   return (
     <>
       <Button
@@ -39,4 +43,5 @@ export const TourDiscoveryButton: React.FC = () => {
       )}
     </>
   );
+  */
 };
