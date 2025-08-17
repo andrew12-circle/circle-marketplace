@@ -68,17 +68,18 @@ export const GuideTour: React.FC<GuideTourProps> = ({ guide, onComplete, onSkip 
             tooltipLeft = rect.left + window.scrollX + (rect.width / 2) - (tooltipWidth / 2);
         }
 
-        // Ensure tooltip stays within viewport
+        // Ensure tooltip stays within viewport with extra padding for buttons
         const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight;
+        const padding = 20;
         
-        if (tooltipLeft < 10) tooltipLeft = 10;
-        if (tooltipLeft + tooltipWidth > viewportWidth - 10) {
-          tooltipLeft = viewportWidth - tooltipWidth - 10;
+        if (tooltipLeft < padding) tooltipLeft = padding;
+        if (tooltipLeft + tooltipWidth > viewportWidth - padding) {
+          tooltipLeft = viewportWidth - tooltipWidth - padding;
         }
-        if (tooltipTop < 10) tooltipTop = 10;
-        if (tooltipTop + tooltipHeight > window.scrollY + viewportHeight - 60) {
-          tooltipTop = window.scrollY + viewportHeight - tooltipHeight - 60;
+        if (tooltipTop < padding) tooltipTop = padding;
+        if (tooltipTop + tooltipHeight > window.scrollY + viewportHeight - padding) {
+          tooltipTop = window.scrollY + viewportHeight - tooltipHeight - padding;
         }
 
         setTooltipPosition({ top: tooltipTop, left: tooltipLeft });
