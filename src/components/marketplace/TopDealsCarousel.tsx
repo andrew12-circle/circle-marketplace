@@ -127,26 +127,16 @@ export const TopDealsCarousel = ({ services, serviceRatings, onServiceClick }: T
             const proPrice = parsePrice(service.pro_price);
             const isSponsored = showSponsored && (service as any).is_sponsored;
             
+            // Always recalculate discount to ensure accuracy
             let discountPct = 0;
-            
-            // Debug: Log all price data for this service
-            console.log(`Price data for ${service.title}:`, {
-              stored_discount: service.discount_percentage,
-              retail_price: service.retail_price,
-              pro_price: service.pro_price,
-              parsed_retail: retailPrice,
-              parsed_pro: proPrice
-            });
-            
-            if (service.discount_percentage) {
-              // If discount_percentage is stored, use it but validate it makes sense
-              const storedDiscount = Math.round(parsePrice(service.discount_percentage));
-              console.log(`Using stored discount: ${storedDiscount}% for ${service.title}`);
-              discountPct = storedDiscount;
-            } else if (retailPrice > 0 && proPrice > 0 && proPrice < retailPrice) {
+            if (retailPrice > 0 && proPrice > 0 && proPrice < retailPrice) {
               // Calculate discount: what % off the retail price
               discountPct = Math.round(((retailPrice - proPrice) / retailPrice) * 100);
-              console.log(`Calculated discount for ${service.title}: retail=$${retailPrice}, pro=$${proPrice}, discount=${discountPct}%`);
+              console.log(`🔍 Discount for ${service.title}: $${retailPrice} → $${proPrice} = ${discountPct}% OFF`);
+            } else if (service.discount_percentage && (!retailPrice || !proPrice)) {
+              // Only use stored discount if we don't have valid price data to calculate
+              discountPct = Math.round(parsePrice(service.discount_percentage));
+              console.log(`📦 Using stored discount for ${service.title}: ${discountPct}%`);
             }
 
             return (
