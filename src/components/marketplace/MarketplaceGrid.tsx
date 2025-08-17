@@ -33,6 +33,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { marketplaceCircuitBreaker } from "@/utils/circuitBreaker";
 import { usePaginatedServices } from "@/hooks/usePaginatedServices";
 import { useABTest } from "@/hooks/useABTest";
+import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { TourDiscoveryButton } from "./TourDiscoveryButton";
 interface FilterState {
   category: string;
