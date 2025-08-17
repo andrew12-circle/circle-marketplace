@@ -29,6 +29,7 @@ import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { useABTest } from "@/hooks/useABTest";
 import { SponsoredLabel } from "./SponsoredLabel";
 import { ServiceBadges } from "./ServiceBadges";
+import { extractNumericPrice, computeDiscountPercentage } from '@/utils/dealPricing';
 
 interface ServiceRatingStats {
   averageRating: number;
@@ -127,48 +128,9 @@ export const ServiceCard = ({
     }
   };
 
-  // Safe price extraction with validation
-  const extractNumericPrice = (priceString: string): number => {
-    const validation = extractAndValidatePrice(priceString, 'retail');
-    if (!validation.isValid || validation.sanitizedPrice === null) {
-      console.error('Price validation failed:', priceString, validation.errors);
-      return 0;
-    }
-    return validation.sanitizedPrice;
-  };
-
-  // Calculate dynamic discount percentage
+  // Calculate dynamic discount percentage using shared logic
   const calculateDiscountPercentage = (): number | null => {
-    if (!service.retail_price) return null;
-    
-    const retailPrice = extractNumericPrice(service.retail_price);
-    
-    // Unverified: discount equals RESPA split limit off retail
-    if (!service.is_verified && service.respa_split_limit) {
-      return service.respa_split_limit;
-    }
-    
-    // Verified: prefer potential co-pay discount if available
-    if (service.copay_allowed && service.respa_split_limit) {
-      if (service.pro_price) {
-        const potential = extractNumericPrice(service.pro_price) * (1 - (service.respa_split_limit / 100));
-        const percentage = Math.round((potential / retailPrice) * 100);
-        return 100 - percentage;
-      } else if (service.co_pay_price) {
-        const coPayPrice = extractNumericPrice(service.co_pay_price);
-        const percentage = Math.round((coPayPrice / retailPrice) * 100);
-        return 100 - percentage;
-      }
-    }
-    
-    // Fallback: show Circle Pro discount only when verified
-    if (service.pro_price && service.is_verified) {
-      const proPrice = extractNumericPrice(service.pro_price);
-      const percentage = Math.round((proPrice / retailPrice) * 100);
-      return 100 - percentage;
-    }
-    
-    return null;
+    return computeDiscountPercentage(service);
   };
 
   const handleSave = (e: React.MouseEvent) => {

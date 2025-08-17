@@ -10,6 +10,9 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { Star } from "lucide-react";
 import { logger } from "@/utils/logger";
 import { type Service } from "@/hooks/useMarketplaceData";
+import { useAuth } from "@/contexts/AuthContext";
+import { useCurrency } from "@/hooks/useCurrency";
+import { computeDiscountPercentage, getEffectivePrice } from "@/utils/dealPricing";
 
 interface ServiceRatingStats {
   average_rating: number;
@@ -25,40 +28,45 @@ interface TopDealsCarouselProps {
 import { parsePrice } from "@/utils/parsePrice";
 
 const calculateScore = (service: Service, rating?: ServiceRatingStats): number => {
-  const retailPrice = parsePrice(service.retail_price);
-  const proPrice = parsePrice(service.pro_price);
+  let score = 0;
   
-  // Discount calculation
-  let discountPct = 0;
-  if (service.discount_percentage) {
-    discountPct = parsePrice(service.discount_percentage);
-  } else if (retailPrice > 0 && proPrice > 0) {
-    discountPct = ((retailPrice - proPrice) / retailPrice) * 100;
+  // Use shared discount calculation for consistency
+  const discount = computeDiscountPercentage(service) || 0;
+  score += discount * 0.3;
+  
+  // Trust score weight
+  if (rating?.average_rating) {
+    score += rating.average_rating * 10;
   }
   
-  // Trust score
-  let trustScore = 0;
-  if (service.vendor?.is_verified) trustScore += 20;
-  if (rating?.average_rating) trustScore += (rating.average_rating / 5) * 10;
+  // Featured service weight
+  if (service.is_featured) {
+    score += 20;
+  }
   
-  // Featured boost
-  const featuredScore = (service.is_featured ? 20 : 0) + (service.is_top_pick ? 15 : 0);
-  
-  // Co-pay boost
-  const coPayScore = service.copay_allowed ? 5 : 0;
+  // Co-pay availability weight
+  if (service.copay_allowed) {
+    score += 15;
+  }
   
   // Brand boost (simple heuristic)
   const brandNames = ['hubspot', 'salesforce', 'mailchimp', 'canva', 'zoom'];
   const vendorName = (service.vendor?.name || '').toLowerCase();
   const brandBoost = brandNames.some(brand => vendorName.includes(brand)) ? 10 : 0;
-
-  // Sponsored boost if flagged
-  const sponsoredBoost = (service as any).is_sponsored ? ((service as any).sponsored_rank_boost || 50) : 0;
+  score += brandBoost * 0.1;
   
-  return (0.30 * discountPct) + (0.20 * trustScore) + (0.15 * featuredScore) + (0.10 * coPayScore) + (0.10 * brandBoost) + (0.15 * sponsoredBoost);
+  // Sponsored content weight (lower priority)
+  if ((service as any).is_sponsored) {
+    score += 5;
+  }
+  
+  return score;
 };
 
 export const TopDealsCarousel = ({ services, serviceRatings, onServiceClick }: TopDealsCarouselProps) => {
+  const { profile } = useAuth();
+  const { formatPrice } = useCurrency();
+  
   // Sponsored features enabled by default for Amazon-level experience
   const sponsoredEnabled = true;
   const sponsoredTopDeals = true;
@@ -124,20 +132,13 @@ export const TopDealsCarousel = ({ services, serviceRatings, onServiceClick }: T
           {topDeals.map((service) => {
             const rating = serviceRatings?.get(service.id);
             const retailPrice = parsePrice(service.retail_price);
-            const proPrice = parsePrice(service.pro_price);
             const isSponsored = showSponsored && (service as any).is_sponsored;
             
-            // Always recalculate discount to ensure accuracy
-            let discountPct = 0;
-            if (retailPrice > 0 && proPrice > 0 && proPrice < retailPrice) {
-              // Calculate discount: what % off the retail price
-              discountPct = Math.round(((retailPrice - proPrice) / retailPrice) * 100);
-              console.log(`🔍 Discount for ${service.title}: $${retailPrice} → $${proPrice} = ${discountPct}% OFF`);
-            } else if (service.discount_percentage && (!retailPrice || !proPrice)) {
-              // Only use stored discount if we don't have valid price data to calculate
-              discountPct = Math.round(parsePrice(service.discount_percentage));
-              console.log(`📦 Using stored discount for ${service.title}: ${discountPct}%`);
-            }
+            // Use shared discount calculation logic
+            const discountPct = computeDiscountPercentage(service) || 0;
+            
+            // Get effective pricing based on membership and copay eligibility
+            const { price: effectivePrice, label: priceLabel } = getEffectivePrice(service, !!profile?.is_pro_member);
 
             return (
               <CarouselItem key={service.id} className="pl-2 md:pl-4 basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/5">
@@ -181,16 +182,24 @@ export const TopDealsCarousel = ({ services, serviceRatings, onServiceClick }: T
                       )}
 
                       {/* Price */}
-                      <div className="flex items-center gap-2">
-                        {proPrice > 0 && (
-                          <span className="font-bold text-lg text-primary">
-                            ${proPrice}
-                          </span>
+                      <div className="text-right">
+                        <div className="text-lg font-bold text-primary">
+                          {formatPrice(effectivePrice)}
+                        </div>
+                        {priceLabel === 'Potential Co-Pay' && (
+                          <>
+                            <div className="text-sm text-muted-foreground line-through">
+                              {formatPrice(retailPrice)}
+                            </div>
+                            <div className="text-xs text-green-600 font-medium">
+                              Potential Co-Pay
+                            </div>
+                          </>
                         )}
-                        {retailPrice > proPrice && (
-                          <span className="text-sm text-muted-foreground line-through">
-                            ${retailPrice}
-                          </span>
+                        {priceLabel === 'Circle Pro Price' && retailPrice !== effectivePrice && (
+                          <div className="text-sm text-muted-foreground line-through">
+                            {formatPrice(retailPrice)}
+                          </div>
                         )}
                       </div>
 
