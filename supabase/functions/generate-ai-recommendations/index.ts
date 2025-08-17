@@ -45,46 +45,84 @@ serve(async (req) => {
       );
     }
 
-    // Check if goals are set
-    if (!profile.onboarding_completed || !profile.primary_challenge) {
-      return new Response(
-        JSON.stringify({ 
-          error: 'Agent needs to complete goal assessment first',
-          requires_assessment: true 
-        }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // Get market benchmarks for agent's location and tier
-    const agentTier = getAgentTier(profile);
-    const { data: benchmarks } = await supabase
-      .from('market_benchmarks')
+    // Get agent's actual performance data from command center
+    const { data: agentData } = await supabase
+      .from('agents')
       .select('*')
-      .eq('state', profile.state || 'National')
-      .eq('agent_tier', agentTier)
-      .eq('benchmark_year', 2024)
-      .limit(1);
+      .eq('user_id', agent_id)
+      .single();
+
+    // Get agent's performance tracking (last 12 months)
+    const { data: performanceData } = await supabase
+      .from('agent_performance_tracking')
+      .select('*')
+      .eq('agent_id', agentData?.id)
+      .order('month_year', { ascending: false })
+      .limit(12);
+
+    // Calculate annual totals from performance data
+    const annualPerformance = calculateAnnualPerformance(performanceData || []);
+
+    // Get site-wide purchasing patterns - what other agents are buying
+    const { data: popularServices } = await supabase
+      .from('co_pay_requests')
+      .select(`
+        service_id,
+        services (
+          id,
+          title,
+          description,
+          category,
+          retail_price,
+          average_rating
+        )
+      `)
+      .eq('status', 'approved')
+      .not('service_id', 'is', null);
+
+    // Get similar agents' purchasing patterns (same tier/performance level)
+    const agentTier = getAgentTierFromPerformance(annualPerformance);
+    const { data: similarAgentPurchases } = await supabase
+      .from('co_pay_requests')
+      .select(`
+        service_id,
+        agent_id,
+        agents!inner (
+          years_active
+        ),
+        services (
+          id,
+          title,
+          description,
+          category,
+          retail_price,
+          average_rating
+        )
+      `)
+      .eq('status', 'approved')
+      .not('service_id', 'is', null);
 
     // Get available services
     const { data: services } = await supabase
       .from('services')
       .select('*')
       .eq('is_published', true)
-      .limit(50);
+      .limit(100);
 
-    // Get service bundles that match the agent's challenge
+    // Get service bundles
     const { data: bundles } = await supabase
       .from('ai_service_bundles')
       .select('*')
-      .contains('target_challenges', [profile.primary_challenge])
       .eq('is_active', true);
 
-    // Generate recommendations based on profile
-    const recommendations = await generateRecommendations(
-      profile, 
-      benchmarks?.[0], 
-      services || [], 
+    // Generate recommendations based on performance gaps and peer analysis
+    const recommendations = await generatePerformanceBasedRecommendations(
+      profile,
+      agentData,
+      annualPerformance,
+      popularServices || [],
+      similarAgentPurchases || [],
+      services || [],
       bundles || [],
       openaiApiKey
     );
@@ -106,7 +144,8 @@ serve(async (req) => {
       JSON.stringify({ 
         success: true,
         recommendations_count: recommendations.length,
-        agent_tier: agentTier
+        agent_tier: agentTier,
+        annual_performance: annualPerformance
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
@@ -119,6 +158,276 @@ serve(async (req) => {
     );
   }
 });
+
+function calculateAnnualPerformance(performanceData: any[]): any {
+  const totalVolume = performanceData.reduce((sum, p) => sum + (p.volume_closed || 0), 0);
+  const totalTransactions = performanceData.reduce((sum, p) => sum + (p.transactions_closed || 0), 0);
+  const avgConversionRate = performanceData.length > 0 
+    ? performanceData.reduce((sum, p) => sum + (p.conversion_rate || 0), 0) / performanceData.length 
+    : 0;
+  const avgCommission = performanceData.length > 0
+    ? performanceData.reduce((sum, p) => sum + (p.average_commission || 0), 0) / performanceData.length 
+    : 0;
+
+  return {
+    totalVolume,
+    totalTransactions,
+    avgConversionRate,
+    avgCommission,
+    monthsWithData: performanceData.length
+  };
+}
+
+function getAgentTierFromPerformance(performance: any): string {
+  const { totalTransactions, totalVolume } = performance;
+  
+  if (totalTransactions >= 50 || totalVolume >= 15000000) return 'top_producer';
+  if (totalTransactions >= 24 || totalVolume >= 8000000) return 'established';
+  if (totalTransactions >= 12 || totalVolume >= 4000000) return 'growing';
+  return 'new';
+}
+
+async function generatePerformanceBasedRecommendations(
+  profile: any,
+  agentData: any,
+  annualPerformance: any,
+  popularServices: any[],
+  similarAgentPurchases: any[],
+  services: any[],
+  bundles: any[],
+  openaiApiKey?: string
+): Promise<any[]> {
+  const recommendations: any[] = [];
+
+  // 1. Performance gap analysis
+  const performanceGaps = analyzePerformanceGaps(profile, annualPerformance);
+  recommendations.push(...performanceGaps);
+
+  // 2. Peer-based recommendations from similar agents
+  const peerRecommendations = generatePeerBasedRecommendations(
+    annualPerformance,
+    similarAgentPurchases,
+    services
+  );
+  recommendations.push(...peerRecommendations);
+
+  // 3. Popular services trending site-wide
+  const trendingRecommendations = generateTrendingRecommendations(
+    popularServices,
+    services
+  );
+  recommendations.push(...trendingRecommendations);
+
+  // 4. AI-powered strategic recommendations based on actual performance
+  if (openaiApiKey && recommendations.length < 5) {
+    try {
+      const aiRecommendation = await generateAIPerformanceRecommendation(
+        profile,
+        annualPerformance,
+        popularServices,
+        openaiApiKey
+      );
+      if (aiRecommendation) {
+        recommendations.push({
+          recommendation_type: 'ai_strategy',
+          recommendation_text: aiRecommendation,
+          confidence_score: 0.8,
+          estimated_roi_percentage: 20,
+          priority_rank: 20
+        });
+      }
+    } catch (error) {
+      console.error('Error generating AI recommendation:', error);
+    }
+  }
+
+  return recommendations
+    .sort((a, b) => a.priority_rank - b.priority_rank)
+    .slice(0, 5); // Limit to top 5 recommendations
+}
+
+function analyzePerformanceGaps(profile: any, performance: any): any[] {
+  const recommendations: any[] = [];
+  const { totalTransactions, totalVolume, avgConversionRate } = performance;
+  const goals = {
+    transactions: profile.annual_goal_transactions || 24,
+    volume: profile.annual_goal_volume || 6000000
+  };
+
+  // Transaction gap analysis
+  if (totalTransactions < goals.transactions * 0.8) {
+    const gap = goals.transactions - totalTransactions;
+    recommendations.push({
+      recommendation_type: 'performance_gap',
+      recommendation_text: `You're ${gap} transactions behind your annual goal of ${goals.transactions}. Focus on lead generation and conversion tools to accelerate deal flow.`,
+      confidence_score: 0.95,
+      estimated_roi_percentage: 35,
+      priority_rank: 1
+    });
+  }
+
+  // Volume gap analysis
+  if (totalVolume < goals.volume * 0.8) {
+    const volumeGap = goals.volume - totalVolume;
+    recommendations.push({
+      recommendation_type: 'volume_gap',
+      recommendation_text: `You need $${volumeGap.toLocaleString()} more volume to reach your goal. Consider luxury market tools or higher-value client acquisition strategies.`,
+      confidence_score: 0.9,
+      estimated_roi_percentage: 30,
+      priority_rank: 2
+    });
+  }
+
+  // Conversion rate analysis
+  if (avgConversionRate < 0.15 && avgConversionRate > 0) {
+    recommendations.push({
+      recommendation_type: 'conversion_improvement',
+      recommendation_text: `Your ${(avgConversionRate * 100).toFixed(1)}% conversion rate has room for improvement. CRM and follow-up automation could boost your close rate significantly.`,
+      confidence_score: 0.85,
+      estimated_roi_percentage: 25,
+      priority_rank: 3
+    });
+  }
+
+  return recommendations;
+}
+
+function generatePeerBasedRecommendations(
+  performance: any,
+  similarPurchases: any[],
+  services: any[]
+): any[] {
+  const recommendations: any[] = [];
+  
+  // Analyze what services similar-performing agents are buying
+  const servicePopularity = new Map();
+  
+  similarPurchases.forEach(purchase => {
+    if (purchase.services) {
+      const serviceId = purchase.services.id;
+      const count = servicePopularity.get(serviceId) || 0;
+      servicePopularity.set(serviceId, count + 1);
+    }
+  });
+
+  // Get top 3 most popular services among peers
+  const topPeerServices = Array.from(servicePopularity.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3)
+    .map(([serviceId, count]) => {
+      const service = similarPurchases.find(p => p.services?.id === serviceId)?.services;
+      return { service, purchaseCount: count };
+    })
+    .filter(item => item.service);
+
+  topPeerServices.forEach((item, index) => {
+    recommendations.push({
+      recommendation_type: 'peer_popular',
+      service_id: item.service.id,
+      recommendation_text: `"${item.service.title}" is popular among agents at your performance level - ${item.purchaseCount} similar agents have invested in this service.`,
+      confidence_score: 0.8,
+      estimated_roi_percentage: 20,
+      priority_rank: 10 + index
+    });
+  });
+
+  return recommendations;
+}
+
+function generateTrendingRecommendations(
+  popularServices: any[],
+  services: any[]
+): any[] {
+  const recommendations: any[] = [];
+  
+  // Count service purchases site-wide
+  const serviceCounts = new Map();
+  popularServices.forEach(purchase => {
+    if (purchase.services) {
+      const serviceId = purchase.services.id;
+      const count = serviceCounts.get(serviceId) || 0;
+      serviceCounts.set(serviceId, count + 1);
+    }
+  });
+
+  // Get top trending services
+  const trendingServices = Array.from(serviceCounts.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 2)
+    .map(([serviceId, count]) => {
+      const service = popularServices.find(p => p.services?.id === serviceId)?.services;
+      return { service, purchaseCount: count };
+    })
+    .filter(item => item.service);
+
+  trendingServices.forEach((item, index) => {
+    recommendations.push({
+      recommendation_type: 'trending',
+      service_id: item.service.id,
+      recommendation_text: `"${item.service.title}" is trending across the platform with ${item.purchaseCount} recent purchases. Agents are seeing strong results with this service.`,
+      confidence_score: 0.75,
+      estimated_roi_percentage: 18,
+      priority_rank: 15 + index
+    });
+  });
+
+  return recommendations;
+}
+
+async function generateAIPerformanceRecommendation(
+  profile: any,
+  performance: any,
+  popularServices: any[],
+  openaiApiKey: string
+): Promise<string | null> {
+  try {
+    const topServices = popularServices
+      .slice(0, 5)
+      .map(p => p.services?.title)
+      .filter(Boolean)
+      .join(', ');
+
+    const prompt = `As a real estate performance analyst, provide ONE strategic recommendation for an agent with this performance data:
+
+ACTUAL PERFORMANCE (last 12 months):
+- Transactions closed: ${performance.totalTransactions}
+- Total volume: $${performance.totalVolume.toLocaleString()}
+- Average conversion rate: ${(performance.avgConversionRate * 100).toFixed(1)}%
+- Average commission: $${performance.avgCommission.toLocaleString()}
+
+GOALS:
+- Target transactions: ${profile.annual_goal_transactions || 'Not set'}
+- Target volume: $${profile.annual_goal_volume?.toLocaleString() || 'Not set'}
+
+MARKET TRENDS:
+Popular services agents are buying: ${topServices}
+
+Based on the performance gap between actual and goals, provide a specific, actionable recommendation focusing on the biggest opportunity for improvement.`;
+
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openaiApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4.1-2025-04-14',
+        messages: [
+          { role: 'system', content: 'You are a data-driven real estate performance consultant.' },
+          { role: 'user', content: prompt }
+        ],
+        max_tokens: 200,
+        temperature: 0.7
+      }),
+    });
+
+    const data = await response.json();
+    return data.choices?.[0]?.message?.content?.trim() || null;
+  } catch (error) {
+    console.error('Error calling OpenAI for performance recommendation:', error);
+    return null;
+  }
+}
 
 function getAgentTier(profile: any): string {
   const experience = profile.years_experience || 0;
