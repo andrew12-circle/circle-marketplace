@@ -127,23 +127,39 @@ serve(async (req) => {
       openaiApiKey
     );
 
-    // Save recommendations to database
+    // Save recommendations to database with normalized types
+    let savedCount = 0;
     for (const rec of recommendations) {
-      await supabase
-        .from('goal_based_recommendations')
-        .upsert({
-          agent_id,
-          ...rec,
-          created_at: new Date().toISOString()
-        });
+      try {
+        // Normalize recommendation_type to match database constraint
+        const normalizedType = normalizeRecommendationType(rec.recommendation_type);
+        
+        const { error: saveError } = await supabase
+          .from('goal_based_recommendations')
+          .upsert({
+            agent_id,
+            ...rec,
+            recommendation_type: normalizedType,
+            created_at: new Date().toISOString()
+          });
+        
+        if (saveError) {
+          console.error(`Failed to save recommendation:`, saveError, rec);
+        } else {
+          savedCount++;
+        }
+      } catch (error) {
+        console.error(`Error saving recommendation:`, error, rec);
+      }
     }
 
-    console.log(`Generated ${recommendations.length} recommendations for agent ${agent_id}`);
+    console.log(`Generated ${recommendations.length} recommendations, saved ${savedCount} for agent ${agent_id}`);
 
     return new Response(
       JSON.stringify({ 
         success: true,
         recommendations_count: recommendations.length,
+        saved_count: savedCount,
         agent_tier: agentTier,
         annual_performance: annualPerformance
       }),
@@ -158,6 +174,24 @@ serve(async (req) => {
     );
   }
 });
+
+function normalizeRecommendationType(type: string): string {
+  // Map internal recommendation types to database-allowed values
+  const typeMap: { [key: string]: string } = {
+    'performance_gap': 'service',
+    'volume_gap': 'service', 
+    'conversion_improvement': 'service',
+    'peer_popular': 'service',
+    'trending': 'service',
+    'ai_strategy': 'strategy',
+    'benchmark': 'strategy',
+    'service': 'service',
+    'bundle': 'bundle',
+    'strategy': 'strategy'
+  };
+  
+  return typeMap[type] || 'service';
+}
 
 function calculateAnnualPerformance(performanceData: any[]): any {
   const totalVolume = performanceData.reduce((sum, p) => sum + (p.volume_closed || 0), 0);
@@ -229,7 +263,7 @@ async function generatePerformanceBasedRecommendations(
       );
       if (aiRecommendation) {
         recommendations.push({
-          recommendation_type: 'ai_strategy',
+          recommendation_type: 'strategy',
           recommendation_text: aiRecommendation,
           confidence_score: 0.8,
           estimated_roi_percentage: 20,
