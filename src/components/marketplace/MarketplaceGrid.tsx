@@ -513,7 +513,7 @@ export const MarketplaceGrid = () => {
           <div className="mb-12">
             <h1 className="text-3xl sm:text-6xl font-bold text-black mb-4 lcp-content">Agent Marketplace.</h1>
             <p className="text-gray-600 max-w-2xl text-sm lcp-content">
-              {t('marketplaceDescription')}
+              Finally, the noise is gone. Welcome to the Marketplace — where real estate agents can compare and explore the best tools at a fraction of the cost. Every option is curated, easy to compare, and backed by verified agents like you. Stop guessing. Start growing. Buy outcomes, not tools.
             </p>
           </div>
 
