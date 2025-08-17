@@ -22,14 +22,7 @@ interface TopDealsCarouselProps {
   onServiceClick: (serviceId: string) => void;
 }
 
-const parsePrice = (price: any): number => {
-  if (typeof price === 'number') return price;
-  if (typeof price === 'string') {
-    const parsed = parseFloat(price.replace(/[^0-9.-]/g, ''));
-    return isNaN(parsed) ? 0 : parsed;
-  }
-  return 0;
-};
+import { parsePrice } from "@/utils/parsePrice";
 
 const calculateScore = (service: Service, rating?: ServiceRatingStats): number => {
   const retailPrice = parsePrice(service.retail_price);
