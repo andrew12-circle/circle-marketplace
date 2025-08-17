@@ -255,55 +255,6 @@ const { isBuilding, buildPlan } = useGoalPlan();
         </div>
       </div>
 
-      {/* Quick Actions */}
-      {recommendations.length === 0 && bundles.length === 0 && (
-        <Card>
-          <CardHeader>
-            <div className="flex items-start justify-between">
-              <div>
-                <CardTitle>
-                  {hasCompletedAssessment ? "Ready for your first recommendations" : "No Recommendations Yet"}
-                </CardTitle>
-                <CardDescription>
-                  {hasCompletedAssessment
-                    ? "Generate personalized suggestions based on your saved goals."
-                    : "Complete your goal assessment to get personalized recommendations."}
-                </CardDescription>
-              </div>
-              {/* Remove edit goals from here since it's now in command center */}
-            </div>
-          </CardHeader>
-          <CardContent className="text-center py-6 space-y-3">
-            <div className="flex flex-col gap-2 pt-2">
-              {hasCompletedAssessment ? (
-                <>
-                  <Button onClick={generateAIRecommendations} disabled={isGenerating} className="w-full">
-                    {isGenerating ? "Generating..." : (
-                      <>
-                        <Sparkles className="h-4 w-4 mr-1" />
-                        Generate Recommendations
-                      </>
-                    )}
-                  </Button>
-                  <Button variant="outline" onClick={async () => { await buildPlan(); }} disabled={isBuilding} className="w-full">
-                    {isBuilding ? "Contacting OpenAI..." : (
-                      <>
-                        <TrendingUp className="h-4 w-4 mr-1" />
-                        AI Strategy Guide
-                      </>
-                    )}
-                  </Button>
-                </>
-              ) : (
-                <Button variant="outline" onClick={() => setIsGoalAssessmentOpen(true)} className="w-full">
-                  Complete Assessment
-                </Button>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
       {/* AI Recommendations */}
       {recommendations.length > 0 && (
         <Card>
