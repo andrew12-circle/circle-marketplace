@@ -23,7 +23,7 @@ export const CampaignServicesHeader = () => {
             <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
               Curated Solutions for Agents
             </h2>
-            <p className="mt-1 text-muted-foreground max-w-[65ch]">See agent solutions side-by-side, and save up to 80% on the tools you already use — with one-click co-pay (automatic vendor co-marketing).</p>
+            <p className="mt-1 text-muted-foreground max-w-[65ch]">Shop agent solutions side-by-side, and save up to 80% on the tools you already use — with one-click co-pay (automatic vendor co-marketing).</p>
           </div>
           
           <div className="flex flex-col sm:flex-row gap-3">
