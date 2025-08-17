@@ -42,7 +42,10 @@ export const FunnelAnalyticsDashboard = () => {
       });
 
       if (error) throw error;
-      setMetrics(data);
+      
+      // Type the data properly to avoid the Json type issue
+      const typedData = data as FunnelMetrics;
+      setMetrics(typedData);
     } catch (error) {
       console.error('Error loading funnel metrics:', error);
     } finally {

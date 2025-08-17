@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Check, Crown, Sparkles, Users, Building2, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -16,30 +17,34 @@ const Pricing = () => {
   const navigate = useNavigate();
   const { trackTrialClick } = useFunnelEvents();
   const [loading, setLoading] = useState(false);
-  const [subscription, setSubscription] = useState<any>(null);
+  const [hasActiveSubscription, setHasActiveSubscription] = useState(false);
 
   useEffect(() => {
-    const getSubscription = async () => {
+    const checkSubscription = async () => {
       if (!user) return;
 
       try {
+        // Check if user has an active subscription in profiles table
         const { data, error } = await supabase
-          .from('subscriptions')
-          .select('*')
+          .from('profiles')
+          .select('subscription_status, subscription_tier')
           .eq('user_id', user.id)
           .single();
 
         if (error) {
           console.error('Error fetching subscription:', error);
-        } else {
-          setSubscription(data);
+        } else if (data) {
+          setHasActiveSubscription(
+            data.subscription_status === 'active' || 
+            data.subscription_tier === 'pro'
+          );
         }
       } catch (error) {
         console.error('Error:', error);
       }
     };
 
-    getSubscription();
+    checkSubscription();
   }, [user]);
 
   const handleStartTrial = async () => {
@@ -168,7 +173,7 @@ const Pricing = () => {
 
               {/* CTA Section */}
               <div className="text-center">
-                {subscription?.subscribed ? (
+                {hasActiveSubscription ? (
                   <div className="space-y-4">
                     <Badge className="bg-green-100 text-green-800 border-green-200 text-lg py-2 px-4">
                       <Check className="w-5 h-5 mr-2" />

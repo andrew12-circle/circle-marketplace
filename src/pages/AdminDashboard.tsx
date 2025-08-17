@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
-import { BarChart, Users, DollarSign, TrendingUp, Funnel } from "lucide-react";
+import { BarChart, Users, DollarSign, TrendingUp, Filter } from "lucide-react";
 
 // Import existing admin components
 import { AdminHealthDashboard } from "@/components/admin/AdminHealthDashboard";
@@ -12,7 +12,6 @@ import { ServiceManagementPanel } from "@/components/admin/ServiceManagementPane
 import { VendorManagementPanel } from "@/components/admin/VendorManagementPanel";
 import { AgentInvitationPanel } from "@/components/admin/AgentInvitationPanel";
 import { VendorInvitationPanel } from "@/components/admin/VendorInvitationPanel";
-import { SecurityMonitoringPanel } from "@/components/admin/SecurityMonitoringPanel";
 
 // Import new funnel analytics
 import { FunnelAnalyticsDashboard } from "@/components/analytics/FunnelAnalyticsDashboard";
@@ -34,20 +33,19 @@ const AdminDashboard = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-7">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="overview" className="flex items-center gap-2">
             <BarChart className="w-4 h-4" />
             Overview
           </TabsTrigger>
           <TabsTrigger value="funnel" className="flex items-center gap-2">
-            <Funnel className="w-4 h-4" />
+            <Filter className="w-4 h-4" />
             Funnel Analytics
           </TabsTrigger>
           <TabsTrigger value="services">Services</TabsTrigger>
           <TabsTrigger value="vendors">Vendors</TabsTrigger>
           <TabsTrigger value="agents">Agents</TabsTrigger>
           <TabsTrigger value="invitations">Invitations</TabsTrigger>
-          <TabsTrigger value="security">Security</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview">
@@ -75,10 +73,6 @@ const AdminDashboard = () => {
             <AgentInvitationPanel />
             <VendorInvitationPanel />
           </div>
-        </TabsContent>
-
-        <TabsContent value="security">
-          <SecurityMonitoringPanel />
         </TabsContent>
       </Tabs>
     </div>

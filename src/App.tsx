@@ -9,17 +9,17 @@ import { CartProvider } from "@/contexts/CartContext";
 import { SpiritualCoverageProvider } from "@/contexts/SpiritualCoverageContext";
 import { useFunnelEvents } from "@/hooks/useFunnelEvents";
 
-// Import pages
+// Import pages - using named imports where needed
 import Index from "@/pages/Index";
 import Auth from "@/pages/Auth";
-import Marketplace from "@/pages/Marketplace";
-import Academy from "@/pages/Academy";
+import { Marketplace } from "@/pages/Marketplace";
+import { Academy } from "@/pages/Academy";
 import Pricing from "@/pages/Pricing";
-import ProfileSettings from "@/pages/ProfileSettings";
+import { ProfileSettings } from "@/pages/ProfileSettings";
 import AdminDashboard from "@/pages/AdminDashboard";
 import CommandCenter from "@/pages/CommandCenter";
 import PaymentSuccess from "@/pages/PaymentSuccess";
-import PaymentCanceled from "@/pages/PaymentCanceled";
+import { PaymentCanceled } from "@/pages/PaymentCanceled";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
