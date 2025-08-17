@@ -24,49 +24,65 @@ const categories = [
     name: "CRMs",
     icon: Users,
     searchTerm: "crm",
-    description: "Customer Management"
+    description: "Customer Management",
+    color: "bg-blue-500",
+    iconColor: "text-white"
   },
   {
     name: "Marketing", 
     icon: TrendingUp,
     searchTerm: "marketing",
-    description: "Lead Generation"
+    description: "Lead Generation",
+    color: "bg-green-500",
+    iconColor: "text-white"
   },
   {
     name: "SEO",
     icon: Search,
     searchTerm: "seo",
-    description: "Search Optimization"
+    description: "Search Optimization",
+    color: "bg-purple-500",
+    iconColor: "text-white"
   },
   {
     name: "Coaching",
     icon: GraduationCap,
     searchTerm: "coaching",
-    description: "Professional Training"
+    description: "Professional Training",
+    color: "bg-orange-500",
+    iconColor: "text-white"
   },
   {
     name: "Insurance",
     icon: Shield,
     searchTerm: "insurance",
-    description: "Protection & Coverage"
+    description: "Protection & Coverage",
+    color: "bg-red-500",
+    iconColor: "text-white"
   },
   {
     name: "Photography",
     icon: Camera,
     searchTerm: "photography",
-    description: "Visual Content"
+    description: "Visual Content",
+    color: "bg-pink-500",
+    iconColor: "text-white"
   },
   {
     name: "Video",
     icon: Video,
     searchTerm: "video",
-    description: "Video Production"
+    description: "Video Production",
+    color: "bg-indigo-500",
+    iconColor: "text-white"
   },
   {
     name: "Direct Mail",
     icon: Mail,
     searchTerm: "direct mail",
-    description: "Physical Marketing"
+    description: "Physical Marketing",
+    color: "bg-teal-500",
+    iconColor: "text-white"
   }
 ];
 
@@ -118,20 +134,22 @@ export const CategoryBlocks = ({ onCategoryClick, services }: CategoryBlocksProp
             >
               <CardContent className="p-4 text-center">
                 <div className="space-y-3">
-                  <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                    <IconComponent className="w-6 h-6 text-primary" />
+                  <div className="relative mx-auto w-12 h-12">
+                    <div className={`w-12 h-12 ${category.color} rounded-full flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                      <IconComponent className={`w-6 h-6 ${category.iconColor}`} />
+                    </div>
+                    {categoryCounts.get(category.name) && (
+                      <div className="absolute -top-1 -right-1 min-w-[20px] h-5 bg-primary rounded-full flex items-center justify-center">
+                        <span className="text-xs font-medium text-primary-foreground px-1">
+                          {categoryCounts.get(category.name)}
+                        </span>
+                      </div>
+                    )}
                   </div>
                   <div>
-                    <div className="flex items-center justify-center gap-2 mb-1">
-                      <h3 className="font-semibold text-sm group-hover:text-primary transition-colors">
-                        {category.name}
-                      </h3>
-                      {categoryCounts.get(category.name) && (
-                        <Badge variant="secondary" className="text-xs px-1.5 py-0.5">
-                          {categoryCounts.get(category.name)}
-                        </Badge>
-                      )}
-                    </div>
+                    <h3 className="font-semibold text-sm group-hover:text-primary transition-colors">
+                      {category.name}
+                    </h3>
                     <p className="text-xs text-muted-foreground">
                       {category.description}
                     </p>
