@@ -512,7 +512,7 @@ export const MarketplaceGrid = () => {
           {/* Hero Section */}
           <div className="mb-12">
             <h1 className="text-3xl sm:text-6xl font-bold text-black mb-4 lcp-content">Agent Marketplace.</h1>
-            <p className="text-gray-600 max-w-2xl text-sm lcp-content">Finally, the noise is gone. Welcome to the Marketplace — where real estate agents can compare and explore the best tools at a fraction of the cost. Every option is curated, easy to compare. Stop guessing. Start growing. Buy outcomes, not tools.</p>
+            <p className="text-gray-600 max-w-2xl text-sm lcp-content">Finally, the noise is gone. Welcome to the Marketplace — where real estate agents can compare and explore the best tools at a fraction of the cost. Every option is curated, easy to compare. Stop guessing. Buy outcomes, not tools.</p>
           </div>
 
 
