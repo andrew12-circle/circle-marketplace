@@ -64,7 +64,8 @@ export function ConversationalRefinement({
         goalDescription: `${currentPlan?.goal_description}. REFINEMENT REQUEST: ${refinementMessage}`,
         timeframeWeeks: currentPlan?.timeframe_weeks,
         budgetMin: currentPlan?.current_performance?.budget_min,
-        budgetMax: currentPlan?.current_performance?.budget_max
+        budgetMax: currentPlan?.current_performance?.budget_max,
+        webGrounded: currentPlan?.web_grounded
       });
 
       if (refinedPlan) {

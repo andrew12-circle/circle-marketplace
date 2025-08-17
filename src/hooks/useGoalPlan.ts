@@ -9,6 +9,7 @@ interface BuildPlanArgs {
   timeframeWeeks?: number;
   budgetMin?: number;
   budgetMax?: number;
+  webGrounded?: boolean;
 }
 
 export function useGoalPlan() {
