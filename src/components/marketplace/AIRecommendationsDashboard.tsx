@@ -234,12 +234,6 @@ const { isBuilding, buildPlan } = useGoalPlan();
             Based on your goals and market analysis
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <BuildAIPlanButton />
-          <Button variant="outline" size="sm" onClick={() => setIsGoalAssessmentOpen(true)}>
-            Edit Goals
-          </Button>
-        </div>
       </div>
 
       {/* Compact Goal Progress */}
@@ -261,15 +255,27 @@ const { isBuilding, buildPlan } = useGoalPlan();
       {/* Quick Actions */}
       {recommendations.length === 0 && bundles.length === 0 && (
         <Card>
+          <CardHeader>
+            <div className="flex items-start justify-between">
+              <div>
+                <CardTitle>
+                  {hasCompletedAssessment ? "Ready for your first recommendations" : "No Recommendations Yet"}
+                </CardTitle>
+                <CardDescription>
+                  {hasCompletedAssessment
+                    ? "Generate personalized suggestions based on your saved goals."
+                    : "Complete your goal assessment to get personalized recommendations."}
+                </CardDescription>
+              </div>
+              <div className="flex items-center gap-2">
+                <BuildAIPlanButton />
+                <Button variant="outline" size="sm" onClick={() => setIsGoalAssessmentOpen(true)}>
+                  Edit Goals
+                </Button>
+              </div>
+            </div>
+          </CardHeader>
           <CardContent className="text-center py-6 space-y-3">
-            <h3 className="font-semibold">
-              {hasCompletedAssessment ? "Ready for your first recommendations" : "No Recommendations Yet"}
-            </h3>
-            <p className="text-muted-foreground text-sm">
-              {hasCompletedAssessment
-                ? "Generate personalized suggestions based on your saved goals."
-                : "Complete your goal assessment to get personalized recommendations."}
-            </p>
             <div className="flex flex-col gap-2 pt-2">
               {hasCompletedAssessment ? (
                 <>
@@ -304,13 +310,23 @@ const { isBuilding, buildPlan } = useGoalPlan();
       {recommendations.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-primary" />
-              AI Recommendations
-            </CardTitle>
-            <CardDescription>
-              Personalized suggestions based on your profile and goals
-            </CardDescription>
+            <div className="flex items-start justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5 text-primary" />
+                  AI Recommendations
+                </CardTitle>
+                <CardDescription>
+                  Personalized suggestions based on your profile and goals
+                </CardDescription>
+              </div>
+              <div className="flex items-center gap-2">
+                <BuildAIPlanButton />
+                <Button variant="outline" size="sm" onClick={() => setIsGoalAssessmentOpen(true)}>
+                  Edit Goals
+                </Button>
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -380,13 +396,23 @@ const { isBuilding, buildPlan } = useGoalPlan();
       {bundles.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <ShoppingCart className="h-5 w-5 text-primary" />
-              Curated Service Bundles
-            </CardTitle>
-            <CardDescription>
-              Optimized packages for your business goals
-            </CardDescription>
+            <div className="flex items-start justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <ShoppingCart className="h-5 w-5 text-primary" />
+                  Curated Service Bundles
+                </CardTitle>
+                <CardDescription>
+                  Optimized packages for your business goals
+                </CardDescription>
+              </div>
+              <div className="flex items-center gap-2">
+                <BuildAIPlanButton />
+                <Button variant="outline" size="sm" onClick={() => setIsGoalAssessmentOpen(true)}>
+                  Edit Goals
+                </Button>
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 md:grid-cols-3">
@@ -433,7 +459,6 @@ const { isBuilding, buildPlan } = useGoalPlan();
           </CardContent>
         </Card>
       )}
-
 
       <GoalAssessmentModal
         open={isGoalAssessmentOpen}
