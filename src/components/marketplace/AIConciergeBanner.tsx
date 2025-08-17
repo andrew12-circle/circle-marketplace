@@ -263,6 +263,20 @@ export const AIConciergeBanner = () => {
 
             {/* AI Concierge Input */}
             <div className="bg-card/30 backdrop-blur-sm border border-border/50 rounded-lg p-4">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-sm text-muted-foreground">
+                  Ask questions to get AI-powered business recommendations
+                </p>
+                <Button
+                  onClick={() => navigate('/command-center#goals')}
+                  variant="outline"
+                  size="sm"
+                  className="text-xs"
+                >
+                  <Target className="h-3 w-3 mr-1" />
+                  Edit Goals
+                </Button>
+              </div>
               <div className="flex items-center gap-3">
                 <div className="flex-1 relative">
                   <Input 

@@ -226,31 +226,34 @@ const { isBuilding, buildPlan } = useGoalPlan();
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">Your Personalized Recommendations</h2>
+      {/* Header Section */}
+      <div className="mb-6">
+        <div className="mb-4">
+          <h2 className="text-2xl font-bold flex items-center gap-2 mb-2">
+            <Sparkles className="h-6 w-6 text-primary" />
+            Your Personalized Recommendations
+          </h2>
           <p className="text-muted-foreground">
-            Based on your goals and market analysis
+            AI-powered recommendations based on your business goals and market data
           </p>
         </div>
-      </div>
 
-      {/* Compact Goal Progress */}
-      {(profile as any)?.annual_goal_transactions && (
-        <div className="text-sm text-muted-foreground space-y-1">
-          <div className="flex justify-between">
-            <span>Annual Transactions:</span>
-            <span>0 / {(profile as any).annual_goal_transactions}</span>
-          </div>
-          {(profile as any).annual_goal_volume && (
-            <div className="flex justify-between">
-              <span>Annual Volume:</span>
-              <span>$0 / ${(profile as any).annual_goal_volume.toLocaleString()}</span>
-            </div>
-          )}
+        {/* Action Buttons */}
+        <div className="flex flex-wrap gap-2">
+          <Button onClick={generateAIRecommendations} disabled={isGenerating}>
+            {isGenerating ? (
+              <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-2" />
+            ) : (
+              <Sparkles className="h-4 w-4 mr-2" />
+            )}
+            Generate Recommendations
+          </Button>
+          <Button variant="outline">
+            <TrendingUp className="h-4 w-4 mr-2" />
+            AI Strategy Guide
+          </Button>
         </div>
-      )}
+      </div>
 
       {/* Quick Actions */}
       {recommendations.length === 0 && bundles.length === 0 && (
@@ -267,12 +270,7 @@ const { isBuilding, buildPlan } = useGoalPlan();
                     : "Complete your goal assessment to get personalized recommendations."}
                 </CardDescription>
               </div>
-              <div className="flex items-center gap-2">
-                <BuildAIPlanButton />
-                <Button variant="outline" size="sm" onClick={() => setIsGoalAssessmentOpen(true)}>
-                  Edit Goals
-                </Button>
-              </div>
+              {/* Remove edit goals from here since it's now in command center */}
             </div>
           </CardHeader>
           <CardContent className="text-center py-6 space-y-3">
@@ -290,7 +288,7 @@ const { isBuilding, buildPlan } = useGoalPlan();
                   <Button variant="outline" onClick={async () => { await buildPlan(); }} disabled={isBuilding} className="w-full">
                     {isBuilding ? "Contacting OpenAI..." : (
                       <>
-                        <Sparkles className="h-4 w-4 mr-1" />
+                        <TrendingUp className="h-4 w-4 mr-1" />
                         AI Strategy Guide
                       </>
                     )}
@@ -320,12 +318,7 @@ const { isBuilding, buildPlan } = useGoalPlan();
                   Personalized suggestions based on your profile and goals
                 </CardDescription>
               </div>
-              <div className="flex items-center gap-2">
-                <BuildAIPlanButton />
-                <Button variant="outline" size="sm" onClick={() => setIsGoalAssessmentOpen(true)}>
-                  Edit Goals
-                </Button>
-              </div>
+              {/* Removed edit goals and build plan buttons to simplify */}
             </div>
           </CardHeader>
           <CardContent>
@@ -406,12 +399,7 @@ const { isBuilding, buildPlan } = useGoalPlan();
                   Optimized packages for your business goals
                 </CardDescription>
               </div>
-              <div className="flex items-center gap-2">
-                <BuildAIPlanButton />
-                <Button variant="outline" size="sm" onClick={() => setIsGoalAssessmentOpen(true)}>
-                  Edit Goals
-                </Button>
-              </div>
+              {/* Removed edit goals and build plan buttons to simplify */}
             </div>
           </CardHeader>
           <CardContent>

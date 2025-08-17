@@ -5,11 +5,21 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { LegalFooter } from "@/components/LegalFooter";
 import { RealtorView } from "@/components/command-center/RealtorView";
-import { ArrowLeft, Shield } from "lucide-react";
+import { GoalAssessmentModal } from "@/components/marketplace/GoalAssessmentModal";
+import { ArrowLeft, Shield, Target } from "lucide-react";
+import { useState, useEffect } from "react";
 
 const CommandCenter = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [isGoalAssessmentOpen, setIsGoalAssessmentOpen] = useState(false);
+
+  // Check for hash navigation to goals section
+  useEffect(() => {
+    if (window.location.hash === '#goals') {
+      setIsGoalAssessmentOpen(true);
+    }
+  }, []);
 
   // Require authentication
   if (!user) {
@@ -50,6 +60,32 @@ const CommandCenter = () => {
           </p>
         </div>
 
+        {/* Goals Section */}
+        <div className="mb-8">
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-semibold mb-2 flex items-center gap-2">
+                    <Target className="h-5 w-5 text-primary" />
+                    Business Goals
+                  </h2>
+                  <p className="text-muted-foreground text-sm">
+                    Set and track your business objectives to get personalized AI recommendations
+                  </p>
+                </div>
+                <Button
+                  onClick={() => setIsGoalAssessmentOpen(true)}
+                  variant="outline"
+                >
+                  <Target className="h-4 w-4 mr-2" />
+                  Edit Goals
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
         {/* Performance Dashboard */}
         <div className="mb-4">
           <h2 className="text-xl font-semibold mb-2">Self Performance Dashboard</h2>
@@ -61,6 +97,15 @@ const CommandCenter = () => {
       </div>
 
       <LegalFooter />
+      
+      {/* Goal Assessment Modal */}
+      <GoalAssessmentModal
+        open={isGoalAssessmentOpen}
+        onOpenChange={setIsGoalAssessmentOpen}
+        onComplete={() => {
+          setIsGoalAssessmentOpen(false);
+        }}
+      />
     </div>
   );
 };
