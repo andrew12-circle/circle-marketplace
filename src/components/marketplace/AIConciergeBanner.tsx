@@ -262,56 +262,54 @@ export const AIConciergeBanner = () => {
             </div>
 
             {/* AI Concierge Input */}
-            {!showRecommendationsDashboard && (
-              <div className="bg-card/30 backdrop-blur-sm border border-border/50 rounded-lg p-4">
-                <div className="flex items-center gap-3">
-                  <div className="flex-1 relative">
-                    <Input 
-                      value={chatInput} 
-                      onChange={e => setChatInput(e.target.value)} 
-                      onKeyPress={handleKeyPress} 
-                      onFocus={() => setIsInputFocused(true)} 
-                      onBlur={() => setIsInputFocused(false)} 
-                      placeholder={placeholderText} 
-                      className="bg-background/50 border-border/50 focus:bg-background" 
-                      disabled={isProcessing || isLoading}
-                    />
-                    {(isProcessing || isLoading) && (
-                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                        <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full" />
-                      </div>
-                    )}
-                  </div>
-                  {voiceSupported && (
-                    <Button
-                      onClick={isListening ? stopListening : startListening}
-                      size="sm"
-                      variant={isListening ? "destructive" : "outline"}
-                      disabled={isProcessing || isLoading || voiceProcessing}
-                      className="mr-2"
-                    >
-                      {isListening ? (
-                        <MicOff className="h-4 w-4" />
-                      ) : (
-                        <Mic className="h-4 w-4" />
-                      )}
-                    </Button>
+            <div className="bg-card/30 backdrop-blur-sm border border-border/50 rounded-lg p-4">
+              <div className="flex items-center gap-3">
+                <div className="flex-1 relative">
+                  <Input 
+                    value={chatInput} 
+                    onChange={e => setChatInput(e.target.value)} 
+                    onKeyPress={handleKeyPress} 
+                    onFocus={() => setIsInputFocused(true)} 
+                    onBlur={() => setIsInputFocused(false)} 
+                    placeholder={placeholderText} 
+                    className="bg-background/50 border-border/50 focus:bg-background" 
+                    disabled={isProcessing || isLoading}
+                  />
+                  {(isProcessing || isLoading) && (
+                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                      <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full" />
+                    </div>
                   )}
-                  
-                  <Button 
-                    onClick={handleSendMessage} 
-                    size="sm" 
-                    disabled={!chatInput.trim() || isProcessing || isLoading}
+                </div>
+                {voiceSupported && (
+                  <Button
+                    onClick={isListening ? stopListening : startListening}
+                    size="sm"
+                    variant={isListening ? "destructive" : "outline"}
+                    disabled={isProcessing || isLoading || voiceProcessing}
+                    className="mr-2"
                   >
-                    {isProcessing ? (
-                      <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
+                    {isListening ? (
+                      <MicOff className="h-4 w-4" />
                     ) : (
-                      <Send className="h-4 w-4" />
+                      <Mic className="h-4 w-4" />
                     )}
                   </Button>
-                </div>
+                )}
+                
+                <Button 
+                  onClick={handleSendMessage} 
+                  size="sm" 
+                  disabled={!chatInput.trim() || isProcessing || isLoading}
+                >
+                  {isProcessing ? (
+                    <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
+                  ) : (
+                    <Send className="h-4 w-4" />
+                  )}
+                </Button>
               </div>
-            )}
+            </div>
 
             {/* AI Results Display */}
             {aiResults && (
