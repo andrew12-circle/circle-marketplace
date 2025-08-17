@@ -332,11 +332,11 @@ export const ServiceDetailsModal = ({ service, isOpen, onClose }: ServiceDetails
                     <div className="text-center mb-4">
                       {(pkg.originalPrice || pkg.originalPrice) && (
                         <div className="text-sm text-muted-foreground line-through">
-                          ${pkg.originalPrice}
+                          {pkg.originalPrice}
                         </div>
                       )}
                       <div className="text-3xl font-bold text-circle-primary">
-                        ${pkg.price}
+                        {pkg.price}
                       </div>
                       {pkg.savings && (
                         <Badge className="bg-destructive text-destructive-foreground text-xs mt-1">
