@@ -12,7 +12,7 @@ import { logger } from "@/utils/logger";
 import { type Service } from "@/hooks/useMarketplaceData";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCurrency } from "@/hooks/useCurrency";
-import { computeDiscountPercentage, getEffectivePrice } from "@/utils/dealPricing";
+import { computeDiscountPercentage, getDealDisplayPrice } from "@/utils/dealPricing";
 
 interface ServiceRatingStats {
   average_rating: number;
@@ -27,12 +27,12 @@ interface TopDealsCarouselProps {
 
 import { parsePrice } from "@/utils/parsePrice";
 
-const calculateScore = (service: Service, rating?: ServiceRatingStats): number => {
+const calculateScore = (service: Service, rating?: ServiceRatingStats, discount?: number | null): number => {
   let score = 0;
   
   // Use shared discount calculation for consistency
-  const discount = computeDiscountPercentage(service) || 0;
-  score += discount * 0.3;
+  const discountValue = discount || 0;
+  score += discountValue * 0.3;
   
   // Trust score weight
   if (rating?.average_rating) {
@@ -77,10 +77,19 @@ export const TopDealsCarousel = ({ services, serviceRatings, onServiceClick }: T
 
   const topDeals = useMemo(() => {
     return services
-      .map(service => ({
-        ...service,
-        score: calculateScore(service, serviceRatings?.get(service.id))
-      }))
+      .map(service => {
+        const rating = serviceRatings?.get(service.id);
+        const discount = computeDiscountPercentage(service);
+        const score = calculateScore(service, rating, discount);
+        const dealPrice = getDealDisplayPrice(service);
+        
+        return {
+          ...service,
+          score,
+          discount,
+          dealPrice
+        };
+      })
       .sort((a, b) => b.score - a.score)
       .slice(0, 12);
   }, [services, serviceRatings]);
@@ -134,11 +143,9 @@ export const TopDealsCarousel = ({ services, serviceRatings, onServiceClick }: T
             const retailPrice = parsePrice(service.retail_price);
             const isSponsored = showSponsored && (service as any).is_sponsored;
             
-            // Use shared discount calculation logic
-            const discountPct = computeDiscountPercentage(service) || 0;
-            
-            // Get effective pricing based on membership and copay eligibility
-            const { price: effectivePrice, label: priceLabel } = getEffectivePrice(service, !!profile?.is_pro_member);
+            // Use precalculated discount and pricing
+            const discountPct = service.discount || 0;
+            const { price: effectivePrice, label: priceLabel } = service.dealPrice;
 
             return (
               <CarouselItem key={service.id} className="pl-2 md:pl-4 basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/5">
@@ -183,23 +190,34 @@ export const TopDealsCarousel = ({ services, serviceRatings, onServiceClick }: T
 
                       {/* Price */}
                       <div className="text-right">
-                        <div className="text-lg font-bold text-primary">
-                          {formatPrice(effectivePrice)}
-                        </div>
-                        {priceLabel === 'Potential Co-Pay' && (
+                        {priceLabel === 'Potential Co-Pay' ? (
                           <>
+                            <div className="text-lg font-bold text-primary">
+                              {formatPrice(effectivePrice)}
+                            </div>
                             <div className="text-sm text-muted-foreground line-through">
                               {formatPrice(retailPrice)}
                             </div>
-                            <div className="text-xs text-green-600 font-medium">
+                            <Badge variant="secondary" className="text-xs bg-green-100 text-green-800 mt-1">
                               Potential Co-Pay
-                            </div>
+                            </Badge>
                           </>
-                        )}
-                        {priceLabel === 'Circle Pro Price' && retailPrice !== effectivePrice && (
-                          <div className="text-sm text-muted-foreground line-through">
-                            {formatPrice(retailPrice)}
-                          </div>
+                        ) : (
+                          <>
+                            <div className="text-lg font-bold text-primary">
+                              {formatPrice(effectivePrice)}
+                            </div>
+                            {priceLabel !== 'Retail Price' && (
+                              <div className="text-xs text-muted-foreground mt-1">
+                                {priceLabel}
+                              </div>
+                            )}
+                            {priceLabel === 'Circle Pro Price' && retailPrice !== effectivePrice && (
+                              <div className="text-sm text-muted-foreground line-through">
+                                {formatPrice(retailPrice)}
+                              </div>
+                            )}
+                          </>
                         )}
                       </div>
 

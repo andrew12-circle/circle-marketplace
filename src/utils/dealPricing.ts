@@ -14,6 +14,28 @@ export const extractNumericPrice = (priceString: string): number => {
 };
 
 /**
+ * Get the base price for copay calculation
+ */
+export const getCopayBasePrice = (service: any): number => {
+  // For verified vendors with pro price, use pro price as base
+  if (service.is_verified && service.pro_price) {
+    return extractNumericPrice(service.pro_price);
+  }
+  // Otherwise use retail price as base
+  return extractNumericPrice(service.retail_price || '0');
+};
+
+/**
+ * Calculate potential co-pay price for any service with RESPA split
+ */
+export const computePotentialCopayForService = (service: any): number => {
+  if (!service.respa_split_limit) return 0;
+  
+  const basePrice = getCopayBasePrice(service);
+  return basePrice * (1 - (service.respa_split_limit / 100));
+};
+
+/**
  * Calculate potential co-pay price based on pro price and RESPA split limit
  */
 export const computePotentialCopay = (proPrice: string, respaSplitLimit: number): number => {
@@ -30,20 +52,18 @@ export const computeDiscountPercentage = (service: any): number | null => {
   const retailPrice = extractNumericPrice(service.retail_price);
   if (retailPrice <= 0) return null;
   
-  // Unverified: discount equals RESPA split limit off retail
-  if (!service.is_verified && service.respa_split_limit) {
-    return service.respa_split_limit;
-  }
-  
-  // Verified: prefer potential co-pay discount if available
-  if (service.copay_allowed && service.respa_split_limit) {
-    if (service.pro_price) {
-      const potential = computePotentialCopay(service.pro_price, service.respa_split_limit);
-      const percentage = Math.round((potential / retailPrice) * 100);
-      return 100 - percentage;
-    } else if (service.co_pay_price) {
-      const coPayPrice = extractNumericPrice(service.co_pay_price);
-      const percentage = Math.round((coPayPrice / retailPrice) * 100);
+  // If RESPA split limit exists, calculate copay discount
+  if (service.respa_split_limit) {
+    let copayPrice: number;
+    
+    if (service.co_pay_price) {
+      copayPrice = extractNumericPrice(service.co_pay_price);
+    } else {
+      copayPrice = computePotentialCopayForService(service);
+    }
+    
+    if (copayPrice > 0) {
+      const percentage = Math.round((copayPrice / retailPrice) * 100);
       return 100 - percentage;
     }
   }
@@ -56,6 +76,36 @@ export const computeDiscountPercentage = (service: any): number | null => {
   }
   
   return null;
+};
+
+/**
+ * Get the display price and label for deals
+ */
+export const getDealDisplayPrice = (service: any): { price: number; label: string } => {
+  // Always prefer Potential Co-Pay when RESPA split limit exists
+  if (service.respa_split_limit) {
+    let copayPrice: number;
+    
+    if (service.co_pay_price) {
+      copayPrice = extractNumericPrice(service.co_pay_price);
+    } else {
+      copayPrice = computePotentialCopayForService(service);
+    }
+    
+    if (copayPrice > 0) {
+      return { price: copayPrice, label: 'Potential Co-Pay' };
+    }
+  }
+  
+  // For verified services with pro price (no copay)
+  if (service.is_verified && service.pro_price) {
+    const proPrice = extractNumericPrice(service.pro_price);
+    return { price: proPrice, label: 'Circle Pro Price' };
+  }
+  
+  // Default to retail price
+  const retailPrice = extractNumericPrice(service.retail_price || '0');
+  return { price: retailPrice, label: 'Retail Price' };
 };
 
 /**

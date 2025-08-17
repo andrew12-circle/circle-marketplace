@@ -29,7 +29,7 @@ import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { useABTest } from "@/hooks/useABTest";
 import { SponsoredLabel } from "./SponsoredLabel";
 import { ServiceBadges } from "./ServiceBadges";
-import { extractNumericPrice, computeDiscountPercentage } from '@/utils/dealPricing';
+import { extractNumericPrice, computeDiscountPercentage, getDealDisplayPrice } from '@/utils/dealPricing';
 
 interface ServiceRatingStats {
   averageRating: number;
