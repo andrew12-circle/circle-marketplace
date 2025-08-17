@@ -54,12 +54,22 @@ interface LocalRepresentative {
 }
 type ViewMode = "services" | "products" | "vendors";
 export const MarketplaceGrid = () => {
-  const { t } = useTranslation();
-  
+  const {
+    t
+  } = useTranslation();
+
   // Optimized data fetching with memoization
-  const { data: marketplaceData, isLoading, error } = useMarketplaceData();
-  const { data: savedServiceIds = [] } = useSavedServices();
-  const { invalidateAll } = useInvalidateMarketplace();
+  const {
+    data: marketplaceData,
+    isLoading,
+    error
+  } = useMarketplaceData();
+  const {
+    data: savedServiceIds = []
+  } = useSavedServices();
+  const {
+    invalidateAll
+  } = useInvalidateMarketplace();
   const queryClient = useQueryClient();
   const [showRecovery, setShowRecovery] = useState(false);
   useEffect(() => {
@@ -69,19 +79,22 @@ export const MarketplaceGrid = () => {
     }
     setShowRecovery(false);
   }, [isLoading, marketplaceData]);
-
   const resetFailureState = useCallback(() => {
-    try { marketplaceCircuitBreaker.reset(); } catch {}
+    try {
+      marketplaceCircuitBreaker.reset();
+    } catch {}
   }, []);
-
   const handleReloadDataQuick = useCallback(() => {
-    try { sessionStorage.setItem('forceFreshData', '1'); } catch {}
+    try {
+      sessionStorage.setItem('forceFreshData', '1');
+    } catch {}
     resetFailureState();
     invalidateAll();
   }, [invalidateAll, resetFailureState]);
-
   const handleHardRefresh = useCallback(async () => {
-    try { sessionStorage.setItem('forceFreshData', '1'); } catch {}
+    try {
+      sessionStorage.setItem('forceFreshData', '1');
+    } catch {}
     resetFailureState();
     try {
       await queryClient.cancelQueries();
@@ -91,15 +104,14 @@ export const MarketplaceGrid = () => {
     setShowRecovery(false);
   }, [invalidateAll, queryClient, resetFailureState]);
   // Memoize extracted data to prevent unnecessary re-renders
-  const services = useMemo(() => 
-    (marketplaceData as { services: Service[]; vendors: Vendor[] })?.services || [], 
-    [marketplaceData]
-  );
-  const vendors = useMemo(() => 
-    (marketplaceData as { services: Service[]; vendors: Vendor[] })?.vendors || [], 
-    [marketplaceData]
-  );
-  
+  const services = useMemo(() => (marketplaceData as {
+    services: Service[];
+    vendors: Vendor[];
+  })?.services || [], [marketplaceData]);
+  const vendors = useMemo(() => (marketplaceData as {
+    services: Service[];
+    vendors: Vendor[];
+  })?.vendors || [], [marketplaceData]);
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>("services");
   const [selectedProductCategory, setSelectedProductCategory] = useState<string | null>(null);
@@ -121,7 +133,6 @@ export const MarketplaceGrid = () => {
     coPayEligible: false,
     locationFilter: false
   });
-  
   const handleEnhancedSearchChange = useCallback((sf: SearchFilters) => {
     setSearchFilters(sf);
     setSearchTerm(sf.query || "");
@@ -130,71 +141,71 @@ export const MarketplaceGrid = () => {
       category: sf.categories.length > 0 ? sf.categories[0] : "all",
       priceRange: sf.priceRange,
       featured: sf.features.includes("Featured Service"),
-      coPayEligible: sf.features.includes("Co-Pay Available"),
+      coPayEligible: sf.features.includes("Co-Pay Available")
     }));
   }, []);
-  
-  const { toast } = useToast();
-  const { user, profile } = useAuth();
-  const { location } = useLocation();
-  
-  // Use optimized filtering hook with memoized inputs
-  const memoizedFilters = useMemo(() => filters, [
-    filters.category,
-    filters.priceRange[0],
-    filters.priceRange[1],
-    filters.verified,
-    filters.featured,
-    filters.coPayEligible,
-    filters.locationFilter
-  ]);
-  
-  const { filteredServices, filteredVendors, categories, localVendorCount } = useMarketplaceFilters(
-    services,
-    vendors,
-    searchTerm,
-    memoizedFilters,
+  const {
+    toast
+  } = useToast();
+  const {
+    user,
+    profile
+  } = useAuth();
+  const {
     location
-  );
-// Paginated services (server-side filters + pagination)
-const { variant } = useABTest('ranking_v1', { holdout: 0.1 });
-const orderStrategy = variant === 'holdout' ? 'recent' : 'ranked';
-const {
-  data: paginatedData,
-  fetchNextPage,
-  hasNextPage,
-  isFetchingNextPage,
-  isLoading: isLoadingServices,
-} = usePaginatedServices({
-  searchTerm,
-  category: filters.category,
-  featured: filters.featured,
-  verified: filters.verified,
-  coPayEligible: filters.coPayEligible,
-  orderStrategy,
-});
+  } = useLocation();
 
-const flattenServices = useMemo(() => {
-  const items = paginatedData?.pages?.flatMap(p => p.items) || [];
-  const extractNumericPrice = (priceString?: string | null): number => {
-    if (!priceString) return 0;
-    const cleaned = priceString.replace(/[^0-9.]/g, '');
-    return parseFloat(cleaned) || 0;
-  };
-  return items.filter(s => {
-    const price = extractNumericPrice(s.retail_price);
-    const withinPrice = price >= filters.priceRange[0] && price <= filters.priceRange[1];
-    const matchesVerified = !filters.verified || !!s.vendor?.is_verified;
-    return withinPrice && matchesVerified;
+  // Use optimized filtering hook with memoized inputs
+  const memoizedFilters = useMemo(() => filters, [filters.category, filters.priceRange[0], filters.priceRange[1], filters.verified, filters.featured, filters.coPayEligible, filters.locationFilter]);
+  const {
+    filteredServices,
+    filteredVendors,
+    categories,
+    localVendorCount
+  } = useMarketplaceFilters(services, vendors, searchTerm, memoizedFilters, location);
+  // Paginated services (server-side filters + pagination)
+  const {
+    variant
+  } = useABTest('ranking_v1', {
+    holdout: 0.1
   });
-}, [paginatedData, filters.priceRange, filters.verified]);
+  const orderStrategy = variant === 'holdout' ? 'recent' : 'ranked';
+  const {
+    data: paginatedData,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading: isLoadingServices
+  } = usePaginatedServices({
+    searchTerm,
+    category: filters.category,
+    featured: filters.featured,
+    verified: filters.verified,
+    coPayEligible: filters.coPayEligible,
+    orderStrategy
+  });
+  const flattenServices = useMemo(() => {
+    const items = paginatedData?.pages?.flatMap(p => p.items) || [];
+    const extractNumericPrice = (priceString?: string | null): number => {
+      if (!priceString) return 0;
+      const cleaned = priceString.replace(/[^0-9.]/g, '');
+      return parseFloat(cleaned) || 0;
+    };
+    return items.filter(s => {
+      const price = extractNumericPrice(s.retail_price);
+      const withinPrice = price >= filters.priceRange[0] && price <= filters.priceRange[1];
+      const matchesVerified = !filters.verified || !!s.vendor?.is_verified;
+      return withinPrice && matchesVerified;
+    });
+  }, [paginatedData, filters.priceRange, filters.verified]);
+  const totalServicesCount = paginatedData?.pages?.[0]?.totalCount ?? 0;
+  const baseForFilters = services.length ? services : flattenServices;
 
-const totalServicesCount = paginatedData?.pages?.[0]?.totalCount ?? 0;
-const baseForFilters = services.length ? services : flattenServices;
-
-// Memoize service IDs to prevent unnecessary re-fetching of ratings
-const serviceIds = useMemo(() => flattenServices.map(s => s.id), [flattenServices]);
-const { data: bulkRatings } = useBulkServiceRatings(serviceIds);
+  // Memoize service IDs to prevent unnecessary re-fetching of ratings
+  const serviceIds = useMemo(() => flattenServices.map(s => s.id), [flattenServices]);
+  const {
+    data: bulkRatings
+  } = useBulkServiceRatings(serviceIds);
   // Define product categories with enhanced styling
   const PRODUCT_CATEGORIES = [{
     id: 'facebook-ads',
@@ -294,7 +305,6 @@ const { data: bulkRatings } = useBulkServiceRatings(serviceIds);
         return [];
     }
   };
-
   const getTags = () => {
     switch (viewMode) {
       case 'services':
@@ -368,20 +378,19 @@ const { data: bulkRatings } = useBulkServiceRatings(serviceIds);
       });
     }
   }, [profile?.user_id, toast]);
-const handleViewServiceDetails = useCallback((serviceId: string) => {
-  const service = flattenServices.find(s => s.id === serviceId) || services.find(s => s.id === serviceId);
-  if (service) {
-    setSelectedService(service);
-    setIsServiceModalOpen(true);
-  }
-}, [flattenServices, services]);
+  const handleViewServiceDetails = useCallback((serviceId: string) => {
+    const service = flattenServices.find(s => s.id === serviceId) || services.find(s => s.id === serviceId);
+    if (service) {
+      setSelectedService(service);
+      setIsServiceModalOpen(true);
+    }
+  }, [flattenServices, services]);
   const handleCloseServiceModal = () => {
     setIsServiceModalOpen(false);
     setSelectedService(null);
   };
   const [showVendorSelection, setShowVendorSelection] = useState(false);
   const [selectedServiceForCoPay, setSelectedServiceForCoPay] = useState<Service | null>(null);
-
   const handleConnectVendor = (vendorId: string) => {
     const vendor = vendors.find(v => v.id === vendorId);
     if (!vendor) {
@@ -397,14 +406,16 @@ const handleViewServiceDetails = useCallback((serviceId: string) => {
     const vendorService = services.find(s => s.vendor?.id === vendorId) || {
       id: `mock-${vendorId}`,
       title: `Partnership with ${vendor.name}`,
-      vendor: { id: vendorId, name: vendor.name },
+      vendor: {
+        id: vendorId,
+        name: vendor.name
+      },
       respa_split_limit: 50,
       co_pay_price: "Contact for pricing",
       retail_price: "Contact for pricing",
       pro_price: "Contact for pricing",
       image_url: vendor.logo_url
     };
-
     setSelectedServiceForCoPay(vendorService as Service);
     setShowVendorSelection(true);
   };
@@ -429,12 +440,14 @@ const handleViewServiceDetails = useCallback((serviceId: string) => {
     const sid = params.get('serviceId') || params.get('service');
     if (q) {
       setSearchTerm(q);
-      setSearchFilters(prev => ({ ...prev, query: q }));
+      setSearchFilters(prev => ({
+        ...prev,
+        query: q
+      }));
     }
     if (sid) setDeeplinkServiceId(sid);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
   useEffect(() => {
     if (!deeplinkServiceId) return;
     const target = services.find(s => s.id === deeplinkServiceId);
@@ -493,13 +506,12 @@ const handleViewServiceDetails = useCallback((serviceId: string) => {
       return keywords.some(keyword => title.includes(keyword) || description.includes(keyword) || category.includes(keyword) || tags.some(tag => tag.includes(keyword)));
     });
   };
-
   return <>
       <div className="min-h-screen bg-background">
         <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
           {/* Hero Section */}
           <div className="mb-12">
-            <h1 className="text-3xl sm:text-6xl font-bold text-black mb-4 lcp-content">Realtor Marketplace</h1>
+            <h1 className="text-3xl sm:text-6xl font-bold text-black mb-4 lcp-content">Agent Marketplace.</h1>
             <p className="text-gray-600 max-w-2xl text-sm lcp-content">
               {t('marketplaceDescription')}
             </p>
@@ -507,8 +519,7 @@ const handleViewServiceDetails = useCallback((serviceId: string) => {
 
 
           {/* Inline non-blocking banner */}
-          {(isLoading && !marketplaceData) && (
-            <div className="mb-4">
+          {isLoading && !marketplaceData && <div className="mb-4">
               <div className="rounded-lg border bg-card text-card-foreground p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                 <span className="text-sm">Loading marketplace data… Services are available while we finish.</span>
                 <div className="flex gap-2">
@@ -516,10 +527,8 @@ const handleViewServiceDetails = useCallback((serviceId: string) => {
                   <Button onClick={handleHardRefresh}>Try again</Button>
                 </div>
               </div>
-            </div>
-          )}
-          {(error && !marketplaceData) && (
-            <div className="mb-4">
+            </div>}
+          {error && !marketplaceData && <div className="mb-4">
               <div className="rounded-lg border bg-card text-card-foreground p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                 <span className="text-sm">Limited mode: services are available; vendors and categories will load when ready.</span>
                 <div className="flex gap-2">
@@ -527,8 +536,7 @@ const handleViewServiceDetails = useCallback((serviceId: string) => {
                   <Button onClick={handleHardRefresh}>Try again</Button>
                 </div>
               </div>
-            </div>
-          )}
+            </div>}
 
           {/* Circle Pro Banner - Show for non-signed-in users and non-pro members */}
           {(!user || !profile?.is_pro_member) && <CircleProBanner />}
@@ -541,12 +549,7 @@ const handleViewServiceDetails = useCallback((serviceId: string) => {
 
            {/* Sticky Enhanced Search Component */}
           <StickySearchContainer>
-            <EnhancedSearch 
-              onSearchChange={handleEnhancedSearchChange} 
-              availableCategories={getCategories()} 
-              availableTags={getTags()}
-              viewMode={viewMode}
-            />
+            <EnhancedSearch onSearchChange={handleEnhancedSearchChange} availableCategories={getCategories()} availableTags={getTags()} viewMode={viewMode} />
           </StickySearchContainer>
 
           {/* View Mode Toggle */}
@@ -567,34 +570,19 @@ const handleViewServiceDetails = useCallback((serviceId: string) => {
 
 
           {/* Grid - Mobile Responsive */}
-{viewMode === "services" ? (
-  <>
+        {viewMode === "services" ? <>
     <div className="mobile-grid gap-4 sm:gap-6">
-      {flattenServices.map((service, index) => (
-        <OptimizedServiceCard
-          key={`service-${service.id}-${index}`}
-          service={service}
-          onSave={handleSaveService}
-          onViewDetails={handleViewServiceDetails}
-          isSaved={allSavedServiceIds.includes(service.id)}
-          bulkRatings={bulkRatings}
-        />
-      ))}
+      {flattenServices.map((service, index) => <OptimizedServiceCard key={`service-${service.id}-${index}`} service={service} onSave={handleSaveService} onViewDetails={handleViewServiceDetails} isSaved={allSavedServiceIds.includes(service.id)} bulkRatings={bulkRatings} />)}
     </div>
     <div className="mt-6 flex items-center justify-center gap-4">
       <span className="text-sm text-muted-foreground">
         Showing {flattenServices.length} of {totalServicesCount} results
       </span>
-      {hasNextPage && (
-        <Button onClick={() => fetchNextPage()} disabled={isFetchingNextPage}>
+      {hasNextPage && <Button onClick={() => fetchNextPage()} disabled={isFetchingNextPage}>
           {isFetchingNextPage ? 'Loading…' : 'Load more'}
-        </Button>
-      )}
+        </Button>}
     </div>
-  </>
-) : viewMode === "products" ? (
-  selectedProductCategory ? (
-    <div>
+  </> : viewMode === "products" ? selectedProductCategory ? <div>
       <div className="mb-6 flex items-center gap-4">
         <Button variant="outline" onClick={handleBackToProducts}>
           ← Back to Products
@@ -604,28 +592,12 @@ const handleViewServiceDetails = useCallback((serviceId: string) => {
         </h2>
       </div>
       <div className="mobile-grid gap-4 sm:gap-6">
-        {getServicesForProduct(selectedProductCategory).map((service, index) => (
-          <OptimizedServiceCard
-            key={`product-${selectedProductCategory}-${service.id}-${index}`}
-            service={service}
-            onSave={handleSaveService}
-            onViewDetails={handleViewServiceDetails}
-            isSaved={allSavedServiceIds.includes(service.id)}
-            bulkRatings={bulkRatings}
-          />
-        ))}
+        {getServicesForProduct(selectedProductCategory).map((service, index) => <OptimizedServiceCard key={`product-${selectedProductCategory}-${service.id}-${index}`} service={service} onSave={handleSaveService} onViewDetails={handleViewServiceDetails} isSaved={allSavedServiceIds.includes(service.id)} bulkRatings={bulkRatings} />)}
       </div>
-    </div>
-  ) : (
-    <div className="mobile-grid gap-4 sm:gap-6">
+    </div> : <div className="mobile-grid gap-4 sm:gap-6">
       {filteredProducts.map(product => {
-        const IconComponent = product.icon;
-        return (
-          <div
-            key={product.id}
-            className="group relative overflow-hidden bg-white rounded-xl border border-gray-200 hover:border-gray-300 cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
-            onClick={() => handleSelectProduct(product.id)}
-          >
+            const IconComponent = product.icon;
+            return <div key={product.id} className="group relative overflow-hidden bg-white rounded-xl border border-gray-200 hover:border-gray-300 cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1" onClick={() => handleSelectProduct(product.id)}>
             {/* Background Gradient */}
             <div className={`absolute inset-0 bg-gradient-to-br ${product.gradient} opacity-5 group-hover:opacity-10 transition-opacity duration-300`} />
 
@@ -667,47 +639,32 @@ const handleViewServiceDetails = useCallback((serviceId: string) => {
 
             {/* Hover Effect Overlay */}
             <div className="absolute inset-0 ring-1 ring-gray-200 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-          </div>
-        );
-      })}
-    </div>
-  )
-) : (
-  ((isLoading || error) && vendors.length === 0) ? (
-      <div className="space-y-4">
+          </div>;
+          })}
+    </div> : (isLoading || error) && vendors.length === 0 ? <div className="space-y-4">
         <div className="mobile-grid gap-4 sm:gap-6">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="h-48 bg-muted rounded-lg animate-pulse" />
-          ))}
+          {Array.from({
+              length: 6
+            }).map((_, i) => <div key={i} className="h-48 bg-muted rounded-lg animate-pulse" />)}
         </div>
         <div className="flex items-center justify-center gap-2">
           <Button variant="outline" onClick={handleReloadDataQuick}>Reload data</Button>
           <Button onClick={handleHardRefresh}>Try again</Button>
         </div>
-      </div>
-    ) : (
-      <div className="mobile-grid gap-4 sm:gap-6">
-        {filteredVendors.map(vendor => (
-          <MarketplaceVendorCard key={vendor.id} vendor={vendor} onConnect={handleConnectVendor} onViewProfile={handleViewVendorProfile} />
-        ))}
-      </div>
-    )
-)}
+      </div> : <div className="mobile-grid gap-4 sm:gap-6">
+        {filteredVendors.map(vendor => <MarketplaceVendorCard key={vendor.id} vendor={vendor} onConnect={handleConnectVendor} onViewProfile={handleViewVendorProfile} />)}
+      </div>}
 
-{/* Enhanced Empty State */}
-{(
-  (viewMode === "services" && flattenServices.length === 0) ||
-  (viewMode === "vendors" && filteredVendors.length === 0) ||
-  (viewMode === "products" && !selectedProductCategory && filteredProducts.length === 0) ||
-  (viewMode === "products" && selectedProductCategory && getServicesForProduct(selectedProductCategory).length === 0)
-) && (
-  <div className="text-center py-12 space-y-6">
+        {/* Enhanced Empty State */}
+        {(viewMode === "services" && flattenServices.length === 0 || viewMode === "vendors" && filteredVendors.length === 0 || viewMode === "products" && !selectedProductCategory && filteredProducts.length === 0 || viewMode === "products" && selectedProductCategory && getServicesForProduct(selectedProductCategory).length === 0) && <div className="text-center py-12 space-y-6">
     <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
       <Search className="w-8 h-8 text-muted-foreground" />
     </div>
     <div>
       <h3 className="text-lg font-semibold text-foreground mb-2">
-        {t('noResultsFound', { type: viewMode })}
+        {t('noResultsFound', {
+                type: viewMode
+              })}
       </h3>
       <p className="text-muted-foreground mb-4">
         {t('tryAdjustingFilters')}
@@ -715,51 +672,40 @@ const handleViewServiceDetails = useCallback((serviceId: string) => {
     </div>
     
     {/* Popular Search Suggestions */}
-    {viewMode === "services" && (
-      <div className="space-y-3">
+    {viewMode === "services" && <div className="space-y-3">
         <p className="text-sm text-muted-foreground">Try searching for:</p>
         <div className="flex flex-wrap justify-center gap-2">
-          {['Facebook Ads', 'SEO', 'Photography', 'Direct Mail', 'CRM'].map((term) => (
-            <Button
-              key={term}
-              variant="outline"
-              size="sm"
-              onClick={() => {
+          {['Facebook Ads', 'SEO', 'Photography', 'Direct Mail', 'CRM'].map(term => <Button key={term} variant="outline" size="sm" onClick={() => {
                 setSearchTerm(term);
-                setSearchFilters(prev => ({ ...prev, query: term }));
-              }}
-              className="h-8 text-xs"
-            >
+                setSearchFilters(prev => ({
+                  ...prev,
+                  query: term
+                }));
+              }} className="h-8 text-xs">
               {term}
-            </Button>
-          ))}
+            </Button>)}
         </div>
-      </div>
-    )}
+      </div>}
     
     <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-      <Button
-        variant="outline"
-        onClick={() => {
-          setSearchTerm("");
-          setFilters({
-            category: "all",
-            priceRange: [0, 2000],
-            verified: false,
-            featured: false,
-            coPayEligible: false,
-            locationFilter: false,
-          });
-        }}
-      >
+      <Button variant="outline" onClick={() => {
+              setSearchTerm("");
+              setFilters({
+                category: "all",
+                priceRange: [0, 2000],
+                verified: false,
+                featured: false,
+                coPayEligible: false,
+                locationFilter: false
+              });
+            }}>
         {t('clearAll')} filters
       </Button>
       
       {/* Quick Tour Button */}
       <TourDiscoveryButton />
     </div>
-  </div>
-)}
+  </div>}
         </div>
       </div>
 
