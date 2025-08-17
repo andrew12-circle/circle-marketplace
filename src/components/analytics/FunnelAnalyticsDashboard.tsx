@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -43,9 +42,10 @@ export const FunnelAnalyticsDashboard = () => {
 
       if (error) throw error;
       
-      // Type the data properly to avoid the Json type issue
-      const typedData = data as FunnelMetrics;
-      setMetrics(typedData);
+      // Safely type the data as FunnelMetrics
+      if (data && typeof data === 'object' && !Array.isArray(data)) {
+        setMetrics(data as FunnelMetrics);
+      }
     } catch (error) {
       console.error('Error loading funnel metrics:', error);
     } finally {

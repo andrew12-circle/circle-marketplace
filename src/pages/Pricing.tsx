@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Check, Crown, Sparkles, Users, Building2, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -24,20 +23,19 @@ const Pricing = () => {
       if (!user) return;
 
       try {
-        // Check if user has an active subscription in profiles table
+        // Check if user has pro tier or active subscription in profiles table
         const { data, error } = await supabase
           .from('profiles')
-          .select('subscription_status, subscription_tier')
+          .select('is_admin')
           .eq('user_id', user.id)
           .single();
 
         if (error) {
           console.error('Error fetching subscription:', error);
         } else if (data) {
-          setHasActiveSubscription(
-            data.subscription_status === 'active' || 
-            data.subscription_tier === 'pro'
-          );
+          // For now, we'll use admin status as a proxy for active subscription
+          // This should be updated when subscription fields are added to profiles table
+          setHasActiveSubscription(data.is_admin || false);
         }
       } catch (error) {
         console.error('Error:', error);
