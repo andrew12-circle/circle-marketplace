@@ -242,38 +242,83 @@ const { isBuilding, buildPlan } = useGoalPlan();
         </div>
       </div>
 
-      {/* Goal Progress */}
-      {(profile as any)?.annual_goal_transactions && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Target className="h-5 w-5 text-primary" />
-              Goal Progress
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div>
-                <div className="flex justify-between text-sm">
-                  <span>Annual Transactions</span>
-                  <span>0 / {(profile as any).annual_goal_transactions}</span>
-                </div>
-                <Progress value={0} className="h-2 mt-1" />
-              </div>
-              
-              {(profile as any).annual_goal_volume && (
+      {/* Goal Progress and Quick Actions */}
+      <div className="grid gap-6 md:grid-cols-2">
+        {/* Goal Progress */}
+        {(profile as any)?.annual_goal_transactions && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Target className="h-5 w-5 text-primary" />
+                Goal Progress
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
                 <div>
                   <div className="flex justify-between text-sm">
-                    <span>Annual Volume</span>
-                    <span>$0 / ${(profile as any).annual_goal_volume.toLocaleString()}</span>
+                    <span>Annual Transactions</span>
+                    <span>0 / {(profile as any).annual_goal_transactions}</span>
                   </div>
                   <Progress value={0} className="h-2 mt-1" />
                 </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+                
+                {(profile as any).annual_goal_volume && (
+                  <div>
+                    <div className="flex justify-between text-sm">
+                      <span>Annual Volume</span>
+                      <span>$0 / ${(profile as any).annual_goal_volume.toLocaleString()}</span>
+                    </div>
+                    <Progress value={0} className="h-2 mt-1" />
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Quick Actions */}
+        {recommendations.length === 0 && bundles.length === 0 && (
+          <Card>
+            <CardContent className="text-center py-6 space-y-3">
+              <h3 className="font-semibold">
+                {hasCompletedAssessment ? "Ready for your first recommendations" : "No Recommendations Yet"}
+              </h3>
+              <p className="text-muted-foreground text-sm">
+                {hasCompletedAssessment
+                  ? "Generate personalized suggestions based on your saved goals."
+                  : "Complete your goal assessment to get personalized recommendations."}
+              </p>
+              <div className="flex flex-col gap-2 pt-2">
+                {hasCompletedAssessment ? (
+                  <>
+                    <Button onClick={generateAIRecommendations} disabled={isGenerating} className="w-full">
+                      {isGenerating ? "Generating..." : (
+                        <>
+                          <Sparkles className="h-4 w-4 mr-1" />
+                          Generate Recommendations
+                        </>
+                      )}
+                    </Button>
+                    <Button variant="outline" onClick={async () => { await buildPlan(); }} disabled={isBuilding} className="w-full">
+                      {isBuilding ? "Contacting OpenAI..." : (
+                        <>
+                          <Sparkles className="h-4 w-4 mr-1" />
+                          AI Strategy Guide
+                        </>
+                      )}
+                    </Button>
+                  </>
+                ) : (
+                  <Button variant="outline" onClick={() => setIsGoalAssessmentOpen(true)} className="w-full">
+                    Complete Assessment
+                  </Button>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
 
       {/* AI Recommendations */}
       {recommendations.length > 0 && (
@@ -409,47 +454,6 @@ const { isBuilding, buildPlan } = useGoalPlan();
         </Card>
       )}
 
-      {/* Empty state with action */}
-      {recommendations.length === 0 && bundles.length === 0 && (
-        <Card>
-          <CardContent className="text-center py-4 space-y-2">
-            <h3 className="font-semibold">
-              {hasCompletedAssessment ? "Ready for your first recommendations" : "No Recommendations Yet"}
-            </h3>
-            <p className="text-muted-foreground">
-              {hasCompletedAssessment
-                ? "Generate personalized suggestions based on your saved goals."
-                : "Complete your goal assessment to get personalized recommendations."}
-            </p>
-            <div className="flex justify-center gap-2 pt-2">
-{hasCompletedAssessment ? (
-  <>
-    <Button onClick={generateAIRecommendations} disabled={isGenerating}>
-      {isGenerating ? "Generating..." : (
-        <>
-          <Sparkles className="h-4 w-4 mr-1" />
-          Generate Recommendations
-        </>
-      )}
-    </Button>
-    <Button variant="outline" onClick={async () => { await buildPlan(); }} disabled={isBuilding}>
-      {isBuilding ? "Contacting OpenAI..." : (
-        <>
-          <Sparkles className="h-4 w-4 mr-1" />
-          AI Strategy Guide
-        </>
-      )}
-    </Button>
-  </>
-) : (
-  <Button variant="outline" onClick={() => setIsGoalAssessmentOpen(true)}>
-    Complete Assessment
-  </Button>
-)}
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
       <GoalAssessmentModal
         open={isGoalAssessmentOpen}
