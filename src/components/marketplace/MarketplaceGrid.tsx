@@ -9,6 +9,9 @@ import { ServiceDetailsModal } from "./ServiceDetailsModal";
 import { AIConciergeBanner } from "./AIConciergeBanner";
 import { AddProductModal } from "./AddProductModal";
 import { VendorSelectionModal } from "./VendorSelectionModal";
+import { TopDealsCarousel } from "./TopDealsCarousel";
+import { CategoryBlocks } from "./CategoryBlocks";
+import { ROISavingsHook } from "./ROISavingsHook";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Filter, Sparkles, Zap, Facebook, Globe, Mail, Share2, Monitor, TrendingUp, Database, Camera, Video, Printer, ArrowRight, BookOpen } from "lucide-react";
@@ -163,6 +166,24 @@ export const MarketplaceGrid = () => {
     categories,
     localVendorCount
   } = useMarketplaceFilters(services, vendors, searchTerm, memoizedFilters, location);
+  // Feature gate for new landing experience
+  const showNewLanding = useMemo(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const urlFlag = params.get('landing') === 'topdeals';
+      const stored = localStorage.getItem('landing_topdeals') === 'true';
+      
+      if (urlFlag) {
+        localStorage.setItem('landing_topdeals', 'true');
+        return true;
+      }
+      
+      return stored;
+    } catch {
+      return false;
+    }
+  }, []);
+
   // Paginated services (server-side filters + pagination)
   const {
     variant
@@ -324,6 +345,19 @@ export const MarketplaceGrid = () => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) || product.description.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesSearch;
   });
+
+  const handleCategoryClick = (searchTerm: string, categoryName: string) => {
+    setSearchTerm(searchTerm);
+    setViewMode("services");
+    // Scroll to results after state update
+    setTimeout(() => {
+      const resultsElement = document.getElementById('marketplace-results');
+      if (resultsElement) {
+        resultsElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 100);
+  };
+
   const handleSaveService = useCallback(async (serviceId: string) => {
     if (!profile?.user_id) {
       toast({
@@ -544,6 +578,18 @@ export const MarketplaceGrid = () => {
 
           {/* Campaign Services Header */}
           <CampaignServicesHeader />
+
+          {showNewLanding && (
+            <>
+              <TopDealsCarousel
+                services={flattenServices}
+                serviceRatings={bulkRatings}
+                onServiceClick={handleViewServiceDetails}
+              />
+              <CategoryBlocks onCategoryClick={handleCategoryClick} />
+              <ROISavingsHook />
+            </>
+          )}
 
            {/* Sticky Enhanced Search Component */}
           <StickySearchContainer>

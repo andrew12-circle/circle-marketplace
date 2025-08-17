@@ -1,0 +1,185 @@
+import { useMemo } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import { Star, Verified } from "lucide-react";
+import { logger } from "@/utils/logger";
+import { type Service } from "@/hooks/useMarketplaceData";
+
+interface ServiceRatingStats {
+  average_rating: number;
+  total_reviews: number;
+}
+
+
+interface TopDealsCarouselProps {
+  services: Service[];
+  serviceRatings?: any;
+  onServiceClick: (serviceId: string) => void;
+}
+
+const parsePrice = (price: any): number => {
+  if (typeof price === 'number') return price;
+  if (typeof price === 'string') {
+    const parsed = parseFloat(price.replace(/[^0-9.-]/g, ''));
+    return isNaN(parsed) ? 0 : parsed;
+  }
+  return 0;
+};
+
+const calculateScore = (service: Service, rating?: ServiceRatingStats): number => {
+  const retailPrice = parsePrice(service.retail_price);
+  const proPrice = parsePrice(service.pro_price);
+  
+  // Discount calculation
+  let discountPct = 0;
+  if (service.discount_percentage) {
+    discountPct = parsePrice(service.discount_percentage);
+  } else if (retailPrice > 0 && proPrice > 0) {
+    discountPct = ((retailPrice - proPrice) / retailPrice) * 100;
+  }
+  
+  // Trust score
+  let trustScore = 0;
+  if (service.vendor?.is_verified) trustScore += 20;
+  if (rating?.average_rating) trustScore += (rating.average_rating / 5) * 10;
+  
+  // Featured boost
+  const featuredScore = (service.is_featured ? 20 : 0) + (service.is_top_pick ? 15 : 0);
+  
+  // Co-pay boost
+  const coPayScore = service.copay_allowed ? 5 : 0;
+  
+  // Brand boost (simple heuristic)
+  const brandNames = ['hubspot', 'salesforce', 'mailchimp', 'canva', 'zoom'];
+  const vendorName = (service.vendor?.name || '').toLowerCase();
+  const brandBoost = brandNames.some(brand => vendorName.includes(brand)) ? 10 : 0;
+  
+  return (0.35 * discountPct) + (0.25 * trustScore) + (0.20 * featuredScore) + (0.10 * coPayScore) + (0.10 * brandBoost);
+};
+
+export const TopDealsCarousel = ({ services, serviceRatings, onServiceClick }: TopDealsCarouselProps) => {
+  const topDeals = useMemo(() => {
+    return services
+      .map(service => ({
+        ...service,
+        score: calculateScore(service, serviceRatings?.get(service.id))
+      }))
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 12);
+  }, [services, serviceRatings]);
+
+  const handleDealClick = (serviceId: string, serviceName: string) => {
+    logger.log('top_deal_clicked', { serviceId, serviceName });
+    onServiceClick(serviceId);
+  };
+
+  if (topDeals.length === 0) return null;
+
+  return (
+    <div className="mb-8">
+      <h2 className="text-2xl font-semibold mb-4 text-foreground">🔥 Top Deals</h2>
+      <Carousel
+        opts={{
+          align: "start",
+          loop: false,
+        }}
+        className="w-full"
+      >
+        <CarouselContent className="-ml-2 md:-ml-4">
+          {topDeals.map((service) => {
+            const rating = serviceRatings?.get(service.id);
+            const retailPrice = parsePrice(service.retail_price);
+            const proPrice = parsePrice(service.pro_price);
+            
+            let discountPct = 0;
+            if (service.discount_percentage) {
+              discountPct = parsePrice(service.discount_percentage);
+            } else if (retailPrice > 0 && proPrice > 0) {
+              discountPct = Math.round(((retailPrice - proPrice) / retailPrice) * 100);
+            }
+
+            return (
+              <CarouselItem key={service.id} className="pl-2 md:pl-4 basis-1/2 md:basis-1/3 lg:basis-1/4">
+                <Card className="h-full hover:shadow-md transition-shadow cursor-pointer group">
+                  <CardContent className="p-4">
+                    <div className="space-y-3">
+                      {/* Vendor info */}
+                      <div className="flex items-center gap-2">
+                        {service.vendor?.logo_url && (
+                          <img 
+                            src={service.vendor.logo_url} 
+                            alt={service.vendor?.name}
+                            className="w-6 h-6 object-contain"
+                            loading="lazy"
+                          />
+                        )}
+                        <span className="text-sm font-medium text-muted-foreground truncate">
+                          {service.vendor?.name}
+                        </span>
+                        {service.vendor?.is_verified && (
+                          <Verified className="w-4 h-4 text-primary" />
+                        )}
+                      </div>
+
+                      {/* Service title */}
+                      <h3 className="font-semibold text-sm leading-tight line-clamp-2 group-hover:text-primary transition-colors">
+                        {service.title}
+                      </h3>
+
+                      {/* Discount badge */}
+                      {discountPct > 0 && (
+                        <Badge variant="destructive" className="text-xs">
+                          {discountPct}% OFF
+                        </Badge>
+                      )}
+
+                      {/* Price */}
+                      <div className="flex items-center gap-2">
+                        {proPrice > 0 && (
+                          <span className="font-bold text-lg text-primary">
+                            ${proPrice}
+                          </span>
+                        )}
+                        {retailPrice > proPrice && (
+                          <span className="text-sm text-muted-foreground line-through">
+                            ${retailPrice}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Rating */}
+                      {rating && rating.average_rating > 0 && (
+                        <div className="flex items-center gap-1">
+                          <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                          <span className="text-sm font-medium">
+                            {rating.average_rating.toFixed(1)}
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            ({rating.total_reviews})
+                          </span>
+                        </div>
+                      )}
+
+                      {/* CTA */}
+                      <Button 
+                        size="sm" 
+                        className="w-full"
+                        onClick={() => handleDealClick(service.id, service.title)}
+                      >
+                        View Deal
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </CarouselItem>
+            );
+          })}
+        </CarouselContent>
+        <CarouselPrevious className="hidden md:flex" />
+        <CarouselNext className="hidden md:flex" />
+      </Carousel>
+    </div>
+  );
+};
