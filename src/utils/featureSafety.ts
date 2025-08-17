@@ -4,6 +4,10 @@ export interface FeatureFlags {
   marketplace: boolean;
   academy: boolean;
   adminPanel: boolean;
+  sponsoredPlacements: boolean;
+  sponsoredGrid: boolean;
+  sponsoredTopDeals: boolean;
+  sponsoredBadges: boolean;
 }
 
 // Default feature flags - all enabled in production
@@ -11,6 +15,10 @@ const DEFAULT_FLAGS: FeatureFlags = {
   marketplace: true,
   academy: true,
   adminPanel: true,
+  sponsoredPlacements: false,
+  sponsoredGrid: false,
+  sponsoredTopDeals: false,
+  sponsoredBadges: false,
 };
 
 // Get feature flags from localStorage or use defaults
