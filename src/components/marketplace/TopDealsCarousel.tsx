@@ -134,6 +134,8 @@ export const TopDealsCarousel = ({ services, serviceRatings, onServiceClick }: T
             } else if (retailPrice > 0 && proPrice > 0 && proPrice < retailPrice) {
               // Calculate discount: what % off the retail price
               discountPct = Math.round(((retailPrice - proPrice) / retailPrice) * 100);
+              // Debug logging
+              console.log(`Discount calc for ${service.title}: retail=$${retailPrice}, pro=$${proPrice}, discount=${discountPct}%`);
             }
 
             return (
