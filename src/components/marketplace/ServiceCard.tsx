@@ -28,6 +28,7 @@ import { ToastAction } from "@/components/ui/toast";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { useABTest } from "@/hooks/useABTest";
 import { SponsoredLabel } from "./SponsoredLabel";
+import { ServiceBadges } from "./ServiceBadges";
 
 interface ServiceRatingStats {
   averageRating: number;
@@ -40,9 +41,21 @@ interface ServiceCardProps {
   onViewDetails?: (serviceId: string) => void;
   isSaved?: boolean;
   bulkRatings?: Map<string, ServiceRatingStats>;
+  variant?: 'default' | 'compact';
+  onView?: () => void;
+  showBundlePrice?: boolean;
 }
 
-export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false, bulkRatings }: ServiceCardProps) => {
+export const ServiceCard = ({ 
+  service, 
+  onSave, 
+  onViewDetails, 
+  isSaved = false, 
+  bulkRatings,
+  variant = 'default',
+  onView,
+  showBundlePrice = true
+}: ServiceCardProps) => {
   const { t } = useTranslation();
   const [isHovered, setIsHovered] = useState(false);
   const [isClosingModal, setIsClosingModal] = useState(false);

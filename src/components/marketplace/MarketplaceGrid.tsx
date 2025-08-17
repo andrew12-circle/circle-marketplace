@@ -35,6 +35,9 @@ import { usePaginatedServices } from "@/hooks/usePaginatedServices";
 import { useABTest } from "@/hooks/useABTest";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { TourDiscoveryButton } from "./TourDiscoveryButton";
+import { SmartSearchAutocomplete } from "./SmartSearchAutocomplete";
+import { RecentlyViewedServices } from "./RecentlyViewedServices";
+import { ServiceBundles } from "./ServiceBundles";
 interface FilterState {
   category: string;
   priceRange: number[];
