@@ -26,6 +26,8 @@ import { useToast } from "@/hooks/use-toast";
 import { ReviewRatingSystem } from "./ReviewRatingSystem";
 import { useServiceRatings } from "@/hooks/useServiceRatings";
 import { useServiceReviews } from "@/hooks/useServiceReviews";
+import { CustomersAlsoViewed } from "./CustomersAlsoViewed";
+import { ServiceBundles } from "./ServiceBundles";
 interface Service {
   id: string;
   title: string;
@@ -399,6 +401,25 @@ export const ServiceDetailsModal = ({ service, isOpen, onClose }: ServiceDetails
               <Separator className="my-8" />
             </>
           )}
+
+          {/* Customers Also Viewed */}
+          <div className="mb-8">
+            <CustomersAlsoViewed 
+              currentService={service}
+              maxSuggestions={6}
+            />
+          </div>
+
+          {/* Related Service Bundles */}
+          <div className="mb-8">
+            <ServiceBundles 
+              currentService={service}
+              category={service.category}
+              maxBundles={2}
+            />
+          </div>
+
+          <Separator className="my-8" />
 
           {/* Call to Actions */}
           <div className="grid md:grid-cols-2 gap-6">

@@ -171,9 +171,9 @@ export const MarketplaceGrid = () => {
     localVendorCount
   } = useMarketplaceFilters(services, vendors, searchTerm, memoizedFilters, location);
   
-  // Sponsored placement settings
-  const sponsoredEnabled = useFeatureFlag('sponsoredPlacements', false);
-  const sponsoredGrid = useFeatureFlag('sponsoredGrid', false);
+  // Sponsored placement settings - enabled by default for Amazon-level experience
+  const sponsoredEnabled = true;
+  const sponsoredGrid = true;
   const { variant: abVariant } = useABTest('sponsored-placements', { holdout: 0.1 });
   const showSponsoredInGrid = sponsoredEnabled && sponsoredGrid && abVariant === 'ranked';
   
@@ -575,18 +575,31 @@ export const MarketplaceGrid = () => {
           {/* Campaign Services Header */}
           <CampaignServicesHeader />
 
-          <>
-            <TopDealsCarousel
-                services={flattenServices}
-                serviceRatings={bulkRatings}
-                onServiceClick={handleViewServiceDetails}
-              />
-              <CategoryBlocks 
-                onCategoryClick={handleCategoryClick}
-                services={flattenServices}
-              />
-            <ROISavingsHook />
-          </>
+           <>
+             <TopDealsCarousel
+                 services={flattenServices}
+                 serviceRatings={bulkRatings}
+                 onServiceClick={handleViewServiceDetails}
+               />
+               <CategoryBlocks 
+                 onCategoryClick={handleCategoryClick}
+                 services={flattenServices}
+               />
+
+               {/* Recently Viewed Services */}
+               <RecentlyViewedServices 
+                 onServiceClick={handleViewServiceDetails}
+                 className="mb-8"
+               />
+
+               {/* Service Bundles */}
+               <ServiceBundles 
+                 maxBundles={3}
+                 className="mb-8"
+               />
+
+             <ROISavingsHook />
+           </>
 
            {/* Sticky Enhanced Search Component */}
           <StickySearchContainer>

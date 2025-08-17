@@ -12,7 +12,12 @@ interface ViewedService {
   title: string;
 }
 
-export const RecentlyViewedServices = () => {
+interface RecentlyViewedServicesProps {
+  onServiceClick?: (serviceId: string) => void;
+  className?: string;
+}
+
+export const RecentlyViewedServices = ({ onServiceClick, className = "" }: RecentlyViewedServicesProps = {}) => {
   const [viewedServices, setViewedServices] = useState<ViewedService[]>([]);
   const { data: marketplaceData } = useMarketplaceData();
 
@@ -56,7 +61,7 @@ export const RecentlyViewedServices = () => {
   }
 
   return (
-    <Card className="w-full">
+    <Card className={`w-full ${className}`}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
         <CardTitle className="flex items-center gap-2 text-lg">
           <Clock className="w-5 h-5 text-muted-foreground" />
@@ -78,6 +83,7 @@ export const RecentlyViewedServices = () => {
               <ServiceCard 
                 service={service} 
                 variant="compact"
+                onViewDetails={onServiceClick}
                 onView={() => {}} // Recently viewed services don't need to track views again
               />
               <Button

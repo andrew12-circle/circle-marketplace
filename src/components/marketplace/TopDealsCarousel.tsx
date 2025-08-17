@@ -66,9 +66,10 @@ const calculateScore = (service: Service, rating?: ServiceRatingStats): number =
 };
 
 export const TopDealsCarousel = ({ services, serviceRatings, onServiceClick }: TopDealsCarouselProps) => {
-  const sponsoredEnabled = useFeatureFlag('sponsoredPlacements', false);
-  const sponsoredTopDeals = useFeatureFlag('sponsoredTopDeals', false);
-  const sponsoredBadges = useFeatureFlag('sponsoredBadges', false);
+  // Sponsored features enabled by default for Amazon-level experience
+  const sponsoredEnabled = true;
+  const sponsoredTopDeals = true;
+  const sponsoredBadges = true;
   const { variant: abVariant } = useABTest('sponsored-placements', { holdout: 0.1 });
   const { trackImpression, trackClick } = useSponsoredTracking();
 

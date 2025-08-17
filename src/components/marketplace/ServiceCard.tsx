@@ -75,9 +75,9 @@ export const ServiceCard = ({
   const { formatPrice } = useCurrency();
   const isProMember = profile?.is_pro_member || false;
   
-  // Sponsored placement features
-  const sponsoredEnabled = useFeatureFlag('sponsoredPlacements', false);
-  const sponsoredBadges = useFeatureFlag('sponsoredBadges', false);
+  // Sponsored placement features - enabled by default for Amazon-level experience
+  const sponsoredEnabled = true;
+  const sponsoredBadges = true;
   const { variant: abVariant } = useABTest('sponsored-placements', { holdout: 0.1 });
   const showSponsored = sponsoredEnabled && sponsoredBadges && abVariant === 'ranked';
   const isSponsored = showSponsored && (service as any).is_sponsored;
@@ -401,18 +401,25 @@ export const ServiceCard = ({
               </TooltipContent>
             </Tooltip>
 
-            {/* Tags - Fixed height */}
+            {/* Service Badges - Rich visual indicators */}
             <div className="h-8 mb-3">
+              <ServiceBadges 
+                service={service}
+                variant="compact"
+                maxBadges={2}
+                className="mb-2"
+              />
+              
               {service.tags && service.tags.length > 0 && (
                 <div className="flex flex-wrap gap-1">
-                  {service.tags.slice(0, 3).map((tag, index) => (
+                  {service.tags.slice(0, 2).map((tag, index) => (
                     <Badge key={`${service.id}-tag-${index}`} variant="outline" className="text-xs">
                       {tag}
                     </Badge>
                   ))}
-                  {service.tags.length > 3 && (
+                  {service.tags.length > 2 && (
                     <span className="text-xs text-muted-foreground">
-                      +{service.tags.length - 3} more
+                      +{service.tags.length - 2} more
                     </span>
                   )}
                 </div>

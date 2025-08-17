@@ -25,12 +25,14 @@ interface ServiceBundlesProps {
   currentService?: Service;
   category?: string;
   maxBundles?: number;
+  className?: string;
 }
 
 export const ServiceBundles = ({ 
   currentService, 
   category,
-  maxBundles = 3 
+  maxBundles = 3,
+  className = ""
 }: ServiceBundlesProps) => {
   const [expandedBundle, setExpandedBundle] = useState<string | null>(null);
   const { data: marketplaceData } = useMarketplaceData();
@@ -155,7 +157,7 @@ export const ServiceBundles = ({
   };
 
   return (
-    <Card className="w-full">
+    <Card className={`w-full ${className}`}>
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
           <Package className="w-5 h-5 text-muted-foreground" />
