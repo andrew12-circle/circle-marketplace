@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { ServiceCard } from "./ServiceCard";
 import { useMarketplaceData } from "@/hooks/useMarketplaceData";
 import { useServiceViewTracker } from "./RecentlyViewedServices";
+import { parsePrice } from "@/utils/parsePrice";
 import type { Service } from "@/hooks/useMarketplaceData";
 
 interface ServiceBundle {
@@ -55,7 +56,7 @@ export const ServiceBundles = ({
 
       if (categoryServices.length >= 2) {
         const originalPrice = categoryServices.reduce((sum, s) => 
-          sum + parseFloat(s.pro_price || s.retail_price || '0'), 0
+          sum + parsePrice(s.pro_price || s.retail_price || '0'), 0
         );
         const bundlePrice = originalPrice * 0.85; // 15% discount
         const savings = originalPrice - bundlePrice;
@@ -79,7 +80,7 @@ export const ServiceBundles = ({
     const starterServices = allServices
       .filter(s => s.id !== currentService?.id)
       .filter(s => {
-        const price = parseFloat(s.pro_price || s.retail_price || '0');
+        const price = parsePrice(s.pro_price || s.retail_price || '0');
         return price > 0 && price <= 500;
       })
       .sort((a, b) => (a.vendor?.rating || 0) - (b.vendor?.rating || 0))
@@ -87,7 +88,7 @@ export const ServiceBundles = ({
 
     if (starterServices.length >= 2) {
       const originalPrice = starterServices.reduce((sum, s) => 
-        sum + parseFloat(s.pro_price || s.retail_price || '0'), 0
+        sum + parsePrice(s.pro_price || s.retail_price || '0'), 0
       );
       const bundlePrice = originalPrice * 0.8; // 20% discount
       const savings = originalPrice - bundlePrice;
@@ -111,14 +112,14 @@ export const ServiceBundles = ({
       .filter(s => s.id !== currentService?.id)
       .filter(s => s.vendor?.is_verified && s.is_featured)
       .filter(s => {
-        const price = parseFloat(s.pro_price || s.retail_price || '0');
+        const price = parsePrice(s.pro_price || s.retail_price || '0');
         return price >= 200;
       })
       .slice(0, 3);
 
     if (premiumServices.length >= 2) {
       const originalPrice = premiumServices.reduce((sum, s) => 
-        sum + parseFloat(s.pro_price || s.retail_price || '0'), 0
+        sum + parsePrice(s.pro_price || s.retail_price || '0'), 0
       );
       const bundlePrice = originalPrice * 0.9; // 10% discount
       const savings = originalPrice - bundlePrice;

@@ -43,6 +43,8 @@ export const SponsoredPlacementsManager = () => {
         .select(`
           id,
           title,
+          is_sponsored,
+          sponsored_rank_boost,
           vendors!inner(name)
         `)
         .eq('is_active', true)
@@ -57,8 +59,8 @@ export const SponsoredPlacementsManager = () => {
             id: service.id,
             title: service.title,
             vendor_name: service.vendors?.name || 'Unknown',
-            is_sponsored: false, // Default until we can query it properly
-            sponsored_rank_boost: 0, // Default until we can query it properly
+            is_sponsored: service.is_sponsored || false,
+            sponsored_rank_boost: service.sponsored_rank_boost || 0,
             ...stats
           };
         })
@@ -130,7 +132,13 @@ export const SponsoredPlacementsManager = () => {
 
   const handleSponsoredToggle = async (serviceId: string, currentValue: boolean) => {
     try {
-      // For now, just update local state until types are refreshed
+      const { error } = await supabase
+        .from('services')
+        .update({ is_sponsored: !currentValue })
+        .eq('id', serviceId);
+
+      if (error) throw error;
+
       setServices(services.map(s => 
         s.id === serviceId 
           ? { ...s, is_sponsored: !currentValue }
@@ -138,8 +146,8 @@ export const SponsoredPlacementsManager = () => {
       ));
 
       toast({
-        title: 'Updated Locally',
-        description: `Service ${!currentValue ? 'marked as sponsored' : 'removed from sponsored'} (demo mode)`,
+        title: 'Updated Successfully',
+        description: `Service ${!currentValue ? 'marked as sponsored' : 'removed from sponsored'}`,
       });
     } catch (error) {
       console.error('Error updating sponsored status:', error);
@@ -153,12 +161,23 @@ export const SponsoredPlacementsManager = () => {
 
   const handleRankBoostChange = async (serviceId: string, boost: number) => {
     try {
-      // For now, just update local state until types are refreshed
+      const { error } = await supabase
+        .from('services')
+        .update({ sponsored_rank_boost: boost })
+        .eq('id', serviceId);
+
+      if (error) throw error;
+
       setServices(services.map(s => 
         s.id === serviceId 
           ? { ...s, sponsored_rank_boost: boost }
           : s
       ));
+
+      toast({
+        title: 'Updated Successfully',
+        description: 'Rank boost updated',
+      });
     } catch (error) {
       console.error('Error updating rank boost:', error);
       toast({

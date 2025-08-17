@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ServiceCard } from "./ServiceCard";
 import { useMarketplaceData } from "@/hooks/useMarketplaceData";
 import { useServiceViewTracker } from "./RecentlyViewedServices";
+import { parsePrice } from "@/utils/parsePrice";
 import type { Service } from "@/hooks/useMarketplaceData";
 
 interface CustomersAlsoViewedProps {
@@ -36,8 +37,8 @@ export const CustomersAlsoViewed = ({
       }
 
       // Similar price range (medium weight)
-      const currentPrice = parseFloat(currentService.pro_price || currentService.retail_price || '0');
-      const servicePrice = parseFloat(service.pro_price || service.retail_price || '0');
+      const currentPrice = parsePrice(currentService.pro_price || currentService.retail_price || '0');
+      const servicePrice = parsePrice(service.pro_price || service.retail_price || '0');
       const priceDiff = Math.abs(currentPrice - servicePrice);
       const maxPrice = Math.max(currentPrice, servicePrice);
       

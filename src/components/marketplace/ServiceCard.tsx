@@ -78,8 +78,7 @@ export const ServiceCard = ({
   // Sponsored placement features - enabled by default for Amazon-level experience
   const sponsoredEnabled = true;
   const sponsoredBadges = true;
-  const { variant: abVariant } = useABTest('sponsored-placements', { holdout: 0.1 });
-  const showSponsored = sponsoredEnabled && sponsoredBadges && abVariant === 'ranked';
+  const showSponsored = sponsoredEnabled && sponsoredBadges;
   const isSponsored = showSponsored && (service as any).is_sponsored;
   
   // Use bulk ratings data if available, otherwise fallback to individual fetch
@@ -250,8 +249,26 @@ export const ServiceCard = ({
       return;
     }
 
-    // Track the service view
+    // Track the service view and store in localStorage for Recently Viewed
     await trackView();
+    
+    // Store in localStorage for Recently Viewed component
+    try {
+      const recentlyViewed = JSON.parse(localStorage.getItem('circle-recently-viewed') || '[]');
+      const viewData = {
+        serviceId: service.id,
+        viewedAt: Date.now(),
+        title: service.title
+      };
+      
+      // Remove duplicates and add to beginning
+      const filtered = recentlyViewed.filter((item: any) => item.serviceId !== service.id);
+      const updated = [viewData, ...filtered].slice(0, 20);
+      
+      localStorage.setItem('circle-recently-viewed', JSON.stringify(updated));
+    } catch (error) {
+      console.error('Error storing recently viewed:', error);
+    }
 
     // Server-side price validation
     const isPriceValid = await validateCartPricing(service.id, finalPrice);
@@ -339,7 +356,7 @@ export const ServiceCard = ({
           {/* Image - Fixed height */}
           <div className="relative h-48 overflow-hidden bg-white flex-shrink-0 p-4">
             <img
-              src={service.image_url || "/public/placeholder.svg"}
+              src={service.image_url || "/placeholder.svg"}
               alt={service.title}
               className="w-full h-full object-contain object-center transition-transform duration-300 group-hover:scale-105"
             />

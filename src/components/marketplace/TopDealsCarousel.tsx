@@ -70,10 +70,9 @@ export const TopDealsCarousel = ({ services, serviceRatings, onServiceClick }: T
   const sponsoredEnabled = true;
   const sponsoredTopDeals = true;
   const sponsoredBadges = true;
-  const { variant: abVariant } = useABTest('sponsored-placements', { holdout: 0.1 });
   const { trackImpression, trackClick } = useSponsoredTracking();
 
-  const showSponsored = sponsoredEnabled && sponsoredTopDeals && abVariant === 'ranked';
+  const showSponsored = sponsoredEnabled && sponsoredTopDeals;
 
   const topDeals = useMemo(() => {
     return services
