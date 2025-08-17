@@ -499,7 +499,7 @@ const handleViewServiceDetails = useCallback((serviceId: string) => {
         <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
           {/* Hero Section */}
           <div className="mb-12">
-            <h1 className="text-3xl sm:text-6xl font-bold text-black mb-4 lcp-content">{t('marketplaceTitle')}</h1>
+            <h1 className="text-3xl sm:text-6xl font-bold text-black mb-4 lcp-content">Realtor Marketplace</h1>
             <p className="text-gray-600 max-w-2xl text-sm lcp-content">
               {t('marketplaceDescription')}
             </p>
