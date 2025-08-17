@@ -3774,7 +3774,9 @@ export type Database = {
           creator_social_links: Json | null
           creator_verified: boolean | null
           creator_website: string | null
+          current_tools: Json | null
           display_name: string | null
+          goal_assessment_completed: boolean | null
           id: string
           invitation_source: string | null
           invited_as_creator: boolean | null
@@ -3789,6 +3791,8 @@ export type Database = {
           longitude: number | null
           marketing_time_per_week: number | null
           onboarding_completed: boolean | null
+          performance_data_complete: boolean | null
+          personality_data: Json | null
           phone: string | null
           primary_challenge: string | null
           respa_max_copay_percentage: number | null
@@ -3805,6 +3809,7 @@ export type Database = {
           vendor_enabled: boolean | null
           vendor_type: string | null
           website_url: string | null
+          work_style_preferences: Json | null
           years_experience: number | null
           zip_code: string | null
         }
@@ -3828,7 +3833,9 @@ export type Database = {
           creator_social_links?: Json | null
           creator_verified?: boolean | null
           creator_website?: string | null
+          current_tools?: Json | null
           display_name?: string | null
+          goal_assessment_completed?: boolean | null
           id?: string
           invitation_source?: string | null
           invited_as_creator?: boolean | null
@@ -3843,6 +3850,8 @@ export type Database = {
           longitude?: number | null
           marketing_time_per_week?: number | null
           onboarding_completed?: boolean | null
+          performance_data_complete?: boolean | null
+          personality_data?: Json | null
           phone?: string | null
           primary_challenge?: string | null
           respa_max_copay_percentage?: number | null
@@ -3859,6 +3868,7 @@ export type Database = {
           vendor_enabled?: boolean | null
           vendor_type?: string | null
           website_url?: string | null
+          work_style_preferences?: Json | null
           years_experience?: number | null
           zip_code?: string | null
         }
@@ -3882,7 +3892,9 @@ export type Database = {
           creator_social_links?: Json | null
           creator_verified?: boolean | null
           creator_website?: string | null
+          current_tools?: Json | null
           display_name?: string | null
+          goal_assessment_completed?: boolean | null
           id?: string
           invitation_source?: string | null
           invited_as_creator?: boolean | null
@@ -3897,6 +3909,8 @@ export type Database = {
           longitude?: number | null
           marketing_time_per_week?: number | null
           onboarding_completed?: boolean | null
+          performance_data_complete?: boolean | null
+          personality_data?: Json | null
           phone?: string | null
           primary_challenge?: string | null
           respa_max_copay_percentage?: number | null
@@ -3913,6 +3927,7 @@ export type Database = {
           vendor_enabled?: boolean | null
           vendor_type?: string | null
           website_url?: string | null
+          work_style_preferences?: Json | null
           years_experience?: number | null
           zip_code?: string | null
         }

@@ -44,8 +44,9 @@ export function AIRecommendationsDashboard() {
   const [bundles, setBundles] = useState<ServiceBundle[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isGoalAssessmentOpen, setIsGoalAssessmentOpen] = useState(false);
-const [isGenerating, setIsGenerating] = useState(false);
-const { isBuilding, buildPlan } = useGoalPlan();
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [isCheckingRequirements, setIsCheckingRequirements] = useState(false);
+  const { isBuilding, buildPlan } = useGoalPlan();
 
   useEffect(() => {
     if (user?.id) {
@@ -89,52 +90,88 @@ const { isBuilding, buildPlan } = useGoalPlan();
     }
   };
 
+  const checkDataRequirements = async () => {
+    if (!user?.id || !profile) return false;
+    
+    // Check if user has completed goal assessment with new fields
+    const goalAssessmentComplete = (profile as any).goal_assessment_completed;
+    const hasPersonalityData = (profile as any).personality_data && Object.keys((profile as any).personality_data).length > 0;
+    const hasCurrentTools = (profile as any).current_tools && Object.keys((profile as any).current_tools).length > 0;
+    
+    // Check if user has any performance data (transactions in last 12 months)
+    const { data: agentData } = await supabase
+      .from('agents')
+      .select('id')
+      .eq('user_id', user.id)
+      .single();
+    
+    let hasPerformanceData = false;
+    if (agentData) {
+      const { data: performanceData } = await supabase
+        .from('agent_quiz_responses')
+        .select('id')
+        .eq('agent_id', agentData.id)
+        .limit(1);
+      
+      hasPerformanceData = (performanceData && performanceData.length > 0);
+    }
+    
+    return goalAssessmentComplete && hasPersonalityData && hasCurrentTools && hasPerformanceData;
+  };
+
+  const getBudgetRange = () => {
+    const budgetPref = (profile as any)?.budget_preference || 'balanced';
+    switch (budgetPref) {
+      case 'low_cost': return { min: 100, max: 500 };
+      case 'high_investment': return { min: 2000, max: 5000 };
+      default: return { min: 500, max: 2000 };
+    }
+  };
+
   const generateAIRecommendations = async () => {
-    if (!user?.id) return;
+    if (!user?.id) {
+      toast({ title: "Sign in required", description: "Please sign in to generate AI recommendations.", variant: "destructive" });
+      return;
+    }
+
     try {
-      setIsGenerating(true);
-      const { data, error } = await supabase.functions.invoke('generate-ai-recommendations', {
-        body: { agent_id: user.id },
-      });
-
-      if (error) {
-        console.error('Error invoking generate-ai-recommendations:', error);
-        toast({
-          title: "Generation failed",
-          description: "We couldn't generate recommendations right now. Please try again shortly.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      if (data?.requires_assessment) {
-        toast({
-          title: "Assessment required",
-          description: "Please complete your goal assessment to get personalized recommendations.",
-          variant: "destructive",
-        });
+      setIsCheckingRequirements(true);
+      
+      // Check data requirements first
+      const hasRequiredData = await checkDataRequirements();
+      if (!hasRequiredData) {
         setIsGoalAssessmentOpen(true);
+        toast({ 
+          title: "Complete your profile", 
+          description: "We need your goals, personality, and performance data to create your personalized 'Path to Success' plan.", 
+          variant: "default" 
+        });
         return;
       }
 
-      await loadRecommendations();
+      setIsGenerating(true);
+      const { data, error } = await supabase.functions.invoke("generate-goal-plan", {
+        body: { 
+          goalTitle: `Path to ${(profile as any).annual_goal_transactions || 40}`,
+          goalDescription: `Personalized growth plan based on your current performance and personality`,
+          timeframeWeeks: 52,
+          budgetMin: getBudgetRange().min,
+          budgetMax: getBudgetRange().max
+        },
+      });
 
-      const count = data?.recommendations_count ?? undefined;
-      toast({
-        title: "Recommendations updated",
-        description: count !== undefined
-          ? `Generated ${count} new recommendation${count === 1 ? '' : 's'}.`
-          : "Your personalized recommendations are ready.",
-      });
-    } catch (e) {
-      console.error('Unexpected error generating recommendations:', e);
-      toast({
-        title: "Something went wrong",
-        description: "Please try generating recommendations again.",
-        variant: "destructive",
-      });
+      if (error) throw error;
+
+      if (data?.plan) {
+        toast({ title: "Your Path to Success is Ready!", description: "AI analyzed 1.6M+ agents to create your personalized growth plan." });
+        await loadRecommendations();
+      }
+    } catch (error: any) {
+      console.error("Error generating recommendations:", error);
+      toast({ title: "AI error", description: error?.message ?? "Failed to generate recommendations", variant: "destructive" });
     } finally {
       setIsGenerating(false);
+      setIsCheckingRequirements(false);
     }
   };
 
@@ -240,13 +277,13 @@ const { isBuilding, buildPlan } = useGoalPlan();
 
         {/* Action Buttons */}
         <div className="flex flex-wrap gap-2">
-          <Button onClick={generateAIRecommendations} disabled={isGenerating}>
-            {isGenerating ? (
+          <Button onClick={generateAIRecommendations} disabled={isGenerating || isCheckingRequirements}>
+            {(isGenerating || isCheckingRequirements) ? (
               <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-2" />
             ) : (
               <Sparkles className="h-4 w-4 mr-2" />
             )}
-            Generate Recommendations
+            {isCheckingRequirements ? 'Checking requirements...' : isGenerating ? 'Generating your path...' : `Build My Path to ${(profile as any)?.annual_goal_transactions || 40}`}
           </Button>
           <Button variant="outline">
             <TrendingUp className="h-4 w-4 mr-2" />
@@ -403,8 +440,10 @@ const { isBuilding, buildPlan } = useGoalPlan();
         open={isGoalAssessmentOpen}
         onOpenChange={setIsGoalAssessmentOpen}
         onComplete={async () => {
-          await generateAIRecommendations();
           setIsGoalAssessmentOpen(false);
+          // Refresh recommendations after completing assessment
+          await loadRecommendations();
+          await loadServiceBundles();
         }}
       />
     </div>

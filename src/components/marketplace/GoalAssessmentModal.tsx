@@ -25,6 +25,16 @@ interface GoalFormData {
   primary_challenge: string;
   marketing_time_per_week: number;
   budget_preference: string;
+  // New personality data
+  personality_type: string;
+  work_style: string;
+  communication_preference: string;
+  lead_source_comfort: string[];
+  // Current tools data
+  current_crm: string;
+  current_dialer: string;
+  current_marketing_tools: string[];
+  social_media_usage: string;
 }
 
 export function GoalAssessmentModal({ open, onOpenChange, onComplete }: GoalAssessmentModalProps) {
@@ -39,12 +49,25 @@ export function GoalAssessmentModal({ open, onOpenChange, onComplete }: GoalAsse
     average_commission_per_deal: 5000,
     primary_challenge: '',
     marketing_time_per_week: 5,
-    budget_preference: 'balanced'
+    budget_preference: 'balanced',
+    // New personality defaults
+    personality_type: '',
+    work_style: '',
+    communication_preference: '',
+    lead_source_comfort: [],
+    // Current tools defaults
+    current_crm: '',
+    current_dialer: '',
+    current_marketing_tools: [],
+    social_media_usage: ''
   });
 
   // Prefill from existing profile when opening (for editing goals)
   useEffect(() => {
     if (open && profile) {
+      const personalityData = (profile as any).personality_data || {};
+      const currentTools = (profile as any).current_tools || {};
+      
       setFormData({
         annual_goal_transactions: (profile as any).annual_goal_transactions ?? 12,
         annual_goal_volume: (profile as any).annual_goal_volume ?? 3000000,
@@ -52,12 +75,22 @@ export function GoalAssessmentModal({ open, onOpenChange, onComplete }: GoalAsse
         primary_challenge: (profile as any).primary_challenge ?? '',
         marketing_time_per_week: (profile as any).marketing_time_per_week ?? 5,
         budget_preference: (profile as any).budget_preference ?? 'balanced',
+        // Personality data
+        personality_type: personalityData.personality_type ?? '',
+        work_style: personalityData.work_style ?? '',
+        communication_preference: personalityData.communication_preference ?? '',
+        lead_source_comfort: personalityData.lead_source_comfort ?? [],
+        // Current tools
+        current_crm: currentTools.crm ?? '',
+        current_dialer: currentTools.dialer ?? '',
+        current_marketing_tools: currentTools.marketing_tools ?? [],
+        social_media_usage: currentTools.social_media_usage ?? ''
       });
       setCurrentStep(1);
     }
   }, [open, profile]);
 
-  const totalSteps = 4;
+  const totalSteps = 6;
   const progress = (currentStep / totalSteps) * 100;
 
   const handleInputChange = (field: keyof GoalFormData, value: string | number) => {
@@ -84,11 +117,33 @@ export function GoalAssessmentModal({ open, onOpenChange, onComplete }: GoalAsse
 
     setIsLoading(true);
     try {
+      // Separate personality and tool data for storage
+      const personalityData = {
+        personality_type: formData.personality_type,
+        work_style: formData.work_style,
+        communication_preference: formData.communication_preference,
+        lead_source_comfort: formData.lead_source_comfort
+      };
+      
+      const currentTools = {
+        crm: formData.current_crm,
+        dialer: formData.current_dialer,
+        marketing_tools: formData.current_marketing_tools,
+        social_media_usage: formData.social_media_usage
+      };
+
       const { error } = await supabase
         .from('profiles')
         .update({
-          ...formData,
-          onboarding_completed: true,
+          annual_goal_transactions: formData.annual_goal_transactions,
+          annual_goal_volume: formData.annual_goal_volume,
+          average_commission_per_deal: formData.average_commission_per_deal,
+          primary_challenge: formData.primary_challenge,
+          marketing_time_per_week: formData.marketing_time_per_week,
+          budget_preference: formData.budget_preference,
+          personality_data: personalityData,
+          current_tools: currentTools,
+          goal_assessment_completed: true,
           last_assessment_date: new Date().toISOString()
         })
         .eq('user_id', user.id);
@@ -287,6 +342,151 @@ export function GoalAssessmentModal({ open, onOpenChange, onComplete }: GoalAsse
               </div>
             </CardContent>
           </Card>
+          );
+
+      case 5:
+        return (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Target className="h-5 w-5 text-primary" />
+                Work Style & Personality
+              </CardTitle>
+              <CardDescription>
+                Help us understand how you prefer to work
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="personality">Personality Type</Label>
+                <Select 
+                  value={formData.personality_type} 
+                  onValueChange={(value) => handleInputChange('personality_type', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select your personality type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="extrovert">Extrovert - I energize from interaction</SelectItem>
+                    <SelectItem value="introvert">Introvert - I prefer focused, one-on-one work</SelectItem>
+                    <SelectItem value="ambivert">Ambivert - I'm comfortable with both</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div>
+                <Label htmlFor="work_style">Work Style</Label>
+                <Select 
+                  value={formData.work_style} 
+                  onValueChange={(value) => handleInputChange('work_style', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select your work style" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="hunter">Hunter - I love prospecting and cold outreach</SelectItem>
+                    <SelectItem value="farmer">Farmer - I prefer nurturing existing relationships</SelectItem>
+                    <SelectItem value="hybrid">Hybrid - I do both equally well</SelectItem>
+                    <SelectItem value="referral_focused">Referral Focused - I work primarily through referrals</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div>
+                <Label htmlFor="communication">Communication Preference</Label>
+                <Select 
+                  value={formData.communication_preference} 
+                  onValueChange={(value) => handleInputChange('communication_preference', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="How do you prefer to communicate?" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="phone_calls">Phone Calls</SelectItem>
+                    <SelectItem value="video_calls">Video Calls</SelectItem>
+                    <SelectItem value="text_email">Text & Email</SelectItem>
+                    <SelectItem value="social_media">Social Media</SelectItem>
+                    <SelectItem value="in_person">In Person</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </CardContent>
+          </Card>
+        );
+
+      case 6:
+        return (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-primary" />
+                Current Tools & Systems
+              </CardTitle>
+              <CardDescription>
+                Tell us what tools you're already using
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="crm">Current CRM</Label>
+                <Select 
+                  value={formData.current_crm} 
+                  onValueChange={(value) => handleInputChange('current_crm', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select your CRM" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">No CRM</SelectItem>
+                    <SelectItem value="chime">Chime</SelectItem>
+                    <SelectItem value="top_producer">Top Producer</SelectItem>
+                    <SelectItem value="wise_agent">Wise Agent</SelectItem>
+                    <SelectItem value="follow_up_boss">Follow Up Boss</SelectItem>
+                    <SelectItem value="kvcore">KVCore</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div>
+                <Label htmlFor="dialer">Current Dialer/Phone System</Label>
+                <Select 
+                  value={formData.current_dialer} 
+                  onValueChange={(value) => handleInputChange('current_dialer', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select your dialer" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">No Dialer</SelectItem>
+                    <SelectItem value="mojo">Mojo</SelectItem>
+                    <SelectItem value="redx">RedX</SelectItem>
+                    <SelectItem value="vulcan7">Vulcan7</SelectItem>
+                    <SelectItem value="phoneburner">PhoneBurner</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div>
+                <Label htmlFor="social_media">Social Media Usage</Label>
+                <Select 
+                  value={formData.social_media_usage} 
+                  onValueChange={(value) => handleInputChange('social_media_usage', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="How do you use social media?" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="heavy_user">Heavy User - Daily posting and engagement</SelectItem>
+                    <SelectItem value="moderate_user">Moderate User - Regular posting</SelectItem>
+                    <SelectItem value="light_user">Light User - Occasional posts</SelectItem>
+                    <SelectItem value="minimal_user">Minimal User - Rarely post</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </CardContent>
+          </Card>
         );
 
       default:
@@ -323,7 +523,7 @@ export function GoalAssessmentModal({ open, onOpenChange, onComplete }: GoalAsse
             {currentStep === totalSteps ? (
               <Button 
                 onClick={handleComplete}
-                disabled={isLoading || !formData.primary_challenge}
+                disabled={isLoading || !formData.primary_challenge || !formData.personality_type || !formData.work_style}
               >
                 {isLoading ? "Saving..." : "Complete Setup"}
               </Button>
@@ -334,7 +534,9 @@ export function GoalAssessmentModal({ open, onOpenChange, onComplete }: GoalAsse
                   (currentStep === 1 && (!formData.annual_goal_transactions || !formData.annual_goal_volume)) ||
                   (currentStep === 2 && !formData.average_commission_per_deal) ||
                   (currentStep === 3 && !formData.primary_challenge) ||
-                  (currentStep === 4 && !formData.marketing_time_per_week)
+                  (currentStep === 4 && !formData.marketing_time_per_week) ||
+                  (currentStep === 5 && (!formData.personality_type || !formData.work_style)) ||
+                  (currentStep === 6 && !formData.current_crm)
                 }
               >
                 Next
