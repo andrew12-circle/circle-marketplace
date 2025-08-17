@@ -26,7 +26,7 @@ const Auth = () => {
   // Track authentication events
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_UP') {
+      if (event === 'SIGNED_IN' && session?.user) {
         trackSignupSuccess();
       }
     });

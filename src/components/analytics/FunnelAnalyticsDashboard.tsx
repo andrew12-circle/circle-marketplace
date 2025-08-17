@@ -44,7 +44,7 @@ export const FunnelAnalyticsDashboard = () => {
       
       // Safely type the data as FunnelMetrics
       if (data && typeof data === 'object' && !Array.isArray(data)) {
-        setMetrics(data as FunnelMetrics);
+        setMetrics(data as unknown as FunnelMetrics);
       }
     } catch (error) {
       console.error('Error loading funnel metrics:', error);
