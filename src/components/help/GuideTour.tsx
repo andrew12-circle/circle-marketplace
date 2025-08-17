@@ -173,14 +173,14 @@ export const GuideTour: React.FC<GuideTourProps> = ({ guide, onComplete, onSkip 
             </Button>
           </div>
 
-          {/* Progress */}
-          <Progress value={progress} className="h-1 mb-3" />
-
           {/* Step content */}
           <div className="space-y-3">
             <h4 className="font-medium text-sm">{currentStep.title}</h4>
             <p className="text-sm text-muted-foreground">{currentStep.content}</p>
           </div>
+
+          {/* Progress */}
+          <Progress value={progress} className="h-1 mb-3" />
 
           {/* Navigation */}
           <div className="flex items-center justify-between mt-4">
