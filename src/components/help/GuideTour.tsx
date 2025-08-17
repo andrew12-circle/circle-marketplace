@@ -77,8 +77,8 @@ export const GuideTour: React.FC<GuideTourProps> = ({ guide, onComplete, onSkip 
           tooltipLeft = viewportWidth - tooltipWidth - 10;
         }
         if (tooltipTop < 10) tooltipTop = 10;
-        if (tooltipTop + tooltipHeight > window.scrollY + viewportHeight - 10) {
-          tooltipTop = window.scrollY + viewportHeight - tooltipHeight - 10;
+        if (tooltipTop + tooltipHeight > window.scrollY + viewportHeight - 60) {
+          tooltipTop = window.scrollY + viewportHeight - tooltipHeight - 60;
         }
 
         setTooltipPosition({ top: tooltipTop, left: tooltipLeft });
