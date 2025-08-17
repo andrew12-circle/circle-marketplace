@@ -123,10 +123,15 @@ export const TopDealsCarousel = ({ services, serviceRatings, onServiceClick }: T
                         )}
                       </div>
 
-                      {/* Service title */}
-                      <h3 className="font-semibold text-sm leading-tight line-clamp-2 group-hover:text-primary transition-colors">
+                       {/* Service title - highlight this is about services */}
+                      <h3 className="font-semibold text-base leading-tight line-clamp-2 group-hover:text-primary transition-colors">
                         {service.title}
                       </h3>
+                      {service.description && (
+                        <p className="text-xs text-muted-foreground line-clamp-1">
+                          {service.description}
+                        </p>
+                      )}
 
                       {/* Discount badge */}
                       {discountPct > 0 && (

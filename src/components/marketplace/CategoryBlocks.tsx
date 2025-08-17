@@ -1,5 +1,5 @@
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { 
   Users, 
   TrendingUp, 
@@ -11,9 +11,12 @@ import {
   Mail 
 } from "lucide-react";
 import { logger } from "@/utils/logger";
+import { useMemo } from "react";
+import { type Service } from "@/hooks/useMarketplaceData";
 
 interface CategoryBlocksProps {
   onCategoryClick: (searchTerm: string, categoryName: string) => void;
+  services: Service[];
 }
 
 const categories = [
@@ -67,7 +70,34 @@ const categories = [
   }
 ];
 
-export const CategoryBlocks = ({ onCategoryClick }: CategoryBlocksProps) => {
+export const CategoryBlocks = ({ onCategoryClick, services }: CategoryBlocksProps) => {
+  const categoryCounts = useMemo(() => {
+    const counts = new Map<string, number>();
+    
+    services.forEach(service => {
+      const category = (service.category || '').toLowerCase();
+      const title = (service.title || '').toLowerCase();
+      const description = (service.description || '').toLowerCase();
+      const tags = (service.tags || []).join(' ').toLowerCase();
+      
+      categories.forEach(cat => {
+        const searchTerms = cat.searchTerm.split(' ').map(term => term.toLowerCase());
+        const hasMatch = searchTerms.some(term => 
+          category.includes(term) || 
+          title.includes(term) || 
+          description.includes(term) ||
+          tags.includes(term)
+        );
+        
+        if (hasMatch) {
+          counts.set(cat.name, (counts.get(cat.name) || 0) + 1);
+        }
+      });
+    });
+    
+    return counts;
+  }, [services]);
+
   const handleCategoryClick = (searchTerm: string, categoryName: string) => {
     logger.log('category_block_clicked', { searchTerm, categoryName });
     onCategoryClick(searchTerm, categoryName);
@@ -92,10 +122,17 @@ export const CategoryBlocks = ({ onCategoryClick }: CategoryBlocksProps) => {
                     <IconComponent className="w-6 h-6 text-primary" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-sm group-hover:text-primary transition-colors">
-                      {category.name}
-                    </h3>
-                    <p className="text-xs text-muted-foreground mt-1">
+                    <div className="flex items-center justify-center gap-2 mb-1">
+                      <h3 className="font-semibold text-sm group-hover:text-primary transition-colors">
+                        {category.name}
+                      </h3>
+                      {categoryCounts.get(category.name) && (
+                        <Badge variant="secondary" className="text-xs px-1.5 py-0.5">
+                          {categoryCounts.get(category.name)}
+                        </Badge>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
                       {category.description}
                     </p>
                   </div>

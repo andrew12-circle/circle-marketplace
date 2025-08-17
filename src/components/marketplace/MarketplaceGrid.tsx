@@ -586,7 +586,10 @@ export const MarketplaceGrid = () => {
                 serviceRatings={bulkRatings}
                 onServiceClick={handleViewServiceDetails}
               />
-              <CategoryBlocks onCategoryClick={handleCategoryClick} />
+              <CategoryBlocks 
+                onCategoryClick={handleCategoryClick}
+                services={flattenServices}
+              />
               <ROISavingsHook />
             </>
           )}
