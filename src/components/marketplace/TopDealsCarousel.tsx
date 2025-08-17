@@ -105,23 +105,17 @@ export const TopDealsCarousel = ({ services, serviceRatings, onServiceClick }: T
                 <Card className="h-full hover:shadow-md transition-shadow cursor-pointer group">
                   <CardContent className="p-4">
                     <div className="space-y-3">
-                      {/* Vendor info */}
-                      <div className="flex items-center gap-2">
-                        {service.vendor?.logo_url && (
+                      {/* Service image */}
+                      {service.image_url && (
+                        <div className="w-full h-32 mb-3 overflow-hidden rounded-md bg-muted">
                           <img 
-                            src={service.vendor.logo_url} 
-                            alt={service.vendor?.name}
-                            className="w-6 h-6 object-contain"
+                            src={service.image_url} 
+                            alt={service.title}
+                            className="w-full h-full object-cover"
                             loading="lazy"
                           />
-                        )}
-                        <span className="text-sm font-medium text-muted-foreground truncate">
-                          {service.vendor?.name}
-                        </span>
-                        {service.vendor?.is_verified && (
-                          <Verified className="w-4 h-4 text-primary" />
-                        )}
-                      </div>
+                        </div>
+                      )}
 
                        {/* Service title - highlight this is about services */}
                       <h3 className="font-semibold text-base leading-tight line-clamp-2 group-hover:text-primary transition-colors">
