@@ -4813,6 +4813,7 @@ export type Database = {
           is_active: boolean | null
           is_featured: boolean | null
           is_respa_regulated: boolean | null
+          is_sponsored: boolean | null
           is_top_pick: boolean | null
           is_verified: boolean | null
           max_split_percentage_non_ssp: number | null
@@ -4829,6 +4830,7 @@ export type Database = {
           retail_price: string | null
           service_provider_id: string | null
           sort_order: number | null
+          sponsored_rank_boost: number | null
           supporting_documents: Json | null
           tags: string[] | null
           title: string
@@ -4857,6 +4859,7 @@ export type Database = {
           is_active?: boolean | null
           is_featured?: boolean | null
           is_respa_regulated?: boolean | null
+          is_sponsored?: boolean | null
           is_top_pick?: boolean | null
           is_verified?: boolean | null
           max_split_percentage_non_ssp?: number | null
@@ -4873,6 +4876,7 @@ export type Database = {
           retail_price?: string | null
           service_provider_id?: string | null
           sort_order?: number | null
+          sponsored_rank_boost?: number | null
           supporting_documents?: Json | null
           tags?: string[] | null
           title: string
@@ -4901,6 +4905,7 @@ export type Database = {
           is_active?: boolean | null
           is_featured?: boolean | null
           is_respa_regulated?: boolean | null
+          is_sponsored?: boolean | null
           is_top_pick?: boolean | null
           is_verified?: boolean | null
           max_split_percentage_non_ssp?: number | null
@@ -4917,6 +4922,7 @@ export type Database = {
           retail_price?: string | null
           service_provider_id?: string | null
           sort_order?: number | null
+          sponsored_rank_boost?: number | null
           supporting_documents?: Json | null
           tags?: string[] | null
           title?: string

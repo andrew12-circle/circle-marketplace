@@ -1,9 +1,13 @@
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
+import { useFeatureFlag } from "@/hooks/useFeatureFlag";
+import { useABTest } from "@/hooks/useABTest";
+import { useSponsoredTracking } from "@/hooks/useSponsoredTracking";
+import { SponsoredLabel } from "./SponsoredLabel";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { Star, Verified } from "lucide-react";
+import { Star } from "lucide-react";
 import { logger } from "@/utils/logger";
 import { type Service } from "@/hooks/useMarketplaceData";
 
@@ -11,7 +15,6 @@ interface ServiceRatingStats {
   average_rating: number;
   total_reviews: number;
 }
-
 
 interface TopDealsCarouselProps {
   services: Service[];
@@ -55,11 +58,22 @@ const calculateScore = (service: Service, rating?: ServiceRatingStats): number =
   const brandNames = ['hubspot', 'salesforce', 'mailchimp', 'canva', 'zoom'];
   const vendorName = (service.vendor?.name || '').toLowerCase();
   const brandBoost = brandNames.some(brand => vendorName.includes(brand)) ? 10 : 0;
+
+  // Sponsored boost if flagged
+  const sponsoredBoost = (service as any).is_sponsored ? ((service as any).sponsored_rank_boost || 50) : 0;
   
-  return (0.35 * discountPct) + (0.25 * trustScore) + (0.20 * featuredScore) + (0.10 * coPayScore) + (0.10 * brandBoost);
+  return (0.30 * discountPct) + (0.20 * trustScore) + (0.15 * featuredScore) + (0.10 * coPayScore) + (0.10 * brandBoost) + (0.15 * sponsoredBoost);
 };
 
 export const TopDealsCarousel = ({ services, serviceRatings, onServiceClick }: TopDealsCarouselProps) => {
+  const sponsoredEnabled = useFeatureFlag('sponsoredPlacements', false);
+  const sponsoredTopDeals = useFeatureFlag('sponsoredTopDeals', false);
+  const sponsoredBadges = useFeatureFlag('sponsoredBadges', false);
+  const { variant: abVariant } = useABTest('sponsored-placements', { holdout: 0.1 });
+  const { trackImpression, trackClick } = useSponsoredTracking();
+
+  const showSponsored = sponsoredEnabled && sponsoredTopDeals && abVariant === 'ranked';
+
   const topDeals = useMemo(() => {
     return services
       .map(service => ({
@@ -70,8 +84,34 @@ export const TopDealsCarousel = ({ services, serviceRatings, onServiceClick }: T
       .slice(0, 12);
   }, [services, serviceRatings]);
 
+  // Track impressions for sponsored items
+  useEffect(() => {
+    if (showSponsored && sponsoredBadges) {
+      topDeals.forEach(service => {
+        if ((service as any).is_sponsored) {
+          trackImpression({
+            serviceId: service.id,
+            placement: 'top_deals',
+            context: 'carousel_view'
+          });
+        }
+      });
+    }
+  }, [topDeals, showSponsored, sponsoredBadges, trackImpression]);
+
   const handleDealClick = (serviceId: string, serviceName: string) => {
     logger.log('top_deal_clicked', { serviceId, serviceName });
+    
+    // Track sponsored click if applicable
+    const service = topDeals.find(s => s.id === serviceId);
+    if (showSponsored && service && (service as any).is_sponsored) {
+      trackClick({
+        serviceId,
+        placement: 'top_deals',
+        context: 'carousel_click'
+      });
+    }
+    
     onServiceClick(serviceId);
   };
 
@@ -92,6 +132,7 @@ export const TopDealsCarousel = ({ services, serviceRatings, onServiceClick }: T
             const rating = serviceRatings?.get(service.id);
             const retailPrice = parsePrice(service.retail_price);
             const proPrice = parsePrice(service.pro_price);
+            const isSponsored = showSponsored && (service as any).is_sponsored;
             
             let discountPct = 0;
             if (service.discount_percentage) {
@@ -102,7 +143,14 @@ export const TopDealsCarousel = ({ services, serviceRatings, onServiceClick }: T
 
             return (
               <CarouselItem key={service.id} className="pl-2 md:pl-4 basis-1/2 md:basis-1/3 lg:basis-1/4">
-                <Card className="h-full hover:shadow-md transition-shadow cursor-pointer group">
+                <Card className="h-full hover:shadow-md transition-shadow cursor-pointer group relative">
+                  {/* Sponsored badge */}
+                  {isSponsored && sponsoredBadges && (
+                    <div className="absolute top-2 right-2 z-10">
+                      <SponsoredLabel variant="small" />
+                    </div>
+                  )}
+                  
                   <CardContent className="p-4">
                     <div className="space-y-3">
                       {/* Service image */}

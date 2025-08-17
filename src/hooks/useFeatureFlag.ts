@@ -44,8 +44,8 @@ export function useRemoteFeatureFlags() {
         .limit(1)
         .maybeSingle();
       
-      // Parse any feature flag config from app_config if exists
-      return data?.feature_flags || {};
+      // Parse any feature flag config if we add it later
+      return {};
     } catch (error) {
       console.warn('Error fetching remote feature flags:', error);
       return {};

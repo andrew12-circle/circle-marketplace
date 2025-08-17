@@ -45,6 +45,7 @@ import BulkFAQGenerator from '@/components/admin/BulkFAQGenerator';
 import { VendorQuestionsManager } from '@/components/admin/VendorQuestionsManager';
 import { AdminHealthDashboard } from '@/components/admin/AdminHealthDashboard';
 import { RetentionAnalyticsDashboard } from '@/components/admin/RetentionAnalyticsDashboard';
+import { SponsoredPlacementsManager } from '@/components/admin/SponsoredPlacementsManager';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Upload, Building, Youtube, DollarSign, BarChart3, Coins, Shield as ShieldIcon, Users2, Send, BookOpen, Heart, MessageSquare } from 'lucide-react';
@@ -546,6 +547,13 @@ export default function AdminDashboard() {
                 <span className="hidden sm:inline">Analytics</span>
               </TabsTrigger>
               <TabsTrigger 
+                value="sponsored" 
+                className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
+              >
+                <Star className="h-4 w-4" />
+                <span className="hidden sm:inline">Sponsored</span>
+              </TabsTrigger>
+              <TabsTrigger 
                 value="ranking" 
                 className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
               >
@@ -930,6 +938,10 @@ export default function AdminDashboard() {
 
         <TabsContent value="analytics" className="space-y-6">
           <VendorActivityAnalytics />
+        </TabsContent>
+
+        <TabsContent value="sponsored" className="space-y-6">
+          <SponsoredPlacementsManager />
         </TabsContent>
 
         <TabsContent value="ranking" className="space-y-6">

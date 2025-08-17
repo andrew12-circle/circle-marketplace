@@ -25,6 +25,9 @@ import { useActiveDisclaimer } from "@/hooks/useActiveDisclaimer";
 import { useServiceRatingFromBulk } from "@/hooks/useBulkServiceRatings";
 import { useProviderTracking } from "@/hooks/useProviderTracking";
 import { ToastAction } from "@/components/ui/toast";
+import { useFeatureFlag } from "@/hooks/useFeatureFlag";
+import { useABTest } from "@/hooks/useABTest";
+import { SponsoredLabel } from "./SponsoredLabel";
 
 interface ServiceRatingStats {
   averageRating: number;
@@ -58,6 +61,13 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false, b
   const navigate = useNavigate();
   const { formatPrice } = useCurrency();
   const isProMember = profile?.is_pro_member || false;
+  
+  // Sponsored placement features
+  const sponsoredEnabled = useFeatureFlag('sponsoredPlacements', false);
+  const sponsoredBadges = useFeatureFlag('sponsoredBadges', false);
+  const { variant: abVariant } = useABTest('sponsored-placements', { holdout: 0.1 });
+  const showSponsored = sponsoredEnabled && sponsoredBadges && abVariant === 'ranked';
+  const isSponsored = showSponsored && (service as any).is_sponsored;
   
   // Use bulk ratings data if available, otherwise fallback to individual fetch
   const bulkRatingData = useServiceRatingFromBulk(service.id, bulkRatings);
@@ -291,6 +301,13 @@ export const ServiceCard = ({ service, onSave, onViewDetails, isSaved = false, b
               </Badge>
             )}
           </div>
+
+          {/* Sponsored Badge */}
+          {isSponsored && (
+            <div className="absolute top-3 right-12 z-10">
+              <SponsoredLabel variant="small" />
+            </div>
+          )}
 
           {/* Save Button */}
           <Button

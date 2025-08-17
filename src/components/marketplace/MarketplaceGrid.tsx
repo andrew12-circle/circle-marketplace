@@ -166,6 +166,13 @@ export const MarketplaceGrid = () => {
     categories,
     localVendorCount
   } = useMarketplaceFilters(services, vendors, searchTerm, memoizedFilters, location);
+  
+  // Sponsored placement settings
+  const sponsoredEnabled = useFeatureFlag('sponsoredPlacements', false);
+  const sponsoredGrid = useFeatureFlag('sponsoredGrid', false);
+  const { variant: abVariant } = useABTest('sponsored-placements', { holdout: 0.1 });
+  const showSponsoredInGrid = sponsoredEnabled && sponsoredGrid && abVariant === 'ranked';
+  
   // Enable new landing experience for all users
   const showNewLanding = true;
 
