@@ -111,7 +111,7 @@ export const TopDealsCarousel = ({ services, serviceRatings, onServiceClick }: T
                           <img 
                             src={service.image_url} 
                             alt={service.title}
-                            className="w-full h-full object-cover px-2"
+                            className="w-full h-full object-contain px-2"
                             loading="lazy"
                           />
                         </div>
