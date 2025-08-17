@@ -103,7 +103,7 @@ const Index = () => {
                   <img 
                     src={circleLogoUrl}
                     alt="Circle Logo" 
-                    className="w-16 h-16 sm:w-20 sm:h-20 object-contain"
+                    className="w-12 h-12 sm:w-16 sm:h-16 object-contain"
                     width="80"
                     height="80"
                     loading="eager"
