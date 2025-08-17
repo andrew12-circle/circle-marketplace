@@ -107,7 +107,7 @@ export const TopDealsCarousel = ({ services, serviceRatings, onServiceClick }: T
                     <div className="space-y-3">
                       {/* Service image */}
                       {service.image_url && (
-                        <div className="w-full h-32 mb-3 overflow-hidden rounded-md bg-muted -mx-2">
+                        <div className="w-full h-32 mb-3 overflow-hidden rounded-md bg-white -mx-2">
                           <img 
                             src={service.image_url} 
                             alt={service.title}
