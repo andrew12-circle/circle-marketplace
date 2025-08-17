@@ -77,7 +77,7 @@ export function FirstVisitIntro() {
       <DialogContent className="sm:max-w-lg">
         <DialogHeader className="space-y-3">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-gradient-to-br from-primary to-circle-accent rounded-lg flex items-center justify-center">
               <Sparkles className="w-4 h-4 text-primary-foreground" />
             </div>
             <Badge variant="secondary" className="text-xs">
@@ -94,7 +94,7 @@ export function FirstVisitIntro() {
 
         <div className="space-y-3 py-2">
           <div className="flex items-start gap-3">
-            <CheckCircle className="w-5 h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
+            <CheckCircle className="w-5 h-5 text-circle-success mt-0.5 flex-shrink-0" />
             <div>
               <h4 className="font-medium text-sm">{t('intro.benefit1Title')}</h4>
               <p className="text-xs text-muted-foreground">{t('intro.benefit1Desc')}</p>
@@ -108,7 +108,7 @@ export function FirstVisitIntro() {
             </div>
           </div>
           <div className="flex items-start gap-3">
-            <Users className="w-5 h-5 text-accent-foreground mt-0.5 flex-shrink-0" />
+            <Users className="w-5 h-5 text-circle-accent mt-0.5 flex-shrink-0" />
             <div>
               <h4 className="font-medium text-sm">{t('intro.benefit3Title')}</h4>
               <p className="text-xs text-muted-foreground">{t('intro.benefit3Desc')}</p>

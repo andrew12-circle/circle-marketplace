@@ -2555,98 +2555,6 @@ export type Database = {
         }
         Relationships: []
       }
-      funnel_events: {
-        Row: {
-          anon_id: string
-          created_at: string
-          event_name: string
-          id: string
-          metadata: Json
-          page_url: string | null
-          referrer_url: string | null
-          session_id: string | null
-          user_id: string | null
-        }
-        Insert: {
-          anon_id: string
-          created_at?: string
-          event_name: string
-          id?: string
-          metadata?: Json
-          page_url?: string | null
-          referrer_url?: string | null
-          session_id?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          anon_id?: string
-          created_at?: string
-          event_name?: string
-          id?: string
-          metadata?: Json
-          page_url?: string | null
-          referrer_url?: string | null
-          session_id?: string | null
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "funnel_events_session_id_fkey"
-            columns: ["session_id"]
-            isOneToOne: false
-            referencedRelation: "funnel_sessions"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      funnel_sessions: {
-        Row: {
-          anon_id: string
-          country: string | null
-          created_at: string
-          device: string | null
-          id: string
-          landing_page: string | null
-          referrer: string | null
-          started_at: string
-          updated_at: string
-          user_id: string | null
-          utm_campaign: string | null
-          utm_medium: string | null
-          utm_source: string | null
-        }
-        Insert: {
-          anon_id: string
-          country?: string | null
-          created_at?: string
-          device?: string | null
-          id?: string
-          landing_page?: string | null
-          referrer?: string | null
-          started_at?: string
-          updated_at?: string
-          user_id?: string | null
-          utm_campaign?: string | null
-          utm_medium?: string | null
-          utm_source?: string | null
-        }
-        Update: {
-          anon_id?: string
-          country?: string | null
-          created_at?: string
-          device?: string | null
-          id?: string
-          landing_page?: string | null
-          referrer?: string | null
-          started_at?: string
-          updated_at?: string
-          user_id?: string | null
-          utm_campaign?: string | null
-          utm_medium?: string | null
-          utm_source?: string | null
-        }
-        Relationships: []
-      }
       funnel_templates: {
         Row: {
           created_at: string | null
@@ -6832,10 +6740,6 @@ export type Database = {
           youtube_channel_id: string
         }[]
       }
-      get_funnel_metrics: {
-        Args: { p_period?: string }
-        Returns: Json
-      }
       get_optimized_marketplace_data: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -6928,10 +6832,6 @@ export type Database = {
       increment_video_views: {
         Args: { video_uuid: string }
         Returns: undefined
-      }
-      link_funnel_events: {
-        Args: { p_anon_id: string }
-        Returns: Json
       }
       link_youtube_channel_to_user: {
         Args: {
