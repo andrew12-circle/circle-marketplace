@@ -409,8 +409,11 @@ export const MarketplaceGrid = () => {
     }
   }, [profile?.user_id, toast]);
   const handleViewServiceDetails = useCallback((serviceId: string) => {
+    console.log('handleViewServiceDetails called with serviceId:', serviceId);
     const service = flattenServices.find(s => s.id === serviceId) || services.find(s => s.id === serviceId);
+    console.log('Found service:', service ? service.title : 'NOT FOUND');
     if (service) {
+      console.log('Setting selectedService and opening modal');
       setSelectedService(service);
       setIsServiceModalOpen(true);
     }
