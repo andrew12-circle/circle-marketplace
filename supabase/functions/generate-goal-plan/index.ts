@@ -41,14 +41,40 @@ serve(async (req) => {
 
     const body = (await req.json().catch(() => ({}))) as BuildPlanInput;
 
-    // Load profile context (lightweight)
+    // Get comprehensive user context
     const { data: profile } = await supabase
       .from("profiles")
-      .select(
-        "display_name, location, city, state, zip_code, specialties, years_experience, annual_transactions, annual_volume, business_name, agent_tier"
-      )
+      .select(`
+        display_name, location, city, state, zip_code, specialties, years_experience, 
+        annual_transactions, annual_volume, business_name, agent_tier,
+        personality_data, current_tools, work_style_preferences,
+        annual_goal_transactions, annual_goal_volume, primary_challenge,
+        marketing_time_per_week, budget_preference
+      `)
       .eq("user_id", user.id)
       .maybeSingle();
+
+    // Get agent performance data
+    const { data: agentData } = await supabase
+      .from("agents")
+      .select("*")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    const { data: performanceData } = await supabase
+      .from("agent_performance_tracking")
+      .select("*")
+      .eq("agent_id", agentData?.id)
+      .order("month_year", { ascending: false })
+      .limit(12);
+
+    // Get recent transactions for baseline
+    const { data: recentTransactions } = await supabase
+      .from("agent_transactions")
+      .select("*")
+      .eq("agent_id", agentData?.id)
+      .gte("close_date", new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString())
+      .order("close_date", { ascending: false });
 
     // Curate active services the AI can pick from
     const { data: services } = await supabase
@@ -69,29 +95,80 @@ serve(async (req) => {
       timeline_weeks: (s as any).timeline_weeks ?? null,
     }));
 
-    // Fallback local recommendation if no key
+    // Calculate current performance baseline
+    const currentTransactions = recentTransactions?.length || 0;
+    const currentVolume = recentTransactions?.reduce((sum, t) => sum + (t.sale_price || 0), 0) || 0;
+    const targetTransactions = profile?.annual_goal_transactions || Math.max(currentTransactions * 1.5, 40);
+    const gapToClose = Math.max(0, targetTransactions - currentTransactions);
+
+    // Personality-aware fallback if no OpenAI key
     if (!OPENAI_API_KEY) {
+      const personalityStyle = profile?.personality_data?.personality_type || "balanced";
+      const currentTools = profile?.current_tools || {};
+      const workStyle = profile?.work_style_preferences || {};
+      
+      // Filter services based on personality and avoid "won't do" preferences
+      const avoidColdCalls = workStyle?.outreach_preferences?.includes("no_cold_calls");
+      const preferInbound = workStyle?.outreach_preferences?.includes("prefer_inbound");
+      
+      let recommendedServices = curated;
+      
+      // Filter out services that don't match preferences
+      if (avoidColdCalls) {
+        recommendedServices = recommendedServices.filter(s => 
+          !s.title?.toLowerCase().includes("cold call") && 
+          !s.title?.toLowerCase().includes("dialer")
+        );
+      }
+      
+      if (preferInbound) {
+        recommendedServices = recommendedServices.filter(s =>
+          s.category === "marketing" || 
+          s.title?.toLowerCase().includes("content") ||
+          s.title?.toLowerCase().includes("seo")
+        );
+      }
+
       const simplePlan = {
-        goal_title: body.goalTitle ?? "Growth plan",
-        summary:
-          "AI key missing; generated a basic staged plan using your catalog.",
-        timeframe_weeks: body.timeframeWeeks ?? 12,
+        goal_title: `Path to ${targetTransactions} Transactions`,
+        summary: `Grow from ${currentTransactions} to ${targetTransactions} transactions using strategies that match your ${personalityStyle} style`,
+        timeframe_weeks: body.timeframeWeeks ?? 52,
+        current_performance: {
+          transactions: currentTransactions,
+          volume: currentVolume,
+          gap_to_close: gapToClose
+        },
+        personality_match: {
+          style: personalityStyle,
+          avoids: workStyle?.outreach_preferences || [],
+          current_tools: Object.keys(currentTools || {})
+        },
         kpis: ["leads_generated", "appointments_set", "deals_closed"],
         phases: [
           {
-            name: "Foundation",
-            weeks: 1,
-            steps: curated.slice(0, 3).map((c) => ({
-              action: `Evaluate and prepare for ${c.title}`,
+            name: "Foundation Optimization (0-4 weeks)",
+            weeks: 4,
+            steps: recommendedServices.slice(0, 2).map((c) => ({
+              action: `Optimize ${c.title} for your ${personalityStyle} style`,
               service_ids: [c.id],
-              expected_impact: "setup",
+              expected_impact: `+${Math.round(gapToClose * 0.2)} transactions`,
+              est_cost: c.price,
+            })),
+          },
+          {
+            name: "Growth Acceleration (5-12 weeks)",
+            weeks: 8,
+            steps: recommendedServices.slice(2, 4).map((c) => ({
+              action: `Scale with ${c.title}`,
+              service_ids: [c.id],
+              expected_impact: `+${Math.round(gapToClose * 0.5)} transactions`,
               est_cost: c.price,
             })),
           },
         ],
-        recommended_service_ids: curated.slice(0, 5).map((c) => c.id),
-        confidence: 0.4,
-        model_used: "local-fallback",
+        recommended_service_ids: recommendedServices.slice(0, 5).map((c) => c.id),
+        confidence: 0.8,
+        model_used: "personality-aware-fallback",
       };
 
       // Persist
@@ -116,11 +193,22 @@ serve(async (req) => {
       });
     }
 
-    // Build prompt for OpenAI: force JSON response that references only provided service IDs
-    const system = `You are a senior growth strategist for real estate professionals.
-Create an actionable, phased plan that achieves the user's goal using ONLY the provided service_ids from the catalog.
-Use outside knowledge for strategy, sequencing, and KPIs, but all purchases must map to provided service_ids.
-Always return strict JSON matching the schema.`;
+    // Create personality and performance-aware prompt
+    const currentTransactions = recentTransactions?.length || 0;
+    const currentVolume = recentTransactions?.reduce((sum, t) => sum + (t.sale_price || 0), 0) || 0;
+    const targetTransactions = profile?.annual_goal_transactions || Math.max(currentTransactions * 1.5, 40);
+    const gapToClose = Math.max(0, targetTransactions - currentTransactions);
+
+    const system = `You are an expert real estate business strategist specializing in personalized growth plans for agents with different personality types and work styles.
+
+CRITICAL: Create a "Path to ${targetTransactions}" plan that:
+1. Uses ONLY the provided service_ids from the catalog
+2. Respects the agent's personality and work style preferences 
+3. Avoids strategies they explicitly won't do
+4. Focuses on closing the gap from ${currentTransactions} to ${targetTransactions} transactions
+5. Returns strict JSON matching the schema
+
+Your plan should be highly personalized based on their current performance, personality, and tool preferences.`;
 
     const schemaHint = {
       goal_title: body.goalTitle ?? "",
@@ -143,14 +231,46 @@ Always return strict JSON matching the schema.`;
       ],
     };
 
+    const personalityContext = profile?.personality_data ? `
+Personality Type: ${profile.personality_data.personality_type}
+Communication Style: ${profile.personality_data.communication_style}
+Work Preferences: ${profile.personality_data.work_preferences}
+` : "";
+
+    const workStyleContext = profile?.work_style_preferences ? `
+Outreach Preferences: ${profile.work_style_preferences.outreach_preferences?.join(", ")}
+Marketing Channels: ${profile.work_style_preferences.preferred_channels?.join(", ")}
+Time Availability: ${profile.work_style_preferences.time_availability}
+` : "";
+
+    const currentToolsContext = profile?.current_tools ? `
+Current CRM: ${profile.current_tools.crm || "Not specified"}
+Dialer: ${profile.current_tools.dialer || "None"}
+Lead Generation: ${profile.current_tools.lead_generation || "None"}
+Marketing Tools: ${profile.current_tools.marketing || "None"}
+` : "";
+
+    const performanceContext = `
+Current Performance (Last 12 months):
+- Transactions Closed: ${currentTransactions}
+- Total Volume: $${currentVolume.toLocaleString()}
+- Target Transactions: ${targetTransactions}
+- Gap to Close: ${gapToClose} transactions
+- Primary Challenge: ${profile?.primary_challenge || "Not specified"}
+`;
+
     const userMsg = {
       goal: {
-        title: body.goalTitle ?? "",
-        description: body.goalDescription ?? "",
-        timeframe_weeks: body.timeframeWeeks ?? 12,
+        title: body.goalTitle ?? `Path to ${targetTransactions} Transactions`,
+        description: body.goalDescription ?? `Grow from ${currentTransactions} to ${targetTransactions} transactions using strategies that match agent's personality and work style`,
+        timeframe_weeks: body.timeframeWeeks ?? 52,
         budget_min: body.budgetMin ?? null,
         budget_max: body.budgetMax ?? null,
       },
+      performance_context: performanceContext,
+      personality_context: personalityContext,
+      work_style_context: workStyleContext,
+      current_tools_context: currentToolsContext,
       profile: profile ?? {},
       service_catalog: curated,
       output_schema: schemaHint,
@@ -158,6 +278,8 @@ Always return strict JSON matching the schema.`;
         use_only_service_ids_from_catalog: true,
         max_phases: 4,
         max_steps_per_phase: 5,
+        respect_personality_preferences: true,
+        avoid_incompatible_strategies: true,
       },
     };
 

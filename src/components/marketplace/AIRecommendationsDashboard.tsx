@@ -6,9 +6,10 @@ import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { Target, TrendingUp, Clock, ShoppingCart, Eye, X, CheckCircle, Sparkles } from "lucide-react";
+import { useAgentData } from "@/hooks/useAgentData";
+import { Target, TrendingUp, Clock, ShoppingCart, Eye, X, CheckCircle, Sparkles, AlertCircle, BookOpen, Bot } from "lucide-react";
 import { GoalAssessmentModal } from "./GoalAssessmentModal";
-import { BuildAIPlanButton } from "@/components/marketplace/BuildAIPlanButton";
+import { ConversationalRefinement } from "./ConversationalRefinement";
 import { useGoalPlan } from "@/hooks/useGoalPlan";
 
 interface Recommendation {
@@ -40,12 +41,15 @@ interface ServiceBundle {
 export function AIRecommendationsDashboard() {
   const { user, profile } = useAuth();
   const { toast } = useToast();
+  const { agent, stats: agentStats, loading: agentLoading } = useAgentData();
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [bundles, setBundles] = useState<ServiceBundle[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isGoalAssessmentOpen, setIsGoalAssessmentOpen] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isCheckingRequirements, setIsCheckingRequirements] = useState(false);
+  const [currentPlan, setCurrentPlan] = useState<any>(null);
+  const [showRefinement, setShowRefinement] = useState(false);
   const { isBuilding, buildPlan } = useGoalPlan();
 
   useEffect(() => {
@@ -90,33 +94,32 @@ export function AIRecommendationsDashboard() {
     }
   };
 
-  const checkDataRequirements = async () => {
-    if (!user?.id || !profile) return false;
+  const checkDataRequirements = () => {
+    const hasProfile = user?.id;
+    const hasGoalAssessment = (profile as any)?.goal_assessment_completed;
+    const hasPersonalityData = (profile as any)?.personality_data?.personality_type;
+    const hasCurrentTools = (profile as any)?.current_tools && Object.keys((profile as any).current_tools).length > 0;
+    const hasGoals = (profile as any)?.annual_goal_transactions || (profile as any)?.primary_challenge;
     
-    // Check if user has completed goal assessment with new fields
-    const goalAssessmentComplete = (profile as any).goal_assessment_completed;
-    const hasPersonalityData = (profile as any).personality_data && Object.keys((profile as any).personality_data).length > 0;
-    const hasCurrentTools = (profile as any).current_tools && Object.keys((profile as any).current_tools).length > 0;
+    // Check if we have recent performance data from useAgentData
+    const hasPerformanceData = agentStats?.dealCount !== undefined;
     
-    // Check if user has any performance data (transactions in last 12 months)
-    const { data: agentData } = await supabase
-      .from('agents')
-      .select('id')
-      .eq('user_id', user.id)
-      .single();
-    
-    let hasPerformanceData = false;
-    if (agentData) {
-      const { data: performanceData } = await supabase
-        .from('agent_quiz_responses')
-        .select('id')
-        .eq('agent_id', agentData.id)
-        .limit(1);
-      
-      hasPerformanceData = (performanceData && performanceData.length > 0);
-    }
-    
-    return goalAssessmentComplete && hasPersonalityData && hasCurrentTools && hasPerformanceData;
+    return {
+      hasProfile,
+      hasGoalAssessment,
+      hasPersonalityData,
+      hasCurrentTools,
+      hasGoals,
+      hasPerformanceData,
+      isComplete: hasProfile && hasGoalAssessment && hasPersonalityData && hasCurrentTools && hasGoals && hasPerformanceData,
+      missing: [
+        !hasGoalAssessment && 'Goal Assessment',
+        !hasPersonalityData && 'Personality Profile',
+        !hasCurrentTools && 'Current Tools',
+        !hasGoals && 'Business Goals',
+        !hasPerformanceData && 'Performance Data'
+      ].filter(Boolean)
+    };
   };
 
   const getBudgetRange = () => {
@@ -134,44 +137,58 @@ export function AIRecommendationsDashboard() {
       return;
     }
 
-    try {
-      setIsCheckingRequirements(true);
-      
-      // Check data requirements first
-      const hasRequiredData = await checkDataRequirements();
-      if (!hasRequiredData) {
-        setIsGoalAssessmentOpen(true);
-        toast({ 
-          title: "Complete your profile", 
-          description: "We need your goals, personality, and performance data to create your personalized 'Path to Success' plan.", 
-          variant: "default" 
-        });
-        return;
-      }
+    const requirements = checkDataRequirements();
+    if (!requirements.isComplete) {
+      toast({
+        title: "Missing Information",
+        description: `Please complete: ${requirements.missing.join(', ')}`,
+        variant: "destructive"
+      });
+      setIsGoalAssessmentOpen(true);
+      return;
+    }
 
-      setIsGenerating(true);
-      const { data, error } = await supabase.functions.invoke("generate-goal-plan", {
-        body: { 
-          goalTitle: `Path to ${(profile as any).annual_goal_transactions || 40}`,
-          goalDescription: `Personalized growth plan based on your current performance and personality`,
+    setIsGenerating(true);
+    
+    try {
+      const budgetRange = getBudgetRange();
+      const currentTransactions = agentStats?.dealCount || 0;
+      const targetTransactions = (profile as any)?.annual_goal_transactions || Math.max(currentTransactions * 1.5, 40);
+      
+      // Use the goal plan generation for personality-aware planning
+      const { data, error } = await supabase.functions.invoke('generate-goal-plan', {
+        body: {
+          goalTitle: `Path to ${targetTransactions} Transactions`,
+          goalDescription: `Grow from ${currentTransactions} to ${targetTransactions} transactions using strategies that match your personality and work style`,
           timeframeWeeks: 52,
-          budgetMin: getBudgetRange().min,
-          budgetMax: getBudgetRange().max
-        },
+          budgetMin: budgetRange.min,
+          budgetMax: budgetRange.max
+        }
       });
 
       if (error) throw error;
 
       if (data?.plan) {
-        toast({ title: "Your Path to Success is Ready!", description: "AI analyzed 1.6M+ agents to create your personalized growth plan." });
-        await loadRecommendations();
+        setCurrentPlan(data.plan);
+        setShowRefinement(true);
+        
+        toast({
+          title: "Your Path to Success is Ready!",
+          description: `Generated a personalized plan to reach ${targetTransactions} transactions.`
+        });
       }
+
+      // Also load regular recommendations
+      loadRecommendations();
     } catch (error: any) {
-      console.error("Error generating recommendations:", error);
-      toast({ title: "AI error", description: error?.message ?? "Failed to generate recommendations", variant: "destructive" });
+      console.error('Error generating AI recommendations:', error);
+      toast({
+        title: "Generation Failed",
+        description: "Unable to generate recommendations. Please try again.",
+        variant: "destructive"
+      });
     } finally {
       setIsGenerating(false);
-      setIsCheckingRequirements(false);
     }
   };
 
@@ -250,7 +267,7 @@ export function AIRecommendationsDashboard() {
     }
   };
 
-  if (isLoading) {
+  if (isLoading || agentLoading) {
     return (
       <div className="space-y-4">
         <div className="h-32 bg-muted rounded-lg animate-pulse" />
@@ -259,7 +276,10 @@ export function AIRecommendationsDashboard() {
     );
   }
 
-  const hasCompletedAssessment = Boolean((profile as any)?.onboarding_completed);
+  const requirements = checkDataRequirements();
+  const currentTransactions = agentStats?.dealCount || 0;
+  const targetTransactions = (profile as any)?.annual_goal_transactions || Math.max(currentTransactions * 1.5, 40);
+  const personalityType = (profile as any)?.personality_data?.personality_type || null;
 
   return (
     <div className="space-y-6">
@@ -268,29 +288,146 @@ export function AIRecommendationsDashboard() {
         <div className="mb-4">
           <h2 className="text-2xl font-bold flex items-center gap-2 mb-2">
             <Sparkles className="h-6 w-6 text-primary" />
-            Your Personalized Recommendations
+            {personalityType ? `Your ${personalityType} Growth Path` : 'Your Personalized Recommendations'}
           </h2>
           <p className="text-muted-foreground">
-            AI-powered recommendations based on your business goals and market data
+            {currentTransactions > 0 ? (
+              `Grow from ${currentTransactions} to ${targetTransactions} transactions with personalized strategies`
+            ) : (
+              'AI-powered recommendations based on your business goals and market data'
+            )}
           </p>
         </div>
 
         {/* Action Buttons */}
         <div className="flex flex-wrap gap-2">
-          <Button onClick={generateAIRecommendations} disabled={isGenerating || isCheckingRequirements}>
-            {(isGenerating || isCheckingRequirements) ? (
-              <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-2" />
+          <Button onClick={generateAIRecommendations} disabled={isGenerating}>
+            {isGenerating ? (
+              <>
+                <Bot className="h-4 w-4 mr-2 animate-pulse" />
+                Building Your Path...
+              </>
+            ) : requirements.isComplete ? (
+              <>
+                <Sparkles className="h-4 w-4 mr-2" />
+                Build My Path to {targetTransactions}
+              </>
             ) : (
-              <Sparkles className="h-4 w-4 mr-2" />
+              <>
+                <AlertCircle className="h-4 w-4 mr-2" />
+                Complete Setup
+              </>
             )}
-            {isCheckingRequirements ? 'Checking requirements...' : isGenerating ? 'Generating your path...' : `Build My Path to ${(profile as any)?.annual_goal_transactions || 40}`}
           </Button>
           <Button variant="outline">
-            <TrendingUp className="h-4 w-4 mr-2" />
+            <BookOpen className="h-4 w-4 mr-2" />
             AI Strategy Guide
           </Button>
         </div>
       </div>
+
+      {/* Requirements Status */}
+      {!requirements.isComplete && (
+        <Card className="border-orange-200 bg-orange-50/50 dark:border-orange-800 dark:bg-orange-900/20 mb-6">
+          <CardContent className="p-4">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="h-5 w-5 text-orange-600 mt-0.5" />
+              <div>
+                <h3 className="font-medium text-orange-800 dark:text-orange-200">
+                  Complete Your Profile for Personalized Recommendations
+                </h3>
+                <p className="text-sm text-orange-600 dark:text-orange-300 mt-1">
+                  Missing: {requirements.missing.join(', ')}
+                </p>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="mt-2"
+                  onClick={() => setIsGoalAssessmentOpen(true)}
+                >
+                  Complete Now
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Current Plan Display */}
+      {currentPlan && (
+        <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10 mb-6">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <Target className="h-5 w-5 text-primary" />
+                  {currentPlan.goal_title}
+                </CardTitle>
+                <CardDescription>{currentPlan.summary}</CardDescription>
+              </div>
+              <Badge variant="secondary" className="flex items-center gap-1">
+                <CheckCircle className="h-3 w-3" />
+                {currentPlan.confidence ? `${Math.round(currentPlan.confidence * 100)}% Match` : 'Generated'}
+              </Badge>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {currentPlan.current_performance && (
+              <div className="grid grid-cols-3 gap-4 mb-4 p-4 bg-background/50 rounded-lg">
+                <div>
+                  <div className="text-2xl font-bold text-primary">{currentPlan.current_performance.transactions}</div>
+                  <div className="text-sm text-muted-foreground">Current Transactions</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-green-600">{currentPlan.current_performance.gap_to_close}</div>
+                  <div className="text-sm text-muted-foreground">Gap to Close</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-blue-600">{currentPlan.timeframe_weeks}w</div>
+                  <div className="text-sm text-muted-foreground">Timeline</div>
+                </div>
+              </div>
+            )}
+
+            {currentPlan.phases && (
+              <div className="space-y-3">
+                <h4 className="font-medium">Growth Phases</h4>
+                {currentPlan.phases.map((phase: any, index: number) => (
+                  <div key={index} className="flex items-center gap-3 p-3 bg-background/30 rounded-lg">
+                    <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-medium">
+                      {index + 1}
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-medium">{phase.name}</div>
+                      <div className="text-sm text-muted-foreground">{phase.steps?.[0]?.expected_impact}</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-medium text-green-600">{phase.weeks} weeks</div>
+                      <div className="text-sm text-muted-foreground">{phase.steps?.length} steps</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Conversational Refinement */}
+      {showRefinement && currentPlan && (
+        <div className="mb-6">
+          <ConversationalRefinement
+            currentPlan={currentPlan}
+            onPlanUpdated={(newPlan) => {
+              setCurrentPlan(newPlan);
+              toast({
+                title: "Plan Updated",
+                description: "Your growth plan has been refined based on your feedback."
+              });
+            }}
+          />
+        </div>
+      )}
 
       {/* AI Recommendations */}
       {recommendations.length > 0 && (
@@ -439,11 +576,12 @@ export function AIRecommendationsDashboard() {
       <GoalAssessmentModal
         open={isGoalAssessmentOpen}
         onOpenChange={setIsGoalAssessmentOpen}
-        onComplete={async () => {
+        onComplete={() => {
           setIsGoalAssessmentOpen(false);
-          // Refresh recommendations after completing assessment
-          await loadRecommendations();
-          await loadServiceBundles();
+          // Reload data to reflect new assessment
+          setTimeout(() => {
+            generateAIRecommendations();
+          }, 1000);
         }}
       />
     </div>
