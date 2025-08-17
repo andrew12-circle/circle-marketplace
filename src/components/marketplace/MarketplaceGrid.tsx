@@ -166,23 +166,8 @@ export const MarketplaceGrid = () => {
     categories,
     localVendorCount
   } = useMarketplaceFilters(services, vendors, searchTerm, memoizedFilters, location);
-  // Feature gate for new landing experience
-  const showNewLanding = useMemo(() => {
-    try {
-      const params = new URLSearchParams(window.location.search);
-      const urlFlag = params.get('landing') === 'topdeals';
-      const stored = localStorage.getItem('landing_topdeals') === 'true';
-      
-      if (urlFlag) {
-        localStorage.setItem('landing_topdeals', 'true');
-        return true;
-      }
-      
-      return stored;
-    } catch {
-      return false;
-    }
-  }, []);
+  // Enable new landing experience for all users
+  const showNewLanding = true;
 
   // Paginated services (server-side filters + pagination)
   const {
@@ -579,9 +564,8 @@ export const MarketplaceGrid = () => {
           {/* Campaign Services Header */}
           <CampaignServicesHeader />
 
-          {showNewLanding && (
-            <>
-              <TopDealsCarousel
+          <>
+            <TopDealsCarousel
                 services={flattenServices}
                 serviceRatings={bulkRatings}
                 onServiceClick={handleViewServiceDetails}
@@ -590,9 +574,8 @@ export const MarketplaceGrid = () => {
                 onCategoryClick={handleCategoryClick}
                 services={flattenServices}
               />
-              <ROISavingsHook />
-            </>
-          )}
+            <ROISavingsHook />
+          </>
 
            {/* Sticky Enhanced Search Component */}
           <StickySearchContainer>
