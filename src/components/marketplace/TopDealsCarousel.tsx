@@ -1,8 +1,9 @@
-import { useMemo, useEffect } from "react";
+import { useMemo, useEffect, useState } from "react";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { useABTest } from "@/hooks/useABTest";
 import { useSponsoredTracking } from "@/hooks/useSponsoredTracking";
 import { SponsoredLabel } from "./SponsoredLabel";
+import { ServiceFunnelModal } from "./ServiceFunnelModal";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -67,6 +68,10 @@ export const TopDealsCarousel = ({ services, serviceRatings, onServiceClick }: T
   const { profile } = useAuth();
   const { formatPrice } = useCurrency();
   
+  // Modal state management - same as ServiceCard
+  const [isFunnelModalOpen, setIsFunnelModalOpen] = useState(false);
+  const [selectedService, setSelectedService] = useState<Service | null>(null);
+  
   // Sponsored features enabled by default for Amazon-level experience
   const sponsoredEnabled = true;
   const sponsoredTopDeals = true;
@@ -112,9 +117,12 @@ export const TopDealsCarousel = ({ services, serviceRatings, onServiceClick }: T
   const handleDealClick = (serviceId: string, serviceName: string) => {
     logger.log('top_deal_clicked', { serviceId, serviceName });
     
-    // Track sponsored click if applicable
+    // Find the service and set it as selected
     const service = topDeals.find(s => s.id === serviceId);
-    if (showSponsored && service && (service as any).is_sponsored) {
+    if (!service) return;
+    
+    // Track sponsored click if applicable
+    if (showSponsored && (service as any).is_sponsored) {
       trackClick({
         serviceId,
         placement: 'top_deals',
@@ -122,7 +130,9 @@ export const TopDealsCarousel = ({ services, serviceRatings, onServiceClick }: T
       });
     }
     
-    onServiceClick(serviceId);
+    // Open ServiceFunnelModal instead of calling onServiceClick
+    setSelectedService(service);
+    setIsFunnelModalOpen(true);
   };
 
   if (topDeals.length === 0) return null;
@@ -252,6 +262,18 @@ export const TopDealsCarousel = ({ services, serviceRatings, onServiceClick }: T
         <CarouselPrevious className="hidden md:flex" />
         <CarouselNext className="hidden md:flex" />
       </Carousel>
+      
+      {/* ServiceFunnelModal - same as ServiceCard */}
+      {isFunnelModalOpen && selectedService && (
+        <ServiceFunnelModal
+          isOpen={isFunnelModalOpen}
+          onClose={() => {
+            setIsFunnelModalOpen(false);
+            setSelectedService(null);
+          }}
+          service={selectedService}
+        />
+      )}
     </div>
   );
 };
