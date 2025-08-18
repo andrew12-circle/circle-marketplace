@@ -194,12 +194,19 @@ export const TopDealsCarousel = ({ services, serviceRatings, onServiceClick }: T
                         </p>
                       )}
 
-                      {/* Discount badge */}
-                      {discountPct > 0 && (
-                        <Badge variant="destructive" className="text-xs">
-                          {discountPct}% OFF
-                        </Badge>
-                      )}
+                      {/* Badges */}
+                      <div className="flex gap-1 flex-wrap">
+                        {discountPct > 0 && (
+                          <Badge variant="destructive" className="text-[10px] px-1.5 py-0.5 h-5">
+                            {discountPct}% OFF
+                          </Badge>
+                        )}
+                        {service.copay_allowed && (
+                          <Badge variant="secondary" className="text-[10px] px-1.5 py-0.5 h-5 bg-green-100 text-green-800">
+                            Co-Pay Available
+                          </Badge>
+                        )}
+                      </div>
 
                       {/* Price */}
                       <div className="text-right">
