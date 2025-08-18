@@ -164,8 +164,9 @@ export const SponsoredPlacementsManager = () => {
 
   const handleFlagToggle = (flagName: keyof typeof flags) => {
     const newFlags = { ...flags, [flagName]: !flags[flagName] };
-    setFlagsState(newFlags);
     setFeatureFlags(newFlags);
+    // Reload flags from localStorage to ensure sync
+    setFlagsState(getFeatureFlags());
     
     toast({
       title: `Feature ${!flags[flagName] ? 'Enabled' : 'Disabled'}`,
