@@ -8,6 +8,7 @@ export interface FeatureFlags {
   sponsoredGrid: boolean;
   sponsoredTopDeals: boolean;
   sponsoredBadges: boolean;
+  serviceBundles: boolean;
 }
 
 // Default feature flags - all enabled in production
@@ -19,6 +20,7 @@ const DEFAULT_FLAGS: FeatureFlags = {
   sponsoredGrid: false,
   sponsoredTopDeals: false,
   sponsoredBadges: false,
+  serviceBundles: false,
 };
 
 // Get feature flags from localStorage or use defaults
