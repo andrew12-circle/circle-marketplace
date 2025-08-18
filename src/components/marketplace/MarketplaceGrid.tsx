@@ -613,7 +613,7 @@ export const MarketplaceGrid = () => {
           </StickySearchContainer>
 
           {/* View Mode Toggle */}
-          <div className="flex gap-2 mb-6">
+          <div id="marketplace-results" className="flex gap-2 mb-6">
             <Button variant={viewMode === "services" ? "default" : "outline"} onClick={() => setViewMode("services")} className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-9 sm:h-10 text-sm sm:text-base">
               <Sparkles className="w-3 h-3 sm:w-4 sm:h-4" />
               {t('services')}
