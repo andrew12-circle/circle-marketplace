@@ -11,7 +11,7 @@ import { AddProductModal } from "./AddProductModal";
 import { VendorSelectionModal } from "./VendorSelectionModal";
 import { TopDealsCarousel } from "./TopDealsCarousel";
 import { CategoryBlocks } from "./CategoryBlocks";
-import { ROISavingsHook } from "./ROISavingsHook";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Filter, Sparkles, Zap, Facebook, Globe, Mail, Share2, Monitor, TrendingUp, Database, Camera, Video, Printer, ArrowRight, BookOpen } from "lucide-react";
@@ -604,7 +604,7 @@ export const MarketplaceGrid = () => {
                   />
                 )}
 
-             <ROISavingsHook />
+             
            </>
 
            {/* Sticky Enhanced Search Component */}
