@@ -150,7 +150,7 @@ export const CategoryBlocks = ({ onCategoryClick, services }: CategoryBlocksProp
         <h3 className="text-lg font-semibold text-foreground">{title}</h3>
         <p className="text-sm text-muted-foreground">{subtitle}</p>
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         {categories.map((category) => {
           const IconComponent = category.icon;
           
