@@ -11,7 +11,8 @@ import {
   Mail,
   FileText,
   Presentation,
-  Palette
+  Palette,
+  Globe
 } from "lucide-react";
 import { logger } from "@/utils/logger";
 import { useMemo } from "react";
@@ -38,6 +39,14 @@ const DIGITAL_CATEGORIES = [
     tags: ["cat:ads-lead-gen"],
     description: "Digital Advertising",
     color: "bg-green-500",
+    iconColor: "text-white"
+  },
+  {
+    name: "Website / IDX",
+    icon: Globe,
+    tags: ["cat:website-idx"],
+    description: "Websites & Property Search",
+    color: "bg-cyan-500",
     iconColor: "text-white"
   },
   {
