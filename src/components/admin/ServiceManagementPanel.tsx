@@ -213,6 +213,34 @@ const safeParseJSON = (val: string) => {
   try { return JSON.parse(val); } catch { return null; }
 };
 
+// Helper function to compare values with proper type handling
+const compareValues = (a: any, b: any): boolean => {
+  // Handle null/undefined cases
+  if (a === null || a === undefined) a = '';
+  if (b === null || b === undefined) b = '';
+  
+  // Handle arrays
+  if (Array.isArray(a) && Array.isArray(b)) {
+    return JSON.stringify(a.sort()) === JSON.stringify(b.sort());
+  }
+  if (Array.isArray(a) || Array.isArray(b)) {
+    return false;
+  }
+  
+  // Handle numbers
+  if (typeof a === 'number' || typeof b === 'number') {
+    return Number(a) === Number(b);
+  }
+  
+  // Handle booleans
+  if (typeof a === 'boolean' || typeof b === 'boolean') {
+    return Boolean(a) === Boolean(b);
+  }
+  
+  // Handle strings
+  return String(a) === String(b);
+};
+
 export const ServiceManagementPanel = () => {
   const { toast } = useToast();
   const invalidateCache = useInvalidateMarketplace();
@@ -702,6 +730,25 @@ export const ServiceManagementPanel = () => {
       return { savedAt: new Date().toISOString(), verified: false, message };
     }
   };
+
+  const handleTabChange = (value: 'details' | 'pricing' | 'funnel') => {
+    if (activeTab === 'pricing' && value !== 'pricing' && isPricingDirty) {
+      const proceed = window.confirm('You have unsaved pricing changes. Save before leaving this tab?');
+      if (proceed) {
+        handleFunnelSave();
+      }
+    }
+    setActiveTab(value);
+  };
+
+  const detailKeys = ['title','description','category','duration','estimated_roi','sort_order','is_featured','is_top_pick','is_verified','requires_quote','copay_allowed','direct_purchase_enabled','respa_split_limit','max_split_percentage_non_ssp','retail_price','pro_price','price_duration','tags'] as const;
+  
+  const isDetailsDirty = selectedService ? detailKeys.some((key) => {
+    const currentValue = (editForm as any)[key];
+    const originalValue = (selectedService as any)[key];
+    return !compareValues(currentValue, originalValue);
+  }) : false;
+
   const isPricingDirty = selectedService
     ? JSON.stringify(pricingTiers) !== JSON.stringify((selectedService as any).pricing_tiers || [])
     : false;
@@ -714,20 +761,6 @@ export const ServiceManagementPanel = () => {
     if (mins === 1) return '1 minute ago';
     return `${mins} minutes ago`;
   };
-
-  const handleTabChange = (value: 'details' | 'pricing' | 'funnel') => {
-    if (activeTab === 'pricing' && value !== 'pricing' && isPricingDirty) {
-      const proceed = window.confirm('You have unsaved pricing changes. Save before leaving this tab?');
-      if (proceed) {
-        handleFunnelSave();
-      }
-    }
-    setActiveTab(value);
-  };
-
-  // Track unsaved changes in Details form
-  const detailKeys = ['title','description','category','duration','estimated_roi','sort_order','is_featured','is_top_pick','is_verified','requires_quote','copay_allowed','direct_purchase_enabled','respa_split_limit','max_split_percentage_non_ssp','retail_price','pro_price','price_duration','tags'] as const;
-  const isDetailsDirty = selectedService ? detailKeys.some((k) => (editForm as any)[k] !== (selectedService as any)[k]) : false;
 
   if (loading) {
     return <p>Loading services...</p>;
@@ -911,7 +944,10 @@ export const ServiceManagementPanel = () => {
 
               <TabsContent value="details" className="space-y-4">
                 {isEditingDetails ? (
-                  <div className="space-y-4">{isDetailsDirty && (<Badge variant="outline" className="text-xs">Unsaved changes</Badge>)}
+                  <div className="space-y-4">
+                    {isDetailsDirty && (
+                      <Badge variant="outline" className="text-xs">Unsaved changes</Badge>
+                    )}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <label className="text-sm font-medium">Service Title</label>
@@ -1151,7 +1187,12 @@ export const ServiceManagementPanel = () => {
                       </Button>
                       <Button 
                         variant="outline" 
-                        onClick={() => { if (selectedService) setEditForm(selectedService); setIsEditingDetails(false); }}
+                        onClick={() => { 
+                          if (selectedService) {
+                            setEditForm(selectedService); 
+                            setIsEditingDetails(false);
+                          }
+                        }}
                       >
                         Cancel
                       </Button>
