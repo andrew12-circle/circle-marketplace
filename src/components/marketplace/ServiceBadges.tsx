@@ -50,14 +50,6 @@ export const ServiceBadges = ({
     });
   }
 
-  if (service.vendor?.is_verified) {
-    badges.push({
-      label: 'Verified',
-      icon: <Shield className="w-3 h-3" />,
-      className: 'bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0',
-      priority: 3
-    });
-  }
 
   // Check if trending based on performance data
   if (isTrending(service.id)) {
