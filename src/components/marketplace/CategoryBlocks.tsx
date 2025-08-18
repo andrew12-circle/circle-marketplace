@@ -53,10 +53,10 @@ const categories = [
     iconColor: "text-white"
   },
   {
-    name: "Insurance",
+    name: "Gifting - Client Retention",
     icon: Shield,
-    searchTerm: "insurance",
-    description: "Protection & Coverage",
+    searchTerm: "gifting client retention",
+    description: "Client Appreciation",
     color: "bg-red-500",
     iconColor: "text-white"
   },
