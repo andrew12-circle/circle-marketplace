@@ -993,22 +993,32 @@ export const ServiceManagementPanel = () => {
                       <div className="space-y-2">
                         <label className="text-sm font-medium">ROI (%)</label>
                         <div className="relative">
-                          <Input
-                            type="number"
-                            min="0"
-                            max="1000"
-                            step="0.01"
-                            value={editForm.estimated_roi || ''}
-                            onChange={(e) => {
-                              const value = e.target.value === '' ? null : Number(e.target.value);
-                              setEditForm({ ...editForm, estimated_roi: value });
-                            }}
-                            placeholder="Enter ROI percentage"
-                            className="pr-8"
-                          />
+                          {!editForm.is_verified ? (
+                            <Input
+                              value="TBD"
+                              disabled
+                              className="pr-8 text-muted-foreground"
+                            />
+                          ) : (
+                            <Input
+                              type="number"
+                              min="0"
+                              max="1000"
+                              step="0.01"
+                              value={editForm.estimated_roi || ''}
+                              onChange={(e) => {
+                                const value = e.target.value === '' ? null : Number(e.target.value);
+                                setEditForm({ ...editForm, estimated_roi: value });
+                              }}
+                              placeholder="Enter ROI percentage"
+                              className="pr-8"
+                            />
+                          )}
                           <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">%</span>
                         </div>
-                        <p className="text-xs text-muted-foreground">Enter the ROI as a percentage (e.g., 800 for 800%)</p>
+                        <p className="text-xs text-muted-foreground">
+                          {!editForm.is_verified ? 'ROI will show TBD until service is verified' : 'Enter the ROI as a percentage (e.g., 800 for 800%)'}
+                        </p>
                       </div>
                       <div className="space-y-2">
                         <label className="text-sm font-medium">Sort Order</label>
