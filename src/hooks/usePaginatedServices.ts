@@ -54,9 +54,21 @@ async function fetchServicesPage(offset: number, filters: PaginatedFilters): Pro
   // Server-side filters
   const term = (filters.searchTerm || '').trim();
   if (term) {
-    // Search title and description
-    const like = `%${term}%`;
-    query = query.or(`title.ilike.${like},description.ilike.${like}`);
+    // Split search term into individual keywords for better matching
+    const keywords = term.split(/\s+/).filter(keyword => keyword.length > 2);
+    
+    if (keywords.length === 1) {
+      // Single keyword - search in title, description, category, and tags
+      const like = `%${keywords[0]}%`;
+      query = query.or(`title.ilike.${like},description.ilike.${like},category.ilike.${like}`);
+    } else if (keywords.length > 1) {
+      // Multiple keywords - create OR conditions for each keyword
+      const conditions = keywords.map(keyword => {
+        const like = `%${keyword}%`;
+        return `title.ilike.${like},description.ilike.${like},category.ilike.${like}`;
+      }).join(',');
+      query = query.or(conditions);
+    }
   }
 
   if (filters.category && filters.category !== 'all' && filters.category !== 'All') {
