@@ -223,8 +223,8 @@ export const InviteVendorModal = ({ open, onOpenChange }: InviteVendorModalProps
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto z-[110] bg-card/95 supports-[backdrop-filter]:bg-card/80 backdrop-blur border border-border rounded-xl sm:rounded-2xl shadow-2xl">
-        <DialogHeader className="text-center -mx-6 -mt-6 px-6 pt-6 pb-4 bg-muted/40 border-b border-border rounded-t-xl">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto z-[110] bg-background border border-border/20 rounded-xl sm:rounded-2xl shadow-lg">
+        <DialogHeader className="text-center -mx-6 -mt-6 px-6 pt-6 pb-4 bg-background border-b border-border/10 rounded-t-xl">
           <div className="flex items-center justify-center gap-3 mb-3">
             <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center shadow-sm">
               <UserPlus className="w-6 h-6 text-primary" />
