@@ -15,6 +15,7 @@ import { SecurityStatusIndicator } from "@/components/security/SecurityEnhanceme
 import RequestLogger from "@/components/security/RequestLogger";
 import { OnboardingRedirect } from "@/components/onboarding/OnboardingRedirect";
 import { OutageBanner } from "@/components/common/OutageBanner";
+import { OfflineBanner } from "@/components/common/OfflineBanner";
 import { globalErrorMonitor } from "@/utils/globalErrorMonitor";
 import { HelpWidget } from "@/components/help/HelpWidget";
 // Lazy-loaded heavy pages
@@ -64,6 +65,7 @@ const AppContent = () => {
 
   return (
     <>
+      <OfflineBanner />
       <OutageBanner />
       <Suspense fallback={<div className="p-6 text-center text-muted-foreground">Loading...</div>}>
         <Routes>

@@ -5,6 +5,9 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
 import { performanceMonitor } from '@/utils/performanceMonitor';
+import { cacheManager } from '@/utils/cacheManager';
+import { globalErrorMonitor } from '@/utils/globalErrorMonitor';
+import { toast } from 'sonner';
 
 interface EdgeFuncStatus { name: string; ok: boolean; ms: number; error?: string }
 
@@ -12,8 +15,10 @@ export default function HealthStability() {
   const [edgeStatus, setEdgeStatus] = useState<EdgeFuncStatus[]>([]);
   const [clientErrorCount24h, setClientErrorCount24h] = useState<number>(0);
   const [loading, setLoading] = useState(false);
+  const [cacheClearing, setCacheClearing] = useState(false);
 
   const perf = useMemo(() => performanceMonitor.getStats(), []);
+  const healthStatus = useMemo(() => globalErrorMonitor.getHealthStatus(), []);
 
   useEffect(() => {
     // SEO
@@ -64,6 +69,48 @@ export default function HealthStability() {
     setClientErrorCount24h(count ?? 0);
   };
 
+  const clearCachePreserveSession = async () => {
+    setCacheClearing(true);
+    try {
+      console.log('🧪 [Health] Clear cache requested by user');
+      await cacheManager.clearAllCachePreserveSession();
+      toast.success('Cache cleared (session preserved)');
+    } catch (error) {
+      console.error('Failed to clear cache:', error);
+      toast.error('Failed to clear cache');
+    } finally {
+      setCacheClearing(false);
+    }
+  };
+
+  const runDiagnostics = async () => {
+    console.log('🔍 [Health] Running diagnostics...');
+    
+    // Check connectivity
+    console.log('🌐 [Health] Navigator online:', navigator.onLine);
+    
+    // Check Supabase session
+    const { data: { session } } = await supabase.auth.getSession();
+    console.log('🔐 [Health] Supabase session:', session ? 'Active' : 'None');
+    
+    // Check localStorage
+    try {
+      const testKey = 'diagnostic_test';
+      localStorage.setItem(testKey, 'test');
+      const value = localStorage.getItem(testKey);
+      localStorage.removeItem(testKey);
+      console.log('💾 [Health] LocalStorage:', value === 'test' ? 'Working' : 'Failed');
+    } catch (error) {
+      console.log('💾 [Health] LocalStorage: Error -', error);
+    }
+    
+    // Check cache
+    const cacheInfo = cacheManager.getCacheInfo();
+    console.log('🗂️ [Health] Cache size:', cacheInfo.size, 'entries');
+    
+    toast.success('Diagnostics logged to console');
+  };
+
   useEffect(() => {
     checkEdges();
     loadClientErrorCount();
@@ -76,7 +123,22 @@ export default function HealthStability() {
         <p className="text-muted-foreground">Live status of errors, performance, and edge functions</p>
       </header>
 
-      <section className="grid gap-4 md:grid-cols-3">
+      <section className="grid gap-4 md:grid-cols-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>System Health</CardTitle>
+          </CardHeader>
+          <CardContent className="flex items-center justify-between">
+            <div className="text-sm">
+              <div className="text-2xl font-semibold">{healthStatus.recentErrors}</div>
+              <div className="text-muted-foreground">Recent errors</div>
+            </div>
+            <Badge variant={healthStatus.isHealthy ? 'secondary' : 'destructive'}>
+              {healthStatus.isHealthy ? 'Healthy' : 'Issues'}
+            </Badge>
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader>
             <CardTitle>Client Errors (24h)</CardTitle>
@@ -119,6 +181,36 @@ export default function HealthStability() {
             <Button size="sm" variant="outline" onClick={checkEdges} disabled={loading}>
               {loading ? 'Checking...' : 'Re-check'}
             </Button>
+          </CardContent>
+        </Card>
+      </section>
+
+      <section>
+        <Card>
+          <CardHeader>
+            <CardTitle>Diagnostics & Cache Management</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid gap-3 md:grid-cols-2">
+              <Button 
+                onClick={clearCachePreserveSession} 
+                variant="outline"
+                disabled={cacheClearing}
+              >
+                {cacheClearing ? 'Clearing...' : 'Clear Cached Assets (Keep Session)'}
+              </Button>
+              <Button 
+                onClick={runDiagnostics} 
+                variant="outline"
+              >
+                Run Diagnostics
+              </Button>
+            </div>
+            <div className="text-sm text-muted-foreground">
+              <p>• Clear cache if you're experiencing loading issues</p>
+              <p>• Diagnostics log detailed info to browser console</p>
+              <p>• Online status: {navigator.onLine ? '🟢 Connected' : '🔴 Offline'}</p>
+            </div>
           </CardContent>
         </Card>
       </section>

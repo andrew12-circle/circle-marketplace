@@ -13,7 +13,7 @@ class GlobalErrorMonitor {
   private errorCount = 0;
   private errorTimeWindow: number[] = [];
   private config: GlobalMonitoringConfig = {
-    errorThreshold: 5,
+    errorThreshold: 8,
     timeWindow: 5,
     autoHealingEnabled: true,
     bootCanaryEnabled: true
@@ -57,20 +57,63 @@ class GlobalErrorMonitor {
 
       if (failures.length > 0) {
         console.warn('⚠️ Boot canary detected issues:', failures);
-        
-        if (this.config.autoHealingEnabled) {
-          await this.triggerSelfHealing('boot_canary_failure');
-        }
+        this.showSafeReloadBanner();
       } else {
         this.bootCanaryPassed = true;
         console.log('✅ Boot canary passed');
       }
     } catch (error) {
       console.error('❌ Boot canary failed:', error);
-      if (this.config.autoHealingEnabled) {
-        await this.triggerSelfHealing('boot_canary_error');
-      }
+      this.showSafeReloadBanner();
     }
+  }
+
+  private showSafeReloadBanner() {
+    const bannerId = 'safe-reload-banner';
+    if (document.getElementById(bannerId)) return; // Already shown
+
+    const banner = document.createElement('div');
+    banner.id = bannerId;
+    banner.innerHTML = `
+      <div style="
+        position: fixed; 
+        top: 0; 
+        left: 0; 
+        right: 0; 
+        background: hsl(var(--destructive)); 
+        color: hsl(var(--destructive-foreground)); 
+        padding: 12px; 
+        text-align: center; 
+        z-index: 9999;
+        font-family: system-ui, -apple-system, sans-serif;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      ">
+        ⚠️ Connection issues detected. 
+        <button onclick="window.location.reload()" style="
+          margin-left: 8px; 
+          padding: 4px 12px; 
+          background: rgba(255,255,255,0.2); 
+          color: inherit; 
+          border: 1px solid rgba(255,255,255,0.3); 
+          border-radius: 4px; 
+          cursor: pointer;
+        ">
+          Safe Reload
+        </button>
+        <button onclick="document.getElementById('${bannerId}').remove()" style="
+          margin-left: 8px; 
+          padding: 4px 8px; 
+          background: transparent; 
+          color: inherit; 
+          border: none; 
+          cursor: pointer;
+        ">
+          ✕
+        </button>
+      </div>
+    `;
+    
+    document.body.appendChild(banner);
   }
 
   private async testSupabaseConnection(): Promise<void> {
@@ -188,12 +231,19 @@ class GlobalErrorMonitor {
   }
 
   private async triggerSelfHealing(reason: string) {
+    // Throttle self-healing to prevent loops
+    if (!cacheManager.canSelfHeal()) {
+      console.log(`🔧 Self-healing throttled for: ${reason}`);
+      return;
+    }
+
     console.log(`🔧 Triggering self-healing for: ${reason}`);
+    cacheManager.markSelfHealExecuted();
     
     try {
-      // Step 1: Clear caches
-      cacheManager.clearAllCache();
-      console.log('✅ Caches cleared');
+      // Step 1: Clear caches while preserving session
+      await cacheManager.clearAllCachePreserveSession();
+      console.log('✅ Caches cleared (session preserved)');
 
       // Step 2: Reset error counters
       this.errorCount = 0;
@@ -220,11 +270,11 @@ class GlobalErrorMonitor {
       }
 
       // Step 4: Gradual escalation based on severity
-      if (reason === 'boot_canary_failure' || reason === 'error_threshold_exceeded') {
+      if (reason === 'error_threshold_exceeded') {
         // Wait a bit, then soft reload
         setTimeout(() => {
           console.log('🔄 Performing soft reload...');
-          window.location.reload();
+          cacheManager.forceReload();
         }, 2000);
       }
 
@@ -257,8 +307,8 @@ class GlobalErrorMonitor {
         const currentVersion = '1.0.0'; // Should come from build process
         if (this.isVersionOutdated(currentVersion, config.min_build_version)) {
           console.log('📱 App version outdated, triggering refresh...');
-          cacheManager.clearAllCache();
-          window.location.reload();
+          await cacheManager.clearAllCachePreserveSession();
+          cacheManager.forceReload();
         }
       }
 
