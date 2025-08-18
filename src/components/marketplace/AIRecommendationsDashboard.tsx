@@ -32,16 +32,17 @@ export function AIRecommendationsDashboard() {
     const hasPersonalityData = (profile as any)?.personality_data?.personality_type;
     const hasCurrentTools = (profile as any)?.current_tools && Object.keys((profile as any).current_tools).length > 0;
     const hasGoals = (profile as any)?.annual_goal_transactions || (profile as any)?.primary_challenge;
-    const hasPerformanceData = agentStats && (agentStats.buyerDeals !== undefined || agentStats.sellerDeals !== undefined);
+    
+    // Make performance data optional - use defaults if not available
+    const hasBasicRequirements = hasProfile && hasGoalAssessment && hasPersonalityData && hasCurrentTools && hasGoals;
     
     return {
-      isComplete: hasProfile && hasGoalAssessment && hasPersonalityData && hasCurrentTools && hasGoals && hasPerformanceData,
+      isComplete: hasBasicRequirements,
       missing: [
         !hasGoalAssessment && 'Goal Assessment',
-        !hasPersonalityData && 'Personality Profile',
+        !hasPersonalityData && 'Personality Profile', 
         !hasCurrentTools && 'Current Tools',
-        !hasGoals && 'Business Goals',
-        !hasPerformanceData && 'Performance Data'
+        !hasGoals && 'Business Goals'
       ].filter(Boolean)
     };
   };
