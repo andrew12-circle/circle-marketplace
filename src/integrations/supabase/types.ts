@@ -6837,6 +6837,24 @@ export type Database = {
         Args: { p_agent_id: string }
         Returns: Json
       }
+      get_bestseller_services: {
+        Args: {
+          p_max_count?: number
+          p_min_count?: number
+          p_period?: string
+          p_top_pct?: number
+        }
+        Returns: {
+          avg_purchase_value: number
+          conversion_rate: number
+          purchase_velocity: number
+          rank: number
+          sales_score: number
+          service_id: string
+          total_purchases: number
+          total_revenue: number
+        }[]
+      }
       get_creator_earnings_summary: {
         Args: { creator_user_id: string }
         Returns: Json

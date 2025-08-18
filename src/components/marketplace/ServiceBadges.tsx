@@ -28,7 +28,7 @@ export const ServiceBadges = ({
   maxBadges = 3,
   className = ""
 }: ServiceBadgesProps) => {
-  const { isTrending } = useTrendingServices();
+  const { isTrending, isBestseller } = useTrendingServices();
   const badges = [];
 
   // Priority order for badges
@@ -69,8 +69,8 @@ export const ServiceBadges = ({
     });
   }
 
-  // Bestseller (high review count)
-  if (service.vendor?.review_count >= 50) {
+  // Bestseller (high sales performance)
+  if (isBestseller(service.id)) {
     badges.push({
       label: 'Bestseller',
       icon: <Flame className="w-3 h-3" />,
