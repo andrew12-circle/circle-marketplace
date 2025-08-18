@@ -494,15 +494,22 @@ export const ServiceManagementPanel = () => {
     try {
       // Normalize numeric fields to match DB constraints
       let roi = editForm.estimated_roi ?? null;
-      let respa = editForm.respa_split_limit ?? null; // likely integer column
-      let nonSsp = editForm.max_split_percentage_non_ssp ?? null; // likely integer column
+      let respa = editForm.respa_split_limit ?? null;
+      let nonSsp = editForm.max_split_percentage_non_ssp ?? null;
       const adjustments: string[] = [];
+      
+      // Don't normalize ROI - allow full range up to 1000%
       if (typeof roi === 'number') {
-        const original = roi;
-        if (roi > 1000) roi = 1000;
-        if (roi < 0) roi = 0;
-        if (roi !== original) adjustments.push(`ROI normalized to ${roi}%`);
+        if (roi > 1000) {
+          roi = 1000;
+          adjustments.push(`ROI capped at 1000%`);
+        }
+        if (roi < 0) {
+          roi = 0;
+          adjustments.push(`ROI cannot be negative`);
+        }
       }
+      
       if (typeof respa === 'number') {
         const original = respa;
         respa = Math.min(1000, Math.max(0, Math.round(respa)));
@@ -529,7 +536,7 @@ export const ServiceManagementPanel = () => {
         is_top_pick: !!editForm.is_top_pick,
         is_verified: !!editForm.is_verified,
         requires_quote: !!editForm.requires_quote,
-        copay_allowed: !!editForm.copay_allowed, // Use database field name
+        copay_allowed: !!editForm.copay_allowed,
         direct_purchase_enabled: !!editForm.direct_purchase_enabled,
         respa_split_limit: respa,
         max_split_percentage_non_ssp: nonSsp,
@@ -985,14 +992,23 @@ export const ServiceManagementPanel = () => {
                       </div>
                       <div className="space-y-2">
                         <label className="text-sm font-medium">ROI (%)</label>
-                        <Input
-                          type="number"
-                          min="0"
-                          max="1000"
-                          step="0.01"
-                          value={editForm.estimated_roi || ''}
-                          onChange={(e) => setEditForm({ ...editForm, estimated_roi: Number(e.target.value) })}
-                        />
+                        <div className="relative">
+                          <Input
+                            type="number"
+                            min="0"
+                            max="1000"
+                            step="0.01"
+                            value={editForm.estimated_roi || ''}
+                            onChange={(e) => {
+                              const value = e.target.value === '' ? null : Number(e.target.value);
+                              setEditForm({ ...editForm, estimated_roi: value });
+                            }}
+                            placeholder="Enter ROI percentage"
+                            className="pr-8"
+                          />
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">%</span>
+                        </div>
+                        <p className="text-xs text-muted-foreground">Enter the ROI as a percentage (e.g., 800 for 800%)</p>
                       </div>
                       <div className="space-y-2">
                         <label className="text-sm font-medium">Sort Order</label>
@@ -1297,7 +1313,6 @@ export const ServiceManagementPanel = () => {
           </CardContent>
         </Card>
       )}
-
 
       {showFunnelPreview && selectedService && (
         <ServiceFunnelModal
