@@ -64,6 +64,7 @@ export const MarketplaceGrid = () => {
   const {
     t
   } = useTranslation();
+  const bundlesEnabled = useFeatureFlag("serviceBundles", false);
 
   // Optimized data fetching with memoization
   const {
@@ -595,11 +596,13 @@ export const MarketplaceGrid = () => {
                  className="mb-8"
                />
 
-               {/* Service Bundles */}
-               <ServiceBundles 
-                 maxBundles={3}
-                 className="mb-8"
-               />
+                {/* Service Bundles */}
+                {bundlesEnabled && (
+                  <ServiceBundles 
+                    maxBundles={3}
+                    className="mb-8"
+                  />
+                )}
 
              <ROISavingsHook />
            </>

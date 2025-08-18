@@ -28,6 +28,7 @@ import { useServiceRatings } from "@/hooks/useServiceRatings";
 import { useServiceReviews } from "@/hooks/useServiceReviews";
 import { CustomersAlsoViewed } from "./CustomersAlsoViewed";
 import { ServiceBundles } from "./ServiceBundles";
+import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 interface Service {
   id: string;
   title: string;
@@ -123,6 +124,7 @@ export const ServiceDetailsModal = ({ service, isOpen, onClose }: ServiceDetails
   const { toast } = useToast();
   const isProMember = profile?.is_pro_member || false;
   const { reviews } = useServiceReviews(service?.id || "");
+  const bundlesEnabled = useFeatureFlag("serviceBundles", false);
   if (!service) return null;
 
   const handleAddToCart = (packageType: string) => {
@@ -411,13 +413,15 @@ export const ServiceDetailsModal = ({ service, isOpen, onClose }: ServiceDetails
           </div>
 
           {/* Related Service Bundles */}
-          <div className="mb-8">
-            <ServiceBundles 
-              currentService={service}
-              category={service.category}
-              maxBundles={2}
-            />
-          </div>
+          {bundlesEnabled && (
+            <div className="mb-8">
+              <ServiceBundles 
+                currentService={service}
+                category={service.category}
+                maxBundles={2}
+              />
+            </div>
+          )}
 
           <Separator className="my-8" />
 
