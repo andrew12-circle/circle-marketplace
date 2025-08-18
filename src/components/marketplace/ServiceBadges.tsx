@@ -99,15 +99,6 @@ export const ServiceBadges = ({
     });
   }
 
-  // Co-pay available
-  if (service.copay_allowed) {
-    badges.push({
-      label: 'Co-Pay',
-      icon: <Heart className="w-3 h-3" />,
-      className: 'bg-gradient-to-r from-rose-500 to-red-500 text-white border-0',
-      priority: 8
-    });
-  }
 
   // High ROI
   if (service.estimated_roi && service.estimated_roi >= 300) {
