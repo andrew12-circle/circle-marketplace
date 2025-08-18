@@ -6930,6 +6930,26 @@ export type Database = {
         Args: { p_service_id: string; p_time_period?: string }
         Returns: Json
       }
+      get_trending_services: {
+        Args: {
+          p_max_count?: number
+          p_min_count?: number
+          p_period?: string
+          p_top_pct?: number
+        }
+        Returns: {
+          bookings_now: number
+          conv_now: number
+          conv_prev: number
+          purchases_now: number
+          rank: number
+          revenue_now: number
+          score: number
+          service_id: string
+          views_now: number
+          views_prev: number
+        }[]
+      }
       get_user_admin_status: {
         Args: Record<PropertyKey, never>
         Returns: boolean

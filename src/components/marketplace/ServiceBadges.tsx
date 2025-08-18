@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Service } from "@/hooks/useMarketplaceData";
+import { useTrendingServices } from "@/hooks/useTrendingServices";
 
 interface ServiceBadgesProps {
   service: Service;
@@ -27,6 +28,7 @@ export const ServiceBadges = ({
   maxBadges = 3,
   className = ""
 }: ServiceBadgesProps) => {
+  const { isTrending } = useTrendingServices();
   const badges = [];
 
   // Priority order for badges
@@ -57,8 +59,8 @@ export const ServiceBadges = ({
     });
   }
 
-  // Check if trending (high rating + reviews)
-  if (service.vendor?.rating >= 4.5 && service.vendor?.review_count >= 10) {
+  // Check if trending based on performance data
+  if (isTrending(service.id)) {
     badges.push({
       label: 'Trending',
       icon: <TrendingUp className="w-3 h-3" />,
