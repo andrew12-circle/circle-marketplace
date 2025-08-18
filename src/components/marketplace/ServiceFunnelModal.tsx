@@ -229,7 +229,6 @@ export const ServiceFunnelModal = ({
   const riskLevel = determineServiceRisk(service.title, service.description);
   const { trackBooking, trackPurchase, trackOutboundClick, trackEvent, trackWebsiteClick } = useProviderTracking(service.id, isOpen);
   const [openItem, setOpenItem] = useState<string | undefined>(undefined);
-  const pricingRef = useRef<HTMLDivElement | null>(null);
   
   // Use service verification status from database  
   const isVerified = service.is_verified;
@@ -1053,16 +1052,17 @@ export const ServiceFunnelModal = ({
                               {(service.website_url || service.vendor?.website_url) ? 'View Website' : 'Website Not Available'}
                             </Button>
                          
-                         
-                             <Button 
-                              variant="outline" 
-                               onClick={() => {
-                                 setOpenItem('question-7');
-                                 trackEvent({ event_type: 'click', event_data: { context: 'pricing', section: 'question-7' } } as any);
-                                 requestAnimationFrame(() => {
-                                   pricingRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                                 });
-                               }}
+                          
+                              <Button 
+                               variant="outline" 
+                                onClick={() => {
+                                  // Scroll to the pricing section
+                                  const pricingSection = document.querySelector('[data-section="pricing-packages"]');
+                                  if (pricingSection) {
+                                    pricingSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                  }
+                                  trackEvent({ event_type: 'click', event_data: { context: 'pricing', section: 'pricing-packages' } } as any);
+                                }}
                              className="w-full border-2 border-gray-300 hover:border-gray-400 py-3 rounded-xl font-semibold"
                            >
                              <DollarSign className="w-5 h-5 mr-2" />
@@ -1078,7 +1078,7 @@ export const ServiceFunnelModal = ({
           </div>
 
           {/* Pricing Packages Section */}
-          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 py-12">
+          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 py-12" data-section="pricing-packages">
             <div className="max-w-7xl mx-auto px-6">
               <div className="text-center mb-8">
                 <h2 className="text-3xl font-bold text-gray-900 mb-4">Choose Your Package</h2>
