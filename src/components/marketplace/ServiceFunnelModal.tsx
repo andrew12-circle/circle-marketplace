@@ -47,6 +47,7 @@ import { EnhancedProviderIntegration } from "./EnhancedProviderIntegration";
 import { useProviderTracking } from "@/hooks/useProviderTracking";
 import { supabase } from "@/integrations/supabase/client";
 import { ReviewRatingSystem } from "@/components/marketplace/ReviewRatingSystem";
+import { CustomersAlsoViewed } from "@/components/marketplace/CustomersAlsoViewed";
 import { SafeHTML } from "@/utils/htmlSanitizer";
 
 // Helper: detect and embed YouTube videos
@@ -1188,6 +1189,11 @@ export const ServiceFunnelModal = ({
               </div>
 
             </div>
+          </div>
+
+          {/* Customers Also Viewed Section */}
+          <div className="max-w-6xl mx-auto px-6 py-8">
+            <CustomersAlsoViewed currentService={service} maxSuggestions={6} />
           </div>
 
           {/* Disclaimer Section for Non-Verified Services */}
