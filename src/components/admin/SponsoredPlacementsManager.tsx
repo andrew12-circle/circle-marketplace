@@ -38,6 +38,16 @@ export const SponsoredPlacementsManager = () => {
 
   const loadServices = async () => {
     try {
+      console.log('Loading services for sponsored placements...');
+      
+      // First, let's get a count of total services to debug
+      const { count: totalCount, error: countError } = await supabase
+        .from('services')
+        .select('*', { count: 'exact', head: true })
+        .eq('is_active', true);
+
+      console.log('Total active services:', totalCount);
+
       const { data, error } = await supabase
         .from('services')
         .select(`
@@ -45,20 +55,49 @@ export const SponsoredPlacementsManager = () => {
           title,
           is_sponsored,
           sponsored_rank_boost,
-          vendors!inner(name)
+          is_active,
+          vendors!inner(
+            id,
+            name
+          )
         `)
         .eq('is_active', true)
         .order('title');
 
-      if (error) throw error;
+      if (error) {
+        console.error('Services query error:', error);
+        throw error;
+      }
+
+      console.log('Raw services data:', data);
+
+      if (!data || data.length === 0) {
+        console.log('No services found. Checking if any services exist at all...');
+        
+        // Check if there are any services at all (without vendor join)
+        const { data: allServices, error: allError } = await supabase
+          .from('services')
+          .select('id, title, is_active')
+          .limit(5);
+          
+        console.log('All services (first 5):', allServices);
+        
+        toast({
+          title: 'No Services Found',
+          description: 'No active services were found in the database.',
+          variant: 'destructive'
+        });
+        setServices([]);
+        return;
+      }
 
       const servicesWithStats = await Promise.all(
-        (data || []).map(async (service: any) => {
+        data.map(async (service: any) => {
           const stats = await getServiceStats(service.id);
           return {
             id: service.id,
             title: service.title,
-            vendor_name: service.vendors?.name || 'Unknown',
+            vendor_name: service.vendors?.name || 'Unknown Vendor',
             is_sponsored: service.is_sponsored || false,
             sponsored_rank_boost: service.sponsored_rank_boost || 0,
             ...stats
@@ -66,14 +105,22 @@ export const SponsoredPlacementsManager = () => {
         })
       );
 
+      console.log('Services with stats:', servicesWithStats);
       setServices(servicesWithStats);
+      
+      toast({
+        title: 'Services Loaded',
+        description: `Found ${servicesWithStats.length} services`,
+      });
+      
     } catch (error) {
       console.error('Error loading services:', error);
       toast({
         title: 'Error',
-        description: 'Failed to load services',
+        description: `Failed to load services: ${error.message}`,
         variant: 'destructive'
       });
+      setServices([]);
     } finally {
       setLoading(false);
     }
@@ -272,14 +319,34 @@ export const SponsoredPlacementsManager = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <Input
-              placeholder="Search services..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+            <div className="flex items-center justify-between">
+              <Input
+                placeholder="Search services..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="max-w-sm"
+              />
+              <Button onClick={loadServices} variant="outline" size="sm">
+                Refresh Services
+              </Button>
+            </div>
             
             {loading ? (
               <div className="text-center py-8">Loading services...</div>
+            ) : filteredServices.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground">
+                  {services.length === 0 
+                    ? "No services found. Make sure services exist in the database and are marked as active."
+                    : "No services match your search criteria."
+                  }
+                </p>
+                {services.length === 0 && (
+                  <Button onClick={loadServices} variant="outline" className="mt-4">
+                    Try Loading Again
+                  </Button>
+                )}
+              </div>
             ) : (
               <div className="space-y-2">
                 {filteredServices.map((service) => (
