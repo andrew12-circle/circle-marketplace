@@ -100,6 +100,45 @@ export const SmartSearchAutocomplete = ({
     const lowerQuery = query.toLowerCase();
     const newSuggestions: SearchSuggestion[] = [];
 
+    // Keyword mapping for old-school categories
+    const keywordMap = new Map([
+      ['yard signs', 'Signs'],
+      ['signs', 'Signs'], 
+      ['for sale signs', 'Signs'],
+      ['postcards', 'Print & Mail'],
+      ['direct mail', 'Print & Mail'],
+      ['print', 'Print & Mail'],
+      ['flyers', 'Print & Mail'],
+      ['mailers', 'Print & Mail'],
+      ['presentations', 'Presentations'],
+      ['listing presentations', 'Presentations'],
+      ['branding', 'Branding'],
+      ['business cards', 'Branding'],
+      ['logos', 'Branding'],
+      ['client events', 'Client Event Kits'],
+      ['open house supplies', 'Client Event Kits'],
+      ['event kits', 'Client Event Kits'],
+      ['gifting', 'Client Retention'],
+      ['client appreciation', 'Client Retention'],
+      ['closing gifts', 'Client Retention']
+    ]);
+
+    // Check for keyword matches first
+    for (const [keyword, category] of keywordMap) {
+      if (lowerQuery.includes(keyword)) {
+        newSuggestions.push({
+          type: 'category' as const,
+          value: category,
+          label: `${category} services`,
+          count: marketplaceData.services.filter(s => 
+            s.category?.toLowerCase().includes(category.toLowerCase()) ||
+            s.title?.toLowerCase().includes(keyword) ||
+            s.description?.toLowerCase().includes(keyword)
+          ).length
+        });
+      }
+    }
+
     // Service suggestions
     const matchingServices = marketplaceData.services
       .filter(service => 

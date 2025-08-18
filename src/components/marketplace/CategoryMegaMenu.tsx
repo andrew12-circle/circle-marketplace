@@ -277,28 +277,53 @@ export const CategoryMegaMenu = ({ selectedCategory, onCategorySelect, viewMode 
           
           <div className="grid grid-cols-1 gap-6 p-6">
             {viewMode === 'services' && serviceCategories.length > 0 ? (
-              // Show actual service categories from database
-              <div className="space-y-3">
-                <div className="flex items-center justify-between pb-2 border-b border-border/50">
-                  <div className="flex items-center gap-2">
-                    <Building2 className="h-4 w-4 text-circle-primary" />
-                    <h4 className="font-medium text-sm text-foreground">Service Categories</h4>
+              <>
+                {/* Old-school Essentials Section */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between pb-2 border-b border-border/50">
+                    <div className="flex items-center gap-2">
+                      <Home className="h-4 w-4 text-circle-primary" />
+                      <h4 className="font-medium text-sm text-foreground">Old-school Essentials</h4>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-1">
+                    {['Print & Mail', 'Signs', 'Presentations', 'Branding', 'Client Event Kits', 'Client Retention'].map((category) => (
+                      <button
+                        key={category}
+                        onClick={() => handleCategorySelect(category)}
+                        className={`w-full text-left text-sm px-2 py-1.5 rounded hover:bg-accent transition-colors flex items-center justify-between ${
+                          selectedCategory === category ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:text-foreground"
+                        }`}
+                      >
+                        <span>{category}</span>
+                      </button>
+                    ))}
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-1">
-                  {serviceCategories.map((category) => (
-                    <button
-                      key={category}
-                      onClick={() => handleCategorySelect(category)}
-                      className={`w-full text-left text-sm px-2 py-1.5 rounded hover:bg-accent transition-colors flex items-center justify-between ${
-                        selectedCategory === category ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:text-foreground"
-                      }`}
-                    >
-                      <span>{category}</span>
-                    </button>
-                  ))}
+                
+                {/* Service Categories from Database */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between pb-2 border-b border-border/50">
+                    <div className="flex items-center gap-2">
+                      <Building2 className="h-4 w-4 text-circle-primary" />
+                      <h4 className="font-medium text-sm text-foreground">All Service Categories</h4>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-1">
+                    {serviceCategories.map((category) => (
+                      <button
+                        key={category}
+                        onClick={() => handleCategorySelect(category)}
+                        className={`w-full text-left text-sm px-2 py-1.5 rounded hover:bg-accent transition-colors flex items-center justify-between ${
+                          selectedCategory === category ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:text-foreground"
+                        }`}
+                      >
+                        <span>{category}</span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              </>
             ) : (
               // Show predefined categories for other modes or fallback
               (viewMode === 'services' ? SERVICE_CATEGORIES : viewMode === 'products' ? PRODUCT_CATEGORIES : VENDOR_CATEGORIES).map((category) => {

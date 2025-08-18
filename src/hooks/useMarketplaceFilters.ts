@@ -34,10 +34,60 @@ export const useMarketplaceFilters = (
         baseQuery ? [baseQuery, ...baseQuery.split(/[\s-]+/).filter(Boolean)] : []
       );
 
-      // Synonym expansion to make "360 marketing" find "360 branding" and vice versa
+      // Expanded synonym mapping for better search coverage
       const expandToken = (tok: string) => {
+        // Digital marketing synonyms
+        if (tok === 'ads') {
+          tokens.add('advertising');
+          tokens.add('facebook ads');
+          tokens.add('google ads');
+          tokens.add('meta ads');
+          tokens.add('paid social');
+          tokens.add('ppc');
+        }
         if (tok === 'marketing') tokens.add('branding');
         if (tok === 'branding') tokens.add('marketing');
+        if (tok === 'crm') {
+          tokens.add('customer management');
+          tokens.add('database');
+          tokens.add('lead tracking');
+          tokens.add('contact management');
+        }
+        
+        // Old-school marketing synonyms
+        if (tok === 'print') {
+          tokens.add('direct mail');
+          tokens.add('postcards');
+          tokens.add('flyers');
+          tokens.add('brochures');
+          tokens.add('door hangers');
+          tokens.add('mailers');
+        }
+        if (tok === 'signs') {
+          tokens.add('yard signs');
+          tokens.add('for sale signs');
+          tokens.add('open house signs');
+          tokens.add('rider signs');
+          tokens.add('banners');
+        }
+        if (tok === 'presentations') {
+          tokens.add('listing presentations');
+          tokens.add('buyer presentations');
+          tokens.add('market reports');
+          tokens.add('cma templates');
+        }
+        if (tok === 'gifting') {
+          tokens.add('client retention');
+          tokens.add('client appreciation');
+          tokens.add('closing gifts');
+        }
+        if (tok === 'events') {
+          tokens.add('open house supplies');
+          tokens.add('client events');
+          tokens.add('hosting materials');
+        }
+        
+        // Legacy 360 support
         if (tok === '360') {
           tokens.add('360 branding');
           tokens.add('360 marketing');

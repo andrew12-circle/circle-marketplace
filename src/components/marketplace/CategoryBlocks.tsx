@@ -8,7 +8,10 @@ import {
   Gift, 
   Camera, 
   Video, 
-  Mail 
+  Mail,
+  FileText,
+  Presentation,
+  Palette
 } from "lucide-react";
 import { logger } from "@/utils/logger";
 import { useMemo } from "react";
@@ -19,27 +22,28 @@ interface CategoryBlocksProps {
   services: Service[];
 }
 
-const categories = [
+// Digital-first categories - for tech-savvy realtors focused on fast growth
+const DIGITAL_CATEGORIES = [
   {
     name: "CRMs",
     icon: Users,
-    searchTerm: "crm",
+    searchTerm: "crm customer management database lead tracking contact management",
     description: "Customer Management",
     color: "bg-blue-500",
     iconColor: "text-white"
   },
   {
-    name: "Marketing", 
+    name: "Ads & Lead Gen", 
     icon: TrendingUp,
-    searchTerm: "marketing",
-    description: "Lead Generation",
+    searchTerm: "marketing advertising facebook ads google ads meta ads paid social ppc lead generation",
+    description: "Digital Advertising",
     color: "bg-green-500",
     iconColor: "text-white"
   },
   {
     name: "SEO",
     icon: Search,
-    searchTerm: "seo",
+    searchTerm: "seo search optimization website ranking google local seo",
     description: "Search Optimization",
     color: "bg-purple-500",
     iconColor: "text-white"
@@ -47,41 +51,61 @@ const categories = [
   {
     name: "Coaching",
     icon: GraduationCap,
-    searchTerm: "coaching",
+    searchTerm: "coaching training mentorship business coaching sales coaching",
     description: "Professional Training",
     color: "bg-orange-500",
+    iconColor: "text-white"
+  }
+];
+
+// Old-school categories - for relationship-focused realtors who value traditional marketing
+const OLD_SCHOOL_CATEGORIES = [
+  {
+    name: "Client Event Kits",
+    icon: Gift,
+    searchTerm: "client events open house supplies hosting materials event planning client appreciation events",
+    description: "Event Hosting Supplies",
+    color: "bg-emerald-500",
+    iconColor: "text-white"
+  },
+  {
+    name: "Print & Mail",
+    icon: Mail,
+    searchTerm: "print direct mail postcards flyers brochures door hangers mailers",
+    description: "Physical Marketing",
+    color: "bg-teal-500",
+    iconColor: "text-white"
+  },
+  {
+    name: "Signs",
+    icon: FileText,
+    searchTerm: "signs yard signs open house signs for sale signs rider signs banners",
+    description: "Property Signage",
+    color: "bg-slate-500",
+    iconColor: "text-white"
+  },
+  {
+    name: "Presentations",
+    icon: Presentation,
+    searchTerm: "presentations listing presentations buyer presentations market reports cma templates",
+    description: "Client Presentations",
+    color: "bg-violet-500",
+    iconColor: "text-white"
+  },
+  {
+    name: "Branding",
+    icon: Palette,
+    searchTerm: "branding business cards logos brand design identity marketing materials",
+    description: "Brand Identity",
+    color: "bg-rose-500",
     iconColor: "text-white"
   },
   {
     name: "Client Retention",
-    icon: Gift,
-    searchTerm: "gifting client retention",
-    description: "Gifting / Client Appreciation",
-    color: "bg-red-500",
-    iconColor: "text-white"
-  },
-  {
-    name: "Photography",
     icon: Camera,
-    searchTerm: "photography",
-    description: "Visual Content",
-    color: "bg-pink-500",
-    iconColor: "text-white"
-  },
-  {
-    name: "Video",
-    icon: Video,
-    searchTerm: "video",
-    description: "Video Production",
-    color: "bg-indigo-500",
-    iconColor: "text-white"
-  },
-  {
-    name: "Direct Mail",
-    icon: Mail,
-    searchTerm: "direct mail",
-    description: "Physical Marketing",
-    color: "bg-teal-500",
+    searchTerm: "client retention gifting client appreciation photography closing gifts",
+    description: "Relationship Building",
+    color: "bg-red-500",
     iconColor: "text-white"
   }
 ];
@@ -89,6 +113,7 @@ const categories = [
 export const CategoryBlocks = ({ onCategoryClick, services }: CategoryBlocksProps) => {
   const categoryCounts = useMemo(() => {
     const counts = new Map<string, number>();
+    const allCategories = [...DIGITAL_CATEGORIES, ...OLD_SCHOOL_CATEGORIES];
     
     services.forEach(service => {
       const category = (service.category || '').toLowerCase();
@@ -96,7 +121,7 @@ export const CategoryBlocks = ({ onCategoryClick, services }: CategoryBlocksProp
       const description = (service.description || '').toLowerCase();
       const tags = (service.tags || []).join(' ').toLowerCase();
       
-      categories.forEach(cat => {
+      allCategories.forEach(cat => {
         const searchTerms = cat.searchTerm.split(' ').map(term => term.toLowerCase());
         const hasMatch = searchTerms.some(term => 
           category.includes(term) || 
@@ -119,9 +144,12 @@ export const CategoryBlocks = ({ onCategoryClick, services }: CategoryBlocksProp
     onCategoryClick(searchTerm, categoryName);
   };
 
-  return (
+  const renderCategoryGrid = (categories: typeof DIGITAL_CATEGORIES, title: string, subtitle: string) => (
     <div className="mb-8">
-      <h2 className="text-2xl font-semibold mb-4 text-foreground">Shop by Category</h2>
+      <div className="mb-4">
+        <h3 className="text-lg font-semibold text-foreground">{title}</h3>
+        <p className="text-sm text-muted-foreground">{subtitle}</p>
+      </div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {categories.map((category) => {
           const IconComponent = category.icon;
@@ -147,9 +175,9 @@ export const CategoryBlocks = ({ onCategoryClick, services }: CategoryBlocksProp
                     )}
                   </div>
                   <div>
-                    <h3 className="font-semibold text-sm group-hover:text-primary transition-colors">
+                    <h4 className="font-semibold text-sm group-hover:text-primary transition-colors">
                       {category.name}
-                    </h3>
+                    </h4>
                     <p className="text-xs text-muted-foreground">
                       {category.description}
                     </p>
@@ -160,6 +188,24 @@ export const CategoryBlocks = ({ onCategoryClick, services }: CategoryBlocksProp
           );
         })}
       </div>
+    </div>
+  );
+
+  return (
+    <div className="mb-8">
+      <h2 className="text-2xl font-semibold mb-6 text-foreground">Shop by Category</h2>
+      
+      {renderCategoryGrid(
+        DIGITAL_CATEGORIES, 
+        "Digital-first (Fast Growth)", 
+        "Technology and automation tools for scaling your business"
+      )}
+      
+      {renderCategoryGrid(
+        OLD_SCHOOL_CATEGORIES, 
+        "Old-school (Relationship Builders)", 
+        "Traditional marketing and relationship-building essentials"
+      )}
     </div>
   );
 };
