@@ -196,7 +196,7 @@ export const TopDealsCarousel = ({ services, serviceRatings, onServiceClick }: T
 
                       {/* Discount badge */}
                       {discountPct > 0 && (
-                        <Badge variant="destructive" className="text-[10px] px-1.5 py-0.5 h-5">
+                        <Badge variant="destructive" className="text-xs">
                           {discountPct}% OFF
                         </Badge>
                       )}
