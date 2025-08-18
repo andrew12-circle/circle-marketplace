@@ -5,7 +5,7 @@ import {
   TrendingUp, 
   Search, 
   GraduationCap, 
-  Shield, 
+  Gift, 
   Camera, 
   Video, 
   Mail 
@@ -54,7 +54,7 @@ const categories = [
   },
   {
     name: "Client Retention",
-    icon: Shield,
+    icon: Gift,
     searchTerm: "gifting client retention",
     description: "Gifting / Client Appreciation",
     color: "bg-red-500",
