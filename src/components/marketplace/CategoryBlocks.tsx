@@ -27,7 +27,7 @@ const DIGITAL_CATEGORIES = [
   {
     name: "CRMs",
     icon: Users,
-    searchTerm: "crm customer management database lead tracking contact management",
+    tags: ["cat:crms"],
     description: "Customer Management",
     color: "bg-blue-500",
     iconColor: "text-white"
@@ -35,7 +35,7 @@ const DIGITAL_CATEGORIES = [
   {
     name: "Ads & Lead Gen", 
     icon: TrendingUp,
-    searchTerm: "marketing advertising facebook ads google ads meta ads paid social ppc lead generation",
+    tags: ["cat:ads-lead-gen"],
     description: "Digital Advertising",
     color: "bg-green-500",
     iconColor: "text-white"
@@ -43,7 +43,7 @@ const DIGITAL_CATEGORIES = [
   {
     name: "SEO",
     icon: Search,
-    searchTerm: "seo search optimization website ranking google local seo",
+    tags: ["cat:seo"],
     description: "Search Optimization",
     color: "bg-purple-500",
     iconColor: "text-white"
@@ -51,7 +51,7 @@ const DIGITAL_CATEGORIES = [
   {
     name: "Coaching",
     icon: GraduationCap,
-    searchTerm: "coaching training mentorship business coaching sales coaching",
+    tags: ["cat:coaching"],
     description: "Professional Training",
     color: "bg-orange-500",
     iconColor: "text-white"
@@ -63,7 +63,7 @@ const OLD_SCHOOL_CATEGORIES = [
   {
     name: "Client Event Kits",
     icon: Gift,
-    searchTerm: "client events open house supplies hosting materials event planning client appreciation events",
+    tags: ["cat:client-events"],
     description: "Event Hosting Supplies",
     color: "bg-emerald-500",
     iconColor: "text-white"
@@ -71,7 +71,7 @@ const OLD_SCHOOL_CATEGORIES = [
   {
     name: "Print & Mail",
     icon: Mail,
-    searchTerm: "print direct mail postcards flyers brochures door hangers mailers",
+    tags: ["cat:print-mail"],
     description: "Physical Marketing",
     color: "bg-teal-500",
     iconColor: "text-white"
@@ -79,7 +79,7 @@ const OLD_SCHOOL_CATEGORIES = [
   {
     name: "Signs",
     icon: FileText,
-    searchTerm: "signs yard signs open house signs for sale signs rider signs banners",
+    tags: ["cat:signs"],
     description: "Property Signage",
     color: "bg-slate-500",
     iconColor: "text-white"
@@ -87,7 +87,7 @@ const OLD_SCHOOL_CATEGORIES = [
   {
     name: "Presentations",
     icon: Presentation,
-    searchTerm: "presentations listing presentations buyer presentations market reports cma templates",
+    tags: ["cat:presentations"],
     description: "Client Presentations",
     color: "bg-violet-500",
     iconColor: "text-white"
@@ -95,7 +95,7 @@ const OLD_SCHOOL_CATEGORIES = [
   {
     name: "Branding",
     icon: Palette,
-    searchTerm: "branding business cards logos brand design identity marketing materials",
+    tags: ["cat:branding"],
     description: "Brand Identity",
     color: "bg-rose-500",
     iconColor: "text-white"
@@ -103,7 +103,7 @@ const OLD_SCHOOL_CATEGORIES = [
   {
     name: "Client Retention",
     icon: Camera,
-    searchTerm: "client retention gifting client appreciation photography closing gifts",
+    tags: ["cat:client-retention"],
     description: "Relationship Building",
     color: "bg-red-500",
     iconColor: "text-white"
@@ -116,19 +116,10 @@ export const CategoryBlocks = ({ onCategoryClick, services }: CategoryBlocksProp
     const allCategories = [...DIGITAL_CATEGORIES, ...OLD_SCHOOL_CATEGORIES];
     
     services.forEach(service => {
-      const category = (service.category || '').toLowerCase();
-      const title = (service.title || '').toLowerCase();
-      const description = (service.description || '').toLowerCase();
-      const tags = (service.tags || []).join(' ').toLowerCase();
+      const serviceTags = service.tags || [];
       
       allCategories.forEach(cat => {
-        const searchTerms = cat.searchTerm.split(' ').map(term => term.toLowerCase());
-        const hasMatch = searchTerms.some(term => 
-          category.includes(term) || 
-          title.includes(term) || 
-          description.includes(term) ||
-          tags.includes(term)
-        );
+        const hasMatch = cat.tags.some(catTag => serviceTags.includes(catTag));
         
         if (hasMatch) {
           counts.set(cat.name, (counts.get(cat.name) || 0) + 1);
@@ -139,9 +130,9 @@ export const CategoryBlocks = ({ onCategoryClick, services }: CategoryBlocksProp
     return counts;
   }, [services]);
 
-  const handleCategoryClick = (searchTerm: string, categoryName: string) => {
-    logger.log('category_block_clicked', { searchTerm, categoryName });
-    onCategoryClick(searchTerm, categoryName);
+  const handleCategoryClick = (tags: string[], categoryName: string) => {
+    logger.log('category_block_clicked', { tags, categoryName });
+    onCategoryClick(tags[0], categoryName); // Use first tag for search
   };
 
   const renderCategoryGrid = (categories: typeof DIGITAL_CATEGORIES, title: string, subtitle: string) => (
@@ -158,7 +149,7 @@ export const CategoryBlocks = ({ onCategoryClick, services }: CategoryBlocksProp
             <Card 
               key={category.name}
               className="hover:shadow-md transition-all duration-200 cursor-pointer group hover:border-primary/50"
-              onClick={() => handleCategoryClick(category.searchTerm, category.name)}
+              onClick={() => handleCategoryClick(category.tags, category.name)}
             >
               <CardContent className="p-4 text-center">
                 <div className="space-y-3">

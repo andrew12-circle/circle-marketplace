@@ -54,20 +54,25 @@ async function fetchServicesPage(offset: number, filters: PaginatedFilters): Pro
   // Server-side filters
   const term = (filters.searchTerm || '').trim();
   if (term) {
-    // Split search term into individual keywords for better matching
-    const keywords = term.split(/\s+/).filter(keyword => keyword.length > 2);
-    
-    if (keywords.length === 1) {
-      // Single keyword - search in title, description, category, and tags
-      const like = `%${keywords[0]}%`;
-      query = query.or(`title.ilike.${like},description.ilike.${like},category.ilike.${like}`);
-    } else if (keywords.length > 1) {
-      // Multiple keywords - create OR conditions for each keyword
-      const conditions = keywords.map(keyword => {
-        const like = `%${keyword}%`;
-        return `title.ilike.${like},description.ilike.${like},category.ilike.${like}`;
-      }).join(',');
-      query = query.or(conditions);
+    // Check if it's a category tag filter
+    if (term.startsWith('cat:')) {
+      query = query.contains('tags', [term]);
+    } else {
+      // Split search term into individual keywords for better matching
+      const keywords = term.split(/\s+/).filter(keyword => keyword.length > 2);
+      
+      if (keywords.length === 1) {
+        // Single keyword - search in title, description, category, and tags
+        const like = `%${keywords[0]}%`;
+        query = query.or(`title.ilike.${like},description.ilike.${like},category.ilike.${like}`);
+      } else if (keywords.length > 1) {
+        // Multiple keywords - create OR conditions for each keyword
+        const conditions = keywords.map(keyword => {
+          const like = `%${keyword}%`;
+          return `title.ilike.${like},description.ilike.${like},category.ilike.${like}`;
+        }).join(',');
+        query = query.or(conditions);
+      }
     }
   }
 

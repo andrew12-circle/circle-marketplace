@@ -996,12 +996,50 @@ export const ServiceManagementPanel = () => {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-medium">Tags (comma-separated)</label>
-                      <Input
-                        value={(editForm.tags && Array.isArray(editForm.tags)) ? (editForm.tags as string[]).join(', ') : ''}
-                        onChange={(e) => setEditForm({ ...editForm, tags: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })}
-                        placeholder="Website, Branding, Luxury"
-                      />
+                      <label className="text-sm font-medium">Category Tags</label>
+                      <div className="space-y-2">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                          {[
+                            { tag: 'cat:crms', label: 'CRMs' },
+                            { tag: 'cat:ads-lead-gen', label: 'Ads & Lead Gen' },
+                            { tag: 'cat:seo', label: 'SEO' },
+                            { tag: 'cat:coaching', label: 'Coaching' },
+                            { tag: 'cat:client-events', label: 'Client Events' },
+                            { tag: 'cat:print-mail', label: 'Print & Mail' },
+                            { tag: 'cat:signs', label: 'Signs' },
+                            { tag: 'cat:presentations', label: 'Presentations' },
+                            { tag: 'cat:branding', label: 'Branding' },
+                            { tag: 'cat:client-retention', label: 'Client Retention' }
+                          ].map(({ tag, label }) => (
+                            <div key={tag} className="flex items-center space-x-2">
+                              <Switch
+                                checked={(editForm.tags || []).includes(tag)}
+                                onCheckedChange={(checked) => {
+                                  const currentTags = editForm.tags || [];
+                                  if (checked) {
+                                    setEditForm({ ...editForm, tags: [...currentTags, tag] });
+                                  } else {
+                                    setEditForm({ ...editForm, tags: currentTags.filter(t => t !== tag) });
+                                  }
+                                }}
+                              />
+                              <label className="text-xs font-medium">{label}</label>
+                            </div>
+                          ))}
+                        </div>
+                        <div className="mt-2">
+                          <label className="text-sm font-medium">Additional Tags (comma-separated)</label>
+                          <Input
+                            value={(editForm.tags || []).filter(tag => !tag.startsWith('cat:')).join(', ')}
+                            onChange={(e) => {
+                              const categoryTags = (editForm.tags || []).filter(tag => tag.startsWith('cat:'));
+                              const additionalTags = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
+                              setEditForm({ ...editForm, tags: [...categoryTags, ...additionalTags] });
+                            }}
+                            placeholder="Website, Branding, Luxury"
+                          />
+                        </div>
+                      </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
