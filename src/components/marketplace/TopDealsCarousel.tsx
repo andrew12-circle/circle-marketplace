@@ -159,7 +159,10 @@ export const TopDealsCarousel = ({ services, serviceRatings, onServiceClick }: T
 
             return (
               <CarouselItem key={service.id} className="pl-2 md:pl-4 basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/5">
-                <Card className="h-full hover:shadow-md transition-shadow group relative">
+                <Card 
+                  className="h-full hover:shadow-md transition-shadow group relative cursor-pointer"
+                  onClick={() => handleDealClick(service.id, service.title)}
+                >
                   {/* Sponsored badge */}
                   {isSponsored && sponsoredBadges && (
                     <div className="absolute top-2 right-2 z-10">
