@@ -968,7 +968,7 @@ export const ServiceManagementPanel = () => {
                             </div>
                             <div className="flex flex-col gap-1">
                               <div className="flex items-center gap-2">
-                                <span className="text-xs text-muted-foreground">Verified</span>
+                                <span className="text-xs text-muted-foreground w-12">Verified</span>
                                 <Switch
                                   checked={service.is_verified || false}
                                   onCheckedChange={() => handleVerificationToggle(service.id, service.is_verified || false)}
@@ -976,7 +976,7 @@ export const ServiceManagementPanel = () => {
                                 />
                               </div>
                               <div className="flex items-center gap-2">
-                                <span className="text-xs text-muted-foreground">Active</span>
+                                <span className="text-xs text-muted-foreground w-12">Active</span>
                                 <Switch
                                   checked={service.is_active || false}
                                   onCheckedChange={() => handleVisibilityToggle(service.id, service.is_active || false)}
