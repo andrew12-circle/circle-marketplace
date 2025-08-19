@@ -948,23 +948,24 @@ export const ServiceManagementPanel = () => {
                   onClick={() => handleServiceSelect(service)}
                 >
                   <CardContent className="p-4">
-                      <div className="flex items-start gap-3">
-                        {service.image_url ? (
-                          <img
-                            src={service.image_url}
-                            alt={service.title}
-                            className="w-12 h-12 rounded-lg object-contain"
-                          />
-                        ) : (
-                          <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center">
-                            <Package className="h-6 w-6 text-muted-foreground" />
-                          </div>
-                        )}
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 min-w-0">
-                              <Badge variant="secondary" className="text-[10px] shrink-0">#{service.sort_order ?? '-'}</Badge>
-                              <h3 className="font-semibold truncate">{service.title}</h3>
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <Badge variant="secondary" className="text-[10px] shrink-0">#{service.sort_order ?? '-'}</Badge>
+                          <h3 className="font-semibold truncate">{service.title}</h3>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          {service.image_url ? (
+                            <img
+                              src={service.image_url}
+                              alt={service.title}
+                              className="w-20 h-12 rounded-lg object-contain"
+                            />
+                          ) : (
+                            <div className="w-20 h-12 rounded-lg bg-muted flex items-center justify-center">
+                              <Package className="h-6 w-6 text-muted-foreground" />
                             </div>
+                          )}
+                          <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-1 mt-1">
                               {service.is_featured && (
                                 <Badge variant="secondary" className="text-xs">
@@ -1003,9 +1004,10 @@ export const ServiceManagementPanel = () => {
                                   onClick={(e) => e.stopPropagation()}
                                 />
                               </div>
-                            </div>
-                          </div>
-                      </div>
+                             </div>
+                           </div>
+                         </div>
+                       </div>
                   </CardContent>
                 </Card>
               ))}
