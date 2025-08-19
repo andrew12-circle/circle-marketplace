@@ -717,10 +717,7 @@ export const MarketplaceGrid = () => {
       <div className="mb-6">
         <div className="rounded-lg border bg-card text-card-foreground p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <span className="text-sm text-center sm:text-left">
-            {isLoading && !marketplaceData 
-              ? "Loading marketplace data… Services are available while we finish."
-              : "Limited mode: services are available; vendors and categories will load when ready."
-            }
+            Oops! Our apologies, the services are not loading. This is common because of a browser error. Please clear your cache and reload.
           </span>
           <div className="flex gap-2 justify-center">
             <Button variant="outline" onClick={handleReloadDataQuick}>Reload data</Button>
