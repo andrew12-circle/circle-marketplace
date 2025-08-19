@@ -1077,7 +1077,8 @@ export const ServiceFunnelModal = ({
             </div>
           </div>
 
-          {/* Pricing Packages Section */}
+          {/* Pricing Packages Section - Only show if pricing tiers are configured */}
+          {service.pricing_tiers?.length > 0 && (
           <div className="bg-gradient-to-br from-blue-50 to-indigo-50 py-12" data-section="pricing-packages">
             <div className="max-w-7xl mx-auto px-6">
               <div className="text-center mb-8">
@@ -1189,6 +1190,7 @@ export const ServiceFunnelModal = ({
               </div>
             </div>
           </div>
+          )}
 
           {/* Customers Also Viewed Section */}
           <div className="max-w-6xl mx-auto px-6 py-8">
