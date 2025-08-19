@@ -914,7 +914,6 @@ export default function AdminDashboard() {
         </TabsContent>
 
         <TabsContent value="services" className="space-y-6">
-          <ServiceVisibilityManager />
           <ServiceManagementPanel />
           <ServiceDisclaimerManager />
           <BulkFAQGenerator />

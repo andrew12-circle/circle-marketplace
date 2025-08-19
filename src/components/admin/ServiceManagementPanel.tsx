@@ -73,6 +73,7 @@ interface Service {
   is_featured: boolean;
   is_top_pick: boolean;
   is_verified?: boolean;
+  is_active?: boolean;
   direct_purchase_enabled?: boolean;
   vendor_id?: string;
   service_provider_id?: string;
@@ -713,6 +714,42 @@ export const ServiceManagementPanel = () => {
     }
   };
 
+  const handleVisibilityToggle = async (serviceId: string, currentStatus: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('services')
+        .update({ is_active: !currentStatus })
+        .eq('id', serviceId);
+
+      if (error) throw error;
+
+      // Update local state
+      setServices(services.map(service => 
+        service.id === serviceId 
+          ? { ...service, is_active: !currentStatus }
+          : service
+      ));
+
+      if (selectedService?.id === serviceId) {
+        const updatedService = { ...selectedService, is_active: !currentStatus };
+        setSelectedService(updatedService);
+        setEditForm(updatedService);
+      }
+
+      toast({
+        title: 'Success',
+        description: `Service ${!currentStatus ? 'activated' : 'deactivated'} successfully`,
+      });
+    } catch (error) {
+      console.error('Error updating visibility:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update visibility status',
+        variant: 'destructive',
+      });
+    }
+  };
+
   const handleFunnelSave = async (): Promise<SaveResult> => {
     if (!selectedService) return { savedAt: new Date().toISOString(), verified: false };
 
@@ -934,6 +971,14 @@ export const ServiceManagementPanel = () => {
                               <Switch
                                 checked={service.is_verified || false}
                                 onCheckedChange={() => handleVerificationToggle(service.id, service.is_verified || false)}
+                                onClick={(e) => e.stopPropagation()}
+                              />
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs text-muted-foreground">Active</span>
+                              <Switch
+                                checked={service.is_active || false}
+                                onCheckedChange={() => handleVisibilityToggle(service.id, service.is_active || false)}
                                 onClick={(e) => e.stopPropagation()}
                               />
                             </div>
