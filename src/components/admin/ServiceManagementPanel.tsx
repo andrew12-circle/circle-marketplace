@@ -950,13 +950,13 @@ export const ServiceManagementPanel = () => {
                   <CardContent className="p-4">
                       <div className="flex items-start gap-3">
                         {service.image_url ? (
-                           <img
-                             src={service.image_url}
-                             alt={service.title}
-                             className="w-full h-12 rounded-lg object-cover"
-                           />
+                          <img
+                            src={service.image_url}
+                            alt={service.title}
+                            className="w-12 h-12 rounded-lg object-cover"
+                          />
                         ) : (
-                          <div className="w-full h-12 rounded-lg bg-muted flex items-center justify-center">
+                          <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center">
                             <Package className="h-6 w-6 text-muted-foreground" />
                           </div>
                         )}
