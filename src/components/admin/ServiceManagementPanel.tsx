@@ -553,11 +553,11 @@ export const ServiceManagementPanel = () => {
       let nonSsp = editForm.max_split_percentage_non_ssp ?? null;
       const adjustments: string[] = [];
       
-      // Don't normalize ROI - allow full range up to 1000%
+      // Allow high ROI values up to 10000%
       if (typeof roi === 'number') {
-        if (roi > 1000) {
-          roi = 1000;
-          adjustments.push(`ROI capped at 1000%`);
+        if (roi > 10000) {
+          roi = 10000;
+          adjustments.push(`ROI capped at 10000%`);
         }
         if (roi < 0) {
           roi = 0;
@@ -1107,21 +1107,21 @@ export const ServiceManagementPanel = () => {
                             <Input
                               type="number"
                               min="0"
-                              max="1000"
-                              step="0.01"
+                              max="10000"
+                              step="0.1"
                               value={editForm.estimated_roi || ''}
                               onChange={(e) => {
                                 const value = e.target.value === '' ? null : Number(e.target.value);
                                 setEditForm({ ...editForm, estimated_roi: value });
                               }}
-                              placeholder="Enter ROI percentage"
+                              placeholder="Enter ROI percentage (e.g., 1200 for 1200%)"
                               className="pr-8"
                             />
                           )}
                           <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">%</span>
                         </div>
                         <p className="text-xs text-muted-foreground">
-                          {!editForm.is_verified ? 'ROI will show TBD until service is verified' : 'Enter the ROI as a percentage (e.g., 800 for 800%)'}
+                          {!editForm.is_verified ? 'ROI will show TBD until service is verified' : 'Enter the ROI as a percentage. Values can go beyond 1000% (e.g., 1200 for 1200%)'}
                         </p>
                       </div>
                       <div className="space-y-2">
