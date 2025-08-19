@@ -89,8 +89,8 @@ async function fetchServicesPage(offset: number, filters: PaginatedFilters): Pro
     query = query.eq('copay_allowed', true);
   }
 
-  // Only show active services - verification is handled by UI filters
-  query = query.eq('is_active', true);
+  // Only show services that are both active and verified
+  query = query.eq('is_active', true).eq('is_verified', true);
 
   const { data, error, count } = await query;
   if (error) throw error;
