@@ -1059,26 +1059,27 @@ export const ServiceManagementPanel = () => {
                     {isDetailsDirty && (
                       <Badge variant="outline" className="text-xs">Unsaved changes</Badge>
                     )}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">Service Title</label>
-                        <Input
-                          value={editForm.title || ''}
-                          onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
-                         />
-                       </div>
-                     </div>
+                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                       {/* Left Column - Edit Form */}
+                       <div className="space-y-4">
+                         <div className="space-y-2">
+                           <label className="text-sm font-medium">Service Title</label>
+                           <Input
+                             value={editForm.title || ''}
+                             onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                            />
+                          </div>
+                        
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium">Description</label>
+                            <Textarea
+                              value={editForm.description || ''}
+                              onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                              rows={4}
+                            />
+                          </div>
                      
-                     <div className="space-y-2">
-                       <label className="text-sm font-medium">Description</label>
-                       <Textarea
-                         value={editForm.description || ''}
-                         onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
-                         rows={4}
-                       />
-                     </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="space-y-2">
                         <label className="text-sm font-medium">Duration</label>
                         <Input
@@ -1209,9 +1210,31 @@ export const ServiceManagementPanel = () => {
                             }}
                             placeholder="Website, Branding, Luxury"
                           />
-                        </div>
-                      </div>
-                    </div>
+                         </div>
+
+                         {/* Right Column - Live Preview */}
+                         <div className="space-y-4">
+                           <div>
+                             <label className="text-sm font-medium mb-2 block">Live Preview</label>
+                             <div className="border rounded-lg p-4 bg-muted/20">
+                               <ServiceCard
+                                 service={{
+                                   ...selectedService,
+                                   ...editForm,
+                                   vendor: selectedService.vendor
+                                 }}
+                                 variant="compact"
+                                 isSaved={false}
+                                 onSave={() => {}}
+                                 onViewDetails={() => {}}
+                               />
+                             </div>
+                             <p className="text-xs text-muted-foreground mt-2">
+                               This is how your service will appear to customers in the marketplace.
+                             </p>
+                           </div>
+                         </div>
+                       </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
                      <div className="flex items-center space-x-2">
@@ -1314,9 +1337,33 @@ export const ServiceManagementPanel = () => {
                           </div>
                         </div>
                       </div>
-                    )}
+                     )}
 
-                    <div className="flex gap-2">
+                       {/* Right Column - Live Preview */}
+                       <div className="space-y-4">
+                         <div>
+                           <label className="text-sm font-medium mb-2 block">Live Preview</label>
+                           <div className="border rounded-lg p-4 bg-muted/20">
+                             <ServiceCard
+                               service={{
+                                 ...selectedService,
+                                 ...editForm,
+                                 vendor: selectedService.vendor
+                               }}
+                               variant="compact"
+                               isSaved={false}
+                               onSave={() => {}}
+                               onViewDetails={() => {}}
+                             />
+                           </div>
+                           <p className="text-xs text-muted-foreground mt-2">
+                             This is how your service will appear to customers in the marketplace.
+                           </p>
+                         </div>
+                       </div>
+                     </div>
+                   
+                     <div className="flex gap-2">
                       <Button onClick={handleServiceUpdate} disabled={!isDetailsDirty}>
                         Save Changes
                       </Button>
