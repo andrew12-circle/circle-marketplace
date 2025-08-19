@@ -953,7 +953,7 @@ export const ServiceManagementPanel = () => {
                           <img
                             src={service.image_url}
                             alt={service.title}
-                            className="w-12 h-12 rounded-lg object-cover"
+                            className="w-12 h-12 rounded-lg object-contain"
                           />
                         ) : (
                           <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center">
