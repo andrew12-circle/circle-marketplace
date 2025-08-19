@@ -72,21 +72,23 @@ const AppContent = () => {
       <Suspense fallback={<div className="p-6 text-center text-muted-foreground">Loading...</div>}>
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route path="/academy" element={<Academy />} />
-          <Route path="/command-center" element={<CommandCenter />} />
+          <Route path="/academy/*" element={<Academy />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/orders" element={<OrderHistory />} />
+          <Route path="/payment/success" element={<PaymentSuccess />} />
+          <Route path="/payment/canceled" element={<PaymentCanceled />} />
           <Route path="/pricing" element={<Pricing />} />
-          <Route path="/profile-settings" element={<ProfileSettings />} />
+          <Route path="/profile" element={<ProfileSettings />} />
           <Route path="/wallet" element={<AgentWallet />} />
+          <Route path="/accounting" element={<AdminAccounting />} />
           <Route path="/saved" element={<SavedItems />} />
-          <Route path="/payment-success" element={<PaymentSuccess />} />
-          <Route path="/payment-canceled" element={<PaymentCanceled />} />
           <Route path="/consultation-demo" element={<ConsultationDemo />} />
           <Route path="/vendor-dashboard" element={<VendorDashboard />} />
           <Route path="/vendor-analytics" element={<VendorAnalyticsDashboard />} />
           <Route path="/vendor-registration" element={<VendorRegistration />} />
           <Route path="/analytics" element={<AnalyticsDashboard />} />
+          <Route path="/command-center" element={<CommandCenter />} />
+          <Route path="/command-center-test" element={<CommandCenterTest />} />
           <Route path="/health" element={<HealthStability />} />
           <Route path="/support" element={<SupportDashboard />} />
           <Route path="/advanced-features" element={<AdvancedFeaturesDashboard />} />
