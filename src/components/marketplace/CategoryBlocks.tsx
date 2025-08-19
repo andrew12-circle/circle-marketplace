@@ -143,7 +143,7 @@ const OLD_SCHOOL_CATEGORIES = [
     name: "Signage & Branding",
     icon: FileText,
     tags: ["cat:signs"],
-    description: "Property Signage",
+    description: "Yard signs, riders, car wraps, branded merchandise",
     color: "bg-slate-500",
     iconColor: "text-white"
   },
