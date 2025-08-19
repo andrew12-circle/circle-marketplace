@@ -438,7 +438,7 @@ const AcademyContent = () => {
             </div>
           </div>
           <div className="flex flex-col gap-3 w-full sm:w-auto">
-            <Button onClick={() => setActiveView('create')} className="bg-white text-green-600 hover:bg-green-50 font-semibold px-6 py-3 w-full sm:w-auto">
+            <Button onClick={() => setActiveView('create')} className="bg-white text-black hover:bg-green-50 font-semibold px-6 py-3 w-full sm:w-auto">
               Create Your Playbook
             </Button>
             <Button variant="outline" onClick={() => setActiveView('playbooks')} className="border-white/30 text-black hover:bg-white/10 w-full sm:w-auto">
