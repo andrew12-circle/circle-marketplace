@@ -550,25 +550,6 @@ export const MarketplaceGrid = () => {
           </div>
 
 
-          {/* Inline non-blocking banner */}
-          {isLoading && !marketplaceData && <div className="mb-4">
-              <div className="rounded-lg border bg-card text-card-foreground p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                <span className="text-sm">Loading marketplace data… Services are available while we finish.</span>
-                <div className="flex gap-2">
-                  <Button variant="outline" onClick={handleReloadDataQuick}>Reload data</Button>
-                  <Button onClick={handleHardRefresh}>Try again</Button>
-                </div>
-              </div>
-            </div>}
-          {error && !marketplaceData && <div className="mb-4">
-              <div className="rounded-lg border bg-card text-card-foreground p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                <span className="text-sm">Limited mode: services are available; vendors and categories will load when ready.</span>
-                <div className="flex gap-2">
-                  <Button variant="outline" onClick={handleReloadDataQuick}>Reload data</Button>
-                  <Button onClick={handleHardRefresh}>Try again</Button>
-                </div>
-              </div>
-            </div>}
 
           {/* Circle Pro Banner - Show for non-signed-in users and non-pro members */}
           {(!user || !profile?.is_pro_member) && <CircleProBanner />}
@@ -730,6 +711,24 @@ export const MarketplaceGrid = () => {
         {t('tryAdjustingFilters')}
       </p>
     </div>
+
+    {/* Loading/Error Status Banner */}
+    {(isLoading && !marketplaceData) || (error && !marketplaceData) ? (
+      <div className="mb-6">
+        <div className="rounded-lg border bg-card text-card-foreground p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <span className="text-sm text-center sm:text-left">
+            {isLoading && !marketplaceData 
+              ? "Loading marketplace data… Services are available while we finish."
+              : "Limited mode: services are available; vendors and categories will load when ready."
+            }
+          </span>
+          <div className="flex gap-2 justify-center">
+            <Button variant="outline" onClick={handleReloadDataQuick}>Reload data</Button>
+            <Button onClick={handleHardRefresh}>Try again</Button>
+          </div>
+        </div>
+      </div>
+    ) : null}
     
     {/* Popular Search Suggestions */}
     {viewMode === "services" && <div className="space-y-3">
