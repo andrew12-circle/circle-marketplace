@@ -12,7 +12,13 @@ import {
   FileText,
   Presentation,
   Palette,
-  Globe
+  Globe,
+  Bot,
+  Play,
+  Home,
+  BarChart3,
+  Calculator,
+  Zap
 } from "lucide-react";
 import { logger } from "@/utils/logger";
 import { useMemo } from "react";
@@ -63,6 +69,54 @@ const DIGITAL_CATEGORIES = [
     tags: ["cat:coaching"],
     description: "Professional Training",
     color: "bg-orange-500",
+    iconColor: "text-white"
+  },
+  {
+    name: "Marketing Automation & Content",
+    icon: Bot,
+    tags: ["cat:marketing-automation"],
+    description: "Automated Marketing Tools",
+    color: "bg-indigo-500",
+    iconColor: "text-white"
+  },
+  {
+    name: "Video & Media Tools",
+    icon: Play,
+    tags: ["cat:video-media"],
+    description: "Video & Media Production",
+    color: "bg-pink-500",
+    iconColor: "text-white"
+  },
+  {
+    name: "Listing & Showing Tools",
+    icon: Home,
+    tags: ["cat:listing-showing"],
+    description: "Property Management Tools",
+    color: "bg-yellow-500",
+    iconColor: "text-white"
+  },
+  {
+    name: "Data & Analytics",
+    icon: BarChart3,
+    tags: ["cat:data-analytics"],
+    description: "Business Intelligence",
+    color: "bg-emerald-600",
+    iconColor: "text-white"
+  },
+  {
+    name: "Finance & Business Tools",
+    icon: Calculator,
+    tags: ["cat:finance-business"],
+    description: "Financial Management",
+    color: "bg-stone-500",
+    iconColor: "text-white"
+  },
+  {
+    name: "Productivity & Collaboration",
+    icon: Zap,
+    tags: ["cat:productivity"],
+    description: "Team & Task Management",
+    color: "bg-amber-500",
     iconColor: "text-white"
   }
 ];
@@ -150,7 +204,7 @@ export const CategoryBlocks = ({ onCategoryClick, services }: CategoryBlocksProp
         <h3 className="text-lg font-semibold text-foreground">{title}</h3>
         <p className="text-sm text-muted-foreground">{subtitle}</p>
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
         {categories.map((category) => {
           const IconComponent = category.icon;
           
