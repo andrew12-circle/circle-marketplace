@@ -140,7 +140,7 @@ const OLD_SCHOOL_CATEGORIES = [
     iconColor: "text-white"
   },
   {
-    name: "Signs",
+    name: "Signage & Branding",
     icon: FileText,
     tags: ["cat:signs"],
     description: "Property Signage",
