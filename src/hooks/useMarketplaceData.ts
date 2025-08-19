@@ -143,7 +143,6 @@ const fetchServices = async (): Promise<Service[]> => {
         )
       `)
       .eq('is_active', true)
-      .eq('is_verified', true)
       .order('sort_order', { ascending: true })
       .order('created_at', { ascending: false })
       .limit(200), // Increased from 100 to 200 to accommodate all services
