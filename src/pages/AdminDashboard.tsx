@@ -399,11 +399,19 @@ export default function AdminDashboard() {
     }
   };
 
+  // Show loading while auth is still loading
   if (loading) {
     return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
   }
 
+  // Only redirect after we're sure auth and profile have loaded
   if (!user || !isAdmin) {
+    console.log('AdminDashboard: Redirecting user', { 
+      hasUser: !!user, 
+      isAdmin, 
+      profileLoaded: !!profile,
+      loading 
+    });
     return <Navigate to="/" replace />;
   }
 

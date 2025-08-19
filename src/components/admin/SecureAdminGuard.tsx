@@ -21,7 +21,18 @@ export const SecureAdminGuard: React.FC<SecureAdminGuardProps> = ({
 
   useEffect(() => {
     const verifyAdminSecurity = async () => {
-      if (!user || !profile?.is_admin || loading) {
+      // Wait for auth to fully load before making decisions
+      if (loading) {
+        return;
+      }
+      
+      // Only proceed with verification if we have a user and admin status
+      if (!user || !profile?.is_admin) {
+        console.log('SecureAdminGuard: User or admin status check failed', { 
+          hasUser: !!user, 
+          isAdmin: profile?.is_admin,
+          profileLoaded: !!profile 
+        });
         setVerificationLoading(false);
         return;
       }

@@ -30,7 +30,7 @@ const timeOptions = [
 ];
 
 export default function AdminCommissions() {
-  const { user, profile } = useAuth();
+  const { user, profile, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [days, setDays] = useState('30');
   const [events, setEvents] = useState<TrackingEventRow[]>([]);
@@ -165,7 +165,26 @@ export default function AdminCommissions() {
     URL.revokeObjectURL(url);
   };
 
+  // Show loading while auth is still loading
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="flex items-center gap-3">
+          <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          <span className="text-muted-foreground">Loading...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Only redirect after we're sure auth and profile have loaded
   if (!user || !profile?.is_admin) {
+    console.log('AdminCommissions: Redirecting user', { 
+      hasUser: !!user, 
+      isAdmin: profile?.is_admin, 
+      profileLoaded: !!profile,
+      authLoading 
+    });
     navigate('/', { replace: true });
     return null;
   }
