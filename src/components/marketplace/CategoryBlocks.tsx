@@ -18,7 +18,10 @@ import {
   Home,
   BarChart3,
   Calculator,
-  Zap
+  Zap,
+  Headphones,
+  UserPlus,
+  Award
 } from "lucide-react";
 import { logger } from "@/utils/logger";
 import { useMemo } from "react";
@@ -117,6 +120,30 @@ const DIGITAL_CATEGORIES = [
     tags: ["cat:productivity"],
     description: "Team & Task Management",
     color: "bg-amber-500",
+    iconColor: "text-white"
+  },
+  {
+    name: "Virtual Assistants & Dialers",
+    icon: Headphones,
+    tags: ["cat:virtual-assistants"],
+    description: "Remote Support & Calling",
+    color: "bg-red-500",
+    iconColor: "text-white"
+  },
+  {
+    name: "Team & Recruiting Tools",
+    icon: UserPlus,
+    tags: ["cat:team-recruiting"],
+    description: "Staff Management & Hiring",
+    color: "bg-teal-600",
+    iconColor: "text-white"
+  },
+  {
+    name: "CE & Licensing",
+    icon: Award,
+    tags: ["cat:ce-licensing"],
+    description: "Continuing Education & Licenses",
+    color: "bg-sky-500",
     iconColor: "text-white"
   }
 ];
