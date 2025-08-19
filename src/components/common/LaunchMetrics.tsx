@@ -10,7 +10,7 @@ export const LaunchMetrics = () => {
     try {
       if (!user) return;
       
-      await supabase.from('launch_metrics').insert([{
+      await (supabase.from as any)('launch_metrics').insert([{
         user_id: user.id,
         event_type: eventType,
         event_data: eventData || {},
@@ -70,7 +70,7 @@ export const LaunchMetrics = () => {
 // Key metrics to track for launch success
 export const trackLaunchMetric = async (metricType: 'conversion' | 'engagement' | 'error', data: Record<string, any>) => {
   try {
-    await supabase.from('launch_metrics').insert([{
+    await (supabase.from as any)('launch_metrics').insert([{
       event_type: `launch_${metricType}`,
       event_data: data,
       created_at: new Date().toISOString()
