@@ -378,10 +378,7 @@ const AcademyContent = () => {
               breath, learn, and actually move your career forward.
             </p>
           </div>
-          <Button 
-            onClick={() => setIsAICuratorOpen(true)}
-            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-3 rounded-lg font-medium flex items-center gap-2 w-full md:w-auto shrink-0"
-          >
+          <Button onClick={() => setIsAICuratorOpen(true)} className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-3 rounded-lg font-medium flex items-center gap-2 w-full md:w-auto shrink-0">
             <Brain className="w-5 h-5" />
             AI Content Curator
           </Button>
@@ -399,11 +396,7 @@ const AcademyContent = () => {
                 <p className="text-xs sm:text-sm text-blue-700 mt-1">Tell us where you are and where you want to be. Our AI will curate the exact content you need.</p>
               </div>
             </div>
-            <Button 
-              onClick={() => setIsAICuratorOpen(true)}
-              size="sm"
-              className="bg-blue-600 hover:bg-blue-700 text-white w-full sm:w-auto mt-2 sm:mt-0 shrink-0"
-            >
+            <Button onClick={() => setIsAICuratorOpen(true)} size="sm" className="bg-blue-600 hover:bg-blue-700 text-white w-full sm:w-auto mt-2 sm:mt-0 shrink-0">
               Get Started
             </Button>
           </div>
@@ -421,7 +414,7 @@ const AcademyContent = () => {
               <span className="text-xs sm:text-sm font-medium text-green-100">SHARE YOUR SUCCESS</span>
             </div>
             <h2 className="text-xl sm:text-3xl font-bold mb-3">Turn Your Story Into A National Playbook</h2>
-            <p className="text-green-50 mb-4 text-base">We make it super easy to share your proven strategies and create playbooks & courses. Your content won't be shared with local agents within 50 miles, but over a million agents nationwide will see it — which could lead to substantial income. Agents want to learn for agents in the market not outdated coaching. </p>
+            <p className="text-green-50 mb-4 text-base">We make it super easy to share your proven strategies and create playbooks & courses. Your content won't be shared with local agents within 50 miles, but over a million agents nationwide will see it — which could lead to substantial income. Agents want to learn for agents in the market.</p>
             <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 text-xs sm:text-sm">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-green-300 rounded-full"></div>
@@ -583,10 +576,9 @@ const AcademyContent = () => {
       description: "Podcast saved to your library"
     });
   };
-
   const handleAIContentSelect = (content: any) => {
     console.log("AI Content Selected:", content);
-    
+
     // Handle different content types
     switch (content.type) {
       case 'video':
@@ -605,10 +597,10 @@ const AcademyContent = () => {
       default:
         toast({
           title: "Content Selected",
-          description: `Opening: ${content.title}`,
+          description: `Opening: ${content.title}`
         });
     }
-    
+
     // Close the AI curator modal
     setIsAICuratorOpen(false);
   };
@@ -1739,11 +1731,7 @@ const AcademyContent = () => {
 
         <CourseViewerModal isOpen={isCourseModalOpen} onClose={() => setIsCourseModalOpen(false)} courseId={selectedCourse || ""} />
 
-        <AcademyAIContentCurator 
-          open={isAICuratorOpen} 
-          onOpenChange={setIsAICuratorOpen}
-          onContentSelect={handleAIContentSelect}
-        />
+        <AcademyAIContentCurator open={isAICuratorOpen} onOpenChange={setIsAICuratorOpen} onContentSelect={handleAIContentSelect} />
       </div>
     </SidebarProvider>
     
