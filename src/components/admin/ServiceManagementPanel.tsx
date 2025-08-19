@@ -1068,17 +1068,8 @@ export const ServiceManagementPanel = () => {
                          />
                        </div>
                      </div>
-                     
-                     <div className="space-y-2">
-                       <label className="text-sm font-medium">Description</label>
-                       <Textarea
-                         value={editForm.description || ''}
-                         onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
-                         rows={4}
-                       />
-                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="space-y-2">
                         <label className="text-sm font-medium">Duration</label>
                         <Input
