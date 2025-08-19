@@ -1010,12 +1010,6 @@ export const ServiceManagementPanel = () => {
                                 {service.retail_price}
                               </span>
                             )}
-                            {(service.vendors?.name && service.vendors.name !== 'Circle Marketplace') && (
-                              <span className="flex items-center gap-1">
-                                <Building className="h-3 w-3" />
-                                {service.vendors.name}
-                              </span>
-                            )}
                             {(service.service_providers?.name && service.service_providers.name !== 'Circle Marketplace') && (
                               <span className="flex items-center gap-1">
                                 <Building className="h-3 w-3" />
