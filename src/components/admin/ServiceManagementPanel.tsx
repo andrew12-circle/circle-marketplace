@@ -17,7 +17,7 @@ import { formatRelativeTime } from "@/utils/dateFormatting";
 interface Service {
   id: string;
   title: string;
-  description?: string;
+  description: string;
   retail_price?: string;
   pro_price?: string;
   price_duration?: string;
@@ -25,24 +25,24 @@ interface Service {
   estimated_roi?: number;
   sort_order?: number;
   is_verified?: boolean;
-  is_featured?: boolean;
-  is_top_pick?: boolean;
-  requires_quote?: boolean;
+  is_featured: boolean;
+  is_top_pick: boolean;
+  requires_quote: boolean;
   copay_allowed?: boolean;
   direct_purchase_enabled?: boolean;
   respa_split_limit?: number;
   max_split_percentage_non_ssp?: number;
   tags?: string[];
-  category?: string;
+  category: string;
   vendor?: any;
 }
 
-interface ServiceManagementPanelFixedProps {
+interface ServiceManagementPanelProps {
   services: Service[];
   setServices: (services: Service[]) => void;
 }
 
-export const ServiceManagementPanelFixed: React.FC<ServiceManagementPanelFixedProps> = ({
+export const ServiceManagementPanel: React.FC<ServiceManagementPanelProps> = ({
   services,
   setServices
 }) => {

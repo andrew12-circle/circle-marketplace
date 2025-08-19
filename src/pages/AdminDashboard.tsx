@@ -914,7 +914,7 @@ export default function AdminDashboard() {
         </TabsContent>
 
         <TabsContent value="services" className="space-y-6">
-          <ServiceManagementPanel />
+          <ServiceManagementPanel services={[]} setServices={() => {}} />
           <ServiceDisclaimerManager />
           <BulkFAQGenerator />
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
