@@ -960,13 +960,33 @@ export const ServiceManagementPanel = () => {
                             <Package className="h-6 w-6 text-muted-foreground" />
                           </div>
                         )}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between">
+                          <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 min-w-0">
                               <Badge variant="secondary" className="text-[10px] shrink-0">#{service.sort_order ?? '-'}</Badge>
                               <h3 className="font-semibold truncate">{service.title}</h3>
                             </div>
-                            <div className="flex flex-col gap-1">
+                            <div className="flex items-center gap-1 mt-1">
+                              {service.is_featured && (
+                                <Badge variant="secondary" className="text-xs">
+                                  <Star className="h-3 w-3 mr-1" />
+                                  Featured
+                                </Badge>
+                              )}
+                              {service.is_top_pick && (
+                                <Badge variant="outline" className="text-xs">
+                                  Top Pick
+                                </Badge>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                              {(service.service_providers?.name && service.service_providers.name !== 'Circle Marketplace') && (
+                                <span className="flex items-center gap-1">
+                                  <Building className="h-3 w-3" />
+                                  {service.service_providers.name}
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex flex-col gap-1 mt-2">
                               <div className="flex items-center gap-2">
                                 <span className="text-xs text-muted-foreground w-12">Verified</span>
                                 <Switch
@@ -985,33 +1005,6 @@ export const ServiceManagementPanel = () => {
                               </div>
                             </div>
                           </div>
-                          <div className="flex items-center gap-1 mt-1">
-                            {service.is_verified && (
-                              <Badge variant="default" className="text-xs">
-                                Verified
-                              </Badge>
-                            )}
-                            {service.is_featured && (
-                              <Badge variant="secondary" className="text-xs">
-                                <Star className="h-3 w-3 mr-1" />
-                                Featured
-                              </Badge>
-                            )}
-                            {service.is_top_pick && (
-                              <Badge variant="outline" className="text-xs">
-                                Top Pick
-                              </Badge>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
-                            {(service.service_providers?.name && service.service_providers.name !== 'Circle Marketplace') && (
-                              <span className="flex items-center gap-1">
-                                <Building className="h-3 w-3" />
-                                {service.service_providers.name}
-                              </span>
-                            )}
-                          </div>
-                        </div>
                       </div>
                   </CardContent>
                 </Card>
