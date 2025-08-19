@@ -128,7 +128,7 @@ const Index = () => {
                 
                 {/* Navigation Tabs - Desktop */}
                 <div className="flex flex-1 justify-center items-center gap-4">
-                  <NavigationTabs activeTab="marketplace" />
+                  {/* <NavigationTabs activeTab="marketplace" /> */}
                   <TourDiscoveryButton />
                 </div>
                 

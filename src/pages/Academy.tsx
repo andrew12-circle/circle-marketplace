@@ -1696,7 +1696,7 @@ const AcademyContent = () => {
               
               {/* Navigation Tabs - Desktop */}
               <div className="flex flex-1 justify-center">
-                <NavigationTabs />
+                {/* <NavigationTabs /> */}
               </div>
               
               <div className="flex items-center gap-2 sm:gap-4">
