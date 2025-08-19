@@ -79,10 +79,10 @@ createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <SpiritualCoverageProvider>
-        <AuthProvider>
-          <CartProvider>
-          <BrowserRouter>
-            <Suspense fallback={<RouteLoader />}>
+          <AuthProvider>
+            <BrowserRouter>
+              <CartProvider>
+              <Suspense fallback={<RouteLoader />}>
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
@@ -123,8 +123,8 @@ createRoot(document.getElementById("root")!).render(
             </Suspense>
             <Toaster />
             <ReloadReasonBanner />
+            </CartProvider>
           </BrowserRouter>
-          </CartProvider>
         </AuthProvider>
       </SpiritualCoverageProvider>
     </QueryClientProvider>
