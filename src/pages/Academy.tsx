@@ -1645,7 +1645,7 @@ const AcademyContent = () => {
     user,
     profile
   } = useAuth();
-  const circleLogoUrl = "/lovable-uploads/97692497-6d98-46a8-b6fc-05cd68bdc160.png";
+  const circleLogoUrl = "/circle-logo-updated.png";
   const isMobile = useIsMobile();
   const location = useLocation();
   return <div className="min-h-screen bg-background">
