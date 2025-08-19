@@ -5,7 +5,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { X, Lightbulb, AlertTriangle, TrendingUp, BookOpen } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 
@@ -30,6 +30,7 @@ interface ProactiveHelpSuggestion {
 export const ProactiveHelpMonitor: React.FC = () => {
   const { user } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [triggers, setTriggers] = useState<ProactiveTrigger[]>([]);
   const [suggestions, setSuggestions] = useState<ProactiveHelpSuggestion[]>([]);
@@ -194,7 +195,7 @@ export const ProactiveHelpMonitor: React.FC = () => {
 
         case 'suggest_path':
           // Navigate to Academy with learning path context
-          window.location.href = '/academy?showRecommendations=true';
+          navigate('/academy?showRecommendations=true');
           break;
       }
 

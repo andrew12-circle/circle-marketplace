@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { useNavigate } from 'react-router-dom';
 
 interface CartItem {
   id: string; // Can be serviceId or courseId
@@ -58,6 +59,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   // Load cart from localStorage on mount
   useEffect(() => {
@@ -126,7 +128,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       // Redirect to auth page
       setTimeout(() => {
-        window.location.href = '/auth?mode=signup';
+        navigate('/auth?mode=signup');
       }, 1000);
       return false;
     }

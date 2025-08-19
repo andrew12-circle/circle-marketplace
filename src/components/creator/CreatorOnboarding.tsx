@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -398,6 +399,7 @@ const CreatorWelcome = ({ onNext }: any) => (
 export const CreatorOnboarding = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [onboardingData, setOnboardingData] = useState<OnboardingData>({
     basicInfo: { bio: '', experience_years: 0, specialties: [] },
@@ -503,7 +505,7 @@ export const CreatorOnboarding = () => {
       });
 
       // Redirect to payment setup page
-      window.location.href = '/creator-payment-setup';
+      navigate('/creator-payment-setup');
 
     } catch (error) {
       console.error('Onboarding error:', error);

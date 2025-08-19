@@ -264,7 +264,7 @@ class GlobalErrorMonitor {
         if (!lastBust || new Date(lastBust) < bustTime) {
           console.log('💥 Remote cache bust triggered');
           localStorage.setItem('last_cache_bust', new Date().toISOString());
-          cacheManager.forceReload();
+          cacheManager.forceReload('self_heal');
           return;
         }
       }
@@ -274,7 +274,7 @@ class GlobalErrorMonitor {
         // Wait a bit, then soft reload
         setTimeout(() => {
           console.log('🔄 Performing soft reload...');
-          cacheManager.forceReload();
+          cacheManager.forceReload('self_heal');
         }, 2000);
       }
 
@@ -308,7 +308,7 @@ class GlobalErrorMonitor {
         if (this.isVersionOutdated(currentVersion, config.min_build_version)) {
           console.log('📱 App version outdated, triggering refresh...');
           await cacheManager.clearAllCachePreserveSession();
-          cacheManager.forceReload();
+          cacheManager.forceReload('version_update');
         }
       }
 

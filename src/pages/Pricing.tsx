@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Check, X, ChevronDown, ChevronUp } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -19,6 +19,7 @@ export const Pricing = () => {
   const {
     user
   } = useAuth();
+  const navigate = useNavigate();
   const handleSubscription = async (plan: "pro") => {
     try {
       setLoading(plan);
@@ -29,7 +30,7 @@ export const Pricing = () => {
       } = await supabase.auth.getSession();
       if (!session) {
         // Redirect to signup mode for a smoother user experience
-        window.location.href = '/auth?mode=signup';
+        navigate('/auth?mode=signup');
         return;
       }
       const {

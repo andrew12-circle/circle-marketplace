@@ -7,6 +7,8 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { SpiritualCoverageProvider } from "@/contexts/SpiritualCoverageContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { cacheManager } from "./utils/cacheManager";
+import { globalErrorMonitor } from "./utils/globalErrorMonitor";
+import { ReloadReasonBanner } from "./components/common/ReloadReasonBanner";
 import "./index.css";
 import "./i18n";
 
@@ -70,6 +72,9 @@ const queryClient = new QueryClient({
 // Clear cache if version mismatch
 cacheManager.checkAndClearCache();
 
+// Initialize global error monitoring
+globalErrorMonitor.initialize();
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
@@ -117,6 +122,7 @@ createRoot(document.getElementById("root")!).render(
               </Routes>
             </Suspense>
             <Toaster />
+            <ReloadReasonBanner />
           </BrowserRouter>
           </CartProvider>
         </AuthProvider>

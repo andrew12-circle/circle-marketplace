@@ -289,7 +289,7 @@ export const VendorAnalyticsDashboard = () => {
           </CardHeader>
           <CardContent className="text-center">
             <Button 
-              onClick={() => window.location.href = '/vendor-registration'}
+              onClick={() => navigate('/vendor-registration')}
               className="w-full"
             >
               Register as Vendor

@@ -106,7 +106,10 @@ class CacheManager {
   /**
    * Force page reload with cache bypass using query parameter
    */
-  forceReload(): void {
+  forceReload(reason: 'self_heal' | 'version_update' | 'manual' = 'manual'): void {
+    // Store reload reason for diagnostic banner
+    sessionStorage.setItem('last_reload_reason', reason);
+    
     const url = new URL(window.location.href);
     url.searchParams.set('_cb', Date.now().toString());
     window.location.href = url.toString();
