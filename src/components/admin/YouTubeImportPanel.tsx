@@ -29,8 +29,26 @@ export const YouTubeImportPanel = () => {
   const [newTag, setNewTag] = useState('');
 
   const categories = [
-    'Marketing', 'Sales', 'Technology', 'Finance', 'Real Estate',
-    'Business Development', 'Leadership', 'Training', 'Education'
+    'CRMs',
+    'Ads & Lead Gen', 
+    'Website / IDX',
+    'SEO',
+    'Coaching',
+    'Marketing Automation & Content',
+    'Video & Media Tools',
+    'Listing & Showing Tools',
+    'Data & Analytics', 
+    'Finance & Business Tools',
+    'Productivity & Collaboration',
+    'Virtual Assistants & Dialers',
+    'Team & Recruiting Tools',
+    'CE & Licensing',
+    'Client Event Kits',
+    'Print & Mail',
+    'Signage & Branding', 
+    'Presentations',
+    'Branding',
+    'Client Retention'
   ];
 
   // Extract YouTube video ID from various URL formats

@@ -1161,21 +1161,33 @@ export const ServiceManagementPanel = () => {
                         />
                       </div>
                     </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Category Tags</label>
                       <div className="space-y-2">
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                          {[
-                            { tag: 'cat:crms', label: 'CRMs' },
-                            { tag: 'cat:ads-lead-gen', label: 'Ads & Lead Gen' },
-                            { tag: 'cat:seo', label: 'SEO' },
-                            { tag: 'cat:coaching', label: 'Coaching' },
-                            { tag: 'cat:client-events', label: 'Client Events' },
-                            { tag: 'cat:print-mail', label: 'Print & Mail' },
-                            { tag: 'cat:signs', label: 'Signs' },
-                            { tag: 'cat:presentations', label: 'Presentations' },
-                            { tag: 'cat:branding', label: 'Branding' },
-                            { tag: 'cat:client-retention', label: 'Client Retention' }
+                        <label className="text-sm font-medium">Category Tags</label>
+                        <div className="space-y-2">
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                            {[
+                              // Digital-first categories
+                              { tag: 'cat:crms', label: 'CRMs' },
+                              { tag: 'cat:ads-lead-gen', label: 'Ads & Lead Gen' },
+                              { tag: 'cat:website-idx', label: 'Website / IDX' },
+                              { tag: 'cat:seo', label: 'SEO' },
+                              { tag: 'cat:coaching', label: 'Coaching' },
+                              { tag: 'cat:marketing-automation', label: 'Marketing Automation & Content' },
+                              { tag: 'cat:video-media', label: 'Video & Media Tools' },
+                              { tag: 'cat:listing-showing', label: 'Listing & Showing Tools' },
+                              { tag: 'cat:data-analytics', label: 'Data & Analytics' },
+                              { tag: 'cat:finance-business', label: 'Finance & Business Tools' },
+                              { tag: 'cat:productivity', label: 'Productivity & Collaboration' },
+                              { tag: 'cat:virtual-assistants', label: 'Virtual Assistants & Dialers' },
+                              { tag: 'cat:team-recruiting', label: 'Team & Recruiting Tools' },
+                              { tag: 'cat:ce-licensing', label: 'CE & Licensing' },
+                              // Old-school categories
+                              { tag: 'cat:client-events', label: 'Client Event Kits' },
+                              { tag: 'cat:print-mail', label: 'Print & Mail' },
+                              { tag: 'cat:signs', label: 'Signage & Branding' },
+                              { tag: 'cat:presentations', label: 'Presentations' },
+                              { tag: 'cat:branding', label: 'Branding' },
+                              { tag: 'cat:client-retention', label: 'Client Retention' }
                           ].map(({ tag, label }) => (
                             <div key={tag} className="flex items-center space-x-2">
                               <Switch

@@ -29,15 +29,26 @@ export const AddProductModal = ({ open, onOpenChange, onProductAdded }: AddProdu
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const categories = [
-    "Travel Services",
-    "Real Estate",
-    "Beauty & Wellness",
-    "Food & Dining",
-    "Technology",
-    "Healthcare",
-    "Education",
-    "Professional Services",
-    "Entertainment"
+    "CRMs",
+    "Ads & Lead Gen",
+    "Website / IDX",
+    "SEO",
+    "Coaching",
+    "Marketing Automation & Content",
+    "Video & Media Tools",
+    "Listing & Showing Tools", 
+    "Data & Analytics",
+    "Finance & Business Tools",
+    "Productivity & Collaboration",
+    "Virtual Assistants & Dialers",
+    "Team & Recruiting Tools",
+    "CE & Licensing",
+    "Client Event Kits",
+    "Print & Mail",
+    "Signage & Branding",
+    "Presentations",
+    "Branding",
+    "Client Retention"
   ];
 
   const handleSecureSubmit = async (sanitizedData: Record<string, string>) => {
