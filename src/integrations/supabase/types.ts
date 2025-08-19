@@ -4829,6 +4829,7 @@ export type Database = {
       }
       services: {
         Row: {
+          average_rating: number | null
           calendar_link: string | null
           category: string | null
           co_pay_price: string | null
@@ -4848,6 +4849,7 @@ export type Database = {
           image_url: string | null
           is_active: boolean | null
           is_featured: boolean | null
+          is_published: boolean | null
           is_respa_regulated: boolean | null
           is_sponsored: boolean | null
           is_top_pick: boolean | null
@@ -4875,6 +4877,7 @@ export type Database = {
           website_url: string | null
         }
         Insert: {
+          average_rating?: number | null
           calendar_link?: string | null
           category?: string | null
           co_pay_price?: string | null
@@ -4894,6 +4897,7 @@ export type Database = {
           image_url?: string | null
           is_active?: boolean | null
           is_featured?: boolean | null
+          is_published?: boolean | null
           is_respa_regulated?: boolean | null
           is_sponsored?: boolean | null
           is_top_pick?: boolean | null
@@ -4921,6 +4925,7 @@ export type Database = {
           website_url?: string | null
         }
         Update: {
+          average_rating?: number | null
           calendar_link?: string | null
           category?: string | null
           co_pay_price?: string | null
@@ -4940,6 +4945,7 @@ export type Database = {
           image_url?: string | null
           is_active?: boolean | null
           is_featured?: boolean | null
+          is_published?: boolean | null
           is_respa_regulated?: boolean | null
           is_sponsored?: boolean | null
           is_top_pick?: boolean | null
