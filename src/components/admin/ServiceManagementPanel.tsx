@@ -257,7 +257,7 @@ export const ServiceManagementPanel = () => {
   const [editForm, setEditForm] = useState<Partial<Service>>({});
   const [error, setError] = useState<string | null>(null);
   const [lastFunnelSavedAt, setLastFunnelSavedAt] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'details' | 'pricing' | 'funnel'>('details');
+  const [activeTab, setActiveTab] = useState<'details' | 'funnel'>('details');
 
   // Default funnel content for new services
   const [funnelContent, setFunnelContent] = useState<FunnelContent>({
@@ -829,13 +829,7 @@ export const ServiceManagementPanel = () => {
     }
   };
 
-  const handleTabChange = (value: 'details' | 'pricing' | 'funnel') => {
-    if (activeTab === 'pricing' && value !== 'pricing' && isPricingDirty) {
-      const proceed = window.confirm('You have unsaved pricing changes. Save before leaving this tab?');
-      if (proceed) {
-        handleFunnelSave();
-      }
-    }
+  const handleTabChange = (value: 'details' | 'funnel') => {
     setActiveTab(value);
   };
 
@@ -846,10 +840,6 @@ export const ServiceManagementPanel = () => {
     const originalValue = (selectedService as any)[key];
     return !compareValues(currentValue, originalValue);
   }) : false;
-
-  const isPricingDirty = selectedService
-    ? JSON.stringify(pricingTiers) !== JSON.stringify((selectedService as any).pricing_tiers || [])
-    : false;
 
   const formatRelativeTime = (iso?: string | null) => {
     if (!iso) return '';
@@ -1049,9 +1039,8 @@ export const ServiceManagementPanel = () => {
           </CardHeader>
           <CardContent>
             <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
+              <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="details">Service Details</TabsTrigger>
-                <TabsTrigger value="pricing">Pricing & Features</TabsTrigger>
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -1370,27 +1359,6 @@ export const ServiceManagementPanel = () => {
                 )}
               </TabsContent>
 
-              <TabsContent value="pricing" className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    {isPricingDirty && <Badge variant="outline" className="text-xs">Unsaved changes</Badge>}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button variant="outline" disabled={!isPricingDirty} onClick={() => {
-                      const base = ((selectedService as any)?.pricing_tiers) || [];
-                      setPricingTiers(Array.isArray(base) ? base : []);
-                    }}>
-                      Discard
-                    </Button>
-                    <Button onClick={handleFunnelSave} disabled={!isPricingDirty}>Save Pricing</Button>
-                  </div>
-                </div>
-                <ServicePricingTiersEditor 
-                  tiers={pricingTiers}
-                  onChange={setPricingTiers}
-                />
-              </TabsContent>
-
               <TabsContent value="funnel" className="space-y-4">
                 {showFunnelEditor ? (
                   <ServiceFunnelEditor
@@ -1410,9 +1378,6 @@ export const ServiceManagementPanel = () => {
                           <span className="text-xs text-muted-foreground">
                             Saved {formatRelativeTime(lastFunnelSavedAt)}
                           </span>
-                        )}
-                        {isPricingDirty && (
-                          <Badge variant="outline" className="text-xs">Unsaved pricing</Badge>
                         )}
                         <Button variant="outline" onClick={() => setShowFunnelPreview(true)}>
                           <Eye className="h-4 w-4 mr-2" />
