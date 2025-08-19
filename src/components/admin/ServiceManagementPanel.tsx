@@ -1065,25 +1065,18 @@ export const ServiceManagementPanel = () => {
                         <Input
                           value={editForm.title || ''}
                           onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">Category</label>
-                        <Input
-                          value={editForm.category || ''}
-                          onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
-                        />
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Description</label>
-                      <Textarea
-                        value={editForm.description || ''}
-                        onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
-                        rows={4}
-                      />
-                    </div>
+                         />
+                       </div>
+                     </div>
+                     
+                     <div className="space-y-2">
+                       <label className="text-sm font-medium">Description</label>
+                       <Textarea
+                         value={editForm.description || ''}
+                         onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                         rows={4}
+                       />
+                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="space-y-2">
