@@ -1004,12 +1004,6 @@ export const ServiceManagementPanel = () => {
                             )}
                           </div>
                           <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
-                            {service.retail_price && (
-                              <span className="flex items-center gap-1">
-                                <DollarSign className="h-3 w-3" />
-                                {service.retail_price}
-                              </span>
-                            )}
                             {(service.service_providers?.name && service.service_providers.name !== 'Circle Marketplace') && (
                               <span className="flex items-center gap-1">
                                 <Building className="h-3 w-3" />
