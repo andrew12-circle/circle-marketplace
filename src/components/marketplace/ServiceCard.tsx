@@ -324,7 +324,7 @@ export const ServiceCard = ({
             />
           </div>
 
-          <CardContent className="p-4 flex flex-col flex-grow mobile-card-content">
+          <CardContent className="p-4 flex flex-col justify-between h-full mobile-card-content">
             {/* Title and Vendor Info - Fixed height */}
             <div className="flex items-center gap-2 text-sm text-muted-foreground h-6 mb-3">
               <h3 className="font-semibold text-foreground leading-tight mobile-title">
@@ -406,7 +406,7 @@ export const ServiceCard = ({
             </div>
 
             {/* Mobile-Optimized Pricing for Launch */}
-            <div className="space-y-3 mb-3 flex-grow">
+            <div className="space-y-3 mb-3 mt-auto">
               {isProMember ? (
                 <>
                   {/* Pro Member View: Show pro price prominently */}
