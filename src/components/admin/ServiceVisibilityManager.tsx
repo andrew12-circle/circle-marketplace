@@ -327,7 +327,7 @@ export const ServiceVisibilityManager = () => {
         <CardHeader>
           <CardTitle>Services ({filteredServices.length})</CardTitle>
           <CardDescription>
-            Toggle individual services on/off. Only active services appear in the marketplace.
+            Toggle individual services on/off. Only services that are both <strong>Active</strong> and <strong>Verified</strong> appear in the marketplace.
           </CardDescription>
         </CardHeader>
         <CardContent>

@@ -395,6 +395,60 @@ export const ServiceManagementPanel = () => {
     fetchServices();
   }, []);
 
+  // Bulk verification actions
+  const bulkVerify = async (verify: boolean) => {
+    const servicesToUpdate = filteredServices.filter(s => s.is_verified !== verify);
+    
+    if (servicesToUpdate.length === 0) {
+      toast({
+        title: 'Info',
+        description: `All filtered services are already ${verify ? 'verified' : 'unverified'}`,
+      });
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Are you sure you want to ${verify ? 'verify' : 'unverify'} ${servicesToUpdate.length} services?`
+    );
+
+    if (!confirmed) return;
+
+    try {
+      const serviceIds = servicesToUpdate.map(s => s.id);
+      
+      const { error } = await supabase
+        .from('services')
+        .update({ is_verified: verify })
+        .in('id', serviceIds);
+
+      if (error) throw error;
+
+      // Update local state
+      setServices(prev => 
+        prev.map(service => 
+          serviceIds.includes(service.id)
+            ? { ...service, is_verified: verify }
+            : service
+        )
+      );
+
+      toast({
+        title: 'Success',
+        description: `${servicesToUpdate.length} services ${verify ? 'verified' : 'unverified'} successfully`,
+      });
+
+      // Clear marketplace cache to ensure fresh data
+      invalidateCache.invalidateAll();
+    } catch (error) {
+      console.error('Error in bulk verification:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to perform bulk verification update',
+        variant: 'destructive'
+      });
+    }
+  };
+
   useEffect(() => {
     const filtered = services.filter(service =>
       service.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -803,14 +857,36 @@ export const ServiceManagementPanel = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <Search className="h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search services by title, category, or vendor..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="max-w-md"
-              />
+            <div className="flex flex-col sm:flex-row gap-2">
+              <div className="flex-1 flex items-center gap-2">
+                <Search className="h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search services by title, category, or vendor..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="max-w-md"
+                />
+              </div>
+              <div className="flex gap-2">
+                <Button 
+                  onClick={() => bulkVerify(true)}
+                  variant="outline"
+                  size="sm"
+                  className="whitespace-nowrap"
+                >
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  Verify Filtered ({filteredServices.filter(s => !s.is_verified).length})
+                </Button>
+                <Button 
+                  onClick={() => bulkVerify(false)}
+                  variant="outline"
+                  size="sm"
+                  className="whitespace-nowrap"
+                >
+                  <Eye className="h-4 w-4 mr-2" />
+                  Unverify Filtered ({filteredServices.filter(s => s.is_verified).length})
+                </Button>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-96 overflow-y-auto">
