@@ -719,7 +719,14 @@ export const MarketplaceGrid = () => {
           <span className="text-sm text-center sm:text-left">
             Oops! Our apologies, the services are not loading. This is common because of a browser error. Please clear your cache and reload.
           </span>
-          <div className="flex gap-2 justify-center">
+          <div className="flex gap-2 justify-center flex-wrap">
+            <Button variant="outline" onClick={() => {
+              // Clear browser storage
+              localStorage.clear();
+              sessionStorage.clear();
+              // Force hard refresh with cache bypass
+              window.location.reload();
+            }}>Clear Cache</Button>
             <Button variant="outline" onClick={handleReloadDataQuick}>Reload data</Button>
             <Button onClick={handleHardRefresh}>Try again</Button>
           </div>
