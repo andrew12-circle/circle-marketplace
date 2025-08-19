@@ -442,14 +442,22 @@ const AcademyContent = () => {
       </div>
 
       {/* Category Icons */}
-      <div className="flex flex-wrap md:flex-nowrap gap-4 md:gap-8 mb-16 overflow-x-auto md:overflow-x-visible">
-        {categories.map(category => {
+      <div className="grid grid-cols-3 md:grid-cols-6 gap-4 mb-16">
+        {categories.map((category, index) => {
         const Icon = category.icon;
-        return <button key={category.id} onClick={() => setActiveView(category.id)} className="flex flex-col items-center gap-2 p-3 md:p-4 rounded-lg hover:bg-gray-50 transition-colors group shrink-0">
-              <div className="w-10 h-10 md:w-12 md:h-12 bg-gray-100 rounded-lg flex items-center justify-center group-hover:bg-gray-200 transition-colors">
-                <Icon className="w-5 h-5 md:w-6 md:h-6 text-gray-700" />
+        const colorClasses = [
+          "bg-gradient-to-br from-blue-500 to-blue-600 text-white",
+          "bg-gradient-to-br from-purple-500 to-purple-600 text-white", 
+          "bg-gradient-to-br from-green-500 to-green-600 text-white",
+          "bg-gradient-to-br from-orange-500 to-orange-600 text-white",
+          "bg-gradient-to-br from-pink-500 to-pink-600 text-white",
+          "bg-gradient-to-br from-teal-500 to-teal-600 text-white"
+        ];
+        return <button key={category.id} onClick={() => setActiveView(category.id)} className="flex flex-col items-center gap-2 p-3 md:p-4 rounded-lg hover:scale-105 transition-all duration-200 group">
+              <div className={`w-12 h-12 md:w-14 md:h-14 rounded-xl flex items-center justify-center transition-all duration-200 group-hover:scale-110 ${colorClasses[index % colorClasses.length]}`}>
+                <Icon className="w-6 h-6 md:w-7 md:h-7" />
               </div>
-              <span className="text-xs md:text-sm text-gray-700 font-medium text-center whitespace-nowrap">{category.label}</span>
+              <span className="text-xs md:text-sm text-gray-700 font-medium text-center">{category.label}</span>
             </button>;
       })}
       </div>
