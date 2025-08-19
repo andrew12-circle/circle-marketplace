@@ -51,6 +51,8 @@ import CommandCenter from "./pages/CommandCenter";
 import { CommandCenterTest } from "./pages/CommandCenterTest";
 import CreatorOnboardingPage from "./pages/CreatorOnboarding";
 import Welcome from "./pages/Welcome";
+import CircleMinistry from "./pages/CircleMinistry";
+import MinistrySuccess from "./pages/MinistrySuccess";
 
 import CompliancePage from "./pages/CompliancePage";
 import AdminCommissions from "./pages/AdminCommissions";
@@ -92,9 +94,11 @@ const AppContent = () => {
                       <Route path="/admin" element={<AdminDashboard />} />
                       <Route path="/admin/accounting" element={<AdminAccounting />} />
                       <Route path="/admin/commissions" element={<AdminCommissions />} />
-                       <Route path="/creator-onboarding" element={<CreatorOnboardingPage />} />
-                       <Route path="/welcome" element={<Welcome />} />
-                       <Route path="/compliance" element={<CompliancePage />} />
+                        <Route path="/creator-onboarding" element={<CreatorOnboardingPage />} />
+                         <Route path="/welcome" element={<Welcome />} />
+                         <Route path="/compliance" element={<CompliancePage />} />
+                         <Route path="/ministry" element={<CircleMinistry />} />
+                         <Route path="/ministry/success" element={<MinistrySuccess />} />
                      {/* Legal Pages */}
                      <Route path="/terms" element={<TermsOfService />} />
                      <Route path="/privacy" element={<PrivacyPolicy />} />

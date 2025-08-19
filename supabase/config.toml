@@ -87,3 +87,6 @@ verify_jwt = false
 
 [functions.resume-subscription]
 verify_jwt = false
+
+[functions.create-donation]
+verify_jwt = false
