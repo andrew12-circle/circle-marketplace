@@ -405,39 +405,40 @@ export const ServiceCard = ({
               )}
             </div>
 
-            {/* Pricing Structure - Flexible but consistent */}
-            <div className="space-y-2 mb-3 flex-grow">
+            {/* Mobile-Optimized Pricing for Launch */}
+            <div className="space-y-3 mb-3 flex-grow">
               {isProMember ? (
                 <>
-                  {/* Pro Member View: Show retail with line-through only if verified, pro price as main */}
-                  {service.retail_price && (
-                     <div className="flex items-center justify-between pt-10">
-                      <span className="text-sm text-muted-foreground">Retail Price:</span>
-                      <span className={`text-sm text-muted-foreground ${service.is_verified ? 'line-through' : ''}`}>
-                        {formatPrice(extractNumericPrice(service.retail_price), service.price_duration || 'mo')}
-                      </span>
-                    </div>
-                  )}
-                  
-                  {service.is_verified && service.pro_price && (
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-1">
-                          <span className="text-sm font-medium text-circle-primary">Circle Pro Price:</span>
-                          <Crown className="w-4 h-4 text-circle-primary" />
+                  {/* Pro Member View: Show pro price prominently */}
+                  <div className="text-center">
+                    {service.is_verified && service.pro_price ? (
+                      <>
+                        {service.retail_price && (
+                          <div className="text-xs text-muted-foreground mb-1">
+                            <span className="line-through">
+                              Retail: {formatPrice(extractNumericPrice(service.retail_price), service.price_duration || 'mo')}
+                            </span>
+                          </div>
+                        )}
+                        <div className="flex items-center justify-center gap-2 text-xl font-bold text-blue-600">
+                          <Crown className="w-4 h-4" />
+                          <span>{formatPrice(extractNumericPrice(service.pro_price), service.price_duration || 'mo')}</span>
                         </div>
-                        <span className="text-xl font-bold text-circle-primary">
-                          {formatPrice(extractNumericPrice(service.pro_price), service.price_duration || 'mo')}
-                        </span>
+                        <div className="text-xs text-blue-600 font-medium">Circle Pro Price</div>
+                      </>
+                    ) : (
+                      <div className="text-xl font-bold text-foreground">
+                        {formatPrice(extractNumericPrice(service.retail_price || '0'), service.price_duration || 'mo')}
                       </div>
-                    </div>
-                  )}
-                  
-                   {service.copay_allowed && service.respa_split_limit && ((service.is_verified && service.pro_price) || (!service.is_verified && service.retail_price)) && (
-                    <div className="space-y-1">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-1">
-                          <span className="text-sm font-medium text-green-600">Potential Co-Pay:</span>
+                    )}
+                  </div>
+
+                  {/* Co-Pay Section - Mobile Optimized */}
+                  {service.copay_allowed && service.respa_split_limit && ((service.is_verified && service.pro_price) || (!service.is_verified && service.retail_price)) && (
+                    <div className="bg-green-50 border-2 border-green-200 rounded-lg p-3">
+                      <div className="text-center">
+                        <div className="flex items-center justify-center gap-2 text-sm font-medium text-green-700 mb-1">
+                          <span>Co-Pay Available</span>
                           <Tooltip delayDuration={0}>
                             <TooltipTrigger asChild>
                               <button 
@@ -453,31 +454,30 @@ export const ServiceCard = ({
                             </TooltipTrigger>
                           </Tooltip>
                         </div>
-                        <span className="text-lg font-bold text-green-600">
-                          {formatPrice(
+                        <div className="text-green-600 font-medium text-lg">
+                          Your cost: {formatPrice(
                             (service.is_verified 
                               ? extractNumericPrice(service.pro_price!) 
                               : extractNumericPrice(service.retail_price!)
                             ) * (1 - (service.respa_split_limit / 100)), 
                             service.price_duration || 'mo'
                           )}
-                        </span>
-                       </div>
-                        <div className="flex justify-end">
-                           <Badge className="bg-green-600 text-white text-xs">
-                             {service.respa_split_limit}% vendor support
-                           </Badge>
                         </div>
-                        {discountPercentage && discountPercentage > 0 && (
-                          <div className="flex justify-end mt-1">
-                            <Badge className="bg-red-500 text-white text-xs font-medium">
-                              {discountPercentage}% OFF
-                            </Badge>
-                          </div>
-                        )}
+                        <div className="text-xs text-green-600 mt-1">
+                          Up to {service.respa_split_limit}% vendor contribution
+                        </div>
+                      </div>
                     </div>
                   )}
-                  
+
+                  {/* Savings Badge */}
+                  {service.is_verified && service.pro_price && service.retail_price && (
+                    <div className="text-center">
+                      <div className="inline-flex items-center gap-1 bg-blue-50 text-blue-700 text-xs font-medium px-2 py-1 rounded-full">
+                        <span>Save {formatPrice(extractNumericPrice(service.retail_price) - extractNumericPrice(service.pro_price), service.price_duration || 'mo')}</span>
+                      </div>
+                    </div>
+                  )}
                 </>
               ) : (
                 <>
