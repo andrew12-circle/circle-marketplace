@@ -986,9 +986,6 @@ export const ServiceManagementPanel = () => {
                             </div>
                           </div>
                           <div className="flex items-center gap-1 mt-1">
-                            <Badge variant="outline" className="text-xs">
-                              {service.category}
-                            </Badge>
                             {service.is_verified && (
                               <Badge variant="default" className="text-xs">
                                 Verified
