@@ -949,11 +949,11 @@ export const ServiceManagementPanel = () => {
                 >
                   <CardContent className="p-4">
                       <div className="space-y-3">
-                        <div className="flex items-center gap-2 min-w-0">
-                          <Badge variant="secondary" className="text-[10px] shrink-0">#{service.sort_order ?? '-'}</Badge>
-                          <h3 className="font-semibold truncate">{service.title}</h3>
-                        </div>
-                        <div className="flex items-start gap-3">
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <Badge variant="secondary" className="text-[10px] shrink-0">#{service.sort_order ?? '-'}</Badge>
+                            <h3 className="font-semibold truncate">{service.title}</h3>
+                          </div>
                           {service.image_url ? (
                             <img
                               src={service.image_url}
@@ -965,7 +965,8 @@ export const ServiceManagementPanel = () => {
                               <Package className="h-6 w-6 text-muted-foreground" />
                             </div>
                           )}
-                          <div className="flex-1 min-w-0">
+                        </div>
+                        <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-1 mt-1">
                               {service.is_featured && (
                                 <Badge variant="secondary" className="text-xs">
@@ -1007,7 +1008,6 @@ export const ServiceManagementPanel = () => {
                              </div>
                            </div>
                          </div>
-                       </div>
                   </CardContent>
                 </Card>
               ))}
