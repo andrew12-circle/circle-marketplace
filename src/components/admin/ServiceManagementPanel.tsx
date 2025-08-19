@@ -966,21 +966,23 @@ export const ServiceManagementPanel = () => {
                               <Badge variant="secondary" className="text-[10px] shrink-0">#{service.sort_order ?? '-'}</Badge>
                               <h3 className="font-semibold truncate">{service.title}</h3>
                             </div>
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs text-muted-foreground">Verified</span>
-                              <Switch
-                                checked={service.is_verified || false}
-                                onCheckedChange={() => handleVerificationToggle(service.id, service.is_verified || false)}
-                                onClick={(e) => e.stopPropagation()}
-                              />
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs text-muted-foreground">Active</span>
-                              <Switch
-                                checked={service.is_active || false}
-                                onCheckedChange={() => handleVisibilityToggle(service.id, service.is_active || false)}
-                                onClick={(e) => e.stopPropagation()}
-                              />
+                            <div className="flex flex-col gap-1">
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs text-muted-foreground">Verified</span>
+                                <Switch
+                                  checked={service.is_verified || false}
+                                  onCheckedChange={() => handleVerificationToggle(service.id, service.is_verified || false)}
+                                  onClick={(e) => e.stopPropagation()}
+                                />
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs text-muted-foreground">Active</span>
+                                <Switch
+                                  checked={service.is_active || false}
+                                  onCheckedChange={() => handleVisibilityToggle(service.id, service.is_active || false)}
+                                  onClick={(e) => e.stopPropagation()}
+                                />
+                              </div>
                             </div>
                           </div>
                           <div className="flex items-center gap-1 mt-1">
