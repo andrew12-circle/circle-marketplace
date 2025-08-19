@@ -35,6 +35,10 @@ const VendorAnalyticsDashboard = lazy(() => import("./pages/VendorAnalyticsDashb
 const CommandCenter = lazy(() => import("./pages/CommandCenter"));
 const HealthStability = lazy(() => import("./pages/HealthStability"));
 
+// Ministry pages
+const CircleMinistry = lazy(() => import("./pages/CircleMinistry"));
+const MinistrySuccess = lazy(() => import("./pages/MinistrySuccess"));
+
 // Legal pages
 const TermsOfService = lazy(() => import("./pages/legal/TermsOfService").then(m => ({ default: m.TermsOfService })));
 const PrivacyPolicy = lazy(() => import("./pages/legal/PrivacyPolicy").then(m => ({ default: m.PrivacyPolicy })));
@@ -95,6 +99,11 @@ createRoot(document.getElementById("root")!).render(
                 <Route path="/vendor-analytics" element={<VendorAnalyticsDashboard />} />
                 <Route path="/command-center" element={<CommandCenter />} />
                 <Route path="/health" element={<HealthStability />} />
+                
+                {/* Ministry routes */}
+                <Route path="/ministry" element={<CircleMinistry />} />
+                <Route path="/ministry/success" element={<MinistrySuccess />} />
+                <Route path="/minsitry" element={<CircleMinistry />} /> {/* Typo redirect */}
                 
                 {/* Legal routes */}
                 <Route path="/legal/terms" element={<TermsOfService />} />
