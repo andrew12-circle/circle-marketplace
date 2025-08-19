@@ -81,17 +81,28 @@ const Index = () => {
                     >
                       {t('marketplace')}
                     </Link>
-                    <Link
-                      to="/academy"
-                      data-tour="academy-tab"
-                      className={`flex-1 text-xs py-1.5 px-3 rounded-full font-medium transition-all text-center ${
-                        location.pathname === "/academy" 
-                          ? "bg-background text-foreground shadow-sm" 
-                          : "text-muted-foreground"
-                      }`}
-                    >
-                      {t('academy')}
-                    </Link>
+                     <Link
+                       to="/academy"
+                       data-tour="academy-tab"
+                       className={`flex-1 text-xs py-1.5 px-3 rounded-full font-medium transition-all text-center ${
+                         location.pathname === "/academy" 
+                           ? "bg-background text-foreground shadow-sm" 
+                           : "text-muted-foreground"
+                       }`}
+                     >
+                       {t('academy')}
+                     </Link>
+                     <Link
+                       to="/ministry"
+                       data-tour="ministry-tab"
+                       className={`flex-1 text-xs py-1.5 px-3 rounded-full font-medium transition-all text-center ${
+                         location.pathname === "/ministry" 
+                           ? "bg-background text-foreground shadow-sm" 
+                           : "text-muted-foreground"
+                       }`}
+                     >
+                       Ministry
+                     </Link>
                   </div>
                 </div>
               </div>
@@ -163,6 +174,26 @@ const Index = () => {
           {/* Onboarding Resume Banner */}
           <div className="container mx-auto px-3 sm:px-4 pt-6">
             <OnboardingResumeBanner />
+          </div>
+          
+          {/* Ministry CTA Card */}
+          <div className="container mx-auto px-3 sm:px-4 py-6">
+            <div className="bg-gradient-to-r from-primary/10 to-accent/10 rounded-xl p-6 border border-border/50 backdrop-blur-sm">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="text-center sm:text-left">
+                  <h3 className="text-lg font-semibold text-foreground mb-2">Support Circle Ministry</h3>
+                  <p className="text-muted-foreground text-sm max-w-md">
+                    Help us support agents in crisis and fund our charitable initiatives. Every contribution makes a difference.
+                  </p>
+                </div>
+                <Button asChild variant="default" className="shrink-0">
+                  <Link to="/ministry" className="flex items-center gap-2">
+                    <BookOpen className="w-4 h-4" />
+                    Learn More
+                  </Link>
+                </Button>
+              </div>
+            </div>
           </div>
           
           <Marketplace />

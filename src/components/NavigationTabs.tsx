@@ -3,8 +3,8 @@ import { useTranslation } from "react-i18next";
 import { Link, useLocation } from "react-router-dom";
 
 interface NavigationTabsProps {
-  activeTab?: "marketplace" | "academy";
-  onTabChange?: (tab: "marketplace" | "academy") => void;
+  activeTab?: "marketplace" | "academy" | "ministry";
+  onTabChange?: (tab: "marketplace" | "academy" | "ministry") => void;
 }
 
 export const NavigationTabs = ({ activeTab, onTabChange }: NavigationTabsProps) => {
@@ -13,7 +13,8 @@ export const NavigationTabs = ({ activeTab, onTabChange }: NavigationTabsProps) 
   
   // Determine active tab from URL if not provided
   const currentTab = activeTab || (
-    location.pathname === "/academy" ? "academy" : 
+    location.pathname === "/academy" ? "academy" :
+    location.pathname === "/ministry" ? "ministry" :
     "marketplace"
   );
   return (
@@ -41,6 +42,18 @@ export const NavigationTabs = ({ activeTab, onTabChange }: NavigationTabsProps) 
         }`}
       >
         <Link to="/academy">{t('academy')}</Link>
+      </Button>
+      <Button
+        asChild
+        variant="ghost"
+        data-tour="ministry-tab"
+        className={`rounded-lg px-6 py-2 font-medium transition-all duration-200 ${
+          currentTab === "ministry" 
+            ? "bg-background text-foreground shadow-sm" 
+            : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+        }`}
+      >
+        <Link to="/ministry">Ministry</Link>
       </Button>
     </div>
   );

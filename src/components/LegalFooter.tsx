@@ -102,6 +102,9 @@ export const LegalFooter = () => {
           <div>
             <h4 className="font-semibold mb-3 text-sm">Support</h4>
             <div className="space-y-2">
+              <Link to="/ministry" className="block text-sm text-muted-foreground hover:text-primary">
+                Circle Ministry
+              </Link>
               <Link to="/dispute-resolution" className="block text-sm text-muted-foreground hover:text-primary">
                 Dispute Resolution
               </Link>
