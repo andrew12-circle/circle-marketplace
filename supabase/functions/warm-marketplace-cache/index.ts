@@ -18,13 +18,26 @@ Deno.serve(async (req) => {
 
     console.log('🔥 Starting marketplace cache warming...');
 
-    // Fetch all services
+    // Fetch all active services (to match frontend filtering)
     const { data: services, error: servicesError } = await supabase
       .from('services')
-      .select('*')
+      .select(`
+        *,
+        vendors (
+          id,
+          name,
+          rating,
+          review_count,
+          is_verified,
+          website_url,
+          logo_url,
+          support_hours
+        )
+      `)
+      .eq('is_active', true)
       .order('sort_order', { ascending: true })
       .order('created_at', { ascending: false })
-      .limit(100);
+      .limit(200);
 
     if (servicesError) {
       console.error('Error fetching services:', servicesError);
