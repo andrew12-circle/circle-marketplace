@@ -46,6 +46,7 @@ import { VendorQuestionsManager } from '@/components/admin/VendorQuestionsManage
 import { AdminHealthDashboard } from '@/components/admin/AdminHealthDashboard';
 import { RetentionAnalyticsDashboard } from '@/components/admin/RetentionAnalyticsDashboard';
 import { SponsoredPlacementsManager } from '@/components/admin/SponsoredPlacementsManager';
+import { ServiceVisibilityManager } from '@/components/admin/ServiceVisibilityManager';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Upload, Building, Youtube, DollarSign, BarChart3, Coins, Shield as ShieldIcon, Users2, Send, BookOpen, Heart, MessageSquare } from 'lucide-react';
@@ -905,6 +906,7 @@ export default function AdminDashboard() {
         </TabsContent>
 
         <TabsContent value="services" className="space-y-6">
+          <ServiceVisibilityManager />
           <ServiceManagementPanel />
           <ServiceDisclaimerManager />
           <BulkFAQGenerator />
