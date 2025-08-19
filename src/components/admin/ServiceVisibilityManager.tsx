@@ -6,9 +6,10 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Eye, EyeOff, Search, Loader2, RefreshCw } from 'lucide-react';
+import { Eye, EyeOff, Search, Loader2, RefreshCw, ChevronDown, ChevronUp } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface Service {
@@ -30,6 +31,7 @@ export const ServiceVisibilityManager = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [isOpen, setIsOpen] = useState(true);
 
   // Get unique categories
   const categories = [...new Set(services.map(s => s.category).filter(Boolean))].sort();
@@ -195,11 +197,22 @@ export const ServiceVisibilityManager = () => {
   const inactiveCount = services.filter(s => !s.is_active).length;
 
   return (
-    <div className="space-y-6">
+    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">Service Visibility Manager</h2>
-          <p className="text-muted-foreground">
+          <CollapsibleTrigger asChild>
+            <Button variant="ghost" className="p-0 h-auto font-normal">
+              <div className="flex items-center gap-2">
+                <h2 className="text-2xl font-bold">Service Visibility Manager</h2>
+                {isOpen ? (
+                  <ChevronUp className="h-5 w-5 text-muted-foreground" />
+                ) : (
+                  <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                )}
+              </div>
+            </Button>
+          </CollapsibleTrigger>
+          <p className="text-muted-foreground mt-1">
             Control which services appear in the marketplace
           </p>
         </div>
@@ -208,6 +221,8 @@ export const ServiceVisibilityManager = () => {
           Refresh
         </Button>
       </div>
+
+      <CollapsibleContent className="space-y-6">
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -387,6 +402,7 @@ export const ServiceVisibilityManager = () => {
           )}
         </CardContent>
       </Card>
-    </div>
+      </CollapsibleContent>
+    </Collapsible>
   );
 };
