@@ -1,29 +1,10 @@
+
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
-
-const ghlApiKey = Deno.env.get('GHL_API_KEY');
-
-interface GHLContactData {
-  firstName: string;
-  lastName?: string;
-  email: string;
-  phone?: string;
-  companyName?: string;
-  website?: string;
-  address1?: string;
-  city?: string;
-  state?: string;
-  postalCode?: string;
-  tags?: string[];
-  customFields?: Record<string, any>;
-}
-
-const logStep = (step: string, data?: any) => {
-  console.log(`[GHL Contact Creation] ${step}`, data ? JSON.stringify(data, null, 2) : '');
 };
 
 serve(async (req) => {
@@ -33,102 +14,215 @@ serve(async (req) => {
   }
 
   try {
-    logStep('Starting GHL contact creation');
-
-    if (!ghlApiKey) {
-      throw new Error('GHL_API_KEY not configured');
-    }
-
-    const vendorData = await req.json();
-    logStep('Received vendor data', vendorData);
-
-    // Extract name parts
-    const nameParts = vendorData.name?.split(' ') || ['Unknown'];
-    const firstName = nameParts[0];
-    const lastName = nameParts.slice(1).join(' ') || '';
-
-    // Prepare GHL contact data
-    const contactData: GHLContactData = {
+    console.log('🚀 Creating Go High Level contact');
+    
+    const {
+      bookingId,
       firstName,
       lastName,
-      email: vendorData.contact_email || vendorData.individual_email,
-      phone: vendorData.phone || vendorData.individual_phone,
-      companyName: vendorData.name,
-      website: vendorData.website_url,
-      address1: vendorData.location,
-      tags: [
-        'Vendor',
-        'Invited via Circle Platform',
-        ...(vendorData.vendor_type ? [vendorData.vendor_type] : []),
-        ...(vendorData.service_states || []).map((state: string) => `Service State: ${state}`)
-      ],
-      customFields: {
-        vendor_type: vendorData.vendor_type,
-        service_states: vendorData.service_states?.join(', '),
-        service_radius_miles: vendorData.service_radius_miles,
-        nmls_id: vendorData.nmls_id,
-        license_states: vendorData.license_states?.join(', '),
-        individual_name: vendorData.individual_name,
-        individual_title: vendorData.individual_title,
-        individual_license_number: vendorData.individual_license_number,
-        description: vendorData.description,
-        mls_areas: vendorData.mls_areas?.join(', '),
-        service_zip_codes: vendorData.service_zip_codes?.join(', '),
-        platform_source: 'Circle Platform Vendor Invitation',
-        invitation_date: new Date().toISOString()
-      }
+      email,
+      phone,
+      serviceTitle,
+      vendorName,
+      scheduledDate,
+      scheduledTime,
+      projectDetails,
+      budgetRange,
+      source
+    } = await req.json();
+
+    // Create Supabase client for logging
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+      { auth: { persistSession: false } }
+    );
+
+    // Get GHL API key from Supabase secrets
+    const ghlApiKey = Deno.env.get('GHL_API_KEY');
+    const ghlLocationId = Deno.env.get('GHL_LOCATION_ID');
+
+    if (!ghlApiKey || !ghlLocationId) {
+      console.error('❌ Missing GHL API credentials');
+      throw new Error('Go High Level API credentials not configured');
+    }
+
+    // Prepare contact data for GHL
+    const contactData = {
+      firstName: firstName || 'Unknown',
+      lastName: lastName || '',
+      email: email,
+      phone: phone || '',
+      source: source || 'Circle Marketplace',
+      tags: ['Consultation Booking', 'Circle Marketplace', serviceTitle],
+      customFields: [
+        {
+          key: 'service_title',
+          value: serviceTitle
+        },
+        {
+          key: 'vendor_name', 
+          value: vendorName
+        },
+        {
+          key: 'scheduled_date',
+          value: scheduledDate
+        },
+        {
+          key: 'scheduled_time',
+          value: scheduledTime
+        },
+        {
+          key: 'project_details',
+          value: projectDetails || ''
+        },
+        {
+          key: 'budget_range',
+          value: budgetRange || ''
+        },
+        {
+          key: 'booking_id',
+          value: bookingId
+        }
+      ]
     };
 
-    logStep('Prepared contact data for GHL', contactData);
+    console.log('📤 Sending contact to GHL:', {
+      firstName,
+      lastName,
+      email,
+      serviceTitle,
+      scheduledDate,
+      scheduledTime
+    });
 
     // Create contact in Go High Level
-    const ghlResponse = await fetch('https://rest.gohighlevel.com/v1/contacts/', {
+    const ghlResponse = await fetch(`https://rest.gohighlevel.com/v1/contacts/`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${ghlApiKey}`,
         'Content-Type': 'application/json',
+        'Accept': 'application/json'
       },
-      body: JSON.stringify(contactData),
+      body: JSON.stringify({
+        ...contactData,
+        locationId: ghlLocationId
+      })
     });
 
-    const ghlResponseData = await ghlResponse.json();
-    logStep('GHL API Response', { status: ghlResponse.status, data: ghlResponseData });
+    const ghlResult = await ghlResponse.json();
 
     if (!ghlResponse.ok) {
-      throw new Error(`GHL API Error: ${ghlResponse.status} - ${JSON.stringify(ghlResponseData)}`);
+      console.error('❌ GHL contact creation failed:', ghlResult);
+      throw new Error(`GHL API error: ${ghlResult.message || 'Unknown error'}`);
     }
 
-    logStep('Successfully created contact in GHL', ghlResponseData);
+    console.log('✅ Successfully created GHL contact:', ghlResult.contact?.id);
 
-    // Add contact to specific workflow/campaign if needed
-    if (ghlResponseData.contact?.id) {
-      logStep('Contact created with ID', ghlResponseData.contact.id);
-      
-      // You can add additional automation triggers here
-      // For example, adding to a specific workflow or campaign
-      // This would depend on your GHL setup
-    }
-
-    return new Response(JSON.stringify({
-      success: true,
-      ghlContactId: ghlResponseData.contact?.id,
-      message: 'Contact successfully created in Go High Level and automation triggered'
-    }), {
-      status: 200,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    // Log successful integration
+    await supabaseClient.from('integration_logs').insert({
+      integration_type: 'go_high_level',
+      action: 'create_contact',
+      external_id: ghlResult.contact?.id,
+      booking_id: bookingId,
+      status: 'success',
+      response_data: ghlResult,
+      created_at: new Date().toISOString()
+    }).catch(error => {
+      console.log('Logging failed (table may not exist):', error.message);
     });
 
-  } catch (error: any) {
-    logStep('Error creating GHL contact', error);
-    console.error('Error in create-ghl-contact function:', error);
+    // Create a follow-up task/opportunity in GHL if possible
+    try {
+      if (ghlResult.contact?.id) {
+        const opportunityData = {
+          title: `Consultation: ${serviceTitle}`,
+          status: 'open',
+          contactId: ghlResult.contact.id,
+          value: budgetRange === 'under-5k' ? 2500 : 
+                 budgetRange === '5k-10k' ? 7500 :
+                 budgetRange === '10k-25k' ? 17500 :
+                 budgetRange === '25k-50k' ? 37500 :
+                 budgetRange === '50k-100k' ? 75000 :
+                 budgetRange === 'over-100k' ? 100000 : 5000,
+          source: 'Circle Marketplace Consultation',
+          notes: `
+Scheduled: ${scheduledDate} at ${scheduledTime}
+Service: ${serviceTitle}
+Vendor: ${vendorName}
+Project Details: ${projectDetails}
+Budget Range: ${budgetRange}
+          `.trim()
+        };
+
+        const opportunityResponse = await fetch(`https://rest.gohighlevel.com/v1/opportunities/`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${ghlApiKey}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            ...opportunityData,
+            locationId: ghlLocationId
+          })
+        });
+
+        if (opportunityResponse.ok) {
+          const opportunityResult = await opportunityResponse.json();
+          console.log('✅ Created GHL opportunity:', opportunityResult.opportunity?.id);
+        }
+      }
+    } catch (opportunityError) {
+      console.log('⚠️ Opportunity creation failed (non-critical):', opportunityError);
+    }
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        ghl_contact_id: ghlResult.contact?.id,
+        message: 'Contact successfully created in Go High Level',
+        timestamp: new Date().toISOString()
+      }),
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      }
+    );
+
+  } catch (error) {
+    console.error('❌ GHL integration error:', error);
+
+    // Log failed integration
+    try {
+      const supabaseClient = createClient(
+        Deno.env.get('SUPABASE_URL') ?? '',
+        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+        { auth: { persistSession: false } }
+      );
+
+      await supabaseClient.from('integration_logs').insert({
+        integration_type: 'go_high_level',
+        action: 'create_contact',
+        status: 'failed',
+        error_message: error.message,
+        created_at: new Date().toISOString()
+      }).catch(() => {
+        // Ignore logging errors
+      });
+    } catch (logError) {
+      console.log('Failed to log error:', logError);
+    }
     
-    return new Response(JSON.stringify({ 
-      success: false,
-      error: error.message,
-      details: 'Failed to create contact in Go High Level'
-    }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    return new Response(
+      JSON.stringify({ 
+        success: false,
+        error: error.message || 'Failed to create contact in Go High Level',
+        timestamp: new Date().toISOString()
+      }),
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500,
+      }
+    );
   }
 });

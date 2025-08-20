@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -43,11 +44,25 @@ export const ConsultationBookingModal = ({
   const { toast } = useToast();
   const { user } = useAuth();
 
-  const timeSlots = [
-    '9:00 AM', '9:30 AM', '10:00 AM', '10:30 AM', '11:00 AM', '11:30 AM',
-    '12:00 PM', '12:30 PM', '1:00 PM', '1:30 PM', '2:00 PM', '2:30 PM',
-    '3:00 PM', '3:30 PM', '4:00 PM', '4:30 PM', '5:00 PM'
+  // Business hours: Monday-Friday 10am-4pm CST (converted to local display)
+  const businessTimeSlots = [
+    '10:00 AM CST', '10:30 AM CST', '11:00 AM CST', '11:30 AM CST', 
+    '12:00 PM CST', '12:30 PM CST', '1:00 PM CST', '1:30 PM CST', 
+    '2:00 PM CST', '2:30 PM CST', '3:00 PM CST', '3:30 PM CST'
   ];
+
+  // Check if date is a weekday (Monday-Friday) and at least 24 hours out
+  const isDateAvailable = (date: Date) => {
+    const now = new Date();
+    const twentyFourHoursFromNow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+    const dayOfWeek = date.getDay();
+    
+    // 0 = Sunday, 6 = Saturday, so we want 1-5 (Monday-Friday)
+    const isWeekday = dayOfWeek >= 1 && dayOfWeek <= 5;
+    const is24HoursOut = date >= twentyFourHoursFromNow;
+    
+    return isWeekday && is24HoursOut;
+  };
 
   const handleSecureSubmit = async (data: Record<string, string>) => {
     if (!selectedDate || !selectedTime) {
@@ -59,62 +74,18 @@ export const ConsultationBookingModal = ({
       throw new Error("Date and time are required");
     }
 
+    // Validate business hours
+    if (!isDateAvailable(selectedDate)) {
+      toast({
+        title: "Invalid Date",
+        description: "Please select a weekday that is at least 24 hours from now",
+        variant: "destructive"
+      });
+      throw new Error("Invalid date selected");
+    }
+
     setIsSubmitting(true);
     try {
-      // First, check service-level consultation settings
-      const { data: serviceData, error: serviceError } = await supabase
-        .from('services')
-        .select('calendar_link, consultation_email, consultation_phone')
-        .eq('id', service.id)
-        .single();
-
-      if (serviceError) {
-        console.error('Error fetching service consultation info:', serviceError);
-      }
-
-      // Primary cascade: service calendar_link
-      if (serviceData?.calendar_link) {
-        window.open(serviceData.calendar_link, '_blank');
-        toast({
-          title: "Redirected to Service Calendar",
-          description: "Please complete your booking on the service provider's calendar page.",
-        });
-        onClose();
-        return;
-      }
-
-      // Secondary cascade: check vendor calendar as fallback
-      const { data: vendorData, error: vendorError } = await supabase
-        .from('vendors')
-        .select(`
-          id,
-          name,
-          contact_email,
-          individual_email,
-          vendor_availability (calendar_link)
-        `)
-        .eq('name', service.vendor?.name || 'Direct Service')
-        .single();
-
-      if (vendorError) {
-        console.error('Error fetching vendor info:', vendorError);
-      }
-
-      const vendorCalendarLink = vendorData?.vendor_availability && Array.isArray(vendorData.vendor_availability) 
-        ? vendorData.vendor_availability[0]?.calendar_link 
-        : null;
-
-      // If vendor has calendar link, redirect to it
-      if (vendorCalendarLink) {
-        window.open(vendorCalendarLink, '_blank');
-        toast({
-          title: "Redirected to Vendor Calendar",
-          description: "Please complete your booking on the vendor's calendar page.",
-        });
-        onClose();
-        return;
-      }
-
       // Create internal booking record
       const { data: bookingData, error } = await supabase
         .from('consultation_bookings')
@@ -135,43 +106,61 @@ export const ConsultationBookingModal = ({
 
       if (error) throw error;
 
-      // Send notification via cascade system (service email -> vendor email -> internal team)
-      const serviceEmail = serviceData?.consultation_email;
-      const vendorEmail = vendorData?.individual_email || vendorData?.contact_email;
-      
+      // Create Go High Level contact and send to GHL
       try {
-        const notificationResponse = await supabase.functions.invoke('send-consultation-notification', {
+        const ghlResponse = await supabase.functions.invoke('create-ghl-contact', {
+          body: {
+            bookingId: bookingData.id,
+            firstName: data.client_name.split(' ')[0] || data.client_name,
+            lastName: data.client_name.split(' ').slice(1).join(' ') || '',
+            email: data.client_email,
+            phone: data.client_phone || '',
+            serviceTitle: service.title,
+            vendorName: service.vendor?.name || 'Direct Service',
+            scheduledDate: selectedDate.toISOString().split('T')[0],
+            scheduledTime: selectedTime,
+            projectDetails: data.project_details || '',
+            budgetRange: data.budget_range || '',
+            source: 'Circle Marketplace Consultation'
+          }
+        });
+
+        if (ghlResponse.error) {
+          console.error('Failed to create GHL contact:', ghlResponse.error);
+          // Don't fail the booking if GHL integration fails
+        } else {
+          console.log('Successfully created GHL contact:', ghlResponse.data);
+        }
+      } catch (ghlError) {
+        console.error('Error with GHL integration:', ghlError);
+        // Don't fail the booking if GHL integration fails
+      }
+
+      // Send internal notification
+      try {
+        await supabase.functions.invoke('send-consultation-notification', {
           body: {
             bookingId: bookingData.id,
             serviceId: service.id,
             serviceTitle: service.title,
             vendorName: service.vendor?.name || 'Direct Service',
-            vendorId: vendorData?.id,
-            vendorEmail: vendorEmail,
             clientName: data.client_name,
             clientEmail: data.client_email,
             clientPhone: data.client_phone,
             scheduledDate: selectedDate.toISOString().split('T')[0],
             scheduledTime: selectedTime,
             projectDetails: data.project_details,
-            budgetRange: data.budget_range
+            budgetRange: data.budget_range,
+            isInternalBooking: true // Flag to indicate this is booked with Circle team
           }
         });
-
-        if (notificationResponse.error) {
-          console.error('Failed to send vendor notification:', notificationResponse.error);
-          // Don't fail the booking if notification fails
-        }
       } catch (notificationError) {
-        console.error('Error sending vendor notification:', notificationError);
-        // Don't fail the booking if notification fails
+        console.error('Error sending notification:', notificationError);
       }
 
       toast({
-        title: "Consultation Booked!",
-        description: vendorEmail 
-          ? "We'll send you a confirmation email shortly. The service provider has been notified and will contact you soon."
-          : "We'll send you a confirmation email shortly. Our team will contact the vendor and get back to you within 24 hours.",
+        title: "Consultation Booked Successfully!",
+        description: "We've received your booking and added you to our Go High Level system. Our team will contact you soon to confirm your appointment and discuss connecting you with the right vendor.",
       });
 
       onBookingConfirmed(bookingData.id);
@@ -183,7 +172,7 @@ export const ConsultationBookingModal = ({
         description: "There was an error booking your consultation. Please try again.",
         variant: "destructive"
       });
-      throw error; // Re-throw to let SecureForm handle it
+      throw error;
     } finally {
       setIsSubmitting(false);
     }
@@ -213,11 +202,15 @@ export const ConsultationBookingModal = ({
         >
           {/* Service Info */}
           <div className="bg-muted/50 p-4 rounded-lg">
-            <h3 className="font-semibold text-sm text-muted-foreground">SERVICE PROVIDER</h3>
-            <p className="font-medium">{service.vendor?.name || 'Direct Service'}</p>
+            <h3 className="font-semibold text-sm text-muted-foreground">CONSULTATION WITH CIRCLE TEAM</h3>
+            <p className="font-medium">Circle Marketplace Team</p>
             <p className="text-sm text-muted-foreground mt-1">
-              This consultation will help determine your exact project needs and provide accurate pricing.
+              We'll help connect you with {service.vendor?.name || 'the right vendor'} and ensure you get the best solution for your needs.
             </p>
+            <div className="mt-2 p-2 bg-blue-50 rounded text-xs text-blue-700">
+              <strong>Business Hours:</strong> Monday-Friday, 10:00 AM - 4:00 PM CST<br/>
+              <strong>Advance Notice:</strong> Minimum 24 hours required
+            </div>
           </div>
 
           {/* Date & Time Selection */}
@@ -228,9 +221,12 @@ export const ConsultationBookingModal = ({
                 mode="single"
                 selected={selectedDate}
                 onSelect={setSelectedDate}
-                disabled={(date) => date < new Date() || date.getDay() === 0 || date.getDay() === 6}
+                disabled={(date) => !isDateAvailable(date)}
                 className="rounded-md border mt-2"
               />
+              <p className="text-xs text-muted-foreground mt-1">
+                Only weekdays (Mon-Fri) at least 24 hours in advance
+              </p>
             </div>
             <div>
               <Label htmlFor="time">Select Time *</Label>
@@ -239,7 +235,7 @@ export const ConsultationBookingModal = ({
                   <SelectValue placeholder="Choose a time slot" />
                 </SelectTrigger>
                 <SelectContent>
-                  {timeSlots.map((time) => (
+                  {businessTimeSlots.map((time) => (
                     <SelectItem key={time} value={time}>
                       <div className="flex items-center gap-2">
                         <Clock className="w-4 h-4" />
@@ -249,6 +245,9 @@ export const ConsultationBookingModal = ({
                   ))}
                 </SelectContent>
               </Select>
+              <p className="text-xs text-muted-foreground mt-1">
+                All times shown in Central Standard Time (CST)
+              </p>
             </div>
           </div>
 
