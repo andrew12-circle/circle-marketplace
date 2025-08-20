@@ -277,15 +277,15 @@ export const CategoryBlocks = ({ onCategoryClick, services }: CategoryBlocksProp
       <h2 className="text-2xl font-semibold mb-6 text-foreground">Shop by Category</h2>
       
       {renderCategoryGrid(
-        DIGITAL_CATEGORIES, 
-        "Digital-first (Fast Growth)", 
-        "Technology and automation tools for scaling your business"
-      )}
-      
-      {renderCategoryGrid(
         OLD_SCHOOL_CATEGORIES, 
         "Old-school (Relationship Builders)", 
         "Traditional marketing and relationship-building essentials"
+      )}
+      
+      {renderCategoryGrid(
+        DIGITAL_CATEGORIES, 
+        "Digital-first (Fast Growth)", 
+        "Technology and automation tools for scaling your business"
       )}
     </div>
   );
