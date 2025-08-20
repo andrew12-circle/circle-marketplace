@@ -165,6 +165,7 @@ interface Service {
       buttonVariant?: 'default' | 'secondary' | 'outline';
     };
     proofItWorks?: {
+      introText?: string;
       testimonials?: {
         enabled: boolean;
         items: {
@@ -802,9 +803,17 @@ export const ServiceFunnelModal = ({
                           Proof It Works
                         </div>
                       </AccordionTrigger>
-                      <AccordionContent className="border-l-4 border-l-emerald-500 pl-4 bg-white rounded-b-lg shadow-sm pt-0">
+                       <AccordionContent className="border-l-4 border-l-emerald-500 pl-4 bg-white rounded-b-lg shadow-sm pt-0">
                          <div className="p-6 pt-0">
                            <div className="space-y-6">
+                             {/* Intro Text */}
+                             {service.funnel_content?.proofItWorks?.introText && (
+                               <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                                 <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+                                   {service.funnel_content.proofItWorks.introText}
+                                 </p>
+                               </div>
+                             )}
                              {/* Agent Reviews */}
                              {service.funnel_content?.proofItWorks?.testimonials?.enabled && service.funnel_content.proofItWorks.testimonials.items.length > 0 && reviews.length > 0 && (
                                <div>

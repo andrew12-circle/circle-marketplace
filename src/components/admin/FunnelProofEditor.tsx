@@ -33,6 +33,7 @@ interface ProofVendorVerification {
 }
 
 interface ProofItWorksData {
+  introText?: string;
   testimonials: {
     enabled: boolean;
     items: ProofTestimonial[];
@@ -59,7 +60,7 @@ export const FunnelProofEditor = ({ proofData, onChange }: FunnelProofEditorProp
     setData(proofData);
   }, [proofData]);
 
-  const updateData = (section: keyof ProofItWorksData, updates: any) => {
+  const updateData = (section: keyof Omit<ProofItWorksData, 'introText'>, updates: any) => {
     const newData = {
       ...data,
       [section]: {
@@ -151,6 +152,30 @@ export const FunnelProofEditor = ({ proofData, onChange }: FunnelProofEditorProp
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
+          {/* Intro Text Section */}
+          <div className="space-y-4">
+            <Label htmlFor="intro-text" className="text-base font-medium">
+              Introduction Text (Optional)
+            </Label>
+            <Textarea
+              id="intro-text"
+              value={data.introText || ''}
+              onChange={(e) => {
+                const newData = { ...data, introText: e.target.value };
+                setData(newData);
+                onChange(newData);
+              }}
+              placeholder="Add explanatory text that appears before testimonials, case studies, etc..."
+              rows={3}
+              className="w-full"
+            />
+            <p className="text-sm text-muted-foreground">
+              This text will appear at the top of the "Proof It Works" section to provide context or explanation.
+            </p>
+          </div>
+
+          <Separator />
+
           {/* Testimonials Section */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
