@@ -22,6 +22,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ReviewRatingSystem } from "@/components/marketplace/ReviewRatingSystem";
 import { CustomersAlsoViewed } from "@/components/marketplace/CustomersAlsoViewed";
 import { SafeHTML } from "@/utils/htmlSanitizer";
+import { computePotentialCopayForService, extractNumericPrice } from "@/utils/dealPricing";
 
 // Helper: detect and embed YouTube videos
 const getYouTubeId = (url: string): string | null => {
@@ -858,7 +859,7 @@ export const ServiceFunnelModal = ({
                         <div className="flex items-center justify-between text-sm bg-green-50 p-3 rounded-lg border border-green-200">
                           <span className="text-green-700 font-medium">Co-Pay:</span>
                           <span className="font-bold text-green-700 text-lg">
-                            ${pkg.requestPricing ? 'Quote' : Math.round(pkg.price * 0.15)}
+                            ${pkg.requestPricing ? 'Quote' : Math.round(computePotentialCopayForService(service))}
                           </span>
                         </div>
                       </div>
