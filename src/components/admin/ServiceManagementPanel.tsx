@@ -872,49 +872,6 @@ export const ServiceManagementPanel = () => {
 
   return (
     <div className="space-y-6">
-      {/* Search and Bulk Actions - Moved to Top */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Search className="h-5 w-5" />
-            Search & Bulk Actions
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col sm:flex-row gap-2">
-            <div className="flex-1 flex items-center gap-2">
-              <Search className="h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search services by title, category, or vendor..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="max-w-md"
-              />
-            </div>
-            <div className="flex gap-2">
-              <Button 
-                onClick={() => bulkVerify(true)}
-                variant="outline"
-                size="sm"
-                className="whitespace-nowrap"
-              >
-                <CheckCircle className="h-4 w-4 mr-2" />
-                Verify Filtered ({filteredServices.filter(s => !s.is_verified).length})
-              </Button>
-              <Button 
-                onClick={() => bulkVerify(false)}
-                variant="outline"
-                size="sm"
-                className="whitespace-nowrap"
-              >
-                <Eye className="h-4 w-4 mr-2" />
-                Unverify Filtered ({filteredServices.filter(s => s.is_verified).length})
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Service Selection */}
       <Card>
         <CardHeader>
@@ -1446,6 +1403,49 @@ export const ServiceManagementPanel = () => {
           </CardContent>
         </Card>
       )}
+
+      {/* Search and Bulk Actions */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Search className="h-5 w-5" />
+            Search & Bulk Actions
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <div className="flex-1 flex items-center gap-2">
+              <Search className="h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search services by title, category, or vendor..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="max-w-md"
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button 
+                onClick={() => bulkVerify(true)}
+                variant="outline"
+                size="sm"
+                className="whitespace-nowrap"
+              >
+                <CheckCircle className="h-4 w-4 mr-2" />
+                Verify Filtered ({filteredServices.filter(s => !s.is_verified).length})
+              </Button>
+              <Button 
+                onClick={() => bulkVerify(false)}
+                variant="outline"
+                size="sm"
+                className="whitespace-nowrap"
+              >
+                <Eye className="h-4 w-4 mr-2" />
+                Unverify Filtered ({filteredServices.filter(s => s.is_verified).length})
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {showFunnelPreview && selectedService && (
         <ServiceFunnelModal
