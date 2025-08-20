@@ -4892,7 +4892,6 @@ export type Database = {
           respa_split_limit: number | null
           retail_price: string | null
           service_provider_id: string | null
-          setup_time: string | null
           sort_order: number | null
           sponsored_rank_boost: number | null
           supporting_documents: Json | null
@@ -4946,7 +4945,6 @@ export type Database = {
           respa_split_limit?: number | null
           retail_price?: string | null
           service_provider_id?: string | null
-          setup_time?: string | null
           sort_order?: number | null
           sponsored_rank_boost?: number | null
           supporting_documents?: Json | null
@@ -5000,7 +4998,6 @@ export type Database = {
           respa_split_limit?: number | null
           retail_price?: string | null
           service_provider_id?: string | null
-          setup_time?: string | null
           sort_order?: number | null
           sponsored_rank_boost?: number | null
           supporting_documents?: Json | null

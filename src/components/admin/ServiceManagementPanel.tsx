@@ -67,7 +67,6 @@ interface Service {
   max_split_percentage_non_ssp?: number;
   estimated_roi?: number;
   duration?: string;
-  setup_time?: string;
   tags?: string[];
   rating?: number;
   requires_quote: boolean;
@@ -586,7 +585,6 @@ export const ServiceManagementPanel = () => {
         description: editForm.description,
         category: editForm.category,
         duration: editForm.duration,
-        setup_time: editForm.setup_time,
         estimated_roi: roi,
         sort_order: editForm.sort_order || null,
         is_featured: !!editForm.is_featured,
@@ -835,7 +833,7 @@ export const ServiceManagementPanel = () => {
     setActiveTab(value);
   };
 
-  const detailKeys = ['title','description','category','duration','setup_time','estimated_roi','sort_order','is_featured','is_top_pick','is_verified','requires_quote','copay_allowed','direct_purchase_enabled','respa_split_limit','max_split_percentage_non_ssp','retail_price','pro_price','price_duration','tags'] as const;
+  const detailKeys = ['title','description','category','duration','estimated_roi','sort_order','is_featured','is_top_pick','is_verified','requires_quote','copay_allowed','direct_purchase_enabled','respa_split_limit','max_split_percentage_non_ssp','retail_price','pro_price','price_duration','tags'] as const;
   
   const isDetailsDirty = selectedService ? detailKeys.some((key) => {
     const currentValue = (editForm as any)[key];
@@ -1075,21 +1073,13 @@ export const ServiceManagementPanel = () => {
                        </div>
                      </div>
 
-                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="space-y-2">
-                        <label className="text-sm font-medium">Time to Results</label>
+                        <label className="text-sm font-medium">Duration</label>
                         <Input
                           value={editForm.duration || ''}
                           onChange={(e) => setEditForm({ ...editForm, duration: e.target.value })}
                           placeholder="e.g., 30 days"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">Time to Setup</label>
-                        <Input
-                          value={editForm.setup_time || ''}
-                          onChange={(e) => setEditForm({ ...editForm, setup_time: e.target.value })}
-                          placeholder="e.g., 2-3 days"
                         />
                       </div>
                       <div className="space-y-2">
@@ -1353,8 +1343,7 @@ export const ServiceManagementPanel = () => {
                         <h4 className="font-medium">Basic Information</h4>
                         <p className="text-sm text-muted-foreground">Title: {selectedService.title}</p>
                         <p className="text-sm text-muted-foreground">Category: {selectedService.category}</p>
-                        <p className="text-sm text-muted-foreground">Time to Results: {selectedService.duration || 'Not set'}</p>
-                        <p className="text-sm text-muted-foreground">Time to Setup: {selectedService.setup_time || 'Not set'}</p>
+                        <p className="text-sm text-muted-foreground">Duration: {selectedService.duration || 'Not set'}</p>
                         <p className="text-sm text-muted-foreground">ROI: {selectedService.estimated_roi || 0}%</p>
                       </div>
                       <div>
