@@ -158,21 +158,34 @@ const fetchServices = async (): Promise<Service[]> => {
     throw new Error(`Failed to fetch services: ${error.message}`);
   }
 
-  const formattedServices = (data || []).map((service: any) => ({
-    ...service,
-    discount_percentage: service.discount_percentage ? String(service.discount_percentage) : undefined,
-    is_verified: service.is_verified || false,
-    vendor: service.vendors ? {
-      id: service.vendors.id,
-      name: service.vendors.name,
-      rating: service.vendors.rating || 4.5,
-      review_count: service.vendors.review_count || 0,
-      is_verified: service.vendors.is_verified || false,
-      website_url: service.vendors.website_url,
-      logo_url: service.vendors.logo_url,
-      support_hours: service.vendors.support_hours || 'Business Hours',
-    } : null,
-  }));
+  const formattedServices = (data || []).map((service: any) => {
+    // Parse pricing_tiers if it's a JSON string
+    let pricing_tiers = service.pricing_tiers;
+    if (typeof pricing_tiers === 'string') {
+      try {
+        pricing_tiers = JSON.parse(pricing_tiers);
+      } catch (e) {
+        pricing_tiers = null;
+      }
+    }
+
+    return {
+      ...service,
+      discount_percentage: service.discount_percentage ? String(service.discount_percentage) : undefined,
+      is_verified: service.is_verified || false,
+      pricing_tiers: Array.isArray(pricing_tiers) ? pricing_tiers : null,
+      vendor: service.vendors ? {
+        id: service.vendors.id,
+        name: service.vendors.name,
+        rating: service.vendors.rating || 4.5,
+        review_count: service.vendors.review_count || 0,
+        is_verified: service.vendors.is_verified || false,
+        website_url: service.vendors.website_url,
+        logo_url: service.vendors.logo_url,
+        support_hours: service.vendors.support_hours || 'Business Hours',
+      } : null,
+    };
+  });
 
   // Add monitoring for service count vs total available
   const fetchedCount = formattedServices.length;
