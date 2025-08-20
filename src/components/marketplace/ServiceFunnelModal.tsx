@@ -921,7 +921,7 @@ export const ServiceFunnelModal = ({
                              className="w-full border-2 border-gray-300 hover:border-gray-400 py-3 rounded-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                            >
                               <Building className="w-5 h-5 mr-2" />
-                              {(service.website_url || service.vendor?.website_url) ? 'View Website' : 'Website Not Available'}
+                              {(service.website_url || service.vendor?.website_url) ? 'View Our Website' : 'Website Not Available'}
                             </Button>
                          
                           
