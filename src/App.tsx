@@ -21,6 +21,7 @@ import { HelpWidget } from "@/components/help/HelpWidget";
 // Lazy-loaded heavy pages
 const Index = lazy(() => import("./pages/Index"));
 const Academy = lazy(() => import("./pages/Academy").then(m => ({ default: m.Academy })));
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 import { Auth } from "./pages/Auth";
 import { OrderHistory } from "./pages/OrderHistory";
 import PaymentSuccess from "./pages/PaymentSuccess";
@@ -38,7 +39,6 @@ import AnalyticsDashboard from "./pages/AnalyticsDashboard";
 import SupportDashboard from "./pages/SupportDashboard";
 import AdvancedFeaturesDashboard from "./pages/AdvancedFeaturesDashboard";
 import AIDashboard from "./pages/AIDashboard";
-import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 import HealthStability from "./pages/HealthStability";
 import { TermsOfService } from "./pages/legal/TermsOfService";
