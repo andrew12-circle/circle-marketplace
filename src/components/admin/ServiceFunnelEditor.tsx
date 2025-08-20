@@ -206,6 +206,9 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
       hasChanges,
     });
     setIsSaving(true);
+    
+    let timeoutId: NodeJS.Timeout;
+    
     try {
       console.log("[Admin ServiceFunnelEditor] Sanitizing data...");
       const sanitizedFunnel = sanitizeFunnel(funnelData);
@@ -214,6 +217,15 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
       console.log("[Admin ServiceFunnelEditor] Payload size ~", approxSizeKb, "KB");
 
       console.log("[Admin ServiceFunnelEditor] Starting database update...");
+      
+      // Create a timeout promise that rejects after 30 seconds
+      const timeoutPromise = new Promise((_, reject) => {
+        timeoutId = setTimeout(() => {
+          reject(new Error("Database operation timed out after 30 seconds. Please try again."));
+        }, 30000);
+      });
+      
+      // Create the database update promise
       const updatePromise = supabase
         .from('services')
         .update({
@@ -224,11 +236,19 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
         .eq('id', service.id);
 
       console.log("[Admin ServiceFunnelEditor] Waiting for response with timeout...");
-      const response = await saveWithTimeout(updatePromise, 60000);
+      
+      // Race the update against the timeout
+      const response = await Promise.race([updatePromise, timeoutPromise]);
+
+      // Clear the timeout since we got a response
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
 
       console.log("[Admin ServiceFunnelEditor] Database response received:", response);
       
-      if (response?.error) {
+      // Check if response is a Supabase response object and has an error
+      if (response && typeof response === 'object' && 'error' in response && response.error) {
         console.error("[Admin ServiceFunnelEditor] Database error:", response.error);
         throw response.error;
       }
@@ -247,11 +267,24 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
         title: "Funnel Updated Successfully",
         description: "All changes have been saved to the service funnel.",
       });
+      
       // Warm server-side cache and invalidate client caches so the marketplace reflects changes
-      supabase.functions.invoke('warm-marketplace-cache').catch((e) => console.warn('Cache warm failed', e));
+      try {
+        await supabase.functions.invoke('warm-marketplace-cache');
+        console.log("[Admin ServiceFunnelEditor] Cache warmed successfully");
+      } catch (e) {
+        console.warn('[Admin ServiceFunnelEditor] Cache warm failed', e);
+      }
+      
       invalidateAll();
     } catch (error: any) {
       console.error('[Admin ServiceFunnelEditor] Error saving funnel:', error);
+      
+      // Clear timeout on error
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+      
       toast({
         title: "Save Failed",
         description: error?.message || "There was an error saving the funnel. Please try again.",
