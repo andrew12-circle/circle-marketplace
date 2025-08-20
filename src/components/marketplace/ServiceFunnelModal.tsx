@@ -449,7 +449,7 @@ export const ServiceFunnelModal = ({
                     {/* Quick Stats */}
                     <div className={`grid ${showSupportStats ? 'grid-cols-3' : 'grid-cols-2'} gap-4`}>
                        <div className="text-center p-3 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
-                         <div className="text-2xl font-bold">{isVerified ? '600%' : 'TBD'}</div>
+                         <div className="text-2xl font-bold">{isVerified && service.estimated_roi ? `${service.estimated_roi}%` : 'TBD'}</div>
                          <div className="text-xs text-blue-200">Avg ROI</div>
                        </div>
                        <div className="text-center p-3 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
