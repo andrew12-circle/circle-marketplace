@@ -725,17 +725,17 @@ export const ServiceFunnelModal = ({
                         </div>
                       </AccordionTrigger>
                       <AccordionContent className="border-l-4 border-l-red-500 pl-4 bg-white rounded-b-lg shadow-sm pt-0">
-                        <div className="p-6 pt-[5px]">
-                          {(() => {
-                            const sections = Array.isArray((fc as any)?.faqSections) ? (fc as any).faqSections : [];
-                            const byId = sections.find((s: any) => s?.id === 'question-4');
-                            const byTitle = sections.find(
-                              (s: any) => typeof s?.title === 'string' && s.title.toLowerCase().includes('included')
-                            );
-                            const included = byId?.content || byTitle?.content;
-                            if (included) {
-                              return <SafeHTML html={included} />;
-                            }
+                         <div className="p-6 pt-[5px] whitespace-pre-wrap">
+                           {(() => {
+                             const sections = Array.isArray((fc as any)?.faqSections) ? (fc as any).faqSections : [];
+                             const byId = sections.find((s: any) => s?.id === 'question-4');
+                             const byTitle = sections.find(
+                               (s: any) => typeof s?.title === 'string' && s.title.toLowerCase().includes('included')
+                             );
+                             const included = byId?.content || byTitle?.content;
+                             if (included) {
+                               return <SafeHTML html={included} className="whitespace-pre-wrap" />;
+                             }
                             return (
                               <div className="space-y-6">
                                 {/* Core Features */}
