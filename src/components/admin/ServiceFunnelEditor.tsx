@@ -207,25 +207,30 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
     });
     setIsSaving(true);
     try {
+      console.log("[Admin ServiceFunnelEditor] Sanitizing data...");
       const sanitizedFunnel = sanitizeFunnel(funnelData);
       const sanitizedPricing = JSON.parse(JSON.stringify(pricingTiers || []));
       const approxSizeKb = Math.round((JSON.stringify(sanitizedFunnel).length + JSON.stringify(sanitizedPricing).length) / 1024);
       console.log("[Admin ServiceFunnelEditor] Payload size ~", approxSizeKb, "KB");
 
-      const response = await saveWithTimeout(
-        supabase
-          .from('services')
-          .update({
-            funnel_content: sanitizedFunnel,
-            pricing_tiers: sanitizedPricing,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', service.id),
-        60000  // Increased timeout to 60 seconds
-      );
+      console.log("[Admin ServiceFunnelEditor] Starting database update...");
+      const updatePromise = supabase
+        .from('services')
+        .update({
+          funnel_content: sanitizedFunnel,
+          pricing_tiers: sanitizedPricing,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', service.id);
 
-      if ((response as any)?.error) {
-        throw (response as any).error;
+      console.log("[Admin ServiceFunnelEditor] Waiting for response with timeout...");
+      const response = await saveWithTimeout(updatePromise, 60000);
+
+      console.log("[Admin ServiceFunnelEditor] Database response received:", response);
+      
+      if (response?.error) {
+        console.error("[Admin ServiceFunnelEditor] Database error:", response.error);
+        throw response.error;
       }
 
       const updatedService = {
