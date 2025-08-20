@@ -885,6 +885,36 @@ export const ServiceManagementPanel = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                <Input
+                  placeholder="Search services, categories, or companies..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => bulkVerify(true)}
+                  disabled={filteredServices.length === 0}
+                >
+                  <CheckCircle className="h-4 w-4 mr-1" />
+                  Verify All ({filteredServices.length})
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => bulkVerify(false)}
+                  disabled={filteredServices.length === 0}
+                >
+                  Unverify All ({filteredServices.length})
+                </Button>
+              </div>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-96 overflow-y-auto">
               {filteredServices.map((service) => (
                 <Card 
