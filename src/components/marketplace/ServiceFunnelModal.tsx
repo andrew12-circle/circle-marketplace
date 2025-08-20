@@ -807,13 +807,11 @@ export const ServiceFunnelModal = ({
                          <div className="p-6 pt-0">
                            <div className="space-y-6">
                              {/* Intro Text */}
-                             {service.funnel_content?.proofItWorks?.introText && (
-                                <div className="p-4 rounded-lg border border-border">
-                                 <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
-                                   {service.funnel_content.proofItWorks.introText}
-                                 </p>
-                               </div>
-                             )}
+                              {service.funnel_content?.proofItWorks?.introText && (
+                                <p className="text-gray-700 leading-relaxed whitespace-pre-wrap mb-6">
+                                  {service.funnel_content.proofItWorks.introText}
+                                </p>
+                              )}
                              {/* Agent Reviews */}
                              {service.funnel_content?.proofItWorks?.testimonials?.enabled && service.funnel_content.proofItWorks.testimonials.items.length > 0 && reviews.length > 0 && (
                                <div>
