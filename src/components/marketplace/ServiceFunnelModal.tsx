@@ -10,35 +10,7 @@ import { toast } from "sonner";
 import { useServiceReviews } from "@/hooks/useServiceReviews";
 import { AnswerDropdown } from "./AnswerDropdown";
 import { PricingChoiceModal } from "./PricingChoiceModal";
-import { 
-  Star, 
-  TrendingUp, 
-  Users, 
-  DollarSign, 
-  CheckCircle, 
-  Target,
-  Zap,
-  Trophy,
-  ArrowRight,
-  Building,
-  MapPin,
-  Calendar,
-  Clock,
-  Phone,
-  Mail,
-  ShoppingCart,
-  Heart,
-  Share2,
-  Plus,
-  Minus,
-  ThumbsUp,
-  ThumbsDown,
-  Verified,
-  Crown,
-  X,
-  Play,
-  Shield
-} from "lucide-react";
+import { Star, TrendingUp, Users, DollarSign, CheckCircle, Target, Zap, Trophy, ArrowRight, Building, MapPin, Calendar, Clock, Phone, Mail, ShoppingCart, Heart, Share2, Plus, Minus, ThumbsUp, ThumbsDown, Verified, Crown, X, Play, Shield } from "lucide-react";
 import { getRiskBadge, getComplianceAlert, determineServiceRisk } from "./RESPAComplianceSystem";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -65,13 +37,11 @@ const getYouTubeId = (url: string): string | null => {
   } catch {}
   return null;
 };
-
 const getYouTubeEmbedUrl = (url?: string): string | null => {
   if (!url) return null;
   const id = getYouTubeId(url);
   return id ? `https://www.youtube-nocookie.com/embed/${id}?rel=0&modestbranding=1` : null;
 };
-
 interface Service {
   id: string;
   title: string;
@@ -198,16 +168,14 @@ interface Service {
     };
   };
 }
-
 interface ServiceFunnelModalProps {
   isOpen: boolean;
   onClose: () => void;
   service: Service;
 }
-
-export const ServiceFunnelModal = ({ 
-  isOpen, 
-  onClose, 
+export const ServiceFunnelModal = ({
+  isOpen,
+  onClose,
   service
 }: ServiceFunnelModalProps) => {
   const [selectedPackage, setSelectedPackage] = useState<string>("");
@@ -216,26 +184,38 @@ export const ServiceFunnelModal = ({
   const [isPricingChoiceOpen, setIsPricingChoiceOpen] = useState(false);
   const [activeMediaUrl, setActiveMediaUrl] = useState<string | null>(null);
   // Get support stats visibility from service funnel content
-  const showSupportStats = service.funnel_content && typeof service.funnel_content === 'object' && 'showSupportStats' in service.funnel_content 
-    ? service.funnel_content.showSupportStats 
-    : false;
+  const showSupportStats = service.funnel_content && typeof service.funnel_content === 'object' && 'showSupportStats' in service.funnel_content ? service.funnel_content.showSupportStats : false;
   const [vendorAvailability, setVendorAvailability] = useState<{
     is_available_now: boolean;
     availability_message?: string;
     next_available_slot?: string;
   } | null>(null);
-  const { addToCart } = useCart();
-  const { profile } = useAuth();
+  const {
+    addToCart
+  } = useCart();
+  const {
+    profile
+  } = useAuth();
   const isProMember = profile?.is_pro_member || false;
   const riskLevel = determineServiceRisk(service.title, service.description);
-  const { trackBooking, trackPurchase, trackOutboundClick, trackEvent, trackWebsiteClick } = useProviderTracking(service.id, isOpen);
+  const {
+    trackBooking,
+    trackPurchase,
+    trackOutboundClick,
+    trackEvent,
+    trackWebsiteClick
+  } = useProviderTracking(service.id, isOpen);
   const [openItem, setOpenItem] = useState<string | undefined>("question-1");
-  
+
   // Use service verification status from database  
   const isVerified = service.is_verified;
-  
+
   // Fetch real reviews for this service
-  const { reviews, loading: reviewsLoading, error: reviewsError } = useServiceReviews(service.id);
+  const {
+    reviews,
+    loading: reviewsLoading,
+    error: reviewsError
+  } = useServiceReviews(service.id);
 
   // Normalize funnel content variants
   const subHeadline = (service.funnel_content as any)?.subHeadline || (service.funnel_content as any)?.subheadline;
@@ -245,50 +225,49 @@ export const ServiceFunnelModal = ({
   const ctaTitle = fc?.callToAction?.title || fc?.callToAction?.primaryHeadline || 'Ready to Transform Your Business?';
   const ctaDescription = fc?.callToAction?.description || fc?.callToAction?.primaryDescription || '';
   const scheduleText = fc?.callToAction?.primaryButtonText || 'Schedule Consultation';
-  const faqSections: Array<{ id: string; title: string; content: string }> = (fc?.faqSections as any) || [];
+  const faqSections: Array<{
+    id: string;
+    title: string;
+    content: string;
+  }> = fc?.faqSections as any || [];
 
   // Use pricing tiers if available, otherwise fallback to default packages
-  const packages = service.pricing_tiers?.length ? 
-    service.pricing_tiers.map(tier => ({
-      id: tier.id,
-      name: tier.name,
-      price: tier.requestPricing ? 0 : parseFloat(tier.price || "100"),
-      originalPrice: tier.originalPrice ? parseFloat(tier.originalPrice) : undefined,
-      description: tier.description,
-      features: tier.features?.map(f => f.text) || [],
-      popular: tier.isPopular,
-      requestPricing: tier.requestPricing
-    })) : [
-      {
-        id: "basic",
-        name: "Basic Package",
-        price: parseFloat(service.retail_price || "100") * 0.75,
-        originalPrice: parseFloat(service.retail_price || "100"),
-        description: "Essential service features for getting started",
-        features: ["Core service delivery", "Email support", "Basic reporting"],
-        requestPricing: false
-      },
-      {
-        id: "standard",
-        name: "Standard Package", 
-        price: parseFloat(service.retail_price || "100"),
-        originalPrice: parseFloat(service.retail_price || "100") * 1.33,
-        description: "Complete solution for most needs",
-        features: ["Everything in Basic", "Priority support", "Advanced reporting", "Custom consultation"],
-        popular: true,
-        requestPricing: false
-      },
-      {
-        id: "premium",
-        name: "Premium Package",
-        price: parseFloat(service.retail_price || "100") * 1.5,
-        originalPrice: parseFloat(service.retail_price || "100") * 2,
-        description: "Full-service solution with dedicated support",
-        features: ["Everything in Standard", "Dedicated account manager", `${service.vendor?.support_hours || 'Business Hours'} support`, "Custom integrations"], // Dynamic support hours
-        requestPricing: false
-      }
-    ];
-
+  const packages = service.pricing_tiers?.length ? service.pricing_tiers.map(tier => ({
+    id: tier.id,
+    name: tier.name,
+    price: tier.requestPricing ? 0 : parseFloat(tier.price || "100"),
+    originalPrice: tier.originalPrice ? parseFloat(tier.originalPrice) : undefined,
+    description: tier.description,
+    features: tier.features?.map(f => f.text) || [],
+    popular: tier.isPopular,
+    requestPricing: tier.requestPricing
+  })) : [{
+    id: "basic",
+    name: "Basic Package",
+    price: parseFloat(service.retail_price || "100") * 0.75,
+    originalPrice: parseFloat(service.retail_price || "100"),
+    description: "Essential service features for getting started",
+    features: ["Core service delivery", "Email support", "Basic reporting"],
+    requestPricing: false
+  }, {
+    id: "standard",
+    name: "Standard Package",
+    price: parseFloat(service.retail_price || "100"),
+    originalPrice: parseFloat(service.retail_price || "100") * 1.33,
+    description: "Complete solution for most needs",
+    features: ["Everything in Basic", "Priority support", "Advanced reporting", "Custom consultation"],
+    popular: true,
+    requestPricing: false
+  }, {
+    id: "premium",
+    name: "Premium Package",
+    price: parseFloat(service.retail_price || "100") * 1.5,
+    originalPrice: parseFloat(service.retail_price || "100") * 2,
+    description: "Full-service solution with dedicated support",
+    features: ["Everything in Standard", "Dedicated account manager", `${service.vendor?.support_hours || 'Business Hours'} support`, "Custom integrations"],
+    // Dynamic support hours
+    requestPricing: false
+  }];
   const selectedPkg = packages.find(pkg => pkg.id === selectedPackage) || packages[1];
 
   // Initialize selected package on component mount or when packages change
@@ -299,7 +278,6 @@ export const ServiceFunnelModal = ({
       setSelectedPackage(popularPackage?.id || packages[0].id);
     }
   }, [packages, selectedPackage]);
-
   const handleAddToCart = () => {
     addToCart({
       id: service.id,
@@ -310,7 +288,7 @@ export const ServiceFunnelModal = ({
       requiresQuote: service.requires_quote,
       type: 'service'
     });
-    
+
     // Track the purchase action
     trackPurchase({
       id: service.id,
@@ -318,15 +296,12 @@ export const ServiceFunnelModal = ({
       amount: selectedPkg.price * quantity,
       payment_method: 'cart'
     });
-    
     onClose();
   };
-
   const handleChooseProPrice = () => {
     setIsPricingChoiceOpen(false);
     handleAddToCart();
   };
-
   const handleChooseCoPay = () => {
     setIsPricingChoiceOpen(false);
     // Handle copay request flow here
@@ -335,7 +310,6 @@ export const ServiceFunnelModal = ({
     });
     onClose();
   };
-
   const handleChooseAgentPoints = () => {
     setIsPricingChoiceOpen(false);
     // Handle agent points payment here
@@ -344,50 +318,32 @@ export const ServiceFunnelModal = ({
     });
     onClose();
   };
-
   const renderStarRating = (rating: number, size = "sm") => {
-    return (
-      <div className="flex items-center gap-1">
+    return <div className="flex items-center gap-1">
         {[...Array(5)].map((_, i) => {
-          const isFullStar = i < Math.floor(rating);
-          const isPartialStar = i === Math.floor(rating) && rating % 1 !== 0;
-          const fillPercentage = isPartialStar ? (rating <= 4.9 ? 50 : (rating % 1) * 100) : 0;
-          
-          return (
-            <div key={i} className={`relative ${size === "lg" ? "h-5 w-5" : "h-4 w-4"}`}>
+        const isFullStar = i < Math.floor(rating);
+        const isPartialStar = i === Math.floor(rating) && rating % 1 !== 0;
+        const fillPercentage = isPartialStar ? rating <= 4.9 ? 50 : rating % 1 * 100 : 0;
+        return <div key={i} className={`relative ${size === "lg" ? "h-5 w-5" : "h-4 w-4"}`}>
               <Star className={`${size === "lg" ? "h-5 w-5" : "h-4 w-4"} text-gray-300 absolute`} />
-              {isFullStar && (
-                <Star className={`${size === "lg" ? "h-5 w-5" : "h-4 w-4"} fill-yellow-400 text-yellow-400 absolute`} />
-              )}
-              {isPartialStar && (
-                <div 
-                  className="overflow-hidden absolute"
-                  style={{ width: `${fillPercentage}%` }}
-                >
+              {isFullStar && <Star className={`${size === "lg" ? "h-5 w-5" : "h-4 w-4"} fill-yellow-400 text-yellow-400 absolute`} />}
+              {isPartialStar && <div className="overflow-hidden absolute" style={{
+            width: `${fillPercentage}%`
+          }}>
                   <Star className={`${size === "lg" ? "h-5 w-5" : "h-4 w-4"} fill-yellow-400 text-yellow-400`} />
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-    );
+                </div>}
+            </div>;
+      })}
+      </div>;
   };
-
-  return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()} modal={true}>
+  return <Dialog open={isOpen} onOpenChange={open => !open && onClose()} modal={true}>
       <DialogContent className="max-w-[90vw] lg:max-w-6xl max-h-[90vh] overflow-hidden p-0 animate-scale-in">
         <DialogHeader className="sr-only">
           <span>Service Details</span>
         </DialogHeader>
         
         {/* Close Button - Fixed Position */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="absolute top-4 right-4 z-50 h-8 w-8 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white shadow-lg border border-white/20"
-          onClick={onClose}
-        >
+        <Button variant="ghost" size="icon" className="absolute top-4 right-4 z-50 h-8 w-8 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white shadow-lg border border-white/20" onClick={onClose}>
           <X className="h-4 w-4 text-gray-700" />
         </Button>
 
@@ -401,23 +357,17 @@ export const ServiceFunnelModal = ({
               <div className="max-w-4xl mx-auto">
                 {/* Badges */}
                 <div className="flex flex-wrap items-center gap-3 mb-6 animate-fade-in">
-                  {isVerified ? (
-                    <Badge className="bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 backdrop-blur-sm">
+                  {isVerified ? <Badge className="bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 backdrop-blur-sm">
                       <Verified className="w-3 h-3 mr-1" />
                       Verified Pro
-                    </Badge>
-                  ) : (
-                    <Badge className="bg-amber-500/20 text-amber-300 border border-amber-400/30 backdrop-blur-sm">
+                    </Badge> : <Badge className="bg-amber-500/20 text-amber-300 border border-amber-400/30 backdrop-blur-sm">
                       <X className="w-3 h-3 mr-1" />
                       Not Verified
-                    </Badge>
-                  )}
-                  {service.vendor?.is_premium_provider && (
-                    <Badge className="bg-amber-500/20 text-amber-300 border border-amber-400/30 backdrop-blur-sm">
+                    </Badge>}
+                  {service.vendor?.is_premium_provider && <Badge className="bg-amber-500/20 text-amber-300 border border-amber-400/30 backdrop-blur-sm">
                       <Trophy className="w-3 h-3 mr-1" />
                       Premium Provider
-                    </Badge>
-                  )}
+                    </Badge>}
                 </div>
 
                 {/* Main Content Grid */}
@@ -432,8 +382,7 @@ export const ServiceFunnelModal = ({
                       {subHeadline || "Transform your real estate business with our proven system"}
                     </p>
 
-                    {(reviews.length > 0) && (
-                      <div className="flex items-center gap-4 p-4 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
+                    {reviews.length > 0 && <div className="flex items-center gap-4 p-4 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
                         <div className="flex items-center gap-2">
                           {renderStarRating(service.vendor?.rating || 0, "lg")}
                           <span className="text-lg font-medium">
@@ -444,8 +393,7 @@ export const ServiceFunnelModal = ({
                         <span className="text-sm text-blue-200">
                           {reviews.length} reviews
                         </span>
-                      </div>
-                    )}
+                      </div>}
 
                     {/* Quick Stats */}
                     <div className={`grid ${showSupportStats ? 'grid-cols-3' : 'grid-cols-2'} gap-4`}>
@@ -455,104 +403,58 @@ export const ServiceFunnelModal = ({
                        </div>
                        <div className="text-center p-3 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
                          <div className="text-2xl font-bold">{isVerified && service.duration ? service.duration : 'TBD'}</div>
-                         <div className="text-xs text-blue-200">Days to Results</div>
+                         <div className="text-xs text-blue-200">Time to Results</div>
                        </div>
-                      {showSupportStats && (
-                        <div className="text-center p-3 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
+                      {showSupportStats && <div className="text-center p-3 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
                           <div className="text-2xl font-bold">{service.vendor?.support_hours || 'Business Hours'}</div>
                           <div className="text-xs text-blue-200">Support</div>
-                        </div>
-                      )}
+                        </div>}
                     </div>
                   </div>
 
                   {/* Right Media */}
                   <div className="relative animate-fade-in">
                     <div className="aspect-video bg-white/10 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/20 shadow-2xl">
-                      {(service.funnel_content?.media?.[0]?.url || service.image_url) ? (
-                        (() => {
-                          const baseMediaItem = service.funnel_content?.media?.[0];
-                          const baseUrl = baseMediaItem?.url || service.image_url;
-                          const currentUrl = activeMediaUrl || baseUrl;
-                          const yt = getYouTubeEmbedUrl(currentUrl || undefined);
-                          const isVideo = !!yt || (currentUrl ? /\.(mp4|webm|ogg)$/i.test(currentUrl) : false);
-                          
-                          if (isVideo) {
-                            return yt ? (
-                              <iframe
-                                src={yt}
-                                title={service.funnel_content?.headline || service.title}
-                                className="w-full h-full"
-                                loading="lazy"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                referrerPolicy="strict-origin-when-cross-origin"
-                                allowFullScreen
-                              />
-                            ) : (
-                              <video
-                                controls
-                                className="w-full h-full object-cover"
-                                src={currentUrl || undefined}
-                              />
-                            );
-                          } else {
-                            return (
-                              <img
-                                src={currentUrl || undefined}
-                                alt={service.funnel_content?.headline || service.title}
-                                className="w-full h-full object-contain hover-scale bg-white p-5"
-                              />
-                            );
-                          }
-                        })()
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-600/20 to-purple-600/20">
+                      {service.funnel_content?.media?.[0]?.url || service.image_url ? (() => {
+                      const baseMediaItem = service.funnel_content?.media?.[0];
+                      const baseUrl = baseMediaItem?.url || service.image_url;
+                      const currentUrl = activeMediaUrl || baseUrl;
+                      const yt = getYouTubeEmbedUrl(currentUrl || undefined);
+                      const isVideo = !!yt || (currentUrl ? /\.(mp4|webm|ogg)$/i.test(currentUrl) : false);
+                      if (isVideo) {
+                        return yt ? <iframe src={yt} title={service.funnel_content?.headline || service.title} className="w-full h-full" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen /> : <video controls className="w-full h-full object-cover" src={currentUrl || undefined} />;
+                      } else {
+                        return <img src={currentUrl || undefined} alt={service.funnel_content?.headline || service.title} className="w-full h-full object-contain hover-scale bg-white p-5" />;
+                      }
+                    })() : <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-600/20 to-purple-600/20">
                           <Play className="w-16 h-16 text-white/60" />
-                        </div>
-                      )}
+                        </div>}
                     </div>
 
                     {/* Additional Media Grid */}
                     <div className="grid grid-cols-4 gap-2 mt-3">
                       {(() => {
-                        const media: Array<{ url: string; type: 'image' | 'video'; title?: string }> = Array.isArray(fc?.media) ? fc.media : [];
-                        const thumbs = media.slice(1, 5); // show next up to 4 items (first is in the main player)
-                        if (!thumbs.length) return null;
-                        return thumbs.map((m, idx) => {
-                          const youTubeId = getYouTubeId(m.url);
-                          const isVideo = m.type === 'video' || !!youTubeId || /\.(mp4|webm|ogg)$/i.test(m.url || '');
-                          const thumbUrl = youTubeId
-                            ? `https://i.ytimg.com/vi/${youTubeId}/hqdefault.jpg`
-                            : m.url;
-                          return (
-                            <button
-                              key={`${m.url}-${idx}`}
-                              type="button"
-                              onClick={() => setActiveMediaUrl(m.url)}
-                              className="relative aspect-video bg-white/10 backdrop-blur-sm rounded-lg overflow-hidden border border-white/20 cursor-pointer hover-scale"
-                              aria-label={m.title || (isVideo ? 'Play video' : 'View image')}
-                            >
-                              {thumbUrl ? (
-                                <img
-                                  src={thumbUrl}
-                                  alt={m.title || (isVideo ? 'Video thumbnail' : 'Image thumbnail')}
-                                  className="w-full h-full object-cover"
-                                  loading="lazy"
-                                />
-                              ) : (
-                                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-600/20 to-purple-600/20">
+                      const media: Array<{
+                        url: string;
+                        type: 'image' | 'video';
+                        title?: string;
+                      }> = Array.isArray(fc?.media) ? fc.media : [];
+                      const thumbs = media.slice(1, 5); // show next up to 4 items (first is in the main player)
+                      if (!thumbs.length) return null;
+                      return thumbs.map((m, idx) => {
+                        const youTubeId = getYouTubeId(m.url);
+                        const isVideo = m.type === 'video' || !!youTubeId || /\.(mp4|webm|ogg)$/i.test(m.url || '');
+                        const thumbUrl = youTubeId ? `https://i.ytimg.com/vi/${youTubeId}/hqdefault.jpg` : m.url;
+                        return <button key={`${m.url}-${idx}`} type="button" onClick={() => setActiveMediaUrl(m.url)} className="relative aspect-video bg-white/10 backdrop-blur-sm rounded-lg overflow-hidden border border-white/20 cursor-pointer hover-scale" aria-label={m.title || (isVideo ? 'Play video' : 'View image')}>
+                              {thumbUrl ? <img src={thumbUrl} alt={m.title || (isVideo ? 'Video thumbnail' : 'Image thumbnail')} className="w-full h-full object-cover" loading="lazy" /> : <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-600/20 to-purple-600/20">
                                   <Play className="w-8 h-8 text-white/60" />
-                                </div>
-                              )}
-                              {isVideo && (
-                                <div className="absolute inset-0 flex items-center justify-center bg-black/0 hover:bg-black/10 transition-colors">
+                                </div>}
+                              {isVideo && <div className="absolute inset-0 flex items-center justify-center bg-black/0 hover:bg-black/10 transition-colors">
                                   <Play className="w-7 h-7 text-white drop-shadow" />
-                                </div>
-                              )}
-                            </button>
-                          );
-                        });
-                      })()}
+                                </div>}
+                            </button>;
+                      });
+                    })()}
                     </div>
 
                   </div>
@@ -580,12 +482,7 @@ export const ServiceFunnelModal = ({
                       <AccordionContent className="border-l-4 border-l-blue-500 pl-4 bg-white rounded-b-lg shadow-sm pt-0">
                         <div className="p-6 pt-0">
                           <p className="text-gray-600 leading-relaxed pt-[5px]">
-                            {(
-                              (Array.isArray((fc as any)?.faqSections) &&
-                                (((fc as any).faqSections.find((s: any) => s?.id === 'question-1') || (fc as any).faqSections[0])?.content))
-                              ) || fc?.heroDescription || service.description ||
-                              "All-in-one real estate lead generation & CRM platform designed to turn online leads into closings faster"
-                            }
+                            {Array.isArray((fc as any)?.faqSections) && ((fc as any).faqSections.find((s: any) => s?.id === 'question-1') || (fc as any).faqSections[0])?.content || fc?.heroDescription || service.description || "All-in-one real estate lead generation & CRM platform designed to turn online leads into closings faster"}
                           </p>
                         </div>
                       </AccordionContent>
@@ -602,17 +499,12 @@ export const ServiceFunnelModal = ({
                       <AccordionContent className="border-l-4 border-l-purple-500 pl-4 bg-white rounded-b-lg shadow-sm pt-0">
                           <div className="p-6 pt-[5px]">
                             {(() => {
-                              const sections = Array.isArray((fc as any)?.faqSections) ? (fc as any).faqSections : [];
-                              const byId = sections.find((s: any) => s?.id === 'question-2');
-                              const byTitle = sections.find((s: any) => typeof s?.title === 'string' && s.title.toLowerCase().includes('roi'));
-                              const roi = byId?.content || byTitle?.content || 
-                                (isVerified && typeof fc?.estimatedRoi === 'number'
-                                  ? `Based on similar deployments, average ROI is ~${fc.estimatedRoi}% within ${fc?.duration || '30 days'}.`
-                                  : isVerified 
-                                    ? '600% average return on investment with proper implementation'
-                                    : 'ROI data is not available for non-verified vendors. Contact the vendor directly for performance information.');
-                              return <SafeHTML html={roi} />;
-                            })()}
+                          const sections = Array.isArray((fc as any)?.faqSections) ? (fc as any).faqSections : [];
+                          const byId = sections.find((s: any) => s?.id === 'question-2');
+                          const byTitle = sections.find((s: any) => typeof s?.title === 'string' && s.title.toLowerCase().includes('roi'));
+                          const roi = byId?.content || byTitle?.content || (isVerified && typeof fc?.estimatedRoi === 'number' ? `Based on similar deployments, average ROI is ~${fc.estimatedRoi}% within ${fc?.duration || '30 days'}.` : isVerified ? '600% average return on investment with proper implementation' : 'ROI data is not available for non-verified vendors. Contact the vendor directly for performance information.');
+                          return <SafeHTML html={roi} />;
+                        })()}
                           </div>
                       </AccordionContent>
                     </AccordionItem>
@@ -628,15 +520,14 @@ export const ServiceFunnelModal = ({
                       <AccordionContent className="border-l-4 border-l-orange-500 pl-4 bg-white rounded-b-lg shadow-sm pt-0">
                         <div className="p-6 pt-[5px]">
                           {(() => {
-                            const sections = Array.isArray((fc as any)?.faqSections) ? (fc as any).faqSections : [];
-                            const byId = sections.find((s: any) => s?.id === 'question-3');
-                            const byTitle = sections.find((s: any) => typeof s?.title === 'string' && s.title.toLowerCase().includes('soon'));
-                            const answer = byId?.content || byTitle?.content;
-                            if (answer) {
-                              return <SafeHTML html={answer} />;
-                            }
-                            return (
-                              <div className="space-y-6">
+                          const sections = Array.isArray((fc as any)?.faqSections) ? (fc as any).faqSections : [];
+                          const byId = sections.find((s: any) => s?.id === 'question-3');
+                          const byTitle = sections.find((s: any) => typeof s?.title === 'string' && s.title.toLowerCase().includes('soon'));
+                          const answer = byId?.content || byTitle?.content;
+                          if (answer) {
+                            return <SafeHTML html={answer} />;
+                          }
+                          return <div className="space-y-6">
                                 {/* Time Investment Overview */}
                                 <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
                                   <h4 className="font-semibold text-blue-900 mb-3 flex items-center gap-2">
@@ -710,9 +601,8 @@ export const ServiceFunnelModal = ({
                                     ✅ The system handles: ads, landing pages, lead nurturing, appointment booking
                                   </div>
                                 </div>
-                              </div>
-                            );
-                          })()}
+                              </div>;
+                        })()}
                         </div>
                       </AccordionContent>
                     </AccordionItem>
@@ -728,17 +618,14 @@ export const ServiceFunnelModal = ({
                       <AccordionContent className="border-l-4 border-l-red-500 pl-4 bg-white rounded-b-lg shadow-sm pt-0">
                          <div className="p-6 pt-[5px] whitespace-pre-wrap">
                            {(() => {
-                             const sections = Array.isArray((fc as any)?.faqSections) ? (fc as any).faqSections : [];
-                             const byId = sections.find((s: any) => s?.id === 'question-4');
-                             const byTitle = sections.find(
-                               (s: any) => typeof s?.title === 'string' && s.title.toLowerCase().includes('included')
-                             );
-                             const included = byId?.content || byTitle?.content;
-                             if (included) {
-                               return <SafeHTML html={included} className="whitespace-pre-wrap" />;
-                             }
-                            return (
-                              <div className="space-y-6">
+                          const sections = Array.isArray((fc as any)?.faqSections) ? (fc as any).faqSections : [];
+                          const byId = sections.find((s: any) => s?.id === 'question-4');
+                          const byTitle = sections.find((s: any) => typeof s?.title === 'string' && s.title.toLowerCase().includes('included'));
+                          const included = byId?.content || byTitle?.content;
+                          if (included) {
+                            return <SafeHTML html={included} className="whitespace-pre-wrap" />;
+                          }
+                          return <div className="space-y-6">
                                 {/* Core Features */}
                                 <div>
                                   <h4 className="font-semibold text-gray-900 mb-3">Core Features</h4>
@@ -788,9 +675,8 @@ export const ServiceFunnelModal = ({
                                     </div>
                                   </div>
                                 </div>
-                              </div>
-                            );
-                          })()}
+                              </div>;
+                        })()}
                         </div>
                       </AccordionContent>
                     </AccordionItem>
@@ -807,35 +693,28 @@ export const ServiceFunnelModal = ({
                          <div className="p-6 pt-0">
                            <div className="space-y-6">
                              {/* Intro Text */}
-                              {service.funnel_content?.proofItWorks?.introText && (
-                                <p className="text-gray-700 leading-relaxed whitespace-pre-wrap mb-6 pt-15">
+                              {service.funnel_content?.proofItWorks?.introText && <p className="text-gray-700 leading-relaxed whitespace-pre-wrap mb-6 pt-15">
                                   {service.funnel_content.proofItWorks.introText}
-                                </p>
-                              )}
+                                </p>}
                              {/* Agent Reviews */}
-                             {service.funnel_content?.proofItWorks?.testimonials?.enabled && service.funnel_content.proofItWorks.testimonials.items.length > 0 && reviews.length > 0 && (
-                               <div>
+                             {service.funnel_content?.proofItWorks?.testimonials?.enabled && service.funnel_content.proofItWorks.testimonials.items.length > 0 && reviews.length > 0 && <div>
                                  <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
                                    <Star className="w-5 h-5 text-yellow-500" />
                                    Agent Reviews
                                  </h4>
                                  <div className="space-y-3">
-                                   {service.funnel_content.proofItWorks.testimonials.items.map((testimonial) => (
-                                     <div key={testimonial.id} className="bg-gray-50 p-4 rounded-lg border">
+                                   {service.funnel_content.proofItWorks.testimonials.items.map(testimonial => <div key={testimonial.id} className="bg-gray-50 p-4 rounded-lg border">
                                        <div className="flex items-center gap-3 mb-2">
                                          {renderStarRating(testimonial.rating)}
                                          <span className="font-medium text-gray-900">{testimonial.name}, {testimonial.company}</span>
                                        </div>
                                        <p className="text-gray-700 italic">"{testimonial.content}"</p>
-                                     </div>
-                                   ))}
+                                     </div>)}
                                  </div>
-                               </div>
-                             )}
+                               </div>}
 
                              {/* Case Study Snapshot */}
-                             {service.funnel_content?.proofItWorks?.caseStudy?.enabled && (
-                               <div>
+                             {service.funnel_content?.proofItWorks?.caseStudy?.enabled && <div>
                                  <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
                                    <TrendingUp className="w-5 h-5 text-green-500" />
                                    Case Study Results
@@ -858,12 +737,10 @@ export const ServiceFunnelModal = ({
                                      <div className="text-sm text-gray-600">{service.funnel_content.proofItWorks.caseStudy.data.description}</div>
                                    </div>
                                  </div>
-                               </div>
-                             )}
+                               </div>}
 
                              {/* Vendor Verification */}
-                             {service.funnel_content?.proofItWorks?.vendorVerification?.enabled && service.vendor?.is_verified && (
-                               <div>
+                             {service.funnel_content?.proofItWorks?.vendorVerification?.enabled && service.vendor?.is_verified && <div>
                                  <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
                                    <Verified className="w-5 h-5 text-emerald-500" />
                                    Vendor Verification
@@ -874,14 +751,11 @@ export const ServiceFunnelModal = ({
                                        <Verified className="w-3 h-3 mr-1" />
                                        Verified Provider
                                      </Badge>
-                                     {service.funnel_content.proofItWorks.vendorVerification.data.badges.map((badge, index) => (
-                                       <span key={index} className="text-emerald-700 font-medium">✓ {badge}</span>
-                                     ))}
+                                     {service.funnel_content.proofItWorks.vendorVerification.data.badges.map((badge, index) => <span key={index} className="text-emerald-700 font-medium">✓ {badge}</span>)}
                                    </div>
                                    <p className="text-emerald-600 text-sm mt-2">{service.funnel_content.proofItWorks.vendorVerification.data.description}</p>
                                  </div>
-                               </div>
-                             )}
+                               </div>}
 
                            </div>
                          </div>
@@ -901,47 +775,42 @@ export const ServiceFunnelModal = ({
                        
                        {/* Action Buttons */}
                        <div className="space-y-3">
-                         <Button 
-                           onClick={() => setIsConsultationFlowOpen(true)}
-                           className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all"
-                         >
+                         <Button onClick={() => setIsConsultationFlowOpen(true)} className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all">
                            <Calendar className="w-5 h-5 mr-2" />
                            Book Consultation
                          </Button>
                          
-                           <Button 
-                             variant="outline" 
-                             onClick={() => {
-                               const rawUrl = service.website_url || service.vendor?.website_url;
-                               if (rawUrl) {
-                                 trackWebsiteClick(rawUrl, service.vendor?.id, 'vendor_website');
-                               }
-                             }}
-                             disabled={!service.website_url && !service.vendor?.website_url}
-                             className="w-full border-2 border-gray-300 hover:border-gray-400 py-3 rounded-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-                           >
+                           <Button variant="outline" onClick={() => {
+                        const rawUrl = service.website_url || service.vendor?.website_url;
+                        if (rawUrl) {
+                          trackWebsiteClick(rawUrl, service.vendor?.id, 'vendor_website');
+                        }
+                      }} disabled={!service.website_url && !service.vendor?.website_url} className="w-full border-2 border-gray-300 hover:border-gray-400 py-3 rounded-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed">
                               <Building className="w-5 h-5 mr-2" />
-                              {(service.website_url || service.vendor?.website_url) ? 'View Our Website' : 'Website Not Available'}
+                              {service.website_url || service.vendor?.website_url ? 'View Our Website' : 'Website Not Available'}
                             </Button>
                          
                           
-                           {service.pricing_tiers?.length > 0 && (
-                               <Button 
-                                variant="outline" 
-                                 onClick={() => {
-                                   // Scroll to the pricing section
-                                   const pricingSection = document.querySelector('[data-section="pricing-packages"]');
-                                   if (pricingSection) {
-                                     pricingSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                                   }
-                                   trackEvent({ event_type: 'click', event_data: { context: 'pricing', section: 'pricing-packages' } } as any);
-                                 }}
-                              className="w-full border-2 border-gray-300 hover:border-gray-400 py-3 rounded-xl font-semibold"
-                            >
+                           {service.pricing_tiers?.length > 0 && <Button variant="outline" onClick={() => {
+                        // Scroll to the pricing section
+                        const pricingSection = document.querySelector('[data-section="pricing-packages"]');
+                        if (pricingSection) {
+                          pricingSection.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                          });
+                        }
+                        trackEvent({
+                          event_type: 'click',
+                          event_data: {
+                            context: 'pricing',
+                            section: 'pricing-packages'
+                          }
+                        } as any);
+                      }} className="w-full border-2 border-gray-300 hover:border-gray-400 py-3 rounded-xl font-semibold">
                               <DollarSign className="w-5 h-5 mr-2" />
                               Pricing
-                            </Button>
-                           )}
+                            </Button>}
                        </div>
                      </CardContent>
                   </Card>
@@ -952,37 +821,20 @@ export const ServiceFunnelModal = ({
           </div>
 
           {/* Pricing Packages Section - Only show if pricing tiers are configured */}
-          {service.pricing_tiers?.length > 0 && (
-          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 py-12" data-section="pricing-packages">
+          {service.pricing_tiers?.length > 0 && <div className="bg-gradient-to-br from-blue-50 to-indigo-50 py-12" data-section="pricing-packages">
             <div className="max-w-7xl mx-auto px-6">
               <div className="text-center mb-8">
                 <h2 className="text-3xl font-bold text-gray-900 mb-4">Choose Your Package</h2>
                 <p className="text-lg text-gray-600">Select the perfect solution for your business needs</p>
               </div>
               
-              <div className={`grid gap-6 ${
-                packages.length === 1 ? 'grid-cols-1 max-w-md mx-auto' :
-                packages.length === 2 ? 'grid-cols-1 lg:grid-cols-2 max-w-4xl mx-auto' :
-                packages.length === 3 ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto' :
-                'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 max-w-7xl mx-auto'
-              }`}>
-                {packages.slice(0, 4).map((pkg, index) => (
-                  <div
-                    key={pkg.id}
-                    className={`relative p-6 rounded-2xl border-2 cursor-pointer transition-all hover:scale-105 hover:shadow-xl ${
-                      selectedPackage === pkg.id
-                        ? 'border-blue-500 bg-white shadow-xl ring-4 ring-blue-100'
-                        : 'border-gray-200 bg-white hover:border-gray-300 shadow-lg'
-                    } ${pkg.popular ? 'ring-2 ring-blue-200' : ''}`}
-                    onClick={() => setSelectedPackage(pkg.id)}
-                  >
-                    {pkg.popular && (
-                      <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+              <div className={`grid gap-6 ${packages.length === 1 ? 'grid-cols-1 max-w-md mx-auto' : packages.length === 2 ? 'grid-cols-1 lg:grid-cols-2 max-w-4xl mx-auto' : packages.length === 3 ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 max-w-7xl mx-auto'}`}>
+                {packages.slice(0, 4).map((pkg, index) => <div key={pkg.id} className={`relative p-6 rounded-2xl border-2 cursor-pointer transition-all hover:scale-105 hover:shadow-xl ${selectedPackage === pkg.id ? 'border-blue-500 bg-white shadow-xl ring-4 ring-blue-100' : 'border-gray-200 bg-white hover:border-gray-300 shadow-lg'} ${pkg.popular ? 'ring-2 ring-blue-200' : ''}`} onClick={() => setSelectedPackage(pkg.id)}>
+                    {pkg.popular && <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
                         <Badge className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-2 text-sm font-semibold shadow-lg border-0 rounded-full whitespace-nowrap">
                           ⭐ Most Popular
                         </Badge>
-                      </div>
-                    )}
+                      </div>}
                     
                     <div className="text-center mb-4">
                       <h4 className="font-bold text-xl text-gray-900 mb-2">{pkg.name}</h4>
@@ -992,7 +844,7 @@ export const ServiceFunnelModal = ({
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-gray-600">Retail:</span>
                           <span className="font-medium text-gray-800">
-                            ${pkg.requestPricing ? 'Quote' : (pkg.originalPrice || pkg.price)}
+                            ${pkg.requestPricing ? 'Quote' : pkg.originalPrice || pkg.price}
                           </span>
                         </div>
                         <div className="flex items-center justify-between text-sm">
@@ -1013,58 +865,38 @@ export const ServiceFunnelModal = ({
                     </div>
 
                     <div className="space-y-3 mb-6">
-                      {pkg.features.slice(0, 4).map((feature, idx) => (
-                        <div key={idx} className="flex items-start gap-2 text-sm">
+                      {pkg.features.slice(0, 4).map((feature, idx) => <div key={idx} className="flex items-start gap-2 text-sm">
                           <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
                           <span className="text-gray-600">{feature}</span>
-                        </div>
-                      ))}
-                      {pkg.features.length > 4 && (
-                        <div className="text-sm text-gray-500 text-center">
+                        </div>)}
+                      {pkg.features.length > 4 && <div className="text-sm text-gray-500 text-center">
                           +{pkg.features.length - 4} more features
-                        </div>
-                      )}
+                        </div>}
                     </div>
 
-                    <Button 
-                      className={`w-full py-3 rounded-xl font-semibold transition-all ${
-                        selectedPackage === pkg.id 
-                          ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg' 
-                          : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-                      }`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedPackage(pkg.id);
-                      }}
-                    >
+                    <Button className={`w-full py-3 rounded-xl font-semibold transition-all ${selectedPackage === pkg.id ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'}`} onClick={e => {
+                  e.stopPropagation();
+                  setSelectedPackage(pkg.id);
+                }}>
                       {selectedPackage === pkg.id ? '✓ Selected' : 'Select Package'}
                     </Button>
-                  </div>
-                ))}
+                  </div>)}
               </div>
 
               {/* Action Buttons */}
               <div className="mt-12 flex flex-col sm:flex-row gap-4 justify-center max-w-2xl mx-auto">
-                <Button 
-                  onClick={() => setIsConsultationFlowOpen(true)}
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all flex-1"
-                >
+                <Button onClick={() => setIsConsultationFlowOpen(true)} className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all flex-1">
                   <Calendar className="w-5 h-5 mr-2" />
                   Get Started with {selectedPkg?.name || 'Selected Package'}
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={() => setIsPricingChoiceOpen(true)}
-                  className="border-2 border-gray-300 hover:border-gray-400 px-8 py-4 rounded-xl font-semibold text-lg flex-1"
-                >
+                <Button variant="outline" onClick={() => setIsPricingChoiceOpen(true)} className="border-2 border-gray-300 hover:border-gray-400 px-8 py-4 rounded-xl font-semibold text-lg flex-1">
                   <ShoppingCart className="w-5 h-5 mr-2" />
                   Add to Cart - ${selectedPkg?.price || '0'}
                 </Button>
               </div>
             </div>
-          </div>
-          )}
+          </div>}
 
           {/* Customers Also Viewed Section */}
           <div className="max-w-6xl mx-auto px-6 py-8">
@@ -1072,8 +904,7 @@ export const ServiceFunnelModal = ({
           </div>
 
           {/* Disclaimer Section for Non-Verified Services */}
-          {!isVerified && (
-            <div className="bg-amber-50 border-l-4 border-amber-400 py-6">
+          {!isVerified && <div className="bg-amber-50 border-l-4 border-amber-400 py-6">
               <div className="max-w-6xl mx-auto px-6">
                 <div className="flex items-start gap-3">
                   <div className="flex-shrink-0">
@@ -1094,12 +925,10 @@ export const ServiceFunnelModal = ({
                   </div>
                 </div>
               </div>
-            </div>
-          )}
+            </div>}
 
           {/* Verified Service Disclaimer */}
-          {isVerified && (
-            <div className="border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/50 rounded-lg p-4 mt-6">
+          {isVerified && <div className="border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/50 rounded-lg p-4 mt-6">
               <div className="flex items-start space-x-3">
                 <Shield className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
                 <div>
@@ -1120,39 +949,23 @@ export const ServiceFunnelModal = ({
                   </div>
                 </div>
               </div>
-            </div>
-          )}
+            </div>}
         </div>
 
         {/* Consultation Flow Modal */}
-        {isConsultationFlowOpen && (
-          <ConsultationFlow
-            isOpen={isConsultationFlowOpen}
-            onClose={() => setIsConsultationFlowOpen(false)}
-            service={service}
-          />
-        )}
+        {isConsultationFlowOpen && <ConsultationFlow isOpen={isConsultationFlowOpen} onClose={() => setIsConsultationFlowOpen(false)} service={service} />}
 
         {/* Pricing Choice Modal */}
-        {isPricingChoiceOpen && (
-          <PricingChoiceModal
-            isOpen={isPricingChoiceOpen}
-            onClose={() => setIsPricingChoiceOpen(false)}
-            service={{
-              id: service.id,
-              title: `${service.title} - ${selectedPkg?.name || 'Selected Package'}`,
-              pro_price: selectedPkg?.price?.toString() || '0',
-              retail_price: selectedPkg?.originalPrice?.toString() || selectedPkg?.price?.toString() || '0',
-              respa_split_limit: 50, // Default 50% split limit
-              price_duration: service.duration,
-              requires_quote: selectedPkg?.requestPricing || service.requires_quote
-            }}
-            onChooseProPrice={handleChooseProPrice}
-            onChooseCoPay={handleChooseCoPay}
-            onChooseAgentPoints={handleChooseAgentPoints}
-          />
-        )}
+        {isPricingChoiceOpen && <PricingChoiceModal isOpen={isPricingChoiceOpen} onClose={() => setIsPricingChoiceOpen(false)} service={{
+        id: service.id,
+        title: `${service.title} - ${selectedPkg?.name || 'Selected Package'}`,
+        pro_price: selectedPkg?.price?.toString() || '0',
+        retail_price: selectedPkg?.originalPrice?.toString() || selectedPkg?.price?.toString() || '0',
+        respa_split_limit: 50,
+        // Default 50% split limit
+        price_duration: service.duration,
+        requires_quote: selectedPkg?.requestPricing || service.requires_quote
+      }} onChooseProPrice={handleChooseProPrice} onChooseCoPay={handleChooseCoPay} onChooseAgentPoints={handleChooseAgentPoints} />}
       </DialogContent>
-    </Dialog>
-  );
+    </Dialog>;
 };
