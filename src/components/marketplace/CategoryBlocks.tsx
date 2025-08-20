@@ -159,6 +159,14 @@ const OLD_SCHOOL_CATEGORIES = [
     iconColor: "text-white"
   },
   {
+    name: "Client Gifting, Community Sponsorships",
+    icon: Award,
+    tags: ["cat:client-gifting"],
+    description: "Client Gifts & Community Support",
+    color: "bg-lime-500",
+    iconColor: "text-white"
+  },
+  {
     name: "Print & Mail",
     icon: Mail,
     tags: ["cat:print-mail"],
