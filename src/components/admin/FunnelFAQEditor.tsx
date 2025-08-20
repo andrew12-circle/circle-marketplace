@@ -71,12 +71,6 @@ const DEFAULT_FAQ_SECTIONS = [
     color: "emerald"
   },
   {
-    id: "question-6",
-    title: "How Do I Get Started?",
-    content: "Book a 15-minute demo, choose your package, and go live in 24-48 hours with our complete setup service",
-    color: "pink"
-  },
-  {
     id: "question-7",
     title: "Choose Your Package",
     content: "Select from our flexible pricing options designed to fit your business needs and budget",
