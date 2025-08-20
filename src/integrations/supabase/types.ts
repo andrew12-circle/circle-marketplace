@@ -1340,11 +1340,18 @@ export type Database = {
           client_phone: string | null
           consultation_notes: string | null
           created_at: string
+          external_event_id: string | null
+          external_link: string | null
+          external_provider: string | null
+          external_status: string | null
           id: string
+          is_external: boolean | null
           project_details: string | null
+          scheduled_at: string | null
           scheduled_date: string
           scheduled_time: string
           service_id: string
+          source: string | null
           status: string
           updated_at: string
           user_id: string | null
@@ -1356,11 +1363,18 @@ export type Database = {
           client_phone?: string | null
           consultation_notes?: string | null
           created_at?: string
+          external_event_id?: string | null
+          external_link?: string | null
+          external_provider?: string | null
+          external_status?: string | null
           id?: string
+          is_external?: boolean | null
           project_details?: string | null
+          scheduled_at?: string | null
           scheduled_date: string
           scheduled_time: string
           service_id: string
+          source?: string | null
           status?: string
           updated_at?: string
           user_id?: string | null
@@ -1372,11 +1386,18 @@ export type Database = {
           client_phone?: string | null
           consultation_notes?: string | null
           created_at?: string
+          external_event_id?: string | null
+          external_link?: string | null
+          external_provider?: string | null
+          external_status?: string | null
           id?: string
+          is_external?: boolean | null
           project_details?: string | null
+          scheduled_at?: string | null
           scheduled_date?: string
           scheduled_time?: string
           service_id?: string
+          source?: string | null
           status?: string
           updated_at?: string
           user_id?: string | null
@@ -4830,6 +4851,8 @@ export type Database = {
       services: {
         Row: {
           average_rating: number | null
+          booking_time_rules: Json | null
+          booking_type: string | null
           calendar_link: string | null
           category: string | null
           co_pay_price: string | null
@@ -4844,6 +4867,8 @@ export type Database = {
           discount_percentage: string | null
           duration: string | null
           estimated_roi: number | null
+          external_booking_provider: string | null
+          external_booking_url: string | null
           funnel_content: Json | null
           id: string
           image_url: string | null
@@ -4870,6 +4895,7 @@ export type Database = {
           sort_order: number | null
           sponsored_rank_boost: number | null
           supporting_documents: Json | null
+          sync_to_ghl: boolean | null
           tags: string[] | null
           title: string
           updated_at: string | null
@@ -4878,6 +4904,8 @@ export type Database = {
         }
         Insert: {
           average_rating?: number | null
+          booking_time_rules?: Json | null
+          booking_type?: string | null
           calendar_link?: string | null
           category?: string | null
           co_pay_price?: string | null
@@ -4892,6 +4920,8 @@ export type Database = {
           discount_percentage?: string | null
           duration?: string | null
           estimated_roi?: number | null
+          external_booking_provider?: string | null
+          external_booking_url?: string | null
           funnel_content?: Json | null
           id?: string
           image_url?: string | null
@@ -4918,6 +4948,7 @@ export type Database = {
           sort_order?: number | null
           sponsored_rank_boost?: number | null
           supporting_documents?: Json | null
+          sync_to_ghl?: boolean | null
           tags?: string[] | null
           title: string
           updated_at?: string | null
@@ -4926,6 +4957,8 @@ export type Database = {
         }
         Update: {
           average_rating?: number | null
+          booking_time_rules?: Json | null
+          booking_type?: string | null
           calendar_link?: string | null
           category?: string | null
           co_pay_price?: string | null
@@ -4940,6 +4973,8 @@ export type Database = {
           discount_percentage?: string | null
           duration?: string | null
           estimated_roi?: number | null
+          external_booking_provider?: string | null
+          external_booking_url?: string | null
           funnel_content?: Json | null
           id?: string
           image_url?: string | null
@@ -4966,6 +5001,7 @@ export type Database = {
           sort_order?: number | null
           sponsored_rank_boost?: number | null
           supporting_documents?: Json | null
+          sync_to_ghl?: boolean | null
           tags?: string[] | null
           title?: string
           updated_at?: string | null
@@ -6541,6 +6577,53 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      webhook_events: {
+        Row: {
+          consultation_booking_id: string | null
+          created_at: string | null
+          error_message: string | null
+          event_type: string
+          external_event_id: string | null
+          id: string
+          payload: Json
+          processed: boolean | null
+          processed_at: string | null
+          provider: string
+        }
+        Insert: {
+          consultation_booking_id?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          event_type: string
+          external_event_id?: string | null
+          id?: string
+          payload?: Json
+          processed?: boolean | null
+          processed_at?: string | null
+          provider: string
+        }
+        Update: {
+          consultation_booking_id?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          event_type?: string
+          external_event_id?: string | null
+          id?: string
+          payload?: Json
+          processed?: boolean | null
+          processed_at?: string | null
+          provider?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "webhook_events_consultation_booking_id_fkey"
+            columns: ["consultation_booking_id"]
+            isOneToOne: false
+            referencedRelation: "consultation_bookings"
+            referencedColumns: ["id"]
           },
         ]
       }
