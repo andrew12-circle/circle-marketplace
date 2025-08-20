@@ -808,7 +808,7 @@ export const ServiceFunnelModal = ({
                            <div className="space-y-6">
                              {/* Intro Text */}
                               {service.funnel_content?.proofItWorks?.introText && (
-                                <p className="text-gray-700 leading-relaxed whitespace-pre-wrap mb-6">
+                                <p className="text-gray-700 leading-relaxed whitespace-pre-wrap mb-6 pt-15">
                                   {service.funnel_content.proofItWorks.introText}
                                 </p>
                               )}
