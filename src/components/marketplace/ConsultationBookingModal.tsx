@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -39,10 +39,17 @@ export const ConsultationBookingModal = ({
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [projectDetails, setProjectDetails] = useState('');
-  
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
+
+  // Pre-populate form with user data when signed in
+  useEffect(() => {
+    if (user) {
+      setName(user.user_metadata?.full_name || user.email?.split('@')[0] || '');
+      setEmail(user.email || '');
+    }
+  }, [user]);
 
   // Business hours: Monday-Friday 10am-4pm CST (converted to local display)
   const businessTimeSlots = [
@@ -263,6 +270,8 @@ export const ConsultationBookingModal = ({
                 <Input
                   id="client_name"
                   name="client_name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
                   placeholder="Your full name"
                   required
                 />
@@ -273,6 +282,8 @@ export const ConsultationBookingModal = ({
                   id="client_email"
                   name="client_email"
                   type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   placeholder="your@email.com"
                   required
                 />
@@ -284,6 +295,8 @@ export const ConsultationBookingModal = ({
                 id="client_phone"
                 name="client_phone"
                 type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
                 placeholder="(555) 123-4567"
               />
             </div>
