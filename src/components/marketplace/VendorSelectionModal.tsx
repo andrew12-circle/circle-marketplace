@@ -4,7 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search, MapPin, Star, Users, TrendingUp, Building, Plus, CheckCircle } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Search, MapPin, Star, Users, TrendingUp, Building, Plus, CheckCircle, Info, AlertTriangle } from "lucide-react";
 import confirmationImage from "@/assets/confirmation-image.png";
 import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,7 +14,9 @@ import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "@/hooks/useLocation";
 import { InviteVendorModal } from "./InviteVendorModal";
 import { VendorFunnelModal } from "./VendorFunnelModal";
+import { VendorReferralModal } from "./VendorReferralModal";
 import { CoPayVendorCard } from "./CoPayVendorCard";
+import { isSSP, isNonSSP, getVendorTypeInfo, filterVendorsForService } from "@/utils/sspHelpers";
 
 interface Vendor {
   id: string;
@@ -57,10 +61,12 @@ export const VendorSelectionModal = ({
   const [isLoading, setIsLoading] = useState(false);
   const [isSelectingVendor, setIsSelectingVendor] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const [showReferralModal, setShowReferralModal] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null);
   const [showFunnelModal, setShowFunnelModal] = useState(false);
   const [funnelVendor, setFunnelVendor] = useState<Vendor | null>(null);
+  const [showAllVendors, setShowAllVendors] = useState(false);
   const { toast } = useToast();
   const { location } = useLocation();
   const [expandedCompanyId, setExpandedCompanyId] = useState<string | null>(null);
@@ -88,10 +94,11 @@ export const VendorSelectionModal = ({
     console.log('VendorSelectionModal: Filtering vendors...', { 
       totalVendors: vendors.length, 
       searchQuery, 
-      userLocation: location?.state 
+      userLocation: location?.state,
+      showAllVendors
     });
 
-    let filtered = [...vendors]; // Create a copy to avoid mutating original array
+    let filtered = filterVendorsForService(vendors, service, !showAllVendors);
 
     // Apply location filter if available - but be more lenient
     if (location?.state && vendors.length > 0) {
@@ -128,16 +135,24 @@ export const VendorSelectionModal = ({
       );
     }
 
-    // Preserve the original sort order from the database query
-    // The vendors were already sorted by sort_order ASC, then rating DESC
-    // No additional sorting needed - just maintain the order from the original array
+    // Sort with Non-SSP first if not showing all vendors
+    if (!showAllVendors) {
+      filtered.sort((a, b) => {
+        const aIsNonSSP = isNonSSP(a);
+        const bIsNonSSP = isNonSSP(b);
+        if (aIsNonSSP && !bIsNonSSP) return -1;
+        if (!aIsNonSSP && bIsNonSSP) return 1;
+        return 0;
+      });
+    }
+
     console.log('VendorSelectionModal: Filtering complete', { 
       filteredCount: filtered.length,
       originalCount: vendors.length 
     });
 
     return filtered;
-  }, [vendors, searchQuery, location?.state, getStateAbbreviation]);
+  }, [vendors, searchQuery, location?.state, getStateAbbreviation, service, showAllVendors]);
 
   useEffect(() => {
     if (isOpen) {
@@ -151,6 +166,7 @@ export const VendorSelectionModal = ({
       setFunnelVendor(null);
       setExpandedCompanyId(null);
       setPledgedPointsMap({});
+      setShowAllVendors(false); // Default to Non-SSP preferred
       
       loadVendors();
     } else {
@@ -437,15 +453,17 @@ export const VendorSelectionModal = ({
               </p>
             )}
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowInviteModal(true)}
-            className="shrink-0 mr-8 border-green-600 text-green-600 hover:bg-green-50 hover:border-green-700 hover:text-green-700"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Request Your Vendors
-          </Button>
+          <div className="flex items-center space-x-2 shrink-0 mr-8">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowReferralModal(true)}
+              className="border-green-600 text-green-600 hover:bg-green-50 hover:border-green-700 hover:text-green-700"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Request Your Vendors
+            </Button>
+          </div>
         </DialogHeader>
         
         {showConfirmation ? (
@@ -573,17 +591,34 @@ export const VendorSelectionModal = ({
                                   )}
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                  <div className="flex items-start justify-between mb-2">
-                                    <h3 className="font-semibold text-sm truncate">{company.name}</h3>
-                                    <div className="flex items-center gap-2">
-                                      {pledged > 0 && (
-                                        <Badge variant="outline" className="text-xs">Pledged: {pledged.toLocaleString()} pts</Badge>
-                                      )}
-                                      {company.is_verified && (
-                                        <Badge variant="outline" className="text-xs">✓ Verified</Badge>
-                                      )}
-                                    </div>
-                                  </div>
+                                   <div className="flex items-start justify-between mb-2">
+                                     <h3 className="font-semibold text-sm truncate">{company.name}</h3>
+                                     <div className="flex items-center gap-2">
+                                       {(() => {
+                                         const typeInfo = getVendorTypeInfo(company);
+                                         return (
+                                           <TooltipProvider>
+                                             <Tooltip>
+                                               <TooltipTrigger>
+                                                 <Badge variant={typeInfo.badgeVariant} className="text-xs">
+                                                   {typeInfo.badge}
+                                                 </Badge>
+                                               </TooltipTrigger>
+                                               <TooltipContent>
+                                                 <p className="text-xs">{typeInfo.tooltip}</p>
+                                               </TooltipContent>
+                                             </Tooltip>
+                                           </TooltipProvider>
+                                         );
+                                       })()}
+                                       {pledged > 0 && (
+                                         <Badge variant="outline" className="text-xs">Pledged: {pledged.toLocaleString()} pts</Badge>
+                                       )}
+                                       {company.is_verified && (
+                                         <Badge variant="outline" className="text-xs">✓ Verified</Badge>
+                                       )}
+                                     </div>
+                                   </div>
 
                                   {company.location && (
                                     <div className="flex items-center gap-1 text-xs text-muted-foreground mb-2">
@@ -737,6 +772,12 @@ export const VendorSelectionModal = ({
         )}
       </DialogContent>
     </Dialog>
+
+    <VendorReferralModal 
+      isOpen={showReferralModal}
+      onClose={() => setShowReferralModal(false)}
+      serviceTitle={service.title}
+    />
 
     <InviteVendorModal 
       open={showInviteModal}

@@ -1,10 +1,12 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Crown, Users, ShoppingCart, Coins } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Crown, Users, ShoppingCart, Coins, AlertTriangle, Info } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { computePotentialCoPayNonSSP } from "@/utils/dealPricing";
 
 interface PricingChoiceModalProps {
   isOpen: boolean;
@@ -40,6 +42,11 @@ export const PricingChoiceModal = ({
   const retailPrice = service.retail_price ? parseFloat(service.retail_price.replace(/[^\d.]/g, '')) : 0;
   const coPayPrice = proPrice && service.respa_split_limit 
     ? proPrice * (1 - (service.respa_split_limit / 100))
+    : 0;
+  
+  // Calculate Non-SSP potential pricing
+  const nonSspCoPayPrice = service.max_split_percentage_non_ssp 
+    ? computePotentialCoPayNonSSP(service.pro_price || service.retail_price || '0', service)
     : 0;
 
   // Load agent points and RESPA compliance when modal opens
@@ -267,17 +274,46 @@ export const PricingChoiceModal = ({
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
+              {/* Standard SSP Pricing */}
               <div className="flex items-center justify-between">
-                <span className="text-lg font-bold text-green-600">
-                  ${coPayPrice.toFixed(2)}{service.price_duration ? `/${service.price_duration}` : ''}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-lg font-bold text-green-600">
+                    ${coPayPrice.toFixed(2)}{service.price_duration ? `/${service.price_duration}` : ''}
+                  </span>
+                  <Badge variant="secondary" className="text-xs">SSP</Badge>
+                </div>
                 <span className="text-sm text-muted-foreground">
-                  Vendor Assisted
+                  Standard Rate
                 </span>
               </div>
+              
+              {/* Non-SSP Potential Pricing */}
+              {nonSspCoPayPrice > 0 && nonSspCoPayPrice < coPayPrice && (
+                <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-semibold text-blue-700">
+                        As low as ~${nonSspCoPayPrice.toFixed(2)}
+                      </span>
+                      <Badge variant="default" className="text-xs bg-blue-100 text-blue-700">Non-SSP</Badge>
+                    </div>
+                    <Info className="w-4 h-4 text-blue-600" />
+                  </div>
+                  <p className="text-xs text-blue-600">
+                    Potential price with Non-SSP vendors (subject to approval)
+                  </p>
+                </div>
+              )}
+              
               <p className="text-sm text-muted-foreground">
-                Get connected with a vendor who will help cover {service.respa_split_limit}% of the cost.
+                Get connected with a vendor partner. SSP vendors limited to {service.respa_split_limit}% by RESPA compliance.
               </p>
+              
+              <div className="bg-amber-50 border border-amber-200 p-2 rounded text-xs text-amber-700">
+                <AlertTriangle className="w-3 h-3 inline mr-1" />
+                Final pricing depends on vendor approval and compliance requirements.
+              </div>
+              
               <Button 
                 className="w-full bg-green-600 hover:bg-green-700 text-white" 
                 onClick={onChooseCoPay}

@@ -44,6 +44,15 @@ export const computePotentialCopay = (proPrice: string, respaSplitLimit: number)
 };
 
 /**
+ * Calculate potential co-pay price for Non-SSP vendors (potentially better rates)
+ */
+export const computePotentialCoPayNonSSP = (basePrice: string, service: any): number => {
+  const basePriceNum = extractNumericPrice(basePrice);
+  const nonSspSplit = service.max_split_percentage_non_ssp || 70; // Default 70% for non-SSP
+  return basePriceNum * (1 - (nonSspSplit / 100));
+};
+
+/**
  * Calculate discount percentage for a service with all pricing logic
  */
 export const computeDiscountPercentage = (service: any): number | null => {

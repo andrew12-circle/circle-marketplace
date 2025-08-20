@@ -4892,6 +4892,7 @@ export type Database = {
           respa_split_limit: number | null
           retail_price: string | null
           service_provider_id: string | null
+          setup_time: string | null
           sort_order: number | null
           sponsored_rank_boost: number | null
           supporting_documents: Json | null
@@ -4945,6 +4946,7 @@ export type Database = {
           respa_split_limit?: number | null
           retail_price?: string | null
           service_provider_id?: string | null
+          setup_time?: string | null
           sort_order?: number | null
           sponsored_rank_boost?: number | null
           supporting_documents?: Json | null
@@ -4998,6 +5000,7 @@ export type Database = {
           respa_split_limit?: number | null
           retail_price?: string | null
           service_provider_id?: string | null
+          setup_time?: string | null
           sort_order?: number | null
           sponsored_rank_boost?: number | null
           supporting_documents?: Json | null
@@ -6155,6 +6158,63 @@ export type Database = {
           question_text?: string
           updated_at?: string
           vendor_id?: string
+        }
+        Relationships: []
+      }
+      vendor_referrals: {
+        Row: {
+          agent_id: string
+          contact_status: string
+          contacted_at: string | null
+          created_at: string
+          id: string
+          referral_notes: string | null
+          relationship: string | null
+          scheduled_call_at: string | null
+          service_interest: string | null
+          status_notes: string | null
+          updated_at: string
+          vendor_company: string | null
+          vendor_email: string
+          vendor_name: string
+          vendor_phone: string | null
+          vendor_type: string | null
+        }
+        Insert: {
+          agent_id: string
+          contact_status?: string
+          contacted_at?: string | null
+          created_at?: string
+          id?: string
+          referral_notes?: string | null
+          relationship?: string | null
+          scheduled_call_at?: string | null
+          service_interest?: string | null
+          status_notes?: string | null
+          updated_at?: string
+          vendor_company?: string | null
+          vendor_email: string
+          vendor_name: string
+          vendor_phone?: string | null
+          vendor_type?: string | null
+        }
+        Update: {
+          agent_id?: string
+          contact_status?: string
+          contacted_at?: string | null
+          created_at?: string
+          id?: string
+          referral_notes?: string | null
+          relationship?: string | null
+          scheduled_call_at?: string | null
+          service_interest?: string | null
+          status_notes?: string | null
+          updated_at?: string
+          vendor_company?: string | null
+          vendor_email?: string
+          vendor_name?: string
+          vendor_phone?: string | null
+          vendor_type?: string | null
         }
         Relationships: []
       }
