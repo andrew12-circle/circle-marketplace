@@ -169,6 +169,7 @@ interface Service {
       };
     };
   };
+  respa_split_limit?: number;
 }
 interface ServiceFunnelModalProps {
   isOpen: boolean;
@@ -859,7 +860,7 @@ export const ServiceFunnelModal = ({
                         <div className="flex items-center justify-between text-sm bg-green-50 p-3 rounded-lg border border-green-200">
                           <span className="text-green-700 font-medium">Co-Pay:</span>
                           <span className="font-bold text-green-700 text-lg">
-                            ${pkg.requestPricing ? 'Quote' : Math.round(computePotentialCopayForService(service))}
+                            ${pkg.requestPricing ? 'Quote' : Math.round(pkg.price * (1 - (service.respa_split_limit || 0) / 100))}
                           </span>
                         </div>
                       </div>
