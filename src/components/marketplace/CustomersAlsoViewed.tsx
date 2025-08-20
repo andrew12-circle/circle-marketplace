@@ -86,17 +86,17 @@ export const CustomersAlsoViewed = ({
       .map(item => item.service);
   }, [currentService, marketplaceData, maxSuggestions]);
 
-  const visibleServices = recommendedServices.slice(currentIndex, currentIndex + 3);
+  const visibleServices = recommendedServices.slice(currentIndex, currentIndex + 4);
 
   const canScrollLeft = currentIndex > 0;
-  const canScrollRight = currentIndex + 3 < recommendedServices.length;
+  const canScrollRight = currentIndex + 4 < recommendedServices.length;
 
   const scrollLeft = () => {
     setCurrentIndex(Math.max(0, currentIndex - 1));
   };
 
   const scrollRight = () => {
-    setCurrentIndex(Math.min(recommendedServices.length - 3, currentIndex + 1));
+    setCurrentIndex(Math.min(recommendedServices.length - 4, currentIndex + 1));
   };
 
   if (recommendedServices.length === 0) {
@@ -132,7 +132,7 @@ export const CustomersAlsoViewed = ({
         </div>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {visibleServices.map((service) => (
             <ServiceCard
               key={service.id}
@@ -143,15 +143,15 @@ export const CustomersAlsoViewed = ({
           ))}
         </div>
         
-        {recommendedServices.length > 3 && (
+        {recommendedServices.length > 4 && (
           <div className="flex justify-center mt-4">
             <div className="flex gap-2">
-              {Array.from({ length: Math.ceil(recommendedServices.length / 3) }).map((_, index) => (
+              {Array.from({ length: Math.ceil(recommendedServices.length / 4) }).map((_, index) => (
                 <button
                   key={index}
-                  onClick={() => setCurrentIndex(index * 3)}
+                  onClick={() => setCurrentIndex(index * 4)}
                   className={`w-2 h-2 rounded-full transition-colors ${
-                    Math.floor(currentIndex / 3) === index
+                    Math.floor(currentIndex / 4) === index
                       ? 'bg-primary'
                       : 'bg-muted-foreground/30'
                   }`}
