@@ -13,6 +13,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { SecureForm } from '@/components/common/SecureForm';
 import { commonRules } from '@/hooks/useSecureInput';
+import { useProviderTracking } from '@/hooks/useProviderTracking';
+import { useNavigate } from 'react-router-dom';
 
 interface ConsultationBookingModalProps {
   isOpen: boolean;
@@ -40,8 +42,11 @@ export const ConsultationBookingModal = ({
   const [phone, setPhone] = useState('');
   const [projectDetails, setProjectDetails] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [integrationErrors, setIntegrationErrors] = useState<string[]>([]);
   const { toast } = useToast();
   const { user } = useAuth();
+  const { trackBooking } = useProviderTracking(service.id, isOpen);
+  const navigate = useNavigate();
 
   // Pre-populate form with user data when signed in
   useEffect(() => {
@@ -72,6 +77,28 @@ export const ConsultationBookingModal = ({
   };
 
   const handleSecureSubmit = async (data: Record<string, string>) => {
+    // Gate behind authentication
+    if (!user) {
+      toast({
+        title: "Sign In Required",
+        description: "Please sign in to book a consultation. You'll be redirected back to this form after signing in.",
+        variant: "destructive",
+        action: (
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => {
+              navigate('/auth');
+              onClose();
+            }}
+          >
+            Sign In
+          </Button>
+        )
+      });
+      throw new Error("Authentication required");
+    }
+
     if (!selectedDate || !selectedTime) {
       toast({
         title: "Missing Information",
@@ -92,12 +119,16 @@ export const ConsultationBookingModal = ({
     }
 
     setIsSubmitting(true);
+    setIntegrationErrors([]);
+    console.log('[Consultation Booking] Starting booking process for service:', service.id);
+    
     try {
       // Create internal booking record
+      console.log('[Consultation Booking] Inserting booking record...');
       const { data: bookingData, error } = await supabase
         .from('consultation_bookings')
         .insert({
-          user_id: user?.id,
+          user_id: user.id,
           service_id: service.id,
           scheduled_date: selectedDate.toISOString().split('T')[0],
           scheduled_time: selectedTime,
@@ -105,15 +136,29 @@ export const ConsultationBookingModal = ({
           client_email: data.client_email,
           client_phone: data.client_phone || null,
           project_details: data.project_details || null,
-          
           status: 'pending'
         })
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('[Consultation Booking] Database insert failed:', error);
+        // Handle RLS errors specifically
+        if (error.message?.includes('row-level security') || error.message?.includes('RLS')) {
+          toast({
+            title: "Authentication Error",
+            description: "Please sign in and try again. If the problem persists, refresh the page.",
+            variant: "destructive"
+          });
+          throw new Error("RLS authentication error");
+        }
+        throw error;
+      }
+
+      console.log('[Consultation Booking] Successfully created booking:', bookingData.id);
 
       // Create Go High Level contact and send to GHL
+      console.log('[Consultation Booking] Calling GHL integration...');
       try {
         const ghlResponse = await supabase.functions.invoke('create-ghl-contact', {
           body: {
@@ -127,23 +172,23 @@ export const ConsultationBookingModal = ({
             scheduledDate: selectedDate.toISOString().split('T')[0],
             scheduledTime: selectedTime,
             projectDetails: data.project_details || '',
-            
             source: 'Circle Marketplace Consultation'
           }
         });
 
         if (ghlResponse.error) {
-          console.error('Failed to create GHL contact:', ghlResponse.error);
-          // Don't fail the booking if GHL integration fails
+          console.error('[Consultation Booking] GHL integration failed:', ghlResponse.error);
+          setIntegrationErrors(prev => [...prev, 'CRM integration']);
         } else {
-          console.log('Successfully created GHL contact:', ghlResponse.data);
+          console.log('[Consultation Booking] GHL integration successful:', ghlResponse.data);
         }
       } catch (ghlError) {
-        console.error('Error with GHL integration:', ghlError);
-        // Don't fail the booking if GHL integration fails
+        console.error('[Consultation Booking] GHL integration error:', ghlError);
+        setIntegrationErrors(prev => [...prev, 'CRM integration']);
       }
 
       // Send internal notification
+      console.log('[Consultation Booking] Sending notification...');
       try {
         await supabase.functions.invoke('send-consultation-notification', {
           body: {
@@ -157,27 +202,77 @@ export const ConsultationBookingModal = ({
             scheduledDate: selectedDate.toISOString().split('T')[0],
             scheduledTime: selectedTime,
             projectDetails: data.project_details,
-            
-            isInternalBooking: true // Flag to indicate this is booked with Circle team
+            isInternalBooking: true
           }
         });
+        console.log('[Consultation Booking] Notification sent successfully');
       } catch (notificationError) {
-        console.error('Error sending notification:', notificationError);
+        console.error('[Consultation Booking] Notification failed:', notificationError);
+        setIntegrationErrors(prev => [...prev, 'email notification']);
       }
+
+      // Track successful booking
+      try {
+        await trackBooking({
+          id: bookingData.id,
+          type: 'consultation',
+          value: 0 // Consultations are free
+        });
+        console.log('[Consultation Booking] Tracking recorded');
+      } catch (trackingError) {
+        console.error('[Consultation Booking] Tracking failed:', trackingError);
+      }
+
+      const successMessage = integrationErrors.length > 0 
+        ? `Consultation booked successfully! Note: Some integrations failed (${integrationErrors.join(', ')}). Our team will still contact you to confirm your appointment.`
+        : "We've received your booking and added you to our Go High Level system. Our team will contact you soon to confirm your appointment and discuss connecting you with the right vendor.";
 
       toast({
         title: "Consultation Booked Successfully!",
-        description: "We've received your booking and added you to our Go High Level system. Our team will contact you soon to confirm your appointment and discuss connecting you with the right vendor.",
+        description: successMessage,
+        ...(integrationErrors.length > 0 && {
+          action: (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => window.location.href = 'mailto:support@circlemarketplace.io?subject=Consultation Booking Support'}
+            >
+              Need Help?
+            </Button>
+          )
+        })
       });
 
+      console.log('[Consultation Booking] Process completed successfully');
       onBookingConfirmed(bookingData.id);
       onClose();
     } catch (error) {
-      console.error('Error booking consultation:', error);
+      console.error('[Consultation Booking] Process failed:', error);
+      
+      // Provide specific error messages
+      let errorMessage = "There was an error booking your consultation. Please try again.";
+      if (error instanceof Error) {
+        if (error.message.includes('Authentication required')) {
+          return; // Don't show additional error, auth message already shown
+        }
+        if (error.message.includes('RLS')) {
+          errorMessage = "Authentication error. Please refresh the page and try again.";
+        }
+      }
+      
       toast({
         title: "Booking Failed",
-        description: "There was an error booking your consultation. Please try again.",
-        variant: "destructive"
+        description: errorMessage,
+        variant: "destructive",
+        action: integrationErrors.length === 0 ? (
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => window.location.href = 'mailto:support@circlemarketplace.io?subject=Booking Error Support'}
+          >
+            Get Help
+          </Button>
+        ) : undefined
       });
       throw error;
     } finally {
@@ -201,6 +296,26 @@ export const ConsultationBookingModal = ({
             Book Consultation: {service.title}
           </DialogTitle>
         </DialogHeader>
+
+        {/* Authentication Check */}
+        {!user && (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+            <div className="flex items-center gap-2">
+              <User className="w-5 h-5 text-yellow-600" />
+              <p className="font-medium text-yellow-800">Sign In Required</p>
+            </div>
+            <p className="text-sm text-yellow-700 mt-1">
+              You need to be signed in to book a consultation. 
+              <Button 
+                variant="link" 
+                className="p-0 ml-1 text-yellow-800 underline" 
+                onClick={() => navigate('/auth')}
+              >
+                Sign in now
+              </Button>
+            </p>
+          </div>
+        )}
 
         <SecureForm 
           validationRules={validationRules}
