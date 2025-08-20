@@ -1053,21 +1053,23 @@ export const ServiceFunnelModal = ({
                             </Button>
                          
                           
-                              <Button 
-                               variant="outline" 
-                                onClick={() => {
-                                  // Scroll to the pricing section
-                                  const pricingSection = document.querySelector('[data-section="pricing-packages"]');
-                                  if (pricingSection) {
-                                    pricingSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                                  }
-                                  trackEvent({ event_type: 'click', event_data: { context: 'pricing', section: 'pricing-packages' } } as any);
-                                }}
-                             className="w-full border-2 border-gray-300 hover:border-gray-400 py-3 rounded-xl font-semibold"
-                           >
-                             <DollarSign className="w-5 h-5 mr-2" />
-                             Pricing
-                           </Button>
+                           {service.pricing_tiers?.length > 0 && (
+                               <Button 
+                                variant="outline" 
+                                 onClick={() => {
+                                   // Scroll to the pricing section
+                                   const pricingSection = document.querySelector('[data-section="pricing-packages"]');
+                                   if (pricingSection) {
+                                     pricingSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                   }
+                                   trackEvent({ event_type: 'click', event_data: { context: 'pricing', section: 'pricing-packages' } } as any);
+                                 }}
+                              className="w-full border-2 border-gray-300 hover:border-gray-400 py-3 rounded-xl font-semibold"
+                            >
+                              <DollarSign className="w-5 h-5 mr-2" />
+                              Pricing
+                            </Button>
+                           )}
                        </div>
                      </CardContent>
                   </Card>
