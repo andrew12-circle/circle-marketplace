@@ -19,6 +19,7 @@ interface PricingChoiceModalProps {
     respa_split_limit?: number;
     price_duration?: string;
     requires_quote?: boolean;
+    max_split_percentage_non_ssp?: number;
   };
   onChooseProPrice: () => void;
   onChooseCoPay: () => void;

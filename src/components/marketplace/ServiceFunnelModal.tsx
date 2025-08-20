@@ -966,7 +966,8 @@ export const ServiceFunnelModal = ({
         respa_split_limit: 50,
         // Default 50% split limit
         price_duration: service.duration,
-        requires_quote: selectedPkg?.requestPricing || service.requires_quote
+        requires_quote: selectedPkg?.requestPricing || service.requires_quote,
+        max_split_percentage_non_ssp: (service as any).max_split_percentage_non_ssp
       }} onChooseProPrice={handleChooseProPrice} onChooseCoPay={handleChooseCoPay} onChooseAgentPoints={handleChooseAgentPoints} />}
 
         {/* Vendor Selection Modal */}
