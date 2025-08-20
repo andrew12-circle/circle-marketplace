@@ -876,60 +876,6 @@ export const ServiceFunnelModal = ({
                                </div>
                              )}
 
-                             {/* Fallback for services without proof data */}
-                             {(!service.funnel_content?.proofItWorks?.testimonials?.enabled && 
-                               !service.funnel_content?.proofItWorks?.caseStudy?.enabled && 
-                               !service.funnel_content?.proofItWorks?.vendorVerification?.enabled) && (
-                               <>
-
-                                 {/* Default Case Study */}
-                                 <div>
-                                   <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                                     <TrendingUp className="w-5 h-5 text-green-500" />
-                                     Case Study Results
-                                   </h4>
-                                   <div className="bg-gradient-to-r from-red-50 to-green-50 p-4 rounded-lg border">
-                                     <div className="grid grid-cols-2 gap-4">
-                                       <div className="text-center">
-                                         <div className="text-sm text-gray-600 mb-1">Before</div>
-                                         <div className="text-2xl font-bold text-red-600">12</div>
-                                         <div className="text-xs text-gray-500">leads/month</div>
-                                       </div>
-                                       <div className="text-center">
-                                         <div className="text-sm text-gray-600 mb-1">After 90 Days</div>
-                                         <div className="text-2xl font-bold text-green-600">85</div>
-                                         <div className="text-xs text-gray-500">leads/month</div>
-                                       </div>
-                                     </div>
-                                     <div className="text-center mt-3">
-                                       <div className="text-lg font-semibold text-emerald-600">+608% Lead Increase</div>
-                                       <div className="text-sm text-gray-600">Real agent results from Q3 2024</div>
-                                     </div>
-                                   </div>
-                                 </div>
-
-                                 {/* Default Vendor Verification */}
-                                 {service.vendor?.is_verified && (
-                                   <div>
-                                     <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                                       <Verified className="w-5 h-5 text-emerald-500" />
-                                       Vendor Verification
-                                     </h4>
-                                     <div className="bg-emerald-50 p-4 rounded-lg border border-emerald-200">
-                                       <div className="flex items-center gap-3">
-                                         <Badge className="bg-emerald-500/20 text-emerald-700 border border-emerald-400/30">
-                                           <Verified className="w-3 h-3 mr-1" />
-                                           Verified Provider
-                                         </Badge>
-                                         <span className="text-emerald-700 font-medium">✓ Background checked</span>
-                                         <span className="text-emerald-700 font-medium">✓ Performance verified</span>
-                                       </div>
-                                       <p className="text-emerald-600 text-sm mt-2">This vendor has been vetted and meets our quality standards.</p>
-                                     </div>
-                                   </div>
-                                 )}
-                               </>
-                             )}
                            </div>
                          </div>
                       </AccordionContent>
