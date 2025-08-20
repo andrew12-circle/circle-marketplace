@@ -453,7 +453,7 @@ export const ServiceFunnelModal = ({
                          <div className="text-xs text-blue-200">Avg ROI</div>
                        </div>
                        <div className="text-center p-3 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
-                         <div className="text-2xl font-bold">{isVerified ? '30' : 'TBD'}</div>
+                         <div className="text-2xl font-bold">{isVerified && service.duration ? service.duration : 'TBD'}</div>
                          <div className="text-xs text-blue-200">Days to Results</div>
                        </div>
                       {showSupportStats && (
