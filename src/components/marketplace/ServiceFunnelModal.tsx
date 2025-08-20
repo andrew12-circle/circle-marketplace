@@ -229,7 +229,7 @@ export const ServiceFunnelModal = ({
   const isProMember = profile?.is_pro_member || false;
   const riskLevel = determineServiceRisk(service.title, service.description);
   const { trackBooking, trackPurchase, trackOutboundClick, trackEvent, trackWebsiteClick } = useProviderTracking(service.id, isOpen);
-  const [openItem, setOpenItem] = useState<string | undefined>(undefined);
+  const [openItem, setOpenItem] = useState<string | undefined>("question-1");
   
   // Use service verification status from database  
   const isVerified = service.is_verified;
