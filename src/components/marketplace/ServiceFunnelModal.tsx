@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { useServiceReviews } from "@/hooks/useServiceReviews";
 import { AnswerDropdown } from "./AnswerDropdown";
 import { PricingChoiceModal } from "./PricingChoiceModal";
+import { VendorSelectionModal } from "./VendorSelectionModal";
 import { Star, TrendingUp, Users, DollarSign, CheckCircle, Target, Zap, Trophy, ArrowRight, Building, MapPin, Calendar, Clock, Phone, Mail, ShoppingCart, Heart, Share2, Plus, Minus, ThumbsUp, ThumbsDown, Verified, Crown, X, Play, Shield } from "lucide-react";
 import { getRiskBadge, getComplianceAlert, determineServiceRisk } from "./RESPAComplianceSystem";
 import { useCart } from "@/contexts/CartContext";
@@ -182,6 +183,7 @@ export const ServiceFunnelModal = ({
   const [quantity, setQuantity] = useState(1);
   const [isConsultationFlowOpen, setIsConsultationFlowOpen] = useState(false);
   const [isPricingChoiceOpen, setIsPricingChoiceOpen] = useState(false);
+  const [isVendorSelectionOpen, setIsVendorSelectionOpen] = useState(false);
   const [activeMediaUrl, setActiveMediaUrl] = useState<string | null>(null);
   // Get support stats visibility from service funnel content
   const showSupportStats = service.funnel_content && typeof service.funnel_content === 'object' && 'showSupportStats' in service.funnel_content ? service.funnel_content.showSupportStats : false;
@@ -304,11 +306,7 @@ export const ServiceFunnelModal = ({
   };
   const handleChooseCoPay = () => {
     setIsPricingChoiceOpen(false);
-    // Handle copay request flow here
-    toast("Co-pay request initiated! You'll be connected with a vendor partner.", {
-      description: "Check your notifications for updates on your co-pay request."
-    });
-    onClose();
+    setIsVendorSelectionOpen(true);
   };
   const handleChooseAgentPoints = () => {
     setIsPricingChoiceOpen(false);
@@ -970,6 +968,29 @@ export const ServiceFunnelModal = ({
         price_duration: service.duration,
         requires_quote: selectedPkg?.requestPricing || service.requires_quote
       }} onChooseProPrice={handleChooseProPrice} onChooseCoPay={handleChooseCoPay} onChooseAgentPoints={handleChooseAgentPoints} />}
+
+        {/* Vendor Selection Modal */}
+        {isVendorSelectionOpen && <VendorSelectionModal
+          isOpen={isVendorSelectionOpen}
+          onClose={() => setIsVendorSelectionOpen(false)}
+          onVendorSelect={(vendor) => {
+            setIsVendorSelectionOpen(false);
+            toast("Co-pay request sent!", {
+              description: `Your request has been sent to ${vendor.name}. You'll be notified when they respond.`
+            });
+            onClose();
+          }}
+          service={{
+            id: service.id,
+            title: service.title,
+            co_pay_price: selectedPkg?.price ? (selectedPkg.price * 0.5).toString() : '0',
+            retail_price: selectedPkg?.originalPrice?.toString() || selectedPkg?.price?.toString() || '0',
+            pro_price: selectedPkg?.price?.toString() || '0',
+            image_url: service.image_url,
+            respa_split_limit: 50,
+            requires_quote: selectedPkg?.requestPricing || service.requires_quote
+          }}
+        />}
       </DialogContent>
     </Dialog>;
 };
