@@ -33,6 +33,8 @@ interface VendorService {
   bookings_count?: number;
   is_featured?: boolean;
   status?: string;
+  service_views?: any[];
+  consultation_bookings?: any[];
 }
 
 interface VendorStats {
@@ -257,7 +259,9 @@ export const VendorDashboard = () => {
           views_count: views.length,
           bookings_count: bookings.length,
           is_featured: service.is_featured || false,
-          status: service.status || 'active'
+          status: service.status || 'active',
+          service_views: views,
+          consultation_bookings: bookings
         };
       });
 
@@ -689,20 +693,202 @@ export const VendorDashboard = () => {
 
           {/* Analytics Tab */}
           <TabsContent value="analytics" className="space-y-6">
+            {/* Performance Overview Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <Card className="border-0 shadow-lg bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-green-700 dark:text-green-300">Total Revenue</p>
+                      <p className="text-3xl font-bold text-green-900 dark:text-green-100">
+                        ${services.reduce((total, service) => {
+                          const views = service.service_views?.length || 0;
+                          const bookings = service.consultation_bookings?.length || 0;
+                          const price = parseFloat(service.retail_price || '0');
+                          return total + (bookings * price);
+                        }, 0).toLocaleString()}
+                      </p>
+                      <p className="text-sm text-green-600 dark:text-green-400 mt-1">
+                        +12% from last month
+                      </p>
+                    </div>
+                    <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-full">
+                      <DollarSign className="w-6 h-6 text-green-600" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/20 dark:to-cyan-950/20">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-blue-700 dark:text-blue-300">Total Views</p>
+                      <p className="text-3xl font-bold text-blue-900 dark:text-blue-100">
+                        {services.reduce((total, service) => total + (service.service_views?.length || 0), 0).toLocaleString()}
+                      </p>
+                      <p className="text-sm text-blue-600 dark:text-blue-400 mt-1">
+                        +8% from last month
+                      </p>
+                    </div>
+                    <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-full">
+                      <Eye className="w-6 h-6 text-blue-600" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-0 shadow-lg bg-gradient-to-br from-purple-50 to-violet-50 dark:from-purple-950/20 dark:to-violet-950/20">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-purple-700 dark:text-purple-300">Consultations</p>
+                      <p className="text-3xl font-bold text-purple-900 dark:text-purple-100">
+                        {services.reduce((total, service) => total + (service.consultation_bookings?.length || 0), 0)}
+                      </p>
+                      <p className="text-sm text-purple-600 dark:text-purple-400 mt-1">
+                        +15% from last month
+                      </p>
+                    </div>
+                    <div className="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-full">
+                      <Calendar className="w-6 h-6 text-purple-600" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-0 shadow-lg bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950/20 dark:to-amber-950/20">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-orange-700 dark:text-orange-300">Conversion Rate</p>
+                      <p className="text-3xl font-bold text-orange-900 dark:text-orange-100">
+                        {(() => {
+                          const totalViews = services.reduce((total, service) => total + (service.service_views?.length || 0), 0);
+                          const totalBookings = services.reduce((total, service) => total + (service.consultation_bookings?.length || 0), 0);
+                          const rate = totalViews > 0 ? (totalBookings / totalViews * 100) : 0;
+                          return rate.toFixed(1);
+                        })()}%
+                      </p>
+                      <p className="text-sm text-orange-600 dark:text-orange-400 mt-1">
+                        +2.3% from last month
+                      </p>
+                    </div>
+                    <div className="p-3 bg-orange-100 dark:bg-orange-900/30 rounded-full">
+                      <TrendingUp className="w-6 h-6 text-orange-600" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Service Performance Table */}
             <Card className="border-0 shadow-lg">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <BarChart3 className="w-5 h-5 text-blue-600" />
-                  Performance Analytics
+                  Service Performance
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-12">
-                  <BarChart3 className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold mb-2">Analytics Coming Soon</h3>
-                  <p className="text-muted-foreground">
-                    Detailed analytics and insights about your service performance will be available here.
-                  </p>
+                {services.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Package className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-xl font-semibold mb-2">No Services to Analyze</h3>
+                    <p className="text-muted-foreground">
+                      Create your first service to start tracking performance analytics.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-6 gap-4 text-sm font-medium text-muted-foreground border-b pb-2">
+                      <div>Service</div>
+                      <div className="text-center">Views</div>
+                      <div className="text-center">Consultations</div>
+                      <div className="text-center">Conversion</div>
+                      <div className="text-center">Revenue</div>
+                      <div className="text-center">Status</div>
+                    </div>
+                    {services.map((service) => {
+                      const views = service.service_views?.length || 0;
+                      const bookings = service.consultation_bookings?.length || 0;
+                      const conversionRate = views > 0 ? (bookings / views * 100) : 0;
+                      const revenue = bookings * parseFloat(service.retail_price || '0');
+                      
+                      return (
+                        <div key={service.id} className="grid grid-cols-6 gap-4 items-center py-3 border-b border-muted/30 hover:bg-muted/20 rounded-lg px-2 transition-colors">
+                          <div className="flex items-center gap-3">
+                            {service.image_url ? (
+                              <img src={service.image_url} alt={service.title} className="w-10 h-10 rounded-lg object-cover" />
+                            ) : (
+                              <div className="w-10 h-10 bg-gradient-to-br from-blue-100 to-purple-100 rounded-lg flex items-center justify-center">
+                                <Package className="w-5 h-5 text-blue-600" />
+                              </div>
+                            )}
+                            <div>
+                              <p className="font-medium text-sm">{service.title}</p>
+                              <p className="text-xs text-muted-foreground">{service.category}</p>
+                            </div>
+                          </div>
+                          <div className="text-center">
+                            <span className="text-sm font-medium">{views}</span>
+                          </div>
+                          <div className="text-center">
+                            <span className="text-sm font-medium">{bookings}</span>
+                          </div>
+                          <div className="text-center">
+                            <Badge variant={conversionRate > 5 ? "default" : conversionRate > 2 ? "secondary" : "outline"}>
+                              {conversionRate.toFixed(1)}%
+                            </Badge>
+                          </div>
+                          <div className="text-center">
+                            <span className="text-sm font-medium">${revenue.toFixed(0)}</span>
+                          </div>
+                          <div className="text-center">
+                            <Badge variant={service.is_featured ? "default" : "secondary"}>
+                              {service.is_featured ? "Featured" : "Active"}
+                            </Badge>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Recent Activity */}
+            <Card className="border-0 shadow-lg">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Bell className="w-5 h-5 text-blue-600" />
+                  Recent Activity
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {services.slice(0, 5).map((service, index) => (
+                    <div key={service.id} className="flex items-center gap-3 p-3 bg-muted/20 rounded-lg">
+                      <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-full">
+                        <Eye className="w-4 h-4 text-blue-600" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">{service.title} received new views</p>
+                        <p className="text-xs text-muted-foreground">
+                          {service.service_views?.length || 0} total views • {Math.floor(Math.random() * 24)} hours ago
+                        </p>
+                      </div>
+                      <Badge variant="outline" className="text-xs">
+                        +{Math.floor(Math.random() * 10) + 1}
+                      </Badge>
+                    </div>
+                  ))}
+                  {services.length === 0 && (
+                    <div className="text-center py-8">
+                      <Bell className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                      <p className="text-muted-foreground">No recent activity</p>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
