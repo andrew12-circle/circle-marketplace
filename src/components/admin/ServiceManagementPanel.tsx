@@ -30,6 +30,7 @@ import { useInvalidateMarketplace, QUERY_KEYS } from '@/hooks/useMarketplaceData
 import { useQueryClient } from '@tanstack/react-query';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ServiceConsultationEmails } from './ServiceConsultationEmails';
+import { AdminNotes } from './AdminNotes';
 
 interface PricingFeature {
   id: string;
@@ -873,6 +874,9 @@ export const ServiceManagementPanel = () => {
 
   return (
     <div className="space-y-6">
+      {/* Admin Notes Section */}
+      <AdminNotes />
+      
       {/* Service Selection */}
       <Card>
         <CardHeader>
