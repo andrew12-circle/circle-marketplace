@@ -1041,40 +1041,47 @@ export const ServiceManagementPanel = () => {
                                 </span>
                               )}
                             </div>
-                            <div className="flex flex-col gap-1 mt-2">
-                              <div className="flex items-center gap-2">
-                                <span className="text-xs text-muted-foreground w-12">Verified</span>
-                                <Switch
-                                  checked={service.is_verified || false}
-                                  onCheckedChange={() => handleVerificationToggle(service.id, service.is_verified || false)}
-                                  onClick={(e) => e.stopPropagation()}
-                                />
-                              </div>
-                               <div className="flex items-center gap-2">
-                                 <span className="text-xs text-muted-foreground w-12">Active</span>
-                                 <Switch
-                                   checked={service.is_active || false}
-                                   onCheckedChange={() => handleVisibilityToggle(service.id, service.is_active || false)}
-                                   onClick={(e) => e.stopPropagation()}
-                                 />
+                             <div className="flex justify-between items-start mt-2">
+                               {/* Left side switches */}
+                               <div className="flex flex-col gap-1">
+                                 <div className="flex items-center gap-2">
+                                   <span className="text-xs text-muted-foreground w-12">Verified</span>
+                                   <Switch
+                                     checked={service.is_verified || false}
+                                     onCheckedChange={() => handleVerificationToggle(service.id, service.is_verified || false)}
+                                     onClick={(e) => e.stopPropagation()}
+                                   />
+                                 </div>
+                                 <div className="flex items-center gap-2">
+                                   <span className="text-xs text-muted-foreground w-12">Active</span>
+                                   <Switch
+                                     checked={service.is_active || false}
+                                     onCheckedChange={() => handleVisibilityToggle(service.id, service.is_active || false)}
+                                     onClick={(e) => e.stopPropagation()}
+                                   />
+                                 </div>
                                </div>
-                               <div className="flex items-center gap-2">
-                                 <span className="text-xs text-muted-foreground w-12">Affiliate</span>
-                                 <Switch
-                                   checked={service.is_affiliate || false}
-                                   onCheckedChange={() => handleAffiliateToggle(service.id, service.is_affiliate || false)}
-                                   onClick={(e) => e.stopPropagation()}
-                                 />
+                               
+                               {/* Right side switches */}
+                               <div className="flex flex-col gap-1">
+                                 <div className="flex items-center gap-2">
+                                   <span className="text-xs text-muted-foreground w-12">Affiliate</span>
+                                   <Switch
+                                     checked={service.is_affiliate || false}
+                                     onCheckedChange={() => handleAffiliateToggle(service.id, service.is_affiliate || false)}
+                                     onClick={(e) => e.stopPropagation()}
+                                   />
+                                 </div>
+                                 <div className="flex items-center gap-2">
+                                   <span className="text-xs text-muted-foreground w-12">Booking</span>
+                                   <Switch
+                                     checked={service.is_booking_link || false}
+                                     onCheckedChange={() => handleBookingLinkToggle(service.id, service.is_booking_link || false)}
+                                     onClick={(e) => e.stopPropagation()}
+                                   />
+                                 </div>
                                </div>
-                               <div className="flex items-center gap-2">
-                                 <span className="text-xs text-muted-foreground w-12">Booking</span>
-                                 <Switch
-                                   checked={service.is_booking_link || false}
-                                   onCheckedChange={() => handleBookingLinkToggle(service.id, service.is_booking_link || false)}
-                                   onClick={(e) => e.stopPropagation()}
-                                 />
-                               </div>
-                              </div>
+                             </div>
                            </div>
                          </div>
                   </CardContent>
