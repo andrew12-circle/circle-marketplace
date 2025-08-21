@@ -92,6 +92,7 @@ export const TopDealsCarousel = ({ services, serviceRatings, onServiceClick }: T
 
   const topDeals = useMemo(() => {
     return safeServices
+      .filter(service => (service as any).is_affiliate) // Only show affiliate services
       .map(service => {
         try {
           const rating = serviceRatings?.get(service.id);
