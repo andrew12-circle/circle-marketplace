@@ -10,6 +10,7 @@ import { useState } from "react";
 import { VendorFunnelModal } from "./VendorFunnelModal";
 import { useCoPayRequests } from "@/hooks/useCoPayRequests";
 import { useVendorActivityTracking } from "@/hooks/useVendorActivityTracking";
+import { useAgentVendorEligibility } from "@/hooks/useAgentVendorEligibility";
 
 interface Vendor {
   id: string;
@@ -60,6 +61,7 @@ export const EnhancedVendorCard = ({ vendor, onConnect, onViewProfile }: Enhance
   const [isFunnelModalOpen, setIsFunnelModalOpen] = useState(false);
   const { createCoPayRequest } = useCoPayRequests();
   const { trackFunnelView, trackContactRequest } = useVendorActivityTracking();
+  const { isEligible, loading: eligibilityLoading } = useAgentVendorEligibility(vendor.id);
   // Determine risk level based on vendor name/description
   const riskLevel = determineServiceRisk(vendor.name, vendor.description);
   
@@ -292,15 +294,27 @@ export const EnhancedVendorCard = ({ vendor, onConnect, onViewProfile }: Enhance
       </CardContent>
 
       <CardFooter className="p-4 pt-0 flex gap-2">
-        <Button 
-          onClick={(e) => {
-            e.stopPropagation();
-            handleConnect();
-          }}
-          className="flex-1"
-        >
-          Request Co-pay Support
-        </Button>
+        {isEligible !== false ? (
+          <Button 
+            onClick={(e) => {
+              e.stopPropagation();
+              handleConnect();
+            }}
+            className="flex-1"
+            disabled={eligibilityLoading}
+          >
+            {eligibilityLoading ? 'Checking...' : 'Request Co-pay Support'}
+          </Button>
+        ) : (
+          <Button 
+            variant="outline"
+            className="flex-1"
+            disabled
+            title="You don't meet the criteria for co-pay support with this vendor"
+          >
+            Not Eligible for Co-pay
+          </Button>
+        )}
         <Button 
           variant="outline"
           onClick={handleArrowClick}

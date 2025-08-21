@@ -52,6 +52,25 @@ serve(async (req) => {
       estimatedPartnerContribution
     });
 
+    // Check agent eligibility
+    const { data: isEligible, error: eligibilityError } = await supabaseClient
+      .rpc('check_agent_vendor_match', {
+        p_agent_id: userData.user.id,
+        p_vendor_id: vendorId
+      });
+
+    if (eligibilityError) {
+      console.error('Error checking agent eligibility:', eligibilityError);
+    } else if (!isEligible) {
+      return new Response(JSON.stringify({ 
+        error: "You don't meet the criteria for co-pay support with this vendor",
+        success: false 
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 403,
+      });
+    }
+
     // Check if facilitator checkout is enabled
     const { data: appConfig } = await supabaseClient
       .from('app_config')

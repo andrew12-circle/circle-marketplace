@@ -25,18 +25,18 @@ export const AgentPaymentSuccess = () => {
 
       try {
         // Simple query to avoid TypeScript recursion issues
-        const { data: orders }: any = await supabase
+        const { data: orders } = await supabase
           .from('copay_orders')
-          .select('*')
-          .eq('stripe_session_id', sessionId);
+          .select('id, order_number, agent_amount, service_id, vendor_id, agent_stripe_payment_intent_id')
+          .eq('agent_stripe_payment_intent_id', sessionId);
 
         if (orders && orders.length > 0) {
           const order = orders[0];
           
           // Get service and vendor data separately
-          const { data: service }: any = await supabase.from('services').select('title').eq('id', order.service_id).single();
-          const { data: vendor }: any = await supabase.from('vendors').select('name').eq('id', order.vendor_id).single();
-          const { data: contributions }: any = await supabase.from('partner_contributions').select('*').eq('copay_order_id', order.id);
+          const { data: service } = await supabase.from('services').select('title').eq('id', order.service_id).maybeSingle();
+          const { data: vendor } = await supabase.from('vendors').select('name').eq('id', order.vendor_id).maybeSingle();
+          const { data: contributions } = await supabase.from('partner_contributions').select('*').eq('copay_order_id', order.id);
           
           // Verify payment
           const { data: verificationResult } = await supabase.functions.invoke('copay-verify-payment', {
