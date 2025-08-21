@@ -397,10 +397,10 @@ export const ServiceFunnelModal = ({
 
                     {/* Quick Stats */}
                     <div className={`grid ${showSupportStats ? 'grid-cols-4' : 'grid-cols-3'} gap-4`}>
-                       <div className="text-center p-3 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
-                         <div className="text-2xl font-bold">{isVerified && service.estimated_roi ? `${service.estimated_roi}%` : 'TBD'}</div>
-                         <div className="text-xs text-blue-200">Avg ROI</div>
-                       </div>
+                        <div className="text-center p-3 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 flex flex-col items-center justify-center">
+                          <div className="text-2xl font-bold">{isVerified && service.estimated_roi ? `${service.estimated_roi}%` : 'TBD'}</div>
+                          <div className="text-xs text-blue-200">Avg ROI</div>
+                        </div>
                         <div className="text-center p-3 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 min-w-0 flex-1">
                           <div className="text-2xl font-bold">{isVerified && service.duration ? service.duration : 'TBD'}</div>
                           <div className="text-xs text-blue-200">Time to Results</div>
