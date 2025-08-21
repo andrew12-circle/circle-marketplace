@@ -891,7 +891,7 @@ export const ServiceFunnelModal = ({
               <div className="mt-12 flex flex-col sm:flex-row gap-4 justify-center max-w-2xl mx-auto">
                 <Button onClick={() => setIsConsultationFlowOpen(true)} className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all flex-1">
                   <Calendar className="w-5 h-5 mr-2" />
-                  Get Started with {selectedPkg?.name || 'Selected Package'}
+                  Book Consultation for {selectedPkg?.name || 'Selected Package'}
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
                 <Button variant="outline" onClick={() => setIsPricingChoiceOpen(true)} className="border-2 border-gray-300 hover:border-gray-400 px-8 py-4 rounded-xl font-semibold text-lg flex-1">
