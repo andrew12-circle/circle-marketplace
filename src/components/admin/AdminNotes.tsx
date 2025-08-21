@@ -66,12 +66,14 @@ export const AdminNotes = ({ serviceId, serviceName }: AdminNotesProps) => {
 
     setSaving(true);
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
       const { error } = await supabase
         .from('admin_notes')
         .insert([{
           note_text: newNote.trim(),
           service_id: serviceId,
-          created_by: (await supabase.auth.getUser()).data.user?.id
+          created_by: user?.id
         }]);
 
       if (error) throw error;
