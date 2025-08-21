@@ -11,7 +11,7 @@ import { useServiceReviews } from "@/hooks/useServiceReviews";
 import { AnswerDropdown } from "./AnswerDropdown";
 import { PricingChoiceModal } from "./PricingChoiceModal";
 import { VendorSelectionModal } from "./VendorSelectionModal";
-import { Star, TrendingUp, Users, DollarSign, CheckCircle, Target, Zap, Trophy, ArrowRight, Building, MapPin, Calendar, Clock, Phone, Mail, ShoppingCart, Heart, Share2, Plus, Minus, ThumbsUp, ThumbsDown, Verified, Crown, X, Play, Shield } from "lucide-react";
+import { Star, TrendingUp, Users, DollarSign, CheckCircle, Target, Zap, Trophy, ArrowRight, Building, MapPin, Calendar, Clock, Phone, Mail, ShoppingCart, Heart, Share2, Plus, Minus, ThumbsUp, ThumbsDown, Verified, Crown, X, Play, Shield, Globe } from "lucide-react";
 import { getRiskBadge, getComplianceAlert, determineServiceRisk } from "./RESPAComplianceSystem";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -913,6 +913,55 @@ export const ServiceFunnelModal = ({
                     Add to Cart - ${selectedPkg?.price || '0'}
                   </Button>
                 )}
+              </div>
+
+              {/* Last Updated & Pricing Verification Section */}
+              <div className="mt-12 border-t border-gray-200 pt-8">
+                <div className="text-center max-w-2xl mx-auto">
+                  <div className="inline-flex items-center gap-3 mb-4">
+                    <Clock className="w-5 h-5 text-gray-500" />
+                    <span className="text-sm text-gray-600">
+                      Last updated: {(service as any).updated_at ? new Date((service as any).updated_at).toLocaleDateString('en-US', { 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                      }) : 'Date not available'}
+                    </span>
+                  </div>
+                  
+                  <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
+                    <h4 className="text-lg font-semibold text-blue-900 mb-3">
+                      Pricing Verification Notice
+                    </h4>
+                    
+                    <p className="text-sm text-blue-800 mb-4 leading-relaxed">
+                      We are a site that makes choosing simple. If the company has changed prices since this date, 
+                      please verify with them directly. You ultimately will be finalizing billing with the company, 
+                      not us, and any vendor helps. We are just a facilitator for the relationship.
+                    </p>
+                    
+                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                      {service.website_url && (
+                        <Button
+                          variant="outline"
+                          onClick={() => window.open(service.website_url, '_blank')}
+                          className="border-blue-300 text-blue-700 hover:bg-blue-100"
+                        >
+                          <Globe className="w-4 h-4 mr-2" />
+                          Visit Official Website
+                        </Button>
+                      )}
+                      <Button
+                        variant="outline"
+                        onClick={() => setIsConsultationFlowOpen(true)}
+                        className="border-blue-300 text-blue-700 hover:bg-blue-100"
+                      >
+                        <Calendar className="w-4 h-4 mr-2" />
+                        Book Consultation to Verify Pricing
+                      </Button>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>}
