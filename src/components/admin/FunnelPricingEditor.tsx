@@ -21,6 +21,8 @@ interface PricingTier {
   description: string;
   price: string;
   originalPrice?: string;
+  yearlyPrice?: string;
+  yearlyOriginalPrice?: string;
   duration: string;
   features: PricingFeature[];
   isPopular: boolean;
@@ -144,7 +146,7 @@ export const FunnelPricingEditor = ({ pricingTiers, onChange }: FunnelPricingEdi
                 </div>
 
                 {/* Basic Info */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   <div>
                     <Label>Package Name</Label>
                     <Input
@@ -154,7 +156,7 @@ export const FunnelPricingEditor = ({ pricingTiers, onChange }: FunnelPricingEdi
                     />
                   </div>
                   <div>
-                    <Label>Price</Label>
+                    <Label>Monthly Price</Label>
                     <div className="flex items-center gap-2">
                       <DollarSign className="w-4 h-4 text-gray-500" />
                       <Input
@@ -166,7 +168,7 @@ export const FunnelPricingEditor = ({ pricingTiers, onChange }: FunnelPricingEdi
                     </div>
                   </div>
                   <div>
-                    <Label>Original Price (Optional)</Label>
+                    <Label>Monthly Original Price (Optional)</Label>
                     <div className="flex items-center gap-2">
                       <DollarSign className="w-4 h-4 text-gray-500" />
                       <Input
@@ -176,6 +178,36 @@ export const FunnelPricingEditor = ({ pricingTiers, onChange }: FunnelPricingEdi
                         type="number"
                       />
                     </div>
+                  </div>
+                  <div>
+                    <Label>Yearly Price (Optional)</Label>
+                    <div className="flex items-center gap-2">
+                      <DollarSign className="w-4 h-4 text-gray-500" />
+                      <Input
+                        value={tier.yearlyPrice || ""}
+                        onChange={(e) => updateTier(tierIndex, 'yearlyPrice', e.target.value)}
+                        placeholder="990"
+                        type="number"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
+                  <div>
+                    <Label>Yearly Original Price (Optional)</Label>
+                    <div className="flex items-center gap-2">
+                      <DollarSign className="w-4 h-4 text-gray-500" />
+                      <Input
+                        value={tier.yearlyOriginalPrice || ""}
+                        onChange={(e) => updateTier(tierIndex, 'yearlyOriginalPrice', e.target.value)}
+                        placeholder="1990"
+                        type="number"
+                      />
+                    </div>
+                    <p className="text-sm text-gray-500 mt-1">
+                      If yearly pricing is provided, customers will see a toggle to switch between monthly and yearly plans
+                    </p>
                   </div>
                 </div>
 

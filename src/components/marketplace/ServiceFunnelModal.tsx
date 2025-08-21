@@ -68,6 +68,8 @@ interface Service {
     description: string;
     price: string;
     originalPrice?: string;
+    yearlyPrice?: string;
+    yearlyOriginalPrice?: string;
     duration: string;
     features: Array<{
       id: string;
@@ -188,6 +190,7 @@ export const ServiceFunnelModal = ({
   const [isVendorSelectionOpen, setIsVendorSelectionOpen] = useState(false);
   const [activeMediaUrl, setActiveMediaUrl] = useState<string | null>(null);
   const [expandedFeatures, setExpandedFeatures] = useState<{[key: string]: boolean}>({});
+  const [showYearlyPricing, setShowYearlyPricing] = useState(false);
   // Get support stats visibility from service funnel content
   const showSupportStats = service.funnel_content && typeof service.funnel_content === 'object' && 'showSupportStats' in service.funnel_content ? service.funnel_content.showSupportStats : false;
   const [vendorAvailability, setVendorAvailability] = useState<{
@@ -242,6 +245,9 @@ export const ServiceFunnelModal = ({
     name: tier.name,
     price: tier.requestPricing ? 0 : parseFloat(tier.price || "100"),
     originalPrice: tier.originalPrice ? parseFloat(tier.originalPrice) : undefined,
+    yearlyPrice: tier.yearlyPrice ? parseFloat(tier.yearlyPrice) : undefined,
+    yearlyOriginalPrice: tier.yearlyOriginalPrice ? parseFloat(tier.yearlyOriginalPrice) : undefined,
+    duration: tier.duration,
     description: tier.description,
     features: tier.features?.map(f => f.text) || [],
     popular: tier.isPopular,
@@ -251,6 +257,9 @@ export const ServiceFunnelModal = ({
     name: "Basic Package",
     price: parseFloat(service.retail_price || "100") * 0.75,
     originalPrice: parseFloat(service.retail_price || "100"),
+    yearlyPrice: undefined,
+    yearlyOriginalPrice: undefined,
+    duration: "monthly",
     description: "Essential service features for getting started",
     features: ["Core service delivery", "Email support", "Basic reporting"],
     requestPricing: false
@@ -259,6 +268,9 @@ export const ServiceFunnelModal = ({
     name: "Standard Package",
     price: parseFloat(service.retail_price || "100"),
     originalPrice: parseFloat(service.retail_price || "100") * 1.33,
+    yearlyPrice: undefined,
+    yearlyOriginalPrice: undefined,
+    duration: "monthly",
     description: "Complete solution for most needs",
     features: ["Everything in Basic", "Priority support", "Advanced reporting", "Custom consultation"],
     popular: true,
@@ -268,11 +280,17 @@ export const ServiceFunnelModal = ({
     name: "Premium Package",
     price: parseFloat(service.retail_price || "100") * 1.5,
     originalPrice: parseFloat(service.retail_price || "100") * 2,
+    yearlyPrice: undefined,
+    yearlyOriginalPrice: undefined,
+    duration: "monthly",
     description: "Full-service solution with dedicated support",
     features: ["Everything in Standard", "Dedicated account manager", `${service.vendor?.support_hours || 'Business Hours'} support`, "Custom integrations"],
     // Dynamic support hours
     requestPricing: false
   }];
+  
+  const hasYearlyPricing = packages.some(pkg => pkg.yearlyPrice);
+  
   const selectedPkg = packages.find(pkg => pkg.id === selectedPackage) || packages[1];
 
   // Initialize selected package on component mount or when packages change
@@ -831,6 +849,25 @@ export const ServiceFunnelModal = ({
               <div className="text-center mb-8">
                 <h2 className="text-3xl font-bold text-gray-900 mb-4">Choose Your Package</h2>
                 <p className="text-lg text-gray-600">Select the perfect solution for your business needs</p>
+                
+                {hasYearlyPricing && (
+                  <div className="flex items-center justify-center gap-3 mt-6">
+                    <span className={`text-sm font-medium ${!showYearlyPricing ? 'text-gray-900' : 'text-gray-500'}`}>
+                      Monthly
+                    </span>
+                    <Switch
+                      checked={showYearlyPricing}
+                      onCheckedChange={setShowYearlyPricing}
+                      className="data-[state=checked]:bg-primary"
+                    />
+                    <span className={`text-sm font-medium ${showYearlyPricing ? 'text-gray-900' : 'text-gray-500'}`}>
+                      Yearly
+                    </span>
+                    <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full font-medium">
+                      Save up to 20%
+                    </span>
+                  </div>
+                )}
               </div>
               
               <div className={`grid gap-6 ${packages.length === 1 ? 'grid-cols-1 max-w-md mx-auto' : packages.length === 2 ? 'grid-cols-1 lg:grid-cols-2 max-w-4xl mx-auto' : packages.length === 3 ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 max-w-7xl mx-auto'}`}>
@@ -846,24 +883,34 @@ export const ServiceFunnelModal = ({
                       
                       {/* Pricing Tiers */}
                       <div className="space-y-2 mb-4">
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-gray-600">Retail:</span>
-                           <span className="font-medium text-gray-800">
-                             {pkg.requestPricing ? 'Request Pricing' : `$${pkg.originalPrice || pkg.price}`}
-                           </span>
-                        </div>
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-blue-600">Pro Member:</span>
-                           <span className="font-medium text-blue-600">
-                             {pkg.requestPricing ? 'Request Pricing' : `$${Math.round(pkg.price * 0.85)}`}
-                           </span>
-                        </div>
-                        <div className="flex items-center justify-between text-sm bg-green-50 p-3 rounded-lg border border-green-200">
-                          <span className="text-green-700 font-medium">Co-Pay:</span>
-                           <span className="font-bold text-green-700 text-lg">
-                             {pkg.requestPricing ? 'Request Pricing' : `$${Math.round(pkg.price * (1 - (service.respa_split_limit || 0) / 100))}`}
-                           </span>
-                        </div>
+                        {(() => {
+                          const currentPrice = showYearlyPricing && pkg.yearlyPrice ? pkg.yearlyPrice : pkg.price;
+                          const currentOriginalPrice = showYearlyPricing && pkg.yearlyOriginalPrice ? pkg.yearlyOriginalPrice : pkg.originalPrice;
+                          const period = showYearlyPricing && pkg.yearlyPrice ? '/year' : (pkg.duration?.includes('month') ? '/month' : '');
+                          
+                          return (
+                            <>
+                              <div className="flex items-center justify-between text-sm">
+                                <span className="text-gray-600">Retail:</span>
+                                <span className="font-medium text-gray-800">
+                                  {pkg.requestPricing ? 'Request Pricing' : `$${currentOriginalPrice || currentPrice}${period}`}
+                                </span>
+                              </div>
+                              <div className="flex items-center justify-between text-sm">
+                                <span className="text-blue-600">Pro Member:</span>
+                                <span className="font-medium text-blue-600">
+                                  {pkg.requestPricing ? 'Request Pricing' : `$${Math.round(currentPrice * 0.85)}${period}`}
+                                </span>
+                              </div>
+                              <div className="flex items-center justify-between text-sm bg-green-50 p-3 rounded-lg border border-green-200">
+                                <span className="text-green-700 font-medium">Co-Pay:</span>
+                                <span className="font-bold text-green-700 text-lg">
+                                  {pkg.requestPricing ? 'Request Pricing' : `$${Math.round(currentPrice * (1 - (service.respa_split_limit || 0) / 100))}${period}`}
+                                </span>
+                              </div>
+                            </>
+                          );
+                        })()}
                       </div>
                       
                       <p className="text-sm text-gray-600 mt-3">{pkg.description}</p>
