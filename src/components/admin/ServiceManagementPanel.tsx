@@ -874,9 +874,6 @@ export const ServiceManagementPanel = () => {
 
   return (
     <div className="space-y-6">
-      {/* Admin Notes Section */}
-      <AdminNotes />
-      
       {/* Service Selection */}
       <Card>
         <CardHeader>
@@ -1349,6 +1346,14 @@ export const ServiceManagementPanel = () => {
                     {/* Consultation Email Alerts */}
                     <div className="border-t pt-6">
                       <ServiceConsultationEmails
+                        serviceId={selectedService.id}
+                        serviceName={selectedService.title}
+                      />
+                    </div>
+
+                    {/* Service Notes */}
+                    <div className="border-t pt-6">
+                      <AdminNotes
                         serviceId={selectedService.id}
                         serviceName={selectedService.title}
                       />

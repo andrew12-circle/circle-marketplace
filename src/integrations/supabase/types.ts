@@ -20,6 +20,7 @@ export type Database = {
           created_by: string
           id: string
           note_text: string
+          service_id: string | null
           updated_at: string
         }
         Insert: {
@@ -27,6 +28,7 @@ export type Database = {
           created_by: string
           id?: string
           note_text: string
+          service_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -34,9 +36,18 @@ export type Database = {
           created_by?: string
           id?: string
           note_text?: string
+          service_id?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "admin_notes_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       admin_sessions: {
         Row: {

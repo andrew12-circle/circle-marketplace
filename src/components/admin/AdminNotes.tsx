@@ -17,11 +17,17 @@ interface AdminNote {
   id: string;
   note_text: string;
   created_by: string;
+  service_id: string;
   created_at: string;
   updated_at: string;
 }
 
-export const AdminNotes = () => {
+interface AdminNotesProps {
+  serviceId: string;
+  serviceName: string;
+}
+
+export const AdminNotes = ({ serviceId, serviceName }: AdminNotesProps) => {
   const [notes, setNotes] = useState<AdminNote[]>([]);
   const [newNote, setNewNote] = useState('');
   const [loading, setLoading] = useState(true);
@@ -29,14 +35,17 @@ export const AdminNotes = () => {
   const [showAddForm, setShowAddForm] = useState(false);
 
   useEffect(() => {
-    loadNotes();
-  }, []);
+    if (serviceId) {
+      loadNotes();
+    }
+  }, [serviceId]);
 
   const loadNotes = async () => {
     try {
       const { data, error } = await supabase
         .from('admin_notes')
         .select('*')
+        .eq('service_id', serviceId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -61,6 +70,7 @@ export const AdminNotes = () => {
         .from('admin_notes')
         .insert([{
           note_text: newNote.trim(),
+          service_id: serviceId,
           created_by: (await supabase.auth.getUser()).data.user?.id
         }]);
 
@@ -119,7 +129,7 @@ export const AdminNotes = () => {
         <CardTitle className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <MessageSquare className="w-5 h-5" />
-            Admin Notes
+            Service Notes - {serviceName}
           </div>
           <Button
             onClick={() => setShowAddForm(!showAddForm)}
@@ -137,7 +147,7 @@ export const AdminNotes = () => {
             <Textarea
               value={newNote}
               onChange={(e) => setNewNote(e.target.value)}
-              placeholder="Enter your admin note..."
+              placeholder="Track progress, payment status, vendor communications, etc..."
               className="mb-3"
               rows={3}
             />
@@ -166,8 +176,8 @@ export const AdminNotes = () => {
         {notes.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             <MessageSquare className="w-12 h-12 mx-auto mb-3 opacity-50" />
-            <p>No admin notes yet</p>
-            <p className="text-sm">Add your first note to get started</p>
+            <p>No notes for this service yet</p>
+            <p className="text-sm">Add notes to track progress, payments, vendor communications, etc.</p>
           </div>
         ) : (
           <div className="space-y-3">
