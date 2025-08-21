@@ -673,11 +673,11 @@ export const VendorAnalyticsDashboard = () => {
           </TabsContent>
 
           <TabsContent value="comarketing" className="space-y-6">
-            <VendorCoPaySettings vendorId={vendorData.id} />
-            <VendorAgentCriteriaManager vendorId={vendorData.id} />
             <div className="rounded-xl border-0 shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm p-6">
               <CoMarketingManager />
             </div>
+            <VendorCoPaySettings vendorId={vendorData.id} />
+            <VendorAgentCriteriaManager vendorId={vendorData.id} />
           </TabsContent>
 
           <TabsContent value="profile" className="space-y-6">
