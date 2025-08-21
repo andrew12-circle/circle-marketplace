@@ -77,6 +77,7 @@ export const ServiceConsultationEmails = ({ serviceId, serviceName }: ServiceCon
   };
 
   const handleSave = async () => {
+    console.log('=== SAVE BUTTON CLICKED ===');
     setSaving(true);
     try {
       console.log('Starting save process with emails:', emails);
