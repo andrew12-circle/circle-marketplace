@@ -670,33 +670,45 @@ export type Database = {
       }
       app_config: {
         Row: {
+          auto_heal_enabled: boolean | null
           created_at: string
           facilitator_checkout_enabled: boolean | null
           force_cache_bust_after: string | null
           id: string
           maintenance_message: string | null
           maintenance_mode: boolean | null
+          marketplace_enabled: boolean | null
           min_build_version: string | null
+          security_monitoring_global: boolean | null
+          top_deals_enabled: boolean | null
           updated_at: string
         }
         Insert: {
+          auto_heal_enabled?: boolean | null
           created_at?: string
           facilitator_checkout_enabled?: boolean | null
           force_cache_bust_after?: string | null
           id?: string
           maintenance_message?: string | null
           maintenance_mode?: boolean | null
+          marketplace_enabled?: boolean | null
           min_build_version?: string | null
+          security_monitoring_global?: boolean | null
+          top_deals_enabled?: boolean | null
           updated_at?: string
         }
         Update: {
+          auto_heal_enabled?: boolean | null
           created_at?: string
           facilitator_checkout_enabled?: boolean | null
           force_cache_bust_after?: string | null
           id?: string
           maintenance_message?: string | null
           maintenance_mode?: boolean | null
+          marketplace_enabled?: boolean | null
           min_build_version?: string | null
+          security_monitoring_global?: boolean | null
+          top_deals_enabled?: boolean | null
           updated_at?: string
         }
         Relationships: []
