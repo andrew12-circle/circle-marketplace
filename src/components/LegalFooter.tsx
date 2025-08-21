@@ -23,7 +23,6 @@ export const LegalFooter = () => {
                 <Link 
                   to="/vendor-registration?type=service_provider"
                   onClick={() => {
-                    console.log('Clicked List Your Services button');
                     window.scrollTo(0, 0);
                   }}
                 >
@@ -35,7 +34,6 @@ export const LegalFooter = () => {
                 <Link 
                   to="/vendor-registration?type=co_marketing"
                   onClick={() => {
-                    console.log('Clicked Co-Marketing Partner button');
                     window.scrollTo(0, 0);
                   }}
                 >
@@ -54,13 +52,13 @@ export const LegalFooter = () => {
           <div>
             <h4 className="font-semibold mb-3 text-sm">Legal</h4>
             <div className="space-y-2">
-              <Link to="/terms" className="block text-sm text-muted-foreground hover:text-primary">
+              <Link to="/legal/terms" className="block text-sm text-muted-foreground hover:text-primary">
                 Terms of Service
               </Link>
-              <Link to="/privacy" className="block text-sm text-muted-foreground hover:text-primary">
+              <Link to="/legal/privacy" className="block text-sm text-muted-foreground hover:text-primary">
                 Privacy Policy
               </Link>
-              <Link to="/cookies" className="block text-sm text-muted-foreground hover:text-primary">
+              <Link to="/legal/cookies" className="block text-sm text-muted-foreground hover:text-primary">
                 Cookie Policy
               </Link>
               <Dialog>
@@ -87,13 +85,13 @@ export const LegalFooter = () => {
           <div>
             <h4 className="font-semibold mb-3 text-sm">Marketplace</h4>
             <div className="space-y-2">
-              <Link to="/seller-agreement" className="block text-sm text-muted-foreground hover:text-primary">
+              <Link to="/legal/seller-agreement" className="block text-sm text-muted-foreground hover:text-primary">
                 Seller Agreement
               </Link>
-              <Link to="/buyer-protection" className="block text-sm text-muted-foreground hover:text-primary">
+              <Link to="/legal/buyer-protection" className="block text-sm text-muted-foreground hover:text-primary">
                 Buyer Protection
               </Link>
-              <Link to="/prohibited-items" className="block text-sm text-muted-foreground hover:text-primary">
+              <Link to="/legal/prohibited-items" className="block text-sm text-muted-foreground hover:text-primary">
                 Prohibited Items
               </Link>
             </div>

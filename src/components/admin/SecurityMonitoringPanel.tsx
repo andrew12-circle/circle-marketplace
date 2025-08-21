@@ -6,6 +6,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Shield, AlertTriangle, Eye, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { logger } from '@/utils/logger';
 
 interface SecurityEvent {
   id: string;
@@ -32,14 +33,14 @@ const SecurityMonitoringPanel = () => {
         .limit(50);
 
       if (error) {
-        console.error('Error fetching security events:', error);
+        logger.error('Error fetching security events:', error);
         toast.error('Failed to fetch security events');
         return;
       }
 
       setSecurityEvents((data || []) as SecurityEvent[]);
     } catch (error) {
-      console.error('Error:', error);
+      logger.error('Error:', error);
       toast.error('Failed to fetch security events');
     } finally {
       setLoading(false);

@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Navigate } from 'react-router-dom';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Shield, AlertTriangle } from 'lucide-react';
+import { logger } from '@/utils/logger';
 
 interface SecureAdminGuardProps {
   children: ReactNode;
@@ -28,7 +29,7 @@ export const SecureAdminGuard: React.FC<SecureAdminGuardProps> = ({
       
       // Only proceed with verification if we have a user and admin status
       if (!user || !profile?.is_admin) {
-        console.log('SecureAdminGuard: User or admin status check failed', { 
+        logger.log('SecureAdminGuard: User or admin status check failed', { 
           hasUser: !!user, 
           isAdmin: profile?.is_admin,
           profileLoaded: !!profile 
@@ -60,7 +61,7 @@ export const SecureAdminGuard: React.FC<SecureAdminGuardProps> = ({
 
         setSecurityVerified(true);
       } catch (error) {
-        console.error('Admin security verification failed:', error);
+        logger.error('Admin security verification failed:', error);
         setSecurityError(
           error instanceof Error 
             ? error.message 

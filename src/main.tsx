@@ -49,6 +49,23 @@ const BuyerProtection = lazy(() => import("./pages/legal/BuyerProtection").then(
 const SellerAgreement = lazy(() => import("./pages/legal/SellerAgreement").then(m => ({ default: m.SellerAgreement })));
 const ProhibitedItems = lazy(() => import("./pages/legal/ProhibitedItems").then(m => ({ default: m.ProhibitedItems })));
 
+// Additional pages from App.tsx
+const AnalyticsDashboard = lazy(() => import("./pages/AnalyticsDashboard"));
+const SupportDashboard = lazy(() => import("./pages/SupportDashboard"));
+const AdvancedFeaturesDashboard = lazy(() => import("./pages/AdvancedFeaturesDashboard"));
+const AIDashboard = lazy(() => import("./pages/AIDashboard"));
+const AdminAccounting = lazy(() => import("./pages/AdminAccounting").then(m => ({ default: m.AdminAccounting })));
+const AdminCommissions = lazy(() => import("./pages/AdminCommissions"));
+const CreatorOnboardingPage = lazy(() => import("./pages/CreatorOnboarding"));
+const Welcome = lazy(() => import("./pages/Welcome"));
+const CompliancePage = lazy(() => import("./pages/CompliancePage"));
+const PartnerCheckout = lazy(() => import("./pages/PartnerCheckout").then(m => ({ default: m.PartnerCheckout })));
+const PartnerPaymentSuccess = lazy(() => import("./pages/PartnerPaymentSuccess").then(m => ({ default: m.PartnerPaymentSuccess })));
+const PartnerPaymentCanceled = lazy(() => import("./pages/PartnerPaymentCanceled").then(m => ({ default: m.PartnerPaymentCanceled })));
+const AgentPaymentSuccess = lazy(() => import("./pages/AgentPaymentSuccess").then(m => ({ default: m.AgentPaymentSuccess })));
+const AgentPaymentCanceled = lazy(() => import("./pages/AgentPaymentCanceled").then(m => ({ default: m.AgentPaymentCanceled })));
+const CommandCenterTest = lazy(() => import("./pages/CommandCenterTest").then(m => ({ default: m.CommandCenterTest })));
+
 // Loading component for lazy routes
 const RouteLoader = () => (
   <div className="min-h-screen flex items-center justify-center">
@@ -110,13 +127,44 @@ createRoot(document.getElementById("root")!).render(
                 <Route path="/ministry/success" element={<MinistrySuccess />} />
                 <Route path="/minsitry" element={<CircleMinistry />} /> {/* Typo redirect */}
                 
-                {/* Legal routes */}
                 <Route path="/legal/terms" element={<TermsOfService />} />
                 <Route path="/legal/privacy" element={<PrivacyPolicy />} />
                 <Route path="/legal/cookies" element={<CookiePolicy />} />
                 <Route path="/legal/buyer-protection" element={<BuyerProtection />} />
                 <Route path="/legal/seller-agreement" element={<SellerAgreement />} />
                 <Route path="/legal/prohibited-items" element={<ProhibitedItems />} />
+                
+                {/* Backward-compatible redirects for legal routes */}
+                <Route path="/terms" element={<TermsOfService />} />
+                <Route path="/privacy" element={<PrivacyPolicy />} />
+                <Route path="/cookies" element={<CookiePolicy />} />
+                <Route path="/seller-agreement" element={<SellerAgreement />} />
+                <Route path="/buyer-protection" element={<BuyerProtection />} />
+                <Route path="/prohibited-items" element={<ProhibitedItems />} />
+                
+                {/* Additional routes from App.tsx */}
+                <Route path="/analytics" element={<AnalyticsDashboard />} />
+                <Route path="/support" element={<SupportDashboard />} />
+                <Route path="/advanced-features" element={<AdvancedFeaturesDashboard />} />
+                <Route path="/ai-dashboard" element={<AIDashboard />} />
+                <Route path="/admin/accounting" element={<AdminAccounting />} />
+                <Route path="/admin/commissions" element={<AdminCommissions />} />
+                <Route path="/creator-onboarding" element={<CreatorOnboardingPage />} />
+                <Route path="/welcome" element={<Welcome />} />
+                <Route path="/compliance" element={<CompliancePage />} />
+                <Route path="/partner-checkout/:token" element={<PartnerCheckout />} />
+                <Route path="/partner-payment-success" element={<PartnerPaymentSuccess />} />
+                <Route path="/partner-payment-canceled" element={<PartnerPaymentCanceled />} />
+                <Route path="/agent-payment-success" element={<AgentPaymentSuccess />} />
+                <Route path="/agent-payment-canceled" element={<AgentPaymentCanceled />} />
+                <Route path="/command-center-test" element={<CommandCenterTest />} />
+                
+                {/* Profile settings alternate path */}
+                <Route path="/profile" element={<ProfileSettings />} />
+                
+                {/* Payment routes alternate paths */}
+                <Route path="/payment/success" element={<PaymentSuccess />} />
+                <Route path="/payment/canceled" element={<PaymentCanceled />} />
                 
                 <Route path="*" element={<NotFound />} />
               </Routes>

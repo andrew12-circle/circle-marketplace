@@ -2,6 +2,8 @@ import { useState, useEffect, createContext, useContext } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { SecurityProvider } from '@/components/security/SecurityEnhancementSystem';
+import { logger } from '@/utils/logger';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface Profile {
   id: string;
@@ -60,6 +62,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
 
   const fetchProfile = async (userId: string) => {
     try {
@@ -70,27 +73,29 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         .maybeSingle();
 
       if (error) {
-        console.error('Error fetching profile:', error);
+        logger.error('Error fetching profile:', error);
         return;
       }
 
       setProfile(data);
     } catch (error) {
-      console.error('Error fetching profile:', error);
+      logger.error('Error fetching profile:', error);
     }
   };
 
   useEffect(() => {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('Auth state change:', { event, hasUser: !!session?.user });
+      (event, session) => {
+        logger.log('Auth state change:', { event, hasUser: !!session?.user });
         setSession(session);
         setUser(session?.user ?? null);
         
-        // Fetch profile when user logs in
+        // Defer any Supabase calls to prevent deadlock
         if (session?.user) {
-          await fetchProfile(session.user.id);
+          setTimeout(() => {
+            fetchProfile(session.user.id);
+          }, 0);
         } else {
           setProfile(null);
         }
@@ -101,7 +106,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     // THEN check for existing session
     supabase.auth.getSession().then(async ({ data: { session } }) => {
-      console.log('Initial session check:', { hasUser: !!session?.user });
+      logger.log('Initial session check:', { hasUser: !!session?.user });
       setSession(session);
       setUser(session?.user ?? null);
       
@@ -117,23 +122,26 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signOut = async () => {
     try {
-      console.log('Sign out initiated...');
+      logger.log('Sign out initiated...');
       const { error } = await supabase.auth.signOut();
       
       if (error) {
-        console.error('Sign out error:', error);
+        logger.error('Sign out error:', error);
         return { error };
       }
       
-      console.log('Sign out successful, clearing state...');
+      logger.log('Sign out successful, clearing state...');
       // Clear all state immediately
       setUser(null);
       setSession(null);
       setProfile(null);
       
+      // Clear React Query cache
+      queryClient.clear();
+      
       return { error: null };
     } catch (error) {
-      console.error('Sign out exception:', error);
+      logger.error('Sign out exception:', error);
       return { error: error as Error };
     }
   };
@@ -153,7 +161,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       await fetchProfile(user.id);
       return { error: null };
     } catch (error) {
-      console.error('Error updating profile:', error);
+      logger.error('Error updating profile:', error);
       return { error: error as Error };
     }
   };
