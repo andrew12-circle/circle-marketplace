@@ -375,7 +375,14 @@ export const VendorDashboard = () => {
             <div className="flex items-center gap-4">
               <Button 
                 variant="ghost" 
-                onClick={() => navigate(-1)}
+                onClick={() => {
+                  // Try to go back, but fallback to home if no history
+                  if (window.history.length > 1) {
+                    navigate(-1);
+                  } else {
+                    navigate('/');
+                  }
+                }}
                 className="hover:bg-slate-100 dark:hover:bg-slate-800"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
