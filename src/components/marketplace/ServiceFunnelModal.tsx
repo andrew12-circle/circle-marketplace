@@ -847,21 +847,21 @@ export const ServiceFunnelModal = ({
                       <div className="space-y-2 mb-4">
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-gray-600">Retail:</span>
-                          <span className="font-medium text-gray-800">
-                            ${pkg.requestPricing ? 'Request Pricing' : pkg.originalPrice || pkg.price}
-                          </span>
+                           <span className="font-medium text-gray-800">
+                             {pkg.requestPricing ? 'Request Pricing' : `$${pkg.originalPrice || pkg.price}`}
+                           </span>
                         </div>
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-blue-600">Pro Member:</span>
-                          <span className="font-medium text-blue-600">
-                            ${pkg.requestPricing ? 'Request Pricing' : Math.round(pkg.price * 0.85)}
-                          </span>
+                           <span className="font-medium text-blue-600">
+                             {pkg.requestPricing ? 'Request Pricing' : `$${Math.round(pkg.price * 0.85)}`}
+                           </span>
                         </div>
                         <div className="flex items-center justify-between text-sm bg-green-50 p-3 rounded-lg border border-green-200">
                           <span className="text-green-700 font-medium">Co-Pay:</span>
-                          <span className="font-bold text-green-700 text-lg">
-                            ${pkg.requestPricing ? 'Request Pricing' : Math.round(pkg.price * (1 - (service.respa_split_limit || 0) / 100))}
-                          </span>
+                           <span className="font-bold text-green-700 text-lg">
+                             {pkg.requestPricing ? 'Request Pricing' : `$${Math.round(pkg.price * (1 - (service.respa_split_limit || 0) / 100))}`}
+                           </span>
                         </div>
                       </div>
                       
