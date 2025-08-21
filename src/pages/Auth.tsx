@@ -297,9 +297,9 @@ export const Auth = () => {
             <img 
               src="/circle-logo-updated.png"
               alt="Circle Logo" 
-              className="w-16 h-16 sm:w-20 sm:h-20 object-contain"
-              width="80"
-              height="80"
+              className="w-24 h-24 sm:w-28 sm:h-28 object-contain"
+              width="112"
+              height="112"
               style={{
                 imageRendering: 'crisp-edges'
               }}
