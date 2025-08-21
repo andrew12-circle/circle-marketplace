@@ -18,23 +18,32 @@ export function useAppConfig() {
   return useQuery({
     queryKey: ['app-config'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('app_config')
-        .select('*')
-        .limit(1)
-        .maybeSingle();
-      
-      if (error) {
-        console.warn('Failed to fetch app config:', error);
+      try {
+        const { data, error } = await supabase
+          .from('app_config')
+          .select('*')
+          .limit(1)
+          .maybeSingle();
+        
+        if (error) {
+          console.warn('Failed to fetch app config:', error);
+          return getDefaultConfig();
+        }
+        
+        return data || getDefaultConfig();
+      } catch (e) {
+        console.warn('App config query failed:', e);
         return getDefaultConfig();
       }
-      
-      return data || getDefaultConfig();
     },
     staleTime: 2 * 60 * 1000, // 2 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
     refetchOnWindowFocus: false, // Config doesn't change often
     retry: 1,
+    // Prevent query from throwing during initial render
+    throwOnError: false,
+    // Use default config while loading
+    placeholderData: getDefaultConfig(),
   });
 }
 
@@ -51,24 +60,44 @@ function getDefaultConfig(): AppConfig {
 
 // Convenience hooks for specific flags
 export function useMarketplaceEnabled() {
-  const { data: config } = useAppConfig();
-  const urlOverride = useFeatureFlag('marketplace', true);
-  
-  // URL override takes precedence in dev, server config in production
-  return urlOverride !== undefined ? urlOverride : config?.marketplace_enabled ?? true;
+  try {
+    const { data: config } = useAppConfig();
+    const urlOverride = useFeatureFlag('marketplace', true);
+    
+    // URL override takes precedence in dev, server config in production
+    return urlOverride !== undefined ? urlOverride : config?.marketplace_enabled ?? true;
+  } catch (e) {
+    console.warn('Failed to check marketplace enabled:', e);
+    return true; // Default to enabled
+  }
 }
 
 export function useAutoHealEnabled() {
-  const { data: config } = useAppConfig();
-  return config?.auto_heal_enabled ?? false;
+  try {
+    const { data: config } = useAppConfig();
+    return config?.auto_heal_enabled ?? false;
+  } catch (e) {
+    console.warn('Failed to check auto heal enabled:', e);
+    return false;
+  }
 }
 
 export function useSecurityMonitoringGlobal() {
-  const { data: config } = useAppConfig();
-  return config?.security_monitoring_global ?? false;
+  try {
+    const { data: config } = useAppConfig();
+    return config?.security_monitoring_global ?? false;
+  } catch (e) {
+    console.warn('Failed to check security monitoring:', e);
+    return false;
+  }
 }
 
 export function useTopDealsEnabled() {
-  const { data: config } = useAppConfig();
-  return config?.top_deals_enabled ?? true;
+  try {
+    const { data: config } = useAppConfig();
+    return config?.top_deals_enabled ?? true;
+  } catch (e) {
+    console.warn('Failed to check top deals enabled:', e);
+    return true; // Default to enabled
+  }
 }
