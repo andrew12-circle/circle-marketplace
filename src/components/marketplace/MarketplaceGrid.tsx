@@ -181,13 +181,22 @@ export const MarketplaceGrid = () => {
   // Enable new landing experience for all users
   const showNewLanding = true;
 
-  // Paginated services (server-side filters + pagination)
+  // Paginated services (server-side filters + pagination) - defer until user interacts
   const {
     variant
   } = useABTest('ranking_v1', {
     holdout: 0.1
   });
   const orderStrategy = variant === 'holdout' ? 'recent' : 'ranked';
+  const [enablePagination, setEnablePagination] = useState(false);
+  
+  // Enable pagination when user starts searching or filtering
+  useEffect(() => {
+    if (searchTerm || filters.category !== 'all' || filters.featured || filters.verified || filters.coPayEligible) {
+      setEnablePagination(true);
+    }
+  }, [searchTerm, filters.category, filters.featured, filters.verified, filters.coPayEligible]);
+  
   const {
     data: paginatedData,
     fetchNextPage,
@@ -201,7 +210,7 @@ export const MarketplaceGrid = () => {
     verified: filters.verified,
     coPayEligible: filters.coPayEligible,
     orderStrategy
-  });
+  }, { enabled: enablePagination });
   const flattenServices = useMemo(() => {
     const items = paginatedData?.pages?.flatMap(p => p.items) || [];
     const extractNumericPrice = (priceString?: string | null): number => {

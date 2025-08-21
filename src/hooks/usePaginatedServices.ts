@@ -117,15 +117,22 @@ async function fetchServicesPage(offset: number, filters: PaginatedFilters): Pro
   return { items: formattedServices, totalCount, nextOffset };
 }
 
-export function usePaginatedServices(filters: PaginatedFilters) {
+export function usePaginatedServices(filters: PaginatedFilters, options = { enabled: true }) {
   return useInfiniteQuery<PaginatedPage>({
     queryKey: ['services', 'paginated', filters],
-    queryFn: ({ pageParam = 0 }) => fetchServicesPage(pageParam as number, filters),
+    queryFn: ({ pageParam = 0 }) => 
+      Promise.race([
+        fetchServicesPage(pageParam as number, filters),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Paginated query timeout')), 8000)
+        )
+      ]) as Promise<PaginatedPage>,
     initialPageParam: 0,
     getNextPageParam: (lastPage) => {
       if (!lastPage) return undefined;
       return lastPage.nextOffset < lastPage.totalCount ? lastPage.nextOffset : undefined;
     },
+    enabled: options.enabled,
     staleTime: 5 * 60 * 1000,
     gcTime: 15 * 60 * 1000,
     refetchOnWindowFocus: false,

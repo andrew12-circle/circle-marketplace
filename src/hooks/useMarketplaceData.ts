@@ -88,8 +88,8 @@ export const QUERY_KEYS = {
   savedServices: (userId: string) => ['marketplace', 'savedServices', userId],
 } as const;
 
-// Helper: timeout wrapper
-const withTimeout = async <T,>(promise: PromiseLike<T>, ms = 20000, label?: string): Promise<T> => {
+// Helper: timeout wrapper - reduced timeout for faster recovery
+const withTimeout = async <T,>(promise: PromiseLike<T>, ms = 8000, label?: string): Promise<T> => {
   let timer: number | undefined;
   return Promise.race<T>([
     promise as Promise<T>,
@@ -146,7 +146,7 @@ const fetchServices = async (): Promise<Service[]> => {
       .order('sort_order', { ascending: true })
       .order('created_at', { ascending: false })
       .limit(200), // Increased from 100 to 200 to accommodate all services
-      20000, // 20s timeout for services
+      8000, // Reduced to 8s timeout for faster recovery
       'fetchServices'
     );
 
@@ -217,7 +217,7 @@ const fetchVendors = async (): Promise<Vendor[]> => {
       .order('sort_order', { ascending: true })
       .order('rating', { ascending: false })
       .limit(50),
-      20000, // 20s timeout for vendors
+      8000, // Reduced to 8s timeout for faster recovery
       'fetchVendors'
     );
 
@@ -317,31 +317,7 @@ const fetchCombinedMarketplaceData = async (): Promise<MarketplaceData> => {
       });
     }
 
-    // If both failed, try edge function fallback
-    if (services.length === 0 && vendors.length === 0) {
-      try {
-        const tFallback = performance.now();
-        const { data: fallbackData, error: fallbackError } = await withTimeout(
-          supabase.functions.invoke('get-marketplace-data'),
-          15000,
-          'get-marketplace-data'
-        );
-        performanceMonitor.trackRequest('/functions/get-marketplace-data', 'INVOKE', performance.now() - tFallback, !fallbackError, false);
-        if (fallbackError) throw fallbackError;
-        const combined = (fallbackData as any)?.data || fallbackData;
-        services = combined?.services || [];
-        vendors = combined?.vendors || [];
-      } catch (e) {
-        logger.error('Edge function fallback failed:', e);
-        reportClientError({
-          error_type: 'network',
-          message: 'Edge function fallback failed',
-          component: 'useMarketplaceData',
-          section: 'marketplace',
-          metadata: { error: String(e) }
-        });
-      }
-    }
+    // Skip edge function fallback for faster recovery - removed to prevent cascade delays
 
     if (services.length === 0 && vendors.length === 0) {
       reportClientError({

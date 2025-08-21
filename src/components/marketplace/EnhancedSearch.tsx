@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Search, Filter, X, DollarSign, Star, ChevronDown } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,23 @@ import { Label } from "@/components/ui/label";
 import { useServicePriceRange } from "@/hooks/useServicePriceRange";
 import { useServiceCount } from "@/hooks/useServiceCount";
 import { logger } from "@/utils/logger";
+
+// Debounce hook for search input
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+}
 
 interface EnhancedSearchProps {
   onSearchChange: (filters: SearchFilters) => void;
@@ -65,6 +82,9 @@ export const EnhancedSearch = ({
 
   const { data: serviceCount } = useServiceCount();
   const [activeFiltersCount, setActiveFiltersCount] = useState(0);
+  
+  // Debounce the filters to prevent excessive calls
+  const debouncedFilters = useDebounce(filters, 300);
 
   // Dynamic placeholder based on view mode
   const getSearchPlaceholder = () => {
@@ -83,7 +103,7 @@ export const EnhancedSearch = ({
   };
 
   useEffect(() => {
-    // Count active filters
+    // Count active filters from current state (immediate update)
     let count = 0;
     if (filters.query) count++;
     if (filters.categories.length > 0) count++;
@@ -93,8 +113,12 @@ export const EnhancedSearch = ({
     if (filters.features.length > 0) count++;
     
     setActiveFiltersCount(count);
-    onSearchChange(filters);
-  }, [filters, onSearchChange]);
+  }, [filters, minPrice, maxPrice]);
+
+  // Use debounced filters for search change to prevent excessive calls
+  useEffect(() => {
+    onSearchChange(debouncedFilters);
+  }, [debouncedFilters, onSearchChange]);
 
   const updateFilters = (key: keyof SearchFilters, value: any) => {
     setFilters(prev => ({

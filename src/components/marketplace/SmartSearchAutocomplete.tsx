@@ -6,6 +6,23 @@ import { Badge } from "@/components/ui/badge";
 import { useMarketplaceData } from "@/hooks/useMarketplaceData";
 import { supabase } from "@/integrations/supabase/client";
 
+// Debounce hook for search input
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+}
+
 interface SearchSuggestion {
   type: 'service' | 'category' | 'vendor' | 'recent' | 'trending';
   value: string;
@@ -34,6 +51,9 @@ export const SmartSearchAutocomplete = ({
   const suggestionsRef = useRef<HTMLDivElement>(null);
 
   const { data: marketplaceData } = useMarketplaceData();
+  
+  // Debounce the query to prevent excessive API calls
+  const debouncedQuery = useDebounce(query, 300);
 
   // Load recent searches from localStorage
   useEffect(() => {
@@ -73,9 +93,9 @@ export const SmartSearchAutocomplete = ({
     fetchTrendingSearches();
   }, []);
 
-  // Generate suggestions based on query
+  // Generate suggestions based on debounced query to reduce unnecessary processing
   useEffect(() => {
-    if (!query.trim()) {
+    if (!debouncedQuery.trim()) {
       // Show recent and trending when no query
       const defaultSuggestions: SearchSuggestion[] = [
         ...recentSearches.map(search => ({
@@ -97,7 +117,7 @@ export const SmartSearchAutocomplete = ({
 
     if (!marketplaceData) return;
 
-    const lowerQuery = query.toLowerCase();
+    const lowerQuery = debouncedQuery.toLowerCase();
     const newSuggestions: SearchSuggestion[] = [];
 
     // Keyword mapping for old-school categories
@@ -179,7 +199,7 @@ export const SmartSearchAutocomplete = ({
 
     newSuggestions.push(...matchingServices, ...matchingCategories, ...matchingVendors);
     setSuggestions(newSuggestions.slice(0, 8));
-  }, [query, marketplaceData, recentSearches, trendingSearches]);
+  }, [debouncedQuery, marketplaceData, recentSearches, trendingSearches]);
 
   const handleSearch = (searchQuery: string) => {
     const trimmedQuery = searchQuery.trim();

@@ -116,6 +116,50 @@ class GlobalErrorMonitor {
     document.body.appendChild(banner);
   }
 
+  private showSoftErrorNotification() {
+    const bannerId = 'soft-error-notification';
+    if (document.getElementById(bannerId)) return; // Already shown
+
+    const banner = document.createElement('div');
+    banner.id = bannerId;
+    banner.innerHTML = `
+      <div style="
+        position: fixed; 
+        top: 0; 
+        left: 0; 
+        right: 0; 
+        background: hsl(var(--warning)); 
+        color: hsl(var(--warning-foreground)); 
+        padding: 8px; 
+        text-align: center; 
+        z-index: 9998;
+        font-family: system-ui, -apple-system, sans-serif;
+        font-size: 14px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      ">
+        ⚠️ Experiencing some connectivity issues
+        <button onclick="document.getElementById('${bannerId}').remove()" style="
+          margin-left: 8px; 
+          padding: 2px 6px; 
+          background: transparent; 
+          color: inherit; 
+          border: none; 
+          cursor: pointer;
+        ">
+          ✕
+        </button>
+      </div>
+    `;
+    
+    document.body.appendChild(banner);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+      const el = document.getElementById(bannerId);
+      if (el) el.remove();
+    }, 5000);
+  }
+
   private async testSupabaseConnection(): Promise<void> {
     const { data, error } = await supabase
       .from('app_config')
@@ -220,12 +264,16 @@ class GlobalErrorMonitor {
       section: 'global_monitor'
     });
 
-    // Check if we've hit the error threshold
+    // Check if we've hit the error threshold - soften escalation
     if (this.errorTimeWindow.length >= this.config.errorThreshold) {
       console.warn(`🚨 Error threshold reached: ${this.errorTimeWindow.length} errors in ${this.config.timeWindow} minutes`);
       
-      if (this.config.autoHealingEnabled) {
-        await this.triggerSelfHealing('error_threshold_exceeded');
+      // Only show soft warning, don't immediately trigger reload
+      this.showSoftErrorNotification();
+      
+      // Only escalate to self-healing for very high error counts
+      if (this.config.autoHealingEnabled && this.errorTimeWindow.length >= this.config.errorThreshold * 1.5) {
+        await this.triggerSelfHealing('critical_error_threshold');
       }
     }
   }
