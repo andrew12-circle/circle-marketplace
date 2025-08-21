@@ -187,6 +187,7 @@ export const ServiceFunnelModal = ({
   const [isPricingChoiceOpen, setIsPricingChoiceOpen] = useState(false);
   const [isVendorSelectionOpen, setIsVendorSelectionOpen] = useState(false);
   const [activeMediaUrl, setActiveMediaUrl] = useState<string | null>(null);
+  const [expandedFeatures, setExpandedFeatures] = useState<{[key: string]: boolean}>({});
   // Get support stats visibility from service funnel content
   const showSupportStats = service.funnel_content && typeof service.funnel_content === 'object' && 'showSupportStats' in service.funnel_content ? service.funnel_content.showSupportStats : false;
   const [vendorAvailability, setVendorAvailability] = useState<{
@@ -869,12 +870,24 @@ export const ServiceFunnelModal = ({
                     </div>
 
                     <div className="space-y-3 mb-6">
-                      {pkg.features.slice(0, 4).map((feature, idx) => <div key={idx} className="flex items-start gap-2 text-sm">
+                      {(expandedFeatures[pkg.id] ? pkg.features : pkg.features.slice(0, 4)).map((feature, idx) => <div key={idx} className="flex items-start gap-2 text-sm">
                           <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
                           <span className="text-gray-600">{feature}</span>
                         </div>)}
-                      {pkg.features.length > 4 && <div className="text-sm text-gray-500 text-center">
-                          +{pkg.features.length - 4} more features
+                      {pkg.features.length > 4 && <div 
+                          className="text-sm text-blue-500 hover:text-blue-600 text-center cursor-pointer transition-colors"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setExpandedFeatures(prev => ({
+                              ...prev,
+                              [pkg.id]: !prev[pkg.id]
+                            }));
+                          }}
+                        >
+                          {expandedFeatures[pkg.id] 
+                            ? '− Show less features' 
+                            : `+ ${pkg.features.length - 4} more features`
+                          }
                         </div>}
                     </div>
 
