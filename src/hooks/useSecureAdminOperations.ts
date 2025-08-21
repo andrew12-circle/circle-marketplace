@@ -78,11 +78,20 @@ export const useSecureAdminOperations = () => {
           description: result.message,
         });
       } else {
-        toast({
-          title: 'Operation Failed',
-          description: result.message,
-          variant: 'destructive',
-        });
+        // Handle specific error cases
+        if (result.error === 'user_not_found') {
+          toast({
+            title: 'User Profile Not Found',
+            description: 'This user exists in auth but has no profile record. Contact support to resolve this issue.',
+            variant: 'destructive',
+          });
+        } else {
+          toast({
+            title: 'Operation Failed',
+            description: result.message || 'Unknown error occurred',
+            variant: 'destructive',
+          });
+        }
       }
 
       return result;
