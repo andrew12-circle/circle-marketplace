@@ -585,7 +585,6 @@ export const ServiceManagementPanel = () => {
       setSelectedService(updatedServiceData);
       setServices(services.map(s => s.id === selectedService.id ? updatedServiceData : s));
       setEditForm(updatedServiceData);
-      setIsEditingDetails(false);
       
       // Optimistically update marketplace cache so front-end reflects changes immediately
       queryClient.setQueryData(QUERY_KEYS.marketplaceCombined, (prev: any) => {
