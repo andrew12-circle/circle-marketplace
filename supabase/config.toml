@@ -3,6 +3,12 @@ project_id = "ihzyuyfawapweamqzzlj"
 [functions.ask-circle-ai]
 verify_jwt = false
 
+[functions.copay-partner-checkout]
+verify_jwt = false
+
+[functions.copay-verify-payment]
+verify_jwt = false
+
 [functions.daily-blessing]
 verify_jwt = false
 

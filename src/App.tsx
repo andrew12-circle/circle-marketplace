@@ -26,6 +26,11 @@ import { Auth } from "./pages/Auth";
 import { OrderHistory } from "./pages/OrderHistory";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import { PaymentCanceled } from "./pages/PaymentCanceled";
+import { PartnerCheckout } from "./pages/PartnerCheckout";
+import { PartnerPaymentSuccess } from "./pages/PartnerPaymentSuccess";
+import { PartnerPaymentCanceled } from "./pages/PartnerPaymentCanceled";
+import { AgentPaymentSuccess } from "./pages/AgentPaymentSuccess";
+import { AgentPaymentCanceled } from "./pages/AgentPaymentCanceled";
 import { Pricing } from "./pages/Pricing";
 import { ProfileSettings } from "./pages/ProfileSettings";
 import { AgentWallet } from "./pages/AgentWallet";
@@ -77,6 +82,11 @@ const AppContent = () => {
           <Route path="/orders" element={<OrderHistory />} />
           <Route path="/payment/success" element={<PaymentSuccess />} />
           <Route path="/payment/canceled" element={<PaymentCanceled />} />
+          <Route path="/partner-checkout/:token" element={<PartnerCheckout />} />
+          <Route path="/partner-payment-success" element={<PartnerPaymentSuccess />} />
+          <Route path="/partner-payment-canceled" element={<PartnerPaymentCanceled />} />
+          <Route path="/agent-payment-success" element={<AgentPaymentSuccess />} />
+          <Route path="/agent-payment-canceled" element={<AgentPaymentCanceled />} />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/profile" element={<ProfileSettings />} />
           <Route path="/wallet" element={<AgentWallet />} />

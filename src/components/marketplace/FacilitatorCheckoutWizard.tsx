@@ -115,8 +115,7 @@ export const FacilitatorCheckoutWizard: React.FC<FacilitatorCheckoutWizardProps>
       if (error) throw error;
 
       if (data.success && data.url) {
-        window.open(data.url, '_blank');
-        onOpenChange(false);
+        window.location.href = data.url;
       } else {
         throw new Error(data.error || 'Failed to create checkout session');
       }
