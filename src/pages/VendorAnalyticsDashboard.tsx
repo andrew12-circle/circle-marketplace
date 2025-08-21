@@ -377,7 +377,7 @@ export const VendorAnalyticsDashboard = () => {
             <div className="flex space-x-3">
               <Button 
                 variant="outline" 
-                onClick={() => toast.info("Settings panel coming soon")}
+                onClick={() => setActiveTab("profile")}
                 className="border-white/20 bg-white/10 hover:bg-white/20 text-slate-700 dark:text-slate-200 backdrop-blur-sm transition-all duration-300"
               >
                 <Settings className="w-4 h-4 mr-2" />
