@@ -79,15 +79,21 @@ export const ServiceConsultationEmails = ({ serviceId, serviceName }: ServiceCon
   const handleSave = async () => {
     setSaving(true);
     try {
+      console.log('Starting save process with emails:', emails);
+      console.log('Service ID:', serviceId);
+      
       // Filter out empty emails and validate
       const filteredEmails = emails
         .map(email => email.trim())
         .filter(email => email !== '');
 
+      console.log('Filtered emails:', filteredEmails);
+
       // Validate all emails
       const invalidEmails = filteredEmails.filter(email => !isValidEmail(email));
       if (invalidEmails.length > 0) {
         toast.error(`Invalid email addresses: ${invalidEmails.join(', ')}`);
+        setSaving(false);
         return;
       }
 
@@ -95,13 +101,19 @@ export const ServiceConsultationEmails = ({ serviceId, serviceName }: ServiceCon
       const uniqueEmails = [...new Set(filteredEmails)];
       if (uniqueEmails.length !== filteredEmails.length) {
         toast.error('Duplicate email addresses found. Please remove duplicates.');
+        setSaving(false);
         return;
       }
 
-      const { error } = await supabase
+      console.log('About to update with emails:', uniqueEmails);
+
+      const { data, error } = await supabase
         .from('services')
         .update({ consultation_emails: uniqueEmails })
-        .eq('id', serviceId);
+        .eq('id', serviceId)
+        .select();
+
+      console.log('Update response:', { data, error });
 
       if (error) throw error;
 
