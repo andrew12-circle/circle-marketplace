@@ -4995,6 +4995,7 @@ export type Database = {
           co_pay_price: string | null
           compliance_checklist: Json | null
           consultation_email: string | null
+          consultation_emails: string[]
           consultation_phone: string | null
           copay_allowed: boolean | null
           created_at: string | null
@@ -5049,6 +5050,7 @@ export type Database = {
           co_pay_price?: string | null
           compliance_checklist?: Json | null
           consultation_email?: string | null
+          consultation_emails?: string[]
           consultation_phone?: string | null
           copay_allowed?: boolean | null
           created_at?: string | null
@@ -5103,6 +5105,7 @@ export type Database = {
           co_pay_price?: string | null
           compliance_checklist?: Json | null
           consultation_email?: string | null
+          consultation_emails?: string[]
           consultation_phone?: string | null
           copay_allowed?: boolean | null
           created_at?: string | null
