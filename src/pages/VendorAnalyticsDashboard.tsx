@@ -29,6 +29,8 @@ import { VendorFunnelEditor } from "@/components/marketplace/VendorFunnelEditor"
 import { VendorAnalytics } from "@/components/marketplace/VendorAnalytics";
 import { PreviewVendorCard } from "@/components/marketplace/PreviewVendorCard";
 import { CoMarketingManager } from "@/components/vendor/CoMarketingManager";
+import { VendorCoPaySettings } from "@/components/vendor/VendorCoPaySettings";
+import { VendorAgentCriteriaManager } from "@/components/vendor/VendorAgentCriteriaManager";
 
 interface VendorData {
   id: string;
@@ -83,6 +85,16 @@ export const VendorAnalyticsDashboard = () => {
   const [isEditingFunnel, setIsEditingFunnel] = useState(false);
   const [showCardPreview, setShowCardPreview] = useState(false);
   const [funnelContent, setFunnelContent] = useState(null);
+  const [activeTab, setActiveTab] = useState("overview");
+
+  useEffect(() => {
+    // Check for tab query parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const tabParam = urlParams.get('tab');
+    if (tabParam && ['overview', 'analytics', 'comarketing', 'profile'].includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, []);
 
   useEffect(() => {
     if (user) {
@@ -483,7 +495,7 @@ export const VendorAnalyticsDashboard = () => {
         </div>
 
         {/* Premium Tech Tabs */}
-        <Tabs defaultValue="overview" className="space-y-8">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
           <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:grid-cols-4 bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl border border-white/20 dark:border-slate-700/50 shadow-xl rounded-2xl p-1">
             <TabsTrigger 
               value="overview" 
@@ -661,6 +673,8 @@ export const VendorAnalyticsDashboard = () => {
           </TabsContent>
 
           <TabsContent value="comarketing" className="space-y-6">
+            <VendorCoPaySettings vendorId={vendorData.id} />
+            <VendorAgentCriteriaManager vendorId={vendorData.id} />
             <div className="rounded-xl border-0 shadow-lg bg-gradient-to-br from-card to-card/50 backdrop-blur-sm p-6">
               <CoMarketingManager />
             </div>

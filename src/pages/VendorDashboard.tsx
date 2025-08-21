@@ -18,8 +18,6 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useVendorActivityTracking } from '@/hooks/useVendorActivityTracking';
 import { CoPayRequestsManager } from '@/components/vendor/CoPayRequestsManager';
-import { VendorCoPaySettings } from '@/components/vendor/VendorCoPaySettings';
-import { VendorAgentCriteriaManager } from '@/components/vendor/VendorAgentCriteriaManager';
 
 interface VendorService {
   id: string;
@@ -687,8 +685,31 @@ export const VendorDashboard = () => {
 
           {/* Co-Pay Requests Tab */}
           <TabsContent value="copay" className="space-y-6">
-            <VendorCoPaySettings vendorId={vendorId || ''} />
-            <VendorAgentCriteriaManager vendorId={vendorId || ''} />
+            {/* Co-Pay Settings Moved Notice */}
+            <Card className="border-l-4 border-l-blue-500 bg-blue-50 dark:bg-blue-950/20">
+              <CardContent className="pt-6">
+                <div className="flex items-start space-x-4">
+                  <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
+                    <Settings className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">
+                      Co-Pay Settings & Agent Criteria Moved
+                    </h3>
+                    <p className="text-blue-800 dark:text-blue-200 mb-4">
+                      Co-pay rules, settings, and agent selection criteria have been moved to the Co-Marketing dashboard for better organization and advanced analytics.
+                    </p>
+                    <Button 
+                      onClick={() => navigate('/vendor-analytics?tab=comarketing')}
+                      className="bg-blue-600 hover:bg-blue-700 text-white"
+                    >
+                      <Settings className="w-4 h-4 mr-2" />
+                      Go to Co-Marketing Settings
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
             <CoPayRequestsManager />
           </TabsContent>
 
