@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useLocation } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface SecurityContextType {
   isSecurityMonitoringEnabled: boolean;
@@ -34,8 +36,32 @@ export const SecurityProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [sessionValid, setSessionValid] = useState(true);
   const [lastSecurityCheck, setLastSecurityCheck] = useState<Date | null>(null);
   const { toast } = useToast();
+  const location = useLocation();
+  const { profile } = useAuth();
+
+  // Track recent events for throttling
+  const recentEventsRef = React.useRef(new Set<string>());
+
+  // Check if we should perform security monitoring for this route/user
+  const shouldPerformSecurityChecks = () => {
+    // Only perform intensive security checks for admin users or admin routes
+    const isAdminRoute = location.pathname.startsWith('/admin') || 
+                        location.pathname.startsWith('/command-center') ||
+                        location.pathname.startsWith('/compliance');
+    
+    const isAdminUser = profile?.is_admin === true;
+    
+    return isAdminRoute || isAdminUser;
+  };
 
   const performSecurityCheck = async () => {
+    // Skip intensive security checks if not needed
+    if (!shouldPerformSecurityChecks()) {
+      setSessionValid(true);
+      setLastSecurityCheck(new Date());
+      return;
+    }
+
     try {
       // Check if user session is still valid
       const { data: { session }, error } = await supabase.auth.getSession();
@@ -46,13 +72,7 @@ export const SecurityProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       }
 
       if (session) {
-        // Verify session context if user has admin privileges
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('is_admin')
-          .eq('user_id', session.user.id)
-          .single();
-
+        // Only verify admin session context if user is actually admin
         if (profile?.is_admin) {
           const { data, error: contextError } = await supabase.rpc('validate_admin_session_context');
           
@@ -60,27 +80,42 @@ export const SecurityProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             setSessionValid(false);
             toast({
               title: "Security Alert",
-              description: "Session validation failed. Please re-authenticate.",
+              description: "Admin session validation failed. Please re-authenticate.",
               variant: "destructive",
             });
             return;
           }
         }
 
-        // Check rate limits
+        // Check rate limits using the new RPC
         const { data: rateLimitData } = await supabase.rpc('check_security_operation_rate_limit');
-        setRateLimitRemaining(rateLimitData ? 20 : 0);
+        setRateLimitRemaining(rateLimitData ? 50 : 0); // Updated to match RPC logic
 
         setSessionValid(true);
         setLastSecurityCheck(new Date());
       }
     } catch (error) {
       console.error('Security check failed:', error);
-      setSessionValid(false);
+      // Don't mark as invalid on error - could be network issue
+      if (shouldPerformSecurityChecks()) {
+        setSessionValid(false);
+      }
     }
   };
 
+  // Rate-limited security event logging
   const logSecurityEvent = async (eventType: string, eventData: Record<string, any> = {}) => {
+    // Skip logging for non-security-critical routes/users
+    if (!shouldPerformSecurityChecks()) {
+      return;
+    }
+
+    // Simple in-memory throttle to prevent spam
+    const eventKey = `${eventType}_${Date.now() - (Date.now() % 10000)}`; // 10 second windows
+    if (recentEventsRef.current.has(eventKey)) {
+      return;
+    }
+    
     try {
       const { data: { user } } = await supabase.auth.getUser();
       
@@ -95,6 +130,12 @@ export const SecurityProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             url: window.location.href,
           },
         });
+        
+        // Track this event to prevent spam
+        recentEventsRef.current.add(eventKey);
+        
+        // Clean up old events
+        setTimeout(() => recentEventsRef.current.delete(eventKey), 30000);
       }
     } catch (error) {
       console.error('Failed to log security event:', error);
@@ -102,31 +143,37 @@ export const SecurityProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
 
   useEffect(() => {
-    setIsSecurityMonitoringEnabled(true);
+    // Only enable monitoring if security checks are needed
+    const needsMonitoring = shouldPerformSecurityChecks();
+    setIsSecurityMonitoringEnabled(needsMonitoring);
+    
+    if (!needsMonitoring) {
+      return; // Skip all monitoring for regular users/routes
+    }
     
     // Perform initial security check
     performSecurityCheck();
     
-    // Set up periodic security checks every 10 minutes (reduced frequency)
-    const securityInterval = setInterval(performSecurityCheck, 10 * 60 * 1000);
+    // Set up periodic security checks every 15 minutes (further reduced)
+    const securityInterval = setInterval(performSecurityCheck, 15 * 60 * 1000);
     
-    // Set up auth state change monitoring
+    // Set up auth state change monitoring (less aggressive)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED') {
           await performSecurityCheck();
         }
         
-        // Log authentication events
+        // Log authentication events (throttled)
         await logSecurityEvent(`auth_${event}`, {
           session_exists: !!session,
         });
       }
     );
 
-    // Log page visibility changes for security monitoring
+    // Only monitor visibility for admin routes/users
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
+      if (document.visibilityState === 'visible' && shouldPerformSecurityChecks()) {
         performSecurityCheck();
       }
     };
@@ -138,7 +185,7 @@ export const SecurityProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       subscription.unsubscribe();
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, []);
+  }, [location.pathname, profile?.is_admin]); // Re-run when route or admin status changes
 
   return (
     <SecurityContext.Provider

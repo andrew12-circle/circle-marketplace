@@ -2,6 +2,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { reportClientError } from '@/utils/errorReporting';
 import { cacheManager } from '@/utils/cacheManager';
 
+interface AppConfig {
+  auto_heal_enabled: boolean;
+  maintenance_mode: boolean;
+  maintenance_message?: string;
+}
+
 interface GlobalMonitoringConfig {
   errorThreshold: number;
   timeWindow: number; // minutes
@@ -13,11 +19,12 @@ class GlobalErrorMonitor {
   private errorCount = 0;
   private errorTimeWindow: number[] = [];
   private config: GlobalMonitoringConfig = {
-    errorThreshold: 8,
-    timeWindow: 5,
-    autoHealingEnabled: true,
-    bootCanaryEnabled: true
+    errorThreshold: 15, // Increased threshold
+    timeWindow: 10, // Increased time window
+    autoHealingEnabled: false, // Disabled by default - read from server
+    bootCanaryEnabled: false // Disabled until we're more stable
   };
+  private serverConfig: AppConfig | null = null;
   private isInitialized = false;
   private bootCanaryPassed = false;
 
@@ -26,8 +33,11 @@ class GlobalErrorMonitor {
     
     console.log('🔍 Initializing global error monitoring...');
     
-    // Boot canary check
-    if (this.config.bootCanaryEnabled) {
+    // Load server configuration first
+    await this.loadServerConfig();
+    
+    // Boot canary check (only if enabled in server config)
+    if (this.config.bootCanaryEnabled && this.serverConfig?.auto_heal_enabled) {
       await this.performBootCanary();
     }
 
@@ -39,6 +49,24 @@ class GlobalErrorMonitor {
     
     this.isInitialized = true;
     console.log('✅ Global error monitoring initialized');
+  }
+
+  private async loadServerConfig() {
+    try {
+      const { data } = await supabase
+        .from('app_config')
+        .select('auto_heal_enabled, maintenance_mode, maintenance_message')
+        .limit(1)
+        .maybeSingle();
+      
+      this.serverConfig = data || { auto_heal_enabled: false, maintenance_mode: false };
+      this.config.autoHealingEnabled = this.serverConfig.auto_heal_enabled;
+      
+      console.log('📋 Server config loaded:', { autoHeal: this.serverConfig.auto_heal_enabled });
+    } catch (error) {
+      console.warn('Failed to load server config:', error);
+      this.serverConfig = { auto_heal_enabled: false, maintenance_mode: false };
+    }
   }
 
   private async performBootCanary() {
@@ -264,15 +292,19 @@ class GlobalErrorMonitor {
       section: 'global_monitor'
     });
 
-    // Check if we've hit the error threshold - soften escalation
+    // Check if we've hit the error threshold - much more conservative
     if (this.errorTimeWindow.length >= this.config.errorThreshold) {
       console.warn(`🚨 Error threshold reached: ${this.errorTimeWindow.length} errors in ${this.config.timeWindow} minutes`);
       
       // Only show soft warning, don't immediately trigger reload
       this.showSoftErrorNotification();
       
-      // Only escalate to self-healing for very high error counts
-      if (this.config.autoHealingEnabled && this.errorTimeWindow.length >= this.config.errorThreshold * 1.5) {
+      // Only escalate to self-healing for extremely high error counts AND if enabled on server
+      const criticalThreshold = this.config.errorThreshold * 2; // Much higher bar
+      if (this.config.autoHealingEnabled && 
+          this.serverConfig?.auto_heal_enabled && 
+          this.errorTimeWindow.length >= criticalThreshold) {
+        console.warn(`🚨 CRITICAL: ${this.errorTimeWindow.length} errors, triggering self-heal`);
         await this.triggerSelfHealing('critical_error_threshold');
       }
     }

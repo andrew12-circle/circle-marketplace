@@ -1,5 +1,5 @@
 import { useMemo, useEffect, useState } from "react";
-import { useFeatureFlag } from "@/hooks/useFeatureFlag";
+import { useTopDealsEnabled } from "@/hooks/useAppConfig";
 import { useABTest } from "@/hooks/useABTest";
 import { useSponsoredTracking } from "@/hooks/useSponsoredTracking";
 import { SponsoredLabel } from "./SponsoredLabel";
@@ -67,6 +67,12 @@ const calculateScore = (service: Service, rating?: ServiceRatingStats, discount?
 export const TopDealsCarousel = ({ services, serviceRatings, onServiceClick }: TopDealsCarouselProps) => {
   const { profile } = useAuth();
   const { formatPrice } = useCurrency();
+  const topDealsEnabled = useTopDealsEnabled();
+  
+  // Don't render if disabled via server config
+  if (!topDealsEnabled) {
+    return null;
+  }
   
   // Modal state management - same as ServiceCard
   const [isFunnelModalOpen, setIsFunnelModalOpen] = useState(false);

@@ -34,6 +34,8 @@ import { marketplaceCircuitBreaker } from "@/utils/circuitBreaker";
 import { usePaginatedServices } from "@/hooks/usePaginatedServices";
 import { useABTest } from "@/hooks/useABTest";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
+import { useMarketplaceEnabled } from "@/hooks/useAppConfig";
+import { cacheManager } from "@/utils/cacheManager";
 import { TourDiscoveryButton } from "./TourDiscoveryButton";
 import { SmartSearchAutocomplete } from "./SmartSearchAutocomplete";
 import { RecentlyViewedServices } from "./RecentlyViewedServices";
@@ -67,7 +69,43 @@ type ViewMode = "services" | "products" | "vendors";
 export const MarketplaceGrid = () => {
   const { t } = useTranslation();
   const bundlesEnabled = useFeatureFlag("serviceBundles", false);
-  const marketplaceEnabled = useFeatureFlag("marketplace", true); // Check if marketplace is enabled by admin
+  const marketplaceEnabled = useMarketplaceEnabled(); // Use server-backed config
+  const { toast } = useToast();
+
+  const handleClearCachePreserveSession = async () => {
+    try {
+      await cacheManager.clearAllCachePreserveSession();
+      toast({
+        title: "Cache Cleared",
+        description: "Cache cleared successfully (session preserved)",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to clear cache",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Check server-backed marketplace flag first
+  if (!marketplaceEnabled) {
+    return (
+      <div className="container mx-auto px-4 py-8 text-center">
+        <div className="max-w-md mx-auto space-y-4">
+          <h2 className="text-2xl font-bold text-muted-foreground">
+            Marketplace Temporarily Unavailable
+          </h2>
+          <p className="text-muted-foreground">
+            The marketplace is currently disabled by an administrator. Please check back later.
+          </p>
+          <Button variant="outline" onClick={handleClearCachePreserveSession}>
+            Clear Cache & Retry
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   // Optimized data fetching with memoization
   const {
@@ -163,7 +201,6 @@ export const MarketplaceGrid = () => {
     }));
   }, []);
 
-  const { toast } = useToast();
   const { user, profile } = useAuth();
   const { location } = useLocation();
 
@@ -452,7 +489,7 @@ export const MarketplaceGrid = () => {
           {/* Campaign Services Header */}
           <CampaignServicesHeader />
 
-          {marketplaceEnabled ? (
+          {marketplaceEnabled && (
             <>
               <TopDealsCarousel
                 services={flattenServices}
@@ -710,20 +747,6 @@ export const MarketplaceGrid = () => {
                 </div>
               )}
             </>
-          ) : (
-            <div className="text-center py-12 space-y-6">
-              <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-                <Search className="w-8 h-8 text-muted-foreground" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-foreground mb-2">
-                  Marketplace Temporarily Unavailable
-                </h3>
-                <p className="text-muted-foreground">
-                  The marketplace has been disabled by administrators. Please check back later.
-                </p>
-              </div>
-            </div>
           )}
         </div>
       </div>
