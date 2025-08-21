@@ -64,6 +64,11 @@ export const VendorDashboard = () => {
     total_reviews: 0,
     trending_score: 0
   });
+  const [analytics, setAnalytics] = useState({
+    currentPeriod: { revenue: 0, views: 0, consultations: 0, conversionRate: 0 },
+    previousPeriod: { revenue: 0, views: 0, consultations: 0, conversionRate: 0 },
+    growth: { revenue: 0, views: 0, consultations: 0, conversionRate: 0 }
+  });
   const [loading, setLoading] = useState(true);
   const [isServiceBuilderOpen, setIsServiceBuilderOpen] = useState(false);
   const [currentServiceId, setCurrentServiceId] = useState<string | null>(null);
@@ -231,8 +236,8 @@ export const VendorDashboard = () => {
         .from('services')
         .select(`
           *,
-          service_views(id),
-          consultation_bookings(status),
+          service_views(id, viewed_at),
+          consultation_bookings(status, created_at),
           saved_services(id)
         `)
         .eq('vendor_id', user.id)
@@ -240,11 +245,52 @@ export const VendorDashboard = () => {
 
       if (servicesError) throw servicesError;
 
+      if (!servicesData) {
+        setServices([]);
+        return;
+      }
+
+      // Calculate current and previous period analytics
+      const now = new Date();
+      const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      const sixtyDaysAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
+
+      let currentRevenue = 0, currentViews = 0, currentConsultations = 0;
+      let previousRevenue = 0, previousViews = 0, previousConsultations = 0;
+
       // Map the data to match our interface with enhanced analytics
-      const mappedServices: VendorService[] = (servicesData || []).map((service: any) => {
+      const mappedServices: VendorService[] = servicesData.map((service: any) => {
         const views = service.service_views || [];
         const bookings = service.consultation_bookings || [];
         const saves = service.saved_services || [];
+        const price = parseFloat(service.retail_price || '0');
+
+        // Calculate current period (last 30 days)
+        const currentPeriodViews = views.filter((view: any) => 
+          new Date(view.viewed_at) >= thirtyDaysAgo
+        );
+        const currentPeriodBookings = bookings.filter((booking: any) => 
+          new Date(booking.created_at) >= thirtyDaysAgo
+        );
+
+        // Calculate previous period (30-60 days ago)
+        const previousPeriodViews = views.filter((view: any) => {
+          const viewDate = new Date(view.viewed_at);
+          return viewDate >= sixtyDaysAgo && viewDate < thirtyDaysAgo;
+        });
+        const previousPeriodBookings = bookings.filter((booking: any) => {
+          const bookingDate = new Date(booking.created_at);
+          return bookingDate >= sixtyDaysAgo && bookingDate < thirtyDaysAgo;
+        });
+
+        // Accumulate totals
+        currentViews += currentPeriodViews.length;
+        currentConsultations += currentPeriodBookings.length;
+        currentRevenue += currentPeriodBookings.length * price;
+
+        previousViews += previousPeriodViews.length;
+        previousConsultations += previousPeriodBookings.length;
+        previousRevenue += previousPeriodBookings.length * price;
         
         return {
           id: service.id,
@@ -254,8 +300,8 @@ export const VendorDashboard = () => {
           category: service.category || 'General',
           vendor_location: service.vendor_location || 'Location not specified',
           image_url: service.image_url,
-          rating: service.rating || 4.5, // Use service rating directly
-          reviews_count: 0, // Will be calculated later when reviews table is available
+          rating: service.rating || 4.5,
+          reviews_count: 0,
           views_count: views.length,
           bookings_count: bookings.length,
           is_featured: service.is_featured || false,
@@ -265,6 +311,38 @@ export const VendorDashboard = () => {
         };
       });
 
+      // Calculate conversion rates
+      const currentConversionRate = currentViews > 0 ? (currentConsultations / currentViews) * 100 : 0;
+      const previousConversionRate = previousViews > 0 ? (previousConsultations / previousViews) * 100 : 0;
+
+      // Calculate growth percentages
+      const calculateGrowth = (current: number, previous: number): number => {
+        if (previous === 0) return current > 0 ? 100 : 0;
+        return ((current - previous) / previous) * 100;
+      };
+
+      const analyticsData = {
+        currentPeriod: {
+          revenue: currentRevenue,
+          views: currentViews,
+          consultations: currentConsultations,
+          conversionRate: currentConversionRate
+        },
+        previousPeriod: {
+          revenue: previousRevenue,
+          views: previousViews,
+          consultations: previousConsultations,
+          conversionRate: previousConversionRate
+        },
+        growth: {
+          revenue: calculateGrowth(currentRevenue, previousRevenue),
+          views: calculateGrowth(currentViews, previousViews),
+          consultations: calculateGrowth(currentConsultations, previousConsultations),
+          conversionRate: calculateGrowth(currentConversionRate, previousConversionRate)
+        }
+      };
+
+      setAnalytics(analyticsData);
       setServices(mappedServices);
 
       // Calculate real stats from the data
@@ -701,15 +779,14 @@ export const VendorDashboard = () => {
                     <div>
                       <p className="text-sm font-medium text-green-700 dark:text-green-300">Total Revenue</p>
                       <p className="text-3xl font-bold text-green-900 dark:text-green-100">
-                        ${services.reduce((total, service) => {
-                          const views = service.service_views?.length || 0;
-                          const bookings = service.consultation_bookings?.length || 0;
-                          const price = parseFloat(service.retail_price || '0');
-                          return total + (bookings * price);
-                        }, 0).toLocaleString()}
+                        ${analytics.currentPeriod.revenue.toLocaleString()}
                       </p>
-                      <p className="text-sm text-green-600 dark:text-green-400 mt-1">
-                        +12% from last month
+                      <p className={`text-sm mt-1 ${
+                        analytics.growth.revenue >= 0 
+                          ? 'text-green-600 dark:text-green-400' 
+                          : 'text-red-600 dark:text-red-400'
+                      }`}>
+                        {analytics.growth.revenue >= 0 ? '+' : ''}{analytics.growth.revenue.toFixed(1)}% from last month
                       </p>
                     </div>
                     <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-full">
@@ -725,10 +802,14 @@ export const VendorDashboard = () => {
                     <div>
                       <p className="text-sm font-medium text-blue-700 dark:text-blue-300">Total Views</p>
                       <p className="text-3xl font-bold text-blue-900 dark:text-blue-100">
-                        {services.reduce((total, service) => total + (service.service_views?.length || 0), 0).toLocaleString()}
+                        {analytics.currentPeriod.views.toLocaleString()}
                       </p>
-                      <p className="text-sm text-blue-600 dark:text-blue-400 mt-1">
-                        +8% from last month
+                      <p className={`text-sm mt-1 ${
+                        analytics.growth.views >= 0 
+                          ? 'text-blue-600 dark:text-blue-400' 
+                          : 'text-red-600 dark:text-red-400'
+                      }`}>
+                        {analytics.growth.views >= 0 ? '+' : ''}{analytics.growth.views.toFixed(1)}% from last month
                       </p>
                     </div>
                     <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-full">
@@ -744,10 +825,14 @@ export const VendorDashboard = () => {
                     <div>
                       <p className="text-sm font-medium text-purple-700 dark:text-purple-300">Consultations</p>
                       <p className="text-3xl font-bold text-purple-900 dark:text-purple-100">
-                        {services.reduce((total, service) => total + (service.consultation_bookings?.length || 0), 0)}
+                        {analytics.currentPeriod.consultations}
                       </p>
-                      <p className="text-sm text-purple-600 dark:text-purple-400 mt-1">
-                        +15% from last month
+                      <p className={`text-sm mt-1 ${
+                        analytics.growth.consultations >= 0 
+                          ? 'text-purple-600 dark:text-purple-400' 
+                          : 'text-red-600 dark:text-red-400'
+                      }`}>
+                        {analytics.growth.consultations >= 0 ? '+' : ''}{analytics.growth.consultations.toFixed(1)}% from last month
                       </p>
                     </div>
                     <div className="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-full">
@@ -763,15 +848,14 @@ export const VendorDashboard = () => {
                     <div>
                       <p className="text-sm font-medium text-orange-700 dark:text-orange-300">Conversion Rate</p>
                       <p className="text-3xl font-bold text-orange-900 dark:text-orange-100">
-                        {(() => {
-                          const totalViews = services.reduce((total, service) => total + (service.service_views?.length || 0), 0);
-                          const totalBookings = services.reduce((total, service) => total + (service.consultation_bookings?.length || 0), 0);
-                          const rate = totalViews > 0 ? (totalBookings / totalViews * 100) : 0;
-                          return rate.toFixed(1);
-                        })()}%
+                        {analytics.currentPeriod.conversionRate.toFixed(1)}%
                       </p>
-                      <p className="text-sm text-orange-600 dark:text-orange-400 mt-1">
-                        +2.3% from last month
+                      <p className={`text-sm mt-1 ${
+                        analytics.growth.conversionRate >= 0 
+                          ? 'text-orange-600 dark:text-orange-400' 
+                          : 'text-red-600 dark:text-red-400'
+                      }`}>
+                        {analytics.growth.conversionRate >= 0 ? '+' : ''}{analytics.growth.conversionRate.toFixed(1)}% from last month
                       </p>
                     </div>
                     <div className="p-3 bg-orange-100 dark:bg-orange-900/30 rounded-full">
