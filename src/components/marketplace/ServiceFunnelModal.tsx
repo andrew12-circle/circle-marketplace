@@ -916,48 +916,47 @@ export const ServiceFunnelModal = ({
               </div>
 
               {/* Last Updated & Pricing Verification Section */}
-              <div className="mt-12 border-t border-gray-200 pt-8">
-                <div className="text-center max-w-2xl mx-auto">
-                  <div className="inline-flex items-center gap-3 mb-4">
-                    <Clock className="w-5 h-5 text-gray-500" />
-                    <span className="text-sm text-gray-600">
-                      Last updated: {(service as any).updated_at ? new Date((service as any).updated_at).toLocaleDateString('en-US', { 
-                        year: 'numeric', 
-                        month: 'long', 
-                        day: 'numeric' 
-                      }) : 'Date not available'}
-                    </span>
+              <div className="mt-8 border-t border-gray-200 pt-4">
+                <div className="text-center max-w-xl mx-auto">
+                  <div className="inline-flex items-center gap-2 mb-3 text-xs text-gray-500">
+                    <Clock className="w-3 h-3" />
+                    Last updated: {(service as any).updated_at ? new Date((service as any).updated_at).toLocaleDateString('en-US', { 
+                      year: 'numeric', 
+                      month: 'short', 
+                      day: 'numeric' 
+                    }) : 'Date not available'}
                   </div>
                   
-                  <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
-                    <h4 className="text-lg font-semibold text-blue-900 mb-3">
-                      Pricing Verification Notice
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                    <h4 className="text-sm font-medium text-blue-900 mb-2">
+                      Pricing Verification
                     </h4>
                     
-                    <p className="text-sm text-blue-800 mb-4 leading-relaxed">
-                      We are a site that makes choosing simple. If the company has changed prices since this date, 
-                      please verify with them directly. You ultimately will be finalizing billing with the company, 
-                      not us, and any vendor helps. We are just a facilitator for the relationship.
+                    <p className="text-xs text-blue-700 mb-3 leading-relaxed">
+                      We make choosing simple. If prices changed since this date, verify directly. 
+                      You'll finalize billing with the company - we're just a facilitator.
                     </p>
                     
-                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                    <div className="flex flex-col sm:flex-row gap-2 justify-center">
                       {service.website_url && (
                         <Button
+                          size="sm"
                           variant="outline"
                           onClick={() => window.open(service.website_url, '_blank')}
-                          className="border-blue-300 text-blue-700 hover:bg-blue-100"
+                          className="border-blue-300 text-blue-700 hover:bg-blue-100 text-xs"
                         >
-                          <Globe className="w-4 h-4 mr-2" />
-                          Visit Official Website
+                          <Globe className="w-3 h-3 mr-1" />
+                          Visit Website
                         </Button>
                       )}
                       <Button
+                        size="sm"
                         variant="outline"
                         onClick={() => setIsConsultationFlowOpen(true)}
-                        className="border-blue-300 text-blue-700 hover:bg-blue-100"
+                        className="border-blue-300 text-blue-700 hover:bg-blue-100 text-xs"
                       >
-                        <Calendar className="w-4 h-4 mr-2" />
-                        Book Consultation to Verify Pricing
+                        <Calendar className="w-3 h-3 mr-1" />
+                        Book Consultation
                       </Button>
                     </div>
                   </div>
