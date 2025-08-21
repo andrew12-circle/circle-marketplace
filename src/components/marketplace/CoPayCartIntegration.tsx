@@ -3,8 +3,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useCoPayRequests } from '@/hooks/useCoPayRequests';
-import { CheckCircle, DollarSign, Percent, ShoppingCart } from 'lucide-react';
+import { CheckCircle, DollarSign, Percent, ShoppingCart, Zap } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useFacilitatorConfig } from '@/hooks/useFacilitatorConfig';
+import { FacilitatorCheckoutWizard } from './FacilitatorCheckoutWizard';
 
 interface CoPayCartIntegrationProps {
   cartItems: any[];
@@ -23,6 +25,9 @@ export const CoPayCartIntegration = ({ cartItems, totalAmount, onCheckout }: CoP
   const [isProcessing, setIsProcessing] = useState(false);
   const { getApprovedRequests } = useCoPayRequests();
   const { toast } = useToast();
+  const { facilitatorCheckoutEnabled, loading: configLoading } = useFacilitatorConfig();
+  const [selectedService, setSelectedService] = useState<any>(null);
+  const [facilitatorWizardOpen, setFacilitatorWizardOpen] = useState(false);
 
   const approvedRequests = getApprovedRequests();
   
@@ -76,6 +81,11 @@ export const CoPayCartIntegration = ({ cartItems, totalAmount, onCheckout }: CoP
     }
   };
 
+  const handleFacilitatorCheckout = (service: any) => {
+    setSelectedService(service);
+    setFacilitatorWizardOpen(true);
+  };
+
   if (availableDiscounts.length === 0) {
     return (
       <Card>
@@ -85,10 +95,23 @@ export const CoPayCartIntegration = ({ cartItems, totalAmount, onCheckout }: CoP
               <p className="font-medium">No Co-Pay Assistance Available</p>
               <p className="text-sm text-gray-600">No approved co-pay requests for these services.</p>
             </div>
-            <Button onClick={() => onCheckout([])} disabled={isProcessing}>
-              <ShoppingCart className="w-4 h-4 mr-2" />
-              Proceed to Checkout
-            </Button>
+            <div className="space-y-2">
+              {facilitatorCheckoutEnabled && cartItems.length === 1 && (
+                <Button 
+                  onClick={() => handleFacilitatorCheckout(cartItems[0])}
+                  variant="secondary"
+                  disabled={configLoading}
+                  className="w-full"
+                >
+                  <Zap className="w-4 h-4 mr-2" />
+                  Explore Co-Marketing
+                </Button>
+              )}
+              <Button onClick={() => onCheckout([])} disabled={isProcessing}>
+                <ShoppingCart className="w-4 h-4 mr-2" />
+                Proceed to Checkout
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -171,12 +194,39 @@ export const CoPayCartIntegration = ({ cartItems, totalAmount, onCheckout }: CoP
             <DollarSign className="w-4 h-4 mr-2" />
             {isProcessing ? 'Processing...' : `Checkout with Co-Pay (Save $${totalCoPaySavings.toFixed(2)})`}
           </Button>
+
+          {facilitatorCheckoutEnabled && cartItems.length === 1 && (
+            <Button 
+              onClick={() => handleFacilitatorCheckout(cartItems[0])}
+              variant="outline"
+              disabled={configLoading}
+              className="w-full mt-2"
+            >
+              <Zap className="w-4 h-4 mr-2" />
+              Alternative: Co-Marketing Facilitator
+            </Button>
+          )}
           
           <p className="text-xs text-center text-gray-500 mt-2">
             Your approved co-pay assistance will be automatically applied
           </p>
         </CardContent>
       </Card>
+
+      {selectedService && (
+        <FacilitatorCheckoutWizard
+          open={facilitatorWizardOpen}
+          onOpenChange={setFacilitatorWizardOpen}
+          service={selectedService}
+          vendor={{
+            id: selectedService.vendor_id,
+            name: selectedService.vendor?.name || 'Unknown Vendor',
+            accepts_split_payments: true,
+            requires_circle_payout: false,
+            facilitator_fee_percentage: 3.0
+          }}
+        />
+      )}
     </div>
   );
 };

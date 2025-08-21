@@ -636,6 +636,7 @@ export type Database = {
       app_config: {
         Row: {
           created_at: string
+          facilitator_checkout_enabled: boolean | null
           force_cache_bust_after: string | null
           id: string
           maintenance_message: string | null
@@ -645,6 +646,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          facilitator_checkout_enabled?: boolean | null
           force_cache_bust_after?: string | null
           id?: string
           maintenance_message?: string | null
@@ -654,6 +656,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          facilitator_checkout_enabled?: boolean | null
           force_cache_bust_after?: string | null
           id?: string
           maintenance_message?: string | null
@@ -1866,6 +1869,78 @@ export type Database = {
           updated_at?: string
           user_id?: string
           weekly_summary?: boolean | null
+        }
+        Relationships: []
+      }
+      copay_orders: {
+        Row: {
+          agent_acknowledged_primary_payer: boolean | null
+          agent_amount: number
+          agent_id: string
+          agent_payment_status: string | null
+          agent_stripe_payment_intent_id: string | null
+          created_at: string
+          facilitator_fee_amount: number | null
+          id: string
+          order_metadata: Json | null
+          order_number: string
+          partner_contact_info: Json | null
+          partner_contribution_amount: number | null
+          partner_email: string | null
+          partner_payment_status: string | null
+          partner_stripe_payment_intent_id: string | null
+          partner_type: string | null
+          service_id: string
+          total_service_amount: number
+          updated_at: string
+          vendor_id: string
+          vendor_payout_status: string | null
+        }
+        Insert: {
+          agent_acknowledged_primary_payer?: boolean | null
+          agent_amount: number
+          agent_id: string
+          agent_payment_status?: string | null
+          agent_stripe_payment_intent_id?: string | null
+          created_at?: string
+          facilitator_fee_amount?: number | null
+          id?: string
+          order_metadata?: Json | null
+          order_number: string
+          partner_contact_info?: Json | null
+          partner_contribution_amount?: number | null
+          partner_email?: string | null
+          partner_payment_status?: string | null
+          partner_stripe_payment_intent_id?: string | null
+          partner_type?: string | null
+          service_id: string
+          total_service_amount: number
+          updated_at?: string
+          vendor_id: string
+          vendor_payout_status?: string | null
+        }
+        Update: {
+          agent_acknowledged_primary_payer?: boolean | null
+          agent_amount?: number
+          agent_id?: string
+          agent_payment_status?: string | null
+          agent_stripe_payment_intent_id?: string | null
+          created_at?: string
+          facilitator_fee_amount?: number | null
+          id?: string
+          order_metadata?: Json | null
+          order_number?: string
+          partner_contact_info?: Json | null
+          partner_contribution_amount?: number | null
+          partner_email?: string | null
+          partner_payment_status?: string | null
+          partner_stripe_payment_intent_id?: string | null
+          partner_type?: string | null
+          service_id?: string
+          total_service_amount?: number
+          updated_at?: string
+          vendor_id?: string
+          vendor_payout_status?: string | null
         }
         Relationships: []
       }
@@ -3501,6 +3576,68 @@ export type Database = {
           vendor_id?: string | null
         }
         Relationships: []
+      }
+      partner_contributions: {
+        Row: {
+          contribution_amount: number
+          copay_order_id: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          invitation_accepted_at: string | null
+          invitation_sent_at: string | null
+          invitation_token: string | null
+          metadata: Json | null
+          partner_email: string
+          partner_type: string
+          payment_completed_at: string | null
+          payment_status: string | null
+          stripe_payment_intent_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          contribution_amount: number
+          copay_order_id: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          invitation_accepted_at?: string | null
+          invitation_sent_at?: string | null
+          invitation_token?: string | null
+          metadata?: Json | null
+          partner_email: string
+          partner_type: string
+          payment_completed_at?: string | null
+          payment_status?: string | null
+          stripe_payment_intent_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          contribution_amount?: number
+          copay_order_id?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          invitation_accepted_at?: string | null
+          invitation_sent_at?: string | null
+          invitation_token?: string | null
+          metadata?: Json | null
+          partner_email?: string
+          partner_type?: string
+          payment_completed_at?: string | null
+          payment_status?: string | null
+          stripe_payment_intent_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_contributions_copay_order_id_fkey"
+            columns: ["copay_order_id"]
+            isOneToOne: false
+            referencedRelation: "copay_orders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       playbook_creation_progress: {
         Row: {
@@ -6074,6 +6211,59 @@ export type Database = {
         }
         Relationships: []
       }
+      vendor_payouts: {
+        Row: {
+          copay_order_id: string
+          created_at: string
+          id: string
+          payout_amount: number
+          payout_completed_at: string | null
+          payout_method: string | null
+          payout_notes: string | null
+          payout_reference: string | null
+          payout_status: string | null
+          stripe_transfer_id: string | null
+          updated_at: string
+          vendor_id: string
+        }
+        Insert: {
+          copay_order_id: string
+          created_at?: string
+          id?: string
+          payout_amount: number
+          payout_completed_at?: string | null
+          payout_method?: string | null
+          payout_notes?: string | null
+          payout_reference?: string | null
+          payout_status?: string | null
+          stripe_transfer_id?: string | null
+          updated_at?: string
+          vendor_id: string
+        }
+        Update: {
+          copay_order_id?: string
+          created_at?: string
+          id?: string
+          payout_amount?: number
+          payout_completed_at?: string | null
+          payout_method?: string | null
+          payout_notes?: string | null
+          payout_reference?: string | null
+          payout_status?: string | null
+          stripe_transfer_id?: string | null
+          updated_at?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_payouts_copay_order_id_fkey"
+            columns: ["copay_order_id"]
+            isOneToOne: false
+            referencedRelation: "copay_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vendor_qa: {
         Row: {
           agent_id: string | null
@@ -6265,6 +6455,7 @@ export type Database = {
       }
       vendors: {
         Row: {
+          accepts_split_payments: boolean | null
           ad_budget_max: number | null
           ad_budget_min: number | null
           agreement_documents: Json | null
@@ -6288,6 +6479,7 @@ export type Database = {
           created_at: string
           custom_cta_text: string | null
           description: string | null
+          facilitator_fee_percentage: number | null
           funnel_enabled: boolean | null
           funnel_template_id: string | null
           hero_banner_url: string | null
@@ -6316,6 +6508,7 @@ export type Database = {
           payment_terms: string | null
           phone: string | null
           rating: number | null
+          requires_circle_payout: boolean | null
           respa_risk_level: string | null
           review_count: number | null
           seed_active: boolean | null
@@ -6334,6 +6527,7 @@ export type Database = {
           website_url: string | null
         }
         Insert: {
+          accepts_split_payments?: boolean | null
           ad_budget_max?: number | null
           ad_budget_min?: number | null
           agreement_documents?: Json | null
@@ -6357,6 +6551,7 @@ export type Database = {
           created_at?: string
           custom_cta_text?: string | null
           description?: string | null
+          facilitator_fee_percentage?: number | null
           funnel_enabled?: boolean | null
           funnel_template_id?: string | null
           hero_banner_url?: string | null
@@ -6385,6 +6580,7 @@ export type Database = {
           payment_terms?: string | null
           phone?: string | null
           rating?: number | null
+          requires_circle_payout?: boolean | null
           respa_risk_level?: string | null
           review_count?: number | null
           seed_active?: boolean | null
@@ -6403,6 +6599,7 @@ export type Database = {
           website_url?: string | null
         }
         Update: {
+          accepts_split_payments?: boolean | null
           ad_budget_max?: number | null
           ad_budget_min?: number | null
           agreement_documents?: Json | null
@@ -6426,6 +6623,7 @@ export type Database = {
           created_at?: string
           custom_cta_text?: string | null
           description?: string | null
+          facilitator_fee_percentage?: number | null
           funnel_enabled?: boolean | null
           funnel_template_id?: string | null
           hero_banner_url?: string | null
@@ -6454,6 +6652,7 @@ export type Database = {
           payment_terms?: string | null
           phone?: string | null
           rating?: number | null
+          requires_circle_payout?: boolean | null
           respa_risk_level?: string | null
           review_count?: number | null
           seed_active?: boolean | null
