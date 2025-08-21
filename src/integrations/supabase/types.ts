@@ -5046,6 +5046,8 @@ export type Database = {
           id: string
           image_url: string | null
           is_active: boolean | null
+          is_affiliate: boolean | null
+          is_booking_link: boolean | null
           is_featured: boolean | null
           is_published: boolean | null
           is_respa_regulated: boolean | null
@@ -5101,6 +5103,8 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_active?: boolean | null
+          is_affiliate?: boolean | null
+          is_booking_link?: boolean | null
           is_featured?: boolean | null
           is_published?: boolean | null
           is_respa_regulated?: boolean | null
@@ -5156,6 +5160,8 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_active?: boolean | null
+          is_affiliate?: boolean | null
+          is_booking_link?: boolean | null
           is_featured?: boolean | null
           is_published?: boolean | null
           is_respa_regulated?: boolean | null
