@@ -68,13 +68,7 @@ export const TopDealsCarousel = ({ services, serviceRatings, onServiceClick }: T
   const { profile } = useAuth();
   const { formatPrice } = useCurrency();
   
-  let topDealsEnabled = true; // Default fallback
-  try {
-    topDealsEnabled = useTopDealsEnabled();
-  } catch (error) {
-    console.warn('Failed to check top deals enabled, using fallback:', error);
-    topDealsEnabled = true;
-  }
+  const topDealsEnabled = useTopDealsEnabled();
   
   // Don't render if disabled via server config
   if (!topDealsEnabled) {
