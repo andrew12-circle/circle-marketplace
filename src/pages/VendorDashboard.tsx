@@ -233,6 +233,7 @@ export const VendorDashboard = () => {
           consultation_bookings(status),
           saved_services(id)
         `)
+        .eq('vendor_id', user.id)
         .order('created_at', { ascending: false });
 
       if (servicesError) throw servicesError;
