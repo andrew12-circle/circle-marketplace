@@ -93,7 +93,6 @@ export const ServiceConsultationEmails = ({ serviceId, serviceName }: ServiceCon
       const invalidEmails = filteredEmails.filter(email => !isValidEmail(email));
       if (invalidEmails.length > 0) {
         toast.error(`Invalid email addresses: ${invalidEmails.join(', ')}`);
-        setSaving(false);
         return;
       }
 
@@ -101,7 +100,6 @@ export const ServiceConsultationEmails = ({ serviceId, serviceName }: ServiceCon
       const uniqueEmails = [...new Set(filteredEmails)];
       if (uniqueEmails.length !== filteredEmails.length) {
         toast.error('Duplicate email addresses found. Please remove duplicates.');
-        setSaving(false);
         return;
       }
 
@@ -115,7 +113,15 @@ export const ServiceConsultationEmails = ({ serviceId, serviceName }: ServiceCon
 
       console.log('Update response:', { data, error });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error details:', error);
+        if (error.code === 'PGRST116' || error.message?.includes('permission')) {
+          toast.error('Permission denied. You need admin access or vendor ownership to update consultation emails.');
+        } else {
+          throw error;
+        }
+        return;
+      }
 
       toast.success(`Consultation alert emails updated successfully`);
       
