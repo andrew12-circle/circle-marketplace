@@ -213,7 +213,7 @@ const fetchVendors = async (): Promise<Vendor[]> => {
       .from('vendors')
       .select('*')
       .eq('is_active', true)
-      .in('approval_status', ['approved', 'auto_approved'])
+      .in('approval_status', ['approved', 'auto_approved', 'pending'])
       .order('sort_order', { ascending: true })
       .order('rating', { ascending: false })
       .limit(50),
