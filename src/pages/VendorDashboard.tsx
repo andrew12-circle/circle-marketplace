@@ -17,7 +17,7 @@ import { ServiceFunnelEditorModal } from '@/components/marketplace/ServiceFunnel
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useVendorActivityTracking } from '@/hooks/useVendorActivityTracking';
-import { CoPayRequestsManager } from '@/components/vendor/CoPayRequestsManager';
+
 
 interface VendorService {
   id: string;
@@ -610,14 +610,10 @@ export const VendorDashboard = () => {
 
         {/* Main Dashboard Tabs */}
         <Tabs defaultValue="services" className="space-y-8">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="services" className="flex items-center gap-2">
               <Package className="w-4 h-4" />
               Services ({services.length})
-            </TabsTrigger>
-            <TabsTrigger value="copay" className="flex items-center gap-2">
-              <DollarSign className="w-4 h-4" />
-              Co-Pay Requests
             </TabsTrigger>
             <TabsTrigger value="analytics" className="flex items-center gap-2">
               <BarChart3 className="w-4 h-4" />
@@ -689,11 +685,6 @@ export const VendorDashboard = () => {
                 )}
               </CardContent>
             </Card>
-          </TabsContent>
-
-          {/* Co-Pay Requests Tab */}
-          <TabsContent value="copay" className="space-y-6">
-            <CoPayRequestsManager />
           </TabsContent>
 
           {/* Analytics Tab */}
