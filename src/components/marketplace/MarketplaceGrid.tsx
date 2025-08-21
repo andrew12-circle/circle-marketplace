@@ -69,7 +69,15 @@ type ViewMode = "services" | "products" | "vendors";
 export const MarketplaceGrid = () => {
   const { t } = useTranslation();
   const bundlesEnabled = useFeatureFlag("serviceBundles", false);
-  const marketplaceEnabled = useMarketplaceEnabled(); // Use server-backed config
+  let marketplaceEnabled = true; // Default fallback
+  
+  try {
+    marketplaceEnabled = useMarketplaceEnabled(); // Use server-backed config
+  } catch (error) {
+    console.warn('Failed to check marketplace enabled, using fallback:', error);
+    marketplaceEnabled = true;
+  }
+  
   const { toast } = useToast();
 
   const handleClearCachePreserveSession = async () => {

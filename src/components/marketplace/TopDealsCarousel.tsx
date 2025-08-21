@@ -67,12 +67,22 @@ const calculateScore = (service: Service, rating?: ServiceRatingStats, discount?
 export const TopDealsCarousel = ({ services, serviceRatings, onServiceClick }: TopDealsCarouselProps) => {
   const { profile } = useAuth();
   const { formatPrice } = useCurrency();
-  const topDealsEnabled = useTopDealsEnabled();
+  
+  let topDealsEnabled = true; // Default fallback
+  try {
+    topDealsEnabled = useTopDealsEnabled();
+  } catch (error) {
+    console.warn('Failed to check top deals enabled, using fallback:', error);
+    topDealsEnabled = true;
+  }
   
   // Don't render if disabled via server config
   if (!topDealsEnabled) {
     return null;
   }
+  
+  // Ensure services is an array
+  const safeServices = Array.isArray(services) ? services : [];
   
   // Modal state management - same as ServiceCard
   const [isFunnelModalOpen, setIsFunnelModalOpen] = useState(false);
@@ -87,23 +97,29 @@ export const TopDealsCarousel = ({ services, serviceRatings, onServiceClick }: T
   const showSponsored = sponsoredEnabled && sponsoredTopDeals;
 
   const topDeals = useMemo(() => {
-    return services
+    return safeServices
       .map(service => {
-        const rating = serviceRatings?.get(service.id);
-        const discount = computeDiscountPercentage(service);
-        const score = calculateScore(service, rating, discount);
-        const dealPrice = getDealDisplayPrice(service);
-        
-        return {
-          ...service,
-          score,
-          discount,
-          dealPrice
-        };
+        try {
+          const rating = serviceRatings?.get(service.id);
+          const discount = computeDiscountPercentage(service);
+          const score = calculateScore(service, rating, discount);
+          const dealPrice = getDealDisplayPrice(service);
+          
+          return {
+            ...service,
+            score,
+            discount,
+            dealPrice
+          };
+        } catch (error) {
+          console.warn('Error processing service:', service.id, error);
+          return null;
+        }
       })
-      .sort((a, b) => b.score - a.score)
+      .filter(Boolean) // Remove null entries
+      .sort((a, b) => (b?.score || 0) - (a?.score || 0))
       .slice(0, 12);
-  }, [services, serviceRatings]);
+  }, [safeServices, serviceRatings]);
 
   // Track impressions for sponsored items
   useEffect(() => {
