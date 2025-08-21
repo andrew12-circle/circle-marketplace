@@ -38,6 +38,7 @@ import { TourDiscoveryButton } from "./TourDiscoveryButton";
 import { SmartSearchAutocomplete } from "./SmartSearchAutocomplete";
 import { RecentlyViewedServices } from "./RecentlyViewedServices";
 import { ServiceBundles } from "./ServiceBundles";
+
 interface FilterState {
   category: string;
   priceRange: number[];
@@ -46,6 +47,7 @@ interface FilterState {
   coPayEligible: boolean;
   locationFilter: boolean;
 }
+
 // Interface types are now imported from the hook
 interface LocalRepresentative {
   id: string;
@@ -59,12 +61,13 @@ interface LocalRepresentative {
   latitude?: number;
   longitude?: number;
 }
+
 type ViewMode = "services" | "products" | "vendors";
+
 export const MarketplaceGrid = () => {
-  const {
-    t
-  } = useTranslation();
+  const { t } = useTranslation();
   const bundlesEnabled = useFeatureFlag("serviceBundles", false);
+  const marketplaceEnabled = useFeatureFlag("marketplace", true); // Check if marketplace is enabled by admin
 
   // Optimized data fetching with memoization
   const {
@@ -80,6 +83,7 @@ export const MarketplaceGrid = () => {
   } = useInvalidateMarketplace();
   const queryClient = useQueryClient();
   const [showRecovery, setShowRecovery] = useState(false);
+
   useEffect(() => {
     if (isLoading && !marketplaceData) {
       const id = window.setTimeout(() => setShowRecovery(true), 8000);
@@ -87,11 +91,13 @@ export const MarketplaceGrid = () => {
     }
     setShowRecovery(false);
   }, [isLoading, marketplaceData]);
+
   const resetFailureState = useCallback(() => {
     try {
       marketplaceCircuitBreaker.reset();
     } catch {}
   }, []);
+
   const handleReloadDataQuick = useCallback(() => {
     try {
       sessionStorage.setItem('forceFreshData', '1');
@@ -99,6 +105,7 @@ export const MarketplaceGrid = () => {
     resetFailureState();
     invalidateAll();
   }, [invalidateAll, resetFailureState]);
+
   const handleHardRefresh = useCallback(async () => {
     try {
       sessionStorage.setItem('forceFreshData', '1');
@@ -111,6 +118,7 @@ export const MarketplaceGrid = () => {
     invalidateAll();
     setShowRecovery(false);
   }, [invalidateAll, queryClient, resetFailureState]);
+
   // Memoize extracted data to prevent unnecessary re-renders
   const services = useMemo(() => (marketplaceData as {
     services: Service[];
@@ -120,6 +128,7 @@ export const MarketplaceGrid = () => {
     services: Service[];
     vendors: Vendor[];
   })?.vendors || [], [marketplaceData]);
+
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>("services");
   const [selectedProductCategory, setSelectedProductCategory] = useState<string | null>(null);
@@ -141,6 +150,7 @@ export const MarketplaceGrid = () => {
     coPayEligible: false,
     locationFilter: false
   });
+
   const handleEnhancedSearchChange = useCallback((sf: SearchFilters) => {
     setSearchFilters(sf);
     setSearchTerm(sf.query || "");
@@ -152,16 +162,10 @@ export const MarketplaceGrid = () => {
       coPayEligible: sf.features.includes("Co-Pay Available")
     }));
   }, []);
-  const {
-    toast
-  } = useToast();
-  const {
-    user,
-    profile
-  } = useAuth();
-  const {
-    location
-  } = useLocation();
+
+  const { toast } = useToast();
+  const { user, profile } = useAuth();
+  const { location } = useLocation();
 
   // Use optimized filtering hook with memoized inputs
   const memoizedFilters = useMemo(() => filters, [filters.category, filters.priceRange[0], filters.priceRange[1], filters.verified, filters.featured, filters.coPayEligible, filters.locationFilter]);
@@ -171,32 +175,31 @@ export const MarketplaceGrid = () => {
     categories,
     localVendorCount
   } = useMarketplaceFilters(services, vendors, searchTerm, memoizedFilters, location);
-  
+
   // Sponsored placement settings - enabled by default for Amazon-level experience
   const sponsoredEnabled = true;
   const sponsoredGrid = true;
   const { variant: abVariant } = useABTest('sponsored-placements', { holdout: 0.1 });
   const showSponsoredInGrid = sponsoredEnabled && sponsoredGrid && abVariant === 'ranked';
-  
+
   // Enable new landing experience for all users
   const showNewLanding = true;
 
   // Paginated services (server-side filters + pagination) - defer until user interacts
-  const {
-    variant
-  } = useABTest('ranking_v1', {
-    holdout: 0.1
-  });
+  const { variant } = useABTest('ranking_v1', { holdout: 0.1 });
   const orderStrategy = variant === 'holdout' ? 'recent' : 'ranked';
   const [enablePagination, setEnablePagination] = useState(true); // Enable by default to show services immediately
-  
+
+  // Only enable pagination if marketplace is enabled by admin
+  const shouldEnablePagination = enablePagination && marketplaceEnabled;
+
   // Enable pagination when user starts searching or filtering
   useEffect(() => {
     if (searchTerm || filters.category !== 'all' || filters.featured || filters.verified || filters.coPayEligible) {
       setEnablePagination(true);
     }
   }, [searchTerm, filters.category, filters.featured, filters.verified, filters.coPayEligible]);
-  
+
   const {
     data: paginatedData,
     fetchNextPage,
@@ -210,7 +213,8 @@ export const MarketplaceGrid = () => {
     verified: filters.verified,
     coPayEligible: filters.coPayEligible,
     orderStrategy
-  }, { enabled: enablePagination });
+  }, { enabled: shouldEnablePagination });
+
   const flattenServices = useMemo(() => {
     const items = paginatedData?.pages?.flatMap(p => p.items) || [];
     const extractNumericPrice = (priceString?: string | null): number => {
@@ -225,14 +229,14 @@ export const MarketplaceGrid = () => {
       return withinPrice && matchesVerified;
     });
   }, [paginatedData, filters.priceRange, filters.verified]);
+
   const totalServicesCount = paginatedData?.pages?.[0]?.totalCount ?? 0;
   const baseForFilters = services.length ? services : flattenServices;
 
   // Memoize service IDs to prevent unnecessary re-fetching of ratings
   const serviceIds = useMemo(() => flattenServices.map(s => s.id), [flattenServices]);
-  const {
-    data: bulkRatings
-  } = useBulkServiceRatings(serviceIds);
+  const { data: bulkRatings } = useBulkServiceRatings(serviceIds);
+
   // Define product categories with enhanced styling
   const PRODUCT_CATEGORIES = [{
     id: 'facebook-ads',
@@ -312,10 +316,12 @@ export const MarketplaceGrid = () => {
     gradient: 'from-gray-500 to-gray-600',
     color: 'text-gray-600'
   }];
+
   const [localSavedServiceIds, setLocalSavedServiceIds] = useState<string[]>([]);
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
   const [isAddProductModalOpen, setIsAddProductModalOpen] = useState(false);
+
   // Combine saved services from hook and local state
   const allSavedServiceIds = [...savedServiceIds, ...localSavedServiceIds];
 
@@ -332,6 +338,7 @@ export const MarketplaceGrid = () => {
         return [];
     }
   };
+
   const getTags = () => {
     switch (viewMode) {
       case 'services':
@@ -375,14 +382,10 @@ export const MarketplaceGrid = () => {
     }
     try {
       // Check if already saved
-      const {
-        data: existingSave
-      } = await supabase.from('saved_services').select('id').eq('user_id', profile.user_id).eq('service_id', serviceId).maybeSingle();
+      const { data: existingSave } = await supabase.from('saved_services').select('id').eq('user_id', profile.user_id).eq('service_id', serviceId).maybeSingle();
       if (existingSave) {
         // Remove from saved
-        const {
-          error
-        } = await supabase.from('saved_services').delete().eq('user_id', profile.user_id).eq('service_id', serviceId);
+        const { error } = await supabase.from('saved_services').delete().eq('user_id', profile.user_id).eq('service_id', serviceId);
         if (error) throw error;
 
         // Update local state
@@ -393,9 +396,7 @@ export const MarketplaceGrid = () => {
         });
       } else {
         // Add to saved
-        const {
-          error
-        } = await supabase.from('saved_services').insert({
+        const { error } = await supabase.from('saved_services').insert({
           user_id: profile.user_id,
           service_id: serviceId,
           notes: ''
@@ -418,93 +419,336 @@ export const MarketplaceGrid = () => {
       });
     }
   }, [profile?.user_id, toast]);
+
   const handleViewServiceDetails = useCallback((serviceId: string) => {
-    console.log('handleViewServiceDetails called with serviceId:', serviceId);
     const service = flattenServices.find(s => s.id === serviceId) || services.find(s => s.id === serviceId);
-    console.log('Found service:', service ? service.title : 'NOT FOUND');
     if (service) {
-      console.log('Setting selectedService and opening modal');
       setSelectedService(service);
       setIsServiceModalOpen(true);
     }
   }, [flattenServices, services]);
+
   const handleCloseServiceModal = () => {
     setIsServiceModalOpen(false);
     setSelectedService(null);
   };
-  const [showVendorSelection, setShowVendorSelection] = useState(false);
-  const [selectedServiceForCoPay, setSelectedServiceForCoPay] = useState<Service | null>(null);
-  const handleConnectVendor = (vendorId: string) => {
-    const vendor = vendors.find(v => v.id === vendorId);
-    if (!vendor) {
-      toast({
-        title: "Error",
-        description: "Vendor not found. Please try again.",
-        variant: "destructive"
-      });
-      return;
-    }
 
-    // Find a representative service for this vendor or create a default one
-    const vendorService = services.find(s => s.vendor?.id === vendorId) || {
-      id: `mock-${vendorId}`,
-      title: `Partnership with ${vendor.name}`,
-      vendor: {
-        id: vendorId,
-        name: vendor.name
-      },
-      respa_split_limit: 50,
-      co_pay_price: "Contact for pricing",
-      retail_price: "Contact for pricing",
-      pro_price: "Contact for pricing",
-      image_url: vendor.logo_url
-    };
-    setSelectedServiceForCoPay(vendorService as Service);
-    setShowVendorSelection(true);
-  };
-  const handleViewVendorProfile = (vendorId: string) => {
-    toast({
-      title: "Vendor Profile",
-      description: `Viewing profile for vendor: ${vendorId}`
-    });
-  };
-  const handleSelectProduct = (productId: string) => {
-    setSelectedProductCategory(productId);
-  };
-  const handleBackToProducts = () => {
-    setSelectedProductCategory(null);
-  };
+  return (
+    <>
+      <div className="min-h-screen bg-background">
+        <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
+          {/* Hero Section */}
+          <div className="mb-12">
+            <h1 className="text-3xl sm:text-6xl font-bold text-black mb-4 lcp-content">Agent Marketplace.</h1>
+            <p className="text-gray-600 max-w-2xl text-sm lcp-content">Finally, the noise is gone. Welcome to the Marketplace — where real estate agents can compare and explore the best tools at a fraction of the cost. Every option is curated, easy to compare. Stop guessing. Buy outcomes, not tools.</p>
+          </div>
 
-  // Deep-linking: support ?q= and ?serviceId=
-  const [deeplinkServiceId, setDeeplinkServiceId] = useState<string | null>(null);
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const q = params.get('q') || params.get('query') || '';
-    const sid = params.get('serviceId') || params.get('service');
-    if (q) {
-      setSearchTerm(q);
-      setSearchFilters(prev => ({
-        ...prev,
-        query: q
-      }));
-    }
-    if (sid) setDeeplinkServiceId(sid);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-  useEffect(() => {
-    if (!deeplinkServiceId) return;
-    const target = services.find(s => s.id === deeplinkServiceId);
-    if (target) {
-      handleViewServiceDetails(deeplinkServiceId);
-      setDeeplinkServiceId(null);
-    }
-  }, [deeplinkServiceId, services, handleViewServiceDetails]);
+          {/* Circle Pro Banner - Show for non-signed-in users and non-pro members */}
+          {(!user || !profile?.is_pro_member) && <CircleProBanner />}
 
-  // Filter services by selected product category
-  const getServicesForProduct = (productId: string) => {
-    const productMapping: {
-      [key: string]: string[];
-    } = {
+          {/* AI Concierge Banner - Show for all users */}
+          <AIConciergeBanner />
+
+          {/* Campaign Services Header */}
+          <CampaignServicesHeader />
+
+          {marketplaceEnabled ? (
+            <>
+              <TopDealsCarousel
+                services={flattenServices}
+                serviceRatings={bulkRatings}
+                onServiceClick={handleViewServiceDetails}
+              />
+              <CategoryBlocks 
+                onCategoryClick={handleCategoryClick}
+                services={flattenServices}
+              />
+
+              {/* Recently Viewed Services */}
+              <RecentlyViewedServices 
+                onServiceClick={handleViewServiceDetails}
+                className="mb-8"
+              />
+
+              {/* Service Bundles */}
+              {bundlesEnabled && (
+                <ServiceBundles 
+                  maxBundles={3}
+                  className="mb-8"
+                />
+              )}
+
+              {/* Sticky Enhanced Search Component */}
+              <StickySearchContainer>
+                <EnhancedSearch onSearchChange={handleEnhancedSearchChange} availableCategories={getCategories()} availableTags={getTags()} viewMode={viewMode} />
+              </StickySearchContainer>
+
+              {/* View Mode Toggle */}
+              <div id="marketplace-results" className="flex gap-2 mb-6">
+                <Button variant={viewMode === "services" ? "default" : "outline"} onClick={() => setViewMode("services")} className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-9 sm:h-10 text-sm sm:text-base">
+                  <Sparkles className="w-3 h-3 sm:w-4 sm:h-4" />
+                  {t('services')}
+                </Button>
+                <Button variant={viewMode === "products" ? "default" : "outline"} onClick={() => setViewMode("products")} className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-9 sm:h-10 text-sm sm:text-base">
+                  <Filter className="w-3 h-3 sm:w-4 sm:h-4" />
+                  Products
+                </Button>
+                <Button variant={viewMode === "vendors" ? "default" : "outline"} onClick={() => setViewMode("vendors")} className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-9 sm:h-10 text-sm sm:text-base">
+                  <Zap className="w-3 h-3 sm:w-4 sm:h-4" />
+                  {t('vendors')}
+                </Button>
+              </div>
+
+              {/* Grid - Mobile Responsive */}
+              {viewMode === "services" && (
+                <>
+                  <div className="mobile-grid gap-4 sm:gap-6">
+                    {flattenServices.map((service, index) => (
+                      <OptimizedServiceCard 
+                        key={`service-${service.id}-${index}`} 
+                        service={service} 
+                        onSave={handleSaveService} 
+                        onViewDetails={handleViewServiceDetails} 
+                        isSaved={allSavedServiceIds.includes(service.id)} 
+                        bulkRatings={bulkRatings} 
+                      />
+                    ))}
+                  </div>
+                  <div className="mt-6 flex items-center justify-center gap-4">
+                    <span className="text-sm text-muted-foreground">
+                      Showing {flattenServices.length} of {totalServicesCount} results
+                    </span>
+                    {hasNextPage && (
+                      <Button onClick={() => fetchNextPage()} disabled={isFetchingNextPage}>
+                        {isFetchingNextPage ? 'Loading…' : 'Load more'}
+                      </Button>
+                    )}
+                  </div>
+                </>
+              )}
+
+              {viewMode === "products" && (
+                selectedProductCategory ? (
+                  <div>
+                    <div className="mb-6 flex items-center gap-4">
+                      <Button variant="outline" onClick={() => setSelectedProductCategory(null)}>
+                        ← Back to Products
+                      </Button>
+                      <h2 className="text-2xl font-bold">
+                        {PRODUCT_CATEGORIES.find(p => p.id === selectedProductCategory)?.name}
+                      </h2>
+                    </div>
+                    <div className="mobile-grid gap-4 sm:gap-6">
+                      {getServicesForProduct(selectedProductCategory).map((service, index) => (
+                        <OptimizedServiceCard 
+                          key={`product-${selectedProductCategory}-${service.id}-${index}`} 
+                          service={service} 
+                          onSave={handleSaveService} 
+                          onViewDetails={handleViewServiceDetails} 
+                          isSaved={allSavedServiceIds.includes(service.id)} 
+                          bulkRatings={bulkRatings} 
+                        />
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="mobile-grid gap-4 sm:gap-6">
+                    {filteredProducts.map(product => {
+                      const IconComponent = product.icon;
+                      return (
+                        <div key={product.id} className="group relative overflow-hidden bg-white rounded-xl border border-gray-200 hover:border-gray-300 cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1" onClick={() => setSelectedProductCategory(product.id)}>
+                          {/* Background Gradient */}
+                          <div className={`absolute inset-0 bg-gradient-to-br ${product.gradient} opacity-5 group-hover:opacity-10 transition-opacity duration-300`} />
+
+                          {/* Content */}
+                          <div className="relative p-6">
+                            {/* Icon and Header */}
+                            <div className="flex items-start justify-between mb-4">
+                              <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${product.gradient} flex items-center justify-center shadow-lg`}>
+                                <IconComponent className="w-6 h-6 text-white" />
+                              </div>
+                              <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-gray-600 transform group-hover:translate-x-1 transition-all duration-300" />
+                              </div>
+                            </div>
+
+                            {/* Title */}
+                            <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-gray-800 transition-colors duration-300">
+                              {product.name}
+                            </h3>
+
+                            {/* Description */}
+                            <p className="text-gray-600 text-sm leading-relaxed mb-6 line-clamp-2">
+                              {product.description}
+                            </p>
+
+                            {/* Footer */}
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <div className={`w-2 h-2 rounded-full bg-gradient-to-r ${product.gradient}`} />
+                                <span className="text-sm font-medium text-gray-700">
+                                  {getServicesForProduct(product.id).length} providers
+                                </span>
+                              </div>
+                              <Button variant="ghost" size="sm" className={`${product.color} hover:bg-gray-50 font-medium opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0`}>
+                                Explore →
+                              </Button>
+                            </div>
+                          </div>
+
+                          {/* Hover Effect Overlay */}
+                          <div className="absolute inset-0 ring-1 ring-gray-200 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        </div>
+                      );
+                    })}
+                  </div>
+                )
+              )}
+
+              {viewMode === "vendors" && (
+                (isLoading || error) && vendors.length === 0 ? (
+                  <div className="space-y-4">
+                    <div className="mobile-grid gap-4 sm:gap-6">
+                      {Array.from({ length: 6 }).map((_, i) => (
+                        <div key={i} className="h-48 bg-muted rounded-lg animate-pulse" />
+                      ))}
+                    </div>
+                    <div className="flex items-center justify-center gap-2">
+                      <Button variant="outline" onClick={handleReloadDataQuick}>Reload data</Button>
+                      <Button onClick={handleHardRefresh}>Try again</Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="mobile-grid gap-4 sm:gap-6">
+                    {filteredVendors.map(vendor => (
+                      <MarketplaceVendorCard 
+                        key={vendor.id} 
+                        vendor={vendor} 
+                        onConnect={() => {}} 
+                        onViewProfile={() => {}} 
+                      />
+                    ))}
+                  </div>
+                )
+              )}
+
+              {/* Enhanced Empty State */}
+              {(viewMode === "services" && flattenServices.length === 0 || viewMode === "vendors" && filteredVendors.length === 0 || viewMode === "products" && !selectedProductCategory && filteredProducts.length === 0 || viewMode === "products" && selectedProductCategory && getServicesForProduct(selectedProductCategory).length === 0) && (
+                <div className="text-center py-12 space-y-6">
+                  <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Search className="w-8 h-8 text-muted-foreground" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-foreground mb-2">
+                      {t('noResultsFound', { type: viewMode })}
+                    </h3>
+                    <p className="text-muted-foreground mb-4">
+                      {t('tryAdjustingFilters')}
+                    </p>
+                  </div>
+
+                  {/* Loading/Error Status Banner */}
+                  {(isLoading && !marketplaceData) || (error && !marketplaceData) ? (
+                    <div className="mb-6">
+                      <div className="rounded-lg border bg-card text-card-foreground p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                        <span className="text-sm text-center sm:text-left">
+                          Oops! Our apologies, the services are not loading. This is common because of a browser error. Please clear your cache and reload.
+                        </span>
+                        <div className="flex gap-2 justify-center flex-wrap">
+                          <Button variant="outline" onClick={() => {
+                            // Clear browser storage
+                            localStorage.clear();
+                            sessionStorage.clear();
+                            // Force hard refresh with cache bypass
+                            window.location.reload();
+                          }}>Clear Cache</Button>
+                          <Button variant="outline" onClick={handleReloadDataQuick}>Reload data</Button>
+                          <Button onClick={handleHardRefresh}>Try again</Button>
+                        </div>
+                      </div>
+                    </div>
+                  ) : null}
+
+                  {/* Popular Search Suggestions */}
+                  {viewMode === "services" && (
+                    <div className="space-y-3">
+                      <p className="text-sm text-muted-foreground">Try searching for:</p>
+                      <div className="flex flex-wrap justify-center gap-2">
+                        {['Facebook Ads', 'SEO', 'Photography', 'Direct Mail', 'CRM'].map(term => (
+                          <Button key={term} variant="outline" size="sm" onClick={() => {
+                            setSearchTerm(term);
+                            setSearchFilters(prev => ({
+                              ...prev,
+                              query: term
+                            }));
+                          }} className="h-8 text-xs">
+                            {term}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                    <Button variant="outline" onClick={() => {
+                      setSearchTerm("");
+                      setFilters({
+                        category: "all",
+                        priceRange: [0, 2000],
+                        verified: false,
+                        featured: false,
+                        coPayEligible: false,
+                        locationFilter: false
+                      });
+                    }}>
+                      {t('clearAll')} filters
+                    </Button>
+
+                    {/* Quick Tour Button */}
+                    <TourDiscoveryButton />
+                  </div>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="text-center py-12 space-y-6">
+              <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                <Search className="w-8 h-8 text-muted-foreground" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-foreground mb-2">
+                  Marketplace Temporarily Unavailable
+                </h3>
+                <p className="text-muted-foreground">
+                  The marketplace has been disabled by administrators. Please check back later.
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Service Details Modal */}
+      {selectedService && (
+        <ServiceDetailsModal 
+          service={selectedService} 
+          isOpen={isServiceModalOpen} 
+          onClose={handleCloseServiceModal} 
+        />
+      )}
+
+      {/* Add Product Modal */}
+      <AddProductModal 
+        open={isAddProductModalOpen} 
+        onOpenChange={setIsAddProductModalOpen} 
+        onProductAdded={() => {}} 
+      />
+    </>
+  );
+
+  // Helper function to get services for a product category
+  function getServicesForProduct(productId: string) {
+    const productMapping: { [key: string]: string[] } = {
       'facebook-ads': ['facebook', 'social media ads', 'digital marketing', 'meta ads', 'instagram ads', 'social advertising', 'paid social'],
       'google-ads': ['google', 'ppc', 'search ads', 'google adwords', 'paid search', 'sem', 'display ads', 'youtube ads'],
       'direct-mail': ['direct mail', 'postcards', 'flyers', 'mailers', 'print marketing', 'door hangers', 'marketing materials'],
@@ -548,243 +792,5 @@ export const MarketplaceGrid = () => {
       const tags = service.tags?.map(tag => tag?.toLowerCase() || '') || [];
       return keywords.some(keyword => title.includes(keyword) || description.includes(keyword) || category.includes(keyword) || tags.some(tag => tag.includes(keyword)));
     });
-  };
-  return <>
-      <div className="min-h-screen bg-background">
-        <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
-          {/* Hero Section */}
-          <div className="mb-12">
-            <h1 className="text-3xl sm:text-6xl font-bold text-black mb-4 lcp-content">Agent Marketplace.</h1>
-            <p className="text-gray-600 max-w-2xl text-sm lcp-content">Finally, the noise is gone. Welcome to the Marketplace — where real estate agents can compare and explore the best tools at a fraction of the cost. Every option is curated, easy to compare. Stop guessing. Buy outcomes, not tools.</p>
-          </div>
-
-
-
-          {/* Circle Pro Banner - Show for non-signed-in users and non-pro members */}
-          {(!user || !profile?.is_pro_member) && <CircleProBanner />}
-
-          {/* AI Concierge Banner - Show for all users */}
-          <AIConciergeBanner />
-
-          {/* Campaign Services Header */}
-          <CampaignServicesHeader />
-
-           <>
-             <TopDealsCarousel
-                 services={flattenServices}
-                 serviceRatings={bulkRatings}
-                 onServiceClick={handleViewServiceDetails}
-               />
-               <CategoryBlocks 
-                 onCategoryClick={handleCategoryClick}
-                 services={flattenServices}
-               />
-
-               {/* Recently Viewed Services */}
-               <RecentlyViewedServices 
-                 onServiceClick={handleViewServiceDetails}
-                 className="mb-8"
-               />
-
-                {/* Service Bundles */}
-                {bundlesEnabled && (
-                  <ServiceBundles 
-                    maxBundles={3}
-                    className="mb-8"
-                  />
-                )}
-
-             
-           </>
-
-           {/* Sticky Enhanced Search Component */}
-          <StickySearchContainer>
-            <EnhancedSearch onSearchChange={handleEnhancedSearchChange} availableCategories={getCategories()} availableTags={getTags()} viewMode={viewMode} />
-          </StickySearchContainer>
-
-          {/* View Mode Toggle */}
-          <div id="marketplace-results" className="flex gap-2 mb-6">
-            <Button variant={viewMode === "services" ? "default" : "outline"} onClick={() => setViewMode("services")} className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-9 sm:h-10 text-sm sm:text-base">
-              <Sparkles className="w-3 h-3 sm:w-4 sm:h-4" />
-              {t('services')}
-            </Button>
-            <Button variant={viewMode === "products" ? "default" : "outline"} onClick={() => setViewMode("products")} className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-9 sm:h-10 text-sm sm:text-base">
-              <Filter className="w-3 h-3 sm:w-4 sm:h-4" />
-              Products
-            </Button>
-            <Button variant={viewMode === "vendors" ? "default" : "outline"} onClick={() => setViewMode("vendors")} className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-9 sm:h-10 text-sm sm:text-base">
-              <Zap className="w-3 h-3 sm:w-4 sm:h-4" />
-              {t('vendors')}
-            </Button>
-          </div>
-
-
-          {/* Grid - Mobile Responsive */}
-        {viewMode === "services" ? <>
-    <div className="mobile-grid gap-4 sm:gap-6">
-      {flattenServices.map((service, index) => <OptimizedServiceCard key={`service-${service.id}-${index}`} service={service} onSave={handleSaveService} onViewDetails={handleViewServiceDetails} isSaved={allSavedServiceIds.includes(service.id)} bulkRatings={bulkRatings} />)}
-    </div>
-    <div className="mt-6 flex items-center justify-center gap-4">
-      <span className="text-sm text-muted-foreground">
-        Showing {flattenServices.length} of {totalServicesCount} results
-      </span>
-      {hasNextPage && <Button onClick={() => fetchNextPage()} disabled={isFetchingNextPage}>
-          {isFetchingNextPage ? 'Loading…' : 'Load more'}
-        </Button>}
-    </div>
-  </> : viewMode === "products" ? selectedProductCategory ? <div>
-      <div className="mb-6 flex items-center gap-4">
-        <Button variant="outline" onClick={handleBackToProducts}>
-          ← Back to Products
-        </Button>
-        <h2 className="text-2xl font-bold">
-          {PRODUCT_CATEGORIES.find(p => p.id === selectedProductCategory)?.name}
-        </h2>
-      </div>
-      <div className="mobile-grid gap-4 sm:gap-6">
-        {getServicesForProduct(selectedProductCategory).map((service, index) => <OptimizedServiceCard key={`product-${selectedProductCategory}-${service.id}-${index}`} service={service} onSave={handleSaveService} onViewDetails={handleViewServiceDetails} isSaved={allSavedServiceIds.includes(service.id)} bulkRatings={bulkRatings} />)}
-      </div>
-    </div> : <div className="mobile-grid gap-4 sm:gap-6">
-      {filteredProducts.map(product => {
-            const IconComponent = product.icon;
-            return <div key={product.id} className="group relative overflow-hidden bg-white rounded-xl border border-gray-200 hover:border-gray-300 cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1" onClick={() => handleSelectProduct(product.id)}>
-            {/* Background Gradient */}
-            <div className={`absolute inset-0 bg-gradient-to-br ${product.gradient} opacity-5 group-hover:opacity-10 transition-opacity duration-300`} />
-
-            {/* Content */}
-            <div className="relative p-6">
-              {/* Icon and Header */}
-              <div className="flex items-start justify-between mb-4">
-                <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${product.gradient} flex items-center justify-center shadow-lg`}>
-                  <IconComponent className="w-6 h-6 text-white" />
-                </div>
-                <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-gray-600 transform group-hover:translate-x-1 transition-all duration-300" />
-                </div>
-              </div>
-
-              {/* Title */}
-              <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-gray-800 transition-colors duration-300">
-                {product.name}
-              </h3>
-
-              {/* Description */}
-              <p className="text-gray-600 text-sm leading-relaxed mb-6 line-clamp-2">
-                {product.description}
-              </p>
-
-              {/* Footer */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className={`w-2 h-2 rounded-full bg-gradient-to-r ${product.gradient}`} />
-                  <span className="text-sm font-medium text-gray-700">
-                    {getServicesForProduct(product.id).length} providers
-                  </span>
-                </div>
-                <Button variant="ghost" size="sm" className={`${product.color} hover:bg-gray-50 font-medium opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0`}>
-                  Explore →
-                </Button>
-              </div>
-            </div>
-
-            {/* Hover Effect Overlay */}
-            <div className="absolute inset-0 ring-1 ring-gray-200 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-          </div>;
-          })}
-    </div> : (isLoading || error) && vendors.length === 0 ? <div className="space-y-4">
-        <div className="mobile-grid gap-4 sm:gap-6">
-          {Array.from({
-              length: 6
-            }).map((_, i) => <div key={i} className="h-48 bg-muted rounded-lg animate-pulse" />)}
-        </div>
-        <div className="flex items-center justify-center gap-2">
-          <Button variant="outline" onClick={handleReloadDataQuick}>Reload data</Button>
-          <Button onClick={handleHardRefresh}>Try again</Button>
-        </div>
-      </div> : <div className="mobile-grid gap-4 sm:gap-6">
-        {filteredVendors.map(vendor => <MarketplaceVendorCard key={vendor.id} vendor={vendor} onConnect={handleConnectVendor} onViewProfile={handleViewVendorProfile} />)}
-      </div>}
-
-        {/* Enhanced Empty State */}
-        {(viewMode === "services" && flattenServices.length === 0 || viewMode === "vendors" && filteredVendors.length === 0 || viewMode === "products" && !selectedProductCategory && filteredProducts.length === 0 || viewMode === "products" && selectedProductCategory && getServicesForProduct(selectedProductCategory).length === 0) && <div className="text-center py-12 space-y-6">
-    <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-      <Search className="w-8 h-8 text-muted-foreground" />
-    </div>
-    <div>
-      <h3 className="text-lg font-semibold text-foreground mb-2">
-        {t('noResultsFound', {
-                type: viewMode
-              })}
-      </h3>
-      <p className="text-muted-foreground mb-4">
-        {t('tryAdjustingFilters')}
-      </p>
-    </div>
-
-    {/* Loading/Error Status Banner */}
-    {(isLoading && !marketplaceData) || (error && !marketplaceData) ? (
-      <div className="mb-6">
-        <div className="rounded-lg border bg-card text-card-foreground p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <span className="text-sm text-center sm:text-left">
-            Oops! Our apologies, the services are not loading. This is common because of a browser error. Please clear your cache and reload.
-          </span>
-          <div className="flex gap-2 justify-center flex-wrap">
-            <Button variant="outline" onClick={() => {
-              // Clear browser storage
-              localStorage.clear();
-              sessionStorage.clear();
-              // Force hard refresh with cache bypass
-              window.location.reload();
-            }}>Clear Cache</Button>
-            <Button variant="outline" onClick={handleReloadDataQuick}>Reload data</Button>
-            <Button onClick={handleHardRefresh}>Try again</Button>
-          </div>
-        </div>
-      </div>
-    ) : null}
-    
-    {/* Popular Search Suggestions */}
-    {viewMode === "services" && <div className="space-y-3">
-        <p className="text-sm text-muted-foreground">Try searching for:</p>
-        <div className="flex flex-wrap justify-center gap-2">
-          {['Facebook Ads', 'SEO', 'Photography', 'Direct Mail', 'CRM'].map(term => <Button key={term} variant="outline" size="sm" onClick={() => {
-                setSearchTerm(term);
-                setSearchFilters(prev => ({
-                  ...prev,
-                  query: term
-                }));
-              }} className="h-8 text-xs">
-              {term}
-            </Button>)}
-        </div>
-      </div>}
-    
-    <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-      <Button variant="outline" onClick={() => {
-              setSearchTerm("");
-              setFilters({
-                category: "all",
-                priceRange: [0, 2000],
-                verified: false,
-                featured: false,
-                coPayEligible: false,
-                locationFilter: false
-              });
-            }}>
-        {t('clearAll')} filters
-      </Button>
-      
-      {/* Quick Tour Button */}
-      <TourDiscoveryButton />
-    </div>
-  </div>}
-        </div>
-      </div>
-
-      {/* Service Details Modal */}
-      {selectedService && <ServiceDetailsModal service={selectedService} isOpen={isServiceModalOpen} onClose={handleCloseServiceModal} />}
-
-      {/* Add Product Modal */}
-      <AddProductModal open={isAddProductModalOpen} onOpenChange={setIsAddProductModalOpen} onProductAdded={() => {}} />
-    </>;
+  }
 };
