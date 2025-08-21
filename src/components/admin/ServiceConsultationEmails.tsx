@@ -112,6 +112,7 @@ export const ServiceConsultationEmails = ({ serviceId, serviceName }: ServiceCon
         .select();
 
       console.log('Update response:', { data, error });
+      console.log('Update error details:', error);
 
       if (error) {
         console.error('Supabase error details:', error);
