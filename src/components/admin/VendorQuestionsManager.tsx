@@ -70,7 +70,7 @@ export const VendorQuestionsManager = ({ vendorId, vendorName }: VendorQuestions
       if (error) throw error;
 
       if (data?.success) {
-        toast.success(`Generated AI answers for all 8 questions!`);
+        toast.success(`Generated AI answers for all 7 questions!`);
         // Refresh the questions to show the new AI-generated answers
         await refetch();
       } else {
@@ -154,7 +154,7 @@ export const VendorQuestionsManager = ({ vendorId, vendorName }: VendorQuestions
         <div>
           <h3 className="text-lg font-medium">Vendor Questions & Answers</h3>
           <p className="text-sm text-muted-foreground">
-            Manage the 8 evaluation questions for {vendorName}
+            Manage the 7 evaluation questions for {vendorName}
           </p>
         </div>
         <div className="flex gap-2">
