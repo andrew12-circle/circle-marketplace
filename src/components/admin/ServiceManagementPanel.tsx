@@ -29,6 +29,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useInvalidateMarketplace, QUERY_KEYS } from '@/hooks/useMarketplaceData';
 import { useQueryClient } from '@tanstack/react-query';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { ServiceConsultationEmails } from './ServiceConsultationEmails';
 
 interface PricingFeature {
   id: string;
@@ -1340,6 +1341,14 @@ export const ServiceManagementPanel = () => {
                         </div>
                       </div>
                     )}
+
+                    {/* Consultation Email Alerts */}
+                    <div className="border-t pt-6">
+                      <ServiceConsultationEmails
+                        serviceId={selectedService.id}
+                        serviceName={selectedService.title}
+                      />
+                    </div>
 
                     <div className="flex gap-2">
                       <Button onClick={handleServiceUpdate} disabled={!isDetailsDirty}>
