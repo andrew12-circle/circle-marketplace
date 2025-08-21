@@ -188,7 +188,7 @@ export const MarketplaceGrid = () => {
     holdout: 0.1
   });
   const orderStrategy = variant === 'holdout' ? 'recent' : 'ranked';
-  const [enablePagination, setEnablePagination] = useState(false);
+  const [enablePagination, setEnablePagination] = useState(true); // Enable by default to show services immediately
   
   // Enable pagination when user starts searching or filtering
   useEffect(() => {
