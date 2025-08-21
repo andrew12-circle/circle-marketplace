@@ -7257,6 +7257,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      ensure_profile_exists: {
+        Args: { p_user_id: string }
+        Returns: boolean
+      }
       expire_co_pay_requests: {
         Args: Record<PropertyKey, never>
         Returns: undefined
