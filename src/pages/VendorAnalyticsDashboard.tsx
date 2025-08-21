@@ -761,3 +761,5 @@ export const VendorAnalyticsDashboard = () => {
     </div>
   );
 };
+
+export default VendorAnalyticsDashboard;
