@@ -1,7 +1,7 @@
 import { useState, useEffect, createContext, useContext } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { SecurityProvider } from '@/components/security/SecurityEnhancementSystem';
+
 import { logger } from '@/utils/logger';
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -177,9 +177,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <AuthContext.Provider value={value}>
-      <SecurityProvider>
-        {children}
-      </SecurityProvider>
+      {children}
     </AuthContext.Provider>
   );
 };

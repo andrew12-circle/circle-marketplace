@@ -9,6 +9,7 @@ import { CartProvider } from "@/contexts/CartContext";
 import { cacheManager } from "./utils/cacheManager";
 import { globalErrorMonitor } from "./utils/globalErrorMonitor";
 import { ReloadReasonBanner } from "./components/common/ReloadReasonBanner";
+import { SecurityProvider } from "@/components/security/SecurityEnhancementSystem";
 import "./index.css";
 import "./i18n";
 
@@ -100,8 +101,9 @@ createRoot(document.getElementById("root")!).render(
     <SpiritualCoverageProvider>
         <AuthProvider>
           <BrowserRouter>
-            <CartProvider>
-            <Suspense fallback={<RouteLoader />}>
+            <SecurityProvider>
+              <CartProvider>
+                <Suspense fallback={<RouteLoader />}>
             <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
@@ -170,10 +172,11 @@ createRoot(document.getElementById("root")!).render(
                 
                 <Route path="*" element={<NotFound />} />
             </Routes>
-          </Suspense>
-          <Toaster />
-          <ReloadReasonBanner />
-          </CartProvider>
+                </Suspense>
+                <Toaster />
+                <ReloadReasonBanner />
+              </CartProvider>
+            </SecurityProvider>
         </BrowserRouter>
       </AuthProvider>
     </SpiritualCoverageProvider>
