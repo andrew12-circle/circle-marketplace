@@ -405,10 +405,10 @@ export const ServiceFunnelModal = ({
                           <div className="text-2xl font-bold">{isVerified && service.duration ? service.duration : 'TBD'}</div>
                           <div className="text-xs text-blue-200">Time to Results</div>
                         </div>
-                       <div className="text-center p-3 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
-                         <div className="text-2xl font-bold">TBD</div>
-                         <div className="text-xs text-blue-200">Time to Setup</div>
-                       </div>
+                        <div className="text-center p-3 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 flex flex-col items-center justify-center">
+                          <div className="text-2xl font-bold">TBD</div>
+                          <div className="text-xs text-blue-200">Time to Setup</div>
+                        </div>
                       {showSupportStats && <div className="text-center p-3 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
                           <div className="text-2xl font-bold">{service.vendor?.support_hours || 'Business Hours'}</div>
                           <div className="text-xs text-blue-200">Support</div>
