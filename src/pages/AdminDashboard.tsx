@@ -127,9 +127,10 @@ export default function AdminDashboard() {
         query = query.gte('created_at', sevenDaysAgo.toISOString());
       }
 
-      // Apply search
+      // Apply search - fix the search logic to avoid UUID type errors
       if (userSearchTerm) {
-        query = query.or(`display_name.ilike.%${userSearchTerm}%,business_name.ilike.%${userSearchTerm}%,user_id.eq.${userSearchTerm}`);
+        // Only search in text fields, not UUID fields
+        query = query.or(`display_name.ilike.%${userSearchTerm}%,business_name.ilike.%${userSearchTerm}%`);
       }
 
       const { data, error, count } = await query
