@@ -915,53 +915,6 @@ export const ServiceFunnelModal = ({
                 )}
               </div>
 
-              {/* Last Updated & Pricing Verification Section */}
-              <div className="mt-8 border-t border-gray-200 pt-4">
-                <div className="text-center max-w-xl mx-auto">
-                  <div className="inline-flex items-center gap-2 mb-3 text-xs text-gray-500">
-                    <Clock className="w-3 h-3" />
-                    Last updated: {(service as any).updated_at ? new Date((service as any).updated_at).toLocaleDateString('en-US', { 
-                      year: 'numeric', 
-                      month: 'short', 
-                      day: 'numeric' 
-                    }) : 'Date not available'}
-                  </div>
-                  
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                    <h4 className="text-sm font-medium text-blue-900 mb-2">
-                      Pricing Verification
-                    </h4>
-                    
-                    <p className="text-xs text-blue-700 mb-3 leading-relaxed">
-                      We make choosing simple. If prices changed since this date, verify directly. 
-                      You'll finalize billing with the company - we're just a facilitator.
-                    </p>
-                    
-                    <div className="flex flex-col sm:flex-row gap-2 justify-center">
-                      {service.website_url && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => window.open(service.website_url, '_blank')}
-                          className="border-blue-300 text-blue-700 hover:bg-blue-100 text-xs"
-                        >
-                          <Globe className="w-3 h-3 mr-1" />
-                          Visit Website
-                        </Button>
-                      )}
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setIsConsultationFlowOpen(true)}
-                        className="border-blue-300 text-blue-700 hover:bg-blue-100 text-xs"
-                      >
-                        <Calendar className="w-3 h-3 mr-1" />
-                        Book Consultation
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>}
 
@@ -983,12 +936,50 @@ export const ServiceFunnelModal = ({
                     <h3 className="text-sm font-semibold text-amber-800 mb-2">
                       Circle Marketplace Disclaimer
                     </h3>
-                    <p className="text-sm text-amber-700 leading-relaxed">
+                    <p className="text-sm text-amber-700 leading-relaxed mb-4">
                       This service listing represents Circle Marketplace's opinion based on publicly available data. 
                       We do not endorse or have independently verified the pricing, service details, or company capabilities listed. 
                       All information and recommendations are derived from our analysis and should be independently verified. 
                       Circle Marketplace bears no responsibility for the accuracy of vendor claims or service delivery quality.
                     </p>
+                    
+                    {/* Pricing Verification */}
+                    <div className="bg-amber-100 rounded-lg p-3 mt-3">
+                      <div className="inline-flex items-center gap-2 mb-2 text-xs text-amber-700">
+                        <Clock className="w-3 h-3" />
+                        Last updated: {(service as any).updated_at ? new Date((service as any).updated_at).toLocaleDateString('en-US', { 
+                          year: 'numeric', 
+                          month: 'short', 
+                          day: 'numeric' 
+                        }) : 'Date not available'}
+                      </div>
+                      <p className="text-xs text-amber-700 mb-3">
+                        We make choosing simple. If prices changed since this date, verify directly. 
+                        You'll finalize billing with the company - we're just a facilitator.
+                      </p>
+                      <div className="flex flex-col sm:flex-row gap-2">
+                        {service.website_url && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => window.open(service.website_url, '_blank')}
+                            className="border-amber-300 text-amber-700 hover:bg-amber-100 text-xs"
+                          >
+                            <Globe className="w-3 h-3 mr-1" />
+                            Visit Website
+                          </Button>
+                        )}
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setIsConsultationFlowOpen(true)}
+                          className="border-amber-300 text-amber-700 hover:bg-amber-100 text-xs"
+                        >
+                          <Calendar className="w-3 h-3 mr-1" />
+                          Book Consultation
+                        </Button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -998,13 +989,13 @@ export const ServiceFunnelModal = ({
           {isVerified && <div className="border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/50 rounded-lg p-4 mt-6">
               <div className="flex items-start space-x-3">
                 <Shield className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
-                <div>
+                <div className="flex-1">
                   <div className="flex items-center space-x-2 mb-2">
                     <h4 className="text-sm font-semibold text-blue-900 dark:text-blue-100">
                       Verified Pricing Disclaimer
                     </h4>
                   </div>
-                  <div className="text-xs text-blue-800 dark:text-blue-200 space-y-2">
+                  <div className="text-xs text-blue-800 dark:text-blue-200 space-y-2 mb-3">
                     <p>
                       This service has verified pricing through our verification process. However, pricing is subject to change 
                       and vendors may not have updated their information since changes occurred.
@@ -1013,6 +1004,44 @@ export const ServiceFunnelModal = ({
                       Circle Marketplace cannot guarantee service quality, satisfaction, or discounts as we are a marketplace 
                       platform that represents other companies to make shopping easier. Please verify all details directly with the vendor.
                     </p>
+                  </div>
+                  
+                  {/* Pricing Verification */}
+                  <div className="bg-blue-100 rounded-lg p-3">
+                    <div className="inline-flex items-center gap-2 mb-2 text-xs text-blue-700">
+                      <Clock className="w-3 h-3" />
+                      Last updated: {(service as any).updated_at ? new Date((service as any).updated_at).toLocaleDateString('en-US', { 
+                        year: 'numeric', 
+                        month: 'short', 
+                        day: 'numeric' 
+                      }) : 'Date not available'}
+                    </div>
+                    <p className="text-xs text-blue-700 mb-3">
+                      We make choosing simple. If prices changed since this date, verify directly. 
+                      You'll finalize billing with the company - we're just a facilitator.
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      {service.website_url && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => window.open(service.website_url, '_blank')}
+                          className="border-blue-300 text-blue-700 hover:bg-blue-100 text-xs"
+                        >
+                          <Globe className="w-3 h-3 mr-1" />
+                          Visit Website
+                        </Button>
+                      )}
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setIsConsultationFlowOpen(true)}
+                        className="border-blue-300 text-blue-700 hover:bg-blue-100 text-xs"
+                      >
+                        <Calendar className="w-3 h-3 mr-1" />
+                        Book Consultation
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </div>
