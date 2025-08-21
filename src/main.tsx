@@ -66,6 +66,7 @@ const PartnerPaymentCanceled = lazy(() => import("./pages/PartnerPaymentCanceled
 const AgentPaymentSuccess = lazy(() => import("./pages/AgentPaymentSuccess").then(m => ({ default: m.AgentPaymentSuccess })));
 const AgentPaymentCanceled = lazy(() => import("./pages/AgentPaymentCanceled").then(m => ({ default: m.AgentPaymentCanceled })));
 const CommandCenterTest = lazy(() => import("./pages/CommandCenterTest").then(m => ({ default: m.CommandCenterTest })));
+const QARunner = lazy(() => import("./pages/QARunner").then(m => ({ default: m.QARunner })));
 
 // Loading component for lazy routes
 const RouteLoader = () => (
@@ -162,6 +163,7 @@ createRoot(document.getElementById("root")!).render(
                 <Route path="/agent-payment-success" element={<AgentPaymentSuccess />} />
                 <Route path="/agent-payment-canceled" element={<AgentPaymentCanceled />} />
                 <Route path="/command-center-test" element={<CommandCenterTest />} />
+                <Route path="/qa" element={<QARunner />} />
                 
                 {/* Profile settings alternate path */}
                 <Route path="/profile" element={<ProfileSettings />} />

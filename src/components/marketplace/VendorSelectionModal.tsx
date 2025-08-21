@@ -221,7 +221,7 @@ export const VendorSelectionModal = ({
         return;
       }
 
-      // Query vendors with calculated real-time stats
+      // Query vendors with calculated real-time stats - include pending vendors
       const { data, error } = await supabase
         .from('vendors')
         .select(`
@@ -238,9 +238,10 @@ export const VendorSelectionModal = ({
           parent_vendor_id
         `)
         .eq('is_active', true)
+        .in('approval_status', ['approved', 'auto_approved', 'pending'])
         .order('sort_order', { ascending: true })
         .order('rating', { ascending: false })
-        .limit(20);
+        .limit(100);
 
       console.log('VendorSelectionModal: Supabase response:', { data, error, dataLength: data?.length });
 
@@ -253,16 +254,21 @@ export const VendorSelectionModal = ({
       const vendorsWithStatsAndFiltering = await Promise.all(
         (data || []).map(async (vendor) => {
           try {
-            // Check if agent matches vendor criteria
-            const { data: matchResult, error: matchError } = await supabase
-              .rpc('check_agent_vendor_match', { 
-                p_agent_id: user.id, 
-                p_vendor_id: vendor.id 
-              });
-            
-            if (matchError) {
-              console.error('Error checking agent match for vendor:', vendor.id, matchError);
-              // If match check fails, include vendor by default
+            // Check if agent matches vendor criteria - non-blocking approach
+            let matchResult = true; // Default to true
+            try {
+              const { data: rpcMatchResult, error: matchError } = await supabase
+                .rpc('check_agent_vendor_match', { 
+                  p_agent_id: user.id, 
+                  p_vendor_id: vendor.id 
+                });
+              
+              if (!matchError && rpcMatchResult !== undefined) {
+                matchResult = rpcMatchResult;
+              }
+            } catch (rpcError) {
+              console.warn('Agent-vendor match RPC failed, allowing vendor by default:', rpcError);
+              // Keep matchResult as true
             }
 
             // Calculate real-time stats
@@ -275,9 +281,9 @@ export const VendorSelectionModal = ({
 
             return {
               ...vendor,
-              co_marketing_agents: (statsData as any)?.co_marketing_agents || 0,
+              co_marketing_agents: (statsData as any)?.computed_co_marketing_agents || 0,
               campaigns_funded: (statsData as any)?.campaigns_funded || 0,
-              matches_agent_profile: matchResult !== false // Include if match check failed
+              matches_agent_profile: matchResult
             };
           } catch (err) {
             console.error('Error processing vendor:', err);
@@ -291,10 +297,17 @@ export const VendorSelectionModal = ({
         })
       );
 
-      // Filter out vendors that don't match agent criteria
-      const filteredVendors = vendorsWithStatsAndFiltering.filter(vendor => 
+      // Apply non-blocking filtering - if no matches, show all vendors
+      let filteredVendors = vendorsWithStatsAndFiltering.filter(vendor => 
         vendor.matches_agent_profile
       );
+      
+      // Fallback: if filtering resulted in zero vendors, show all and set flag
+      if (filteredVendors.length === 0) {
+        console.warn('No vendors matched agent criteria, showing all vendors as fallback');
+        filteredVendors = vendorsWithStatsAndFiltering.map(v => ({ ...v, matches_agent_profile: true }));
+        setShowAllVendors(true); // Auto-enable show all vendors
+      }
 
       setVendors(filteredVendors);
       console.log('VendorSelectionModal: Vendors set successfully with live stats and filtering, count:', filteredVendors.length);
@@ -451,6 +464,13 @@ export const VendorSelectionModal = ({
               <p className="text-xs text-muted-foreground">
                 Showing vendors available in {location.state}
               </p>
+            )}
+            {/* QA Diagnostics when ?qa=1 is present */}
+            {new URLSearchParams(window.location.search).get('qa') === '1' && (
+              <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded text-xs">
+                <strong>QA Mode:</strong> Total vendors: {vendors.length} | After filters: {filteredVendors.length}
+                {vendors.length === 0 && <span className="text-red-600"> ⚠️ No vendors loaded!</span>}
+              </div>
             )}
           </div>
           <div className="flex items-center space-x-2 shrink-0 mr-8">

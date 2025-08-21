@@ -40,6 +40,7 @@ import { TourDiscoveryButton } from "./TourDiscoveryButton";
 import { SmartSearchAutocomplete } from "./SmartSearchAutocomplete";
 import { RecentlyViewedServices } from "./RecentlyViewedServices";
 import { ServiceBundles } from "./ServiceBundles";
+import { QAOverlay } from "./QAOverlay";
 
 interface FilterState {
   category: string;
@@ -359,6 +360,10 @@ export const MarketplaceGrid = () => {
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
   const [isAddProductModalOpen, setIsAddProductModalOpen] = useState(false);
+  const [showQAOverlay, setShowQAOverlay] = useState(false);
+  
+  // Check for QA mode
+  const isQAMode = new URLSearchParams(window.location.search).get('qa') === '1';
 
   // Combine saved services from hook and local state
   const allSavedServiceIds = [...savedServiceIds, ...localSavedServiceIds];
@@ -475,10 +480,39 @@ export const MarketplaceGrid = () => {
     <>
       <div className="min-h-screen bg-background">
         <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
+          {/* QA Mode Indicator and Controls */}
+          {isQAMode && (
+            <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+                <span className="text-sm font-medium text-blue-800">QA Mode Active</span>
+                <span className="text-xs text-blue-600">Enhanced diagnostics enabled</span>
+              </div>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={() => setShowQAOverlay(true)}>
+                  Show Diagnostics
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => window.open('/qa', '_blank')}>
+                  Full QA Runner
+                </Button>
+              </div>
+            </div>
+          )}
+
           {/* Hero Section */}
           <div className="mb-12">
             <h1 className="text-3xl sm:text-6xl font-bold text-black mb-4 lcp-content">Agent Marketplace.</h1>
             <p className="text-gray-600 max-w-2xl text-sm lcp-content">Finally, the noise is gone. Welcome to the Marketplace — where real estate agents can compare and explore the best tools at a fraction of the cost. Every option is curated, easy to compare. Stop guessing. Buy outcomes, not tools.</p>
+            
+            {/* QA Diagnostics in Hero when in QA mode */}
+            {isQAMode && (
+              <div className="mt-4 p-2 bg-gray-50 border rounded text-xs space-y-1">
+                <div><strong>Services:</strong> {services.length} loaded, {flattenServices.length} after pagination</div>
+                <div><strong>Vendors:</strong> {vendors.length} active</div>
+                <div><strong>Location:</strong> {location?.state || 'Unknown'}</div>
+                <div><strong>Auth:</strong> {user ? `Authenticated (${user.id.slice(0, 8)}...)` : 'Not authenticated'}</div>
+              </div>
+            )}
           </div>
 
           {/* Circle Pro Banner - Show for non-signed-in users and non-pro members */}
@@ -767,6 +801,11 @@ export const MarketplaceGrid = () => {
         onOpenChange={setIsAddProductModalOpen} 
         onProductAdded={() => {}} 
       />
+
+      {/* QA Overlay */}
+      {showQAOverlay && (
+        <QAOverlay onClose={() => setShowQAOverlay(false)} />
+      )}
     </>
   );
 
