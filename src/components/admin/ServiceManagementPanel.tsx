@@ -76,6 +76,8 @@ interface Service {
   is_top_pick: boolean;
   is_verified?: boolean;
   is_active?: boolean;
+  is_affiliate?: boolean;
+  is_booking_link?: boolean;
   direct_purchase_enabled?: boolean;
   vendor_id?: string;
   service_provider_id?: string;
@@ -752,6 +754,78 @@ export const ServiceManagementPanel = () => {
     }
   };
 
+  const handleAffiliateToggle = async (serviceId: string, currentStatus: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('services')
+        .update({ is_affiliate: !currentStatus })
+        .eq('id', serviceId);
+
+      if (error) throw error;
+
+      // Update local state
+      setServices(services.map(service => 
+        service.id === serviceId 
+          ? { ...service, is_affiliate: !currentStatus }
+          : service
+      ));
+
+      if (selectedService?.id === serviceId) {
+        const updatedService = { ...selectedService, is_affiliate: !currentStatus };
+        setSelectedService(updatedService);
+        setEditForm(updatedService);
+      }
+
+      toast({
+        title: 'Success',
+        description: `Service affiliate status ${!currentStatus ? 'enabled' : 'disabled'}`,
+      });
+    } catch (error) {
+      console.error('Error updating affiliate status:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update affiliate status',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleBookingLinkToggle = async (serviceId: string, currentStatus: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('services')
+        .update({ is_booking_link: !currentStatus })
+        .eq('id', serviceId);
+
+      if (error) throw error;
+
+      // Update local state
+      setServices(services.map(service => 
+        service.id === serviceId 
+          ? { ...service, is_booking_link: !currentStatus }
+          : service
+      ));
+
+      if (selectedService?.id === serviceId) {
+        const updatedService = { ...selectedService, is_booking_link: !currentStatus };
+        setSelectedService(updatedService);
+        setEditForm(updatedService);
+      }
+
+      toast({
+        title: 'Success',
+        description: `Service booking link ${!currentStatus ? 'enabled' : 'disabled'}`,
+      });
+    } catch (error) {
+      console.error('Error updating booking link status:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update booking link status',
+        variant: 'destructive',
+      });
+    }
+  };
+
   const handleFunnelSave = async (): Promise<SaveResult> => {
     if (!selectedService) return { savedAt: new Date().toISOString(), verified: false };
 
@@ -976,15 +1050,31 @@ export const ServiceManagementPanel = () => {
                                   onClick={(e) => e.stopPropagation()}
                                 />
                               </div>
-                              <div className="flex items-center gap-2">
-                                <span className="text-xs text-muted-foreground w-12">Active</span>
-                                <Switch
-                                  checked={service.is_active || false}
-                                  onCheckedChange={() => handleVisibilityToggle(service.id, service.is_active || false)}
-                                  onClick={(e) => e.stopPropagation()}
-                                />
+                               <div className="flex items-center gap-2">
+                                 <span className="text-xs text-muted-foreground w-12">Active</span>
+                                 <Switch
+                                   checked={service.is_active || false}
+                                   onCheckedChange={() => handleVisibilityToggle(service.id, service.is_active || false)}
+                                   onClick={(e) => e.stopPropagation()}
+                                 />
+                               </div>
+                               <div className="flex items-center gap-2">
+                                 <span className="text-xs text-muted-foreground w-12">Affiliate</span>
+                                 <Switch
+                                   checked={service.is_affiliate || false}
+                                   onCheckedChange={() => handleAffiliateToggle(service.id, service.is_affiliate || false)}
+                                   onClick={(e) => e.stopPropagation()}
+                                 />
+                               </div>
+                               <div className="flex items-center gap-2">
+                                 <span className="text-xs text-muted-foreground w-12">Booking</span>
+                                 <Switch
+                                   checked={service.is_booking_link || false}
+                                   onCheckedChange={() => handleBookingLinkToggle(service.id, service.is_booking_link || false)}
+                                   onClick={(e) => e.stopPropagation()}
+                                 />
+                               </div>
                               </div>
-                             </div>
                            </div>
                          </div>
                   </CardContent>
