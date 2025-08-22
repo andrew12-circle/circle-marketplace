@@ -26,6 +26,9 @@ export interface MarketplaceFiltersProps {
   viewMode?: 'services' | 'products' | 'vendors'; // Add viewMode prop
   vendorCount?: number;
   localVendorCount?: number;
+  searchTerm?: string;
+  onSearchTermChange?: (searchTerm: string) => void;
+  quickCategoryLabel?: string;
 }
 
 export const MarketplaceFilters = ({ 
@@ -34,7 +37,10 @@ export const MarketplaceFilters = ({
   categories, 
   viewMode = 'services',
   vendorCount = 0,
-  localVendorCount = 0 
+  localVendorCount = 0,
+  searchTerm = "",
+  onSearchTermChange,
+  quickCategoryLabel
 }: MarketplaceFiltersProps) => {
   const { t } = useTranslation();
   const { location } = useLocation();
@@ -63,11 +69,16 @@ export const MarketplaceFilters = ({
       coPayEligible: false,
       locationFilter: false,
     });
+    // Also clear search term if available
+    if (onSearchTermChange) {
+      onSearchTermChange("");
+    }
   };
 
   const hasActiveFilters = (safeFilters.category && safeFilters.category !== "all") || 
     safeFilters.verified || safeFilters.featured || safeFilters.coPayEligible || safeFilters.locationFilter ||
-    safeFilters.priceRange[0] > 0 || safeFilters.priceRange[1] < 2000;
+    safeFilters.priceRange[0] > 0 || safeFilters.priceRange[1] < 2000 || 
+    (searchTerm && searchTerm.length > 0);
 
   return (
     <div className="bg-gradient-to-r from-background via-background/95 to-background/90 backdrop-blur-md border border-border/20 rounded-2xl shadow-sm overflow-hidden">
@@ -179,6 +190,21 @@ export const MarketplaceFilters = ({
         {hasActiveFilters && (
           <div className="mt-4 pt-4 border-t border-border/20">
             <div className="flex flex-wrap gap-2">
+              {searchTerm && searchTerm.length > 0 && (
+                <Badge variant="secondary" className="flex items-center gap-1 rounded-full">
+                  Search: {quickCategoryLabel || searchTerm}
+                  <X 
+                    className="w-3 h-3 cursor-pointer hover:text-destructive transition-colors" 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      if (onSearchTermChange) {
+                        onSearchTermChange("");
+                      }
+                    }}
+                  />
+                </Badge>
+              )}
               {safeFilters.category && safeFilters.category !== "all" && (
                 <Badge variant="secondary" className="flex items-center gap-1 rounded-full">
                   {safeFilters.category}
