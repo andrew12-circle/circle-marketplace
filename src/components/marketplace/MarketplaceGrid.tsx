@@ -170,7 +170,6 @@ export const MarketplaceGrid = () => {
   })?.vendors || [], [marketplaceData]);
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [quickCategoryLabel, setQuickCategoryLabel] = useState<string>("");
   const [viewMode, setViewMode] = useState<ViewMode>("services");
   const [selectedProductCategory, setSelectedProductCategory] = useState<string | null>(null);
   const [searchFilters, setSearchFilters] = useState<SearchFilters>({
@@ -195,25 +194,12 @@ export const MarketplaceGrid = () => {
   const handleEnhancedSearchChange = useCallback((sf: SearchFilters) => {
     setSearchFilters(sf);
     setSearchTerm(sf.query || "");
-    // Clear quickCategoryLabel when user types search manually
-    if (sf.query && sf.query !== searchTerm) {
-      setQuickCategoryLabel("");
-    }
     setFilters(prev => ({
       ...prev,
       category: sf.categories.length > 0 ? sf.categories[0] : "all",
       priceRange: sf.priceRange,
       featured: sf.features.includes("Featured Service"),
       coPayEligible: sf.features.includes("Co-Pay Available")
-    }));
-  }, [searchTerm]);
-
-  const handleSearchTermChange = useCallback((newSearchTerm: string) => {
-    setSearchTerm(newSearchTerm);
-    setQuickCategoryLabel("");
-    setSearchFilters(prev => ({
-      ...prev,
-      query: newSearchTerm
     }));
   }, []);
 
@@ -418,7 +404,6 @@ export const MarketplaceGrid = () => {
 
   const handleCategoryClick = (searchTerm: string, categoryName: string) => {
     setSearchTerm(searchTerm);
-    setQuickCategoryLabel(categoryName);
     setViewMode("services");
     // Scroll to results after state update
     setTimeout(() => {
@@ -567,23 +552,8 @@ export const MarketplaceGrid = () => {
 
               {/* Sticky Enhanced Search Component */}
               <StickySearchContainer>
-                <EnhancedSearch onSearchChange={handleEnhancedSearchChange} availableCategories={getCategories()} availableTags={getTags()} viewMode={viewMode} externalQuery={searchTerm} />
+                <EnhancedSearch onSearchChange={handleEnhancedSearchChange} availableCategories={getCategories()} availableTags={getTags()} viewMode={viewMode} />
               </StickySearchContainer>
-
-              {/* MarketplaceFilters Component */}
-              <div className="mb-6">
-                <MarketplaceFilters 
-                  filters={filters}
-                  onFiltersChange={setFilters}
-                  categories={categories}
-                  viewMode={viewMode}
-                  vendorCount={vendors.length}
-                  localVendorCount={localVendorCount}
-                  searchTerm={searchTerm}
-                  onSearchTermChange={handleSearchTermChange}
-                  quickCategoryLabel={quickCategoryLabel}
-                />
-              </div>
 
               {/* View Mode Toggle */}
               <div id="marketplace-results" className="flex gap-2 mb-6">
@@ -794,7 +764,6 @@ export const MarketplaceGrid = () => {
                   <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
                     <Button variant="outline" onClick={() => {
                       setSearchTerm("");
-                      setQuickCategoryLabel("");
                       setFilters({
                         category: "all",
                         priceRange: [0, 2000],

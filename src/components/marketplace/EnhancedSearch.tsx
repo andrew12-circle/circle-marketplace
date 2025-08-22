@@ -33,7 +33,6 @@ interface EnhancedSearchProps {
   availableCategories: string[];
   availableTags: string[];
   viewMode?: 'services' | 'products' | 'vendors';
-  externalQuery?: string;
 }
 
 export interface SearchFilters {
@@ -57,8 +56,7 @@ export const EnhancedSearch = ({
   onSearchChange, 
   availableCategories, 
   availableTags,
-  viewMode = 'services',
-  externalQuery = ""
+  viewMode = 'services'
 }: EnhancedSearchProps) => {
   const { min: minPrice, max: maxPrice, isLoading: priceRangeLoading } = useServicePriceRange();
   
@@ -81,16 +79,6 @@ export const EnhancedSearch = ({
       logger.log(`🎯 Updated default price range to: $${minPrice} - $${maxPrice}`);
     }
   }, [minPrice, maxPrice, priceRangeLoading]);
-
-  // Sync with external query when it changes
-  useEffect(() => {
-    if (externalQuery !== filters.query) {
-      setFilters(prev => ({
-        ...prev,
-        query: externalQuery
-      }));
-    }
-  }, [externalQuery]);
 
   const { data: serviceCount } = useServiceCount();
   const [activeFiltersCount, setActiveFiltersCount] = useState(0);
