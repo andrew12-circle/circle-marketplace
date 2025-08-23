@@ -2,6 +2,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { reportClientError } from '@/utils/errorReporting';
 import { cacheManager } from '@/utils/cacheManager';
 
+// Version enforcement tracking
+let versionEnforcedAt: number | null = null;
+const VERSION_ENFORCE_COOLDOWN = 24 * 60 * 60 * 1000; // 24 hours
+
 interface AppConfig {
   auto_heal_enabled: boolean;
   maintenance_mode: boolean;
@@ -382,13 +386,22 @@ class GlobalErrorMonitor {
         return;
       }
 
-      // Check if app version is outdated
+      // Check if app version is outdated with throttling
       if (config?.min_build_version) {
-        const currentVersion = '1.0.0'; // Should come from build process
+        const currentVersion = import.meta.env.VITE_APP_VERSION || '1.0.0';
+        const now = Date.now();
+        
+        // Only enforce version once per cooldown period
         if (this.isVersionOutdated(currentVersion, config.min_build_version)) {
-          console.log('📱 App version outdated, triggering refresh...');
-          await cacheManager.clearAllCachePreserveSession();
-          cacheManager.forceReload('version_update');
+          if (!versionEnforcedAt || (now - versionEnforcedAt) > VERSION_ENFORCE_COOLDOWN) {
+            console.log('📱 App version outdated, triggering refresh...');
+            versionEnforcedAt = now;
+            await cacheManager.clearAllCachePreserveSession();
+            cacheManager.forceReload('version_update');
+          } else {
+            console.log('📱 Version update needed but throttled');
+            this.showVersionUpdateBanner(config.min_build_version);
+          }
         }
       }
 
@@ -447,6 +460,54 @@ class GlobalErrorMonitor {
     `;
     
     document.body.insertAdjacentHTML('beforeend', maintenanceHtml);
+  }
+
+  private showVersionUpdateBanner(requiredVersion: string) {
+    const bannerId = 'version-update-banner';
+    if (document.getElementById(bannerId)) return; // Already shown
+
+    const banner = document.createElement('div');
+    banner.id = bannerId;
+    banner.innerHTML = `
+      <div style="
+        position: fixed; 
+        top: 0; 
+        left: 0; 
+        right: 0; 
+        background: hsl(var(--primary)); 
+        color: hsl(var(--primary-foreground)); 
+        padding: 8px; 
+        text-align: center; 
+        z-index: 9997;
+        font-family: system-ui, -apple-system, sans-serif;
+        font-size: 14px;
+      ">
+        🚀 App update available (v${requiredVersion}). 
+        <button onclick="window.location.reload()" style="
+          margin-left: 8px; 
+          padding: 4px 12px; 
+          background: rgba(255,255,255,0.2); 
+          color: inherit; 
+          border: 1px solid rgba(255,255,255,0.3); 
+          border-radius: 4px; 
+          cursor: pointer;
+        ">
+          Update Now
+        </button>
+        <button onclick="document.getElementById('${bannerId}').remove()" style="
+          margin-left: 8px; 
+          padding: 4px 8px; 
+          background: transparent; 
+          color: inherit; 
+          border: none; 
+          cursor: pointer;
+        ">
+          Later
+        </button>
+      </div>
+    `;
+    
+    document.body.appendChild(banner);
   }
 
   getHealthStatus() {
