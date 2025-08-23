@@ -1,14 +1,12 @@
-import { useState, useCallback, useMemo, useEffect } from "react";
+import { useState, useCallback, useMemo, useEffect, Suspense } from "react";
 import { useTranslation } from "react-i18next";
 import { OptimizedServiceCard } from "./OptimizedServiceCard";
 import { MarketplaceVendorCard } from "./MarketplaceVendorCard";
 import { MarketplaceFilters } from "./MarketplaceFilters";
 import { CampaignServicesHeader } from "./CampaignServicesHeader";
 import { CircleProBanner } from "./CircleProBanner";
-import { ServiceDetailsModal } from "./ServiceDetailsModal";
 import { AIConciergeBanner } from "./AIConciergeBanner";
-import { AddProductModal } from "./AddProductModal";
-import { VendorSelectionModal } from "./VendorSelectionModal";
+import { LazyServiceDetailsModal, LazyAddProductModal, LazyVendorSelectionModal } from "@/utils/lazyModals";
 import { TopDealsCarousel } from "./TopDealsCarousel";
 import { CategoryBlocks } from "./CategoryBlocks";
 
@@ -540,25 +538,35 @@ export const MarketplaceGrid = () => {
           </div>
 
           {/* Circle Pro Banner - Show for non-signed-in users and non-pro members */}
-          {(!user || !profile?.is_pro_member) && <CircleProBanner />}
+          {(!user || !profile?.is_pro_member) && (
+            <LazyComponent threshold="500px" delay={250}>
+              <CircleProBanner />
+            </LazyComponent>
+          )}
 
           {/* AI Concierge Banner - Show for all users */}
-          <AIConciergeBanner />
+          <LazyComponent threshold="400px" delay={200}>
+            <AIConciergeBanner />
+          </LazyComponent>
 
           {/* Campaign Services Header */}
           <CampaignServicesHeader />
 
           {marketplaceEnabled && (
             <>
-              <TopDealsCarousel
-                services={flattenServices}
-                serviceRatings={bulkRatings}
-                onServiceClick={handleViewServiceDetails}
-              />
-              <CategoryBlocks 
-                onCategoryClick={handleCategoryClick}
-                services={flattenServices}
-              />
+              <LazyComponent threshold="200px" delay={100}>
+                <TopDealsCarousel
+                  services={flattenServices}
+                  serviceRatings={bulkRatings}
+                  onServiceClick={handleViewServiceDetails}
+                />
+              </LazyComponent>
+              <LazyComponent threshold="300px" delay={150}>
+                <CategoryBlocks 
+                  onCategoryClick={handleCategoryClick}
+                  services={flattenServices}
+                />
+              </LazyComponent>
 
               {/* Recently Viewed Services */}
               <RecentlyViewedServices 
@@ -817,19 +825,23 @@ export const MarketplaceGrid = () => {
 
       {/* Service Details Modal */}
       {selectedService && (
-        <ServiceDetailsModal 
-          service={selectedService} 
-          isOpen={isServiceModalOpen} 
-          onClose={handleCloseServiceModal} 
-        />
+        <Suspense fallback={<div>Loading...</div>}>
+          <LazyServiceDetailsModal 
+            service={selectedService} 
+            isOpen={isServiceModalOpen} 
+            onClose={handleCloseServiceModal} 
+          />
+        </Suspense>
       )}
 
       {/* Add Product Modal */}
-      <AddProductModal 
-        open={isAddProductModalOpen} 
-        onOpenChange={setIsAddProductModalOpen} 
-        onProductAdded={() => {}} 
-      />
+      <Suspense fallback={<div>Loading...</div>}>
+        <LazyAddProductModal 
+          open={isAddProductModalOpen} 
+          onOpenChange={setIsAddProductModalOpen} 
+          onProductAdded={() => {}} 
+        />
+      </Suspense>
 
       {/* QA Overlay */}
       {showQAOverlay && (

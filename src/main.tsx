@@ -111,6 +111,17 @@ mainThreadOptimizer.queueInit(() => {
   initAppPerformance();
 });
 
+// DOM Performance Diagnostic (dev only)
+if (import.meta.env.DEV) {
+  setTimeout(() => {
+    const nodeCount = document.querySelectorAll('*').length;
+    console.log(`🔍 DOM Performance Check: ${nodeCount} total nodes`);
+    if (nodeCount > 1500) {
+      console.warn('⚠️ High DOM node count detected. Consider lazy loading or virtualization.');
+    }
+  }, 2000);
+}
+
 // Declare window extensions for TypeScript
 declare global {
   interface Window {

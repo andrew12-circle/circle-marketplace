@@ -205,7 +205,7 @@ export const EnhancedSearch = ({
                 <div>
                   <Label className="text-sm font-medium mb-3 block">Categories</Label>
                   <div className="grid grid-cols-1 gap-2 max-h-32 overflow-y-auto">
-                    {availableCategories.map((category) => (
+                    {availableCategories.slice(0, 20).map((category) => (
                       <div key={category} className="flex items-center space-x-2">
                         <Checkbox
                           id={`category-${category}`}
