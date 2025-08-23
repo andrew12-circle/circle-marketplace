@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
+import { ResponsiveLogo } from '@/components/ui/optimized-image';
 import { useOnboardingState } from '@/hooks/useOnboardingState';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
@@ -128,7 +129,7 @@ export function OnboardingWizard() {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
-            <img src="/circle-logo-updated.png" alt="Circle" className="h-8 w-8" />
+            <ResponsiveLogo className="h-8 w-8" />
             <h1 className="text-xl font-bold">Setup</h1>
           </div>
           <Button variant="ghost" size="sm" onClick={handleSkip}>

@@ -14,8 +14,7 @@ import { SecureForm } from "@/components/common/SecureForm";
 import { commonRules, checkAccountLockout, clearFailedAttempts } from "@/hooks/useSecureInput";
 import { PasswordStrengthIndicator } from "@/components/auth/PasswordStrengthIndicator";
 import { AccountLockoutAlert } from "@/components/auth/AccountLockoutAlert";
-
-const circleLogoUrl = "/circle-logo-updated.png";
+import { ResponsiveLogo } from "@/components/ui/optimized-image";
 
 export const Auth = () => {
   useUserRegistration(); // Apply spiritual coverage for user registration
@@ -294,15 +293,10 @@ export const Auth = () => {
         <CardHeader className="space-y-4">
           {/* Logo */}
           <div className="flex justify-center">
-            <img 
-              src="/circle-logo-updated.png"
-              alt="Circle Logo" 
+            <ResponsiveLogo 
               className="w-24 h-24 sm:w-28 sm:h-28 object-contain"
               width="112"
               height="112"
-              style={{
-                imageRendering: 'crisp-edges'
-              }}
             />
           </div>
           

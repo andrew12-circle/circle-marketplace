@@ -28,6 +28,7 @@ import { CourseViewerModal } from "@/components/academy/course/CourseViewerModal
 import { CourseCard } from "@/components/academy/CourseCard";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
+import { ResponsiveLogo } from "@/components/ui/optimized-image";
 import { Progress } from "@/components/ui/progress";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { GraduationCap, BookOpen, Video, Headphones, Book, Search, Filter, Users, TrendingUp, Sparkles, Heart, Award, ChevronRight, Play, Clock, Star, Crown, Brain } from "lucide-react";
@@ -1645,7 +1646,7 @@ const AcademyContent = () => {
     user,
     profile
   } = useAuth();
-  const circleLogoUrl = "/circle-logo-updated.png";
+  
   const isMobile = useIsMobile();
   const location = useLocation();
   return <div className="min-h-screen bg-background">
@@ -1658,9 +1659,7 @@ const AcademyContent = () => {
               {/* Top row - Logo and User Actions */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <img src={circleLogoUrl} alt="Circle Logo" className="w-10 h-10 object-contain" width="40" height="40" loading="eager" style={{
-                imageRendering: 'crisp-edges'
-              }} />
+                  <ResponsiveLogo className="w-10 h-10" />
                 </div>
                 
                 <div className="flex items-center gap-2">
@@ -1689,9 +1688,7 @@ const AcademyContent = () => {
         <div className="flex items-center justify-between">
               {/* Logo */}
               <div className="flex items-center gap-2 sm:gap-3">
-                <img src={circleLogoUrl} alt="Circle Logo" className="w-12 h-12 sm:w-16 sm:h-16 object-contain" width="64" height="64" loading="eager" style={{
-              imageRendering: 'crisp-edges'
-            }} />
+                <ResponsiveLogo className="w-12 h-12 sm:w-16 sm:h-16" />
               </div>
               
               {/* Navigation Tabs - Desktop */}

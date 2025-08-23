@@ -5,7 +5,7 @@ import { Marketplace } from "./Marketplace";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Crown } from "lucide-react";
-const circleLogoUrl = "/circle-logo-updated.png";
+import { ResponsiveLogo } from "@/components/ui/optimized-image";
 
 import { CartDrawer } from "@/components/marketplace/CartDrawer";
 import { UserMenu } from "@/components/UserMenu";
@@ -39,18 +39,7 @@ const Index = () => {
                 {/* Top row - Logo and User Actions */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <img 
-                      src={circleLogoUrl}
-                      alt="Circle Logo" 
-                      className="w-10 h-10 object-contain"
-                      width="40"
-                      height="40"
-                      loading="eager"
-                      decoding="async"
-                      style={{
-                        imageRendering: 'crisp-edges'
-                      }}
-                    />
+                    <ResponsiveLogo className="w-10 h-10" />
                   </div>
                   
                   <div className="flex items-center gap-2">
@@ -111,19 +100,7 @@ const Index = () => {
               <div className="flex items-center justify-between">
                 {/* Logo */}
                 <div className="flex items-center gap-2 sm:gap-3">
-                  <img 
-                    src={circleLogoUrl}
-                    alt="Circle Logo" 
-                    className="w-12 h-12 sm:w-16 sm:h-16 object-contain"
-                    width="80"
-                    height="80"
-                    loading="eager"
-                    decoding="async"
-                    
-                    style={{
-                      imageRendering: 'crisp-edges'
-                    }}
-                  />
+                  <ResponsiveLogo className="w-12 h-12 sm:w-16 sm:h-16" />
                 </div>
                 
                 {/* Navigation Tabs - Desktop */}
