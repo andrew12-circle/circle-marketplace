@@ -23,6 +23,11 @@
     <meta name="description" content="Empowering real estate professionals to grow smarter with Circle's marketplace and academy." />
     <meta name="author" content="Circle" />
     
+    <!-- Critical resource preloading to optimize dependency chain -->
+    <link rel="modulepreload" href="/src/main.tsx" fetchpriority="high">
+    <link rel="preload" href="/assets/index-Vtc2cK_H.js" as="script" fetchpriority="high">
+    <link rel="preload" href="/assets/index-1_cDzJxw.css" as="style" fetchpriority="high">
+    
     <!-- Critical domain preconnects to reduce network dependency chains -->
     <link rel="preconnect" href="https://ihzyuyfawapweamqzzlj.supabase.co" crossorigin>
     <link rel="preconnect" href="https://encrypted-tbn0.gstatic.com">

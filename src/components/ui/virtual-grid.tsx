@@ -36,14 +36,16 @@ export const VirtualGrid = ({
     setVisibleRange({ start, end });
   }, [items.length, itemHeight, containerHeight, itemsPerRow]);
 
-  // Throttled scroll handler
+  // Throttled scroll handler with null safety
   const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
     if (scrollTimeoutRef.current) {
       clearTimeout(scrollTimeoutRef.current);
     }
     
     scrollTimeoutRef.current = setTimeout(() => {
-      updateVisibleRange(e.currentTarget.scrollTop);
+      // Add null safety check to prevent scrollTop errors
+      const scrollTop = e.currentTarget?.scrollTop ?? 0;
+      updateVisibleRange(scrollTop);
     }, 16); // ~60fps
   }, [updateVisibleRange]);
 
