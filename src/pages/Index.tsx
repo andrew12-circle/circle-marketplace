@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Crown } from "lucide-react";
 import { ResponsiveLogo } from "@/components/ui/optimized-image";
+import { CriticalContent, NonCriticalContent, useCriticalResourceHints } from "@/components/ui/critical-content";
 
 import { CartDrawer } from "@/components/marketplace/CartDrawer";
 import { UserMenu } from "@/components/UserMenu";
@@ -22,15 +23,19 @@ import { TourDiscoveryButton } from "@/components/marketplace/TourDiscoveryButto
 import { Building, Store, BookOpen } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-const Index = () => {
-  const { user, profile } = useAuth();
+export default function Index() {
   const { t } = useTranslation();
+  const { user, profile } = useAuth();
   const location = useLocation();
   const isMobile = useIsMobile();
+  
+  // Preload critical resources
+  useCriticalResourceHints();
 
   return (
     <div className="min-h-screen bg-background">
-        {/* Mobile-Optimized Header */}
+      {/* Critical above-the-fold header */}
+      <CriticalContent>
         <header className="border-b bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/50 sticky top-0 z-50">
           <div className="container mx-auto px-3 sm:px-4 py-2 sm:py-3">
             {isMobile ? (
@@ -58,45 +63,11 @@ const Index = () => {
                 
                 {/* Bottom row - Navigation Tabs */}
                 <div className="flex justify-center">
-                  <div className="flex bg-muted rounded-full p-1 w-full max-w-xs">
-                    <Link
-                      to="/"
-                      data-tour="marketplace-tab"
-                      className={`flex-1 text-xs py-1.5 px-3 rounded-full font-medium transition-all text-center ${
-                        location.pathname === "/" 
-                          ? "bg-background text-foreground shadow-sm" 
-                          : "text-muted-foreground"
-                      }`}
-                    >
-                      {t('marketplace')}
-                    </Link>
-                     <Link
-                       to="/academy"
-                       data-tour="academy-tab"
-                       className={`flex-1 text-xs py-1.5 px-3 rounded-full font-medium transition-all text-center ${
-                         location.pathname === "/academy" 
-                           ? "bg-background text-foreground shadow-sm" 
-                           : "text-muted-foreground"
-                       }`}
-                     >
-                       {t('academy')}
-                     </Link>
-                     <Link
-                       to="/ministry"
-                       data-tour="ministry-tab"
-                       className={`flex-1 text-xs py-1.5 px-3 rounded-full font-medium transition-all text-center ${
-                         location.pathname === "/ministry" 
-                           ? "bg-background text-foreground shadow-sm" 
-                           : "text-muted-foreground"
-                       }`}
-                     >
-                       Ministry
-                     </Link>
-                  </div>
+                  <NavigationTabs />
                 </div>
               </div>
             ) : (
-              // Desktop Header Layout (unchanged)
+              // Desktop Header Layout
               <div className="flex items-center justify-between">
                 {/* Logo */}
                 <div className="flex items-center gap-2 sm:gap-3">
@@ -104,70 +75,56 @@ const Index = () => {
                 </div>
                 
                 {/* Navigation Tabs - Desktop */}
-                <div className="flex flex-1 justify-center items-center gap-4">
-                  {/* <NavigationTabs activeTab="marketplace" /> */}
-                  <TourDiscoveryButton />
+                <div className="flex flex-1 justify-center">
+                  <NavigationTabs />
                 </div>
                 
+                {/* User Actions - Desktop */}
                 <div className="flex items-center gap-2 sm:gap-4">
-                  {/* Language & Location Switchers */}
-                  <LanguageSwitcher />
-                  <LocationSwitcher />
-                  
-                  {/* Cart Button - only show on marketplace */}
-                  {location.pathname === "/" && (
-                    <CartDrawer />
-                  )}
-                  
-                  {/* Circle Points - Desktop */}
                   {user && profile && (
-                    <Link to="/wallet" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm hover:bg-accent hover:text-accent-foreground rounded-md px-2 sm:px-3 py-1.5 sm:py-2 transition-colors cursor-pointer touch-target">
-                      <Crown className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-500" />
+                    <Link to="/wallet" className="flex items-center gap-1 text-sm hover:bg-accent hover:text-accent-foreground rounded-md px-2 py-1 transition-colors cursor-pointer">
+                      <Crown className="w-4 h-4 text-yellow-500" />
                       <span className="font-medium">{profile.circle_points}</span>
-                      <span className="text-muted-foreground hidden sm:inline">Points</span>
                     </Link>
                   )}
-                  
-                  {/* Pro upgrade button */}
-                  {user && profile && !profile.is_pro_member && (
-                    <Button asChild variant="secondary" className="bg-gradient-to-r from-circle-primary to-circle-primary border-none text-white hover:from-circle-primary/90 hover:to-circle-primary/90 shadow-lg text-xs sm:text-sm">
-                      <Link to="/pricing">
-                        <Crown className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                        <span className="hidden md:inline">Upgrade to</span> Pro
-                      </Link>
-                    </Button>
-                  )}
-                  
-                  {/* User menu */}
+                  <Button asChild variant="outline" size="sm" className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white border-none hover:from-yellow-500 hover:to-orange-600">
+                    <Link to="/pricing">
+                      <Crown className="w-4 h-4 mr-2" />
+                      Upgrade to Pro
+                    </Link>
+                  </Button>
+                  <LanguageSwitcher />
+                  <LocationSwitcher />
+                  <CartDrawer />
                   <UserMenu />
                 </div>
               </div>
             )}
           </div>
         </header>
+      </CriticalContent>
 
-        {/* Main Content */}
-        <main>
-          {/* Onboarding Resume Banner */}
-          <div className="container mx-auto px-3 sm:px-4 pt-6">
-            <OnboardingResumeBanner />
-          </div>
-          
-          
+      {/* Main content area */}
+      <main className="flex-1">
+        {/* Critical marketplace content */}
+        <CriticalContent>
           <Marketplace />
-        </main>
+        </CriticalContent>
+        
+        {/* Non-critical footer content */}
+        <NonCriticalContent>
+          <OnboardingResumeBanner />
+          <LegalFooter />
+          <FirstVisitIntro />
+        </NonCriticalContent>
+      </main>
 
-        {/* Legal Footer */}
-        <LegalFooter />
-        
-        {/* First Visit Intro Modal */}
-        <FirstVisitIntro />
-        
-        {/* Smart Help System */}
+      {/* Non-critical interactive elements */}
+      <NonCriticalContent>
         <SmartHelpOrchestrator />
         <EnhancedHelpWidget />
-      </div>
-    );
-};
-
-export default Index;
+        <ProactiveHelpMonitor />
+      </NonCriticalContent>
+    </div>
+  );
+}
