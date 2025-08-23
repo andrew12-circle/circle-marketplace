@@ -7559,6 +7559,15 @@ export type Database = {
       }
     }
     Functions: {
+      audit_security_definer_functions: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          function_name: string
+          recommendation: string
+          return_type: string
+          risk_assessment: string
+        }[]
+      }
       auto_block_suspicious_ips: {
         Args: Record<PropertyKey, never>
         Returns: undefined
@@ -7912,6 +7921,17 @@ export type Database = {
           updated_at: string
           vendor_type: string
           website_url: string
+        }[]
+      }
+      identify_security_definer_views: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          definition: string
+          recommendation: string
+          risk_level: string
+          schema_name: string
+          security_type: string
+          view_name: string
         }[]
       }
       increment_content_plays: {
