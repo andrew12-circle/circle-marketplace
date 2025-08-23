@@ -100,7 +100,14 @@ cacheManager.checkAndClearCache();
 globalErrorMonitor.initialize();
 
 // Initialize performance optimizations
-document.body.classList.add('react-loaded');
+initAppPerformance();
+
+// Defer adding react-loaded class to ensure LCP content is visible
+requestAnimationFrame(() => {
+  requestAnimationFrame(() => {
+    document.body.classList.add('react-loaded');
+  });
+});
 
 createRoot(document.getElementById("root")!).render(
   <QueryClientProvider client={queryClient}>

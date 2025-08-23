@@ -48,14 +48,32 @@ export const LaunchMetrics = () => {
       }
     };
 
+    let documentHeight = 0;
+    let hasTrackedDeepScroll = false;
+    
+    const updateDocumentHeight = () => {
+      documentHeight = document.body.scrollHeight;
+    };
+    
     const handleScroll = () => {
+      if (hasTrackedDeepScroll) return;
+      
       requestAnimationFrame(() => {
-        const scrollPercent = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
+        const scrollPercent = documentHeight > 0 
+          ? (window.scrollY / (documentHeight - window.innerHeight)) * 100 
+          : 0;
+        
         if (scrollPercent > 75) {
+          hasTrackedDeepScroll = true;
           trackEvent('deep_scroll', { scroll_percent: scrollPercent });
         }
       });
     };
+    
+    // Cache document height initially and on resize
+    updateDocumentHeight();
+    const resizeObserver = new ResizeObserver(updateDocumentHeight);
+    resizeObserver.observe(document.body);
 
     document.addEventListener('click', handleClick);
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -63,6 +81,7 @@ export const LaunchMetrics = () => {
     return () => {
       document.removeEventListener('click', handleClick);
       window.removeEventListener('scroll', handleScroll);
+      resizeObserver.disconnect();
     };
   }, [user]);
 
