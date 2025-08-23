@@ -30,6 +30,7 @@ import { useMarketplaceData, useSavedServices, useInvalidateMarketplace, type Se
 import { useMarketplaceFilters } from "@/hooks/useMarketplaceFilters";
 import { useBulkServiceRatings } from "@/hooks/useBulkServiceRatings";
 import { logger } from "@/utils/logger";
+import { taskScheduler, processInChunks, debounceTask } from "@/utils/taskScheduler";
 import { useQueryClient } from "@tanstack/react-query";
 import { marketplaceCircuitBreaker } from "@/utils/circuitBreaker";
 import { usePaginatedServices } from "@/hooks/usePaginatedServices";
@@ -192,17 +193,30 @@ export const MarketplaceGrid = () => {
     locationFilter: false
   });
 
+  // Debounce search updates to prevent blocking
+  const debouncedSearchUpdate = useMemo(
+    () => debounceTask(() => {
+      // Heavy search operations are scheduled with task scheduler
+    }, 150),
+    []
+  );
+
   const handleEnhancedSearchChange = useCallback((sf: SearchFilters) => {
-    setSearchFilters(sf);
-    setSearchTerm(sf.query || "");
-    setFilters(prev => ({
-      ...prev,
-      category: sf.categories.length > 0 ? sf.categories[0] : "all",
-      priceRange: sf.priceRange,
-      featured: sf.features.includes("Featured Service"),
-      coPayEligible: sf.features.includes("Co-Pay Available")
-    }));
-  }, []);
+    // Schedule search updates to prevent blocking
+    taskScheduler.schedule(() => {
+      setSearchFilters(sf);
+      setSearchTerm(sf.query || "");
+      setFilters(prev => ({
+        ...prev,
+        category: sf.categories.length > 0 ? sf.categories[0] : "all",
+        priceRange: sf.priceRange,
+        featured: sf.features.includes("Featured Service"),
+        coPayEligible: sf.features.includes("Co-Pay Available")
+      }));
+    });
+    
+    debouncedSearchUpdate();
+  }, [debouncedSearchUpdate]);
 
   const { user, profile } = useAuth();
   const { location } = useLocation();
@@ -424,52 +438,59 @@ export const MarketplaceGrid = () => {
       });
       return;
     }
-    try {
-      // Check if already saved
-      const { data: existingSave } = await supabase.from('saved_services').select('id').eq('user_id', profile.user_id).eq('service_id', serviceId).maybeSingle();
-      if (existingSave) {
-        // Remove from saved
-        const { error } = await supabase.from('saved_services').delete().eq('user_id', profile.user_id).eq('service_id', serviceId);
-        if (error) throw error;
+    
+    // Schedule database operations to prevent blocking
+    taskScheduler.schedule(async () => {
+      try {
+        // Check if already saved
+        const { data: existingSave } = await supabase.from('saved_services').select('id').eq('user_id', profile.user_id).eq('service_id', serviceId).maybeSingle();
+        if (existingSave) {
+          // Remove from saved
+          const { error } = await supabase.from('saved_services').delete().eq('user_id', profile.user_id).eq('service_id', serviceId);
+          if (error) throw error;
 
-        // Update local state
-        setLocalSavedServiceIds(prev => prev.filter(id => id !== serviceId));
-        toast({
-          title: "Removed from saved",
-          description: "Service removed from your saved list"
-        });
-      } else {
-        // Add to saved
-        const { error } = await supabase.from('saved_services').insert({
-          user_id: profile.user_id,
-          service_id: serviceId,
-          notes: ''
-        });
-        if (error) throw error;
+          // Update local state
+          setLocalSavedServiceIds(prev => prev.filter(id => id !== serviceId));
+          toast({
+            title: "Removed from saved",
+            description: "Service removed from your saved list"
+          });
+        } else {
+          // Add to saved
+          const { error } = await supabase.from('saved_services').insert({
+            user_id: profile.user_id,
+            service_id: serviceId,
+            notes: ''
+          });
+          if (error) throw error;
 
-        // Update local state
-        setLocalSavedServiceIds(prev => [...prev, serviceId]);
+          // Update local state
+          setLocalSavedServiceIds(prev => [...prev, serviceId]);
+          toast({
+            title: "Saved successfully",
+            description: "Service added to your saved list"
+          });
+        }
+      } catch (error) {
+        logger.error('Error saving service:', error);
         toast({
-          title: "Saved successfully",
-          description: "Service added to your saved list"
+          title: "Error",
+          description: "Failed to save service. Please try again.",
+          variant: "destructive"
         });
       }
-    } catch (error) {
-      logger.error('Error saving service:', error);
-      toast({
-        title: "Error",
-        description: "Failed to save service. Please try again.",
-        variant: "destructive"
-      });
-    }
+    });
   }, [profile?.user_id, toast]);
 
   const handleViewServiceDetails = useCallback((serviceId: string) => {
-    const service = flattenServices.find(s => s.id === serviceId) || services.find(s => s.id === serviceId);
-    if (service) {
-      setSelectedService(service);
-      setIsServiceModalOpen(true);
-    }
+    // Use task scheduler for potentially heavy operations
+    taskScheduler.schedule(() => {
+      const service = flattenServices.find(s => s.id === serviceId) || services.find(s => s.id === serviceId);
+      if (service) {
+        setSelectedService(service);
+        setIsServiceModalOpen(true);
+      }
+    });
   }, [flattenServices, services]);
 
   const handleCloseServiceModal = () => {

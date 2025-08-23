@@ -1,4 +1,6 @@
 import { initCSSOptimizations } from './cssOptimizer';
+import { taskScheduler } from './taskScheduler';
+import { initDOMOptimizations } from './domOptimizer';
 
 // Performance optimization utilities
 export const deferNonCriticalScripts = () => {
@@ -30,35 +32,52 @@ export const deferNonCriticalScripts = () => {
 export const optimizeScriptLoading = () => {
   // Use requestIdleCallback for non-critical operations
   if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
-    window.requestIdleCallback(() => {
-      // Preload critical chunks
+    (window as any).requestIdleCallback(() => {
+      // Schedule preloading of critical chunks using task scheduler
       const criticalChunks = [
         '/assets/react-core-',
         '/assets/router-',
         '/assets/utils-'
       ];
       
-      criticalChunks.forEach(chunk => {
-        const link = document.createElement('link');
-        link.rel = 'prefetch';
-        link.as = 'script';
-        link.href = chunk;
-        document.head.appendChild(link);
+      // Process chunks in small batches to avoid blocking
+      criticalChunks.forEach((chunk, index) => {
+        taskScheduler.schedule(() => {
+          const link = document.createElement('link');
+          link.rel = 'prefetch';
+          link.as = 'script';
+          link.href = chunk;
+          document.head.appendChild(link);
+        });
       });
     });
   }
 };
 
-// Initialize performance optimizations
+// Break up initialization into smaller tasks
+export const initializeInChunks = () => {
+  if (typeof window === 'undefined') return;
+  
+  // Break up heavy initialization work
+  const initTasks = [
+    () => initCSSOptimizations(),
+    () => initDOMOptimizations(),
+    () => deferNonCriticalScripts(),
+    () => optimizeScriptLoading(),
+  ];
+  
+  // Schedule each task separately to avoid blocking
+  initTasks.forEach(task => {
+    taskScheduler.schedule(task);
+  });
+};
+
+// Initialize performance optimizations with time-slicing
 export const initPerformanceOptimizations = () => {
   if (typeof window !== 'undefined') {
-    // Initialize CSS optimizations immediately
-    initCSSOptimizations();
-    
-    // Run other optimizations after page load
-    window.addEventListener('load', () => {
-      deferNonCriticalScripts();
-      optimizeScriptLoading();
+    // Use task scheduler to avoid blocking main thread
+    taskScheduler.schedule(() => {
+      initializeInChunks();
     });
   }
 };
