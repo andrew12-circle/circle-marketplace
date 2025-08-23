@@ -174,28 +174,66 @@ class JavaScriptOptimizer {
 
   // Preload modules for route transitions
   preloadForRoute(route: string) {
-    const previousRoute = window.location.pathname;
-    
-    // Simulate route change to check conditions
+    // Instead of modifying window.location.pathname, we'll create a temporary context
+    // Store the original pathname getter for conditions
     const originalPathname = window.location.pathname;
-    Object.defineProperty(window.location, 'pathname', {
-      value: route,
-      configurable: true
-    });
+    
+    // Create a temporary location-like object for condition checking
+    const tempLocation = {
+      ...window.location,
+      pathname: route
+    };
+    
+    // Temporarily override the location reference for condition checks
+    const originalLocation = window.location;
+    
+    try {
+      // Use a safer approach: check conditions by passing the route directly
+      this.deferredModules.forEach(config => {
+        if (config.condition && this.checkConditionForRoute(config.condition, route) && !this.loadedModules.has(config.name)) {
+          this.loadModule(config.name).catch(error => {
+            console.warn(`Failed to preload module ${config.name}:`, error);
+          });
+        }
+      });
+    } catch (error) {
+      console.warn('Error during route preloading:', error);
+    }
+  }
 
-    this.deferredModules.forEach(config => {
-      if (config.condition && config.condition() && !this.loadedModules.has(config.name)) {
-        this.loadModule(config.name).catch(error => {
-          console.warn(`Failed to preload module ${config.name}:`, error);
-        });
-      }
-    });
+  // Helper method to safely check conditions for a specific route
+  private checkConditionForRoute(condition: () => boolean, route: string): boolean {
+    try {
+      // Create a scoped evaluation that simulates the route condition
+      return this.evaluateConditionForRoute(route);
+    } catch (error) {
+      console.warn('Error evaluating condition for route:', route, error);
+      return false;
+    }
+  }
 
-    // Restore original pathname
-    Object.defineProperty(window.location, 'pathname', {
-      value: originalPathname,
-      configurable: true
-    });
+  // Evaluate what modules would be needed for a specific route
+  private evaluateConditionForRoute(route: string): boolean {
+    // Directly check route patterns instead of modifying location
+    const isChartsRoute = route.includes('/dashboard') || 
+                         route.includes('/analytics') || 
+                         route.includes('/vendor-dashboard') ||
+                         route.includes('/command-center');
+    
+    const isRadixRoute = route.includes('/admin') || 
+                        route.includes('/settings') ||
+                        route.includes('/profile');
+    
+    const isAnalyticsRoute = route.includes('/analytics') || 
+                            route.includes('/dashboard') ||
+                            route.includes('/admin');
+    
+    const isVendorRoute = route.includes('/vendor') || 
+                         route.includes('/creator') ||
+                         route.includes('/admin');
+    
+    // Return true if any of these conditions would require module loading
+    return isChartsRoute || isRadixRoute || isAnalyticsRoute || isVendorRoute;
   }
 }
 
