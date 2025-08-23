@@ -331,13 +331,6 @@ export type Database = {
             referencedRelation: "agents"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "agent_quiz_responses_agent_id_fkey"
-            columns: ["agent_id"]
-            isOneToOne: false
-            referencedRelation: "public_agent_listings"
-            referencedColumns: ["id"]
-          },
         ]
       }
       agent_relationships: {
@@ -374,24 +367,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "agent_relationships_agent_a_id_fkey"
-            columns: ["agent_a_id"]
-            isOneToOne: false
-            referencedRelation: "public_agent_listings"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "agent_relationships_agent_b_id_fkey"
             columns: ["agent_b_id"]
             isOneToOne: false
             referencedRelation: "agents"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "agent_relationships_agent_b_id_fkey"
-            columns: ["agent_b_id"]
-            isOneToOne: false
-            referencedRelation: "public_agent_listings"
             referencedColumns: ["id"]
           },
           {
@@ -508,13 +487,6 @@ export type Database = {
             columns: ["agent_id"]
             isOneToOne: false
             referencedRelation: "agents"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "agent_transactions_agent_id_fkey"
-            columns: ["agent_id"]
-            isOneToOne: false
-            referencedRelation: "public_agent_listings"
             referencedColumns: ["id"]
           },
         ]
@@ -6149,13 +6121,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "transactions_agent_id_fkey"
-            columns: ["agent_id"]
-            isOneToOne: false
-            referencedRelation: "public_agent_listings"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "transactions_lender_id_fkey"
             columns: ["lender_id"]
             isOneToOne: false
@@ -7390,63 +7355,7 @@ export type Database = {
       }
     }
     Views: {
-      public_agent_listings: {
-        Row: {
-          bio: string | null
-          brokerage: string | null
-          city: string | null
-          first_name: string | null
-          id: string | null
-          is_active: boolean | null
-          last_name: string | null
-          photo_url: string | null
-          social_facebook: string | null
-          social_instagram: string | null
-          social_linkedin: string | null
-          social_youtube: string | null
-          social_zillow: string | null
-          state: string | null
-          years_active: number | null
-          zip_code: string | null
-        }
-        Insert: {
-          bio?: string | null
-          brokerage?: string | null
-          city?: string | null
-          first_name?: string | null
-          id?: string | null
-          is_active?: boolean | null
-          last_name?: string | null
-          photo_url?: string | null
-          social_facebook?: string | null
-          social_instagram?: string | null
-          social_linkedin?: string | null
-          social_youtube?: string | null
-          social_zillow?: string | null
-          state?: string | null
-          years_active?: number | null
-          zip_code?: string | null
-        }
-        Update: {
-          bio?: string | null
-          brokerage?: string | null
-          city?: string | null
-          first_name?: string | null
-          id?: string | null
-          is_active?: boolean | null
-          last_name?: string | null
-          photo_url?: string | null
-          social_facebook?: string | null
-          social_instagram?: string | null
-          social_linkedin?: string | null
-          social_youtube?: string | null
-          social_zillow?: string | null
-          state?: string | null
-          years_active?: number | null
-          zip_code?: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       auto_block_suspicious_ips: {
