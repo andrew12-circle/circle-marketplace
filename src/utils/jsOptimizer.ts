@@ -172,33 +172,49 @@ class JavaScriptOptimizer {
     });
   }
 
+  // Debounced preload to avoid excessive calls
+  private preloadDebounceTimer: number | null = null;
+
   // Preload modules for route transitions
-  preloadForRoute(route: string) {
-    // Instead of modifying window.location.pathname, we'll create a temporary context
-    // Store the original pathname getter for conditions
-    const originalPathname = window.location.pathname;
-    
-    // Create a temporary location-like object for condition checking
-    const tempLocation = {
-      ...window.location,
-      pathname: route
-    };
-    
-    // Temporarily override the location reference for condition checks
-    const originalLocation = window.location;
-    
+  preloadForRoute(route: string | URL) {
+    // Normalize route input
+    let normalizedRoute: string;
     try {
-      // Use a safer approach: check conditions by passing the route directly
-      this.deferredModules.forEach(config => {
-        if (config.condition && this.checkConditionForRoute(config.condition, route) && !this.loadedModules.has(config.name)) {
-          this.loadModule(config.name).catch(error => {
-            console.warn(`Failed to preload module ${config.name}:`, error);
-          });
-        }
-      });
+      if (typeof route === 'string') {
+        normalizedRoute = route.startsWith('/') ? route : `/${route}`;
+      } else if (route && typeof route === 'object' && 'pathname' in route) {
+        normalizedRoute = route.pathname;
+      } else {
+        normalizedRoute = window.location.pathname;
+      }
     } catch (error) {
-      console.warn('Error during route preloading:', error);
+      console.warn('Invalid route provided to preloadForRoute:', route);
+      return;
     }
+
+    // Early return if same as current route
+    if (normalizedRoute === window.location.pathname) {
+      return;
+    }
+
+    // Debounce preloads to avoid bursts
+    if (this.preloadDebounceTimer) {
+      clearTimeout(this.preloadDebounceTimer);
+    }
+
+    this.preloadDebounceTimer = window.setTimeout(() => {
+      try {
+        this.deferredModules.forEach(config => {
+          if (config.condition && this.evaluateConditionForRoute(normalizedRoute) && !this.loadedModules.has(config.name)) {
+            this.loadModule(config.name).catch(error => {
+              console.warn(`Failed to preload module ${config.name}:`, error);
+            });
+          }
+        });
+      } catch (error) {
+        console.warn('Error during route preloading:', error);
+      }
+    }, 100);
   }
 
   // Helper method to safely check conditions for a specific route
@@ -246,21 +262,51 @@ export const initJavaScriptOptimization = () => {
   // Set up conditional loading
   jsOptimizer.initializeConditionalLoading();
 
-  // Set up route-based preloading
-  if ('navigation' in window && 'addEventListener' in (window as any).navigation) {
-    (window as any).navigation.addEventListener('navigate', (event: any) => {
-      const url = new URL(event.destination.url);
-      jsOptimizer.preloadForRoute(url.pathname);
-    });
+  // Set up route-based preloading with robust error handling
+  try {
+    const nav = (window as any).navigation;
+    if (nav && typeof nav.addEventListener === 'function') {
+      nav.addEventListener('navigate', (event: any) => {
+        try {
+          if (event?.destination?.url) {
+            const url = new URL(event.destination.url);
+            jsOptimizer.preloadForRoute(url.pathname);
+          }
+        } catch (error) {
+          console.debug('Navigation API preload error:', error);
+        }
+      });
+    }
+  } catch (error) {
+    console.debug('Navigation API not supported or failed to setup:', error);
   }
 
-  // Fallback for browsers without Navigation API
-  const originalPushState = history.pushState;
-  history.pushState = function(...args) {
-    const result = originalPushState.apply(this, args);
-    if (args[2]) {
-      jsOptimizer.preloadForRoute(args[2] as string);
-    }
-    return result;
-  };
+  // Fallback for browsers without Navigation API + additional event handlers
+  try {
+    const originalPushState = history.pushState;
+    const originalReplaceState = history.replaceState;
+    
+    history.pushState = function(...args) {
+      const result = originalPushState.apply(this, args);
+      if (args[2] && typeof args[2] === 'string') {
+        jsOptimizer.preloadForRoute(args[2]);
+      }
+      return result;
+    };
+
+    history.replaceState = function(...args) {
+      const result = originalReplaceState.apply(this, args);
+      if (args[2] && typeof args[2] === 'string') {
+        jsOptimizer.preloadForRoute(args[2]);
+      }
+      return result;
+    };
+
+    // Handle back/forward navigation
+    window.addEventListener('popstate', () => {
+      jsOptimizer.preloadForRoute(window.location.pathname);
+    });
+  } catch (error) {
+    console.debug('History API patching failed:', error);
+  }
 };
