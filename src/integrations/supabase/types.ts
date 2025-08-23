@@ -728,13 +728,6 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["user_id"]
           },
-          {
-            foreignKeyName: "ai_recommendation_log_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "public_profiles"
-            referencedColumns: ["user_id"]
-          },
         ]
       }
       ai_service_bundles: {
@@ -1081,13 +1074,6 @@ export type Database = {
             columns: ["creator_id"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "channels_creator_id_fkey"
-            columns: ["creator_id"]
-            isOneToOne: false
-            referencedRelation: "public_profiles"
             referencedColumns: ["user_id"]
           },
         ]
@@ -1729,13 +1715,6 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["user_id"]
           },
-          {
-            foreignKeyName: "content_creator_id_fkey"
-            columns: ["creator_id"]
-            isOneToOne: false
-            referencedRelation: "public_profiles"
-            referencedColumns: ["user_id"]
-          },
         ]
       }
       content_comments: {
@@ -1927,13 +1906,6 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["user_id"]
           },
-          {
-            foreignKeyName: "content_plays_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "public_profiles"
-            referencedColumns: ["user_id"]
-          },
         ]
       }
       content_ratings: {
@@ -1974,13 +1946,6 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "content_ratings_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "public_profiles"
             referencedColumns: ["user_id"]
           },
         ]
@@ -4723,13 +4688,6 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["user_id"]
           },
-          {
-            foreignKeyName: "revenue_tracking_creator_id_fkey"
-            columns: ["creator_id"]
-            isOneToOne: false
-            referencedRelation: "public_profiles"
-            referencedColumns: ["user_id"]
-          },
         ]
       }
       rss_import_feeds: {
@@ -7168,13 +7126,6 @@ export type Database = {
             referencedColumns: ["user_id"]
           },
           {
-            foreignKeyName: "video_ratings_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "public_profiles"
-            referencedColumns: ["user_id"]
-          },
-          {
             foreignKeyName: "video_ratings_video_id_fkey"
             columns: ["video_id"]
             isOneToOne: false
@@ -7214,13 +7165,6 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "video_views_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "public_profiles"
             referencedColumns: ["user_id"]
           },
           {
@@ -7299,13 +7243,6 @@ export type Database = {
             columns: ["creator_id"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "videos_creator_id_fkey"
-            columns: ["creator_id"]
-            isOneToOne: false
-            referencedRelation: "public_profiles"
             referencedColumns: ["user_id"]
           },
         ]
@@ -7418,54 +7355,7 @@ export type Database = {
       }
     }
     Views: {
-      public_profiles: {
-        Row: {
-          avatar_url: string | null
-          bio: string | null
-          business_name: string | null
-          city: string | null
-          creator_verified: boolean | null
-          display_name: string | null
-          is_creator: boolean | null
-          is_pro_member: boolean | null
-          specialties: string[] | null
-          state: string | null
-          user_id: string | null
-          website_url: string | null
-          years_experience: number | null
-        }
-        Insert: {
-          avatar_url?: string | null
-          bio?: string | null
-          business_name?: string | null
-          city?: string | null
-          creator_verified?: boolean | null
-          display_name?: string | null
-          is_creator?: boolean | null
-          is_pro_member?: boolean | null
-          specialties?: string[] | null
-          state?: string | null
-          user_id?: string | null
-          website_url?: string | null
-          years_experience?: number | null
-        }
-        Update: {
-          avatar_url?: string | null
-          bio?: string | null
-          business_name?: string | null
-          city?: string | null
-          creator_verified?: boolean | null
-          display_name?: string | null
-          is_creator?: boolean | null
-          is_pro_member?: boolean | null
-          specialties?: string[] | null
-          state?: string | null
-          user_id?: string | null
-          website_url?: string | null
-          years_experience?: number | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       auto_block_suspicious_ips: {
