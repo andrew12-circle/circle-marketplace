@@ -207,30 +207,39 @@ export type Database = {
       }
       agent_playbook_templates: {
         Row: {
+          ai_draft_prompt: string | null
+          auto_prefill_fields: Json | null
           created_at: string
           difficulty_level: string | null
           estimated_completion_time: string | null
           id: string
+          is_quick_template: boolean | null
           sections: Json
           template_description: string | null
           template_name: string
           updated_at: string
         }
         Insert: {
+          ai_draft_prompt?: string | null
+          auto_prefill_fields?: Json | null
           created_at?: string
           difficulty_level?: string | null
           estimated_completion_time?: string | null
           id?: string
+          is_quick_template?: boolean | null
           sections?: Json
           template_description?: string | null
           template_name: string
           updated_at?: string
         }
         Update: {
+          ai_draft_prompt?: string | null
+          auto_prefill_fields?: Json | null
           created_at?: string
           difficulty_level?: string | null
           estimated_completion_time?: string | null
           id?: string
+          is_quick_template?: boolean | null
           sections?: Json
           template_description?: string | null
           template_name?: string
@@ -3686,8 +3695,53 @@ export type Database = {
           },
         ]
       }
+      playbook_ai_assistance: {
+        Row: {
+          ai_suggestion: string
+          assistance_type: string
+          content_id: string | null
+          created_at: string | null
+          creator_id: string
+          id: string
+          original_content: string | null
+          section_index: number
+          user_accepted: boolean | null
+        }
+        Insert: {
+          ai_suggestion: string
+          assistance_type: string
+          content_id?: string | null
+          created_at?: string | null
+          creator_id: string
+          id?: string
+          original_content?: string | null
+          section_index: number
+          user_accepted?: boolean | null
+        }
+        Update: {
+          ai_suggestion?: string
+          assistance_type?: string
+          content_id?: string | null
+          created_at?: string | null
+          creator_id?: string
+          id?: string
+          original_content?: string | null
+          section_index?: number
+          user_accepted?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "playbook_ai_assistance_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "content"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       playbook_creation_progress: {
         Row: {
+          auto_save_enabled: boolean | null
           completed_sections: Json | null
           content_id: string | null
           created_at: string
@@ -3695,11 +3749,13 @@ export type Database = {
           current_section: number | null
           draft_data: Json | null
           id: string
+          last_auto_save: string | null
           status: string | null
           template_id: string | null
           updated_at: string
         }
         Insert: {
+          auto_save_enabled?: boolean | null
           completed_sections?: Json | null
           content_id?: string | null
           created_at?: string
@@ -3707,11 +3763,13 @@ export type Database = {
           current_section?: number | null
           draft_data?: Json | null
           id?: string
+          last_auto_save?: string | null
           status?: string | null
           template_id?: string | null
           updated_at?: string
         }
         Update: {
+          auto_save_enabled?: boolean | null
           completed_sections?: Json | null
           content_id?: string | null
           created_at?: string
@@ -3719,6 +3777,7 @@ export type Database = {
           current_section?: number | null
           draft_data?: Json | null
           id?: string
+          last_auto_save?: string | null
           status?: string | null
           template_id?: string | null
           updated_at?: string
