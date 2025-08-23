@@ -31,6 +31,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ServiceConsultationEmails } from './ServiceConsultationEmails';
 import { AdminNotes } from './AdminNotes';
+import { ServiceAIKnowledge } from './ServiceAIKnowledge';
 
 interface PricingFeature {
   id: string;
@@ -1381,6 +1382,11 @@ export const ServiceManagementPanel = () => {
                         serviceId={selectedService.id}
                         serviceName={selectedService.title}
                       />
+                    </div>
+
+                    {/* AI Knowledge Base */}
+                    <div className="border-t pt-6">
+                      <ServiceAIKnowledge serviceId={selectedService.id} />
                     </div>
 
                     <div className="flex gap-2">

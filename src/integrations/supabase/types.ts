@@ -4878,6 +4878,48 @@ export type Database = {
         }
         Relationships: []
       }
+      service_ai_knowledge: {
+        Row: {
+          content: string
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean | null
+          knowledge_type: string
+          priority: number | null
+          service_id: string
+          tags: string[] | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          knowledge_type?: string
+          priority?: number | null
+          service_id: string
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          knowledge_type?: string
+          priority?: number | null
+          service_id?: string
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       service_customizations: {
         Row: {
           created_at: string
