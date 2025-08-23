@@ -9,6 +9,8 @@ import { ConversationalRefinement } from "./ConversationalRefinement";
 import { RecommendationsHeader } from "./RecommendationsHeader";
 import { ProfileCompletionAlert } from "./ProfileCompletionAlert";
 import { SimplePlanDisplay } from "./SimplePlanDisplay";
+import { SuccessPathScore } from "./SuccessPathScore";
+import { PeerComparison } from "./PeerComparison";
 
 export function AIRecommendationsDashboard() {
   const { user, profile } = useAuth();
@@ -139,6 +141,11 @@ export function AIRecommendationsDashboard() {
       {currentPlan && (
         <SimplePlanDisplay plan={currentPlan} />
       )}
+
+      <div className="grid lg:grid-cols-2 gap-6">
+        <SuccessPathScore />
+        <PeerComparison />
+      </div>
 
       {showRefinement && currentPlan && (
         <div className="mb-6">

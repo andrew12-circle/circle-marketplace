@@ -82,6 +82,51 @@ export type Database = {
         }
         Relationships: []
       }
+      agent_archetypes: {
+        Row: {
+          archetype_name: string
+          created_at: string
+          description: string
+          id: string
+          pain_points: string[]
+          preferred_focus: string[]
+          production_range_max: number
+          production_range_min: number
+          recommended_tools: Json
+          success_metrics: Json
+          team_size_categories: string[]
+          updated_at: string
+        }
+        Insert: {
+          archetype_name: string
+          created_at?: string
+          description: string
+          id?: string
+          pain_points?: string[]
+          preferred_focus?: string[]
+          production_range_max?: number
+          production_range_min?: number
+          recommended_tools?: Json
+          success_metrics?: Json
+          team_size_categories?: string[]
+          updated_at?: string
+        }
+        Update: {
+          archetype_name?: string
+          created_at?: string
+          description?: string
+          id?: string
+          pain_points?: string[]
+          preferred_focus?: string[]
+          production_range_max?: number
+          production_range_min?: number
+          recommended_tools?: Json
+          success_metrics?: Json
+          team_size_categories?: string[]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       agent_copay_spending: {
         Row: {
           agent_id: string
@@ -333,6 +378,59 @@ export type Database = {
             columns: ["transaction_id"]
             isOneToOne: false
             referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agent_success_path_scores: {
+        Row: {
+          archetype_id: string | null
+          created_at: string
+          growth_score: number
+          id: string
+          last_updated: string
+          next_recommendations: Json
+          overall_score: number
+          peer_comparison_percentile: number
+          performance_score: number
+          score_breakdown: Json
+          tool_adoption_score: number
+          user_id: string
+        }
+        Insert: {
+          archetype_id?: string | null
+          created_at?: string
+          growth_score?: number
+          id?: string
+          last_updated?: string
+          next_recommendations?: Json
+          overall_score?: number
+          peer_comparison_percentile?: number
+          performance_score?: number
+          score_breakdown?: Json
+          tool_adoption_score?: number
+          user_id: string
+        }
+        Update: {
+          archetype_id?: string | null
+          created_at?: string
+          growth_score?: number
+          id?: string
+          last_updated?: string
+          next_recommendations?: Json
+          overall_score?: number
+          peer_comparison_percentile?: number
+          performance_score?: number
+          score_breakdown?: Json
+          tool_adoption_score?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_success_path_scores_archetype_id_fkey"
+            columns: ["archetype_id"]
+            isOneToOne: false
+            referencedRelation: "agent_archetypes"
             referencedColumns: ["id"]
           },
         ]
@@ -3312,6 +3410,63 @@ export type Database = {
         }
         Relationships: []
       }
+      industry_benchmarks: {
+        Row: {
+          benchmark_type: string
+          category: string
+          created_at: string
+          data_date: string
+          id: string
+          is_active: boolean
+          percentile_25: number | null
+          percentile_50: number | null
+          percentile_75: number | null
+          percentile_90: number | null
+          sample_size: number | null
+          source: string
+          subcategory: string | null
+          updated_at: string
+          value_numeric: number | null
+          value_text: string | null
+        }
+        Insert: {
+          benchmark_type: string
+          category: string
+          created_at?: string
+          data_date?: string
+          id?: string
+          is_active?: boolean
+          percentile_25?: number | null
+          percentile_50?: number | null
+          percentile_75?: number | null
+          percentile_90?: number | null
+          sample_size?: number | null
+          source: string
+          subcategory?: string | null
+          updated_at?: string
+          value_numeric?: number | null
+          value_text?: string | null
+        }
+        Update: {
+          benchmark_type?: string
+          category?: string
+          created_at?: string
+          data_date?: string
+          id?: string
+          is_active?: boolean
+          percentile_25?: number | null
+          percentile_50?: number | null
+          percentile_75?: number | null
+          percentile_90?: number | null
+          sample_size?: number | null
+          source?: string
+          subcategory?: string | null
+          updated_at?: string
+          value_numeric?: number | null
+          value_text?: string | null
+        }
+        Relationships: []
+      }
       lenders: {
         Row: {
           company: string | null
@@ -4145,6 +4300,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          agent_archetype_id: string | null
           annual_goal_transactions: number | null
           annual_goal_volume: number | null
           avatar_url: string | null
@@ -4177,13 +4333,16 @@ export type Database = {
           is_settlement_service_provider: boolean | null
           last_assessment_date: string | null
           latitude: number | null
+          lead_source_preferences: string[] | null
           location: string | null
           longitude: number | null
           marketing_time_per_week: number | null
           onboarding_completed: boolean | null
+          peer_rank_percentile: number | null
           performance_data_complete: boolean | null
           personality_data: Json | null
           phone: string | null
+          preferred_focus: string[] | null
           primary_challenge: string | null
           respa_max_copay_percentage: number | null
           respa_notes: string | null
@@ -4191,6 +4350,8 @@ export type Database = {
           revenue_share_percentage: number | null
           specialties: string[] | null
           state: string | null
+          success_path_score: number | null
+          team_size: string | null
           total_earnings: number | null
           updated_at: string
           user_id: string
@@ -4204,6 +4365,7 @@ export type Database = {
           zip_code: string | null
         }
         Insert: {
+          agent_archetype_id?: string | null
           annual_goal_transactions?: number | null
           annual_goal_volume?: number | null
           avatar_url?: string | null
@@ -4236,13 +4398,16 @@ export type Database = {
           is_settlement_service_provider?: boolean | null
           last_assessment_date?: string | null
           latitude?: number | null
+          lead_source_preferences?: string[] | null
           location?: string | null
           longitude?: number | null
           marketing_time_per_week?: number | null
           onboarding_completed?: boolean | null
+          peer_rank_percentile?: number | null
           performance_data_complete?: boolean | null
           personality_data?: Json | null
           phone?: string | null
+          preferred_focus?: string[] | null
           primary_challenge?: string | null
           respa_max_copay_percentage?: number | null
           respa_notes?: string | null
@@ -4250,6 +4415,8 @@ export type Database = {
           revenue_share_percentage?: number | null
           specialties?: string[] | null
           state?: string | null
+          success_path_score?: number | null
+          team_size?: string | null
           total_earnings?: number | null
           updated_at?: string
           user_id: string
@@ -4263,6 +4430,7 @@ export type Database = {
           zip_code?: string | null
         }
         Update: {
+          agent_archetype_id?: string | null
           annual_goal_transactions?: number | null
           annual_goal_volume?: number | null
           avatar_url?: string | null
@@ -4295,13 +4463,16 @@ export type Database = {
           is_settlement_service_provider?: boolean | null
           last_assessment_date?: string | null
           latitude?: number | null
+          lead_source_preferences?: string[] | null
           location?: string | null
           longitude?: number | null
           marketing_time_per_week?: number | null
           onboarding_completed?: boolean | null
+          peer_rank_percentile?: number | null
           performance_data_complete?: boolean | null
           personality_data?: Json | null
           phone?: string | null
+          preferred_focus?: string[] | null
           primary_challenge?: string | null
           respa_max_copay_percentage?: number | null
           respa_notes?: string | null
@@ -4309,6 +4480,8 @@ export type Database = {
           revenue_share_percentage?: number | null
           specialties?: string[] | null
           state?: string | null
+          success_path_score?: number | null
+          team_size?: string | null
           total_earnings?: number | null
           updated_at?: string
           user_id?: string
@@ -4321,7 +4494,15 @@ export type Database = {
           years_experience?: number | null
           zip_code?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_agent_archetype_id_fkey"
+            columns: ["agent_archetype_id"]
+            isOneToOne: false
+            referencedRelation: "agent_archetypes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       referral_tokens: {
         Row: {
@@ -7179,6 +7360,10 @@ export type Database = {
           p_total_amount: number
         }
         Returns: Json
+      }
+      calculate_success_path_score: {
+        Args: { p_user_id: string }
+        Returns: number
       }
       calculate_vendor_active_agents: {
         Args: { vendor_uuid: string }
