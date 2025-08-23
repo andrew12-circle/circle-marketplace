@@ -246,21 +246,9 @@ export const initJavaScriptOptimization = () => {
   // Set up conditional loading
   jsOptimizer.initializeConditionalLoading();
 
-  // Set up route-based preloading
-  if ('navigation' in window && 'addEventListener' in (window as any).navigation) {
-    (window as any).navigation.addEventListener('navigate', (event: any) => {
-      const url = new URL(event.destination.url);
-      jsOptimizer.preloadForRoute(url.pathname);
-    });
-  }
-
-  // Fallback for browsers without Navigation API
-  const originalPushState = history.pushState;
-  history.pushState = function(...args) {
-    const result = originalPushState.apply(this, args);
-    if (args[2]) {
-      jsOptimizer.preloadForRoute(args[2] as string);
-    }
-    return result;
-  };
+  // Disable navigation tracking to prevent conflicts with React Router
+  // The route-based preloading was causing pathname redefinition errors
+  // during BrowserRouter initialization. We'll rely on conditional loading instead.
+  
+  console.log('JavaScript optimization initialized with conditional loading only');
 };
