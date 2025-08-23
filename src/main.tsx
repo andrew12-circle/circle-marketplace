@@ -21,7 +21,6 @@ import "./i18n";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
-import QA from "./pages/QA";
 
 // Lazy load non-critical pages
 const Marketplace = lazy(() => import("./pages/Marketplace").then(m => ({ default: m.Marketplace })));
@@ -42,10 +41,6 @@ const VendorDashboard = lazy(() => import("./pages/VendorDashboard").then(m => (
 const VendorAnalyticsDashboard = lazy(() => import("./pages/VendorAnalyticsDashboard").then(m => ({ default: m.VendorAnalyticsDashboard })));
 const CommandCenter = lazy(() => import("./pages/CommandCenter"));
 const HealthStability = lazy(() => import("./pages/HealthStability"));
-
-// Performance monitoring components
-import WebVitalsReporter from "./components/performance/WebVitalsReporter";
-import PerformanceDevOverlay from "./components/performance/PerformanceDevOverlay";
 
 // Ministry pages
 const CircleMinistry = lazy(() => import("./pages/CircleMinistry"));
@@ -231,7 +226,7 @@ createRoot(document.getElementById("root")!).render(
                   <Route path="/agent-payment-success" element={<AgentPaymentSuccess />} />
                   <Route path="/agent-payment-canceled" element={<AgentPaymentCanceled />} />
                   <Route path="/command-center-test" element={<CommandCenterTest />} />
-                  <Route path="/qa" element={<QA />} />
+                  <Route path="/qa" element={<QARunner />} />
                   
                   {/* Profile settings alternate path */}
                   <Route path="/profile" element={<ProfileSettings />} />
@@ -243,10 +238,8 @@ createRoot(document.getElementById("root")!).render(
                   <Route path="*" element={<NotFound />} />
               </Routes>
                   </Suspense>
-                   <WebVitalsReporter />
-                   <PerformanceDevOverlay />
-                   <Toaster />
-                   <ReloadReasonBanner />
+                  <Toaster />
+                  <ReloadReasonBanner />
                 </CartProvider>
               </SecurityProvider>
           </BrowserRouter>

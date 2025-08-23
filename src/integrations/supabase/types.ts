@@ -7387,39 +7387,6 @@ export type Database = {
           },
         ]
       }
-      web_vitals: {
-        Row: {
-          created_at: string
-          device_info: Json | null
-          id: string
-          metric_name: string
-          path: string
-          rating: string | null
-          session_id: string
-          value: number
-        }
-        Insert: {
-          created_at?: string
-          device_info?: Json | null
-          id?: string
-          metric_name: string
-          path: string
-          rating?: string | null
-          session_id: string
-          value: number
-        }
-        Update: {
-          created_at?: string
-          device_info?: Json | null
-          id?: string
-          metric_name?: string
-          path?: string
-          rating?: string | null
-          session_id?: string
-          value?: number
-        }
-        Relationships: []
-      }
       webhook_events: {
         Row: {
           consultation_booking_id: string | null
@@ -7703,20 +7670,6 @@ export type Database = {
           value_statement?: string | null
           vendor_type?: string | null
           website_url?: string | null
-        }
-        Relationships: []
-      }
-      web_vitals_summary: {
-        Row: {
-          avg_value: number | null
-          date_collected: string | null
-          good_percentage: number | null
-          metric_name: string | null
-          p50_value: number | null
-          p75_value: number | null
-          p95_value: number | null
-          path: string | null
-          sample_count: number | null
         }
         Relationships: []
       }
