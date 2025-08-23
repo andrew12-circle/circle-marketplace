@@ -1,5 +1,6 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useTrendingServicesCache } from './useMarketplaceCache';
 
 interface TrendingService {
   service_id: string;
@@ -25,187 +26,57 @@ interface BestsellerService {
   avg_purchase_value: number;
 }
 
-interface TrendingCache {
-  data: TrendingService[];
-  timestamp: number;
-  expiresAt: number;
-}
-
-interface BestsellerCache {
-  data: BestsellerService[];
-  timestamp: number;
-  expiresAt: number;
-}
-
-// Cache with 15-minute expiry
-const CACHE_DURATION = 15 * 60 * 1000; // 15 minutes in ms
-const trendingCache = new Map<string, TrendingCache>();
-const bestsellerCache = new Map<string, BestsellerCache>();
-
-// Global request deduplication map
-const activeRequests = new Map<string, Promise<any>>();
-
+// Keep original hook interface but use cache-first approach
 export const useTrendingServices = (
   period: '7d' | '30d' = '7d',
   topPct: number = 0.15
 ) => {
-  const [trendingServices, setTrendingServices] = useState<TrendingService[]>([]);
-  const [bestsellerServices, setBestsellerServices] = useState<BestsellerService[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // Use cache for trending services (main use case)
+  const cacheQuery = useTrendingServicesCache();
   
-  // Ref to track if component is mounted
-  const mountedRef = useRef(true);
-  
-  useEffect(() => {
-    mountedRef.current = true;
-    return () => {
-      mountedRef.current = false;
-    };
-  }, []);
+  // Fallback query for bestsellers (less cached)
+  const bestsellerQuery = useQuery({
+    queryKey: ['bestseller-services', period],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .rpc('get_bestseller_services', {
+          p_period: period,
+          p_top_pct: 0.10, // Top 10% for bestsellers
+          p_min_count: 5,
+          p_max_count: 25
+        });
+      
+      if (error) throw error;
+      return data || [];
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+    retry: 2,
+    refetchOnWindowFocus: false
+  });
 
-  const trendingCacheKey = `trending_${period}_${topPct}`;
-  const bestsellerCacheKey = `bestseller_${period}_0.10`; // Fixed 10% for bestsellers
-  const requestKey = `${trendingCacheKey}_${bestsellerCacheKey}`;
-
-  const loadTrendingServices = useCallback(async () => {
-    // Check if request already in flight for this key
-    const existingRequest = activeRequests.get(requestKey);
-    if (existingRequest) {
-      return existingRequest;
-    }
-    
-    // Check trending cache first
-    const cachedTrending = trendingCache.get(trendingCacheKey);
-    if (cachedTrending && Date.now() < cachedTrending.expiresAt && mountedRef.current) {
-      setTrendingServices(cachedTrending.data);
-    }
-
-    // Check bestseller cache
-    const cachedBestseller = bestsellerCache.get(bestsellerCacheKey);
-    if (cachedBestseller && Date.now() < cachedBestseller.expiresAt && mountedRef.current) {
-      setBestsellerServices(cachedBestseller.data);
-    }
-
-    // If both caches are valid, no need to load
-    if (cachedTrending && Date.now() < cachedTrending.expiresAt &&
-        cachedBestseller && Date.now() < cachedBestseller.expiresAt) {
-      return Promise.resolve();
-    }
-
-    // Create and store request promise
-    const requestPromise = (async () => {
-      if (mountedRef.current) {
-        setIsLoading(true);
-        setError(null);
-      }
-
-      try {
-        // Load trending and bestseller data in parallel
-        const [trendingResult, bestsellerResult] = await Promise.all([
-          supabase.rpc('get_trending_services', {
-            p_period: period,
-            p_top_pct: topPct,
-            p_min_count: 8,
-            p_max_count: 40
-          }),
-          supabase.rpc('get_bestseller_services', {
-            p_period: period,
-            p_top_pct: 0.10, // Top 10% for bestsellers
-            p_min_count: 5,
-            p_max_count: 25
-          })
-        ]);
-
-        // Only update state if component is still mounted
-        if (!mountedRef.current) return;
-
-        if (trendingResult.error) {
-          console.error('Error fetching trending services:', trendingResult.error);
-        } else {
-          const trending = trendingResult.data || [];
-          setTrendingServices(trending);
-          trendingCache.set(trendingCacheKey, {
-            data: trending,
-            timestamp: Date.now(),
-            expiresAt: Date.now() + CACHE_DURATION
-          });
-        }
-
-        if (bestsellerResult.error) {
-          console.error('Error fetching bestseller services:', bestsellerResult.error);
-        } else {
-          const bestsellers = bestsellerResult.data || [];
-          setBestsellerServices(bestsellers);
-          bestsellerCache.set(bestsellerCacheKey, {
-            data: bestsellers,
-            timestamp: Date.now(),
-            expiresAt: Date.now() + CACHE_DURATION
-          });
-        }
-
-        if (trendingResult.error && bestsellerResult.error) {
-          setError('Failed to fetch trending and bestseller services');
-        }
-      } catch (err) {
-        console.error('Error loading services:', err);
-        if (mountedRef.current) {
-          setError('Failed to load trending services');
-        }
-      } finally {
-        if (mountedRef.current) {
-          setIsLoading(false);
-        }
-      }
-    })();
-
-    // Store the request promise for deduplication
-    activeRequests.set(requestKey, requestPromise);
-    
-    // Clean up the request from the map when done
-    requestPromise.finally(() => {
-      activeRequests.delete(requestKey);
-    });
-
-    return requestPromise;
-  }, [period, topPct, trendingCacheKey, bestsellerCacheKey, requestKey]);
-
-  // Auto-load on mount
-  useEffect(() => {
-    loadTrendingServices();
-  }, [loadTrendingServices]);
+  const trendingServices: TrendingService[] = cacheQuery.data || [];
+  const bestsellerServices: BestsellerService[] = bestsellerQuery.data || [];
 
   // Create efficient lookups
-  const trendingIds = useMemo(() => {
-    return new Set(trendingServices.map(service => service.service_id));
-  }, [trendingServices]);
+  const trendingIds = new Set(trendingServices.map(service => service.service_id));
+  const bestsellerIds = new Set(bestsellerServices.map(service => service.service_id));
 
-  const bestsellerIds = useMemo(() => {
-    return new Set(bestsellerServices.map(service => service.service_id));
-  }, [bestsellerServices]);
+  const isTrending = (serviceId: string) => trendingIds.has(serviceId);
+  const isBestseller = (serviceId: string) => bestsellerIds.has(serviceId);
 
-  const isTrending = useCallback((serviceId: string) => {
-    return trendingIds.has(serviceId);
-  }, [trendingIds]);
-
-  const isBestseller = useCallback((serviceId: string) => {
-    return bestsellerIds.has(serviceId);
-  }, [bestsellerIds]);
-
-  const getTrendingData = useCallback((serviceId: string) => {
+  const getTrendingData = (serviceId: string) => {
     return trendingServices.find(service => service.service_id === serviceId);
-  }, [trendingServices]);
+  };
 
-  const getBestsellerData = useCallback((serviceId: string) => {
+  const getBestsellerData = (serviceId: string) => {
     return bestsellerServices.find(service => service.service_id === serviceId);
-  }, [bestsellerServices]);
+  };
 
-  const refresh = useCallback(() => {
-    // Clear caches and reload
-    trendingCache.delete(trendingCacheKey);
-    bestsellerCache.delete(bestsellerCacheKey);
-    loadTrendingServices();
-  }, [trendingCacheKey, bestsellerCacheKey, loadTrendingServices]);
+  const refresh = () => {
+    cacheQuery.refetch();
+    bestsellerQuery.refetch();
+  };
 
   return {
     trendingServices,
@@ -216,8 +87,8 @@ export const useTrendingServices = (
     isBestseller,
     getTrendingData,
     getBestsellerData,
-    isLoading,
-    error,
+    isLoading: cacheQuery.isLoading || bestsellerQuery.isLoading,
+    error: cacheQuery.error || bestsellerQuery.error,
     refresh
   };
 };

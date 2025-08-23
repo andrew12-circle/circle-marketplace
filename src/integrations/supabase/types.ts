@@ -7253,6 +7253,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      cleanup_marketplace_cache: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       cleanup_old_security_events: {
         Args: Record<PropertyKey, never>
         Returns: undefined
@@ -7317,6 +7321,10 @@ export type Database = {
       }
       get_funnel_metrics: {
         Args: { p_period?: string }
+        Returns: Json
+      }
+      get_marketplace_cache: {
+        Args: { p_cache_key: string }
         Returns: Json
       }
       get_optimized_marketplace_data: {
@@ -7601,6 +7609,10 @@ export type Database = {
       verify_critical_data_integrity: {
         Args: Record<PropertyKey, never>
         Returns: boolean
+      }
+      warm_marketplace_cache: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
       }
     }
     Enums: {
