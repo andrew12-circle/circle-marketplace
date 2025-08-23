@@ -81,30 +81,23 @@ export const useAgentData = (timeRange: number = 12) => {
         return;
       }
 
-      // Helper to add timeout to Supabase calls
-      const withTimeout = async <T,>(promise: Promise<T>, ms = 5000): Promise<T> => {
-        const timeoutPromise = new Promise<never>((_, reject) => 
-          setTimeout(() => reject(new Error('Query timeout')), ms)
-        );
-        return Promise.race([promise, timeoutPromise]);
-      };
+      console.log('🔄 Starting agent data fetch for user:', user.id);
 
-      // 1. Get agent profile with timeout
-      const { data: agentData, error: agentError } = await withTimeout(
-        supabase
-          .from('agents')
-          .select('*')
-          .eq('user_id', user.id)
-          .single(),
-        5000
-      );
+      // 1. Get agent profile - use maybeSingle() to avoid errors when no data
+      console.log('📋 Fetching agent profile...');
+      const { data: agentData, error: agentError } = await supabase
+        .from('agents')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
 
-      if (agentError && agentError.code !== 'PGRST116') {
+      if (agentError) {
+        console.error('Agent profile fetch error:', agentError);
         throw agentError;
       }
 
       if (!agentData) {
-        // No agent profile found - user is not an agent
+        console.log('ℹ️ No agent profile found - user is not an agent');
         setAgent(null);
         setTransactions([]);
         setStats(null);
@@ -112,24 +105,24 @@ export const useAgentData = (timeRange: number = 12) => {
         return;
       }
 
+      console.log('✅ Agent profile found:', agentData.id);
       setAgent(agentData);
 
-      // 2. Get transactions from data feed with timeout
+      // 2. Get transactions from data feed
+      console.log('📊 Fetching transaction data...');
       const cutoffDate = new Date();
       cutoffDate.setMonth(cutoffDate.getMonth() - timeRange);
 
-      const { data: transactionData, error: transactionError } = await withTimeout(
-        supabase
-          .from('agent_transactions')
-          .select('*')
-          .eq('agent_id', agentData.id)
-          .gte('close_date', cutoffDate.toISOString().split('T')[0])
-          .order('close_date', { ascending: false }),
-        5000
-      );
+      const { data: transactionData, error: transactionError } = await supabase
+        .from('agent_transactions')
+        .select('*')
+        .eq('agent_id', agentData.id)
+        .gte('close_date', cutoffDate.toISOString().split('T')[0])
+        .order('close_date', { ascending: false });
 
       if (transactionError) {
         console.warn('Transaction fetch failed:', transactionError);
+        // Don't throw - continue with empty transactions
       }
 
       // Convert to our Transaction format
@@ -146,26 +139,29 @@ export const useAgentData = (timeRange: number = 12) => {
         source: t.source as 'feed' | 'self_report'
       }));
 
+      console.log(`📈 Found ${formattedTransactions.length} transactions from feed`);
+
       // 3. If no transactions from feed, check for quiz responses
       let finalTransactions = formattedTransactions;
       let hasDataFeed = agentData.data_feed_active && formattedTransactions.length > 0;
       let needsQuiz = false;
 
       if (!hasDataFeed) {
-        // Check for existing quiz response with timeout
+        console.log('🔍 No feed data, checking for quiz responses...');
         try {
-          const { data: quizData } = await withTimeout(
-            supabase
-              .from('agent_quiz_responses')
-              .select('*')
-              .eq('agent_id', agentData.id)
-              .order('created_at', { ascending: false })
-              .limit(1)
-              .single(),
-            3000
-          );
+          const { data: quizData, error: quizError } = await supabase
+            .from('agent_quiz_responses')
+            .select('*')
+            .eq('agent_id', agentData.id)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
 
-          if (quizData) {
+          if (quizError) {
+            console.warn('Quiz fetch error:', quizError);
+            needsQuiz = true;
+          } else if (quizData) {
+            console.log('📝 Found quiz data, generating mock transactions');
             // Generate transactions from quiz data for stats calculation
             const buyerTransactions: Transaction[] = Array.from({ length: quizData.buyers_count }, (_, i) => ({
               id: `quiz-buyer-${i}`,
@@ -186,6 +182,7 @@ export const useAgentData = (timeRange: number = 12) => {
             finalTransactions = [...buyerTransactions, ...sellerTransactions];
             hasDataFeed = false;
           } else {
+            console.log('❓ No quiz data found - user needs to complete quiz');
             needsQuiz = true;
           }
         } catch (quizError) {
@@ -194,12 +191,14 @@ export const useAgentData = (timeRange: number = 12) => {
         }
       }
 
+      console.log(`📊 Final transaction count: ${finalTransactions.length}, hasDataFeed: ${hasDataFeed}, needsQuiz: ${needsQuiz}`);
+
       setTransactions(finalTransactions);
       calculateStats(finalTransactions, hasDataFeed, needsQuiz);
       setLoading(false);
 
     } catch (err) {
-      console.error('Error fetching agent data:', err);
+      console.error('❌ Error fetching agent data:', err);
       setError(err instanceof Error ? err.message : 'An error occurred');
       setLoading(false);
     }
