@@ -1,95 +1,87 @@
-import React, { memo, useMemo } from 'react';
-import { FixedSizeGrid as Grid } from 'react-window';
+import { useState, useCallback, useRef, useEffect } from 'react';
+import { processInChunks } from '@/utils/taskScheduler';
 
 interface VirtualGridProps {
   items: any[];
-  itemHeight: number;
-  itemWidth: number;
-  containerHeight: number;
-  containerWidth: number;
-  columnCount: number;
   renderItem: (item: any, index: number) => React.ReactNode;
-  gap?: number;
+  itemHeight?: number;
+  containerHeight?: number;
+  itemsPerRow?: number;
+  className?: string;
 }
 
-interface GridItemProps {
-  columnIndex: number;
-  rowIndex: number;
-  style: React.CSSProperties;
-  data: {
-    items: any[];
-    columnCount: number;
-    renderItem: (item: any, index: number) => React.ReactNode;
-    gap: number;
-  };
-}
+export const VirtualGrid = ({ 
+  items, 
+  renderItem, 
+  itemHeight = 300, 
+  containerHeight = 600,
+  itemsPerRow = 4,
+  className = ""
+}: VirtualGridProps) => {
+  const [visibleRange, setVisibleRange] = useState({ start: 0, end: 20 });
+  const [renderedItems, setRenderedItems] = useState<React.ReactNode[]>([]);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout>();
 
-const GridItem = memo<GridItemProps>(({ columnIndex, rowIndex, style, data }) => {
-  const { items, columnCount, renderItem, gap } = data;
-  const index = rowIndex * columnCount + columnIndex;
-  
-  if (index >= items.length) {
-    return null;
-  }
+  // Calculate visible items based on scroll position
+  const updateVisibleRange = useCallback((scrollTop: number) => {
+    const rowHeight = itemHeight;
+    const visibleRows = Math.ceil(containerHeight / rowHeight);
+    const startRow = Math.floor(scrollTop / rowHeight);
+    const endRow = startRow + visibleRows + 1; // Add buffer
+    
+    const start = Math.max(0, startRow * itemsPerRow);
+    const end = Math.min(items.length, endRow * itemsPerRow);
+    
+    setVisibleRange({ start, end });
+  }, [items.length, itemHeight, containerHeight, itemsPerRow]);
 
-  const item = items[index];
-  
+  // Throttled scroll handler
+  const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+    if (scrollTimeoutRef.current) {
+      clearTimeout(scrollTimeoutRef.current);
+    }
+    
+    scrollTimeoutRef.current = setTimeout(() => {
+      updateVisibleRange(e.currentTarget.scrollTop);
+    }, 16); // ~60fps
+  }, [updateVisibleRange]);
+
+  // Render visible items in chunks to prevent blocking
+  useEffect(() => {
+    const visibleItems = items.slice(visibleRange.start, visibleRange.end);
+    
+    // Update rendered items immediately for simple cases
+    setRenderedItems(
+      visibleItems.map((item, index) => {
+        const actualIndex = visibleRange.start + index;
+        return renderItem(item, actualIndex);
+      })
+    );
+  }, [items, visibleRange, renderItem]);
+
+  const totalHeight = Math.ceil(items.length / itemsPerRow) * itemHeight;
+  const offsetY = Math.floor(visibleRange.start / itemsPerRow) * itemHeight;
+
   return (
-    <div
-      style={{
-        ...style,
-        left: (style.left as number) + (gap * columnIndex),
-        top: (style.top as number) + (gap * rowIndex),
-        width: (style.width as number) - gap,
-        height: (style.height as number) - gap,
-      }}
+    <div 
+      ref={containerRef}
+      className={`overflow-auto ${className}`}
+      style={{ height: containerHeight }}
+      onScroll={handleScroll}
     >
-      {renderItem(item, index)}
+      <div style={{ height: totalHeight, position: 'relative' }}>
+        <div 
+          style={{ 
+            transform: `translateY(${offsetY}px)`,
+            display: 'grid',
+            gridTemplateColumns: `repeat(${itemsPerRow}, 1fr)`,
+            gap: '1rem'
+          }}
+        >
+          {renderedItems}
+        </div>
+      </div>
     </div>
   );
-});
-
-GridItem.displayName = 'GridItem';
-
-export const VirtualGrid = memo<VirtualGridProps>(({
-  items,
-  itemHeight,
-  itemWidth,
-  containerHeight,
-  containerWidth,
-  columnCount,
-  renderItem,
-  gap = 16
-}) => {
-  const rowCount = Math.ceil(items.length / columnCount);
-  
-  const itemData = useMemo(
-    () => ({
-      items,
-      columnCount,
-      renderItem,
-      gap
-    }),
-    [items, columnCount, renderItem, gap]
-  );
-
-  if (items.length === 0) {
-    return null;
-  }
-
-  return (
-    <Grid
-      columnCount={columnCount}
-      columnWidth={itemWidth + gap}
-      height={containerHeight}
-      width={containerWidth}
-      rowCount={rowCount}
-      rowHeight={itemHeight + gap}
-      itemData={itemData}
-    >
-      {GridItem}
-    </Grid>
-  );
-});
-
-VirtualGrid.displayName = 'VirtualGrid';
+};

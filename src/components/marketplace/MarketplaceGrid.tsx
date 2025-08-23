@@ -15,6 +15,8 @@ import { CategoryBlocks } from "./CategoryBlocks";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Filter, Sparkles, Zap, Facebook, Globe, Mail, Share2, Monitor, TrendingUp, Database, Camera, Video, Printer, ArrowRight, BookOpen, Star, Eye, ChevronRight } from "lucide-react";
+import { VirtualGrid } from "@/components/ui/virtual-grid";
+import { usePagination } from "@/hooks/useDOMOptimization";
 import { LazyComponent } from "@/components/ui/lazy-component";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -596,8 +598,8 @@ export const MarketplaceGrid = () => {
               {/* Grid - Mobile Responsive with Virtualization */}
               {viewMode === "services" && (
                 <>
-                  <div className="mobile-grid gap-4 sm:gap-6 max-h-[80vh] overflow-y-auto">
-                    {flattenServices.slice(0, 24).map((service, index) => (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 max-h-[80vh] overflow-y-auto">
+                    {flattenServices.slice(0, 16).map((service, index) => (
                       <LazyComponent key={`service-${service.id}-${index}`} threshold="200px">
                         <OptimizedServiceCard 
                           service={service} 
@@ -611,9 +613,9 @@ export const MarketplaceGrid = () => {
                    </div>
                    <div className="mt-6 flex items-center justify-center gap-4">
                     <span className="text-sm text-muted-foreground">
-                      Showing {Math.min(12, flattenServices.length)} of {totalServicesCount} results
+                      Showing {Math.min(16, flattenServices.length)} of {totalServicesCount} results
                     </span>
-                    {(flattenServices.length > 12 || hasNextPage) && (
+                    {(flattenServices.length > 16 || hasNextPage) && (
                       <Button onClick={() => fetchNextPage()} disabled={isFetchingNextPage}>
                         {isFetchingNextPage ? 'Loading…' : 'Load more'}
                       </Button>
@@ -633,8 +635,8 @@ export const MarketplaceGrid = () => {
                         {PRODUCT_CATEGORIES.find(p => p.id === selectedProductCategory)?.name}
                       </h2>
                     </div>
-                    <div className="mobile-grid gap-4 sm:gap-6 max-h-[60vh] overflow-y-auto">
-                      {getServicesForProduct(selectedProductCategory).slice(0, 18).map((service, index) => (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 max-h-[60vh] overflow-y-auto">
+                      {getServicesForProduct(selectedProductCategory).slice(0, 12).map((service, index) => (
                         <LazyComponent key={`product-${selectedProductCategory}-${service.id}-${index}`} threshold="150px">
                           <OptimizedServiceCard 
                             service={service} 
