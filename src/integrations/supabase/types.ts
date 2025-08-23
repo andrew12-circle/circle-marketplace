@@ -331,20 +331,6 @@ export type Database = {
             referencedRelation: "agents"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "agent_quiz_responses_agent_id_fkey"
-            columns: ["agent_id"]
-            isOneToOne: false
-            referencedRelation: "agents_business_contact"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "agent_quiz_responses_agent_id_fkey"
-            columns: ["agent_id"]
-            isOneToOne: false
-            referencedRelation: "agents_public"
-            referencedColumns: ["id"]
-          },
         ]
       }
       agent_relationships: {
@@ -381,38 +367,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "agent_relationships_agent_a_id_fkey"
-            columns: ["agent_a_id"]
-            isOneToOne: false
-            referencedRelation: "agents_business_contact"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "agent_relationships_agent_a_id_fkey"
-            columns: ["agent_a_id"]
-            isOneToOne: false
-            referencedRelation: "agents_public"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "agent_relationships_agent_b_id_fkey"
             columns: ["agent_b_id"]
             isOneToOne: false
             referencedRelation: "agents"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "agent_relationships_agent_b_id_fkey"
-            columns: ["agent_b_id"]
-            isOneToOne: false
-            referencedRelation: "agents_business_contact"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "agent_relationships_agent_b_id_fkey"
-            columns: ["agent_b_id"]
-            isOneToOne: false
-            referencedRelation: "agents_public"
             referencedColumns: ["id"]
           },
           {
@@ -529,20 +487,6 @@ export type Database = {
             columns: ["agent_id"]
             isOneToOne: false
             referencedRelation: "agents"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "agent_transactions_agent_id_fkey"
-            columns: ["agent_id"]
-            isOneToOne: false
-            referencedRelation: "agents_business_contact"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "agent_transactions_agent_id_fkey"
-            columns: ["agent_id"]
-            isOneToOne: false
-            referencedRelation: "agents_public"
             referencedColumns: ["id"]
           },
         ]
@@ -6233,20 +6177,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "transactions_agent_id_fkey"
-            columns: ["agent_id"]
-            isOneToOne: false
-            referencedRelation: "agents_business_contact"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "transactions_agent_id_fkey"
-            columns: ["agent_id"]
-            isOneToOne: false
-            referencedRelation: "agents_public"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "transactions_lender_id_fkey"
             columns: ["lender_id"]
             isOneToOne: false
@@ -7565,108 +7495,6 @@ export type Database = {
       }
     }
     Views: {
-      agents_business_contact: {
-        Row: {
-          bio: string | null
-          brokerage: string | null
-          city: string | null
-          created_at: string | null
-          email: string | null
-          first_name: string | null
-          id: string | null
-          is_active: boolean | null
-          last_name: string | null
-          phone: string | null
-          photo_url: string | null
-          social_linkedin: string | null
-          social_zillow: string | null
-          state: string | null
-          updated_at: string | null
-          user_id: string | null
-          years_active: number | null
-        }
-        Insert: {
-          bio?: string | null
-          brokerage?: string | null
-          city?: string | null
-          created_at?: string | null
-          email?: string | null
-          first_name?: string | null
-          id?: string | null
-          is_active?: boolean | null
-          last_name?: string | null
-          phone?: string | null
-          photo_url?: string | null
-          social_linkedin?: string | null
-          social_zillow?: string | null
-          state?: string | null
-          updated_at?: string | null
-          user_id?: string | null
-          years_active?: number | null
-        }
-        Update: {
-          bio?: string | null
-          brokerage?: string | null
-          city?: string | null
-          created_at?: string | null
-          email?: string | null
-          first_name?: string | null
-          id?: string | null
-          is_active?: boolean | null
-          last_name?: string | null
-          phone?: string | null
-          photo_url?: string | null
-          social_linkedin?: string | null
-          social_zillow?: string | null
-          state?: string | null
-          updated_at?: string | null
-          user_id?: string | null
-          years_active?: number | null
-        }
-        Relationships: []
-      }
-      agents_public: {
-        Row: {
-          bio: string | null
-          brokerage: string | null
-          created_at: string | null
-          first_name: string | null
-          id: string | null
-          is_active: boolean | null
-          last_name: string | null
-          photo_url: string | null
-          updated_at: string | null
-          user_id: string | null
-          years_active: number | null
-        }
-        Insert: {
-          bio?: string | null
-          brokerage?: string | null
-          created_at?: string | null
-          first_name?: string | null
-          id?: string | null
-          is_active?: boolean | null
-          last_name?: string | null
-          photo_url?: string | null
-          updated_at?: string | null
-          user_id?: string | null
-          years_active?: number | null
-        }
-        Update: {
-          bio?: string | null
-          brokerage?: string | null
-          created_at?: string | null
-          first_name?: string | null
-          id?: string | null
-          is_active?: boolean | null
-          last_name?: string | null
-          photo_url?: string | null
-          updated_at?: string | null
-          user_id?: string | null
-          years_active?: number | null
-        }
-        Relationships: []
-      }
       service_representatives_public: {
         Row: {
           bio: string | null
