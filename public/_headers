@@ -1,0 +1,48 @@
+# Cache static assets for 1 year with immutable flag
+/assets/js/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/assets/css/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/assets/images/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Cache other assets for 1 week
+/assets/*
+  Cache-Control: public, max-age=604800
+
+# Cache fonts for 1 year
+/*.woff
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.woff2
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.ttf
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.otf
+  Cache-Control: public, max-age=31536000, immutable
+
+# Cache favicons for 1 week
+/favicon.ico
+  Cache-Control: public, max-age=604800
+
+/*.png
+  Cache-Control: public, max-age=604800
+
+/*.svg
+  Cache-Control: public, max-age=604800
+
+# No cache for HTML files to ensure updates
+/*.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+# Service worker should not be cached
+/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+
+# API routes should not be cached
+/api/*
+  Cache-Control: no-cache, no-store, must-revalidate
