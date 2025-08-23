@@ -106,10 +106,11 @@ taskScheduler.schedule(() => {
   globalErrorMonitor.initialize();
 });
 
-// Initialize performance optimizations in chunks
-mainThreadOptimizer.queueInit(() => {
-  initAppPerformance();
-});
+// Performance optimizations temporarily disabled to fix startup issues
+// TODO: Re-enable gradually after identifying the blocking code
+// mainThreadOptimizer.queueInit(() => {
+//   initAppPerformance();
+// });
 
 // DOM Performance Diagnostic (dev only)
 if (import.meta.env.DEV) {
