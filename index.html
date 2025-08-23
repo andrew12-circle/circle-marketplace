@@ -25,8 +25,33 @@
     
     <!-- Critical resource preloading to optimize dependency chain -->
     <link rel="modulepreload" href="/src/main.tsx" fetchpriority="high">
-    <link rel="preload" href="/assets/index-Vtc2cK_H.js" as="script" fetchpriority="high">
-    <link rel="preload" href="/assets/index-1_cDzJxw.css" as="style" fetchpriority="high">
+    
+    <!-- Defer non-critical vendor bundles to reduce unused JavaScript -->
+    <script>
+      // Conditional loading for heavy vendor bundles
+      window.deferredVendors = {
+        charts: false,
+        supabaseAnalytics: false,
+        radixExtended: false
+      };
+      
+      // Load vendor bundles on demand
+      window.loadVendorBundle = function(name) {
+        if (window.deferredVendors[name]) return;
+        
+        const bundleMap = {
+          charts: '/assets/chart-vendor-C_JjxtL4.js',
+          supabaseAnalytics: '/assets/supabase-vendor-CL0beYrG.js', 
+          radixExtended: '/assets/radix-vendor-CSTKXYxC.js'
+        };
+        
+        const script = document.createElement('script');
+        script.src = bundleMap[name];
+        script.defer = true;
+        document.head.appendChild(script);
+        window.deferredVendors[name] = true;
+      };
+    </script>
     
     <!-- Critical domain preconnects to reduce network dependency chains -->
     <link rel="preconnect" href="https://ihzyuyfawapweamqzzlj.supabase.co" crossorigin>

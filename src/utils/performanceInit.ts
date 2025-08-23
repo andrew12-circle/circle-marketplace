@@ -3,12 +3,16 @@ import { taskScheduler } from './taskScheduler';
 import { initializeAppWithPriority, deferUntilIdle } from './fidOptimizer';
 import { initNetworkOptimizations } from './networkOptimizer';
 import { optimizeCSS } from './cssOptimizer';
+import { initJavaScriptOptimization } from './jsOptimizer';
 
 // Initialize all performance optimizations on app startup with FID priority
 export const initAppPerformance = () => {
   if (typeof window !== 'undefined') {
     // Optimize network dependency chains first
     initNetworkOptimizations();
+    
+    // Initialize JavaScript optimization for conditional loading
+    initJavaScriptOptimization();
     
     // Immediately enable input responsiveness
     document.body.style.pointerEvents = 'auto';
