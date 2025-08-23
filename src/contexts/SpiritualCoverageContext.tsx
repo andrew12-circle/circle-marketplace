@@ -1,4 +1,4 @@
-import { createContext, useContext, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useCallback, ReactNode } from 'react';
 import { applyPrayerGuard, SPIRITUAL_COVERAGE, getDailyScripture } from '@/lib/prayerGuard';
 
 interface SpiritualCoverageContextType {
