@@ -3,14 +3,18 @@ import { cn } from "@/lib/utils";
 
 // Calculate total offset including header and navigation tabs
 const getTotalOffset = () => {
-  const header = document.querySelector('header') as HTMLElement;
-  const navTabs = document.querySelector('[class*="NavigationTabs"], .navigation-tabs, [class*="rounded-xl"][class*="mx-auto"]') as HTMLElement;
-  
-  const headerHeight = header ? header.offsetHeight : 76;
-  const navTabsHeight = navTabs ? navTabs.offsetHeight : 52; // typical tab height
-  const spacing = 16; // spacing below nav tabs
-  
-  return headerHeight + navTabsHeight + spacing;
+  return new Promise<number>((resolve) => {
+    requestAnimationFrame(() => {
+      const header = document.querySelector('header') as HTMLElement;
+      const navTabs = document.querySelector('[class*="NavigationTabs"], .navigation-tabs, [class*="rounded-xl"][class*="mx-auto"]') as HTMLElement;
+      
+      const headerHeight = header ? header.offsetHeight : 76;
+      const navTabsHeight = navTabs ? navTabs.offsetHeight : 52; // typical tab height
+      const spacing = 16; // spacing below nav tabs
+      
+      resolve(headerHeight + navTabsHeight + spacing);
+    });
+  });
 };
 
 interface StickySearchContainerProps {
@@ -25,15 +29,22 @@ export const StickySearchContainer = ({ children, className }: StickySearchConta
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Update total offset on mount and resize
-    const updateTotalOffset = () => {
-      setTotalOffset(getTotalOffset());
+    const updateTotalOffset = async () => {
+      const offset = await getTotalOffset();
+      setTotalOffset(offset);
     };
     
     updateTotalOffset();
-    window.addEventListener('resize', updateTotalOffset);
     
-    return () => window.removeEventListener('resize', updateTotalOffset);
+    const handleResize = () => {
+      requestAnimationFrame(() => {
+        updateTotalOffset();
+      });
+    };
+    
+    window.addEventListener('resize', handleResize);
+    
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   useEffect(() => {

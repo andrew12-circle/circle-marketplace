@@ -50,14 +50,16 @@ export const VideoSection = ({
         behavior: 'smooth'
       });
       
-      // Update arrow visibility
-      setTimeout(() => {
-        if (scrollContainerRef.current) {
-          const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
-          setShowLeftArrow(scrollLeft > 0);
-          setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 10);
-        }
-      }, 300);
+      // Use RAF to batch layout reads and prevent forced reflow
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          if (scrollContainerRef.current) {
+            const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
+            setShowLeftArrow(scrollLeft > 0);
+            setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 10);
+          }
+        }, 300);
+      });
     }
   };
 

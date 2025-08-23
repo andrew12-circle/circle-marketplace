@@ -49,10 +49,12 @@ export const LaunchMetrics = () => {
     };
 
     const handleScroll = () => {
-      const scrollPercent = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
-      if (scrollPercent > 75) {
-        trackEvent('deep_scroll', { scroll_percent: scrollPercent });
-      }
+      requestAnimationFrame(() => {
+        const scrollPercent = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
+        if (scrollPercent > 75) {
+          trackEvent('deep_scroll', { scroll_percent: scrollPercent });
+        }
+      });
     };
 
     document.addEventListener('click', handleClick);

@@ -37,62 +37,64 @@ export const GuideTour: React.FC<GuideTourProps> = ({
     if (currentStep?.selector) {
       const element = document.querySelector(currentStep.selector);
       if (element) {
-        const rect = element.getBoundingClientRect();
-        setTargetPosition({
-          top: rect.top + window.scrollY,
-          left: rect.left + window.scrollX,
-          width: rect.width,
-          height: rect.height
-        });
+        requestAnimationFrame(() => {
+          const rect = element.getBoundingClientRect();
+          setTargetPosition({
+            top: rect.top + window.scrollY,
+            left: rect.left + window.scrollX,
+            width: rect.width,
+            height: rect.height
+          });
 
-        // Calculate tooltip position
-        const tooltipWidth = 300;
-        const tooltipHeight = 200;
-        let tooltipTop = rect.top + window.scrollY;
-        let tooltipLeft = rect.left + window.scrollX;
-        switch (currentStep.position) {
-          case 'top':
-            tooltipTop = rect.top + window.scrollY - tooltipHeight - 10;
-            tooltipLeft = rect.left + window.scrollX + rect.width / 2 - tooltipWidth / 2;
-            break;
-          case 'bottom':
-            tooltipTop = rect.top + window.scrollY + rect.height + 10;
-            tooltipLeft = rect.left + window.scrollX + rect.width / 2 - tooltipWidth / 2;
-            break;
-          case 'left':
-            tooltipTop = rect.top + window.scrollY + rect.height / 2 - tooltipHeight / 2;
-            tooltipLeft = rect.left + window.scrollX - tooltipWidth - 10;
-            break;
-          case 'right':
-            tooltipTop = rect.top + window.scrollY + rect.height / 2 - tooltipHeight / 2;
-            tooltipLeft = rect.left + window.scrollX + rect.width + 10;
-            break;
-          default:
-            tooltipTop = rect.top + window.scrollY + rect.height + 10;
-            tooltipLeft = rect.left + window.scrollX + rect.width / 2 - tooltipWidth / 2;
-        }
+          // Calculate tooltip position
+          const tooltipWidth = 300;
+          const tooltipHeight = 200;
+          let tooltipTop = rect.top + window.scrollY;
+          let tooltipLeft = rect.left + window.scrollX;
+          switch (currentStep.position) {
+            case 'top':
+              tooltipTop = rect.top + window.scrollY - tooltipHeight - 10;
+              tooltipLeft = rect.left + window.scrollX + rect.width / 2 - tooltipWidth / 2;
+              break;
+            case 'bottom':
+              tooltipTop = rect.top + window.scrollY + rect.height + 10;
+              tooltipLeft = rect.left + window.scrollX + rect.width / 2 - tooltipWidth / 2;
+              break;
+            case 'left':
+              tooltipTop = rect.top + window.scrollY + rect.height / 2 - tooltipHeight / 2;
+              tooltipLeft = rect.left + window.scrollX - tooltipWidth - 10;
+              break;
+            case 'right':
+              tooltipTop = rect.top + window.scrollY + rect.height / 2 - tooltipHeight / 2;
+              tooltipLeft = rect.left + window.scrollX + rect.width + 10;
+              break;
+            default:
+              tooltipTop = rect.top + window.scrollY + rect.height + 10;
+              tooltipLeft = rect.left + window.scrollX + rect.width / 2 - tooltipWidth / 2;
+          }
 
-        // Ensure tooltip stays within viewport with extra padding for buttons
-        const viewportWidth = window.innerWidth;
-        const viewportHeight = window.innerHeight;
-        const padding = 20;
-        if (tooltipLeft < padding) tooltipLeft = padding;
-        if (tooltipLeft + tooltipWidth > viewportWidth - padding) {
-          tooltipLeft = viewportWidth - tooltipWidth - padding;
-        }
-        if (tooltipTop < padding) tooltipTop = padding;
-        if (tooltipTop + tooltipHeight > window.scrollY + viewportHeight - padding) {
-          tooltipTop = window.scrollY + viewportHeight - tooltipHeight - padding;
-        }
-        setTooltipPosition({
-          top: tooltipTop,
-          left: tooltipLeft
-        });
+          // Ensure tooltip stays within viewport with extra padding for buttons
+          const viewportWidth = window.innerWidth;
+          const viewportHeight = window.innerHeight;
+          const padding = 20;
+          if (tooltipLeft < padding) tooltipLeft = padding;
+          if (tooltipLeft + tooltipWidth > viewportWidth - padding) {
+            tooltipLeft = viewportWidth - tooltipWidth - padding;
+          }
+          if (tooltipTop < padding) tooltipTop = padding;
+          if (tooltipTop + tooltipHeight > window.scrollY + viewportHeight - padding) {
+            tooltipTop = window.scrollY + viewportHeight - tooltipHeight - padding;
+          }
+          setTooltipPosition({
+            top: tooltipTop,
+            left: tooltipLeft
+          });
 
-        // Scroll element into view
-        element.scrollIntoView({
-          behavior: 'smooth',
-          block: 'center'
+          // Scroll element into view
+          element.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center'
+          });
         });
       }
     } else {
