@@ -174,28 +174,66 @@ class JavaScriptOptimizer {
 
   // Preload modules for route transitions
   preloadForRoute(route: string) {
-    const previousRoute = window.location.pathname;
-    
-    // Simulate route change to check conditions
-    const originalPathname = window.location.pathname;
-    Object.defineProperty(window.location, 'pathname', {
-      value: route,
-      configurable: true
-    });
+    // Create a temporary check function with the target route
+    const shouldLoadForRoute = (targetRoute: string) => {
+      return this.deferredModules.some(config => {
+        if (!config.condition) return false;
+        
+        // Check conditions based on the target route instead of modifying window.location
+        const routeChecks = {
+          charts: targetRoute.includes('/dashboard') || 
+                 targetRoute.includes('/analytics') || 
+                 targetRoute.includes('/vendor-dashboard') ||
+                 targetRoute.includes('/command-center'),
+          'radix-non-critical': targetRoute.includes('/admin') || 
+                               targetRoute.includes('/settings') ||
+                               targetRoute.includes('/profile'),
+          'supabase-analytics': targetRoute.includes('/analytics') || 
+                               targetRoute.includes('/dashboard') ||
+                               targetRoute.includes('/admin'),
+          'vendor-utilities': targetRoute.includes('/vendor') || 
+                             targetRoute.includes('/creator') ||
+                             targetRoute.includes('/admin')
+        };
+        
+        return routeChecks[config.name as keyof typeof routeChecks] || false;
+      });
+    };
 
+    // Preload modules needed for the target route
     this.deferredModules.forEach(config => {
-      if (config.condition && config.condition() && !this.loadedModules.has(config.name)) {
+      const routeNeedsModule = this.checkRouteNeedsModule(config.name, route);
+      if (routeNeedsModule && !this.loadedModules.has(config.name)) {
         this.loadModule(config.name).catch(error => {
           console.warn(`Failed to preload module ${config.name}:`, error);
         });
       }
     });
+  }
 
-    // Restore original pathname
-    Object.defineProperty(window.location, 'pathname', {
-      value: originalPathname,
-      configurable: true
-    });
+  // Helper method to check if a route needs a specific module
+  private checkRouteNeedsModule(moduleName: string, route: string): boolean {
+    switch (moduleName) {
+      case 'charts':
+        return route.includes('/dashboard') || 
+               route.includes('/analytics') || 
+               route.includes('/vendor-dashboard') ||
+               route.includes('/command-center');
+      case 'radix-non-critical':
+        return route.includes('/admin') || 
+               route.includes('/settings') ||
+               route.includes('/profile');
+      case 'supabase-analytics':
+        return route.includes('/analytics') || 
+               route.includes('/dashboard') ||
+               route.includes('/admin');
+      case 'vendor-utilities':
+        return route.includes('/vendor') || 
+               route.includes('/creator') ||
+               route.includes('/admin');
+      default:
+        return false;
+    }
   }
 }
 
