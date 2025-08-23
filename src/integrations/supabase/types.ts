@@ -7423,6 +7423,10 @@ export type Database = {
         }
         Returns: number
       }
+      can_view_vendor_sensitive_data: {
+        Args: { vendor_id: string }
+        Returns: boolean
+      }
       check_account_lockout: {
         Args: { client_ip?: unknown; user_email: string }
         Returns: Json
@@ -7637,6 +7641,28 @@ export type Database = {
       get_vendor_dashboard_stats: {
         Args: { p_vendor_id: string }
         Returns: Json
+      }
+      get_vendor_public_profile: {
+        Args: { vendor_id: string }
+        Returns: {
+          approval_status: string
+          description: string
+          id: string
+          is_active: boolean
+          is_premium_provider: boolean
+          is_verified: boolean
+          location: string
+          logo_url: string
+          name: string
+          rating: number
+          review_count: number
+          service_radius_miles: number
+          service_states: string[]
+          support_hours: string
+          value_statement: string
+          vendor_type: string
+          website_url: string
+        }[]
       }
       get_vendor_service_analytics: {
         Args: Record<PropertyKey, never>
