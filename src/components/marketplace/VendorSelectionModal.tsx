@@ -21,17 +21,19 @@ import { isSSP, isNonSSP, getVendorTypeInfo, filterVendorsForService } from "@/u
 interface Vendor {
   id: string;
   name: string;
-  description: string;
+  description?: string;  // Optional - only available in authenticated view
   logo_url?: string;
-  location?: string;
+  location?: string;     // Optional - only available in authenticated view
   rating: number;
   review_count: number;
   is_verified: boolean;
   co_marketing_agents: number;
   campaigns_funded: number;
-  service_states?: string[];
+  service_states?: string[];  // Optional - only available in authenticated view
   vendor_type?: string;
   parent_vendor_id?: string | null;
+  website_url?: string;       // Optional - only available in authenticated view
+  is_premium_provider?: boolean;
 }
 
 interface VendorSelectionModalProps {

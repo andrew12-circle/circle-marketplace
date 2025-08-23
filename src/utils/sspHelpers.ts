@@ -6,24 +6,25 @@
 export interface Vendor {
   id: string;
   name: string;
-  description: string;
+  description?: string;      // Optional - only in authenticated view
   logo_url?: string;
-  website_url?: string;
-  location?: string;
+  website_url?: string;      // Optional - only in authenticated view
+  location?: string;         // Optional - only in authenticated view
   rating: number;
   review_count: number;
   is_verified: boolean;
   co_marketing_agents: number;
   campaigns_funded: number;
-  service_states?: string[];
+  service_states?: string[]; // Optional - only in authenticated view
   mls_areas?: string[];
-  service_radius_miles?: number;
+  service_radius_miles?: number; // Optional - only in authenticated view
   license_states?: string[];
   latitude?: number;
   longitude?: number;
   vendor_type?: string;
   local_representatives?: any;
   parent_vendor_id?: string;
+  is_premium_provider?: boolean;
 }
 
 /**

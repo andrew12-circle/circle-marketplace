@@ -1280,6 +1280,13 @@ export type Database = {
             foreignKeyName: "fk_co_pay_requests_vendor"
             columns: ["vendor_id"]
             isOneToOne: false
+            referencedRelation: "vendor_directory_authenticated"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_co_pay_requests_vendor"
+            columns: ["vendor_id"]
+            isOneToOne: false
             referencedRelation: "vendors"
             referencedColumns: ["id"]
           },
@@ -3753,6 +3760,13 @@ export type Database = {
             foreignKeyName: "order_items_vendor_id_fkey"
             columns: ["vendor_id"]
             isOneToOne: false
+            referencedRelation: "vendor_directory_authenticated"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_items_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
             referencedRelation: "vendors"
             referencedColumns: ["id"]
           },
@@ -5336,6 +5350,13 @@ export type Database = {
             foreignKeyName: "service_representatives_vendor_id_fkey"
             columns: ["vendor_id"]
             isOneToOne: false
+            referencedRelation: "vendor_directory_authenticated"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_representatives_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
             referencedRelation: "vendors"
             referencedColumns: ["id"]
           },
@@ -5646,6 +5667,13 @@ export type Database = {
             columns: ["vendor_id"]
             isOneToOne: false
             referencedRelation: "vendor_directory"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "services_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendor_directory_authenticated"
             referencedColumns: ["id"]
           },
           {
@@ -6273,6 +6301,13 @@ export type Database = {
             foreignKeyName: "vendor_agent_activities_vendor_id_fkey"
             columns: ["vendor_id"]
             isOneToOne: false
+            referencedRelation: "vendor_directory_authenticated"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_agent_activities_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
             referencedRelation: "vendors"
             referencedColumns: ["id"]
           },
@@ -6339,6 +6374,13 @@ export type Database = {
             columns: ["vendor_id"]
             isOneToOne: true
             referencedRelation: "vendor_directory"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_agent_criteria_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: true
+            referencedRelation: "vendor_directory_authenticated"
             referencedColumns: ["id"]
           },
           {
@@ -6522,6 +6564,13 @@ export type Database = {
             columns: ["vendor_id"]
             isOneToOne: false
             referencedRelation: "vendor_directory"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_commissions_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendor_directory_authenticated"
             referencedColumns: ["id"]
           },
           {
@@ -6788,6 +6837,13 @@ export type Database = {
             foreignKeyName: "vendor_qa_vendor_id_fkey"
             columns: ["vendor_id"]
             isOneToOne: false
+            referencedRelation: "vendor_directory_authenticated"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_qa_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
             referencedRelation: "vendors"
             referencedColumns: ["id"]
           },
@@ -6920,6 +6976,13 @@ export type Database = {
             columns: ["vendor_id"]
             isOneToOne: false
             referencedRelation: "vendor_directory"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_user_associations_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendor_directory_authenticated"
             referencedColumns: ["id"]
           },
           {
@@ -7154,6 +7217,13 @@ export type Database = {
             columns: ["parent_vendor_id"]
             isOneToOne: false
             referencedRelation: "vendor_directory"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendors_parent_vendor_id_fkey"
+            columns: ["parent_vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendor_directory_authenticated"
             referencedColumns: ["id"]
           },
           {
@@ -7492,12 +7562,58 @@ export type Database = {
             foreignKeyName: "service_representatives_vendor_id_fkey"
             columns: ["vendor_id"]
             isOneToOne: false
+            referencedRelation: "vendor_directory_authenticated"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_representatives_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
             referencedRelation: "vendors"
             referencedColumns: ["id"]
           },
         ]
       }
       vendor_directory: {
+        Row: {
+          created_at: string | null
+          id: string | null
+          is_premium_provider: boolean | null
+          is_verified: boolean | null
+          logo_url: string | null
+          name: string | null
+          rating: number | null
+          review_count: number | null
+          updated_at: string | null
+          vendor_type: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string | null
+          is_premium_provider?: boolean | null
+          is_verified?: boolean | null
+          logo_url?: string | null
+          name?: string | null
+          rating?: number | null
+          review_count?: number | null
+          updated_at?: string | null
+          vendor_type?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string | null
+          is_premium_provider?: boolean | null
+          is_verified?: boolean | null
+          logo_url?: string | null
+          name?: string | null
+          rating?: number | null
+          review_count?: number | null
+          updated_at?: string | null
+          vendor_type?: string | null
+        }
+        Relationships: []
+      }
+      vendor_directory_authenticated: {
         Row: {
           created_at: string | null
           description: string | null

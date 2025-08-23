@@ -55,23 +55,24 @@ export interface Service {
 export interface Vendor {
   id: string;
   name: string;
-  description: string;
+  description?: string;        // Optional - only in authenticated view
   logo_url?: string;
-  website_url?: string;
-  location?: string;
+  website_url?: string;        // Optional - only in authenticated view
+  location?: string;           // Optional - only in authenticated view
   rating: number;
   review_count: number;
   is_verified: boolean;
   co_marketing_agents: number;
   campaigns_funded: number;
-  service_states?: string[];
+  service_states?: string[];   // Optional - only in authenticated view
   mls_areas?: string[];
-  service_radius_miles?: number;
+  service_radius_miles?: number; // Optional - only in authenticated view
   license_states?: string[];
   latitude?: number;
   longitude?: number;
   vendor_type?: string;
   local_representatives?: any;
+  is_premium_provider?: boolean;
 }
 
 export interface MarketplaceData {
@@ -230,23 +231,25 @@ const fetchVendors = async (): Promise<Vendor[]> => {
     ...vendor,
     id: vendor.id,
     name: vendor.name || 'Unknown Vendor',
-    description: vendor.description || '',
+    // Only include optional fields if they exist (due to security restrictions)
+    description: vendor.description || undefined,
     logo_url: vendor.logo_url,
-    website_url: vendor.website_url,
-    location: vendor.location,
+    website_url: vendor.website_url || undefined,
+    location: vendor.location || undefined,
     rating: vendor.rating || 0,
     review_count: vendor.review_count || 0,
     is_verified: vendor.is_verified || false,
     co_marketing_agents: vendor.co_marketing_agents || 0,
     campaigns_funded: vendor.campaigns_funded || 0,
-    service_states: vendor.service_states || [],
+    service_states: vendor.service_states || undefined,
     mls_areas: vendor.mls_areas || [],
-    service_radius_miles: vendor.service_radius_miles,
+    service_radius_miles: vendor.service_radius_miles || undefined,
     license_states: vendor.license_states || [],
     latitude: vendor.latitude,
     longitude: vendor.longitude,
     vendor_type: vendor.vendor_type || 'company',
     local_representatives: [],
+    is_premium_provider: vendor.is_premium_provider || false,
   }));
 
   logger.log(`✅ Fetched ${formattedVendors.length} vendors in ${duration}ms`);
