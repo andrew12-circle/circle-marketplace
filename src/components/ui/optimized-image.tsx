@@ -87,7 +87,6 @@ export const ResponsiveLogo: React.FC<ResponsiveLogoProps> = ({
         }}
         loading="eager"
         decoding="async"
-        fetchPriority="high"
       />
     </picture>
   );

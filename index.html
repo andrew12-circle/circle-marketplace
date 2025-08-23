@@ -327,30 +327,39 @@
       }
     </style>
     
-    <!-- Defer non-critical CSS to reduce initial blocking -->
+    <!-- Non-blocking CSS loading with timeout fallback -->
+    <link rel="preload" href="/assets/index-1_cDzJxw.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="/assets/index-CouCvFNH.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    
+    <!-- Timeout safety fallback for CSS loading -->
     <script>
-      // Optimized CSS loading to prevent render blocking
-      function loadCSS(href, media) {
-        var link = document.createElement('link');
-        link.rel = 'stylesheet';
-        link.href = href;
-        link.media = media || 'all';
-        document.head.appendChild(link);
-        return link;
-      }
-      
-      // Load main CSS bundles after critical rendering
-      if ('requestIdleCallback' in window) {
-        requestIdleCallback(function() {
-          loadCSS('/assets/index-1_cDzJxw.css');
-          loadCSS('/assets/index-CouCvFNH.css');
+      // Enhanced CSS loading with fallback
+      window.cssTimeout = setTimeout(function() {
+        var links = document.querySelectorAll('link[rel="preload"][as="style"]');
+        links.forEach(function(link) {
+          if (!link.sheet) {
+            link.rel = 'stylesheet';
+          }
         });
-      } else {
-        setTimeout(function() {
-          loadCSS('/assets/index-1_cDzJxw.css');
-          loadCSS('/assets/index-CouCvFNH.css');
-        }, 150);
-      }
+      }, 3000);
+      
+      // Global error monitoring setup
+      window.addEventListener('error', function(e) {
+        console.error('Global error:', e.error);
+      });
+      
+      window.addEventListener('unhandledrejection', function(e) {
+        console.error('Unhandled rejection:', e.reason);
+      });
+      
+      // App loading timeout guard
+      window.appLoadTimeout = setTimeout(function() {
+        console.warn('App loading timeout - showing fallback');
+        var criticalDiv = document.getElementById('critical-content');
+        if (criticalDiv && !document.body.classList.contains('react-loaded')) {
+          criticalDiv.style.display = 'block';
+        }
+      }, 5000);
     </script>
     <noscript>
       <link rel="stylesheet" href="/assets/index-1_cDzJxw.css">
