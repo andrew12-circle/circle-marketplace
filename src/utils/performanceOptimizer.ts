@@ -1,3 +1,5 @@
+import { initCSSOptimizations } from './cssOptimizer';
+
 // Performance optimization utilities
 export const deferNonCriticalScripts = () => {
   // Defer non-critical JavaScript execution
@@ -50,7 +52,10 @@ export const optimizeScriptLoading = () => {
 // Initialize performance optimizations
 export const initPerformanceOptimizations = () => {
   if (typeof window !== 'undefined') {
-    // Run optimizations after page load
+    // Initialize CSS optimizations immediately
+    initCSSOptimizations();
+    
+    // Run other optimizations after page load
     window.addEventListener('load', () => {
       deferNonCriticalScripts();
       optimizeScriptLoading();

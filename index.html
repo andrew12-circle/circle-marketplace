@@ -267,9 +267,33 @@
     
     <link rel="icon" href="/src/assets/circle-logo.png" type="image/png">
     
-    <!-- Preload and defer main CSS to eliminate render-blocking -->
-    <link rel="preload" href="/assets/index-CouCvFNH.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="/assets/index-CouCvFNH.css"></noscript>
+    <!-- Non-blocking CSS loading to eliminate render blocking -->
+    <link rel="preload" href="/assets/index-1_cDzJxw.css" as="style" onload="this.onload=null;this.rel='stylesheet'" media="print">
+    <noscript><link rel="stylesheet" href="/assets/index-1_cDzJxw.css"></noscript>
+    
+    <!-- Fallback for immediate styling -->
+    <script>
+      (function() {
+        function loadCSS(href, media) {
+          var link = document.createElement('link');
+          link.rel = 'stylesheet';
+          link.href = href;
+          link.media = media || 'all';
+          document.head.appendChild(link);
+        }
+        
+        // Load CSS asynchronously after critical path
+        if (window.requestAnimationFrame) {
+          requestAnimationFrame(function() {
+            loadCSS('/assets/index-1_cDzJxw.css');
+          });
+        } else {
+          setTimeout(function() {
+            loadCSS('/assets/index-1_cDzJxw.css');
+          }, 100);
+        }
+      })();
+    </script>
     
     <!-- Additional critical CSS for marketplace components -->
     <style>
