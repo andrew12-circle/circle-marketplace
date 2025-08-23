@@ -1,73 +1,59 @@
-/**
- * Performance optimization utilities
- * Reduces main-thread blocking and improves Core Web Vitals
- */
-
-// Debounce utility to reduce excessive function calls
-export function debounce<T extends (...args: any[]) => any>(
-  func: T,
-  wait: number
-): (...args: Parameters<T>) => void {
-  let timeout: NodeJS.Timeout;
-  return (...args: Parameters<T>) => {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func(...args), wait);
-  };
-}
-
-// Throttle utility to limit function execution frequency
-export function throttle<T extends (...args: any[]) => any>(
-  func: T,
-  limit: number
-): (...args: Parameters<T>) => void {
-  let inThrottle: boolean;
-  return (...args: Parameters<T>) => {
-    if (!inThrottle) {
-      func(...args);
-      inThrottle = true;
-      setTimeout(() => inThrottle = false, limit);
-    }
-  };
-}
-
-// Lazy initialization helper
-export function createLazyInitializer<T>(factory: () => T): () => T {
-  let instance: T;
-  let initialized = false;
-  
-  return () => {
-    if (!initialized) {
-      instance = factory();
-      initialized = true;
-    }
-    return instance;
-  };
-}
-
-// Optimized performance observer that only runs when needed
-export function createOptimizedObserver(
-  type: string,
-  callback: (entries: PerformanceEntry[]) => void,
-  options?: PerformanceObserverInit
-) {
-  // Only create observers in development or QA mode
-  if (!import.meta.env.DEV && new URLSearchParams(window.location.search).get('qa') !== '1') {
-    return { disconnect: () => {} };
-  }
-  
-  if (!('PerformanceObserver' in window)) {
-    return { disconnect: () => {} };
-  }
-  
-  try {
-    const observer = new PerformanceObserver((list) => {
-      callback(list.getEntries());
+// Performance optimization utilities
+export const deferNonCriticalScripts = () => {
+  // Defer non-critical JavaScript execution
+  if (typeof window !== 'undefined') {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          // Load deferred content when it comes into view
+          const element = entry.target;
+          if (element.hasAttribute('data-defer-src')) {
+            const script = document.createElement('script');
+            script.src = element.getAttribute('data-defer-src')!;
+            script.async = true;
+            document.head.appendChild(script);
+            observer.unobserve(element);
+          }
+        }
+      });
     });
-    
-    observer.observe({ type, ...options });
-    return observer;
-  } catch (error) {
-    console.warn('Failed to create performance observer:', error);
-    return { disconnect: () => {} };
+
+    // Observe elements marked for deferred loading
+    document.querySelectorAll('[data-defer-src]').forEach((el) => {
+      observer.observe(el);
+    });
   }
-}
+};
+
+export const optimizeScriptLoading = () => {
+  // Use requestIdleCallback for non-critical operations
+  if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+    window.requestIdleCallback(() => {
+      // Preload critical chunks
+      const criticalChunks = [
+        '/assets/react-core-',
+        '/assets/router-',
+        '/assets/utils-'
+      ];
+      
+      criticalChunks.forEach(chunk => {
+        const link = document.createElement('link');
+        link.rel = 'prefetch';
+        link.as = 'script';
+        link.href = chunk;
+        document.head.appendChild(link);
+      });
+    });
+  }
+};
+
+// Initialize performance optimizations
+export const initPerformanceOptimizations = () => {
+  if (typeof window !== 'undefined') {
+    // Run optimizations after page load
+    window.addEventListener('load', () => {
+      deferNonCriticalScripts();
+      optimizeScriptLoading();
+    });
+  }
+};

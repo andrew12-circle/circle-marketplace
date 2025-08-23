@@ -14,11 +14,15 @@ import { useAuth } from "@/contexts/AuthContext";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { LocationSwitcher } from "@/components/LocationSwitcher";
 import { LegalFooter } from "@/components/LegalFooter";
-import { FirstVisitIntro } from "@/components/marketing/FirstVisitIntro";
+// Removed direct import - now using lazy component
 import { OnboardingResumeBanner } from "@/components/onboarding/OnboardingResumeBanner";
-import { SmartHelpOrchestrator } from "@/components/help/SmartHelpOrchestrator";
-import { EnhancedHelpWidget } from "@/components/help/EnhancedHelpWidget";
-import { ProactiveHelpMonitor } from "@/components/help/ProactiveHelpMonitor";
+import { Suspense } from "react";
+import { 
+  LazySmartHelpOrchestrator, 
+  LazyEnhancedHelpWidget, 
+  LazyProactiveHelpMonitor,
+  LazyFirstVisitIntro 
+} from "@/utils/lazyComponents";
 import { TourDiscoveryButton } from "@/components/marketplace/TourDiscoveryButton";
 import { Building, Store, BookOpen } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -115,15 +119,19 @@ export default function Index() {
         <NonCriticalContent>
           <OnboardingResumeBanner />
           <LegalFooter />
-          <FirstVisitIntro />
+          <Suspense fallback={null}>
+            <LazyFirstVisitIntro />
+          </Suspense>
         </NonCriticalContent>
       </main>
 
       {/* Non-critical interactive elements */}
       <NonCriticalContent>
-        <SmartHelpOrchestrator />
-        <EnhancedHelpWidget />
-        <ProactiveHelpMonitor />
+        <Suspense fallback={null}>
+          <LazySmartHelpOrchestrator />
+          <LazyEnhancedHelpWidget />
+          <LazyProactiveHelpMonitor />
+        </Suspense>
       </NonCriticalContent>
     </div>
   );

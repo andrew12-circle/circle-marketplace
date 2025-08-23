@@ -23,16 +23,67 @@ export default defineConfig(({ mode }) => ({
   build: {
     rollupOptions: {
       output: {
-        manualChunks: {
-          'react-vendor': ['react', 'react-dom'],
-          'router-vendor': ['react-router-dom'],
-          'query-vendor': ['@tanstack/react-query'],
-          'ui-vendor': ['lucide-react'],
-          'radix-core': ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu'],
-          'radix-forms': ['@radix-ui/react-select', '@radix-ui/react-toast'],
-          'supabase-vendor': ['@supabase/supabase-js'],
-          'chart-vendor': ['recharts'],
-          'utils': ['clsx', 'class-variance-authority', 'tailwind-merge'],
+        manualChunks: (id) => {
+          // Core React libs - keep small and prioritized
+          if (id.includes('react') || id.includes('react-dom')) {
+            return 'react-core';
+          }
+          
+          // Router - separate chunk for navigation
+          if (id.includes('react-router-dom')) {
+            return 'router';
+          }
+          
+          // Query client - defer loading
+          if (id.includes('@tanstack/react-query')) {
+            return 'query';
+          }
+          
+          // UI libraries - split into smaller chunks
+          if (id.includes('lucide-react')) {
+            return 'icons';
+          }
+          
+          // Radix components - split by usage pattern
+          if (id.includes('@radix-ui/react-dialog') || id.includes('@radix-ui/react-dropdown-menu')) {
+            return 'radix-overlay';
+          }
+          if (id.includes('@radix-ui/react-select') || id.includes('@radix-ui/react-toast')) {
+            return 'radix-forms';
+          }
+          if (id.includes('@radix-ui/')) {
+            return 'radix-other';
+          }
+          
+          // Supabase - defer loading
+          if (id.includes('@supabase/supabase-js')) {
+            return 'supabase';
+          }
+          
+          // Charts - defer loading (heavy)
+          if (id.includes('recharts')) {
+            return 'charts';
+          }
+          
+          // Utilities - keep small
+          if (id.includes('clsx') || id.includes('class-variance-authority') || id.includes('tailwind-merge')) {
+            return 'utils';
+          }
+          
+          // Internationalization
+          if (id.includes('i18next') || id.includes('react-i18next')) {
+            return 'i18n';
+          }
+          
+          // Form libraries
+          if (id.includes('react-hook-form') || id.includes('@hookform/resolvers') || id.includes('zod')) {
+            return 'forms';
+          }
+          
+          // Large vendor libraries
+          if (id.includes('node_modules')) {
+            return 'vendor';
+          }
         },
         assetFileNames: (assetInfo) => {
           if (!assetInfo.name) return `assets/[name]-[hash][extname]`;

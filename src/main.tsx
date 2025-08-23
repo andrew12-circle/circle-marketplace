@@ -8,6 +8,7 @@ import { SpiritualCoverageProvider } from "@/contexts/SpiritualCoverageContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { cacheManager } from "./utils/cacheManager";
 import { globalErrorMonitor } from "./utils/globalErrorMonitor";
+import { initPerformanceOptimizations } from "./utils/performanceOptimizer";
 import { ReloadReasonBanner } from "./components/common/ReloadReasonBanner";
 import { SecurityProvider } from "@/components/security/SecurityEnhancementSystem";
 import "./index.css";
@@ -96,6 +97,9 @@ cacheManager.checkAndClearCache();
 
 // Initialize global error monitoring
 globalErrorMonitor.initialize();
+
+// Initialize performance optimizations
+initPerformanceOptimizations();
 
 createRoot(document.getElementById("root")!).render(
   <QueryClientProvider client={queryClient}>
