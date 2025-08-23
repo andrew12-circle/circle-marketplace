@@ -640,7 +640,7 @@ export const MarketplaceGrid = () => {
                       </h2>
                     </div>
                     <VirtualGrid
-                      items={getServicesForProduct(selectedProductCategory).slice(0, 12)}
+                      items={getServicesForProduct(selectedProductCategory)}
                       renderItem={(service, index) => (
                         <OptimizedServiceCard 
                           key={`product-${selectedProductCategory}-${service.id}-${index}`}
@@ -658,53 +658,46 @@ export const MarketplaceGrid = () => {
                     />
                    </div>
                 ) : (
-                  <div className="mobile-grid gap-4 sm:gap-6 max-h-[70vh] overflow-y-auto">
-                    {filteredProducts.slice(0, 20).map(product => {
+                  <VirtualGrid
+                    items={filteredProducts}
+                    renderItem={(product, index) => {
                       const IconComponent = product.icon;
                       return (
-                        <LazyComponent key={product.id} threshold="100px">
-                          <div className="group relative overflow-hidden bg-white rounded-xl border border-gray-200 hover:border-gray-300 cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1" onClick={() => setSelectedProductCategory(product.id)}>
-                            {/* Background Gradient */}
-                            <div className={`absolute inset-0 bg-gradient-to-br ${product.gradient} opacity-5 group-hover:opacity-10 transition-opacity duration-300`} />
+                        <div key={product.id} className="group relative overflow-hidden bg-white rounded-xl border border-gray-200 hover:border-gray-300 cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1" onClick={() => setSelectedProductCategory(product.id)}>
+                          {/* Background Gradient */}
+                          <div className={`absolute inset-0 bg-gradient-to-br ${product.gradient} opacity-5 group-hover:opacity-10 transition-opacity duration-300`} />
 
-                            {/* Content */}
-                            <div className="relative p-6">
-                              {/* Icon */}
-                              <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${product.gradient} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300`}>
-                                <IconComponent className="w-6 h-6 text-white" />
-                              </div>
-
-                              {/* Title and Description */}
-                              <h3 className="font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors duration-200">
-                                {product.name}
-                              </h3>
-                              <p className="text-sm text-gray-600 mb-4 line-clamp-2">
-                                {product.description}
-                              </p>
-
-                               {/* Stats */}
-                               <div className="flex items-center justify-between text-xs text-gray-500">
-                                 <span className="flex items-center gap-1">
-                                   <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                                   4.8
-                                 </span>
-                                 <span>{getServicesForProduct(product.id).length} services</span>
-                                 <span className="flex items-center gap-1">
-                                   <Eye className="w-3 h-3" />
-                                   View
-                                 </span>
-                               </div>
+                          {/* Content */}
+                          <div className="relative p-6">
+                            {/* Icon */}
+                            <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${product.gradient} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300`}>
+                              <IconComponent className="w-6 h-6 text-white" />
                             </div>
 
-                            {/* Hover Arrow */}
-                            <div className="absolute top-4 right-4 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                              <ChevronRight className="w-4 h-4 text-gray-600" />
+                            {/* Title and Description */}
+                            <h3 className="font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors duration-200">
+                              {product.name}
+                            </h3>
+                            <p className="text-gray-600 text-sm leading-relaxed mb-4">
+                              {product.description}
+                            </p>
+
+                            {/* Action Arrow */}
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                                View Services
+                              </span>
+                              <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-blue-500 group-hover:translate-x-1 transition-all duration-200" />
                             </div>
                           </div>
-                        </LazyComponent>
+                        </div>
                       );
-                    })}
-                  </div>
+                    }}
+                    itemHeight={180}
+                    containerHeight={540}
+                    itemsPerRow={4}
+                    className="max-h-[70vh] overflow-y-auto"
+                  />
                 )
               )}
 
@@ -722,17 +715,21 @@ export const MarketplaceGrid = () => {
                     </div>
                   </div>
                 ) : (
-                  <div className="mobile-grid gap-4 sm:gap-6 max-h-[70vh] overflow-y-auto">
-                    {filteredVendors.slice(0, 18).map(vendor => (
-                      <LazyComponent key={vendor.id} threshold="150px">
-                        <MarketplaceVendorCard 
-                          vendor={vendor} 
-                          onConnect={() => {}} 
-                          onViewProfile={() => {}} 
-                        />
-                      </LazyComponent>
-                    ))}
-                  </div>
+                  <VirtualGrid
+                    items={filteredVendors}
+                    renderItem={(vendor, index) => (
+                      <MarketplaceVendorCard 
+                        key={vendor.id}
+                        vendor={vendor} 
+                        onConnect={() => {}} 
+                        onViewProfile={() => {}} 
+                      />
+                    )}
+                    itemHeight={200}
+                    containerHeight={600}
+                    itemsPerRow={4}
+                    className="max-h-[70vh] overflow-y-auto"
+                  />
                 )
               )}
 
