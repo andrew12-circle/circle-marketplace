@@ -6,12 +6,13 @@ import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { SpiritualCoverageProvider } from "@/contexts/SpiritualCoverageContext";
 import { CartProvider } from "@/contexts/CartContext";
+import { SecurityProvider } from "@/components/security/SecurityEnhancementSystem";
 import { cacheManager } from "./utils/cacheManager";
 import { globalErrorMonitor } from "./utils/globalErrorMonitor";
-import { initPerformanceOptimizations } from "./utils/performanceOptimizer";
 import { initAppPerformance } from "./utils/performanceInit";
+import { mainThreadOptimizer } from "./utils/mainThreadOptimizer";
+import { taskScheduler } from "./utils/taskScheduler";
 import { ReloadReasonBanner } from "./components/common/ReloadReasonBanner";
-import { SecurityProvider } from "@/components/security/SecurityEnhancementSystem";
 import "./index.css";
 import "./i18n";
 
@@ -93,14 +94,21 @@ const queryClient = new QueryClient({
   },
 });
 
-// Clear cache if version mismatch
-cacheManager.checkAndClearCache();
+// Break up initialization to prevent main thread blocking
+// Clear cache if version mismatch - defer to prevent blocking
+taskScheduler.schedule(() => {
+  cacheManager.checkAndClearCache();
+});
 
-// Initialize global error monitoring
-globalErrorMonitor.initialize();
+// Initialize global error monitoring - defer non-critical setup
+taskScheduler.schedule(() => {
+  globalErrorMonitor.initialize();
+});
 
-// Initialize performance optimizations
-initAppPerformance();
+// Initialize performance optimizations in chunks
+mainThreadOptimizer.queueInit(() => {
+  initAppPerformance();
+});
 
 // Defer adding react-loaded class to ensure LCP content is visible
 requestAnimationFrame(() => {
