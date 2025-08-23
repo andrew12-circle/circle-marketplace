@@ -7921,6 +7921,10 @@ export type Database = {
         }
         Returns: number
       }
+      can_view_agent_sensitive_data: {
+        Args: { agent_user_id: string }
+        Returns: boolean
+      }
       can_view_vendor_sensitive_data: {
         Args: { vendor_id: string }
         Returns: boolean
