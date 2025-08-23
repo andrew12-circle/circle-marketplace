@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { X, ChevronLeft, ChevronRight, SkipForward } from 'lucide-react';
 import { Guide, GuideStep } from './guides';
+import { layoutBatcher } from '@/utils/layoutOptimizer';
 interface GuideTourProps {
   guide: Guide;
   onComplete: () => void;
@@ -37,8 +38,8 @@ export const GuideTour: React.FC<GuideTourProps> = ({
     if (currentStep?.selector) {
       const element = document.querySelector(currentStep.selector);
       if (element) {
-        requestAnimationFrame(() => {
-          const rect = element.getBoundingClientRect();
+        // Use layoutBatcher to prevent forced reflows
+        layoutBatcher.measure(element, (rect) => {
           setTargetPosition({
             top: rect.top + window.scrollY,
             left: rect.left + window.scrollX,
@@ -51,6 +52,7 @@ export const GuideTour: React.FC<GuideTourProps> = ({
           const tooltipHeight = 200;
           let tooltipTop = rect.top + window.scrollY;
           let tooltipLeft = rect.left + window.scrollX;
+          
           switch (currentStep.position) {
             case 'top':
               tooltipTop = rect.top + window.scrollY - tooltipHeight - 10;
@@ -85,16 +87,17 @@ export const GuideTour: React.FC<GuideTourProps> = ({
           if (tooltipTop + tooltipHeight > window.scrollY + viewportHeight - padding) {
             tooltipTop = window.scrollY + viewportHeight - tooltipHeight - padding;
           }
+          
           setTooltipPosition({
             top: tooltipTop,
             left: tooltipLeft
           });
+        });
 
-          // Scroll element into view
-          element.scrollIntoView({
-            behavior: 'smooth',
-            block: 'center'
-          });
+        // Scroll element into view
+        element.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center'
         });
       }
     } else {

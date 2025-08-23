@@ -2,6 +2,7 @@ import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import { VideoCard } from "./VideoCard";
 import { Button } from "@/components/ui/button";
 import { useState, useRef } from "react";
+import { layoutBatcher } from '@/utils/layoutOptimizer';
 
 interface Video {
   id: string;
@@ -50,16 +51,14 @@ export const VideoSection = ({
         behavior: 'smooth'
       });
       
-      // Use RAF to batch layout reads and prevent forced reflow
-      requestAnimationFrame(() => {
-        setTimeout(() => {
-          if (scrollContainerRef.current) {
-            const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
-            setShowLeftArrow(scrollLeft > 0);
-            setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 10);
-          }
-        }, 300);
-      });
+      // Use layoutBatcher to prevent forced reflows
+      if (scrollContainerRef.current) {
+        layoutBatcher.measure(scrollContainerRef.current, (rect) => {
+          const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current!;
+          setShowLeftArrow(scrollLeft > 0);
+          setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 10);
+        });
+      }
     }
   };
 
