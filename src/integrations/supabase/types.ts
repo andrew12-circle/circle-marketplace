@@ -7249,7 +7249,7 @@ export type Database = {
         Returns: undefined
       }
       create_data_checksum: {
-        Args: { data_json: Json }
+        Args: { data_input: Json }
         Returns: string
       }
       detect_suspicious_activity: {
