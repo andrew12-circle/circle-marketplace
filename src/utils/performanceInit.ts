@@ -1,14 +1,23 @@
 import { initPerformanceOptimizations } from './performanceOptimizer';
 import { taskScheduler } from './taskScheduler';
+import { initializeAppWithPriority, deferUntilIdle } from './fidOptimizer';
 
-// Initialize all performance optimizations on app startup
+// Initialize all performance optimizations on app startup with FID priority
 export const initAppPerformance = () => {
   if (typeof window !== 'undefined') {
-    // Use task scheduler to prevent blocking initial render
+    // Immediately enable input responsiveness
+    document.body.style.pointerEvents = 'auto';
+    
+    // Initialize with priority order for FID optimization
+    initializeAppWithPriority();
+    
+    // Break up heavy initialization into smaller tasks
     taskScheduler.schedule(() => {
       initPerformanceOptimizations();
-      
-      // Add CSS containment for heavy components
+    });
+    
+    // Defer CSS optimizations to not block initial interactions
+    taskScheduler.schedule(() => {
       const style = document.createElement('style');
       style.textContent = `
         /* CSS containment for performance */
@@ -47,8 +56,10 @@ export const initAppPerformance = () => {
         }
       `;
       document.head.appendChild(style);
-      
-      // Preload critical images after initial render
+    });
+    
+    // Defer image preloading until after critical path
+    deferUntilIdle(() => {
       const criticalImages = [
         'https://storage.googleapis.com/msgsndr/UjxJODh2Df0UKjTnKpcP/media/68255d47c398f6cc6978ed74.png'
       ];

@@ -18,8 +18,8 @@ export class TaskScheduler {
     const runChunk = () => {
       const start = performance.now();
       
-      // Process tasks for up to 5ms at a time to stay under 50ms blocking threshold
-      while (this.taskQueue.length > 0 && (performance.now() - start) < 5) {
+      // More aggressive yielding - process tasks for only 3ms to reduce FID
+      while (this.taskQueue.length > 0 && (performance.now() - start) < 3) {
         const task = this.taskQueue.shift();
         if (task) {
           try {
@@ -41,19 +41,14 @@ export class TaskScheduler {
     runChunk();
   }
 
-  // Yield control back to the main thread
+  // Yield control back to the main thread with priority for input responsiveness
   private yieldToMainThread(callback: () => void) {
     if ('scheduler' in window && 'postTask' in (window as any).scheduler) {
-      // Use modern scheduler API if available
-      (window as any).scheduler.postTask(callback, { priority: 'user-blocking' });
-    } else if ('requestIdleCallback' in window) {
-      // Use requestIdleCallback for lower priority
-      (window as any).requestIdleCallback(callback, { timeout: 16 });
+      // Use modern scheduler API with background priority to allow input handling
+      (window as any).scheduler.postTask(callback, { priority: 'background' });
     } else {
-      // Fallback to MessageChannel for immediate yielding
-      const channel = new MessageChannel();
-      channel.port2.onmessage = () => callback();
-      channel.port1.postMessage(null);
+      // Use setTimeout for immediate yielding (better for FID than requestIdleCallback)
+      setTimeout(callback, 0);
     }
   }
 }
