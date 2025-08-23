@@ -29,6 +29,11 @@ class PerformanceMonitor {
    * Track a performance metric
    */
   track(name: string, value: number, metadata?: Record<string, any>): void {
+    // Only track in development or QA mode to reduce production overhead
+    if (!import.meta.env.DEV && new URLSearchParams(window.location.search).get('qa') !== '1') {
+      return;
+    }
+    
     const metric: PerformanceMetric = {
       name,
       value,
@@ -43,7 +48,9 @@ class PerformanceMonitor {
       this.metrics = this.metrics.slice(-this.maxMetrics);
     }
     
-    console.log(`📊 Performance: ${name} = ${value}ms`, metadata);
+    if (import.meta.env.DEV) {
+      console.log(`📊 Performance: ${name} = ${value}ms`, metadata);
+    }
   }
   
   /**
@@ -57,6 +64,11 @@ class PerformanceMonitor {
     cached: boolean = false,
     size?: number
   ): void {
+    // Only track in development or QA mode to reduce production overhead
+    if (!import.meta.env.DEV && new URLSearchParams(window.location.search).get('qa') !== '1') {
+      return;
+    }
+    
     const metric: RequestMetric = {
       endpoint,
       method,
@@ -74,9 +86,11 @@ class PerformanceMonitor {
       this.requestMetrics = this.requestMetrics.slice(-this.maxMetrics);
     }
     
-    const status = success ? '✅' : '❌';
-    const cacheStatus = cached ? '💾' : '🌐';
-    console.log(`${status} ${cacheStatus} ${method} ${endpoint}: ${duration}ms`);
+    if (import.meta.env.DEV) {
+      const status = success ? '✅' : '❌';
+      const cacheStatus = cached ? '💾' : '🌐';
+      console.log(`${status} ${cacheStatus} ${method} ${endpoint}: ${duration}ms`);
+    }
   }
   
   /**
@@ -198,11 +212,11 @@ class PerformanceMonitor {
 // Global performance monitor instance
 export const performanceMonitor = new PerformanceMonitor();
 
-// Auto-log summary every 10 minutes in development (reduced frequency)
-if (process.env.NODE_ENV === 'development') {
+// Auto-log summary only in development with QA flag
+if (import.meta.env.DEV && new URLSearchParams(window.location.search).get('qa') === '1') {
   const interval = setInterval(() => {
     performanceMonitor.logSummary();
-  }, 10 * 60 * 1000);
+  }, 30 * 60 * 1000); // Reduced to 30 minutes
   
   // Cleanup on page unload
   if (typeof window !== 'undefined') {
