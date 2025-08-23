@@ -14,7 +14,8 @@ import { CategoryBlocks } from "./CategoryBlocks";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Filter, Sparkles, Zap, Facebook, Globe, Mail, Share2, Monitor, TrendingUp, Database, Camera, Video, Printer, ArrowRight, BookOpen } from "lucide-react";
+import { Search, Filter, Sparkles, Zap, Facebook, Globe, Mail, Share2, Monitor, TrendingUp, Database, Camera, Video, Printer, ArrowRight, BookOpen, Star, Eye, ChevronRight } from "lucide-react";
+import { LazyComponent } from "@/components/ui/lazy-component";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -574,19 +575,20 @@ export const MarketplaceGrid = () => {
               {/* Grid - Mobile Responsive with Virtualization */}
               {viewMode === "services" && (
                 <>
-                  <div className="mobile-grid gap-4 sm:gap-6">
-                    {flattenServices.slice(0, 12).map((service, index) => (
-                      <OptimizedServiceCard 
-                        key={`service-${service.id}-${index}`} 
-                        service={service} 
-                        onSave={handleSaveService} 
-                        onViewDetails={handleViewServiceDetails} 
-                        isSaved={allSavedServiceIds.includes(service.id)} 
-                        bulkRatings={bulkRatings} 
-                      />
+                  <div className="mobile-grid gap-4 sm:gap-6 max-h-[80vh] overflow-y-auto">
+                    {flattenServices.slice(0, 24).map((service, index) => (
+                      <LazyComponent key={`service-${service.id}-${index}`} threshold="200px">
+                        <OptimizedServiceCard 
+                          service={service} 
+                          onSave={handleSaveService} 
+                          onViewDetails={handleViewServiceDetails} 
+                          isSaved={allSavedServiceIds.includes(service.id)} 
+                          bulkRatings={bulkRatings} 
+                        />
+                      </LazyComponent>
                     ))}
-                  </div>
-                  <div className="mt-6 flex items-center justify-center gap-4">
+                   </div>
+                   <div className="mt-6 flex items-center justify-center gap-4">
                     <span className="text-sm text-muted-foreground">
                       Showing {Math.min(12, flattenServices.length)} of {totalServicesCount} results
                     </span>
@@ -610,67 +612,65 @@ export const MarketplaceGrid = () => {
                         {PRODUCT_CATEGORIES.find(p => p.id === selectedProductCategory)?.name}
                       </h2>
                     </div>
-                    <div className="mobile-grid gap-4 sm:gap-6">
-                      {getServicesForProduct(selectedProductCategory).map((service, index) => (
-                        <OptimizedServiceCard 
-                          key={`product-${selectedProductCategory}-${service.id}-${index}`} 
-                          service={service} 
-                          onSave={handleSaveService} 
-                          onViewDetails={handleViewServiceDetails} 
-                          isSaved={allSavedServiceIds.includes(service.id)} 
-                          bulkRatings={bulkRatings} 
-                        />
+                    <div className="mobile-grid gap-4 sm:gap-6 max-h-[60vh] overflow-y-auto">
+                      {getServicesForProduct(selectedProductCategory).slice(0, 18).map((service, index) => (
+                        <LazyComponent key={`product-${selectedProductCategory}-${service.id}-${index}`} threshold="150px">
+                          <OptimizedServiceCard 
+                            service={service} 
+                            onSave={handleSaveService} 
+                            onViewDetails={handleViewServiceDetails} 
+                            isSaved={allSavedServiceIds.includes(service.id)} 
+                            bulkRatings={bulkRatings} 
+                          />
+                        </LazyComponent>
                       ))}
                     </div>
                   </div>
                 ) : (
-                  <div className="mobile-grid gap-4 sm:gap-6">
-                    {filteredProducts.slice(0, 12).map(product => {
+                  <div className="mobile-grid gap-4 sm:gap-6 max-h-[70vh] overflow-y-auto">
+                    {filteredProducts.slice(0, 20).map(product => {
                       const IconComponent = product.icon;
                       return (
-                        <div key={product.id} className="group relative overflow-hidden bg-white rounded-xl border border-gray-200 hover:border-gray-300 cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1" onClick={() => setSelectedProductCategory(product.id)}>
-                          {/* Background Gradient */}
-                          <div className={`absolute inset-0 bg-gradient-to-br ${product.gradient} opacity-5 group-hover:opacity-10 transition-opacity duration-300`} />
+                        <LazyComponent key={product.id} threshold="100px">
+                          <div className="group relative overflow-hidden bg-white rounded-xl border border-gray-200 hover:border-gray-300 cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1" onClick={() => setSelectedProductCategory(product.id)}>
+                            {/* Background Gradient */}
+                            <div className={`absolute inset-0 bg-gradient-to-br ${product.gradient} opacity-5 group-hover:opacity-10 transition-opacity duration-300`} />
 
-                          {/* Content */}
-                          <div className="relative p-6">
-                            {/* Icon and Header */}
-                            <div className="flex items-start justify-between mb-4">
-                              <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${product.gradient} flex items-center justify-center shadow-lg`}>
+                            {/* Content */}
+                            <div className="relative p-6">
+                              {/* Icon */}
+                              <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${product.gradient} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300`}>
                                 <IconComponent className="w-6 h-6 text-white" />
                               </div>
-                              <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-gray-600 transform group-hover:translate-x-1 transition-all duration-300" />
-                              </div>
+
+                              {/* Title and Description */}
+                              <h3 className="font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors duration-200">
+                                {product.name}
+                              </h3>
+                              <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                                {product.description}
+                              </p>
+
+                               {/* Stats */}
+                               <div className="flex items-center justify-between text-xs text-gray-500">
+                                 <span className="flex items-center gap-1">
+                                   <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                                   4.8
+                                 </span>
+                                 <span>{getServicesForProduct(product.id).length} services</span>
+                                 <span className="flex items-center gap-1">
+                                   <Eye className="w-3 h-3" />
+                                   View
+                                 </span>
+                               </div>
                             </div>
 
-                            {/* Title */}
-                            <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-gray-800 transition-colors duration-300">
-                              {product.name}
-                            </h3>
-
-                            {/* Description */}
-                            <p className="text-gray-600 text-sm leading-relaxed mb-6 line-clamp-2">
-                              {product.description}
-                            </p>
-
-                            {/* Footer */}
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                <div className={`w-2 h-2 rounded-full bg-gradient-to-r ${product.gradient}`} />
-                                <span className="text-sm font-medium text-gray-700">
-                                  {getServicesForProduct(product.id).length} providers
-                                </span>
-                              </div>
-                              <Button variant="ghost" size="sm" className={`${product.color} hover:bg-gray-50 font-medium opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0`}>
-                                Explore →
-                              </Button>
+                            {/* Hover Arrow */}
+                            <div className="absolute top-4 right-4 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                              <ChevronRight className="w-4 h-4 text-gray-600" />
                             </div>
                           </div>
-
-                          {/* Hover Effect Overlay */}
-                          <div className="absolute inset-0 ring-1 ring-gray-200 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                        </div>
+                        </LazyComponent>
                       );
                     })}
                   </div>
@@ -691,14 +691,15 @@ export const MarketplaceGrid = () => {
                     </div>
                   </div>
                 ) : (
-                  <div className="mobile-grid gap-4 sm:gap-6">
-                    {filteredVendors.slice(0, 12).map(vendor => (
-                      <MarketplaceVendorCard 
-                        key={vendor.id} 
-                        vendor={vendor} 
-                        onConnect={() => {}} 
-                        onViewProfile={() => {}} 
-                      />
+                  <div className="mobile-grid gap-4 sm:gap-6 max-h-[70vh] overflow-y-auto">
+                    {filteredVendors.slice(0, 18).map(vendor => (
+                      <LazyComponent key={vendor.id} threshold="150px">
+                        <MarketplaceVendorCard 
+                          vendor={vendor} 
+                          onConnect={() => {}} 
+                          onViewProfile={() => {}} 
+                        />
+                      </LazyComponent>
                     ))}
                   </div>
                 )
