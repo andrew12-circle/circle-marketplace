@@ -2246,6 +2246,57 @@ export type Database = {
         }
         Relationships: []
       }
+      creator_earnings: {
+        Row: {
+          created_at: string | null
+          creator_earnings: number
+          creator_id: string
+          gross_amount: number
+          id: string
+          platform_fee: number
+          playbook_id: string | null
+          purchase_id: string | null
+          stripe_payment_intent_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          creator_earnings: number
+          creator_id: string
+          gross_amount: number
+          id?: string
+          platform_fee: number
+          playbook_id?: string | null
+          purchase_id?: string | null
+          stripe_payment_intent_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          creator_earnings?: number
+          creator_id?: string
+          gross_amount?: number
+          id?: string
+          platform_fee?: number
+          playbook_id?: string | null
+          purchase_id?: string | null
+          stripe_payment_intent_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creator_earnings_playbook_id_fkey"
+            columns: ["playbook_id"]
+            isOneToOne: false
+            referencedRelation: "content"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "creator_earnings_purchase_id_fkey"
+            columns: ["purchase_id"]
+            isOneToOne: false
+            referencedRelation: "playbook_purchases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       creator_onboarding: {
         Row: {
           completed_at: string | null
@@ -3695,6 +3746,45 @@ export type Database = {
           },
         ]
       }
+      playbook_access: {
+        Row: {
+          access_granted_at: string | null
+          id: string
+          playbook_id: string | null
+          purchase_id: string | null
+          user_id: string
+        }
+        Insert: {
+          access_granted_at?: string | null
+          id?: string
+          playbook_id?: string | null
+          purchase_id?: string | null
+          user_id: string
+        }
+        Update: {
+          access_granted_at?: string | null
+          id?: string
+          playbook_id?: string | null
+          purchase_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "playbook_access_playbook_id_fkey"
+            columns: ["playbook_id"]
+            isOneToOne: false
+            referencedRelation: "content"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "playbook_access_purchase_id_fkey"
+            columns: ["purchase_id"]
+            isOneToOne: false
+            referencedRelation: "playbook_purchases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       playbook_ai_assistance: {
         Row: {
           ai_suggestion: string
@@ -3795,6 +3885,56 @@ export type Database = {
             columns: ["template_id"]
             isOneToOne: false
             referencedRelation: "agent_playbook_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      playbook_purchases: {
+        Row: {
+          amount: number
+          buyer_id: string
+          completed_at: string | null
+          created_at: string | null
+          creator_id: string
+          id: string
+          playbook_id: string | null
+          revenue_share_percentage: number
+          status: string
+          stripe_payment_intent_id: string | null
+          stripe_session_id: string | null
+        }
+        Insert: {
+          amount: number
+          buyer_id: string
+          completed_at?: string | null
+          created_at?: string | null
+          creator_id: string
+          id?: string
+          playbook_id?: string | null
+          revenue_share_percentage?: number
+          status?: string
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
+        }
+        Update: {
+          amount?: number
+          buyer_id?: string
+          completed_at?: string | null
+          created_at?: string | null
+          creator_id?: string
+          id?: string
+          playbook_id?: string | null
+          revenue_share_percentage?: number
+          status?: string
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "playbook_purchases_playbook_id_fkey"
+            columns: ["playbook_id"]
+            isOneToOne: false
+            referencedRelation: "content"
             referencedColumns: ["id"]
           },
         ]

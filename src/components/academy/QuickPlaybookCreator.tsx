@@ -88,7 +88,13 @@ export const QuickPlaybookCreator = () => {
         .order('estimated_completion_time');
 
       if (error) throw error;
-      setQuickTemplates(data || []);
+      setQuickTemplates((data || []).map(template => ({
+        ...template,
+        sections: Array.isArray(template.sections) ? template.sections : 
+                 typeof template.sections === 'string' ? JSON.parse(template.sections) : [],
+        auto_prefill_fields: Array.isArray(template.auto_prefill_fields) ? template.auto_prefill_fields :
+                            typeof template.auto_prefill_fields === 'string' ? JSON.parse(template.auto_prefill_fields) : []
+      })));
     } catch (error) {
       console.error('Error fetching quick templates:', error);
     } finally {

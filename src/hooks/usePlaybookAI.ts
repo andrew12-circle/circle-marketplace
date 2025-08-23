@@ -29,10 +29,12 @@ export function usePlaybookAI({ contentId, templateId }: UsePlaybookAIProps = {}
         .single();
 
       const context = {
-        userType: 'real_estate_agent',
-        templateId,
-        sectionType: sectionData.type,
-        userProfile: profile || {}
+        preferences: {
+          userType: 'real_estate_agent',
+          templateId,
+          sectionType: sectionData.type,
+          userProfile: profile || {}
+        }
       };
 
       const prompt = templatePrompt 
@@ -129,8 +131,10 @@ ${template.sections.map((section: any, index: number) =>
 Make it specific, actionable, and valuable for other real estate agents.`;
 
       const aiContent = await getRecommendation(prompt, {
-        userType: 'real_estate_agent',
-        templateId: template.id
+        preferences: {
+          userType: 'real_estate_agent',
+          templateId: template.id
+        }
       });
 
       if (aiContent && contentId) {
