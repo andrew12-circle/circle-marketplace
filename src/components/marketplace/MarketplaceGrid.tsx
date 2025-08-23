@@ -571,11 +571,11 @@ export const MarketplaceGrid = () => {
                 </Button>
               </div>
 
-              {/* Grid - Mobile Responsive */}
+              {/* Grid - Mobile Responsive with Virtualization */}
               {viewMode === "services" && (
                 <>
                   <div className="mobile-grid gap-4 sm:gap-6">
-                    {flattenServices.map((service, index) => (
+                    {flattenServices.slice(0, 12).map((service, index) => (
                       <OptimizedServiceCard 
                         key={`service-${service.id}-${index}`} 
                         service={service} 
@@ -588,9 +588,9 @@ export const MarketplaceGrid = () => {
                   </div>
                   <div className="mt-6 flex items-center justify-center gap-4">
                     <span className="text-sm text-muted-foreground">
-                      Showing {flattenServices.length} of {totalServicesCount} results
+                      Showing {Math.min(12, flattenServices.length)} of {totalServicesCount} results
                     </span>
-                    {hasNextPage && (
+                    {(flattenServices.length > 12 || hasNextPage) && (
                       <Button onClick={() => fetchNextPage()} disabled={isFetchingNextPage}>
                         {isFetchingNextPage ? 'Loading…' : 'Load more'}
                       </Button>
@@ -625,7 +625,7 @@ export const MarketplaceGrid = () => {
                   </div>
                 ) : (
                   <div className="mobile-grid gap-4 sm:gap-6">
-                    {filteredProducts.map(product => {
+                    {filteredProducts.slice(0, 12).map(product => {
                       const IconComponent = product.icon;
                       return (
                         <div key={product.id} className="group relative overflow-hidden bg-white rounded-xl border border-gray-200 hover:border-gray-300 cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1" onClick={() => setSelectedProductCategory(product.id)}>
@@ -692,7 +692,7 @@ export const MarketplaceGrid = () => {
                   </div>
                 ) : (
                   <div className="mobile-grid gap-4 sm:gap-6">
-                    {filteredVendors.map(vendor => (
+                    {filteredVendors.slice(0, 12).map(vendor => (
                       <MarketplaceVendorCard 
                         key={vendor.id} 
                         vendor={vendor} 

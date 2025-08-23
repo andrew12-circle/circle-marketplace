@@ -29,12 +29,8 @@ export function usePlaybookAI({ contentId, templateId }: UsePlaybookAIProps = {}
         .single();
 
       const context = {
-        preferences: {
-          userType: 'real_estate_agent',
-          templateId,
-          sectionType: sectionData.type,
-          userProfile: profile || {}
-        }
+        currentPage: 'playbook_creation',
+        marketSegment: 'real_estate_agent'
       };
 
       const prompt = templatePrompt 
@@ -131,10 +127,8 @@ ${template.sections.map((section: any, index: number) =>
 Make it specific, actionable, and valuable for other real estate agents.`;
 
       const aiContent = await getRecommendation(prompt, {
-        preferences: {
-          userType: 'real_estate_agent',
-          templateId: template.id
-        }
+        currentPage: 'quick_playbook_creation',
+        marketSegment: 'real_estate_agent'
       });
 
       if (aiContent && contentId) {
