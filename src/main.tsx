@@ -100,7 +100,7 @@ cacheManager.checkAndClearCache();
 globalErrorMonitor.initialize();
 
 // Initialize performance optimizations
-initAppPerformance();
+document.body.classList.add('react-loaded');
 
 createRoot(document.getElementById("root")!).render(
   <QueryClientProvider client={queryClient}>

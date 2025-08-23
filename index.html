@@ -150,7 +150,8 @@
       
       /* Responsive text sizes */
       @media (min-width: 640px) {
-        .text-3xl { font-size: 3rem; line-height: 1; }
+        .text-3xl { font-size: 3.75rem; line-height: 1; }
+        .sm\\:text-6xl { font-size: 3.75rem; line-height: 1; }
         .sm\\:text-4xl { font-size: 2.25rem; line-height: 2.5rem; }
       }
       @media (min-width: 768px) {
@@ -261,8 +262,9 @@
         display: block;
       }
       
-      /* Hide fallback critical content by default to prevent flash */
-      #critical-content { display: none; }
+      /* Hide fallback critical content when React loads */
+      #critical-content { display: block; }
+      .react-loaded #critical-content { display: none; }
     </style>
     
     <link rel="icon" href="/src/assets/circle-logo.png" type="image/png">
@@ -333,8 +335,8 @@
         </header>
         <main class="container py-16">
           <div class="hero-content mb-12">
-            <h1 class="text-3xl font-bold mb-4">Professional Services Marketplace</h1>
-            <p class="text-gray-600 mb-8">Discover top-rated services and grow your real estate business</p>
+            <h1 class="text-3xl font-bold mb-4 lcp-content">Agent Marketplace.</h1>
+            <p class="text-gray-600 max-w-2xl text-sm lcp-content">Finally, the noise is gone. Welcome to the Marketplace — where real estate agents can compare and explore the best tools at a fraction of the cost. Every option is curated, easy to compare. Stop guessing. Buy outcomes, not tools.</p>
           </div>
           
           <!-- Critical marketplace content skeleton to match actual LCP -->
