@@ -18,7 +18,13 @@ interface OptimizedServiceCardProps {
 export const OptimizedServiceCard = memo<OptimizedServiceCardProps>(
   ({ service, isSaved, onSave, onViewDetails, bulkRatings }) => {
     return (
-      <div data-tour="service-card">
+      <div 
+        data-tour="service-card"
+        style={{ 
+          containIntrinsicSize: '280px 350px',
+          contentVisibility: 'auto'
+        }}
+      >
         <ServiceCard
           service={service}
           isSaved={isSaved}

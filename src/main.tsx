@@ -9,6 +9,7 @@ import { CartProvider } from "@/contexts/CartContext";
 import { cacheManager } from "./utils/cacheManager";
 import { globalErrorMonitor } from "./utils/globalErrorMonitor";
 import { initPerformanceOptimizations } from "./utils/performanceOptimizer";
+import { initAppPerformance } from "./utils/performanceInit";
 import { ReloadReasonBanner } from "./components/common/ReloadReasonBanner";
 import { SecurityProvider } from "@/components/security/SecurityEnhancementSystem";
 import "./index.css";
@@ -99,7 +100,7 @@ cacheManager.checkAndClearCache();
 globalErrorMonitor.initialize();
 
 // Initialize performance optimizations
-initPerformanceOptimizations();
+initAppPerformance();
 
 createRoot(document.getElementById("root")!).render(
   <QueryClientProvider client={queryClient}>

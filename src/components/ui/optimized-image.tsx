@@ -26,6 +26,14 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   const webpSrc = src.replace(/\.(png|jpg|jpeg)$/i, '.webp');
   const fallbackSrc = src;
 
+  // Ensure explicit dimensions for LCP optimization
+  const imgStyle = {
+    ...style,
+    width: width || '100%',
+    height: height || 'auto',
+    aspectRatio: width && height ? `${width}/${height}` : undefined
+  };
+
   return (
     <picture>
       {/* WebP source for modern browsers */}
@@ -38,7 +46,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         className={className}
         width={width}
         height={height}
-        style={style}
+        style={imgStyle}
         loading={priority ? "eager" : "lazy"}
         decoding="async"
         {...props}
