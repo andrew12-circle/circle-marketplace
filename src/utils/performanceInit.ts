@@ -2,6 +2,7 @@ import { initPerformanceOptimizations } from './performanceOptimizer';
 import { taskScheduler } from './taskScheduler';
 import { initializeAppWithPriority, deferUntilIdle } from './fidOptimizer';
 import { initNetworkOptimizations } from './networkOptimizer';
+import { optimizeCSS } from './cssOptimizer';
 
 // Initialize all performance optimizations on app startup with FID priority
 export const initAppPerformance = () => {
@@ -62,8 +63,10 @@ export const initAppPerformance = () => {
       document.head.appendChild(style);
     });
     
-    // Defer image preloading until after critical path
+    // Defer CSS optimization until after critical path
     deferUntilIdle(() => {
+      optimizeCSS();
+      
       const criticalImages = [
         'https://storage.googleapis.com/msgsndr/UjxJODh2Df0UKjTnKpcP/media/68255d47c398f6cc6978ed74.png'
       ];

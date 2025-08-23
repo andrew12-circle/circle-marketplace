@@ -1,6 +1,6 @@
-import { initCSSOptimizations } from './cssOptimizer';
+// Performance optimization utilities with main-thread awareness
 import { taskScheduler } from './taskScheduler';
-import { initDOMOptimizations } from './domOptimizer';
+import { mainThreadOptimizer } from './mainThreadOptimizer';
 
 // Performance optimization utilities
 export const deferNonCriticalScripts = () => {
@@ -60,8 +60,14 @@ export const initializeInChunks = () => {
   
   // Break up heavy initialization work
   const initTasks = [
-    () => initCSSOptimizations(),
-    () => initDOMOptimizations(),
+    () => {
+      // CSS optimizations
+      document.documentElement.style.contain = 'layout style paint';
+    },
+    () => {
+      // DOM optimizations
+      document.body.style.willChange = 'auto';
+    },
     () => deferNonCriticalScripts(),
     () => optimizeScriptLoading(),
   ];

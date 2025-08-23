@@ -277,41 +277,60 @@
     <!-- Preload critical first image for LCP -->
     <link rel="preload" href="https://storage.googleapis.com/msgsndr/UjxJODh2Df0UKjTnKpcP/media/68255d47c398f6cc6978ed74.png" as="image" type="image/png" fetchpriority="high">
     
-    <!-- Non-blocking CSS loading to eliminate render blocking -->
-    <link rel="preload" href="/assets/index-1_cDzJxw.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="/assets/index-1_cDzJxw.css"></noscript>
-    
-    <!-- Optimized CSS loader to reduce main thread work -->
-    <script>
-      // Use scheduler API if available for non-blocking CSS loading
-      (function() {
-        function loadCSS(href) {
-          var link = document.createElement('link');
-          link.rel = 'stylesheet';
-          link.href = href;
-          document.head.appendChild(link);
-        }
-        
-        // Use most efficient scheduling method available
-        if (window.scheduler && window.scheduler.postTask) {
-          scheduler.postTask(() => loadCSS('/assets/index-1_cDzJxw.css'), { priority: 'background' });
-        } else if (window.requestIdleCallback) {
-          requestIdleCallback(() => loadCSS('/assets/index-1_cDzJxw.css'));
-        } else if (window.requestAnimationFrame) {
-          requestAnimationFrame(() => loadCSS('/assets/index-1_cDzJxw.css'));
-        } else {
-          setTimeout(() => loadCSS('/assets/index-1_cDzJxw.css'), 1);
-        }
-      })();
-    </script>
-    
-    <!-- Additional critical CSS for marketplace components -->
-    <style>
-      .marketplace-grid { display: grid; gap: 1rem; }
-      .service-card { background: hsl(var(--card)); border: 1px solid hsl(var(--border)); border-radius: calc(var(--radius) - 2px); }
-      .vendor-card { background: hsl(var(--card)); border: 1px solid hsl(var(--border)); border-radius: calc(var(--radius) - 2px); }
-      .marketplace-filters { background: hsl(var(--background)); position: sticky; top: 0; z-index: 10; }
+    <!-- Critical CSS loading optimization to reduce unused CSS -->
+    <style id="critical-css">
+      /* Critical above-the-fold styles only */
+      .container { max-width: 1200px; margin: 0 auto; padding: 0 1rem; }
+      .hero-content { text-align: center; padding: 4rem 0; }
+      .marketplace-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
+      .service-card { background: white; border-radius: 0.75rem; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+      .btn { display: inline-block; padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-weight: 600; text-decoration: none; }
+      .btn-primary { background: #3b82f6; color: white; }
+      .text-3xl { font-size: 1.875rem; font-weight: 800; }
+      .text-gray-600 { color: #6b7280; }
+      .mb-4 { margin-bottom: 1rem; }
+      .mb-8 { margin-bottom: 2rem; }
+      .mb-12 { margin-bottom: 3rem; }
+      .font-bold { font-weight: 700; }
+      .max-w-2xl { max-width: 42rem; }
+      .text-sm { font-size: 0.875rem; }
+      
+      /* Dark mode support for critical elements */
+      @media (prefers-color-scheme: dark) {
+        .service-card { background: #1f2937; color: #f9fafb; }
+        body { background: #111827; color: #f9fafb; }
+      }
     </style>
+    
+    <!-- Defer non-critical CSS to reduce initial blocking -->
+    <script>
+      // Optimized CSS loading to prevent render blocking
+      function loadCSS(href, media) {
+        var link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = href;
+        link.media = media || 'all';
+        document.head.appendChild(link);
+        return link;
+      }
+      
+      // Load main CSS bundles after critical rendering
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(function() {
+          loadCSS('/assets/index-1_cDzJxw.css');
+          loadCSS('/assets/index-CouCvFNH.css');
+        });
+      } else {
+        setTimeout(function() {
+          loadCSS('/assets/index-1_cDzJxw.css');
+          loadCSS('/assets/index-CouCvFNH.css');
+        }, 150);
+      }
+    </script>
+    <noscript>
+      <link rel="stylesheet" href="/assets/index-1_cDzJxw.css">
+      <link rel="stylesheet" href="/assets/index-CouCvFNH.css">
+    </noscript>
 
     <meta property="og:title" content="circle-agent-growth" />
     <meta property="og:description" content="Lovable Generated Project" />
