@@ -275,7 +275,7 @@ export const ServiceCard = ({
     <TooltipProvider>
       <div className="relative">
         <Card 
-          className="group relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 bg-card border border-border/50 h-full flex flex-col cursor-pointer mobile-card touch-friendly"
+          className="service-card group relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 bg-card border border-border/50 h-full flex flex-col cursor-pointer mobile-card touch-friendly"
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
           onClick={handleViewDetails}
@@ -321,6 +321,11 @@ export const ServiceCard = ({
               src={service.image_url || "/lovable-uploads/placeholder.svg"}
               alt={service.title}
               className="w-full h-full object-contain object-center transition-transform duration-300 group-hover:scale-105"
+              loading="lazy"
+              decoding="async"
+              width={280}
+              height={192}
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
             />
           </div>
 
