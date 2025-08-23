@@ -207,15 +207,12 @@ const fetchVendors = async (): Promise<Vendor[]> => {
   const t0 = performance.now();
   logger.log('🔄 Fetching vendors from Supabase...');
   
-  // Simplified query - use existing columns only
+  // Use the secure vendor directory view for public consumption
   const { data, error } = await withTimeout(
     supabase
-      .from('vendors')
+      .from('vendor_directory')
       .select('*')
-      .eq('is_active', true)
-      .in('approval_status', ['approved', 'auto_approved', 'pending'])
-      .order('sort_order', { ascending: true })
-      .order('rating', { ascending: false })
+      .order('name', { ascending: true })
       .limit(50),
       8000, // Reduced to 8s timeout for faster recovery
       'fetchVendors'

@@ -287,26 +287,11 @@ export const VendorSelectionModal = ({
       // Check if request was aborted
       if (signal.aborted) return;
 
-      // Query vendors with calculated real-time stats - include pending vendors
+      // Query vendors using secure vendor directory view - only non-sensitive data
       const { data, error } = await supabase
-        .from('vendors')
-        .select(`
-          id, 
-          name, 
-          description, 
-          logo_url, 
-          location, 
-          rating, 
-          review_count, 
-          is_verified, 
-          service_states, 
-          vendor_type, 
-          parent_vendor_id
-        `)
-        .eq('is_active', true)
-        .in('approval_status', ['approved', 'auto_approved', 'pending'])
-        .order('sort_order', { ascending: true })
-        .order('rating', { ascending: false })
+        .from('vendor_directory')
+        .select('*')
+        .order('name', { ascending: true })
         .limit(100);
 
       if (isQAMode) {
