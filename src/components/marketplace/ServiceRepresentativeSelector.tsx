@@ -89,10 +89,9 @@ export const ServiceRepresentativeSelector: React.FC<ServiceRepresentativeSelect
       setLoading(true);
       
       const { data, error } = await supabase
-        .from('service_representatives')
+        .from('service_representatives_public')
         .select('*')
         .eq('vendor_id', vendor.id)
-        .eq('is_active', true)
         .order('is_primary', { ascending: false })
         .order('sort_order', { ascending: true })
         .order('name', { ascending: true });

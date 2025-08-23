@@ -7425,6 +7425,72 @@ export type Database = {
       }
     }
     Views: {
+      service_representatives_public: {
+        Row: {
+          bio: string | null
+          id: string | null
+          is_primary: boolean | null
+          location: string | null
+          name: string | null
+          profile_picture_url: string | null
+          rating: number | null
+          reviews_count: number | null
+          sort_order: number | null
+          specialties: string[] | null
+          title: string | null
+          vendor_id: string | null
+          website: string | null
+          years_experience: number | null
+        }
+        Insert: {
+          bio?: string | null
+          id?: string | null
+          is_primary?: boolean | null
+          location?: string | null
+          name?: string | null
+          profile_picture_url?: string | null
+          rating?: number | null
+          reviews_count?: number | null
+          sort_order?: number | null
+          specialties?: string[] | null
+          title?: string | null
+          vendor_id?: string | null
+          website?: string | null
+          years_experience?: number | null
+        }
+        Update: {
+          bio?: string | null
+          id?: string | null
+          is_primary?: boolean | null
+          location?: string | null
+          name?: string | null
+          profile_picture_url?: string | null
+          rating?: number | null
+          reviews_count?: number | null
+          sort_order?: number | null
+          specialties?: string[] | null
+          title?: string | null
+          vendor_id?: string | null
+          website?: string | null
+          years_experience?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_representatives_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendor_directory"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_representatives_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vendor_directory: {
         Row: {
           created_at: string | null
