@@ -7813,6 +7813,22 @@ export type Database = {
         Args: { data_input: Json }
         Returns: string
       }
+      current_jwt: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      current_role: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      current_tenant_id: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      current_user_id: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       detect_suspicious_activity: {
         Args: Record<PropertyKey, never>
         Returns: Json
