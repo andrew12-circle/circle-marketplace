@@ -25,7 +25,10 @@ export default defineConfig(({ mode }) => ({
       output: {
         manualChunks: (id) => {
           // Core React libs - keep small and prioritized
-          if (id.includes('react') || id.includes('react-dom')) {
+          if (id.includes('react/') && !id.includes('node_modules')) {
+            return 'react-core';
+          }
+          if (id.includes('react-dom')) {
             return 'react-core';
           }
           
@@ -34,55 +37,76 @@ export default defineConfig(({ mode }) => ({
             return 'router';
           }
           
-          // Query client - defer loading
+          // Query client - defer loading for data operations
           if (id.includes('@tanstack/react-query')) {
             return 'query';
           }
           
-          // UI libraries - split into smaller chunks
-          if (id.includes('lucide-react')) {
-            return 'icons';
+          // Charts - highly unused on homepage, defer completely
+          if (id.includes('recharts') || id.includes('chart')) {
+            return 'charts-lazy';
           }
           
-          // Radix components - split by usage pattern
-          if (id.includes('@radix-ui/react-dialog') || id.includes('@radix-ui/react-dropdown-menu')) {
-            return 'radix-overlay';
+          // Supabase - defer database operations
+          if (id.includes('@supabase/supabase-js')) {
+            return 'supabase-lazy';
           }
-          if (id.includes('@radix-ui/react-select') || id.includes('@radix-ui/react-toast')) {
+          
+          // Split Radix UI by actual usage patterns
+          if (id.includes('@radix-ui/react-dialog') || id.includes('@radix-ui/react-modal')) {
+            return 'radix-modals';
+          }
+          if (id.includes('@radix-ui/react-dropdown') || id.includes('@radix-ui/react-popover')) {
+            return 'radix-overlays';
+          }
+          if (id.includes('@radix-ui/react-select') || id.includes('@radix-ui/react-combobox')) {
             return 'radix-forms';
+          }
+          if (id.includes('@radix-ui/react-toast') || id.includes('@radix-ui/react-alert')) {
+            return 'radix-feedback';
           }
           if (id.includes('@radix-ui/')) {
             return 'radix-other';
           }
           
-          // Supabase - defer loading
-          if (id.includes('@supabase/supabase-js')) {
-            return 'supabase';
+          // Icons - split by usage
+          if (id.includes('lucide-react')) {
+            return 'icons';
           }
           
-          // Charts - defer loading (heavy)
-          if (id.includes('recharts')) {
-            return 'charts';
+          // Form libraries - defer until forms are actually used
+          if (id.includes('react-hook-form') || id.includes('@hookform/resolvers') || id.includes('zod')) {
+            return 'forms-lazy';
           }
           
-          // Utilities - keep small
+          // Internationalization - defer
+          if (id.includes('i18next') || id.includes('react-i18next')) {
+            return 'i18n-lazy';
+          }
+          
+          // Authentication - defer until login
+          if (id.includes('auth') && id.includes('node_modules')) {
+            return 'auth-lazy';
+          }
+          
+          // Payment processing - defer until checkout
+          if (id.includes('stripe') || id.includes('payment')) {
+            return 'payment-lazy';
+          }
+          
+          // Utils - keep small
           if (id.includes('clsx') || id.includes('class-variance-authority') || id.includes('tailwind-merge')) {
             return 'utils';
           }
           
-          // Internationalization
-          if (id.includes('i18next') || id.includes('react-i18next')) {
-            return 'i18n';
+          // Date libraries - defer
+          if (id.includes('date-fns') || id.includes('react-day-picker')) {
+            return 'date-lazy';
           }
           
-          // Form libraries
-          if (id.includes('react-hook-form') || id.includes('@hookform/resolvers') || id.includes('zod')) {
-            return 'forms';
-          }
-          
-          // Large vendor libraries
+          // Large vendor libraries - defer
           if (id.includes('node_modules')) {
-            return 'vendor';
+            return 'vendor-lazy';
           }
         },
         assetFileNames: (assetInfo) => {

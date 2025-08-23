@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Crown } from "lucide-react";
 import { ResponsiveLogo } from "@/components/ui/optimized-image";
 import { CriticalContent, NonCriticalContent, useCriticalResourceHints } from "@/components/ui/critical-content";
+import { conditionalLoader } from "@/utils/conditionalLoader";
 
 import { CartDrawer } from "@/components/marketplace/CartDrawer";
 import { UserMenu } from "@/components/UserMenu";
@@ -17,6 +18,7 @@ import { LegalFooter } from "@/components/LegalFooter";
 // Removed direct import - now using lazy component
 import { OnboardingResumeBanner } from "@/components/onboarding/OnboardingResumeBanner";
 import { Suspense } from "react";
+import React from "react";
 import { 
   LazySmartHelpOrchestrator, 
   LazyEnhancedHelpWidget, 
@@ -35,6 +37,12 @@ export default function Index() {
   
   // Preload critical resources
   useCriticalResourceHints();
+
+  // Conditionally preload modules based on user behavior
+  React.useEffect(() => {
+    // Preload charts and forms when user is idle (likely to interact)
+    conditionalLoader.preloadOnIdle(['charts', 'forms']);
+  }, []);
 
   return (
     <div className="min-h-screen bg-background">
