@@ -7495,7 +7495,7 @@ export type Database = {
       }
     }
     Views: {
-      service_representatives_public_secure: {
+      service_representatives_public: {
         Row: {
           bio: string | null
           created_at: string | null
@@ -7514,7 +7514,65 @@ export type Database = {
           website: string | null
           years_experience: number | null
         }
-        Relationships: []
+        Insert: {
+          bio?: string | null
+          created_at?: string | null
+          id?: string | null
+          is_primary?: boolean | null
+          location?: string | null
+          name?: string | null
+          profile_picture_url?: string | null
+          rating?: number | null
+          reviews_count?: number | null
+          sort_order?: number | null
+          specialties?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+          vendor_id?: string | null
+          website?: string | null
+          years_experience?: number | null
+        }
+        Update: {
+          bio?: string | null
+          created_at?: string | null
+          id?: string | null
+          is_primary?: boolean | null
+          location?: string | null
+          name?: string | null
+          profile_picture_url?: string | null
+          rating?: number | null
+          reviews_count?: number | null
+          sort_order?: number | null
+          specialties?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+          vendor_id?: string | null
+          website?: string | null
+          years_experience?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_representatives_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendor_directory"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_representatives_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendor_directory_authenticated"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_representatives_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       vendor_directory: {
         Row: {
@@ -7884,27 +7942,6 @@ export type Database = {
           location: string
           specialties: string[]
           website_url: string
-          years_experience: number
-        }[]
-      }
-      get_public_service_representatives: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          bio: string
-          created_at: string
-          id: string
-          is_primary: boolean
-          location: string
-          name: string
-          profile_picture_url: string
-          rating: number
-          reviews_count: number
-          sort_order: number
-          specialties: string[]
-          title: string
-          updated_at: string
-          vendor_id: string
-          website: string
           years_experience: number
         }[]
       }
