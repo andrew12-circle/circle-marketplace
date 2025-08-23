@@ -7537,6 +7537,14 @@ export type Database = {
         }
         Returns: string
       }
+      playbook_ai_draft_section: {
+        Args: {
+          p_section_data: Json
+          p_template_prompt: string
+          p_user_context?: Json
+        }
+        Returns: string
+      }
       process_automatic_copay: {
         Args: {
           p_agent_id: string
