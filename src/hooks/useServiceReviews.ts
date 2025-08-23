@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 
 export interface ServiceReview {
   id: string;
@@ -18,6 +19,7 @@ export interface ServiceReview {
 }
 
 export const useServiceReviews = (serviceId: string) => {
+  const { user } = useAuth();
   const [reviews, setReviews] = useState<ServiceReview[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -25,6 +27,13 @@ export const useServiceReviews = (serviceId: string) => {
   useEffect(() => {
     const fetchReviews = async () => {
       if (!serviceId) {
+        setLoading(false);
+        return;
+      }
+
+      // Only load reviews for authenticated users
+      if (!user) {
+        setReviews([]);
         setLoading(false);
         return;
       }
@@ -98,7 +107,7 @@ export const useServiceReviews = (serviceId: string) => {
     };
 
     fetchReviews();
-  }, [serviceId]);
+  }, [serviceId, user]);
 
   return { reviews, loading, error };
 };

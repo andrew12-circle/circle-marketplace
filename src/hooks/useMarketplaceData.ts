@@ -358,22 +358,18 @@ const fetchCombinedMarketplaceData = async (): Promise<MarketplaceData> => {
   if (canUseDbCache) {
     try {
       const t0 = performance.now();
+      // Use RPC instead of direct table access to handle authentication
       const { data: cacheData } = await marketplaceCircuitBreaker.execute(async () =>
         await withTimeout(
-          supabase
-            .from('marketplace_cache')
-            .select('cache_data')
-            .eq('cache_key', 'marketplace_data')
-            .gt('expires_at', new Date().toISOString())
-            .maybeSingle(),
+          supabase.rpc('get_marketplace_cache', { p_cache_key: 'marketplace_data' }),
           3000,
           'marketplace_cache'
         )
       );
-      performanceMonitor.trackRequest('/marketplace_cache', 'SELECT', performance.now() - t0, true, true);
-      if (cacheData?.cache_data && typeof cacheData.cache_data === 'object') {
+      performanceMonitor.trackRequest('/marketplace_cache', 'RPC', performance.now() - t0, true, true);
+      if (cacheData && typeof cacheData === 'object' && cacheData !== null) {
         logger.log('✅ Retrieved marketplace data from database cache');
-        return cacheData.cache_data as unknown as MarketplaceData;
+        return cacheData as unknown as MarketplaceData;
       }
     } catch (error) {
       logger.log('⛔ Database cache unavailable, proceeding to live fetch', error);
