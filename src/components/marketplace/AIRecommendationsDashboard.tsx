@@ -26,7 +26,17 @@ export function AIRecommendationsDashboard() {
     if (user?.id) {
       setIsLoading(false);
     }
-  }, [user?.id]);
+    
+    // Fallback timeout to prevent indefinite loading
+    const fallbackTimeout = setTimeout(() => {
+      if (isLoading || agentLoading) {
+        console.warn('Agent data loading timeout - proceeding with fallback');
+        setIsLoading(false);
+      }
+    }, 10000);
+    
+    return () => clearTimeout(fallbackTimeout);
+  }, [user?.id, isLoading, agentLoading]);
 
   const checkDataRequirements = () => {
     const hasProfile = user?.id;

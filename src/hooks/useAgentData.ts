@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -82,12 +81,23 @@ export const useAgentData = (timeRange: number = 12) => {
         return;
       }
 
-      // 1. Get agent profile
-      const { data: agentData, error: agentError } = await supabase
-        .from('agents')
-        .select('*')
-        .eq('user_id', user.id)
-        .single();
+      // Helper to add timeout to Supabase calls
+      const withTimeout = async <T,>(promise: Promise<T>, ms = 5000): Promise<T> => {
+        const timeoutPromise = new Promise<never>((_, reject) => 
+          setTimeout(() => reject(new Error('Query timeout')), ms)
+        );
+        return Promise.race([promise, timeoutPromise]);
+      };
+
+      // 1. Get agent profile with timeout
+      const { data: agentData, error: agentError } = await withTimeout(
+        supabase
+          .from('agents')
+          .select('*')
+          .eq('user_id', user.id)
+          .single(),
+        5000
+      );
 
       if (agentError && agentError.code !== 'PGRST116') {
         throw agentError;
@@ -104,19 +114,22 @@ export const useAgentData = (timeRange: number = 12) => {
 
       setAgent(agentData);
 
-      // 2. Get transactions from data feed
+      // 2. Get transactions from data feed with timeout
       const cutoffDate = new Date();
       cutoffDate.setMonth(cutoffDate.getMonth() - timeRange);
 
-      const { data: transactionData, error: transactionError } = await supabase
-        .from('agent_transactions')
-        .select('*')
-        .eq('agent_id', agentData.id)
-        .gte('close_date', cutoffDate.toISOString().split('T')[0])
-        .order('close_date', { ascending: false });
+      const { data: transactionData, error: transactionError } = await withTimeout(
+        supabase
+          .from('agent_transactions')
+          .select('*')
+          .eq('agent_id', agentData.id)
+          .gte('close_date', cutoffDate.toISOString().split('T')[0])
+          .order('close_date', { ascending: false }),
+        5000
+      );
 
       if (transactionError) {
-        throw transactionError;
+        console.warn('Transaction fetch failed:', transactionError);
       }
 
       // Convert to our Transaction format
@@ -139,36 +152,44 @@ export const useAgentData = (timeRange: number = 12) => {
       let needsQuiz = false;
 
       if (!hasDataFeed) {
-        // Check for existing quiz response
-        const { data: quizData } = await supabase
-          .from('agent_quiz_responses')
-          .select('*')
-          .eq('agent_id', agentData.id)
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .single();
+        // Check for existing quiz response with timeout
+        try {
+          const { data: quizData } = await withTimeout(
+            supabase
+              .from('agent_quiz_responses')
+              .select('*')
+              .eq('agent_id', agentData.id)
+              .order('created_at', { ascending: false })
+              .limit(1)
+              .single(),
+            3000
+          );
 
-        if (quizData) {
-          // Generate transactions from quiz data for stats calculation
-          const buyerTransactions: Transaction[] = Array.from({ length: quizData.buyers_count }, (_, i) => ({
-            id: `quiz-buyer-${i}`,
-            close_date: new Date(Date.now() - Math.random() * timeRange * 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-            price: Number(quizData.avg_price),
-            side: 'buyer' as const,
-            source: 'self_report' as const
-          }));
+          if (quizData) {
+            // Generate transactions from quiz data for stats calculation
+            const buyerTransactions: Transaction[] = Array.from({ length: quizData.buyers_count }, (_, i) => ({
+              id: `quiz-buyer-${i}`,
+              close_date: new Date(Date.now() - Math.random() * timeRange * 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+              price: Number(quizData.avg_price),
+              side: 'buyer' as const,
+              source: 'self_report' as const
+            }));
 
-          const sellerTransactions: Transaction[] = Array.from({ length: quizData.sellers_count }, (_, i) => ({
-            id: `quiz-seller-${i}`,
-            close_date: new Date(Date.now() - Math.random() * timeRange * 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-            price: Number(quizData.avg_price),
-            side: 'seller' as const,
-            source: 'self_report' as const
-          }));
+            const sellerTransactions: Transaction[] = Array.from({ length: quizData.sellers_count }, (_, i) => ({
+              id: `quiz-seller-${i}`,
+              close_date: new Date(Date.now() - Math.random() * timeRange * 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+              price: Number(quizData.avg_price),
+              side: 'seller' as const,
+              source: 'self_report' as const
+            }));
 
-          finalTransactions = [...buyerTransactions, ...sellerTransactions];
-          hasDataFeed = false;
-        } else {
+            finalTransactions = [...buyerTransactions, ...sellerTransactions];
+            hasDataFeed = false;
+          } else {
+            needsQuiz = true;
+          }
+        } catch (quizError) {
+          console.warn('Quiz data fetch failed:', quizError);
           needsQuiz = true;
         }
       }
