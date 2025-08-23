@@ -7428,6 +7428,7 @@ export type Database = {
       service_representatives_public: {
         Row: {
           bio: string | null
+          created_at: string | null
           id: string | null
           is_primary: boolean | null
           location: string | null
@@ -7438,12 +7439,14 @@ export type Database = {
           sort_order: number | null
           specialties: string[] | null
           title: string | null
+          updated_at: string | null
           vendor_id: string | null
           website: string | null
           years_experience: number | null
         }
         Insert: {
           bio?: string | null
+          created_at?: string | null
           id?: string | null
           is_primary?: boolean | null
           location?: string | null
@@ -7454,12 +7457,14 @@ export type Database = {
           sort_order?: number | null
           specialties?: string[] | null
           title?: string | null
+          updated_at?: string | null
           vendor_id?: string | null
           website?: string | null
           years_experience?: number | null
         }
         Update: {
           bio?: string | null
+          created_at?: string | null
           id?: string | null
           is_primary?: boolean | null
           location?: string | null
@@ -7470,6 +7475,7 @@ export type Database = {
           sort_order?: number | null
           specialties?: string[] | null
           title?: string | null
+          updated_at?: string | null
           vendor_id?: string | null
           website?: string | null
           years_experience?: number | null
