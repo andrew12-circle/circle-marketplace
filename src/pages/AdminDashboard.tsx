@@ -44,6 +44,7 @@ import { CreatorPayoutDashboard } from '@/components/admin/CreatorPayoutDashboar
 import BulkFAQGenerator from '@/components/admin/BulkFAQGenerator';
 import { VendorQuestionsManager } from '@/components/admin/VendorQuestionsManager';
 import { AdminHealthDashboard } from '@/components/admin/AdminHealthDashboard';
+import { DiagnosticsPanel } from '@/components/admin/DiagnosticsPanel';
 import { RetentionAnalyticsDashboard } from '@/components/admin/RetentionAnalyticsDashboard';
 import { SponsoredPlacementsManager } from '@/components/admin/SponsoredPlacementsManager';
 import { ServiceVisibilityManager } from '@/components/admin/ServiceVisibilityManager';
@@ -963,7 +964,10 @@ export default function AdminDashboard() {
         </TabsContent>
 
         <TabsContent value="health" className="space-y-6">
-          <AdminHealthDashboard />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <AdminHealthDashboard />
+            <DiagnosticsPanel />
+          </div>
         </TabsContent>
 
         <TabsContent value="youtube" className="space-y-6">
