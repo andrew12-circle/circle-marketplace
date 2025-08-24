@@ -92,9 +92,11 @@ const queryClient = new QueryClient({
   },
 });
 
-// Initialize cache and error monitoring directly without deferring
-cacheManager.checkAndClearCache();
-globalErrorMonitor.initialize();
+// Defer non-critical initialization after first paint
+setTimeout(() => {
+  cacheManager.checkAndClearCache();
+  globalErrorMonitor.initialize();
+}, 0);
 
 // DOM Performance Diagnostic (dev only)
 if (import.meta.env.DEV) {
@@ -125,6 +127,12 @@ setTimeout(() => {
   document.body.classList.add('react-loaded');
   if (typeof window !== 'undefined' && window.cssTimeout) {
     clearTimeout(window.cssTimeout);
+  }
+  
+  // Record load time for debugging
+  const loadTime = performance.now();
+  if (loadTime > 6000) {
+    console.warn(`Slow React mount detected: ${Math.round(loadTime)}ms`);
   }
 }, 100);
 

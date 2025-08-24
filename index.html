@@ -327,9 +327,7 @@
       }
     </style>
     
-    <!-- Non-blocking CSS loading with timeout fallback -->
-    <link rel="preload" href="/assets/index-1_cDzJxw.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <link rel="preload" href="/assets/index-CouCvFNH.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <!-- CSS will be loaded by Vite automatically -->
     
     <!-- Timeout safety fallback for CSS loading -->
     <script>
@@ -352,14 +350,14 @@
         console.error('Unhandled rejection:', e.reason);
       });
       
-      // App loading timeout guard
+      // App loading timeout guard (increased to reduce false triggers)
       window.appLoadTimeout = setTimeout(function() {
-        console.warn('App loading timeout - showing fallback');
+        console.info('App loading timeout - showing fallback');
         var criticalDiv = document.getElementById('critical-content');
         if (criticalDiv && !document.body.classList.contains('react-loaded')) {
           criticalDiv.style.display = 'block';
         }
-      }, 5000);
+      }, 9000);
     </script>
     <noscript>
       <link rel="stylesheet" href="/assets/index-1_cDzJxw.css">
