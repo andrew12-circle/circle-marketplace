@@ -1,5 +1,4 @@
-import React from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import type { Service } from './useMarketplaceData';
 
@@ -122,24 +121,6 @@ async function fetchServicesPage(page: number, filters: PagedFilters): Promise<P
 }
 
 export function usePagedServices(page: number, filters: PagedFilters, options = { enabled: true }) {
-  const queryClient = useQueryClient();
-  
-  // Prefetch next page during idle time for better INP
-  React.useEffect(() => {
-    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
-      const prefetchNextPage = () => {
-        queryClient.prefetchQuery({
-          queryKey: ['services', 'paged', page + 1, filters],
-          queryFn: () => fetchServicesPage(page + 1, filters),
-          staleTime: 5 * 60 * 1000,
-        });
-      };
-      
-      const idleHandle = requestIdleCallback(prefetchNextPage, { timeout: 1000 });
-      return () => cancelIdleCallback(idleHandle);
-    }
-  }, [page, filters, queryClient]);
-  
   return useQuery<PagedResult>({
     queryKey: ['services', 'paged', page, filters],
     queryFn: () => 

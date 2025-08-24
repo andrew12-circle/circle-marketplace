@@ -92,7 +92,7 @@ const queryClient = new QueryClient({
   },
 });
 
-// Initialize critical monitoring immediately
+// Initialize cache and error monitoring directly without deferring
 cacheManager.checkAndClearCache();
 globalErrorMonitor.initialize();
 
@@ -125,12 +125,6 @@ setTimeout(() => {
   document.body.classList.add('react-loaded');
   if (typeof window !== 'undefined' && window.cssTimeout) {
     clearTimeout(window.cssTimeout);
-  }
-  
-  // Record load time for debugging
-  const loadTime = performance.now();
-  if (loadTime > 6000) {
-    console.warn(`Slow React mount detected: ${Math.round(loadTime)}ms`);
   }
 }, 100);
 

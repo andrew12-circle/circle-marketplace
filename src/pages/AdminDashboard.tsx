@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -79,7 +79,6 @@ export default function AdminDashboard() {
   
   // Enhanced user management state
   const [userSearchTerm, setUserSearchTerm] = useState('');
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [userFilter, setUserFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -97,22 +96,13 @@ export default function AdminDashboard() {
   // Check if user is admin
   const isAdmin = profile?.is_admin || false;
 
-  // Debounce search term to prevent excessive queries
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearchTerm(userSearchTerm);
-    }, 300);
-    
-    return () => clearTimeout(timer);
-  }, [userSearchTerm]);
-
   useEffect(() => {
     if (!loading && (!user || !isAdmin)) {
       return;
     }
 
     loadUsers();
-  }, [user, isAdmin, loading, currentPage, debouncedSearchTerm, userFilter]);
+  }, [user, isAdmin, loading, currentPage, userSearchTerm, userFilter]);
 
   useEffect(() => {
     filterUsers();
@@ -139,9 +129,9 @@ export default function AdminDashboard() {
       }
 
       // Apply search - fix the search logic to avoid UUID type errors
-      if (debouncedSearchTerm) {
+      if (userSearchTerm) {
         // Only search in text fields, not UUID fields
-        query = query.or(`display_name.ilike.%${debouncedSearchTerm}%,business_name.ilike.%${debouncedSearchTerm}%`);
+        query = query.or(`display_name.ilike.%${userSearchTerm}%,business_name.ilike.%${userSearchTerm}%`);
       }
 
       const { data, error, count } = await query
