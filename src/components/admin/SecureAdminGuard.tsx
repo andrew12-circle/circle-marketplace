@@ -39,6 +39,20 @@ export const SecureAdminGuard: React.FC<SecureAdminGuardProps> = ({
       }
 
       try {
+        // First, try to start/refresh admin session
+        const { data: sessionStarted, error: sessionError } = await supabase.rpc('start_admin_session');
+        
+        if (sessionError) {
+          logger.error('Failed to start admin session:', sessionError);
+          setSecurityError('Failed to initialize admin session. Please try again.');
+          return;
+        }
+
+        if (!sessionStarted) {
+          setSecurityError('Admin session creation failed. Please verify your admin privileges.');
+          return;
+        }
+
         // Verify admin session and security context
         const { data, error } = await supabase.rpc('validate_admin_session_context');
         

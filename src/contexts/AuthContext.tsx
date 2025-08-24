@@ -93,14 +93,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         
         // Defer any Supabase calls to prevent deadlock
         if (session?.user) {
-          setTimeout(() => {
-            fetchProfile(session.user.id);
+          setTimeout(async () => {
+            await fetchProfile(session.user.id);
+            setLoading(false); // Only set loading false after profile is fetched
           }, 0);
         } else {
           setProfile(null);
+          setLoading(false); // Set loading false immediately if no user
         }
-        
-        setLoading(false);
       }
     );
 

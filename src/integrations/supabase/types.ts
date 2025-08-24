@@ -8235,6 +8235,10 @@ export type Database = {
         Args: { p_vendor_id: string }
         Returns: undefined
       }
+      start_admin_session: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       track_vendor_activity: {
         Args: {
           p_activity_data?: Json
