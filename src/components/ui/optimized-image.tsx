@@ -69,25 +69,10 @@ export const ResponsiveLogo: React.FC<ResponsiveLogoProps> = ({
   style,
 }) => {
   return (
-    <picture>
-      {/* Use optimized WebP logo */}
-      <source srcSet="/circle-logo-optimized.webp" type="image/webp" />
-      
-      {/* Fallback to original PNG */}
-      <img
-        src="/circle-logo-updated.png"
-        alt="Circle"
-        className={className}
-        width={width}
-        height={height}
-        style={{
-          imageRendering: 'crisp-edges',
-          objectFit: 'contain',
-          ...style
-        }}
-        loading="eager"
-        decoding="async"
-      />
-    </picture>
+    <div className={className} style={style}>
+      <div className="w-full h-full rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold text-sm">
+        C
+      </div>
+    </div>
   );
 };
