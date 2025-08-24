@@ -69,10 +69,19 @@ export const ResponsiveLogo: React.FC<ResponsiveLogoProps> = ({
   style,
 }) => {
   return (
-    <div className={className} style={style}>
-      <div className="w-full h-full rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold text-sm">
-        C
-      </div>
-    </div>
+    <img
+      src="/lovable-uploads/f5afec55-c4aa-4ebc-844a-7d0b48f155bd.png"
+      alt="Circle Network"
+      className={className}
+      width={width}
+      height={height}
+      style={{
+        imageRendering: 'crisp-edges',
+        objectFit: 'contain',
+        ...style
+      }}
+      loading="eager"
+      decoding="async"
+    />
   );
 };
