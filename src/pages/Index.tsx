@@ -99,12 +99,6 @@ export default function Index() {
                       <span className="font-medium">{profile.circle_points}</span>
                     </Link>
                   )}
-                  <Button asChild variant="outline" size="sm" className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white border-none hover:from-yellow-500 hover:to-orange-600">
-                    <Link to="/pricing">
-                      <Crown className="w-4 h-4 mr-2" />
-                      Upgrade to Pro
-                    </Link>
-                  </Button>
                   <LanguageSwitcher />
                   <LocationSwitcher />
                   <CartDrawer />
