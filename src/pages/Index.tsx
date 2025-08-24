@@ -74,9 +74,9 @@ export default function Index() {
                 </div>
                 
                 {/* Bottom row - Navigation Tabs */}
-                <div className="flex justify-center">
+                {/* <div className="flex justify-center">
                   <NavigationTabs />
-                </div>
+                </div> */}
               </div>
             ) : (
               // Desktop Header Layout
@@ -87,9 +87,9 @@ export default function Index() {
                 </div>
                 
                 {/* Navigation Tabs - Desktop */}
-                <div className="flex flex-1 justify-center">
+                {/* <div className="flex flex-1 justify-center">
                   <NavigationTabs />
-                </div>
+                </div> */}
                 
                 {/* User Actions - Desktop */}
                 <div className="flex items-center gap-2 sm:gap-4">
