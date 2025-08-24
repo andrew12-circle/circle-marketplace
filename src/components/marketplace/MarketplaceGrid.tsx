@@ -13,8 +13,8 @@ import { CategoryBlocks } from "./CategoryBlocks";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Filter, Sparkles, Zap, Facebook, Globe, Mail, Share2, Monitor, TrendingUp, Database, Camera, Video, Printer, ArrowRight, BookOpen, Star, Eye, ChevronRight } from "lucide-react";
-import { VirtualGrid } from "@/components/ui/virtual-grid";
-import { usePagination } from "@/hooks/useDOMOptimization";
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis } from "@/components/ui/pagination";
+
 import { LazyComponent } from "@/components/ui/lazy-component";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -33,7 +33,7 @@ import { logger } from "@/utils/logger";
 import { taskScheduler, processInChunks, debounceTask } from "@/utils/taskScheduler";
 import { useQueryClient } from "@tanstack/react-query";
 import { marketplaceCircuitBreaker } from "@/utils/circuitBreaker";
-import { usePaginatedServices } from "@/hooks/usePaginatedServices";
+import { usePagedServices } from "@/hooks/usePagedServices";
 import { useABTest } from "@/hooks/useABTest";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { useMarketplaceEnabled } from "@/hooks/useAppConfig";
@@ -239,38 +239,30 @@ export const MarketplaceGrid = () => {
   // Enable new landing experience for all users
   const showNewLanding = true;
 
-  // Paginated services (server-side filters + pagination) - defer until user interacts
+  // Page-based pagination for Amazon-style experience
   const { variant } = useABTest('ranking_v1', { holdout: 0.1 });
   const orderStrategy = variant === 'holdout' ? 'recent' : 'ranked';
-  const [enablePagination, setEnablePagination] = useState(true); // Enable by default to show services immediately
+  const [currentPage, setCurrentPage] = useState(1);
 
-  // Only enable pagination if marketplace is enabled by admin
-  const shouldEnablePagination = enablePagination && marketplaceEnabled;
-
-  // Enable pagination when user starts searching or filtering
+  // Reset to page 1 when filters change
   useEffect(() => {
-    if (searchTerm || filters.category !== 'all' || filters.featured || filters.verified || filters.coPayEligible) {
-      setEnablePagination(true);
-    }
+    setCurrentPage(1);
   }, [searchTerm, filters.category, filters.featured, filters.verified, filters.coPayEligible]);
 
   const {
-    data: paginatedData,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
+    data: pagedData,
     isLoading: isLoadingServices
-  } = usePaginatedServices({
+  } = usePagedServices(currentPage, {
     searchTerm,
     category: filters.category,
     featured: filters.featured,
     verified: filters.verified,
     coPayEligible: filters.coPayEligible,
     orderStrategy
-  }, { enabled: shouldEnablePagination });
+  }, { enabled: marketplaceEnabled });
 
   const flattenServices = useMemo(() => {
-    const items = paginatedData?.pages?.flatMap(p => p.items) || [];
+    const items = pagedData?.items || [];
     const extractNumericPrice = (priceString?: string | null): number => {
       if (!priceString) return 0;
       const cleaned = priceString.replace(/[^0-9.]/g, '');
@@ -282,9 +274,9 @@ export const MarketplaceGrid = () => {
       const matchesVerified = !filters.verified || !!s.vendor?.is_verified;
       return withinPrice && matchesVerified;
     });
-  }, [paginatedData, filters.priceRange, filters.verified]);
+  }, [pagedData, filters.priceRange, filters.verified]);
 
-  const totalServicesCount = paginatedData?.pages?.[0]?.totalCount ?? 0;
+  const totalServicesCount = pagedData?.totalCount ?? 0;
   const baseForFilters = services.length ? services : flattenServices;
 
   // Memoize service IDs to prevent unnecessary re-fetching of ratings
@@ -603,12 +595,11 @@ export const MarketplaceGrid = () => {
                 </Button>
               </div>
 
-              {/* Grid - Mobile Responsive with Virtualization */}
+              {/* Services Grid with Pagination */}
               {viewMode === "services" && (
                 <>
-                  <VirtualGrid
-                    items={flattenServices.slice(0, 16)}
-                    renderItem={(service, index) => (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+                    {flattenServices.map((service, index) => (
                       <OptimizedServiceCard 
                         key={`service-${service.id}-${index}`}
                         service={service} 
@@ -617,22 +608,91 @@ export const MarketplaceGrid = () => {
                         isSaved={allSavedServiceIds.includes(service.id)} 
                         bulkRatings={bulkRatings} 
                       />
-                    )}
-                    itemHeight={350}
-                    containerHeight={640}
-                    itemsPerRow={4}
-                    className="max-h-[80vh] overflow-y-auto"
-                  />
-                   <div className="mt-6 flex items-center justify-center gap-4">
-                    <span className="text-sm text-muted-foreground">
-                      Showing {Math.min(16, flattenServices.length)} of {totalServicesCount} results
-                    </span>
-                    {(flattenServices.length > 16 || hasNextPage) && (
-                      <Button onClick={() => fetchNextPage()} disabled={isFetchingNextPage}>
-                        {isFetchingNextPage ? 'Loading…' : 'Load more'}
-                      </Button>
-                    )}
+                    ))}
                   </div>
+                  
+                  {/* Pagination */}
+                  {pagedData && pagedData.totalPages > 1 && (
+                    <div className="mt-8 flex flex-col items-center gap-4">
+                      <Pagination>
+                        <PaginationContent>
+                          <PaginationItem>
+                            <PaginationPrevious 
+                              onClick={() => {
+                                if (currentPage > 1) {
+                                  setCurrentPage(currentPage - 1);
+                                  // Smooth scroll to top
+                                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                                }
+                              }}
+                              className={currentPage <= 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                            />
+                          </PaginationItem>
+                          
+                          {/* Page numbers */}
+                          {Array.from({ length: Math.min(5, pagedData.totalPages) }, (_, i) => {
+                            const pageNumber = currentPage <= 3 
+                              ? i + 1 
+                              : currentPage >= pagedData.totalPages - 2
+                              ? pagedData.totalPages - 4 + i
+                              : currentPage - 2 + i;
+                            
+                            if (pageNumber < 1 || pageNumber > pagedData.totalPages) return null;
+                            
+                            return (
+                              <PaginationItem key={pageNumber}>
+                                <PaginationLink
+                                  onClick={() => {
+                                    setCurrentPage(pageNumber);
+                                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                                  }}
+                                  isActive={currentPage === pageNumber}
+                                  className="cursor-pointer"
+                                >
+                                  {pageNumber}
+                                </PaginationLink>
+                              </PaginationItem>
+                            );
+                          })}
+                          
+                          {pagedData.totalPages > 5 && currentPage < pagedData.totalPages - 2 && (
+                            <>
+                              <PaginationItem>
+                                <PaginationEllipsis />
+                              </PaginationItem>
+                              <PaginationItem>
+                                <PaginationLink
+                                  onClick={() => {
+                                    setCurrentPage(pagedData.totalPages);
+                                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                                  }}
+                                  className="cursor-pointer"
+                                >
+                                  {pagedData.totalPages}
+                                </PaginationLink>
+                              </PaginationItem>
+                            </>
+                          )}
+                          
+                          <PaginationItem>
+                            <PaginationNext 
+                              onClick={() => {
+                                if (currentPage < pagedData.totalPages) {
+                                  setCurrentPage(currentPage + 1);
+                                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                                }
+                              }}
+                              className={currentPage >= pagedData.totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                            />
+                          </PaginationItem>
+                        </PaginationContent>
+                      </Pagination>
+                      
+                      <div className="text-sm text-muted-foreground">
+                        Showing page {currentPage} of {pagedData.totalPages} ({totalServicesCount} total results)
+                      </div>
+                    </div>
+                  )}
                 </>
               )}
 
@@ -647,9 +707,8 @@ export const MarketplaceGrid = () => {
                         {PRODUCT_CATEGORIES.find(p => p.id === selectedProductCategory)?.name}
                       </h2>
                     </div>
-                    <VirtualGrid
-                      items={getServicesForProduct(selectedProductCategory)}
-                      renderItem={(service, index) => (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+                      {getServicesForProduct(selectedProductCategory).map((service, index) => (
                         <OptimizedServiceCard 
                           key={`product-${selectedProductCategory}-${service.id}-${index}`}
                           service={service} 
@@ -658,17 +717,12 @@ export const MarketplaceGrid = () => {
                           isSaved={allSavedServiceIds.includes(service.id)} 
                           bulkRatings={bulkRatings} 
                         />
-                      )}
-                      itemHeight={350}
-                      containerHeight={480}
-                      itemsPerRow={4}
-                      className="max-h-[60vh] overflow-y-auto"
-                    />
+                      ))}
+                    </div>
                    </div>
                 ) : (
-                  <VirtualGrid
-                    items={filteredProducts}
-                    renderItem={(product, index) => {
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+                    {filteredProducts.map((product, index) => {
                       const IconComponent = product.icon;
                       return (
                         <div key={product.id} className="group relative overflow-hidden bg-white rounded-xl border border-gray-200 hover:border-gray-300 cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1" onClick={() => setSelectedProductCategory(product.id)}>
@@ -700,12 +754,8 @@ export const MarketplaceGrid = () => {
                           </div>
                         </div>
                       );
-                    }}
-                    itemHeight={180}
-                    containerHeight={540}
-                    itemsPerRow={4}
-                    className="max-h-[70vh] overflow-y-auto"
-                  />
+                    })}
+                  </div>
                 )
               )}
 
@@ -723,21 +773,16 @@ export const MarketplaceGrid = () => {
                     </div>
                   </div>
                 ) : (
-                  <VirtualGrid
-                    items={filteredVendors}
-                    renderItem={(vendor, index) => (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+                    {filteredVendors.map((vendor, index) => (
                       <MarketplaceVendorCard 
                         key={vendor.id}
                         vendor={vendor} 
                         onConnect={() => {}} 
                         onViewProfile={() => {}} 
                       />
-                    )}
-                    itemHeight={200}
-                    containerHeight={600}
-                    itemsPerRow={4}
-                    className="max-h-[70vh] overflow-y-auto"
-                  />
+                    ))}
+                  </div>
                 )
               )}
 
