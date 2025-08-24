@@ -1,3 +1,4 @@
+import React, { Suspense } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useLocation } from "react-router-dom";
 import { NavigationTabs } from "@/components/NavigationTabs";
@@ -18,8 +19,6 @@ import { LocationSwitcher } from "@/components/LocationSwitcher";
 import { LegalFooter } from "@/components/LegalFooter";
 // Removed direct import - now using lazy component
 import { OnboardingResumeBanner } from "@/components/onboarding/OnboardingResumeBanner";
-import { Suspense } from "react";
-import React from "react";
 import { 
   LazySmartHelpOrchestrator, 
   LazyEnhancedHelpWidget, 
