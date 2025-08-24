@@ -91,7 +91,6 @@ export const StickySearchContainer = ({ children, className }: StickySearchConta
         )}
         style={{
           top: `${totalOffset + 21}px`,
-          minHeight: '88px', // Fixed height to prevent CLS
         }}
       >
         <div className="container mx-auto px-4 py-4">
