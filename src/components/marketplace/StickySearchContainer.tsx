@@ -1,26 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
-import { useOptimizedMeasurement, createOptimizedScrollHandler } from "@/utils/layoutOptimizer";
+import { useIsMobile } from "@/hooks/use-mobile";
 
-// Calculate total offset using optimized measurement to prevent forced reflows
-const getTotalOffset = () => {
-  return new Promise<number>((resolve) => {
-    requestAnimationFrame(() => {
-      const header = document.querySelector('header') as HTMLElement;
-      const navTabs = document.querySelector('[class*="NavigationTabs"], .navigation-tabs, [class*="rounded-xl"][class*="mx-auto"]') as HTMLElement;
-      
-      // Use cached measurements to avoid forced reflows
-      const headerHeight = header?.dataset.cachedHeight ? parseInt(header.dataset.cachedHeight) : 76;
-      const navTabsHeight = navTabs?.dataset.cachedHeight ? parseInt(navTabs.dataset.cachedHeight) : 52;
-      const spacing = 16;
-      
-      // Cache measurements for next time
-      if (header) header.dataset.cachedHeight = headerHeight.toString();
-      if (navTabs) navTabs.dataset.cachedHeight = navTabsHeight.toString();
-      
-      resolve(headerHeight + navTabsHeight + spacing);
-    });
-  });
+// Simplified fixed offset calculation
+const getHeaderOffset = (isMobile: boolean) => {
+  // Fixed values based on the header structure
+  return isMobile ? 130 : 100; // Mobile header is taller due to two-row layout
 };
 
 interface StickySearchContainerProps {
@@ -30,28 +15,12 @@ interface StickySearchContainerProps {
 
 export const StickySearchContainer = ({ children, className }: StickySearchContainerProps) => {
   const [isSticky, setIsSticky] = useState(false);
-  const [totalOffset, setTotalOffset] = useState(144); // default fallback
+  const isMobile = useIsMobile();
   const containerRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const updateTotalOffset = async () => {
-      const offset = await getTotalOffset();
-      setTotalOffset(offset);
-    };
-    
-    updateTotalOffset();
-    
-    const handleResize = () => {
-      requestAnimationFrame(() => {
-        updateTotalOffset();
-      });
-    };
-    
-    window.addEventListener('resize', handleResize);
-    
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  
+  // Use simplified fixed offset
+  const totalOffset = getHeaderOffset(isMobile);
 
   useEffect(() => {
     const sentinel = sentinelRef.current;
@@ -63,7 +32,7 @@ export const StickySearchContainer = ({ children, className }: StickySearchConta
         setIsSticky(!entry.isIntersecting);
       },
       {
-        rootMargin: `-${totalOffset}px 0px -1px 0px`, // Account for total offset
+        rootMargin: `-${totalOffset}px 0px -1px 0px`,
         threshold: 0
       }
     );
@@ -90,7 +59,7 @@ export const StickySearchContainer = ({ children, className }: StickySearchConta
           className
         )}
         style={{
-          top: `${totalOffset + 21}px`,
+          top: `${totalOffset}px`,
         }}
       >
         <div className="container mx-auto px-4 py-4">
