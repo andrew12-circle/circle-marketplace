@@ -201,7 +201,275 @@ const mockVideos = {
   }]
 };
 export const Academy = () => {
-  return <ErrorBoundary section="Academy">{AcademyContent()}</ErrorBoundary>;
+  return <ErrorBoundary section="Academy"><AcademyOptimized /></ErrorBoundary>;
+};
+
+const AcademyOptimized = () => {
+  const [activeView, setActiveView] = useState("home");
+  const [isAICuratorOpen, setIsAICuratorOpen] = useState(false);
+  const { user, profile } = useAuth();
+  const isMobile = useIsMobile();
+
+  const categories = [
+    { id: "playbooks", label: "Agent Playbooks", icon: BookOpen },
+    { id: "create", label: "Create Playbook", icon: GraduationCap },
+    { id: "courses", label: "Courses", icon: GraduationCap },
+    { id: "videos", label: "Videos", icon: Video },
+    { id: "podcasts", label: "Podcasts", icon: Headphones },
+    { id: "books", label: "Books", icon: Book }
+  ];
+
+  const featuredContent = [
+    {
+      id: "1",
+      type: "NEW COURSE", 
+      title: "The Agent Operating System",
+      isNew: true,
+      isDark: true
+    },
+    {
+      id: "2",
+      type: "NEW PLAYBOOK",
+      title: "The 30-Day Content Machine", 
+      isNew: true,
+      isDark: false
+    }
+  ];
+
+  const renderHomeView = () => (
+    <div className="flex-1 p-4 md:p-8 max-w-6xl">
+      {/* Hero Section */}
+      <div className="mb-12">
+        <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-6 gap-4">
+          <div className="flex-1">
+            <h1 className="text-4xl md:text-6xl font-bold text-black mb-4">Academy.</h1>
+            <p className="text-gray-600 max-w-2xl text-sm">
+              Finally, we silenced the noise. Welcome to the Academy. A place you can take a 
+              breath, learn, and actually move your career forward.
+            </p>
+          </div>
+          <Button 
+            onClick={() => setIsAICuratorOpen(true)} 
+            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-3 rounded-lg font-medium flex items-center gap-2 w-full md:w-auto shrink-0"
+          >
+            <Brain className="w-5 h-5" />
+            AI Content Curator
+          </Button>
+        </div>
+        
+        {/* AI Curator Banner */}
+        <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-3 md:p-4 mb-4 md:mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-3">
+            <div className="flex items-center gap-3 flex-1">
+              <div className="p-2 bg-blue-100 rounded-lg shrink-0">
+                <Brain className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-semibold text-blue-900 text-sm sm:text-base">Get Your Personalized Learning Path</h3>
+                <p className="text-xs sm:text-sm text-blue-700 mt-1">Tell us where you are and where you want to be. Our AI will curate the exact content you need.</p>
+              </div>
+            </div>
+            <Button 
+              onClick={() => setIsAICuratorOpen(true)} 
+              size="sm" 
+              className="bg-blue-600 hover:bg-blue-700 text-white w-full sm:w-auto mt-2 sm:mt-0 shrink-0"
+            >
+              Get Started
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Creator Opportunity Banner */}
+      <div className="hidden md:block mb-12 bg-gradient-to-r from-green-600 to-emerald-600 rounded-2xl p-6 sm:p-8 text-white">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+          <div className="flex-1">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-white/20 rounded-lg">
+                <BookOpen className="w-6 h-6" />
+              </div>
+              <span className="text-xs sm:text-sm font-medium text-green-100">SHARE YOUR SUCCESS</span>
+            </div>
+            <h2 className="text-xl sm:text-3xl font-bold mb-3">Turn Your Story Into A National Playbook</h2>
+            <p className="text-green-50 mb-4 text-base">We make it super easy to share your proven strategies and create playbooks & courses. Your content won't be shared with local agents within 50 miles, but over a million agents nationwide will see it — which could lead to substantial income. Agents want to learn for agents in the market.</p>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 text-xs sm:text-sm">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-300 rounded-full"></div>
+                <span>Earn passive income</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-300 rounded-full"></div>
+                <span>1M+ agent audience</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-300 rounded-full"></div>
+                <span>Protected local territory</span>
+              </div>
+            </div>
+          </div>
+          <div className="flex flex-col gap-3 w-full sm:w-auto">
+            <Button 
+              onClick={() => setActiveView('create')} 
+              className="bg-white text-black hover:bg-green-50 font-semibold px-6 py-3 w-full sm:w-auto"
+            >
+              Create Your Playbook
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={() => setActiveView('playbooks')} 
+              className="border-white/30 text-black hover:bg-white/10 w-full sm:w-auto"
+            >
+              View Examples
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Category Icons */}
+      <div className="grid grid-cols-3 md:grid-cols-6 gap-4 mb-16">
+        {categories.map((category, index) => {
+          const Icon = category.icon;
+          const colorClasses = [
+            "bg-gradient-to-br from-blue-500 to-blue-600 text-white",
+            "bg-gradient-to-br from-purple-500 to-purple-600 text-white", 
+            "bg-gradient-to-br from-green-500 to-green-600 text-white",
+            "bg-gradient-to-br from-orange-500 to-orange-600 text-white",
+            "bg-gradient-to-br from-pink-500 to-pink-600 text-white",
+            "bg-gradient-to-br from-teal-500 to-teal-600 text-white"
+          ];
+          return (
+            <button 
+              key={category.id} 
+              onClick={() => setActiveView(category.id)} 
+              className="flex flex-col items-center gap-2 p-3 md:p-4 rounded-lg hover:scale-105 transition-all duration-200 group"
+            >
+              <div className={`w-12 h-12 md:w-14 md:h-14 rounded-xl flex items-center justify-center transition-all duration-200 group-hover:scale-110 ${colorClasses[index % colorClasses.length]}`}>
+                <Icon className="w-6 h-6 md:w-7 md:h-7" />
+              </div>
+              <span className="text-xs md:text-sm text-gray-700 font-medium text-center">{category.label}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* The Latest Section */}
+      <div className="mb-12">
+        <h2 className="text-2xl font-bold text-black mb-2">The latest. </h2>
+        <p className="text-gray-600 mb-8">Take a look at what's new.</p>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          {featuredContent.map(item => (
+            <Card 
+              key={item.id} 
+              className={`p-8 cursor-pointer transition-transform hover:scale-105 ${item.isDark ? "bg-gray-900 text-white" : "bg-blue-50 text-gray-900"}`}
+            >
+              <div className="mb-4">
+                <span className={`text-sm font-medium ${item.isDark ? "text-red-400" : "text-blue-600"}`}>
+                  {item.type}
+                </span>
+              </div>
+              <h3 className="text-2xl font-bold">{item.title}</h3>
+            </Card>
+          ))}
+        </div>
+      </div>
+
+      {/* Bottom Banner */}
+      <div className="bg-gray-900 text-white p-6 rounded-lg flex items-center justify-between">
+        <div>
+          <h3 className="text-lg font-bold mb-1">Everything Agents Wish They Knew Sooner.</h3>
+          <p className="text-sm text-gray-300">$97/agent/month, Full access. Courses & coaching and reporting.</p>
+        </div>
+        <Button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium">
+          Try It Free
+        </Button>
+      </div>
+    </div>
+  );
+
+  const renderContent = () => {
+    switch (activeView) {
+      case "home":
+        return renderHomeView();
+      case "playbooks":
+        return <AgentPlaybookSection />;
+      case "create": 
+        return <PlaybookCreator />;
+      case "videos":
+      case "podcasts":
+      case "books":
+      case "courses":
+        return (
+          <div className="p-8 text-center">
+            <h2 className="text-2xl font-bold mb-4">Coming Soon</h2>
+            <p className="text-gray-600">This section is being optimized for better performance.</p>
+          </div>
+        );
+      default:
+        return renderHomeView();
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-white">
+      {/* Header */}
+      <header className="border-b border-gray-200 bg-white/95 backdrop-blur-sm sticky top-0 z-40">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center gap-6">
+              <Link to="/" className="flex items-center gap-2">
+                <ResponsiveLogo className="h-8 w-auto" />
+              </Link>
+              <NavigationTabs activeTab="academy" />
+            </div>
+            
+            {!isMobile && (
+              <div className="flex items-center gap-4">
+                <LanguageSwitcher />
+                <LocationSwitcher />
+                
+                {user && profile && (
+                  <Link 
+                    to="/wallet" 
+                    className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm hover:bg-accent hover:text-accent-foreground rounded-md px-2 sm:px-3 py-1.5 sm:py-2 transition-colors cursor-pointer touch-target"
+                  >
+                    <Crown className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-500" />
+                    <span className="font-medium">{profile.circle_points}</span>
+                    <span className="text-muted-foreground hidden sm:inline">Points</span>
+                  </Link>
+                )}
+                
+                <UserMenu />
+              </div>
+            )}
+          </div>
+        </div>
+      </header>
+
+      <SidebarProvider>
+        <div className="min-h-screen flex w-full bg-white">
+          {/* Mobile Sidebar Trigger */}
+          <div className="md:hidden fixed top-32 left-4 z-30">
+            <SidebarTrigger className="bg-white shadow-md border rounded-md p-3" />
+          </div>
+
+          <AcademySidebar activeView={activeView} onViewChange={setActiveView} />
+          
+          <div className="flex-1 overflow-auto">
+            {renderContent()}
+          </div>
+
+          <AcademyAIContentCurator 
+            open={isAICuratorOpen} 
+            onOpenChange={setIsAICuratorOpen} 
+            onContentSelect={() => {}} 
+          />
+        </div>
+      </SidebarProvider>
+      
+      <LegalFooter />
+    </div>
+  );
 };
 const AcademyContent = () => {
   const [activeView, setActiveView] = useState("home");
