@@ -94,7 +94,7 @@ export const StickySearchContainer = ({ children, className }: StickySearchConta
           transform: isSticky ? "translateY(0)" : undefined,
         }}
       >
-        <div className="container mx-auto px-4 py-4">
+        <div className="container mx-auto px-4 pb-4">
           {children}
         </div>
       </div>
