@@ -90,8 +90,7 @@ export const StickySearchContainer = ({ children, className }: StickySearchConta
           className
         )}
         style={{
-          top: isSticky ? `${totalOffset + 21}px` : undefined,
-          transform: isSticky ? "translateY(0)" : undefined,
+          top: `${totalOffset + 21}px`,
         }}
       >
         <div className="container mx-auto px-4 py-4">
