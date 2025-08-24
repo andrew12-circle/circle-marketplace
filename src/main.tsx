@@ -92,11 +92,9 @@ const queryClient = new QueryClient({
   },
 });
 
-// Defer non-critical initialization after first paint
-setTimeout(() => {
-  cacheManager.checkAndClearCache();
-  globalErrorMonitor.initialize();
-}, 0);
+// Initialize critical monitoring immediately
+cacheManager.checkAndClearCache();
+globalErrorMonitor.initialize();
 
 // DOM Performance Diagnostic (dev only)
 if (import.meta.env.DEV) {
