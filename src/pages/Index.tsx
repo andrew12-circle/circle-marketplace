@@ -1,7 +1,8 @@
 import { useTranslation } from "react-i18next";
 import { Link, useLocation } from "react-router-dom";
 import { NavigationTabs } from "@/components/NavigationTabs";
-import { Marketplace } from "./Marketplace";
+// Lazy load Marketplace to prevent app loading timeout
+const Marketplace = React.lazy(() => import("./Marketplace").then(m => ({ default: m.Marketplace })));
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Crown } from "lucide-react";
@@ -112,9 +113,15 @@ export default function Index() {
 
       {/* Main content area */}
       <main className="flex-1">
-        {/* Critical marketplace content */}
+        {/* Marketplace content with lazy loading */}
         <CriticalContent>
-          <Marketplace />
+          <Suspense fallback={
+            <div className="min-h-screen flex items-center justify-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+          }>
+            <Marketplace />
+          </Suspense>
         </CriticalContent>
         
         {/* Non-critical footer content */}
