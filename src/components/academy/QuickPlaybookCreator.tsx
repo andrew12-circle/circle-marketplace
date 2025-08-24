@@ -123,15 +123,26 @@ export const QuickPlaybookCreator = () => {
   };
 
   const startQuickPlaybook = async (template: QuickTemplate) => {
+    // Check if user is authenticated
+    if (!user?.id) {
+      toast({
+        title: 'Authentication Required',
+        description: 'Please log in to start creating a playbook.',
+        variant: 'destructive',
+        duration: 5000
+      });
+      return;
+    }
+
     try {
       // Create content record
       const { data: contentData, error: contentError } = await supabase
         .from('content')
         .insert({
-          title: `${template.template_name} - ${user?.email}`,
+          title: `${template.template_name} - ${user.email}`,
           description: template.template_description,
           content_type: 'playbook',
-          creator_id: user?.id,
+          creator_id: user.id,
           category: 'agent_playbooks',
           is_agent_playbook: true,
           playbook_price: 99.00,
@@ -147,7 +158,7 @@ export const QuickPlaybookCreator = () => {
       const { error: progressError } = await supabase
         .from('playbook_creation_progress')
         .insert({
-          creator_id: user?.id,
+          creator_id: user.id,
           template_id: template.id,
           content_id: contentData.id,
           current_section: 0,
