@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { ResponsiveLogo } from '@/components/ui/optimized-image';
 import { useOnboardingState } from '@/hooks/useOnboardingState';
 import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { 
   Star, 
   User, 

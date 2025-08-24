@@ -5,7 +5,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Send, Mic, MicOff, Loader2 } from 'lucide-react';
 import { useEnhancedAI } from '@/hooks/useEnhancedAI';
 import { useVoiceAssistant } from '@/hooks/useVoiceAssistant';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
 interface Message {
