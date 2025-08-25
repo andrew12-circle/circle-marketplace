@@ -1,4 +1,5 @@
 import { lazy } from 'react';
+import { PERF_FLAGS } from '@/config/perfFlags';
 
 // Lazy load heavy components with optimized imports
 export const LazyMarketplace = lazy(() => 
@@ -47,27 +48,35 @@ export const LazyVendorDashboard = lazy(() =>
   }))
 );
 
-// Heavy interactive components
-export const LazyEnhancedHelpWidget = lazy(() =>
-  import('../components/help/EnhancedHelpWidget').then(module => ({
-    default: module.EnhancedHelpWidget
-  }))
-);
+// Heavy interactive components - with safe mode fallbacks
+export const LazyEnhancedHelpWidget = PERF_FLAGS.SAFE_MODE || !PERF_FLAGS.LAZY_HELP_COMPONENTS 
+  ? () => null // Disable in safe mode
+  : lazy(() =>
+      import('../components/help/EnhancedHelpWidget').then(module => ({
+        default: module.EnhancedHelpWidget
+      }))
+    );
 
-export const LazySmartHelpOrchestrator = lazy(() =>
-  import('../components/help/SmartHelpOrchestrator').then(module => ({
-    default: module.SmartHelpOrchestrator
-  }))
-);
+export const LazySmartHelpOrchestrator = PERF_FLAGS.SAFE_MODE || !PERF_FLAGS.LAZY_HELP_COMPONENTS
+  ? () => null // Disable in safe mode  
+  : lazy(() =>
+      import('../components/help/SmartHelpOrchestrator').then(module => ({
+        default: module.SmartHelpOrchestrator
+      }))
+    );
 
-export const LazyProactiveHelpMonitor = lazy(() =>
-  import('../components/help/ProactiveHelpMonitor').then(module => ({
-    default: module.ProactiveHelpMonitor
-  }))
-);
+export const LazyProactiveHelpMonitor = PERF_FLAGS.SAFE_MODE || !PERF_FLAGS.LAZY_HELP_COMPONENTS
+  ? () => null // Disable in safe mode
+  : lazy(() =>
+      import('../components/help/ProactiveHelpMonitor').then(module => ({
+        default: module.ProactiveHelpMonitor
+      }))
+    );
 
-export const LazyFirstVisitIntro = lazy(() =>
-  import('../components/marketing/FirstVisitIntro').then(module => ({
-    default: module.FirstVisitIntro
-  }))
-);
+export const LazyFirstVisitIntro = PERF_FLAGS.SAFE_MODE || !PERF_FLAGS.LAZY_HELP_COMPONENTS
+  ? () => null // Disable in safe mode
+  : lazy(() =>
+      import('../components/marketing/FirstVisitIntro').then(module => ({
+        default: module.FirstVisitIntro
+      }))
+    );

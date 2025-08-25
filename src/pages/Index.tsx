@@ -2,14 +2,14 @@ import React, { Suspense } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useLocation } from "react-router-dom";
 import { NavigationTabs } from "@/components/NavigationTabs";
-// Lazy load Marketplace to prevent app loading timeout
-const Marketplace = React.lazy(() => import("./Marketplace").then(m => ({ default: m.Marketplace })));
+import { Marketplace } from "./Marketplace";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Crown } from "lucide-react";
 import { ResponsiveLogo } from "@/components/ui/optimized-image";
 import { CriticalContent, NonCriticalContent, useCriticalResourceHints } from "@/components/ui/critical-content";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
+import { PERF_FLAGS } from "@/config/perfFlags";
 
 import { CartDrawer } from "@/components/marketplace/CartDrawer";
 import { UserMenu } from "@/components/UserMenu";
@@ -35,10 +35,15 @@ export default function Index() {
   const location = useLocation();
   const isMobile = useIsMobile();
   
-  // Preload critical resources
-  useCriticalResourceHints();
+  // Only preload resources if not in safe mode
+  if (!PERF_FLAGS.SAFE_MODE) {
+    useCriticalResourceHints();
+  }
 
-  // Remove overly aggressive preloading that was causing startup issues
+  // Development timing diagnostics
+  if (PERF_FLAGS.DEV_TIMING && process.env.NODE_ENV === 'development') {
+    console.time('Index page render');
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -108,15 +113,9 @@ export default function Index() {
 
       {/* Main content area */}
       <main className="flex-1">
-        {/* Marketplace content with error boundary and lazy loading */}
+        {/* Marketplace content - render directly in safe mode for instant loading */}
         <ErrorBoundary>
-          <Suspense fallback={
-            <div className="min-h-screen flex items-center justify-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-            </div>
-          }>
-            <Marketplace />
-          </Suspense>
+          <Marketplace />
         </ErrorBoundary>
         
         {/* Non-critical footer content */}
