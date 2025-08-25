@@ -4840,6 +4840,36 @@ export type Database = {
         }
         Relationships: []
       }
+      security_config: {
+        Row: {
+          config_key: string
+          config_value: Json
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          config_key: string
+          config_value?: Json
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          config_key?: string
+          config_value?: Json
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       security_events: {
         Row: {
           created_at: string | null
@@ -7726,6 +7756,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      admin_self_check_enhanced: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       audit_security_definer_functions: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -7817,6 +7851,10 @@ export type Database = {
         Returns: boolean
       }
       check_admin_operation_rate_limit_enhanced: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      check_admin_operation_rate_limit_safe: {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
@@ -8137,6 +8175,10 @@ export type Database = {
         Args: { video_uuid: string }
         Returns: undefined
       }
+      is_ip_blocked_safe: {
+        Args: { p_ip_address: unknown; p_user_id?: string }
+        Returns: boolean
+      }
       link_funnel_events: {
         Args: { p_anon_id: string }
         Returns: Json
@@ -8238,6 +8280,10 @@ export type Database = {
       seed_vendor_questions: {
         Args: { p_vendor_id: string }
         Returns: undefined
+      }
+      should_bypass_ip_restrictions: {
+        Args: { p_user_id?: string }
+        Returns: boolean
       }
       start_admin_session: {
         Args: Record<PropertyKey, never>

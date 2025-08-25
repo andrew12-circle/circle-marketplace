@@ -62,7 +62,8 @@ export const SecureAdminGuard: React.FC<SecureAdminGuardProps> = ({
               setTimeout(() => reject(new Error('Security check timeout')), 3000)
             );
             
-            const securityPromise = supabase.rpc('validate_admin_session_context');
+            // Use enhanced admin session validation for better stability
+            const securityPromise = supabase.rpc('admin_self_check_enhanced');
             
             const { data, error } = await Promise.race([securityPromise, timeoutPromise]) as any;
             
@@ -98,7 +99,7 @@ export const SecureAdminGuard: React.FC<SecureAdminGuardProps> = ({
 
       // Strict Mode: Original blocking security verification
       try {
-        const { data, error } = await supabase.rpc('validate_admin_session_context');
+        const { data, error } = await supabase.rpc('admin_self_check_enhanced');
         
         if (error) throw error;
         

@@ -17,6 +17,7 @@ export const useSecureAdminOperations = () => {
     targetUserId: string
   ): Promise<AdminOperationResult> => {
     try {
+      // Use the enhanced safe admin verification
       const { data, error } = await supabase.rpc('verify_admin_operation_request', {
         operation_type: operationType,
         target_user_id: targetUserId
@@ -58,7 +59,7 @@ export const useSecureAdminOperations = () => {
         return verification;
       }
 
-      // Perform the secure update through our database function
+      // Perform the secure update through our enhanced database function
       const { data, error } = await supabase.rpc('secure_profile_update', {
         target_user_id: targetUserId,
         update_data: updateData
