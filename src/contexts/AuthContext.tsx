@@ -65,6 +65,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const queryClient = useQueryClient();
 
   const fetchProfile = async (userId: string) => {
+    // Guard against undefined/invalid userId
+    if (!userId || typeof userId !== 'string') {
+      console.warn('fetchProfile called with invalid userId:', userId);
+      return;
+    }
+
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -147,7 +153,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const updateProfile = async (updates: Partial<Profile>) => {
-    if (!user) return { error: new Error('No user logged in') };
+    if (!user || !user.id) return { error: new Error('No user logged in') };
     
     try {
       const { error } = await supabase

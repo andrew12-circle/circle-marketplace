@@ -10,6 +10,7 @@ import { cacheManager } from "./utils/cacheManager";
 import { globalErrorMonitor } from "./utils/globalErrorMonitor";
 import { ReloadReasonBanner } from "./components/common/ReloadReasonBanner";
 import { SecurityProvider } from "@/components/security/SecurityEnhancementSystem";
+import { ErrorBoundaryWithQA } from "@/components/common/ErrorBoundaryWithQA";
 import "./index.css";
 import "./i18n";
 
@@ -98,14 +99,15 @@ cacheManager.checkAndClearCache();
 globalErrorMonitor.initialize();
 
 createRoot(document.getElementById("root")!).render(
-  <QueryClientProvider client={queryClient}>
-    <SpiritualCoverageProvider>
-        <AuthProvider>
-          <BrowserRouter>
-            <SecurityProvider>
-              <CartProvider>
-                <Suspense fallback={<RouteLoader />}>
-            <Routes>
+  <ErrorBoundaryWithQA section="Application Root">
+    <QueryClientProvider client={queryClient}>
+      <SpiritualCoverageProvider>
+          <AuthProvider>
+            <BrowserRouter>
+              <SecurityProvider>
+                <CartProvider>
+                  <Suspense fallback={<RouteLoader />}>
+              <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/marketplace" element={<Marketplace />} />
@@ -173,14 +175,15 @@ createRoot(document.getElementById("root")!).render(
                 <Route path="/payment/canceled" element={<PaymentCanceled />} />
                 
                 <Route path="*" element={<NotFound />} />
-            </Routes>
-                </Suspense>
-                <Toaster />
-                <ReloadReasonBanner />
-              </CartProvider>
-            </SecurityProvider>
-        </BrowserRouter>
-      </AuthProvider>
-    </SpiritualCoverageProvider>
-  </QueryClientProvider>
+              </Routes>
+                  </Suspense>
+                  <Toaster />
+                  <ReloadReasonBanner />
+                </CartProvider>
+              </SecurityProvider>
+          </BrowserRouter>
+        </AuthProvider>
+      </SpiritualCoverageProvider>
+    </QueryClientProvider>
+  </ErrorBoundaryWithQA>
 );
