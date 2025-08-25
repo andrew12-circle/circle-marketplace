@@ -112,16 +112,14 @@ export default function Index() {
 
       {/* Main content area */}
       <main className="flex-1">
-        {/* Marketplace content with lazy loading */}
-        <CriticalContent>
-          <Suspense fallback={
-            <div className="min-h-screen flex items-center justify-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-            </div>
-          }>
-            <Marketplace />
-          </Suspense>
-        </CriticalContent>
+        {/* Marketplace content with lazy loading - removed CriticalContent wrapper */}
+        <Suspense fallback={
+          <div className="min-h-screen flex items-center justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          </div>
+        }>
+          <Marketplace />
+        </Suspense>
         
         {/* Non-critical footer content */}
         <NonCriticalContent>
