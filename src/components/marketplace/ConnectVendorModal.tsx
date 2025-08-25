@@ -16,6 +16,9 @@ interface ServiceRepresentative {
   vendor_id: string;
   name: string;
   title?: string;
+  email?: string;
+  phone?: string;
+  license_number?: string;
   profile_picture_url?: string;
   bio?: string;
   location?: string;
@@ -25,6 +28,7 @@ interface ServiceRepresentative {
   rating: number;
   reviews_count: number;
   is_primary: boolean;
+  is_active: boolean;
   sort_order: number;
 }
 

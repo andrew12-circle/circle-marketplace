@@ -46,39 +46,7 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     console.log('🔍 Starting health monitoring check...');
     
-    // Combined query for better performance - measure time
-    const startTime = Date.now();
-    
-    const [errorResult, securityResult, incidentResult] = await Promise.all([
-      supabase
-        .from('client_errors')
-        .select('*', { count: 'exact', head: true })
-        .gte('created_at', new Date(Date.now() - 5 * 60 * 1000).toISOString()),
-      
-      supabase
-        .from('security_events')
-        .select('*', { count: 'exact', head: true })
-        .in('event_type', ['unauthorized_access', 'suspicious_activity'])
-        .gte('created_at', new Date(Date.now() - 5 * 60 * 1000).toISOString()),
-      
-      supabase
-        .from('incidents')
-        .select('*', { count: 'exact', head: true })
-        .eq('status', 'open')
-    ]);
-
-    const dbResponseTime = Date.now() - startTime;
-
-    const metrics = {
-      errorCount: errorResult.count || 0,
-      criticalSecurityEvents: securityResult.count || 0,
-      edgeFunctionFailures: 0, // Edge function monitoring would require additional setup
-      dbResponseTime,
-      activeIncidents: incidentResult.count || 0
-    };
-
-    console.log('📊 Health metrics:', metrics);
-
+    const metrics = await gatherHealthMetrics();
     const alerts = analyzeMetrics(metrics);
     
     console.log('📊 Health metrics:', metrics);
@@ -331,20 +299,16 @@ async function sendEmailAlert(alert: Alert, incidentId: string) {
 async function triggerEmergencyActions(alert: Alert) {
   console.log('🆘 Triggering emergency actions for critical alert');
 
-  // Cache bust for critical issues - try to warm cache
-  try {
-    await supabase.functions.invoke('warm-marketplace-cache');
-    console.log('💥 Cache bust triggered');
-  } catch (cacheErr) {
-    console.log('💥 Cache service not available, falling back to config update');
-    
-    // Fallback: Force cache bust in app config
+  // Force cache bust for critical errors
+  if (alert.type === 'error_spike' || alert.type === 'system_failure') {
     await supabase
       .from('app_config')
       .update({ 
         force_cache_bust_after: new Date().toISOString()
       })
       .eq('id', '00000000-0000-0000-0000-000000000001');
+    
+    console.log('💥 Cache bust triggered');
   }
 }
 

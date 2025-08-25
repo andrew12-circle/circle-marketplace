@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAgentData } from "@/hooks/useAgentData";
@@ -9,8 +9,6 @@ import { ConversationalRefinement } from "./ConversationalRefinement";
 import { RecommendationsHeader } from "./RecommendationsHeader";
 import { ProfileCompletionAlert } from "./ProfileCompletionAlert";
 import { SimplePlanDisplay } from "./SimplePlanDisplay";
-import { SuccessPathScore } from "./SuccessPathScore";
-import { PeerComparison } from "./PeerComparison";
 
 export function AIRecommendationsDashboard() {
   const { user, profile } = useAuth();
@@ -26,17 +24,7 @@ export function AIRecommendationsDashboard() {
     if (user?.id) {
       setIsLoading(false);
     }
-    
-    // Fallback timeout to prevent indefinite loading
-    const fallbackTimeout = setTimeout(() => {
-      if (isLoading || agentLoading) {
-        console.warn('Agent data loading timeout - proceeding with fallback');
-        setIsLoading(false);
-      }
-    }, 10000);
-    
-    return () => clearTimeout(fallbackTimeout);
-  }, [user?.id, isLoading, agentLoading]);
+  }, [user?.id]);
 
   const checkDataRequirements = () => {
     const hasProfile = user?.id;
@@ -151,11 +139,6 @@ export function AIRecommendationsDashboard() {
       {currentPlan && (
         <SimplePlanDisplay plan={currentPlan} />
       )}
-
-      <div className="grid lg:grid-cols-2 gap-6">
-        <SuccessPathScore />
-        <PeerComparison />
-      </div>
 
       {showRefinement && currentPlan && (
         <div className="mb-6">

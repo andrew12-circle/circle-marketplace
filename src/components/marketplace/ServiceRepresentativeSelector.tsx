@@ -12,6 +12,9 @@ interface ServiceRepresentative {
   vendor_id: string;
   name: string;
   title?: string;
+  email?: string;
+  phone?: string;
+  license_number?: string;
   profile_picture_url?: string;
   bio?: string;
   location?: string;
@@ -21,6 +24,7 @@ interface ServiceRepresentative {
   rating: number;
   reviews_count: number;
   is_primary: boolean;
+  is_active: boolean;
   sort_order: number;
 }
 
@@ -85,9 +89,10 @@ export const ServiceRepresentativeSelector: React.FC<ServiceRepresentativeSelect
       setLoading(true);
       
       const { data, error } = await supabase
-        .from('service_representatives_public')
+        .from('service_representatives')
         .select('*')
         .eq('vendor_id', vendor.id)
+        .eq('is_active', true)
         .order('is_primary', { ascending: false })
         .order('sort_order', { ascending: true })
         .order('name', { ascending: true });
@@ -168,35 +173,59 @@ export const ServiceRepresentativeSelector: React.FC<ServiceRepresentativeSelect
                   {selectedRepresentative.title || getVendorTypeDisplayName(vendor.vendor_type)}
                 </p>
                 
-                 <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                   {selectedRepresentative.rating > 0 && (
-                     <div className="flex items-center gap-1">
-                       <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                       <span>{selectedRepresentative.rating.toFixed(1)}</span>
-                     </div>
-                   )}
-                   {selectedRepresentative.years_experience && (
-                     <div className="flex items-center gap-1">
-                       <Clock className="h-3 w-3" />
-                       <span>{selectedRepresentative.years_experience}+ years</span>
-                     </div>
-                   )}
-                 </div>
+                <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                  {selectedRepresentative.rating > 0 && (
+                    <div className="flex items-center gap-1">
+                      <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                      <span>{selectedRepresentative.rating.toFixed(1)}</span>
+                    </div>
+                  )}
+                  {selectedRepresentative.years_experience && (
+                    <div className="flex items-center gap-1">
+                      <Clock className="h-3 w-3" />
+                      <span>{selectedRepresentative.years_experience}+ years</span>
+                    </div>
+                  )}
+                  {selectedRepresentative.license_number && (
+                    <div className="flex items-center gap-1">
+                      <Award className="h-3 w-3" />
+                      <span>License: {selectedRepresentative.license_number}</span>
+                    </div>
+                  )}
+                </div>
 
-                 {/* Website Information */}
-                 {selectedRepresentative.website && (
-                   <div className="mt-3 text-xs">
-                     <a
-                       href={selectedRepresentative.website}
-                       target="_blank"
-                       rel="noopener noreferrer"
-                       className="flex items-center gap-1 hover:text-primary transition-colors cursor-pointer text-muted-foreground"
-                     >
-                       <Globe className="h-3 w-3" />
-                       <span>{selectedRepresentative.website}</span>
-                     </a>
-                   </div>
-                 )}
+                {/* Contact Information */}
+                <div className="flex flex-wrap gap-3 mt-3 text-xs text-muted-foreground">
+                  {selectedRepresentative.email && (
+                    <a
+                      href={`mailto:${selectedRepresentative.email}`}
+                      className="flex items-center gap-1 hover:text-primary transition-colors cursor-pointer"
+                    >
+                      <Mail className="h-3 w-3" />
+                      <span>{selectedRepresentative.email}</span>
+                    </a>
+                  )}
+                  {selectedRepresentative.phone && (
+                    <a
+                      href={`tel:${selectedRepresentative.phone}`}
+                      className="flex items-center gap-1 hover:text-primary transition-colors cursor-pointer"
+                    >
+                      <Phone className="h-3 w-3" />
+                      <span>{selectedRepresentative.phone}</span>
+                    </a>
+                  )}
+                  {selectedRepresentative.website && (
+                    <a
+                      href={selectedRepresentative.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1 hover:text-primary transition-colors cursor-pointer"
+                    >
+                      <Globe className="h-3 w-3" />
+                      <span>{selectedRepresentative.website}</span>
+                    </a>
+                  )}
+                </div>
 
                 {selectedRepresentative.specialties && selectedRepresentative.specialties.length > 0 && (
                   <div className="flex flex-wrap gap-1 mt-2">

@@ -122,7 +122,7 @@ export const BaseVendorCard = ({
   return (
     <>
       <Card
-      className={`vendor-card group relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 bg-card h-full flex flex-col cursor-pointer ${
+      className={`group relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 bg-card h-full flex flex-col cursor-pointer ${
         name === "Circle Home Loans" 
           ? "border-2 border-blue-500 shadow-lg shadow-blue-500/25" 
           : "border border-border/50"
@@ -166,11 +166,6 @@ export const BaseVendorCard = ({
             src={logo_url}
             alt={`${name} logo`}
             className="w-full h-full object-contain object-center transition-transform duration-300 group-hover:scale-105"
-            loading="lazy"
-            decoding="async"
-            width={280}
-            height={192}
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-muted rounded-lg">

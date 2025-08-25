@@ -13,8 +13,6 @@
     <meta http-equiv="Expires" content="0" />
     
     <!-- Preload critical logo image and potential LCP images -->
-    <link rel="preload" href="/circle-logo-optimized.webp" as="image" type="image/webp" fetchpriority="high">
-    <link rel="preload" href="/circle-logo-updated.png" as="image" type="image/png" fetchpriority="high">
     <link rel="preload" href="/lovable-uploads/97692497-6d98-46a8-b6fc-05cd68bdc160.png" as="image" type="image/png">
     <link rel="preload" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS0RwXfXLmbYhwqqBNPxARooTBBuRX8EA2DPA&s" as="image" type="image/jpeg">
     <link rel="preload" href="https://storage.googleapis.com/msgsndr/UjxJODh2Df0UKjTnKpcP/media/68255d47c398f6cc6978ed74.png" as="image" type="image/png">
@@ -22,36 +20,6 @@
     <title>Circle Network</title>
     <meta name="description" content="Empowering real estate professionals to grow smarter with Circle's marketplace and academy." />
     <meta name="author" content="Circle" />
-    
-    <!-- Critical resource preloading to optimize dependency chain -->
-    <link rel="modulepreload" href="/src/main.tsx" fetchpriority="high">
-    
-    <!-- Defer non-critical vendor bundles to reduce unused JavaScript -->
-    <script>
-      // Conditional loading for heavy vendor bundles
-      window.deferredVendors = {
-        charts: false,
-        supabaseAnalytics: false,
-        radixExtended: false
-      };
-      
-      // Load vendor bundles on demand
-      window.loadVendorBundle = function(name) {
-        if (window.deferredVendors[name]) return;
-        
-        const bundleMap = {
-          charts: '/assets/chart-vendor-C_JjxtL4.js',
-          supabaseAnalytics: '/assets/supabase-vendor-CL0beYrG.js', 
-          radixExtended: '/assets/radix-vendor-CSTKXYxC.js'
-        };
-        
-        const script = document.createElement('script');
-        script.src = bundleMap[name];
-        script.defer = true;
-        document.head.appendChild(script);
-        window.deferredVendors[name] = true;
-      };
-    </script>
     
     <!-- Critical domain preconnects to reduce network dependency chains -->
     <link rel="preconnect" href="https://ihzyuyfawapweamqzzlj.supabase.co" crossorigin>
@@ -180,8 +148,7 @@
       
       /* Responsive text sizes */
       @media (min-width: 640px) {
-        .text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
-        .sm\\:text-6xl { font-size: 3.75rem; line-height: 1; }
+        .text-3xl { font-size: 3rem; line-height: 1; }
         .sm\\:text-4xl { font-size: 2.25rem; line-height: 2.5rem; }
       }
       @media (min-width: 768px) {
@@ -292,84 +259,23 @@
         display: block;
       }
       
-      /* Hide fallback critical content when React loads */
+      /* Hide fallback critical content by default to prevent flash */
       #critical-content { display: none; }
-      .show-fallback #critical-content { display: block; }
-      .react-loaded #critical-content { display: none; }
     </style>
     
     <link rel="icon" href="/src/assets/circle-logo.png" type="image/png">
     
-    <!-- Preload critical first image for LCP -->
-    <link rel="preload" href="https://storage.googleapis.com/msgsndr/UjxJODh2Df0UKjTnKpcP/media/68255d47c398f6cc6978ed74.png" as="image" type="image/png" fetchpriority="high">
-    
-    <!-- Critical CSS loading optimization to reduce unused CSS -->
-    <style id="critical-css">
-      /* Critical above-the-fold styles only */
-      .container { max-width: 1200px; margin: 0 auto; padding: 0 1rem; }
-      .hero-content { text-align: center; padding: 4rem 0; }
-      .marketplace-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
-      .service-card { background: white; border-radius: 0.75rem; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-      .btn { display: inline-block; padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-weight: 600; text-decoration: none; }
-      .btn-primary { background: #3b82f6; color: white; }
-      .text-3xl { font-size: 1.875rem; font-weight: 800; }
-      .text-gray-600 { color: #6b7280; }
-      .mb-4 { margin-bottom: 1rem; }
-      .mb-8 { margin-bottom: 2rem; }
-      .mb-12 { margin-bottom: 3rem; }
-      .font-bold { font-weight: 700; }
-      .max-w-2xl { max-width: 42rem; }
-      .text-sm { font-size: 0.875rem; }
-      
-      /* Dark mode support for critical elements */
-      @media (prefers-color-scheme: dark) {
-        .service-card { background: #1f2937; color: #f9fafb; }
-        body { background: #111827; color: #f9fafb; }
-      }
-    </style>
-    
-    <!-- Non-blocking CSS loading with timeout fallback -->
-    <link rel="preload" href="/assets/index-1_cDzJxw.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <!-- Preload and defer main CSS to eliminate render-blocking -->
     <link rel="preload" href="/assets/index-CouCvFNH.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="/assets/index-CouCvFNH.css"></noscript>
     
-    <!-- Timeout safety fallback for CSS loading -->
-    <script>
-      // Enhanced CSS loading with fallback
-      window.cssTimeout = setTimeout(function() {
-        var links = document.querySelectorAll('link[rel="preload"][as="style"]');
-        links.forEach(function(link) {
-          if (!link.sheet) {
-            link.rel = 'stylesheet';
-          }
-        });
-      }, 3000);
-      
-      // Global error monitoring setup
-      window.addEventListener('error', function(e) {
-        console.error('Global error:', e.error);
-      });
-      
-      window.addEventListener('unhandledrejection', function(e) {
-        console.error('Unhandled rejection:', e.reason);
-      });
-      
-      // App loading timeout guard
-      window.appLoadTimeout = setTimeout(function() {
-        var criticalDiv = document.getElementById('critical-content');
-        var root = document.getElementById('root');
-        if (criticalDiv && root && 
-            !document.body.classList.contains('react-loaded') && 
-            root.children.length === 0) {
-          console.warn('React didn\'t mount within 10s, showing minimal fallback');
-          document.body.classList.add('show-fallback');
-          criticalDiv.style.display = 'block';
-        }
-      }, 10000);
-    </script>
-    <noscript>
-      <link rel="stylesheet" href="/assets/index-1_cDzJxw.css">
-      <link rel="stylesheet" href="/assets/index-CouCvFNH.css">
-    </noscript>
+    <!-- Additional critical CSS for marketplace components -->
+    <style>
+      .marketplace-grid { display: grid; gap: 1rem; }
+      .service-card { background: hsl(var(--card)); border: 1px solid hsl(var(--border)); border-radius: calc(var(--radius) - 2px); }
+      .vendor-card { background: hsl(var(--card)); border: 1px solid hsl(var(--border)); border-radius: calc(var(--radius) - 2px); }
+      .marketplace-filters { background: hsl(var(--background)); position: sticky; top: 0; z-index: 10; }
+    </style>
 
     <meta property="og:title" content="circle-agent-growth" />
     <meta property="og:description" content="Lovable Generated Project" />
@@ -382,147 +288,70 @@
   </head>
 
   <body>
-    <!-- Enhanced critical above-the-fold content matching actual app design -->
+    <!-- Enhanced critical above-the-fold content skeleton matching actual LCP -->
     <div id="critical-content" class="lcp-content">
       <div class="min-h-screen bg-background">
-        <header class="border-b bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/50 sticky top-0 z-50">
-          <div class="container mx-auto px-3 sm:px-4 py-2 sm:py-3">
-            <div class="flex items-center justify-between">
-              <!-- Logo -->
-              <div class="flex items-center gap-2 sm:gap-3">
-                <img src="/lovable-uploads/97692497-6d98-46a8-b6fc-05cd68bdc160.png" alt="Circle Network" width="48" height="48" loading="eager" decoding="async" fetchpriority="high" style="display: inline-block;">
-              </div>
-              
-              <!-- Navigation Tabs - Desktop -->
-              <div class="flex flex-1 justify-center">
-                <nav class="flex items-center gap-6">
-                  <div class="text-primary font-medium border-b-2 border-primary pb-1">Marketplace</div>
-                  <div class="text-muted-foreground hover:text-foreground">Academy</div>
-                  <div class="text-muted-foreground hover:text-foreground">Dashboard</div>
-                </nav>
-              </div>
-              
-              <!-- User Actions - Desktop -->
-              <div class="flex items-center gap-2 sm:gap-4">
-                <div class="btn btn-primary">Upgrade to Pro</div>
-                <div class="btn">Sign In</div>
-              </div>
+        <header class="border-b">
+          <div class="container flex items-center justify-between py-4">
+            <div class="flex items-center gap-4">
+              <img src="/lovable-uploads/97692497-6d98-46a8-b6fc-05cd68bdc160.png" alt="Circle Network" width="32" height="32" loading="eager" decoding="async" fetchpriority="high" style="display: inline-block;">
+              <div class="font-bold text-xl">Circle Network</div>
+            </div>
+            <div class="flex items-center gap-4">
+              <div class="btn btn-primary">Sign In</div>
             </div>
           </div>
         </header>
-        
-        <main class="flex-1">
-          <!-- Hero Section -->
-          <section class="py-8 px-4">
-            <div class="container mx-auto text-center mb-8">
-              <h1 class="text-4xl font-bold mb-4">Agent Growth Marketplace</h1>
-              <p class="text-lg text-muted-foreground max-w-3xl mx-auto">Discover vetted tools and services to accelerate your real estate business growth</p>
-            </div>
-            
-            <!-- Search Bar -->
-            <div class="container mx-auto max-w-2xl mb-8">
-              <div class="relative">
-                <input type="text" placeholder="Search services, vendors, or categories..." class="w-full px-4 py-3 border rounded-lg pl-10" />
-                <div class="absolute left-3 top-1/2 transform -translate-y-1/2">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-                </div>
-              </div>
-            </div>
-          </section>
+        <main class="container py-16">
+          <div class="hero-content mb-12">
+            <h1 class="text-3xl font-bold mb-4">Professional Services Marketplace</h1>
+            <p class="text-gray-600 mb-8">Discover top-rated services and grow your real estate business</p>
+          </div>
           
-          <!-- Categories Section -->
-          <section class="py-6 px-4">
-            <div class="container mx-auto">
-              <h2 class="text-2xl font-bold mb-6">Popular Categories</h2>
-              <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                <div class="card p-4 text-center hover:shadow-md transition-shadow">
-                  <div class="w-12 h-12 mx-auto mb-2 bg-primary/10 rounded-lg flex items-center justify-center">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
-                  </div>
-                  <h3 class="font-semibold">Lead Generation</h3>
+          <!-- Critical marketplace content skeleton to match actual LCP -->
+          <section class="py-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              <!-- Featured service card skeleton matching the largest likely LCP element -->
+              <div class="card p-6">
+                <div class="mb-4">
+                  <div style="width: 100%; height: 160px; background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 8px;"></div>
                 </div>
-                <div class="card p-4 text-center hover:shadow-md transition-shadow">
-                  <div class="w-12 h-12 mx-auto mb-2 bg-primary/10 rounded-lg flex items-center justify-center">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-                  </div>
-                  <h3 class="font-semibold">Marketing</h3>
+                <div class="mb-2">
+                  <div style="height: 24px; background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 4px; margin-bottom: 8px;"></div>
+                  <div style="height: 16px; background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 4px; width: 80%;"></div>
                 </div>
-                <div class="card p-4 text-center hover:shadow-md transition-shadow">
-                  <div class="w-12 h-12 mx-auto mb-2 bg-primary/10 rounded-lg flex items-center justify-center">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                  </div>
-                  <h3 class="font-semibold">CRM Tools</h3>
-                </div>
-                <div class="card p-4 text-center hover:shadow-md transition-shadow">
-                  <div class="w-12 h-12 mx-auto mb-2 bg-primary/10 rounded-lg flex items-center justify-center">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2z"/><path d="M12 2v20"/></svg>
-                  </div>
-                  <h3 class="font-semibold">Transaction Management</h3>
-                </div>
-              </div>
-            </div>
-          </section>
-          
-          <!-- Services Grid -->
-          <section class="py-6 px-4">
-            <div class="container mx-auto">
-              <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold">Featured Services</h2>
-                <div class="flex gap-2">
-                  <button class="btn">Filter</button>
-                  <button class="btn">Sort</button>
+                <div class="flex justify-between items-center mt-4">
+                  <div style="height: 20px; width: 60px; background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 4px;"></div>
+                  <div style="height: 32px; width: 80px; background: linear-gradient(90deg, #3b82f6 25%, #2563eb 50%, #3b82f6 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 6px;"></div>
                 </div>
               </div>
               
-              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                <!-- Service Card Skeleton -->
-                <div class="card p-4">
-                  <div class="aspect-video bg-gray-200 rounded-lg mb-4 animate-pulse"></div>
-                  <div class="space-y-2">
-                    <div class="h-5 bg-gray-200 rounded animate-pulse"></div>
-                    <div class="h-4 bg-gray-200 rounded w-3/4 animate-pulse"></div>
-                    <div class="flex justify-between items-center mt-4">
-                      <div class="h-6 bg-gray-200 rounded w-16 animate-pulse"></div>
-                      <div class="h-8 bg-gray-200 rounded w-20 animate-pulse"></div>
-                    </div>
-                  </div>
+              <!-- Additional skeleton cards -->
+              <div class="card p-6">
+                <div class="mb-4">
+                  <div style="width: 100%; height: 160px; background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 8px;"></div>
                 </div>
-                
-                <!-- Repeat skeleton cards -->
-                <div class="card p-4">
-                  <div class="aspect-video bg-gray-200 rounded-lg mb-4 animate-pulse"></div>
-                  <div class="space-y-2">
-                    <div class="h-5 bg-gray-200 rounded animate-pulse"></div>
-                    <div class="h-4 bg-gray-200 rounded w-3/4 animate-pulse"></div>
-                    <div class="flex justify-between items-center mt-4">
-                      <div class="h-6 bg-gray-200 rounded w-16 animate-pulse"></div>
-                      <div class="h-8 bg-gray-200 rounded w-20 animate-pulse"></div>
-                    </div>
-                  </div>
+                <div class="mb-2">
+                  <div style="height: 24px; background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 4px; margin-bottom: 8px;"></div>
+                  <div style="height: 16px; background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 4px; width: 70%;"></div>
                 </div>
-                
-                <div class="card p-4">
-                  <div class="aspect-video bg-gray-200 rounded-lg mb-4 animate-pulse"></div>
-                  <div class="space-y-2">
-                    <div class="h-5 bg-gray-200 rounded animate-pulse"></div>
-                    <div class="h-4 bg-gray-200 rounded w-3/4 animate-pulse"></div>
-                    <div class="flex justify-between items-center mt-4">
-                      <div class="h-6 bg-gray-200 rounded w-16 animate-pulse"></div>
-                      <div class="h-8 bg-gray-200 rounded w-20 animate-pulse"></div>
-                    </div>
-                  </div>
+                <div class="flex justify-between items-center mt-4">
+                  <div style="height: 20px; width: 60px; background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 4px;"></div>
+                  <div style="height: 32px; width: 80px; background: linear-gradient(90deg, #3b82f6 25%, #2563eb 50%, #3b82f6 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 6px;"></div>
                 </div>
-                
-                <div class="card p-4">
-                  <div class="aspect-video bg-gray-200 rounded-lg mb-4 animate-pulse"></div>
-                  <div class="space-y-2">
-                    <div class="h-5 bg-gray-200 rounded animate-pulse"></div>
-                    <div class="h-4 bg-gray-200 rounded w-3/4 animate-pulse"></div>
-                    <div class="flex justify-between items-center mt-4">
-                      <div class="h-6 bg-gray-200 rounded w-16 animate-pulse"></div>
-                      <div class="h-8 bg-gray-200 rounded w-20 animate-pulse"></div>
-                    </div>
-                  </div>
+              </div>
+              
+              <div class="card p-6">
+                <div class="mb-4">
+                  <div style="width: 100%; height: 160px; background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 8px;"></div>
+                </div>
+                <div class="mb-2">
+                  <div style="height: 24px; background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 4px; margin-bottom: 8px;"></div>
+                  <div style="height: 16px; background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 4px; width: 85%;"></div>
+                </div>
+                <div class="flex justify-between items-center mt-4">
+                  <div style="height: 20px; width: 60px; background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 4px;"></div>
+                  <div style="height: 32px; width: 80px; background: linear-gradient(90deg, #3b82f6 25%, #2563eb 50%, #3b82f6 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 6px;"></div>
                 </div>
               </div>
             </div>
@@ -534,5 +363,35 @@
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
     
+    <!-- Hide critical content once React loads -->
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const criticalContent = document.getElementById('critical-content');
+        const root = document.getElementById('root');
+
+        // If React hasn't mounted, reveal the fallback after 800ms (prevents brief flash)
+        setTimeout(() => {
+          if (criticalContent && root && root.children.length === 0) {
+            criticalContent.style.display = 'block';
+          }
+        }, 800);
+        
+        // Hide critical content once React content is ready
+        const observer = new MutationObserver(function(mutations) {
+          for (const mutation of mutations) {
+            if (mutation.addedNodes.length > 0) {
+              // Hide fallback quickly once React renders
+              if (criticalContent && root.children.length > 0) {
+                criticalContent.style.display = 'none';
+              }
+              observer.disconnect();
+              break;
+            }
+          }
+        });
+        
+        observer.observe(root, { childList: true, subtree: true });
+      });
+    </script>
   </body>
 </html>

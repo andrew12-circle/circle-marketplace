@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Target, TrendingUp, Clock, DollarSign } from "lucide-react";
@@ -25,10 +25,6 @@ interface GoalFormData {
   primary_challenge: string;
   marketing_time_per_week: number;
   budget_preference: string;
-  // Agent GPS additions
-  team_size: string;
-  preferred_focus: string[];
-  lead_source_preferences: string[];
   // New personality data
   personality_type: string;
   work_style: string;
@@ -54,10 +50,6 @@ export function GoalAssessmentModal({ open, onOpenChange, onComplete }: GoalAsse
     primary_challenge: '',
     marketing_time_per_week: 5,
     budget_preference: 'balanced',
-    // Agent GPS additions
-    team_size: 'solo',
-    preferred_focus: [],
-    lead_source_preferences: [],
     // New personality defaults
     personality_type: '',
     work_style: '',
@@ -83,10 +75,6 @@ export function GoalAssessmentModal({ open, onOpenChange, onComplete }: GoalAsse
         primary_challenge: (profile as any).primary_challenge ?? '',
         marketing_time_per_week: (profile as any).marketing_time_per_week ?? 5,
         budget_preference: (profile as any).budget_preference ?? 'balanced',
-        // Agent GPS data
-        team_size: (profile as any).team_size ?? 'solo',
-        preferred_focus: (profile as any).preferred_focus ?? [],
-        lead_source_preferences: (profile as any).lead_source_preferences ?? [],
         // Personality data
         personality_type: personalityData.personality_type ?? '',
         work_style: personalityData.work_style ?? '',
@@ -102,10 +90,10 @@ export function GoalAssessmentModal({ open, onOpenChange, onComplete }: GoalAsse
     }
   }, [open, profile]);
 
-  const totalSteps = 7;
+  const totalSteps = 6;
   const progress = (currentStep / totalSteps) * 100;
 
-  const handleInputChange = (field: keyof GoalFormData, value: string | number | string[]) => {
+  const handleInputChange = (field: keyof GoalFormData, value: string | number) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -153,9 +141,6 @@ export function GoalAssessmentModal({ open, onOpenChange, onComplete }: GoalAsse
           primary_challenge: formData.primary_challenge,
           marketing_time_per_week: formData.marketing_time_per_week,
           budget_preference: formData.budget_preference,
-          team_size: formData.team_size,
-          preferred_focus: formData.preferred_focus,
-          lead_source_preferences: formData.lead_source_preferences,
           personality_data: personalityData,
           current_tools: currentTools,
           goal_assessment_completed: true,
@@ -430,89 +415,6 @@ export function GoalAssessmentModal({ open, onOpenChange, onComplete }: GoalAsse
         );
 
       case 6:
-        return (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Target className="h-5 w-5 text-primary" />
-                Business Structure & Focus
-              </CardTitle>
-              <CardDescription>
-                Help us understand your business setup and preferences
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="team_size">Team Size</Label>
-                <Select 
-                  value={formData.team_size} 
-                  onValueChange={(value) => handleInputChange('team_size', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select your team size" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="solo">Solo Agent</SelectItem>
-                    <SelectItem value="small_team">Small Team (2-4 people)</SelectItem>
-                    <SelectItem value="medium_team">Medium Team (5-10 people)</SelectItem>
-                    <SelectItem value="large_team">Large Team (10+ people)</SelectItem>
-                    <SelectItem value="brokerage">Part of Large Brokerage</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div>
-                <Label htmlFor="preferred_focus">Preferred Focus Areas (Select multiple)</Label>
-                <div className="grid grid-cols-2 gap-2 mt-2">
-                  {['buyers', 'sellers', 'investors', 'luxury', 'first_time_buyers', 'commercial'].map((focus) => (
-                    <label key={focus} className="flex items-center space-x-2 cursor-pointer p-2 border rounded hover:bg-muted">
-                      <input
-                        type="checkbox"
-                        checked={formData.preferred_focus.includes(focus)}
-                        onChange={(e) => {
-                          const currentFocus = formData.preferred_focus;
-                          if (e.target.checked) {
-                            handleInputChange('preferred_focus', [...currentFocus, focus]);
-                          } else {
-                            handleInputChange('preferred_focus', currentFocus.filter(f => f !== focus));
-                          }
-                        }}
-                        className="rounded"
-                      />
-                      <span className="text-sm capitalize">{focus.replace('_', ' ')}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-              
-              <div>
-                <Label htmlFor="lead_source_preferences">Preferred Lead Sources (Select multiple)</Label>
-                <div className="grid grid-cols-2 gap-2 mt-2">
-                  {['sphere_of_influence', 'online_leads', 'cold_calling', 'door_knocking', 'social_media', 'referrals', 'farming', 'open_houses'].map((source) => (
-                    <label key={source} className="flex items-center space-x-2 cursor-pointer p-2 border rounded hover:bg-muted">
-                      <input
-                        type="checkbox"
-                        checked={formData.lead_source_preferences.includes(source)}
-                        onChange={(e) => {
-                          const currentSources = formData.lead_source_preferences;
-                          if (e.target.checked) {
-                            handleInputChange('lead_source_preferences', [...currentSources, source]);
-                          } else {
-                            handleInputChange('lead_source_preferences', currentSources.filter(s => s !== source));
-                          }
-                        }}
-                        className="rounded"
-                      />
-                      <span className="text-sm capitalize">{source.replace('_', ' ')}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        );
-
-      case 7:
         return (
           <Card>
             <CardHeader>

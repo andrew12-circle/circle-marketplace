@@ -1,26 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
-import { useOptimizedMeasurement, createOptimizedScrollHandler } from "@/utils/layoutOptimizer";
 
-// Calculate total offset using optimized measurement to prevent forced reflows
+// Calculate total offset including header and navigation tabs
 const getTotalOffset = () => {
-  return new Promise<number>((resolve) => {
-    requestAnimationFrame(() => {
-      const header = document.querySelector('header') as HTMLElement;
-      const navTabs = document.querySelector('[class*="NavigationTabs"], .navigation-tabs, [class*="rounded-xl"][class*="mx-auto"]') as HTMLElement;
-      
-      // Use cached measurements to avoid forced reflows
-      const headerHeight = header?.dataset.cachedHeight ? parseInt(header.dataset.cachedHeight) : 76;
-      const navTabsHeight = navTabs?.dataset.cachedHeight ? parseInt(navTabs.dataset.cachedHeight) : 52;
-      const spacing = 16;
-      
-      // Cache measurements for next time
-      if (header) header.dataset.cachedHeight = headerHeight.toString();
-      if (navTabs) navTabs.dataset.cachedHeight = navTabsHeight.toString();
-      
-      resolve(headerHeight + navTabsHeight + spacing);
-    });
-  });
+  const header = document.querySelector('header') as HTMLElement;
+  const navTabs = document.querySelector('[class*="NavigationTabs"], .navigation-tabs, [class*="rounded-xl"][class*="mx-auto"]') as HTMLElement;
+  
+  const headerHeight = header ? header.offsetHeight : 76;
+  const navTabsHeight = navTabs ? navTabs.offsetHeight : 52; // typical tab height
+  const spacing = 16; // spacing below nav tabs
+  
+  return headerHeight + navTabsHeight + spacing;
 };
 
 interface StickySearchContainerProps {
@@ -35,22 +25,15 @@ export const StickySearchContainer = ({ children, className }: StickySearchConta
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const updateTotalOffset = async () => {
-      const offset = await getTotalOffset();
-      setTotalOffset(offset);
+    // Update total offset on mount and resize
+    const updateTotalOffset = () => {
+      setTotalOffset(getTotalOffset());
     };
     
     updateTotalOffset();
+    window.addEventListener('resize', updateTotalOffset);
     
-    const handleResize = () => {
-      requestAnimationFrame(() => {
-        updateTotalOffset();
-      });
-    };
-    
-    window.addEventListener('resize', handleResize);
-    
-    return () => window.removeEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', updateTotalOffset);
   }, []);
 
   useEffect(() => {
@@ -90,7 +73,7 @@ export const StickySearchContainer = ({ children, className }: StickySearchConta
           className
         )}
         style={{
-          top: isSticky ? "0px" : undefined,
+          top: isSticky ? `${totalOffset + 21}px` : undefined,
           transform: isSticky ? "translateY(0)" : undefined,
         }}
       >

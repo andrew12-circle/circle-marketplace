@@ -113,7 +113,7 @@ export const TopDealsCarousel = ({ services, serviceRatings, onServiceClick }: T
       })
       .filter(Boolean) // Remove null entries
       .sort((a, b) => (b?.score || 0) - (a?.score || 0))
-      .slice(0, 6); // Limit to 6 items for performance
+      .slice(0, 12);
   }, [safeServices, serviceRatings]);
 
   // Track impressions for sponsored items
@@ -192,17 +192,12 @@ export const TopDealsCarousel = ({ services, serviceRatings, onServiceClick }: T
                       {/* Service image */}
                       {service.image_url && (
                         <div className="w-full h-32 mb-3 overflow-hidden rounded-md bg-white -mx-2">
-                           <img 
-                             src={service.image_url} 
-                             alt={service.title}
-                             className="w-full h-full object-contain px-2"
-                             loading="lazy"
-                             decoding="async"
-                             fetchPriority="low"
-                             width={240}
-                             height={128}
-                             sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
-                           />
+                          <img 
+                            src={service.image_url} 
+                            alt={service.title}
+                            className="w-full h-full object-contain px-2"
+                            loading="lazy"
+                          />
                         </div>
                       )}
 

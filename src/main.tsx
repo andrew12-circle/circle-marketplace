@@ -6,11 +6,10 @@ import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { SpiritualCoverageProvider } from "@/contexts/SpiritualCoverageContext";
 import { CartProvider } from "@/contexts/CartContext";
-import { SecurityProvider } from "@/components/security/SecurityEnhancementSystem";
-import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 import { cacheManager } from "./utils/cacheManager";
 import { globalErrorMonitor } from "./utils/globalErrorMonitor";
 import { ReloadReasonBanner } from "./components/common/ReloadReasonBanner";
+import { SecurityProvider } from "@/components/security/SecurityEnhancementSystem";
 import "./index.css";
 import "./i18n";
 
@@ -58,7 +57,6 @@ const AdvancedFeaturesDashboard = lazy(() => import("./pages/AdvancedFeaturesDas
 const AIDashboard = lazy(() => import("./pages/AIDashboard"));
 const AdminAccounting = lazy(() => import("./pages/AdminAccounting").then(m => ({ default: m.AdminAccounting })));
 const AdminCommissions = lazy(() => import("./pages/AdminCommissions"));
-const AdminDiagnostics = lazy(() => import("./pages/AdminDiagnostics"));
 const CreatorOnboardingPage = lazy(() => import("./pages/CreatorOnboarding"));
 const Welcome = lazy(() => import("./pages/Welcome"));
 const CompliancePage = lazy(() => import("./pages/CompliancePage"));
@@ -93,146 +91,96 @@ const queryClient = new QueryClient({
   },
 });
 
-// Initialize cache and error monitoring directly without deferring
+// Clear cache if version mismatch
 cacheManager.checkAndClearCache();
+
+// Initialize global error monitoring
 globalErrorMonitor.initialize();
 
-// DOM Performance Diagnostic (dev only)
-if (import.meta.env.DEV) {
-  setTimeout(() => {
-    const nodeCount = document.querySelectorAll('*').length;
-    console.log(`🔍 DOM Performance Check: ${nodeCount} total nodes`);
-    if (nodeCount > 1500) {
-      console.warn('⚠️ High DOM node count detected. Consider lazy loading or virtualization.');
-    }
-  }, 2000);
-}
-
-// Declare window extensions for TypeScript
-declare global {
-  interface Window {
-    appLoadTimeout?: number;
-    cssTimeout?: number;
-  }
-}
-
-// Clear app loading timeout when React is ready
-if (typeof window !== 'undefined' && window.appLoadTimeout) {
-  clearTimeout(window.appLoadTimeout);
-}
-
-// Add react-loaded class after React commits
-setTimeout(() => {
-  document.body.classList.add('react-loaded');
-  document.body.classList.remove('show-fallback');
-  if (typeof window !== 'undefined' && window.cssTimeout) {
-    clearTimeout(window.cssTimeout);
-  }
-}, 100);
-
 createRoot(document.getElementById("root")!).render(
-  <ErrorBoundary section="Application Root">
-    <QueryClientProvider client={queryClient}>
-      <SpiritualCoverageProvider>
-          <AuthProvider>
-            <BrowserRouter>
-              <SecurityProvider>
-                <CartProvider>
-                  <Suspense fallback={<RouteLoader />}>
-              <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/auth" element={<Auth />} />
-                  <Route path="/marketplace" element={
-                    <ErrorBoundary section="Marketplace">
-                      <Marketplace />
-                    </ErrorBoundary>
-                  } />
-                  <Route path="/academy" element={
-                    <ErrorBoundary section="Academy">
-                      <Academy />
-                    </ErrorBoundary>
-                  } />
-                  <Route path="/creator-dashboard" element={
-                    <ErrorBoundary section="Creator Dashboard">
-                      <CreatorDashboard />
-                    </ErrorBoundary>
-                  } />
-                  <Route path="/creator-payment-setup" element={<CreatorPaymentSetupPage />} />
-                  <Route path="/admin" element={
-                    <ErrorBoundary section="Admin Dashboard">
-                      <AdminDashboard />
-                    </ErrorBoundary>
-                  } />
-                  <Route path="/profile-settings" element={<ProfileSettings />} />
-                  <Route path="/saved" element={<SavedItems />} />
-                  <Route path="/orders" element={<OrderHistory />} />
-                  <Route path="/wallet" element={<AgentWallet />} />
-                  <Route path="/pricing" element={<Pricing />} />
-                  <Route path="/payment-success" element={<PaymentSuccess />} />
-                  <Route path="/payment-canceled" element={<PaymentCanceled />} />
-                  <Route path="/consultation-demo" element={<ConsultationDemo />} />
-                  <Route path="/vendor-registration" element={<VendorRegistration />} />
-                  <Route path="/vendor-dashboard" element={<VendorDashboard />} />
-                  <Route path="/vendor-analytics" element={<VendorAnalyticsDashboard />} />
-                  <Route path="/command-center" element={<CommandCenter />} />
-                  <Route path="/health" element={<HealthStability />} />
-                  
-                  {/* Ministry routes */}
-                  <Route path="/ministry" element={<CircleMinistry />} />
-                  <Route path="/ministry/success" element={<MinistrySuccess />} />
-                  <Route path="/minsitry" element={<CircleMinistry />} /> {/* Typo redirect */}
-                  
-                  <Route path="/legal/terms" element={<TermsOfService />} />
-                  <Route path="/legal/privacy" element={<PrivacyPolicy />} />
-                  <Route path="/legal/cookies" element={<CookiePolicy />} />
-                  <Route path="/legal/buyer-protection" element={<BuyerProtection />} />
-                  <Route path="/legal/seller-agreement" element={<SellerAgreement />} />
-                  <Route path="/legal/prohibited-items" element={<ProhibitedItems />} />
-                  
-                  {/* Backward-compatible redirects for legal routes */}
-                  <Route path="/terms" element={<TermsOfService />} />
-                  <Route path="/privacy" element={<PrivacyPolicy />} />
-                  <Route path="/cookies" element={<CookiePolicy />} />
-                  <Route path="/seller-agreement" element={<SellerAgreement />} />
-                  <Route path="/buyer-protection" element={<BuyerProtection />} />
-                  <Route path="/prohibited-items" element={<ProhibitedItems />} />
-                  
-                  {/* Additional routes from App.tsx */}
-                  <Route path="/analytics" element={<AnalyticsDashboard />} />
-                  <Route path="/support" element={<SupportDashboard />} />
-                  <Route path="/advanced-features" element={<AdvancedFeaturesDashboard />} />
-                  <Route path="/ai-dashboard" element={<AIDashboard />} />
-                  <Route path="/admin/accounting" element={<AdminAccounting />} />
-                  <Route path="/admin/commissions" element={<AdminCommissions />} />
-                  <Route path="/admin/diagnostics" element={<AdminDiagnostics />} />
-                  <Route path="/creator-onboarding" element={<CreatorOnboardingPage />} />
-                  <Route path="/welcome" element={<Welcome />} />
-                  <Route path="/compliance" element={<CompliancePage />} />
-                  <Route path="/partner-checkout/:token" element={<PartnerCheckout />} />
-                  <Route path="/partner-payment-success" element={<PartnerPaymentSuccess />} />
-                  <Route path="/partner-payment-canceled" element={<PartnerPaymentCanceled />} />
-                  <Route path="/agent-payment-success" element={<AgentPaymentSuccess />} />
-                  <Route path="/agent-payment-canceled" element={<AgentPaymentCanceled />} />
-                  <Route path="/command-center-test" element={<CommandCenterTest />} />
-                  <Route path="/qa" element={<QARunner />} />
-                  
-                  {/* Profile settings alternate path */}
-                  <Route path="/profile" element={<ProfileSettings />} />
-                  
-                  {/* Payment routes alternate paths */}
-                  <Route path="/payment/success" element={<PaymentSuccess />} />
-                  <Route path="/payment/canceled" element={<PaymentCanceled />} />
-                  
-                  <Route path="*" element={<NotFound />} />
-              </Routes>
-                  </Suspense>
-                  <Toaster />
-                  <ReloadReasonBanner />
-                </CartProvider>
-              </SecurityProvider>
-          </BrowserRouter>
-        </AuthProvider>
-      </SpiritualCoverageProvider>
-    </QueryClientProvider>
-  </ErrorBoundary>
+  <QueryClientProvider client={queryClient}>
+    <SpiritualCoverageProvider>
+        <AuthProvider>
+          <BrowserRouter>
+            <SecurityProvider>
+              <CartProvider>
+                <Suspense fallback={<RouteLoader />}>
+            <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/marketplace" element={<Marketplace />} />
+                <Route path="/academy" element={<Academy />} />
+                <Route path="/creator-dashboard" element={<CreatorDashboard />} />
+                <Route path="/creator-payment-setup" element={<CreatorPaymentSetupPage />} />
+                <Route path="/admin" element={<AdminDashboard />} />
+                <Route path="/profile-settings" element={<ProfileSettings />} />
+                <Route path="/saved" element={<SavedItems />} />
+                <Route path="/orders" element={<OrderHistory />} />
+                <Route path="/wallet" element={<AgentWallet />} />
+                <Route path="/pricing" element={<Pricing />} />
+                <Route path="/payment-success" element={<PaymentSuccess />} />
+                <Route path="/payment-canceled" element={<PaymentCanceled />} />
+                <Route path="/consultation-demo" element={<ConsultationDemo />} />
+                <Route path="/vendor-registration" element={<VendorRegistration />} />
+                <Route path="/vendor-dashboard" element={<VendorDashboard />} />
+                <Route path="/vendor-analytics" element={<VendorAnalyticsDashboard />} />
+                <Route path="/command-center" element={<CommandCenter />} />
+                <Route path="/health" element={<HealthStability />} />
+                
+                {/* Ministry routes */}
+                <Route path="/ministry" element={<CircleMinistry />} />
+                <Route path="/ministry/success" element={<MinistrySuccess />} />
+                <Route path="/minsitry" element={<CircleMinistry />} /> {/* Typo redirect */}
+                
+                <Route path="/legal/terms" element={<TermsOfService />} />
+                <Route path="/legal/privacy" element={<PrivacyPolicy />} />
+                <Route path="/legal/cookies" element={<CookiePolicy />} />
+                <Route path="/legal/buyer-protection" element={<BuyerProtection />} />
+                <Route path="/legal/seller-agreement" element={<SellerAgreement />} />
+                <Route path="/legal/prohibited-items" element={<ProhibitedItems />} />
+                
+                {/* Backward-compatible redirects for legal routes */}
+                <Route path="/terms" element={<TermsOfService />} />
+                <Route path="/privacy" element={<PrivacyPolicy />} />
+                <Route path="/cookies" element={<CookiePolicy />} />
+                <Route path="/seller-agreement" element={<SellerAgreement />} />
+                <Route path="/buyer-protection" element={<BuyerProtection />} />
+                <Route path="/prohibited-items" element={<ProhibitedItems />} />
+                
+                {/* Additional routes from App.tsx */}
+                <Route path="/analytics" element={<AnalyticsDashboard />} />
+                <Route path="/support" element={<SupportDashboard />} />
+                <Route path="/advanced-features" element={<AdvancedFeaturesDashboard />} />
+                <Route path="/ai-dashboard" element={<AIDashboard />} />
+                <Route path="/admin/accounting" element={<AdminAccounting />} />
+                <Route path="/admin/commissions" element={<AdminCommissions />} />
+                <Route path="/creator-onboarding" element={<CreatorOnboardingPage />} />
+                <Route path="/welcome" element={<Welcome />} />
+                <Route path="/compliance" element={<CompliancePage />} />
+                <Route path="/partner-checkout/:token" element={<PartnerCheckout />} />
+                <Route path="/partner-payment-success" element={<PartnerPaymentSuccess />} />
+                <Route path="/partner-payment-canceled" element={<PartnerPaymentCanceled />} />
+                <Route path="/agent-payment-success" element={<AgentPaymentSuccess />} />
+                <Route path="/agent-payment-canceled" element={<AgentPaymentCanceled />} />
+                <Route path="/command-center-test" element={<CommandCenterTest />} />
+                <Route path="/qa" element={<QARunner />} />
+                
+                {/* Profile settings alternate path */}
+                <Route path="/profile" element={<ProfileSettings />} />
+                
+                {/* Payment routes alternate paths */}
+                <Route path="/payment/success" element={<PaymentSuccess />} />
+                <Route path="/payment/canceled" element={<PaymentCanceled />} />
+                
+                <Route path="*" element={<NotFound />} />
+            </Routes>
+                </Suspense>
+                <Toaster />
+                <ReloadReasonBanner />
+              </CartProvider>
+            </SecurityProvider>
+        </BrowserRouter>
+      </AuthProvider>
+    </SpiritualCoverageProvider>
+  </QueryClientProvider>
 );

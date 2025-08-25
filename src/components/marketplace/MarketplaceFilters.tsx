@@ -184,11 +184,7 @@ export const MarketplaceFilters = ({
                   {safeFilters.category}
                   <X 
                     className="w-3 h-3 cursor-pointer hover:text-destructive transition-colors" 
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      updateFilter("category", "all");
-                    }}
+                    onClick={() => updateFilter("category", "all")}
                   />
                 </Badge>
               )}

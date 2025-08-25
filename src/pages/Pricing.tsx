@@ -7,8 +7,7 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import { ResponsiveLogo } from "@/components/ui/optimized-image";
-
+const circleLogoUrl = "/circle-logo-updated.png";
 export const Pricing = () => {
   const [loading, setLoading] = useState<string | null>(null);
   const [coreOpen, setCoreOpen] = useState(true);
@@ -64,7 +63,7 @@ export const Pricing = () => {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <Link to="/" className="flex items-center gap-3">
-              <ResponsiveLogo className="w-16 h-16 sm:w-20 sm:h-20" />
+              <img src={circleLogoUrl} alt="Circle Logo" className="w-16 h-16 sm:w-20 sm:h-20 object-contain" />
             </Link>
             <div className="flex items-center gap-4">
               {user ? <>

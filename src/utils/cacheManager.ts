@@ -4,7 +4,7 @@
  */
 
 const CACHE_VERSION_KEY = 'app_cache_version';
-const CURRENT_VERSION = import.meta.env.VITE_APP_VERSION || '1.0.2';
+const CURRENT_VERSION = '1.0.2';
 const SUPABASE_SESSION_KEYS = [
   'sb-ihzyuyfawapweamqzzlj-auth-token',
   'supabase.auth.token',

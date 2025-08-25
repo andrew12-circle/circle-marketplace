@@ -1,21 +1,20 @@
-import { useState, useCallback, useMemo, useEffect, Suspense } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { OptimizedServiceCard } from "./OptimizedServiceCard";
 import { MarketplaceVendorCard } from "./MarketplaceVendorCard";
 import { MarketplaceFilters } from "./MarketplaceFilters";
 import { CampaignServicesHeader } from "./CampaignServicesHeader";
 import { CircleProBanner } from "./CircleProBanner";
+import { ServiceDetailsModal } from "./ServiceDetailsModal";
 import { AIConciergeBanner } from "./AIConciergeBanner";
-import { LazyServiceDetailsModal, LazyAddProductModal, LazyVendorSelectionModal } from "@/utils/lazyModals";
+import { AddProductModal } from "./AddProductModal";
+import { VendorSelectionModal } from "./VendorSelectionModal";
 import { TopDealsCarousel } from "./TopDealsCarousel";
 import { CategoryBlocks } from "./CategoryBlocks";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Filter, Sparkles, Zap, Facebook, Globe, Mail, Share2, Monitor, TrendingUp, Database, Camera, Video, Printer, ArrowRight, BookOpen, Star, Eye, ChevronRight } from "lucide-react";
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis } from "@/components/ui/pagination";
-
-import { LazyComponent } from "@/components/ui/lazy-component";
+import { Search, Filter, Sparkles, Zap, Facebook, Globe, Mail, Share2, Monitor, TrendingUp, Database, Camera, Video, Printer, ArrowRight, BookOpen } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -30,10 +29,9 @@ import { useMarketplaceData, useSavedServices, useInvalidateMarketplace, type Se
 import { useMarketplaceFilters } from "@/hooks/useMarketplaceFilters";
 import { useBulkServiceRatings } from "@/hooks/useBulkServiceRatings";
 import { logger } from "@/utils/logger";
-import { taskScheduler, processInChunks, debounceTask } from "@/utils/taskScheduler";
 import { useQueryClient } from "@tanstack/react-query";
 import { marketplaceCircuitBreaker } from "@/utils/circuitBreaker";
-import { usePagedServices } from "@/hooks/usePagedServices";
+import { usePaginatedServices } from "@/hooks/usePaginatedServices";
 import { useABTest } from "@/hooks/useABTest";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { useMarketplaceEnabled } from "@/hooks/useAppConfig";
@@ -193,30 +191,17 @@ export const MarketplaceGrid = () => {
     locationFilter: false
   });
 
-  // Debounce search updates to prevent blocking
-  const debouncedSearchUpdate = useMemo(
-    () => debounceTask(() => {
-      // Heavy search operations are scheduled with task scheduler
-    }, 150),
-    []
-  );
-
   const handleEnhancedSearchChange = useCallback((sf: SearchFilters) => {
-    // Schedule search updates to prevent blocking
-    taskScheduler.schedule(() => {
-      setSearchFilters(sf);
-      setSearchTerm(sf.query || "");
-      setFilters(prev => ({
-        ...prev,
-        category: sf.categories.length > 0 ? sf.categories[0] : "all",
-        priceRange: sf.priceRange,
-        featured: sf.features.includes("Featured Service"),
-        coPayEligible: sf.features.includes("Co-Pay Available")
-      }));
-    });
-    
-    debouncedSearchUpdate();
-  }, [debouncedSearchUpdate]);
+    setSearchFilters(sf);
+    setSearchTerm(sf.query || "");
+    setFilters(prev => ({
+      ...prev,
+      category: sf.categories.length > 0 ? sf.categories[0] : "all",
+      priceRange: sf.priceRange,
+      featured: sf.features.includes("Featured Service"),
+      coPayEligible: sf.features.includes("Co-Pay Available")
+    }));
+  }, []);
 
   const { user, profile } = useAuth();
   const { location } = useLocation();
@@ -239,30 +224,38 @@ export const MarketplaceGrid = () => {
   // Enable new landing experience for all users
   const showNewLanding = true;
 
-  // Page-based pagination for Amazon-style experience
+  // Paginated services (server-side filters + pagination) - defer until user interacts
   const { variant } = useABTest('ranking_v1', { holdout: 0.1 });
   const orderStrategy = variant === 'holdout' ? 'recent' : 'ranked';
-  const [currentPage, setCurrentPage] = useState(1);
+  const [enablePagination, setEnablePagination] = useState(true); // Enable by default to show services immediately
 
-  // Reset to page 1 when filters change
+  // Only enable pagination if marketplace is enabled by admin
+  const shouldEnablePagination = enablePagination && marketplaceEnabled;
+
+  // Enable pagination when user starts searching or filtering
   useEffect(() => {
-    setCurrentPage(1);
+    if (searchTerm || filters.category !== 'all' || filters.featured || filters.verified || filters.coPayEligible) {
+      setEnablePagination(true);
+    }
   }, [searchTerm, filters.category, filters.featured, filters.verified, filters.coPayEligible]);
 
   const {
-    data: pagedData,
+    data: paginatedData,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
     isLoading: isLoadingServices
-  } = usePagedServices(currentPage, {
+  } = usePaginatedServices({
     searchTerm,
     category: filters.category,
     featured: filters.featured,
     verified: filters.verified,
     coPayEligible: filters.coPayEligible,
     orderStrategy
-  }, { enabled: marketplaceEnabled });
+  }, { enabled: shouldEnablePagination });
 
   const flattenServices = useMemo(() => {
-    const items = pagedData?.items || [];
+    const items = paginatedData?.pages?.flatMap(p => p.items) || [];
     const extractNumericPrice = (priceString?: string | null): number => {
       if (!priceString) return 0;
       const cleaned = priceString.replace(/[^0-9.]/g, '');
@@ -274,9 +267,9 @@ export const MarketplaceGrid = () => {
       const matchesVerified = !filters.verified || !!s.vendor?.is_verified;
       return withinPrice && matchesVerified;
     });
-  }, [pagedData, filters.priceRange, filters.verified]);
+  }, [paginatedData, filters.priceRange, filters.verified]);
 
-  const totalServicesCount = pagedData?.totalCount ?? 0;
+  const totalServicesCount = paginatedData?.pages?.[0]?.totalCount ?? 0;
   const baseForFilters = services.length ? services : flattenServices;
 
   // Memoize service IDs to prevent unnecessary re-fetching of ratings
@@ -430,59 +423,52 @@ export const MarketplaceGrid = () => {
       });
       return;
     }
-    
-    // Schedule database operations to prevent blocking
-    taskScheduler.schedule(async () => {
-      try {
-        // Check if already saved
-        const { data: existingSave } = await supabase.from('saved_services').select('id').eq('user_id', profile.user_id).eq('service_id', serviceId).maybeSingle();
-        if (existingSave) {
-          // Remove from saved
-          const { error } = await supabase.from('saved_services').delete().eq('user_id', profile.user_id).eq('service_id', serviceId);
-          if (error) throw error;
+    try {
+      // Check if already saved
+      const { data: existingSave } = await supabase.from('saved_services').select('id').eq('user_id', profile.user_id).eq('service_id', serviceId).maybeSingle();
+      if (existingSave) {
+        // Remove from saved
+        const { error } = await supabase.from('saved_services').delete().eq('user_id', profile.user_id).eq('service_id', serviceId);
+        if (error) throw error;
 
-          // Update local state
-          setLocalSavedServiceIds(prev => prev.filter(id => id !== serviceId));
-          toast({
-            title: "Removed from saved",
-            description: "Service removed from your saved list"
-          });
-        } else {
-          // Add to saved
-          const { error } = await supabase.from('saved_services').insert({
-            user_id: profile.user_id,
-            service_id: serviceId,
-            notes: ''
-          });
-          if (error) throw error;
-
-          // Update local state
-          setLocalSavedServiceIds(prev => [...prev, serviceId]);
-          toast({
-            title: "Saved successfully",
-            description: "Service added to your saved list"
-          });
-        }
-      } catch (error) {
-        logger.error('Error saving service:', error);
+        // Update local state
+        setLocalSavedServiceIds(prev => prev.filter(id => id !== serviceId));
         toast({
-          title: "Error",
-          description: "Failed to save service. Please try again.",
-          variant: "destructive"
+          title: "Removed from saved",
+          description: "Service removed from your saved list"
+        });
+      } else {
+        // Add to saved
+        const { error } = await supabase.from('saved_services').insert({
+          user_id: profile.user_id,
+          service_id: serviceId,
+          notes: ''
+        });
+        if (error) throw error;
+
+        // Update local state
+        setLocalSavedServiceIds(prev => [...prev, serviceId]);
+        toast({
+          title: "Saved successfully",
+          description: "Service added to your saved list"
         });
       }
-    });
+    } catch (error) {
+      logger.error('Error saving service:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save service. Please try again.",
+        variant: "destructive"
+      });
+    }
   }, [profile?.user_id, toast]);
 
   const handleViewServiceDetails = useCallback((serviceId: string) => {
-    // Use task scheduler for potentially heavy operations
-    taskScheduler.schedule(() => {
-      const service = flattenServices.find(s => s.id === serviceId) || services.find(s => s.id === serviceId);
-      if (service) {
-        setSelectedService(service);
-        setIsServiceModalOpen(true);
-      }
-    });
+    const service = flattenServices.find(s => s.id === serviceId) || services.find(s => s.id === serviceId);
+    if (service) {
+      setSelectedService(service);
+      setIsServiceModalOpen(true);
+    }
   }, [flattenServices, services]);
 
   const handleCloseServiceModal = () => {
@@ -530,35 +516,25 @@ export const MarketplaceGrid = () => {
           </div>
 
           {/* Circle Pro Banner - Show for non-signed-in users and non-pro members */}
-          {(!user || !profile?.is_pro_member) && (
-            <LazyComponent threshold="500px" delay={250}>
-              <CircleProBanner />
-            </LazyComponent>
-          )}
+          {(!user || !profile?.is_pro_member) && <CircleProBanner />}
 
           {/* AI Concierge Banner - Show for all users */}
-          <LazyComponent threshold="400px" delay={200}>
-            <AIConciergeBanner />
-          </LazyComponent>
+          <AIConciergeBanner />
 
           {/* Campaign Services Header */}
           <CampaignServicesHeader />
 
           {marketplaceEnabled && (
             <>
-              <LazyComponent threshold="200px" delay={100}>
-                <TopDealsCarousel
-                  services={flattenServices}
-                  serviceRatings={bulkRatings}
-                  onServiceClick={handleViewServiceDetails}
-                />
-              </LazyComponent>
-              <LazyComponent threshold="300px" delay={150}>
-                <CategoryBlocks 
-                  onCategoryClick={handleCategoryClick}
-                  services={flattenServices}
-                />
-              </LazyComponent>
+              <TopDealsCarousel
+                services={flattenServices}
+                serviceRatings={bulkRatings}
+                onServiceClick={handleViewServiceDetails}
+              />
+              <CategoryBlocks 
+                onCategoryClick={handleCategoryClick}
+                services={flattenServices}
+              />
 
               {/* Recently Viewed Services */}
               <RecentlyViewedServices 
@@ -574,37 +550,34 @@ export const MarketplaceGrid = () => {
                 />
               )}
 
-              {/* Sticky Enhanced Search Component with View Mode Toggle */}
+              {/* Sticky Enhanced Search Component */}
               <StickySearchContainer>
                 <EnhancedSearch onSearchChange={handleEnhancedSearchChange} availableCategories={getCategories()} availableTags={getTags()} viewMode={viewMode} />
-                
-                {/* View Mode Toggle */}
-                <div className="flex gap-2 mt-4">
-                  <Button variant={viewMode === "services" ? "default" : "outline"} onClick={() => setViewMode("services")} className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-9 sm:h-10 text-sm sm:text-base">
-                    <Sparkles className="w-3 h-3 sm:w-4 sm:h-4" />
-                    {t('services')}
-                  </Button>
-                  <Button variant={viewMode === "products" ? "default" : "outline"} onClick={() => setViewMode("products")} className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-9 sm:h-10 text-sm sm:text-base">
-                    <Filter className="w-3 h-3 sm:w-4 sm:h-4" />
-                    Products
-                  </Button>
-                  <Button variant={viewMode === "vendors" ? "default" : "outline"} onClick={() => setViewMode("vendors")} className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-9 sm:h-10 text-sm sm:text-base">
-                    <Zap className="w-3 h-3 sm:w-4 sm:h-4" />
-                    {t('vendors')}
-                  </Button>
-                </div>
               </StickySearchContainer>
 
-              {/* Marketplace Results Anchor */}
-              <div id="marketplace-results" className="mb-6" />
+              {/* View Mode Toggle */}
+              <div id="marketplace-results" className="flex gap-2 mb-6">
+                <Button variant={viewMode === "services" ? "default" : "outline"} onClick={() => setViewMode("services")} className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-9 sm:h-10 text-sm sm:text-base">
+                  <Sparkles className="w-3 h-3 sm:w-4 sm:h-4" />
+                  {t('services')}
+                </Button>
+                <Button variant={viewMode === "products" ? "default" : "outline"} onClick={() => setViewMode("products")} className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-9 sm:h-10 text-sm sm:text-base">
+                  <Filter className="w-3 h-3 sm:w-4 sm:h-4" />
+                  Products
+                </Button>
+                <Button variant={viewMode === "vendors" ? "default" : "outline"} onClick={() => setViewMode("vendors")} className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-9 sm:h-10 text-sm sm:text-base">
+                  <Zap className="w-3 h-3 sm:w-4 sm:h-4" />
+                  {t('vendors')}
+                </Button>
+              </div>
 
-              {/* Services Grid with Pagination */}
+              {/* Grid - Mobile Responsive */}
               {viewMode === "services" && (
                 <>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+                  <div className="mobile-grid gap-4 sm:gap-6">
                     {flattenServices.map((service, index) => (
                       <OptimizedServiceCard 
-                        key={`service-${service.id}-${index}`}
+                        key={`service-${service.id}-${index}`} 
                         service={service} 
                         onSave={handleSaveService} 
                         onViewDetails={handleViewServiceDetails} 
@@ -613,89 +586,16 @@ export const MarketplaceGrid = () => {
                       />
                     ))}
                   </div>
-                  
-                  {/* Pagination */}
-                  {pagedData && pagedData.totalPages > 1 && (
-                    <div className="mt-8 flex flex-col items-center gap-4">
-                      <Pagination>
-                        <PaginationContent>
-                          <PaginationItem>
-                            <PaginationPrevious 
-                              onClick={() => {
-                                if (currentPage > 1) {
-                                  setCurrentPage(currentPage - 1);
-                                  // Smooth scroll to top
-                                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                                }
-                              }}
-                              className={currentPage <= 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-                            />
-                          </PaginationItem>
-                          
-                          {/* Page numbers */}
-                          {Array.from({ length: Math.min(5, pagedData.totalPages) }, (_, i) => {
-                            const pageNumber = currentPage <= 3 
-                              ? i + 1 
-                              : currentPage >= pagedData.totalPages - 2
-                              ? pagedData.totalPages - 4 + i
-                              : currentPage - 2 + i;
-                            
-                            if (pageNumber < 1 || pageNumber > pagedData.totalPages) return null;
-                            
-                            return (
-                              <PaginationItem key={pageNumber}>
-                                <PaginationLink
-                                  onClick={() => {
-                                    setCurrentPage(pageNumber);
-                                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                                  }}
-                                  isActive={currentPage === pageNumber}
-                                  className="cursor-pointer"
-                                >
-                                  {pageNumber}
-                                </PaginationLink>
-                              </PaginationItem>
-                            );
-                          })}
-                          
-                          {pagedData.totalPages > 5 && currentPage < pagedData.totalPages - 2 && (
-                            <>
-                              <PaginationItem>
-                                <PaginationEllipsis />
-                              </PaginationItem>
-                              <PaginationItem>
-                                <PaginationLink
-                                  onClick={() => {
-                                    setCurrentPage(pagedData.totalPages);
-                                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                                  }}
-                                  className="cursor-pointer"
-                                >
-                                  {pagedData.totalPages}
-                                </PaginationLink>
-                              </PaginationItem>
-                            </>
-                          )}
-                          
-                          <PaginationItem>
-                            <PaginationNext 
-                              onClick={() => {
-                                if (currentPage < pagedData.totalPages) {
-                                  setCurrentPage(currentPage + 1);
-                                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                                }
-                              }}
-                              className={currentPage >= pagedData.totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-                            />
-                          </PaginationItem>
-                        </PaginationContent>
-                      </Pagination>
-                      
-                      <div className="text-sm text-muted-foreground">
-                        Showing page {currentPage} of {pagedData.totalPages} ({totalServicesCount} total results)
-                      </div>
-                    </div>
-                  )}
+                  <div className="mt-6 flex items-center justify-center gap-4">
+                    <span className="text-sm text-muted-foreground">
+                      Showing {flattenServices.length} of {totalServicesCount} results
+                    </span>
+                    {hasNextPage && (
+                      <Button onClick={() => fetchNextPage()} disabled={isFetchingNextPage}>
+                        {isFetchingNextPage ? 'Loading…' : 'Load more'}
+                      </Button>
+                    )}
+                  </div>
                 </>
               )}
 
@@ -710,10 +610,10 @@ export const MarketplaceGrid = () => {
                         {PRODUCT_CATEGORIES.find(p => p.id === selectedProductCategory)?.name}
                       </h2>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+                    <div className="mobile-grid gap-4 sm:gap-6">
                       {getServicesForProduct(selectedProductCategory).map((service, index) => (
                         <OptimizedServiceCard 
-                          key={`product-${selectedProductCategory}-${service.id}-${index}`}
+                          key={`product-${selectedProductCategory}-${service.id}-${index}`} 
                           service={service} 
                           onSave={handleSaveService} 
                           onViewDetails={handleViewServiceDetails} 
@@ -722,10 +622,10 @@ export const MarketplaceGrid = () => {
                         />
                       ))}
                     </div>
-                   </div>
+                  </div>
                 ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-                    {filteredProducts.map((product, index) => {
+                  <div className="mobile-grid gap-4 sm:gap-6">
+                    {filteredProducts.map(product => {
                       const IconComponent = product.icon;
                       return (
                         <div key={product.id} className="group relative overflow-hidden bg-white rounded-xl border border-gray-200 hover:border-gray-300 cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1" onClick={() => setSelectedProductCategory(product.id)}>
@@ -734,27 +634,42 @@ export const MarketplaceGrid = () => {
 
                           {/* Content */}
                           <div className="relative p-6">
-                            {/* Icon */}
-                            <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${product.gradient} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300`}>
-                              <IconComponent className="w-6 h-6 text-white" />
+                            {/* Icon and Header */}
+                            <div className="flex items-start justify-between mb-4">
+                              <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${product.gradient} flex items-center justify-center shadow-lg`}>
+                                <IconComponent className="w-6 h-6 text-white" />
+                              </div>
+                              <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-gray-600 transform group-hover:translate-x-1 transition-all duration-300" />
+                              </div>
                             </div>
 
-                            {/* Title and Description */}
-                            <h3 className="font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors duration-200">
+                            {/* Title */}
+                            <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-gray-800 transition-colors duration-300">
                               {product.name}
                             </h3>
-                            <p className="text-gray-600 text-sm leading-relaxed mb-4">
+
+                            {/* Description */}
+                            <p className="text-gray-600 text-sm leading-relaxed mb-6 line-clamp-2">
                               {product.description}
                             </p>
 
-                            {/* Action Arrow */}
+                            {/* Footer */}
                             <div className="flex items-center justify-between">
-                              <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-                                View Services
-                              </span>
-                              <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-blue-500 group-hover:translate-x-1 transition-all duration-200" />
+                              <div className="flex items-center gap-2">
+                                <div className={`w-2 h-2 rounded-full bg-gradient-to-r ${product.gradient}`} />
+                                <span className="text-sm font-medium text-gray-700">
+                                  {getServicesForProduct(product.id).length} providers
+                                </span>
+                              </div>
+                              <Button variant="ghost" size="sm" className={`${product.color} hover:bg-gray-50 font-medium opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0`}>
+                                Explore →
+                              </Button>
                             </div>
                           </div>
+
+                          {/* Hover Effect Overlay */}
+                          <div className="absolute inset-0 ring-1 ring-gray-200 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                         </div>
                       );
                     })}
@@ -776,10 +691,10 @@ export const MarketplaceGrid = () => {
                     </div>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-                    {filteredVendors.map((vendor, index) => (
+                  <div className="mobile-grid gap-4 sm:gap-6">
+                    {filteredVendors.map(vendor => (
                       <MarketplaceVendorCard 
-                        key={vendor.id}
+                        key={vendor.id} 
                         vendor={vendor} 
                         onConnect={() => {}} 
                         onViewProfile={() => {}} 
@@ -873,23 +788,19 @@ export const MarketplaceGrid = () => {
 
       {/* Service Details Modal */}
       {selectedService && (
-        <Suspense fallback={<div>Loading...</div>}>
-          <LazyServiceDetailsModal 
-            service={selectedService} 
-            isOpen={isServiceModalOpen} 
-            onClose={handleCloseServiceModal} 
-          />
-        </Suspense>
+        <ServiceDetailsModal 
+          service={selectedService} 
+          isOpen={isServiceModalOpen} 
+          onClose={handleCloseServiceModal} 
+        />
       )}
 
       {/* Add Product Modal */}
-      <Suspense fallback={<div>Loading...</div>}>
-        <LazyAddProductModal 
-          open={isAddProductModalOpen} 
-          onOpenChange={setIsAddProductModalOpen} 
-          onProductAdded={() => {}} 
-        />
-      </Suspense>
+      <AddProductModal 
+        open={isAddProductModalOpen} 
+        onOpenChange={setIsAddProductModalOpen} 
+        onProductAdded={() => {}} 
+      />
 
       {/* QA Overlay */}
       {showQAOverlay && (

@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -8,7 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Search, MapPin, Star, Users, TrendingUp, Building, Plus, CheckCircle, Info, AlertTriangle } from "lucide-react";
 import confirmationImage from "@/assets/confirmation-image.png";
-import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "@/hooks/useLocation";
@@ -21,19 +21,17 @@ import { isSSP, isNonSSP, getVendorTypeInfo, filterVendorsForService } from "@/u
 interface Vendor {
   id: string;
   name: string;
-  description?: string;  // Optional - only available in authenticated view
+  description: string;
   logo_url?: string;
-  location?: string;     // Optional - only available in authenticated view
+  location?: string;
   rating: number;
   review_count: number;
   is_verified: boolean;
   co_marketing_agents: number;
   campaigns_funded: number;
-  service_states?: string[];  // Optional - only available in authenticated view
+  service_states?: string[];
   vendor_type?: string;
   parent_vendor_id?: string | null;
-  website_url?: string;       // Optional - only available in authenticated view
-  is_premium_provider?: boolean;
 }
 
 interface VendorSelectionModalProps {
@@ -91,48 +89,14 @@ export const VendorSelectionModal = ({
     return stateMap[stateName];
   };
 
-  // Debounced search query for performance
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
-  const searchTimeoutRef = useRef<NodeJS.Timeout>();
-
-  // Debounce search input
-  useEffect(() => {
-    if (searchTimeoutRef.current) {
-      clearTimeout(searchTimeoutRef.current);
-    }
-    
-    searchTimeoutRef.current = setTimeout(() => {
-      setDebouncedSearchQuery(searchQuery);
-    }, 300);
-
-    return () => {
-      if (searchTimeoutRef.current) {
-        clearTimeout(searchTimeoutRef.current);
-      }
-    };
-  }, [searchQuery]);
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (searchTimeoutRef.current) {
-        clearTimeout(searchTimeoutRef.current);
-      }
-    };
-  }, []);
-
   // Memoized filtered vendors to avoid re-computation
   const filteredVendors = useMemo(() => {
-    // Only log in QA mode to reduce noise
-    const isQAMode = new URLSearchParams(window.location.search).get('qa') === '1';
-    if (isQAMode) {
-      console.log('VendorSelectionModal: Filtering vendors...', { 
-        totalVendors: vendors.length, 
-        searchQuery: debouncedSearchQuery, 
-        userLocation: location?.state,
-        showAllVendors
-      });
-    }
+    console.log('VendorSelectionModal: Filtering vendors...', { 
+      totalVendors: vendors.length, 
+      searchQuery, 
+      userLocation: location?.state,
+      showAllVendors
+    });
 
     let filtered = filterVendorsForService(vendors, service, !showAllVendors);
 
@@ -152,17 +116,15 @@ export const VendorSelectionModal = ({
       // Only apply location filter if we have matches, otherwise show all
       if (locationFiltered.length > 0) {
         filtered = locationFiltered;
-        if (isQAMode) {
-          console.log('VendorSelectionModal: Applied location filter, found matches:', locationFiltered.length);
-        }
-      } else if (isQAMode) {
+        console.log('VendorSelectionModal: Applied location filter, found matches:', locationFiltered.length);
+      } else {
         console.log('VendorSelectionModal: No location matches, showing all vendors');
       }
     }
 
     // Apply search filter
-    if (debouncedSearchQuery.trim()) {
-      const searchLower = debouncedSearchQuery.toLowerCase();
+    if (searchQuery.trim()) {
+      const searchLower = searchQuery.toLowerCase();
       filtered = filtered.filter(vendor =>
         vendor.name.toLowerCase().includes(searchLower) ||
         vendor.description?.toLowerCase().includes(searchLower) ||
@@ -184,36 +146,20 @@ export const VendorSelectionModal = ({
       });
     }
 
-    if (isQAMode) {
-      console.log('VendorSelectionModal: Filtering complete', { 
-        filteredCount: filtered.length,
-        originalCount: vendors.length 
-      });
-    }
+    console.log('VendorSelectionModal: Filtering complete', { 
+      filteredCount: filtered.length,
+      originalCount: vendors.length 
+    });
 
     return filtered;
-  }, [vendors, debouncedSearchQuery, location?.state, getStateAbbreviation, service, showAllVendors]);
-
-  // Abort controller for request cancellation
-  const abortControllerRef = useRef<AbortController>();
+  }, [vendors, searchQuery, location?.state, getStateAbbreviation, service, showAllVendors]);
 
   useEffect(() => {
     if (isOpen) {
-      // Cancel any in-flight requests
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
-      
-      // Only log in QA mode
-      const isQAMode = new URLSearchParams(window.location.search).get('qa') === '1';
-      if (isQAMode) {
-        console.log('VendorSelectionModal: Modal opened, loading vendors...');
-      }
-      
+      console.log('VendorSelectionModal: Modal opened, loading vendors...');
       // Reset state immediately when modal opens
       setVendors([]);
       setSearchQuery("");
-      setDebouncedSearchQuery("");
       setSelectedVendor(null);
       setShowConfirmation(false);
       setShowFunnelModal(false);
@@ -224,10 +170,7 @@ export const VendorSelectionModal = ({
       
       loadVendors();
     } else {
-      // Cancel any in-flight requests when modal closes
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
+      console.log('VendorSelectionModal: Modal closed, resetting state...');
     }
   }, [isOpen]);
 
@@ -268,16 +211,8 @@ export const VendorSelectionModal = ({
     }
   };
 
-  const loadVendors = useCallback(async () => {
-    // Create new abort controller for this request
-    abortControllerRef.current = new AbortController();
-    const signal = abortControllerRef.current.signal;
-    
-    const isQAMode = new URLSearchParams(window.location.search).get('qa') === '1';
-    if (isQAMode) {
-      console.log('VendorSelectionModal: Starting to load vendors...');
-    }
-    
+  const loadVendors = async () => {
+    console.log('VendorSelectionModal: Starting to load vendors...');
     setIsLoading(true);
     try {
       const { data: { user }, error: userError } = await supabase.auth.getUser();
@@ -286,35 +221,39 @@ export const VendorSelectionModal = ({
         return;
       }
 
-      // Check if request was aborted
-      if (signal.aborted) return;
-
-      // Query vendors using secure vendor directory view - only non-sensitive data
+      // Query vendors with calculated real-time stats - include pending vendors
       const { data, error } = await supabase
-        .from('vendor_directory')
-        .select('*')
-        .order('name', { ascending: true })
+        .from('vendors')
+        .select(`
+          id, 
+          name, 
+          description, 
+          logo_url, 
+          location, 
+          rating, 
+          review_count, 
+          is_verified, 
+          service_states, 
+          vendor_type, 
+          parent_vendor_id
+        `)
+        .eq('is_active', true)
+        .in('approval_status', ['approved', 'auto_approved', 'pending'])
+        .order('sort_order', { ascending: true })
+        .order('rating', { ascending: false })
         .limit(100);
 
-      if (isQAMode) {
-        console.log('VendorSelectionModal: Supabase response:', { data, error, dataLength: data?.length });
-      }
+      console.log('VendorSelectionModal: Supabase response:', { data, error, dataLength: data?.length });
 
       if (error) {
         console.error('VendorSelectionModal: Supabase error details:', error);
         throw error;
       }
 
-      // Check if request was aborted before processing
-      if (signal.aborted) return;
-
       // Filter vendors based on agent profile and calculate real-time stats
       const vendorsWithStatsAndFiltering = await Promise.all(
         (data || []).map(async (vendor) => {
           try {
-            // Check if request was aborted
-            if (signal.aborted) throw new Error('Request aborted');
-            
             // Check if agent matches vendor criteria - non-blocking approach
             let matchResult = true; // Default to true
             try {
@@ -328,9 +267,7 @@ export const VendorSelectionModal = ({
                 matchResult = rpcMatchResult;
               }
             } catch (rpcError) {
-              if (isQAMode) {
-                console.warn('Agent-vendor match RPC failed, allowing vendor by default:', rpcError);
-              }
+              console.warn('Agent-vendor match RPC failed, allowing vendor by default:', rpcError);
               // Keep matchResult as true
             }
 
@@ -338,7 +275,7 @@ export const VendorSelectionModal = ({
             const { data: statsData, error: statsError } = await supabase
               .rpc('calculate_vendor_stats', { vendor_uuid: vendor.id });
             
-            if (statsError && isQAMode) {
+            if (statsError) {
               console.error('Error calculating stats for vendor:', vendor.id, statsError);
             }
 
@@ -349,10 +286,7 @@ export const VendorSelectionModal = ({
               matches_agent_profile: matchResult
             };
           } catch (err) {
-            if (err.message === 'Request aborted') throw err;
-            if (isQAMode) {
-              console.error('Error processing vendor:', err);
-            }
+            console.error('Error processing vendor:', err);
             return {
               ...vendor,
               co_marketing_agents: 0,
@@ -363,9 +297,6 @@ export const VendorSelectionModal = ({
         })
       );
 
-      // Check if request was aborted before setting state
-      if (signal.aborted) return;
-
       // Apply non-blocking filtering - if no matches, show all vendors
       let filteredVendors = vendorsWithStatsAndFiltering.filter(vendor => 
         vendor.matches_agent_profile
@@ -373,19 +304,14 @@ export const VendorSelectionModal = ({
       
       // Fallback: if filtering resulted in zero vendors, show all and set flag
       if (filteredVendors.length === 0) {
-        if (isQAMode) {
-          console.warn('No vendors matched agent criteria, showing all vendors as fallback');
-        }
+        console.warn('No vendors matched agent criteria, showing all vendors as fallback');
         filteredVendors = vendorsWithStatsAndFiltering.map(v => ({ ...v, matches_agent_profile: true }));
         setShowAllVendors(true); // Auto-enable show all vendors
       }
 
       setVendors(filteredVendors);
-      if (isQAMode) {
-        console.log('VendorSelectionModal: Vendors set successfully with live stats and filtering, count:', filteredVendors.length);
-      }
+      console.log('VendorSelectionModal: Vendors set successfully with live stats and filtering, count:', filteredVendors.length);
     } catch (error) {
-      if (error.message === 'Request aborted') return;
       console.error('VendorSelectionModal: Error loading vendors:', error);
       toast({
         title: "Error",
@@ -393,14 +319,10 @@ export const VendorSelectionModal = ({
         variant: "destructive",
       });
     } finally {
-      if (!signal.aborted) {
-        setIsLoading(false);
-        if (isQAMode) {
-          console.log('VendorSelectionModal: Loading complete');
-        }
-      }
+      setIsLoading(false);
+      console.log('VendorSelectionModal: Loading complete');
     }
-  }, [toast]);
+  };
 
   const handleVendorSelect = async (vendor: Vendor) => {
     if (isSelectingVendor) return;
@@ -535,9 +457,9 @@ export const VendorSelectionModal = ({
         <DialogHeader className="flex flex-row items-start justify-between space-y-0 pb-4">
           <div className="flex-1">
             <DialogTitle>Select Co-Pay Partner</DialogTitle>
-            <DialogDescription>
+            <p className="text-sm text-muted-foreground">
               Choose a vendor to help with "{service.title}" - they'll cover {service.respa_split_limit}% of the cost
-            </DialogDescription>
+            </p>
             {location?.state && (
               <p className="text-xs text-muted-foreground">
                 Showing vendors available in {location.state}

@@ -44,7 +44,6 @@ import { CreatorPayoutDashboard } from '@/components/admin/CreatorPayoutDashboar
 import BulkFAQGenerator from '@/components/admin/BulkFAQGenerator';
 import { VendorQuestionsManager } from '@/components/admin/VendorQuestionsManager';
 import { AdminHealthDashboard } from '@/components/admin/AdminHealthDashboard';
-import { DiagnosticsPanel } from '@/components/admin/DiagnosticsPanel';
 import { RetentionAnalyticsDashboard } from '@/components/admin/RetentionAnalyticsDashboard';
 import { SponsoredPlacementsManager } from '@/components/admin/SponsoredPlacementsManager';
 import { ServiceVisibilityManager } from '@/components/admin/ServiceVisibilityManager';
@@ -462,9 +461,6 @@ export default function AdminDashboard() {
                 <Badge variant="outline" className="bg-slate-50 border-slate-300 text-slate-700">
                   v2.4.1
                 </Badge>
-                <Button variant="secondary" onClick={() => navigate('/admin/diagnostics')}>
-                  System Diagnostics
-                </Button>
                 <Button variant="secondary" onClick={() => navigate('/admin/commissions')}>
                   Commissions Tracking
                 </Button>
@@ -967,10 +963,7 @@ export default function AdminDashboard() {
         </TabsContent>
 
         <TabsContent value="health" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <AdminHealthDashboard />
-            <DiagnosticsPanel />
-          </div>
+          <AdminHealthDashboard />
         </TabsContent>
 
         <TabsContent value="youtube" className="space-y-6">

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -81,23 +82,19 @@ export const useAgentData = (timeRange: number = 12) => {
         return;
       }
 
-      console.log('🔄 Starting agent data fetch for user:', user.id);
-
-      // 1. Get agent profile - use maybeSingle() to avoid errors when no data
-      console.log('📋 Fetching agent profile...');
+      // 1. Get agent profile
       const { data: agentData, error: agentError } = await supabase
         .from('agents')
         .select('*')
         .eq('user_id', user.id)
-        .maybeSingle();
+        .single();
 
-      if (agentError) {
-        console.error('Agent profile fetch error:', agentError);
+      if (agentError && agentError.code !== 'PGRST116') {
         throw agentError;
       }
 
       if (!agentData) {
-        console.log('ℹ️ No agent profile found - user is not an agent');
+        // No agent profile found - user is not an agent
         setAgent(null);
         setTransactions([]);
         setStats(null);
@@ -105,11 +102,9 @@ export const useAgentData = (timeRange: number = 12) => {
         return;
       }
 
-      console.log('✅ Agent profile found:', agentData.id);
       setAgent(agentData);
 
       // 2. Get transactions from data feed
-      console.log('📊 Fetching transaction data...');
       const cutoffDate = new Date();
       cutoffDate.setMonth(cutoffDate.getMonth() - timeRange);
 
@@ -121,8 +116,7 @@ export const useAgentData = (timeRange: number = 12) => {
         .order('close_date', { ascending: false });
 
       if (transactionError) {
-        console.warn('Transaction fetch failed:', transactionError);
-        // Don't throw - continue with empty transactions
+        throw transactionError;
       }
 
       // Convert to our Transaction format
@@ -139,66 +133,52 @@ export const useAgentData = (timeRange: number = 12) => {
         source: t.source as 'feed' | 'self_report'
       }));
 
-      console.log(`📈 Found ${formattedTransactions.length} transactions from feed`);
-
       // 3. If no transactions from feed, check for quiz responses
       let finalTransactions = formattedTransactions;
       let hasDataFeed = agentData.data_feed_active && formattedTransactions.length > 0;
       let needsQuiz = false;
 
       if (!hasDataFeed) {
-        console.log('🔍 No feed data, checking for quiz responses...');
-        try {
-          const { data: quizData, error: quizError } = await supabase
-            .from('agent_quiz_responses')
-            .select('*')
-            .eq('agent_id', agentData.id)
-            .order('created_at', { ascending: false })
-            .limit(1)
-            .maybeSingle();
+        // Check for existing quiz response
+        const { data: quizData } = await supabase
+          .from('agent_quiz_responses')
+          .select('*')
+          .eq('agent_id', agentData.id)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single();
 
-          if (quizError) {
-            console.warn('Quiz fetch error:', quizError);
-            needsQuiz = true;
-          } else if (quizData) {
-            console.log('📝 Found quiz data, generating mock transactions');
-            // Generate transactions from quiz data for stats calculation
-            const buyerTransactions: Transaction[] = Array.from({ length: quizData.buyers_count }, (_, i) => ({
-              id: `quiz-buyer-${i}`,
-              close_date: new Date(Date.now() - Math.random() * timeRange * 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-              price: Number(quizData.avg_price),
-              side: 'buyer' as const,
-              source: 'self_report' as const
-            }));
+        if (quizData) {
+          // Generate transactions from quiz data for stats calculation
+          const buyerTransactions: Transaction[] = Array.from({ length: quizData.buyers_count }, (_, i) => ({
+            id: `quiz-buyer-${i}`,
+            close_date: new Date(Date.now() - Math.random() * timeRange * 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            price: Number(quizData.avg_price),
+            side: 'buyer' as const,
+            source: 'self_report' as const
+          }));
 
-            const sellerTransactions: Transaction[] = Array.from({ length: quizData.sellers_count }, (_, i) => ({
-              id: `quiz-seller-${i}`,
-              close_date: new Date(Date.now() - Math.random() * timeRange * 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-              price: Number(quizData.avg_price),
-              side: 'seller' as const,
-              source: 'self_report' as const
-            }));
+          const sellerTransactions: Transaction[] = Array.from({ length: quizData.sellers_count }, (_, i) => ({
+            id: `quiz-seller-${i}`,
+            close_date: new Date(Date.now() - Math.random() * timeRange * 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            price: Number(quizData.avg_price),
+            side: 'seller' as const,
+            source: 'self_report' as const
+          }));
 
-            finalTransactions = [...buyerTransactions, ...sellerTransactions];
-            hasDataFeed = false;
-          } else {
-            console.log('❓ No quiz data found - user needs to complete quiz');
-            needsQuiz = true;
-          }
-        } catch (quizError) {
-          console.warn('Quiz data fetch failed:', quizError);
+          finalTransactions = [...buyerTransactions, ...sellerTransactions];
+          hasDataFeed = false;
+        } else {
           needsQuiz = true;
         }
       }
-
-      console.log(`📊 Final transaction count: ${finalTransactions.length}, hasDataFeed: ${hasDataFeed}, needsQuiz: ${needsQuiz}`);
 
       setTransactions(finalTransactions);
       calculateStats(finalTransactions, hasDataFeed, needsQuiz);
       setLoading(false);
 
     } catch (err) {
-      console.error('❌ Error fetching agent data:', err);
+      console.error('Error fetching agent data:', err);
       setError(err instanceof Error ? err.message : 'An error occurred');
       setLoading(false);
     }

@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { deferUntilIdle, createDeferredEventHandler } from '@/utils/fidOptimizer';
 
 // Launch metrics tracking for 9/1 launch
 export const LaunchMetrics = () => {
@@ -23,17 +22,15 @@ export const LaunchMetrics = () => {
     }
   };
 
-  // Track page views - defer to not block initial interaction
+  // Track page views
   useEffect(() => {
-    deferUntilIdle(() => {
-      const path = window.location.pathname;
-      trackEvent('page_view', { path });
-    });
+    const path = window.location.pathname;
+    trackEvent('page_view', { path });
   }, []);
 
-  // Track user engagement - use deferred handlers to prevent blocking
+  // Track user engagement
   useEffect(() => {
-    const handleClick = createDeferredEventHandler((e: MouseEvent) => {
+    const handleClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       const button = target.closest('button');
       const link = target.closest('a');
@@ -49,34 +46,14 @@ export const LaunchMetrics = () => {
           link_text: link.textContent?.trim() 
         });
       }
-    });
+    };
 
-    let documentHeight = 0;
-    let hasTrackedDeepScroll = false;
-    
-    const updateDocumentHeight = () => {
-      documentHeight = document.body.scrollHeight;
-    };
-    
     const handleScroll = () => {
-      if (hasTrackedDeepScroll) return;
-      
-      requestAnimationFrame(() => {
-        const scrollPercent = documentHeight > 0 
-          ? (window.scrollY / (documentHeight - window.innerHeight)) * 100 
-          : 0;
-        
-        if (scrollPercent > 75) {
-          hasTrackedDeepScroll = true;
-          trackEvent('deep_scroll', { scroll_percent: scrollPercent });
-        }
-      });
+      const scrollPercent = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
+      if (scrollPercent > 75) {
+        trackEvent('deep_scroll', { scroll_percent: scrollPercent });
+      }
     };
-    
-    // Cache document height initially and on resize
-    updateDocumentHeight();
-    const resizeObserver = new ResizeObserver(updateDocumentHeight);
-    resizeObserver.observe(document.body);
 
     document.addEventListener('click', handleClick);
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -84,7 +61,6 @@ export const LaunchMetrics = () => {
     return () => {
       document.removeEventListener('click', handleClick);
       window.removeEventListener('scroll', handleScroll);
-      resizeObserver.disconnect();
     };
   }, [user]);
 

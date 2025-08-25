@@ -259,8 +259,8 @@ export const CategoryMegaMenu = ({ selectedCategory, onCategorySelect, viewMode 
           <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[800px] p-0 z-[100] bg-background border shadow-lg pointer-events-auto" align="start" side="bottom" sideOffset={5}>
-        <div className="bg-background border rounded-lg shadow-lg relative z-10 pointer-events-auto">
+      <PopoverContent className="w-[800px] p-0 z-50 bg-background border shadow-lg" align="start" side="bottom" sideOffset={5}>
+        <div className="bg-background border rounded-lg shadow-lg relative z-10">
           <div className="p-4 border-b">
             <div className="flex items-center justify-between">
               <h3 className="font-semibold text-sm">{t('selectCategory')}</h3>

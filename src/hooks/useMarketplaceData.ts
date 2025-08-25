@@ -55,24 +55,23 @@ export interface Service {
 export interface Vendor {
   id: string;
   name: string;
-  description?: string;        // Optional - only in authenticated view
+  description: string;
   logo_url?: string;
-  website_url?: string;        // Optional - only in authenticated view
-  location?: string;           // Optional - only in authenticated view
+  website_url?: string;
+  location?: string;
   rating: number;
   review_count: number;
   is_verified: boolean;
   co_marketing_agents: number;
   campaigns_funded: number;
-  service_states?: string[];   // Optional - only in authenticated view
+  service_states?: string[];
   mls_areas?: string[];
-  service_radius_miles?: number; // Optional - only in authenticated view
+  service_radius_miles?: number;
   license_states?: string[];
   latitude?: number;
   longitude?: number;
   vendor_type?: string;
   local_representatives?: any;
-  is_premium_provider?: boolean;
 }
 
 export interface MarketplaceData {
@@ -208,12 +207,15 @@ const fetchVendors = async (): Promise<Vendor[]> => {
   const t0 = performance.now();
   logger.log('🔄 Fetching vendors from Supabase...');
   
-  // Use the secure vendor directory view for public consumption
+  // Simplified query - use existing columns only
   const { data, error } = await withTimeout(
     supabase
-      .from('vendor_directory')
+      .from('vendors')
       .select('*')
-      .order('name', { ascending: true })
+      .eq('is_active', true)
+      .in('approval_status', ['approved', 'auto_approved', 'pending'])
+      .order('sort_order', { ascending: true })
+      .order('rating', { ascending: false })
       .limit(50),
       8000, // Reduced to 8s timeout for faster recovery
       'fetchVendors'
@@ -231,25 +233,23 @@ const fetchVendors = async (): Promise<Vendor[]> => {
     ...vendor,
     id: vendor.id,
     name: vendor.name || 'Unknown Vendor',
-    // Only include optional fields if they exist (due to security restrictions)
-    description: vendor.description || undefined,
+    description: vendor.description || '',
     logo_url: vendor.logo_url,
-    website_url: vendor.website_url || undefined,
-    location: vendor.location || undefined,
+    website_url: vendor.website_url,
+    location: vendor.location,
     rating: vendor.rating || 0,
     review_count: vendor.review_count || 0,
     is_verified: vendor.is_verified || false,
     co_marketing_agents: vendor.co_marketing_agents || 0,
     campaigns_funded: vendor.campaigns_funded || 0,
-    service_states: vendor.service_states || undefined,
+    service_states: vendor.service_states || [],
     mls_areas: vendor.mls_areas || [],
-    service_radius_miles: vendor.service_radius_miles || undefined,
+    service_radius_miles: vendor.service_radius_miles,
     license_states: vendor.license_states || [],
     latitude: vendor.latitude,
     longitude: vendor.longitude,
     vendor_type: vendor.vendor_type || 'company',
     local_representatives: [],
-    is_premium_provider: vendor.is_premium_provider || false,
   }));
 
   logger.log(`✅ Fetched ${formattedVendors.length} vendors in ${duration}ms`);
@@ -358,18 +358,22 @@ const fetchCombinedMarketplaceData = async (): Promise<MarketplaceData> => {
   if (canUseDbCache) {
     try {
       const t0 = performance.now();
-      // Use RPC instead of direct table access to handle authentication
       const { data: cacheData } = await marketplaceCircuitBreaker.execute(async () =>
         await withTimeout(
-          supabase.rpc('get_marketplace_cache', { p_cache_key: 'marketplace_data' }),
+          supabase
+            .from('marketplace_cache')
+            .select('cache_data')
+            .eq('cache_key', 'marketplace_data')
+            .gt('expires_at', new Date().toISOString())
+            .maybeSingle(),
           3000,
           'marketplace_cache'
         )
       );
-      performanceMonitor.trackRequest('/marketplace_cache', 'RPC', performance.now() - t0, true, true);
-      if (cacheData && typeof cacheData === 'object' && cacheData !== null) {
+      performanceMonitor.trackRequest('/marketplace_cache', 'SELECT', performance.now() - t0, true, true);
+      if (cacheData?.cache_data && typeof cacheData.cache_data === 'object') {
         logger.log('✅ Retrieved marketplace data from database cache');
-        return cacheData as unknown as MarketplaceData;
+        return cacheData.cache_data as unknown as MarketplaceData;
       }
     } catch (error) {
       logger.log('⛔ Database cache unavailable, proceeding to live fetch', error);

@@ -15,18 +15,18 @@ import { useAgentVendorEligibility } from "@/hooks/useAgentVendorEligibility";
 interface Vendor {
   id: string;
   name: string;
-  description?: string;      // Optional - only in authenticated view
+  description: string;
   logo_url?: string;
-  website_url?: string;      // Optional - only in authenticated view  
-  location?: string;         // Optional - only in authenticated view
+  website_url?: string;
+  location?: string;
   rating: number;
   review_count: number;
   is_verified: boolean;
   co_marketing_agents: number;
   campaigns_funded: number;
-  service_states?: string[]; // Optional - only in authenticated view
+  service_states?: string[];
   mls_areas?: string[];
-  service_radius_miles?: number; // Optional - only in authenticated view
+  service_radius_miles?: number;
   license_states?: string[];
   latitude?: number;
   longitude?: number;
@@ -63,7 +63,7 @@ export const EnhancedVendorCard = ({ vendor, onConnect, onViewProfile }: Enhance
   const { trackFunnelView, trackContactRequest } = useVendorActivityTracking();
   const { isEligible, loading: eligibilityLoading } = useAgentVendorEligibility(vendor.id);
   // Determine risk level based on vendor name/description
-  const riskLevel = determineServiceRisk(vendor.name, vendor.description || '');
+  const riskLevel = determineServiceRisk(vendor.name, vendor.description);
   
   // Mock service area and budget data
   const serviceArea = vendor.location || "Service area not specified";

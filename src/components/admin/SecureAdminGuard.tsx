@@ -1,4 +1,3 @@
-
 import { ReactNode, useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -40,42 +39,18 @@ export const SecureAdminGuard: React.FC<SecureAdminGuardProps> = ({
       }
 
       try {
-        logger.log('SecureAdminGuard: Starting admin session for user', { userId: user.id });
+        // Verify admin session and security context
+        const { data, error } = await supabase.rpc('validate_admin_session_context');
         
-        // Start/refresh admin session first
-        const { data: sessionStarted, error: sessionError } = await supabase.rpc('start_admin_session');
+        if (error) throw error;
         
-        if (sessionError) {
-          logger.error('Failed to start admin session:', sessionError);
-          setSecurityError(`Failed to initialize admin session: ${sessionError.message}`);
-          return;
-        }
-
-        if (!sessionStarted) {
-          setSecurityError('Admin session creation failed. Please verify your admin privileges.');
-          return;
-        }
-
-        logger.log('SecureAdminGuard: Admin session started successfully');
-
-        // Verify admin session context
-        const { data: contextValid, error: contextError } = await supabase.rpc('validate_admin_session_context');
-        
-        if (contextError) {
-          logger.error('Admin context validation error:', contextError);
-          setSecurityError(`Admin context validation failed: ${contextError.message}`);
-          return;
-        }
-        
-        if (!contextValid) {
+        if (!data) {
           setSecurityError('Admin session validation failed. Please log out and log back in.');
           return;
         }
 
-        logger.log('SecureAdminGuard: Admin context validated successfully');
-
         // Log the admin dashboard access
-        const { error: logError } = await supabase.rpc('log_admin_operation_secure', {
+        await supabase.rpc('log_admin_operation_secure', {
           operation_type: 'dashboard_access',
           target_user_id: user.id,
           operation_data: {
@@ -84,13 +59,7 @@ export const SecureAdminGuard: React.FC<SecureAdminGuardProps> = ({
           }
         });
 
-        if (logError) {
-          logger.error('Failed to log admin operation:', logError);
-          // Don't fail on logging errors, just warn
-        }
-
         setSecurityVerified(true);
-        setSecurityError(null);
       } catch (error) {
         logger.error('Admin security verification failed:', error);
         setSecurityError(

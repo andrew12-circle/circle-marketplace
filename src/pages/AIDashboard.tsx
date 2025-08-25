@@ -9,7 +9,7 @@ import { MarketplaceOpportunities } from "@/components/ai-dashboard/MarketplaceO
 import { AIRecommendationsDashboard } from "@/components/marketplace/AIRecommendationsDashboard";
 import { useEnhancedAI } from "@/hooks/useEnhancedAI";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
 const AIDashboard = () => {

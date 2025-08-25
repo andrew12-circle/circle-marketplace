@@ -5,8 +5,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Send, Mic, MicOff, Loader2 } from 'lucide-react';
 import { useEnhancedAI } from '@/hooks/useEnhancedAI';
 import { useVoiceAssistant } from '@/hooks/useVoiceAssistant';
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/components/ui/use-toast';
 
 interface Message {
   id: string;
@@ -79,24 +78,8 @@ export const HelpAI: React.FC = () => {
     setInputValue('');
     addMessage('user', userMessage);
 
-  // Use new concierge answers function
-  try {
-    const { data, error } = await supabase.functions.invoke('concierge-answers', {
-      body: { query: userMessage }
-    });
-
-    if (error) throw error;
-    
-    if (data?.response) {
-      addMessage('ai', data.response);
-    } else {
-      throw new Error('No response received');
-    }
-  } catch (error) {
-    console.error('Concierge error:', error);
-    // Fallback to original AI function
+    // Get AI response with help context
     await getQuickInsight(userMessage);
-  }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {

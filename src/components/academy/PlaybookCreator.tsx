@@ -10,8 +10,6 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { QuickPlaybookCreator } from '@/components/academy/QuickPlaybookCreator';
 import { 
   BookOpen, 
   DollarSign, 
@@ -22,9 +20,7 @@ import {
   FileText,
   Video,
   Star,
-  Target,
-  Zap,
-  Clock
+  Target
 } from 'lucide-react';
 
 interface PlaybookTemplate {
@@ -55,7 +51,6 @@ export const PlaybookCreator = () => {
   const [loading, setLoading] = useState(true);
   const [currentStep, setCurrentStep] = useState(0);
   const [playbookData, setPlaybookData] = useState<any>({});
-  const [activeTab, setActiveTab] = useState('quick');
 
   useEffect(() => {
     fetchTemplates();
@@ -69,7 +64,6 @@ export const PlaybookCreator = () => {
       const { data, error } = await supabase
         .from('agent_playbook_templates')
         .select('*')
-        .eq('is_quick_template', false) // Get full templates only
         .order('template_name');
 
       if (error) throw error;
@@ -278,59 +272,20 @@ export const PlaybookCreator = () => {
     );
   }
 
-  // If user is in a traditional playbook flow, show the traditional interface
-  if (selectedTemplate && progress) {
-    return renderTraditionalCreator();
-  }
-
-  // Main interface with tabs
-  return (
-    <div className="space-y-6">
-      <div className="text-center space-y-4">
-        <div className="flex justify-center">
-          <div className="p-3 bg-primary/10 rounded-full">
-            <BookOpen className="w-8 h-8 text-primary" />
-          </div>
-        </div>
-        <div>
-          <h1 className="text-3xl font-bold">Create Your Agent Playbook</h1>
-          <p className="text-lg text-muted-foreground mt-2">
-            Share your success strategies and earn 70% on each $99 sale
-          </p>
-        </div>
-      </div>
-
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="quick" className="flex items-center gap-2">
-            <Zap className="w-4 h-4" />
-            Quick Creator (30-90 min)
-          </TabsTrigger>
-          <TabsTrigger value="traditional" className="flex items-center gap-2">
-            <Clock className="w-4 h-4" />
-            Traditional (2-10 hours)
-          </TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="quick" className="mt-6">
-          <QuickPlaybookCreator />
-        </TabsContent>
-        
-        <TabsContent value="traditional" className="mt-6">
-          <div className="space-y-6">{renderTraditionalTemplateSelection()}</div>
-        </TabsContent>
-      </Tabs>
-    </div>
-  );
-
-  function renderTraditionalTemplateSelection() {
+  // Show template selection if no playbook in progress
+  if (!selectedTemplate || !progress) {
     return (
-      <>
+      <div className="space-y-6">
         <div className="text-center space-y-4">
+          <div className="flex justify-center">
+            <div className="p-3 bg-primary/10 rounded-full">
+              <BookOpen className="w-8 h-8 text-primary" />
+            </div>
+          </div>
           <div>
-            <h2 className="text-2xl font-bold">Traditional Playbook Creator</h2>
-            <p className="text-muted-foreground">
-              Comprehensive templates with detailed guidance for in-depth playbooks
+            <h1 className="text-3xl font-bold">Create Your Agent Playbook</h1>
+            <p className="text-lg text-muted-foreground mt-2">
+              Share your success strategies and earn 70% on each $99 sale
             </p>
           </div>
         </div>
@@ -360,7 +315,7 @@ export const PlaybookCreator = () => {
         </div>
 
         <div className="space-y-4">
-          <h2 className="text-xl font-semibold">Choose Your Comprehensive Template</h2>
+          <h2 className="text-xl font-semibold">Choose Your Playbook Template</h2>
           <div className="grid gap-4">
             {templates.map((template) => (
               <Card key={template.id} className="cursor-pointer hover:shadow-md transition-shadow">
@@ -389,82 +344,78 @@ export const PlaybookCreator = () => {
             ))}
           </div>
         </div>
-      </>
-    );
-  }
-
-  function renderTraditionalCreator() {
-    if (!selectedTemplate || !progress) return null;
-
-    // Traditional playbook creation interface
-    const currentSection = selectedTemplate.sections[currentStep];
-    const totalSections = selectedTemplate.sections.length;
-    const progressPercentage = ((progress.completed_sections?.length || 0) / totalSections) * 100;
-
-    return (
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold">{selectedTemplate.template_name}</h1>
-            <p className="text-muted-foreground">Section {currentStep + 1} of {totalSections}</p>
-          </div>
-          <Badge variant="outline">
-            {Math.round(progressPercentage)}% Complete
-          </Badge>
-        </div>
-
-        <Progress value={progressPercentage} className="w-full" />
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              {currentSection?.type === 'story' && <FileText className="w-5 h-5" />}
-              {currentSection?.type === 'video' && <Video className="w-5 h-5" />}
-              {currentSection?.type === 'data' && <Target className="w-5 h-5" />}
-              {currentSection?.type === 'tools' && <Star className="w-5 h-5" />}
-              {currentSection?.title}
-            </CardTitle>
-            <p className="text-muted-foreground">{currentSection?.description}</p>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <SectionForm
-              section={currentSection}
-              sectionIndex={currentStep}
-              existingData={playbookData[`section_${currentStep}`] || {}}
-              onSave={(data) => saveSection(currentStep, data)}
-            />
-            
-            <div className="flex justify-between">
-              <Button 
-                variant="outline" 
-                onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
-                disabled={currentStep === 0}
-              >
-                Previous
-              </Button>
-              
-              {currentStep < totalSections - 1 ? (
-                <Button 
-                  onClick={() => setCurrentStep(currentStep + 1)}
-                >
-                  Next Section
-                </Button>
-              ) : (
-                <Button 
-                  onClick={completePlaybook}
-                  disabled={progressPercentage < 100}
-                  className="bg-green-600 hover:bg-green-700"
-                >
-                  <CheckCircle className="w-4 h-4 mr-2" />
-                  Publish Playbook
-                </Button>
-              )}
-            </div>
-          </CardContent>
-        </Card>
       </div>
     );
   }
+
+  // Show playbook creation interface
+  const currentSection = selectedTemplate.sections[currentStep];
+  const totalSections = selectedTemplate.sections.length;
+  const progressPercentage = ((progress.completed_sections?.length || 0) / totalSections) * 100;
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-bold">{selectedTemplate.template_name}</h1>
+          <p className="text-muted-foreground">Section {currentStep + 1} of {totalSections}</p>
+        </div>
+        <Badge variant="outline">
+          {Math.round(progressPercentage)}% Complete
+        </Badge>
+      </div>
+
+      <Progress value={progressPercentage} className="w-full" />
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            {currentSection?.type === 'story' && <FileText className="w-5 h-5" />}
+            {currentSection?.type === 'video' && <Video className="w-5 h-5" />}
+            {currentSection?.type === 'data' && <Target className="w-5 h-5" />}
+            {currentSection?.type === 'tools' && <Star className="w-5 h-5" />}
+            {currentSection?.title}
+          </CardTitle>
+          <p className="text-muted-foreground">{currentSection?.description}</p>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <SectionForm
+            section={currentSection}
+            sectionIndex={currentStep}
+            existingData={playbookData[`section_${currentStep}`] || {}}
+            onSave={(data) => saveSection(currentStep, data)}
+          />
+          
+          <div className="flex justify-between">
+            <Button 
+              variant="outline" 
+              onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
+              disabled={currentStep === 0}
+            >
+              Previous
+            </Button>
+            
+            {currentStep < totalSections - 1 ? (
+              <Button 
+                onClick={() => setCurrentStep(currentStep + 1)}
+              >
+                Next Section
+              </Button>
+            ) : (
+              <Button 
+                onClick={completePlaybook}
+                disabled={progressPercentage < 100}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                <CheckCircle className="w-4 h-4 mr-2" />
+                Publish Playbook
+              </Button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
 };
 
 // Section form component for different section types
