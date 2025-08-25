@@ -1069,7 +1069,8 @@ export const ServiceManagementPanel = () => {
                       'cat:signs': 'Signage & Branding',
                       'cat:presentations': 'Presentations',
                       'cat:branding': 'Branding',
-                      'cat:client-retention': 'Client Retention'
+                       'cat:client-retention': 'Client Retention',
+                       'cat:transaction-coordinator': 'Transaction Coordinator'
                     }[tag] || tag.replace('cat:', '');
                     return (
                       <Badge key={tag} variant="secondary" className="text-xs">
@@ -1231,7 +1232,8 @@ export const ServiceManagementPanel = () => {
                               { tag: 'cat:signs', label: 'Signage & Branding' },
                               { tag: 'cat:presentations', label: 'Presentations' },
                               { tag: 'cat:branding', label: 'Branding' },
-                              { tag: 'cat:client-retention', label: 'Client Retention' }
+                               { tag: 'cat:client-retention', label: 'Client Retention' },
+                               { tag: 'cat:transaction-coordinator', label: 'Transaction Coordinator' }
                           ].map(({ tag, label }) => (
                             <div key={tag} className="flex items-center space-x-2">
                               <Switch

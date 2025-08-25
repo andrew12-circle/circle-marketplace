@@ -213,6 +213,14 @@ const OLD_SCHOOL_CATEGORIES = [
     description: "Relationship Building",
     color: "bg-red-500",
     iconColor: "text-white"
+  },
+  {
+    name: "Transaction Coordinator",
+    icon: FileText,
+    tags: ["cat:transaction-coordinator"],
+    description: "Transaction Management",
+    color: "bg-blue-600",
+    iconColor: "text-white"
   }
 ];
 

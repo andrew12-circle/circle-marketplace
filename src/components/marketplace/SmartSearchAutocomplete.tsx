@@ -140,7 +140,10 @@ export const SmartSearchAutocomplete = ({
       ['event kits', 'Client Event Kits'],
       ['gifting', 'Client Retention'],
       ['client appreciation', 'Client Retention'],
-      ['closing gifts', 'Client Retention']
+      ['closing gifts', 'Client Retention'],
+      ['transaction coordinator', 'Transaction Coordinator'],
+      ['transaction management', 'Transaction Coordinator'],
+      ['closing coordinator', 'Transaction Coordinator']
     ]);
 
     // Check for keyword matches first

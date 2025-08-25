@@ -48,7 +48,8 @@ export const AddProductModal = ({ open, onOpenChange, onProductAdded }: AddProdu
     "Signage & Branding",
     "Presentations",
     "Branding",
-    "Client Retention"
+    "Client Retention",
+    "Transaction Coordinator"
   ];
 
   const handleSecureSubmit = async (sanitizedData: Record<string, string>) => {

@@ -48,7 +48,8 @@ export const YouTubeImportPanel = () => {
     'Signage & Branding', 
     'Presentations',
     'Branding',
-    'Client Retention'
+    'Client Retention',
+    'Transaction Coordinator'
   ];
 
   // Extract YouTube video ID from various URL formats
