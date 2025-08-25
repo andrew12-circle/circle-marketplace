@@ -1,22 +1,8 @@
-// Network optimization utilities for critical resource chains
+// Network optimization utilities - simplified to avoid non-existent chunk preloading
 export const optimizeNetworkChains = () => {
   if (typeof window === 'undefined') return;
 
-  // Preload critical chunks that will be needed soon
-  const criticalChunks = [
-    '/assets/react-vendor',
-    '/assets/radix-vendor', 
-    '/assets/router-vendor'
-  ];
-
-  // Use high priority resource hints
-  criticalChunks.forEach(chunk => {
-    const link = document.createElement('link');
-    link.rel = 'modulepreload';
-    link.href = `${chunk}.js`;
-    link.setAttribute('fetchpriority', 'high');
-    document.head.appendChild(link);
-  });
+  // Only preload resources we know exist - skip dynamic chunk preloading
 
   // Preconnect to external domains early
   const externalDomains = [

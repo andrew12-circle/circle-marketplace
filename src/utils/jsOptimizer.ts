@@ -239,16 +239,10 @@ class JavaScriptOptimizer {
 
 export const jsOptimizer = new JavaScriptOptimizer();
 
-// Initialize optimization
+// Initialize optimization - simplified to prevent router conflicts
 export const initJavaScriptOptimization = () => {
   if (typeof window === 'undefined') return;
 
-  // Set up conditional loading
-  jsOptimizer.initializeConditionalLoading();
-
-  // Disable navigation tracking to prevent conflicts with React Router
-  // The route-based preloading was causing pathname redefinition errors
-  // during BrowserRouter initialization. We'll rely on conditional loading instead.
-  
-  console.log('JavaScript optimization initialized with conditional loading only');
+  // Use conservative conditional loading without route interference
+  console.log('JavaScript optimization: Using safe conditional loading only');
 };

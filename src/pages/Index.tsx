@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Crown } from "lucide-react";
 import { ResponsiveLogo } from "@/components/ui/optimized-image";
 import { CriticalContent, NonCriticalContent, useCriticalResourceHints } from "@/components/ui/critical-content";
-import { conditionalLoader } from "@/utils/conditionalLoader";
+import { ErrorBoundary } from "@/components/ui/error-boundary";
 
 import { CartDrawer } from "@/components/marketplace/CartDrawer";
 import { UserMenu } from "@/components/UserMenu";
@@ -38,11 +38,7 @@ export default function Index() {
   // Preload critical resources
   useCriticalResourceHints();
 
-  // Conditionally preload modules based on user behavior
-  React.useEffect(() => {
-    // Preload charts and forms when user is idle (likely to interact)
-    conditionalLoader.preloadOnIdle(['charts', 'forms']);
-  }, []);
+  // Remove overly aggressive preloading that was causing startup issues
 
   return (
     <div className="min-h-screen bg-background">
@@ -112,14 +108,16 @@ export default function Index() {
 
       {/* Main content area */}
       <main className="flex-1">
-        {/* Marketplace content with lazy loading - removed CriticalContent wrapper */}
-        <Suspense fallback={
-          <div className="min-h-screen flex items-center justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          </div>
-        }>
-          <Marketplace />
-        </Suspense>
+        {/* Marketplace content with error boundary and lazy loading */}
+        <ErrorBoundary>
+          <Suspense fallback={
+            <div className="min-h-screen flex items-center justify-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+          }>
+            <Marketplace />
+          </Suspense>
+        </ErrorBoundary>
         
         {/* Non-critical footer content */}
         <NonCriticalContent>

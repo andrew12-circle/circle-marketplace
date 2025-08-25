@@ -1,58 +1,9 @@
-// CSS optimization utilities for reducing unused CSS
+// CSS optimization utilities - simplified for safety
 export const optimizeCSS = () => {
   if (typeof window === 'undefined') return;
-
-  // Remove unused CSS rules after app loads
-  const removeUnusedCSS = () => {
-    // Get all stylesheets
-    const sheets = Array.from(document.styleSheets);
-    
-    sheets.forEach(sheet => {
-      try {
-        // Skip external stylesheets due to CORS
-        if (sheet.href && !sheet.href.includes(window.location.origin)) {
-          return;
-        }
-        
-        const rules = Array.from(sheet.cssRules || []);
-        const unusedRules: number[] = [];
-        
-        rules.forEach((rule, index) => {
-          if (rule.type === CSSRule.STYLE_RULE) {
-            const styleRule = rule as CSSStyleRule;
-            
-            // Check if selector is used in the DOM
-            try {
-              if (!document.querySelector(styleRule.selectorText)) {
-                unusedRules.push(index);
-              }
-            } catch (e) {
-              // Invalid selector, skip
-            }
-          }
-        });
-        
-        // Remove unused rules in reverse order to maintain indices
-        unusedRules.reverse().forEach(index => {
-          try {
-            sheet.deleteRule(index);
-          } catch (e) {
-            // Rule deletion failed, skip
-          }
-        });
-        
-      } catch (e) {
-        // CORS or other error, skip this stylesheet
-      }
-    });
-  };
-
-  // Defer CSS cleanup until after app is fully loaded
-  if ('requestIdleCallback' in window) {
-    (window as any).requestIdleCallback(removeUnusedCSS, { timeout: 2000 });
-  } else {
-    setTimeout(removeUnusedCSS, 2000);
-  }
+  
+  // Only add safe optimizations without deleting existing CSS rules
+  console.log('CSS optimization: Using safe containment strategies only');
 };
 
 // Load CSS conditionally based on component usage

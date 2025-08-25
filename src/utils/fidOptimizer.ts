@@ -1,4 +1,5 @@
 // First Input Delay optimization utilities
+import React from 'react';
 import { taskScheduler } from './taskScheduler';
 
 /**
@@ -41,6 +42,8 @@ export const scheduleStateUpdate = <T>(setState: React.Dispatch<React.SetStateAc
  * Defer non-critical operations until after initial paint
  */
 export const deferUntilIdle = (operation: () => void) => {
+  if (typeof window === 'undefined') return;
+  
   if ('requestIdleCallback' in window) {
     (window as any).requestIdleCallback(operation, { timeout: 1000 });
   } else {
@@ -61,6 +64,8 @@ export const createDeferredEventHandler = (handler: (...args: any[]) => void) =>
  * Initialize app components in priority order
  */
 export const initializeAppWithPriority = () => {
+  if (typeof window === 'undefined') return;
+  
   // Critical: Allow immediate input responsiveness
   taskScheduler.schedule(() => {
     // Enable basic interactions first
