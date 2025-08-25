@@ -41,9 +41,6 @@ import { SmartSearchAutocomplete } from "./SmartSearchAutocomplete";
 import { RecentlyViewedServices } from "./RecentlyViewedServices";
 import { ServiceBundles } from "./ServiceBundles";
 import { QAOverlay } from "../common/QAOverlay";
-import { MarketplaceSortingControls } from "./MarketplaceSortingControls";
-import { HoldoutRibbon } from "./HoldoutRibbon";
-import { useAdminStatus } from "@/hooks/useAdminStatus";
 
 interface FilterState {
   category: string;
@@ -227,21 +224,8 @@ export const MarketplaceGrid = () => {
   // Enable new landing experience for all users
   const showNewLanding = true;
 
-  // Check admin status for ranking override
-  const { data: isAdmin } = useAdminStatus();
-  
-  // Paginated services (server-side filters + pagination) - defer until user interacts
-  const { variant } = useABTest('ranking_v1', { holdout: 0.1 });
-  
-  // Admin state for sorting control
-  const [adminSortingOverride, setAdminSortingOverride] = useState<'ranked' | 'recent' | null>(null);
-  
-  // Determine active sorting strategy: admin override > A/B test
-  const orderStrategy = isAdmin && adminSortingOverride ? 
-    adminSortingOverride : 
-    (variant === 'holdout' ? 'recent' : 'ranked');
-  
-  const isInHoldout = !isAdmin && variant === 'holdout' && !adminSortingOverride;
+  // Always use ranked sorting for now
+  const orderStrategy = 'ranked';
   const [enablePagination, setEnablePagination] = useState(true); // Enable by default to show services immediately
 
   // Only enable pagination if marketplace is enabled by admin
@@ -379,10 +363,6 @@ export const MarketplaceGrid = () => {
   
   // Check for QA mode
   const isQAMode = new URLSearchParams(window.location.search).get('qa') === '1';
-  
-  const handleSortingStrategyChange = (strategy: 'ranked' | 'recent') => {
-    setAdminSortingOverride(strategy);
-  };
 
   // Combine saved services from hook and local state
   const allSavedServiceIds = [...savedServiceIds, ...localSavedServiceIds];
@@ -499,20 +479,6 @@ export const MarketplaceGrid = () => {
     <>
       <div className="min-h-screen bg-background">
         <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
-          {/* Admin Sorting Controls */}
-          {isAdmin && (
-            <div className="mb-4">
-              <MarketplaceSortingControls
-                currentStrategy={orderStrategy}
-                onStrategyChange={handleSortingStrategyChange}
-                isAdmin={isAdmin}
-              />
-            </div>
-          )}
-
-          {/* Holdout Ribbon for Non-Admin Users */}
-          <HoldoutRibbon isVisible={isInHoldout} />
-
           {/* QA Mode Indicator and Controls */}
           {isQAMode && (
             <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center justify-between">
