@@ -124,6 +124,7 @@ if (typeof window !== 'undefined' && window.appLoadTimeout) {
 // Add react-loaded class after React commits
 setTimeout(() => {
   document.body.classList.add('react-loaded');
+  document.body.classList.remove('show-fallback');
   if (typeof window !== 'undefined' && window.cssTimeout) {
     clearTimeout(window.cssTimeout);
   }

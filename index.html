@@ -293,7 +293,8 @@
       }
       
       /* Hide fallback critical content when React loads */
-      #critical-content { display: block; }
+      #critical-content { display: none; }
+      .show-fallback #critical-content { display: block; }
       .react-loaded #critical-content { display: none; }
     </style>
     
@@ -354,12 +355,16 @@
       
       // App loading timeout guard
       window.appLoadTimeout = setTimeout(function() {
-        console.warn('App loading timeout - showing fallback');
         var criticalDiv = document.getElementById('critical-content');
-        if (criticalDiv && !document.body.classList.contains('react-loaded')) {
+        var root = document.getElementById('root');
+        if (criticalDiv && root && 
+            !document.body.classList.contains('react-loaded') && 
+            root.children.length === 0) {
+          console.warn('React didn\'t mount within 10s, showing minimal fallback');
+          document.body.classList.add('show-fallback');
           criticalDiv.style.display = 'block';
         }
-      }, 5000);
+      }, 10000);
     </script>
     <noscript>
       <link rel="stylesheet" href="/assets/index-1_cDzJxw.css">
@@ -529,35 +534,5 @@
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
     
-    <!-- Hide critical content once React loads -->
-    <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        const criticalContent = document.getElementById('critical-content');
-        const root = document.getElementById('root');
-
-        // If React hasn't mounted, reveal the fallback after 800ms (prevents brief flash)
-        setTimeout(() => {
-          if (criticalContent && root && root.children.length === 0) {
-            criticalContent.style.display = 'block';
-          }
-        }, 800);
-        
-        // Hide critical content once React content is ready
-        const observer = new MutationObserver(function(mutations) {
-          for (const mutation of mutations) {
-            if (mutation.addedNodes.length > 0) {
-              // Hide fallback quickly once React renders
-              if (criticalContent && root.children.length > 0) {
-                criticalContent.style.display = 'none';
-              }
-              observer.disconnect();
-              break;
-            }
-          }
-        });
-        
-        observer.observe(root, { childList: true, subtree: true });
-      });
-    </script>
   </body>
 </html>
