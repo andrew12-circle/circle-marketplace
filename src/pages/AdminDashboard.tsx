@@ -462,6 +462,9 @@ export default function AdminDashboard() {
                 <Badge variant="outline" className="bg-slate-50 border-slate-300 text-slate-700">
                   v2.4.1
                 </Badge>
+                <Button variant="secondary" onClick={() => navigate('/admin/diagnostics')}>
+                  System Diagnostics
+                </Button>
                 <Button variant="secondary" onClick={() => navigate('/admin/commissions')}>
                   Commissions Tracking
                 </Button>

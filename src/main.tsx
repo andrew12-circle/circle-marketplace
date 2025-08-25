@@ -58,6 +58,7 @@ const AdvancedFeaturesDashboard = lazy(() => import("./pages/AdvancedFeaturesDas
 const AIDashboard = lazy(() => import("./pages/AIDashboard"));
 const AdminAccounting = lazy(() => import("./pages/AdminAccounting").then(m => ({ default: m.AdminAccounting })));
 const AdminCommissions = lazy(() => import("./pages/AdminCommissions"));
+const AdminDiagnostics = lazy(() => import("./pages/AdminDiagnostics"));
 const CreatorOnboardingPage = lazy(() => import("./pages/CreatorOnboarding"));
 const Welcome = lazy(() => import("./pages/Welcome"));
 const CompliancePage = lazy(() => import("./pages/CompliancePage"));
@@ -202,6 +203,7 @@ createRoot(document.getElementById("root")!).render(
                   <Route path="/ai-dashboard" element={<AIDashboard />} />
                   <Route path="/admin/accounting" element={<AdminAccounting />} />
                   <Route path="/admin/commissions" element={<AdminCommissions />} />
+                  <Route path="/admin/diagnostics" element={<AdminDiagnostics />} />
                   <Route path="/creator-onboarding" element={<CreatorOnboardingPage />} />
                   <Route path="/welcome" element={<Welcome />} />
                   <Route path="/compliance" element={<CompliancePage />} />
