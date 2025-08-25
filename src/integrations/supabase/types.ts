@@ -7722,6 +7722,10 @@ export type Database = {
       }
     }
     Functions: {
+      admin_self_check: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       audit_security_definer_functions: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -8277,7 +8281,7 @@ export type Database = {
       }
       validate_admin_session_context: {
         Args: Record<PropertyKey, never>
-        Returns: boolean
+        Returns: Json
       }
       validate_and_sanitize_text_input: {
         Args: { input_text: string }
