@@ -630,7 +630,11 @@ export const ServiceManagementPanel = () => {
     }
   };
 
-  const handleVerificationToggle = async (serviceId: string, currentStatus: boolean) => {
+  const handleVerificationToggle = async (serviceId: string, currentStatus: boolean, event?: React.MouseEvent) => {
+    if (event) {
+      event.stopPropagation();
+    }
+    
     try {
       const { error } = await supabase
         .from('services')
@@ -666,7 +670,11 @@ export const ServiceManagementPanel = () => {
     }
   };
 
-  const handleVisibilityToggle = async (serviceId: string, currentStatus: boolean) => {
+  const handleVisibilityToggle = async (serviceId: string, currentStatus: boolean, event?: React.MouseEvent) => {
+    if (event) {
+      event.stopPropagation();
+    }
+    
     try {
       const { error } = await supabase
         .from('services')
@@ -702,7 +710,11 @@ export const ServiceManagementPanel = () => {
     }
   };
 
-  const handleAffiliateToggle = async (serviceId: string, currentStatus: boolean) => {
+  const handleAffiliateToggle = async (serviceId: string, currentStatus: boolean, event?: React.MouseEvent) => {
+    if (event) {
+      event.stopPropagation();
+    }
+    
     try {
       const { error } = await supabase
         .from('services')
@@ -738,7 +750,11 @@ export const ServiceManagementPanel = () => {
     }
   };
 
-  const handleBookingLinkToggle = async (serviceId: string, currentStatus: boolean) => {
+  const handleBookingLinkToggle = async (serviceId: string, currentStatus: boolean, event?: React.MouseEvent) => {
+    if (event) {
+      event.stopPropagation();
+    }
+    
     try {
       const { error } = await supabase
         .from('services')
@@ -978,7 +994,6 @@ export const ServiceManagementPanel = () => {
                                    <Switch
                                      checked={service.is_verified || false}
                                      onCheckedChange={() => handleVerificationToggle(service.id, service.is_verified || false)}
-                                     onClick={(e) => e.stopPropagation()}
                                    />
                                  </div>
                                  <div className="flex items-center gap-2">
@@ -986,7 +1001,6 @@ export const ServiceManagementPanel = () => {
                                    <Switch
                                      checked={service.is_active || false}
                                      onCheckedChange={() => handleVisibilityToggle(service.id, service.is_active || false)}
-                                     onClick={(e) => e.stopPropagation()}
                                    />
                                  </div>
                                </div>
@@ -998,7 +1012,6 @@ export const ServiceManagementPanel = () => {
                                    <Switch
                                      checked={service.is_affiliate || false}
                                      onCheckedChange={() => handleAffiliateToggle(service.id, service.is_affiliate || false)}
-                                     onClick={(e) => e.stopPropagation()}
                                    />
                                  </div>
                                  <div className="flex items-center gap-2">
@@ -1006,7 +1019,6 @@ export const ServiceManagementPanel = () => {
                                    <Switch
                                      checked={service.is_booking_link || false}
                                      onCheckedChange={() => handleBookingLinkToggle(service.id, service.is_booking_link || false)}
-                                     onClick={(e) => e.stopPropagation()}
                                    />
                                  </div>
                                </div>
