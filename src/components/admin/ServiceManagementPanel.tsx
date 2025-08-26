@@ -31,6 +31,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ServiceConsultationEmails } from './ServiceConsultationEmails';
 import { AdminNotes } from './AdminNotes';
+import { ServiceDisclaimerSection } from './ServiceDisclaimerSection';
 
 interface PricingFeature {
   id: string;
@@ -1088,8 +1089,9 @@ export const ServiceManagementPanel = () => {
           </CardHeader>
           <CardContent>
             <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
+              <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="details">Service Details</TabsTrigger>
+                <TabsTrigger value="disclaimer">Disclaimer</TabsTrigger>
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -1431,6 +1433,13 @@ export const ServiceManagementPanel = () => {
                     </div>
                   </div>
                 )}
+              </TabsContent>
+
+              <TabsContent value="disclaimer" className="space-y-4">
+                <ServiceDisclaimerSection
+                  serviceId={selectedService.id}
+                  serviceName={selectedService.title}
+                />
               </TabsContent>
 
               <TabsContent value="funnel" className="space-y-4">

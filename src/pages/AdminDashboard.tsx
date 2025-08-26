@@ -22,7 +22,7 @@ import { YouTubeChannelImportPanel } from '@/components/admin/YouTubeChannelImpo
 
 import { RESPAComplianceManager } from '@/components/admin/RESPAComplianceManager';
 import { RESPADisclaimerManager } from '@/components/admin/RESPADisclaimerManager';
-import { ServiceDisclaimerManager } from '@/components/admin/ServiceDisclaimerManager';
+
 import { ServiceReviewsManager } from '@/components/admin/ServiceReviewsManager';
 import RESPADocumentationViewer from '@/components/admin/RESPADocumentationViewer';
 import VendorSSPManager from '@/components/admin/VendorSSPManager';
@@ -918,7 +918,6 @@ export default function AdminDashboard() {
 
         <TabsContent value="services" className="space-y-6">
           <ServiceManagementPanel />
-          <ServiceDisclaimerManager />
           <BulkFAQGenerator />
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <ServiceImportPanel />
