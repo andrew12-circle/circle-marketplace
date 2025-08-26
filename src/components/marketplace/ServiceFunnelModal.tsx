@@ -23,6 +23,7 @@ import { ReviewRatingSystem } from "@/components/marketplace/ReviewRatingSystem"
 import { CustomersAlsoViewed } from "@/components/marketplace/CustomersAlsoViewed";
 import { SafeHTML } from "@/utils/htmlSanitizer";
 import { computePotentialCopayForService, extractNumericPrice } from "@/utils/dealPricing";
+import { useSponsoredTracking } from '@/hooks/useSponsoredTracking';
 
 // Helper: detect and embed YouTube videos
 const getYouTubeId = (url: string): string | null => {
@@ -62,6 +63,7 @@ interface Service {
   duration?: string;
   requires_quote?: boolean;
   website_url?: string;
+  direct_purchase_enabled?: boolean;
   pricing_tiers?: Array<{
     id: string;
     name: string;
@@ -213,6 +215,7 @@ export const ServiceFunnelModal = ({
     trackEvent,
     trackWebsiteClick
   } = useProviderTracking(service.id, isOpen);
+  const { trackClick } = useSponsoredTracking();
   const [openItem, setOpenItem] = useState<string | undefined>("question-1");
 
   // Use service verification status from database  
@@ -335,6 +338,30 @@ export const ServiceFunnelModal = ({
     toast("Processing payment with agent points...", {
       description: "Your points will be deducted upon successful processing."
     });
+    onClose();
+  };
+
+  const handleBuyNow = async () => {
+    if (!service.website_url) return;
+    
+    // Track sponsored click if applicable
+    const isSponsored = (service as any).is_sponsored;
+    if (isSponsored) {
+      await trackClick({
+        serviceId: service.id,
+        placement: 'vendor_profile',
+        context: 'buy_now_button'
+      });
+    }
+    
+    // Add UTM parameters for tracking
+    const url = new URL(service.website_url);
+    url.searchParams.set('utm_source', 'circle_marketplace');
+    url.searchParams.set('utm_medium', 'service_funnel');
+    url.searchParams.set('utm_campaign', 'buy_now');
+    url.searchParams.set('utm_content', service.id);
+    
+    window.open(url.toString(), '_blank', 'noopener,noreferrer');
     onClose();
   };
   const renderStarRating = (rating: number, size = "sm") => {
@@ -796,22 +823,29 @@ export const ServiceFunnelModal = ({
                      <CardContent className="p-6">
                        <h3 className="text-xl font-bold text-gray-900 mb-6">Quick Actions</h3>
                        
-                       {/* Action Buttons */}
-                       <div className="space-y-3">
-                         <Button onClick={() => setIsConsultationFlowOpen(true)} className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all">
-                           <Calendar className="w-5 h-5 mr-2" />
-                           Book Consultation
-                         </Button>
-                         
-                           <Button variant="outline" onClick={() => {
-                        const rawUrl = service.website_url || service.vendor?.website_url;
-                        if (rawUrl) {
-                          trackWebsiteClick(rawUrl, service.vendor?.id, 'vendor_website');
-                        }
-                      }} disabled={!service.website_url && !service.vendor?.website_url} className="w-full border-2 border-gray-300 hover:border-gray-400 py-3 rounded-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed">
-                              <Building className="w-5 h-5 mr-2" />
-                              {service.website_url || service.vendor?.website_url ? 'View Our Website' : 'Website Not Available'}
+                        {/* Action Buttons */}
+                        <div className="space-y-3">
+                          {service.direct_purchase_enabled && service.website_url ? (
+                            <Button onClick={handleBuyNow} className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all">
+                              <ShoppingCart className="w-5 h-5 mr-2" />
+                              Buy Now
                             </Button>
+                          ) : (
+                            <Button onClick={() => setIsConsultationFlowOpen(true)} className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all">
+                              <Calendar className="w-5 h-5 mr-2" />
+                              Book Consultation
+                            </Button>
+                          )}
+                          
+                            <Button variant="outline" onClick={() => {
+                         const rawUrl = service.website_url || service.vendor?.website_url;
+                         if (rawUrl) {
+                           trackWebsiteClick(rawUrl, service.vendor?.id, 'vendor_website');
+                         }
+                       }} disabled={!service.website_url && !service.vendor?.website_url} className="w-full border-2 border-gray-300 hover:border-gray-400 py-3 rounded-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed">
+                               <Building className="w-5 h-5 mr-2" />
+                               {service.website_url || service.vendor?.website_url ? 'View Our Website' : 'Website Not Available'}
+                             </Button>
                          
                           
                            {service.pricing_tiers?.length > 0 && <Button variant="outline" onClick={() => {
@@ -949,16 +983,32 @@ export const ServiceFunnelModal = ({
 
               {/* Action Buttons */}
               <div className="mt-12 flex flex-col sm:flex-row gap-4 justify-center max-w-2xl mx-auto">
-                <Button onClick={() => setIsConsultationFlowOpen(true)} className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all flex-1">
-                  <Calendar className="w-5 h-5 mr-2" />
-                  Book Consultation for {selectedPkg?.name || 'Selected Package'}
-                  <ArrowRight className="w-5 h-5 ml-2" />
-                </Button>
-                {!selectedPkg?.requestPricing && (
-                  <Button variant="outline" onClick={() => setIsPricingChoiceOpen(true)} className="border-2 border-gray-300 hover:border-gray-400 px-8 py-4 rounded-xl font-semibold text-lg flex-1">
-                    <ShoppingCart className="w-5 h-5 mr-2" />
-                    Add to Cart - ${selectedPkg?.price || '0'}
-                  </Button>
+                {service.direct_purchase_enabled && service.website_url ? (
+                  <>
+                    <Button onClick={handleBuyNow} className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all flex-1">
+                      <ShoppingCart className="w-5 h-5 mr-2" />
+                      Buy Now - ${selectedPkg?.price || '0'}
+                      <ArrowRight className="w-5 h-5 ml-2" />
+                    </Button>
+                    <Button variant="outline" onClick={() => setIsConsultationFlowOpen(true)} className="border-2 border-gray-300 hover:border-gray-400 px-8 py-4 rounded-xl font-semibold text-lg flex-1">
+                      <Calendar className="w-5 h-5 mr-2" />
+                      Book Consultation
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button onClick={() => setIsConsultationFlowOpen(true)} className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all flex-1">
+                      <Calendar className="w-5 h-5 mr-2" />
+                      Book Consultation for {selectedPkg?.name || 'Selected Package'}
+                      <ArrowRight className="w-5 h-5 ml-2" />
+                    </Button>
+                    {!selectedPkg?.requestPricing && (
+                      <Button variant="outline" onClick={() => setIsPricingChoiceOpen(true)} className="border-2 border-gray-300 hover:border-gray-400 px-8 py-4 rounded-xl font-semibold text-lg flex-1">
+                        <ShoppingCart className="w-5 h-5 mr-2" />
+                        Add to Cart - ${selectedPkg?.price || '0'}
+                      </Button>
+                    )}
+                  </>
                 )}
               </div>
 

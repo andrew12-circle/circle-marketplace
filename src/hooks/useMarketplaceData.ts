@@ -33,6 +33,7 @@ export interface Service {
   requires_quote?: boolean;
   // Direct purchase feature - vendor controlled
   direct_purchase_enabled?: boolean;
+  website_url?: string;
   // Co-pay and RESPA related fields
   copay_allowed?: boolean;
   respa_split_limit?: number; // RESPA compliance split limit

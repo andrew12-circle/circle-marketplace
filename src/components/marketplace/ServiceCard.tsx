@@ -30,6 +30,7 @@ import { useABTest } from "@/hooks/useABTest";
 import { SponsoredLabel } from "./SponsoredLabel";
 import { ServiceBadges } from "./ServiceBadges";
 import { extractNumericPrice, computeDiscountPercentage, getDealDisplayPrice } from '@/utils/dealPricing';
+import { useSponsoredTracking } from '@/hooks/useSponsoredTracking';
 
 interface ServiceRatingStats {
   averageRating: number;
@@ -75,6 +76,7 @@ export const ServiceCard = ({
   const navigate = useNavigate();
   const { formatPrice } = useCurrency();
   const isProMember = profile?.is_pro_member || false;
+  const { trackClick } = useSponsoredTracking();
   
   // Sponsored placement features - enabled by default for Amazon-level experience
   const sponsoredEnabled = true;
@@ -267,6 +269,30 @@ export const ServiceCard = ({
     if (disclaimerContent?.button_url) {
       navigate(disclaimerContent.button_url);
     }
+  };
+
+  const handleBuyNow = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    if (!service.website_url) return;
+    
+    // Track sponsored click if applicable
+    if (isSponsored) {
+      await trackClick({
+        serviceId: service.id,
+        placement: 'search_grid',
+        context: 'buy_now_button'
+      });
+    }
+    
+    // Add UTM parameters for tracking
+    const url = new URL(service.website_url);
+    url.searchParams.set('utm_source', 'circle_marketplace');
+    url.searchParams.set('utm_medium', 'service_card');
+    url.searchParams.set('utm_campaign', 'buy_now');
+    url.searchParams.set('utm_content', service.id);
+    
+    window.open(url.toString(), '_blank', 'noopener,noreferrer');
   };
 
   const discountPercentage = calculateDiscountPercentage();
@@ -571,6 +597,32 @@ export const ServiceCard = ({
                   <ShoppingCart className="w-4 h-4 mr-1" />
                   Add to Cart
                 </Button>
+              ) : service.direct_purchase_enabled && service.website_url ? (
+                <>
+                  {/* Buy Now Button for Direct Purchase */}
+                  <Button
+                    size="sm"
+                    className="flex-1 h-9"
+                    onClick={handleBuyNow}
+                  >
+                    <ShoppingCart className="w-4 h-4 mr-1" />
+                    Buy Now
+                  </Button>
+                  
+                  {/* Book Consultation Button */}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1 h-9"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsConsultationFlowOpen(true);
+                    }}
+                  >
+                    <Calendar className="w-4 h-4 mr-1" />
+                    Book Consultation
+                  </Button>
+                </>
               ) : (
                 <>
                   {/* Primary action - Consultation (traditional flow) */}
