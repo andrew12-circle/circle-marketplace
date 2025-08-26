@@ -551,6 +551,7 @@ export const ServiceManagementPanel = () => {
         retail_price: editForm.retail_price ?? null,
         pro_price: editForm.pro_price ?? null,
         price_duration: editForm.price_duration ?? null,
+        website_url: editForm.website_url ?? null,
         tags: Array.isArray(editForm.tags) ? editForm.tags : null,
         updated_at: new Date().toISOString()
       };
@@ -1146,6 +1147,19 @@ export const ServiceManagementPanel = () => {
                        </div>
                      </div>
 
+                     {/* Purchase URL Field */}
+                     <div className="space-y-2">
+                       <label className="text-sm font-medium">Purchase URL (Buy Now Link)</label>
+                       <Input
+                         value={editForm.website_url || ''}
+                         onChange={(e) => setEditForm({ ...editForm, website_url: e.target.value })}
+                         placeholder="https://example.com/checkout or https://calendly.com/yourlink"
+                       />
+                       <p className="text-xs text-muted-foreground">
+                         This is where users will be redirected when they click "Buy Now". Use your checkout page URL for direct purchases, or a booking link for consultations.
+                       </p>
+                     </div>
+
                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="space-y-2">
                         <label className="text-sm font-medium">Duration</label>
@@ -1374,11 +1388,11 @@ export const ServiceManagementPanel = () => {
                           <div>
                             <h4 className="font-medium text-blue-900 mb-1">Direct Purchase Enabled</h4>
                             <p className="text-sm text-blue-700 mb-2">
-                              This service will show a "Buy Now" option that bypasses consultation booking, 
-                              reducing sales staff costs and allowing customers to purchase directly.
+                              This service will show a "Buy Now" button that redirects to your Purchase URL above,
+                              bypassing consultation booking and allowing customers to purchase directly.
                             </p>
                             <div className="text-xs text-blue-600">
-                              ✓ Customers can purchase instantly • ✓ Reduced acquisition costs • ✓ Direct to onboarding
+                              ✓ Customers can purchase instantly • ✓ Reduced acquisition costs • ✓ Direct to checkout
                             </div>
                           </div>
                         </div>
@@ -1435,6 +1449,13 @@ export const ServiceManagementPanel = () => {
                         <p className="text-sm text-muted-foreground">Category: {selectedService.category}</p>
                         <p className="text-sm text-muted-foreground">Duration: {selectedService.duration || 'Not set'}</p>
                         <p className="text-sm text-muted-foreground">ROI: {selectedService.estimated_roi || 0}%</p>
+                        <p className="text-sm text-muted-foreground">
+                          Purchase URL: {selectedService.website_url ? (
+                            <a href={selectedService.website_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
+                              {selectedService.website_url}
+                            </a>
+                          ) : 'Not set'}
+                        </p>
                       </div>
                       <div>
                         <h4 className="font-medium">Status</h4>
@@ -1507,7 +1528,6 @@ export const ServiceManagementPanel = () => {
           </CardContent>
         </Card>
       )}
-
 
       {showFunnelPreview && selectedService && (
         <ServiceFunnelModal
