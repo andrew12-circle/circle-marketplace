@@ -210,7 +210,19 @@ serve(async (req) => {
       sources = []
     }: BulkRequest = await req.json();
 
-    console.log(`🚀 Starting bulk research generation v2 - mode: ${mode}, limit: ${limit}, offset: ${offset}, dryRun: ${dryRun}`);
+    console.log(`🚀 Starting bulk research generation v3 - mode: ${mode}, limit: ${limit}, offset: ${offset}, dryRun: ${dryRun}`);
+    
+    // Get total count first for accurate pagination
+    const { count: totalCount, error: countError } = await supabase
+      .from('services')
+      .select('*', { count: 'exact', head: true });
+    
+    if (countError) {
+      console.error('Error getting total count:', countError);
+    }
+    
+    console.log(`📊 Total services in database: ${totalCount || 'unknown'}`);
+    
     const { data: services, error: servicesError } = await supabase
       .from('services')
       .select(`
@@ -225,17 +237,23 @@ serve(async (req) => {
     }
 
     if (!services || services.length === 0) {
+      console.log(`📭 No more services to process at offset ${offset}`);
       return new Response(JSON.stringify({
         processed: 0,
         updated: 0,
         skipped: 0,
         nextOffset: offset,
         hasMore: false,
+        totalCount: totalCount || 0,
+        currentOffset: offset,
+        batchSize: limit,
         errors: []
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
+    
+    console.log(`📦 Fetched ${services.length} services for processing (${offset + 1}-${offset + services.length} of ${totalCount || '?'})`)
 
     let processed = 0;
     let updated = 0;
@@ -330,9 +348,11 @@ serve(async (req) => {
     }
 
     const nextOffset = offset + limit;
-    const hasMore = services.length === limit;
+    // More accurate hasMore calculation
+    const hasMore = totalCount ? nextOffset < totalCount : services.length === limit;
 
     console.log(`📊 Batch complete - processed: ${processed}, updated: ${updated}, skipped: ${skipped}, errors: ${errors.length}`);
+    console.log(`📈 Progress: ${nextOffset}/${totalCount || '?'} services, hasMore: ${hasMore}`);
 
     return new Response(JSON.stringify({
       processed,
@@ -340,6 +360,9 @@ serve(async (req) => {
       skipped,
       nextOffset,
       hasMore,
+      totalCount: totalCount || 0,
+      currentOffset: offset,
+      batchSize: limit,
       errors
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

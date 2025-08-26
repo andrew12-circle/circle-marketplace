@@ -83,6 +83,8 @@ export default function BulkServiceResearch() {
       let totalUpdated = 0;
       let totalSkipped = 0;
       let batchIndex = 0;
+      let totalCount = 0;
+      const maxBatches = 100; // Safety guard against infinite loops
 
       // Parse sources
       const sourceList = sources
@@ -90,9 +92,8 @@ export default function BulkServiceResearch() {
         .map(s => s.trim())
         .filter(s => s.length > 0);
 
-      // Loop through all batches until the function reports no more
-      // eslint-disable-next-line no-constant-condition
-      while (true) {
+      // Loop through all batches until we've processed everything
+      while (batchIndex < maxBatches) {
         batchIndex += 1;
         appendLog(`🚀 Running batch ${batchIndex} (limit ${limit}, offset ${offset})...`);
 
@@ -130,8 +131,15 @@ export default function BulkServiceResearch() {
           skipped: s = 0,
           nextOffset = offset + limit,
           hasMore = false,
+          totalCount: tc = 0,
           errors = [],
         } = response.data || {};
+
+        // Update totals from first batch
+        if (batchIndex === 1 && tc > 0) {
+          totalCount = tc;
+          appendLog(`📊 Found ${totalCount} total services to process`);
+        }
 
         totalProcessed += p;
         totalUpdated += u;
@@ -149,21 +157,35 @@ export default function BulkServiceResearch() {
           appendLog(`✅ Batch ${batchIndex} complete: processed ${p}, updated ${u}, skipped ${s}`);
         }
 
-        // Update progress roughly (assuming ~200 services)
-        const estTotal = 200;
-        setProgress(Math.min(100, Math.round((totalProcessed / estTotal) * 100)));
+        // Update progress based on actual total or estimate
+        const actualTotal = totalCount > 0 ? totalCount : 200;
+        const progressPercent = Math.min(100, Math.round((offset / actualTotal) * 100));
+        setProgress(progressPercent);
+        appendLog(`📈 Progress: ${offset}/${actualTotal} (${progressPercent}%)`);
 
-        if (!hasMore || p === 0) break;
+        // Stop conditions: no more data, no items processed, or reached total
+        if (!hasMore || p === 0 || (totalCount > 0 && offset >= totalCount)) {
+          appendLog(`🛑 Stopping: hasMore=${hasMore}, processed=${p}, offset=${offset}, total=${totalCount}`);
+          break;
+        }
 
         // Small delay between batches to be respectful to rate limits
         await new Promise(resolve => setTimeout(resolve, 1000));
       }
 
+      if (batchIndex >= maxBatches) {
+        appendLog(`⚠️ Reached maximum batch limit (${maxBatches}) - stopping for safety`);
+      }
+
+      // Ensure UI shows completion
+      setProgress(100);
+      setIsRunning(false);
+
       toast({ 
         title: dryRun ? 'Dry Run Complete' : 'Research Generation Complete', 
-        description: `${totalUpdated} services updated, ${totalSkipped} skipped` 
+        description: `${totalUpdated} services updated, ${totalSkipped} skipped, ${totalProcessed} total processed` 
       });
-      appendLog(`🎉 All done! Generated research for ${totalUpdated} services.`);
+      appendLog(`🎉 All done! Generated research for ${totalUpdated} services (${totalProcessed} total processed).`);
     } catch (e: any) {
       console.error('Batch generation error:', e);
       const errorMessage = e.message || e.toString() || 'Failed to run research generator';
@@ -173,14 +195,10 @@ export default function BulkServiceResearch() {
         variant: 'destructive' 
       });
       appendLog(`❌ Error: ${errorMessage}`);
-      
-      // Preserve UI state on error - don't reset progress
-      setIsRunning(false);
     } finally {
-      // Only reset if we completed successfully
-      if (!isRunning) {
-        setProgress(100);
-      }
+      // Always ensure UI is reset properly
+      setIsRunning(false);
+      setProgress(100);
     }
   };
 
