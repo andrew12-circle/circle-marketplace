@@ -15,7 +15,6 @@ import { SecureAdminGuard } from '@/components/admin/SecureAdminGuard';
 import { SpiritualAdminGuard } from '@/components/admin/SpiritualAdminGuard';
 import { useSecureAdminOperations } from '@/hooks/useSecureAdminOperations';
 import { AdminStabilityRibbon } from '@/components/admin/AdminStabilityRibbon';
-import { AdminDiagnostics } from '@/components/admin/AdminDiagnostics';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ContentPromotionPanel } from '@/components/admin/ContentPromotionPanel';
 import { YouTubeImportPanel } from '@/components/admin/YouTubeImportPanel';
@@ -78,8 +77,6 @@ export default function AdminDashboard() {
   const [filteredUsers, setFilteredUsers] = useState<UserProfile[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(true);
   const [securityWarnings, setSecurityWarnings] = useState<string[]>([]);
-  const [degradedMode, setDegradedMode] = useState(false);
-  const [failedEndpoints, setFailedEndpoints] = useState<string[]>([]);
   
   // Enhanced user management state
   const [userSearchTerm, setUserSearchTerm] = useState('');
@@ -115,11 +112,6 @@ export default function AdminDashboard() {
   const loadUsers = async () => {
     setLoadingUsers(true);
     try {
-      // Add 8-second timeout for user data loading
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('User data load timeout')), 8000);
-      });
-
       let query = supabase
         .from('profiles')
         .select('*', { count: 'exact' });
@@ -143,13 +135,9 @@ export default function AdminDashboard() {
         query = query.or(`display_name.ilike.%${userSearchTerm}%,business_name.ilike.%${userSearchTerm}%`);
       }
 
-      const result = await Promise.race([
-        query.order('created_at', { ascending: false })
-             .range((currentPage - 1) * USERS_PER_PAGE, currentPage * USERS_PER_PAGE - 1),
-        timeoutPromise
-      ]) as any;
-
-      const { data, error, count } = result;
+      const { data, error, count } = await query
+        .order('created_at', { ascending: false })
+        .range((currentPage - 1) * USERS_PER_PAGE, currentPage * USERS_PER_PAGE - 1);
 
       if (error) throw error;
       
@@ -157,20 +145,11 @@ export default function AdminDashboard() {
       setTotalUsers(count || 0);
       setTotalPages(Math.ceil((count || 0) / USERS_PER_PAGE));
       
-      // Clear degraded mode on successful load
-      setDegradedMode(false);
-      setFailedEndpoints(prev => prev.filter(e => e !== 'user_profiles'));
-      
     } catch (error) {
       console.error('Error loading users:', error);
-      
-      // Enter degraded mode
-      setDegradedMode(true);
-      setFailedEndpoints(prev => [...new Set([...prev, 'user_profiles'])]);
-      
       toast({
-        title: 'Degraded Mode',
-        description: 'User data failed to load - some features may be limited',
+        title: 'Error',
+        description: 'Failed to load users',
         variant: 'destructive',
       });
     } finally {
@@ -444,38 +423,6 @@ export default function AdminDashboard() {
       <SecureAdminGuard requireElevatedPrivileges={true}>
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
         <AdminStabilityRibbon />
-        <div className="container mx-auto px-6 py-2">
-          <AdminDiagnostics />
-        </div>
-        
-        {degradedMode && (
-          <div className="container mx-auto px-6 py-2">
-            <Alert variant="destructive" className="border-amber-200 bg-amber-50">
-              <AlertTriangle className="h-4 w-4 text-amber-600" />
-              <AlertDescription className="text-amber-800">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <strong>Degraded Mode Active:</strong> Some admin features may be limited due to network issues.
-                    {failedEndpoints.length > 0 && (
-                      <div className="mt-1 text-sm">
-                        Failed: {failedEndpoints.join(', ')}
-                      </div>
-                    )}
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => window.location.reload()}
-                    className="ml-4"
-                  >
-                    <RefreshCw className="h-3 w-3 mr-1" />
-                    Retry All
-                  </Button>
-                </div>
-              </AlertDescription>
-            </Alert>
-          </div>
-        )}
         {/* Professional Header */}
         <div className="bg-white border-b border-slate-200 shadow-sm">
           <div className="container mx-auto px-6 py-4">

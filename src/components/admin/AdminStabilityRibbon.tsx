@@ -32,15 +32,7 @@ export const AdminStabilityRibbon = () => {
   useEffect(() => {
     const checkStability = async () => {
       try {
-        // Add 10-second timeout to prevent blocking
-        const timeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error('Stability check timeout')), 10000);
-        });
-        
-        const { data, error } = await Promise.race([
-          supabase.rpc('admin_self_check_enhanced'),
-          timeoutPromise
-        ]) as any;
+        const { data, error } = await supabase.rpc('admin_self_check_enhanced');
         
         if (error) {
           console.warn('Admin stability check failed:', error);
@@ -50,18 +42,6 @@ export const AdminStabilityRibbon = () => {
         setStabilityData(data as AdminStabilityData);
       } catch (error) {
         console.warn('Admin stability check error:', error);
-        // Set minimal stable data on timeout to prevent blocking
-        setStabilityData({
-          stability_status: {
-            admin_access_guaranteed: true,
-            global_access_enabled: true,
-            fail_safe_mode: 'enabled'
-          },
-          network_status: {
-            connection_stable: true,
-            rate_limit_ok: true
-          }
-        });
       } finally {
         setLoading(false);
       }

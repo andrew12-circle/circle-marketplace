@@ -416,26 +416,15 @@ export const ServiceManagementPanel = () => {
   const fetchServices = async () => {
     try {
       setError(null);
-      
-      // Add 7-second timeout for service data loading
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Service data load timeout')), 7000);
-      });
-
-      const result = await Promise.race([
-        supabase
-          .from('services')
-          .select(`
-            *,
-            vendors (name, logo_url),
-            service_providers (name, logo_url)
-          `)
-          .order('sort_order', { ascending: true })
-          .order('created_at', { ascending: false }),
-        timeoutPromise
-      ]) as any;
-
-      const { data, error } = result;
+      const { data, error } = await supabase
+        .from('services')
+        .select(`
+          *,
+          vendors (name, logo_url),
+          service_providers (name, logo_url)
+        `)
+        .order('sort_order', { ascending: true })
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
       setServices(data || []);
@@ -444,10 +433,8 @@ export const ServiceManagementPanel = () => {
       const errorMessage = error instanceof Error ? error.message : 'Failed to fetch services';
       setError(errorMessage);
       toast({
-        title: 'Degraded Mode',
-        description: errorMessage === 'Service data load timeout' 
-          ? 'Service data is taking too long to load - entering degraded mode'
-          : errorMessage,
+        title: 'Error',
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {

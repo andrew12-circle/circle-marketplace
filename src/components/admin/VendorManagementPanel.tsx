@@ -83,18 +83,10 @@ export const VendorManagementPanel = () => {
   const fetchVendors = async () => {
     try {
       setError(null);
-      
-      // Add 7-second timeout for vendor data loading
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Vendor data load timeout')), 7000);
-      });
-
-      const result = await Promise.race([
-        supabase.from('vendors').select('*').order('name'),
-        timeoutPromise
-      ]) as any;
-
-      const { data, error } = result;
+      const { data, error } = await supabase
+        .from('vendors')
+        .select('*')
+        .order('name');
 
       if (error) throw error;
       setVendors(data || []);
@@ -103,10 +95,8 @@ export const VendorManagementPanel = () => {
       const errorMessage = error instanceof Error ? error.message : 'Failed to fetch vendors';
       setError(errorMessage);
       toast({
-        title: 'Degraded Mode',
-        description: errorMessage === 'Vendor data load timeout' 
-          ? 'Vendor data is taking too long to load - entering degraded mode'
-          : errorMessage,
+        title: 'Error',
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {
