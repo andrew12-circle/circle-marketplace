@@ -44,6 +44,16 @@ export const useSecureAdminOperations = () => {
     targetUserId: string, 
     updateData: Record<string, any>
   ): Promise<AdminOperationResult> => {
+    // Guard against undefined UUID which causes database errors
+    if (!targetUserId || targetUserId === 'undefined' || typeof targetUserId !== 'string') {
+      console.error('Invalid targetUserId provided:', targetUserId);
+      toast({
+        title: 'Error',
+        description: 'Invalid user ID provided',
+        variant: 'destructive',
+      });
+      return { success: false, message: 'Invalid user ID' };
+    }
     setLoading(true);
     
     try {

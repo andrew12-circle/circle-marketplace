@@ -65,9 +65,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const queryClient = useQueryClient();
 
   const fetchProfile = async (userId: string) => {
-    // Guard against undefined/invalid userId
-    if (!userId || typeof userId !== 'string') {
-      console.warn('fetchProfile called with invalid userId:', userId);
+    // Guard against undefined/invalid userId - this prevents UUID errors
+    if (!userId || typeof userId !== 'string' || userId === 'undefined') {
+      logger.warn('fetchProfile called with invalid userId:', userId);
       return;
     }
 
@@ -78,29 +78,41 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         .maybeSingle();
 
       if (error) {
-        logger.error('Error fetching profile:', error);
-        // Fallback to direct query if RPC fails
+        logger.error('Error fetching profile via RPC:', error);
+        // Fallback to direct query with defensive handling
         try {
           const { data: fallbackData, error: fallbackError } = await supabase
             .from('profiles')
             .select('*')
             .eq('user_id', userId)
+            .order('created_at', { ascending: false }) // Get newest first
             .limit(1)
             .maybeSingle();
           
           if (!fallbackError && fallbackData) {
+            logger.log('Profile fetched via fallback query');
             setProfile(fallbackData);
             return;
+          } else if (fallbackError) {
+            logger.error('Fallback profile fetch error:', fallbackError);
           }
         } catch (fallbackErr) {
-          logger.error('Fallback profile fetch also failed:', fallbackErr);
+          logger.error('Fallback profile fetch exception:', fallbackErr);
         }
         return;
       }
 
-      setProfile(data);
+      if (data) {
+        logger.log('Profile fetched successfully via RPC');
+        // Cast the RPC result to match our Profile interface
+        setProfile(data as any);
+      } else {
+        logger.warn('No profile found for user:', userId);
+        setProfile(null);
+      }
     } catch (error) {
-      logger.error('Error fetching profile:', error);
+      logger.error('fetchProfile exception:', error);
+      setProfile(null);
     }
   };
 

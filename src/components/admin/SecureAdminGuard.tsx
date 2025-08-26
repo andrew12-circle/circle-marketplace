@@ -1,5 +1,6 @@
 import { ReactNode, useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAdminStatus } from '@/hooks/useAdminStatus';
 import { supabase } from '@/integrations/supabase/client';
 import { Navigate } from 'react-router-dom';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -19,7 +20,8 @@ export const SecureAdminGuard: React.FC<SecureAdminGuardProps> = ({
   children, 
   requireElevatedPrivileges = false 
 }) => {
-  const { user, profile, loading } = useAuth();
+  const { user, loading } = useAuth();
+  const { data: isAdmin, isLoading: adminLoading } = useAdminStatus();
   const [securityVerified, setSecurityVerified] = useState(false);
   const [securityWarning, setSecurityWarning] = useState<string | null>(null);
   const [verificationLoading, setVerificationLoading] = useState(true);
@@ -33,11 +35,11 @@ export const SecureAdminGuard: React.FC<SecureAdminGuardProps> = ({
       }
       
       // Only proceed with verification if we have a user and admin status
-      if (!user || !profile?.is_admin) {
+      if (!user || !isAdmin) {
         logger.log('SecureAdminGuard: User or admin status check failed', { 
           hasUser: !!user, 
-          isAdmin: profile?.is_admin,
-          profileLoaded: !!profile 
+          isAdmin: isAdmin,
+          adminLoading: adminLoading 
         });
         setVerificationLoading(false);
         return;
@@ -47,7 +49,7 @@ export const SecureAdminGuard: React.FC<SecureAdminGuardProps> = ({
       if (!STRICT_ADMIN_SECURITY) {
         logger.log('SecureAdminGuard: Safe Mode - Granting immediate admin access', {
           userId: user.id,
-          isAdmin: profile.is_admin,
+          isAdmin: isAdmin,
           strictMode: false
         });
         
@@ -140,9 +142,9 @@ export const SecureAdminGuard: React.FC<SecureAdminGuardProps> = ({
     };
 
     verifyAdminSecurity();
-  }, [user, profile, loading, requireElevatedPrivileges]);
+  }, [user, isAdmin, loading, adminLoading, requireElevatedPrivileges]);
 
-  if (loading || verificationLoading) {
+  if (loading || adminLoading || verificationLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="flex items-center gap-2">
@@ -153,7 +155,7 @@ export const SecureAdminGuard: React.FC<SecureAdminGuardProps> = ({
     );
   }
 
-  if (!user || !profile?.is_admin) {
+  if (!user || !isAdmin) {
     return <Navigate to="/" replace />;
   }
 
