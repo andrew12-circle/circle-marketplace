@@ -18,7 +18,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ConsultationFlow } from "./ConsultationFlow";
 import { ServiceFunnelModal } from "./ServiceFunnelModal";
 import { VendorSelectionModal } from "./VendorSelectionModal";
-import { PricingChoiceModal } from "./PricingChoiceModal";
+import { PaymentChoiceModal } from "./PaymentChoiceModal";
 import { DirectPurchaseModal } from "./DirectPurchaseModal";
 import { Service } from "@/hooks/useMarketplaceData";
 import { useActiveDisclaimer } from "@/hooks/useActiveDisclaimer";
@@ -183,21 +183,17 @@ export const ServiceCard = ({
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.stopPropagation();
     
-    // If pro member and co-pay is available, show choice modal
-    if (isProMember && service.is_verified && service.copay_allowed && service.retail_price && service.respa_split_limit && service.pro_price) {
-      setIsPricingChoiceModalOpen(true);
-      return;
-    }
-    
-    // Otherwise proceed with direct add to cart
-    addDirectlyToCart();
+    // Always show payment choice modal first - this is the unified flow
+    setIsPricingChoiceModalOpen(true);
   };
 
-  const addDirectlyToCart = async () => {
-    // Determine price based on user's membership and available pricing
+  const addDirectlyToCart = async (coverageType?: 'pro' | 'copay', selectedVendor?: any) => {
+    // Determine price based on coverage type and user's membership
     let finalPrice = 0;
     
-    if (isProMember && service.is_verified && service.pro_price) {
+    if (coverageType === 'copay' && service.co_pay_price) {
+      finalPrice = extractNumericPrice(service.co_pay_price);
+    } else if (isProMember && service.is_verified && service.pro_price) {
       finalPrice = extractNumericPrice(service.pro_price);
     } else if (service.retail_price) {
       finalPrice = extractNumericPrice(service.retail_price);
@@ -252,7 +248,12 @@ export const ServiceCard = ({
       vendor: service.vendor?.name || 'Unknown Vendor',
       image_url: service.image_url,
       requiresQuote: service.requires_quote,
-      type: 'service'
+      type: 'service',
+      coverageType,
+      selectedVendor,
+      affiliateUrl: service.website_url,
+      requiresConsultation: service.requires_quote,
+      coverageStatus: 'pending-selection'
     });
   };
 
@@ -705,80 +706,25 @@ export const ServiceCard = ({
           }}
         />
 
-        <PricingChoiceModal
+        <PaymentChoiceModal
           isOpen={isPricingChoiceModalOpen}
           onClose={() => setIsPricingChoiceModalOpen(false)}
-          service={{
-            id: service.id,
-            title: service.title,
-            pro_price: service.pro_price,
-            retail_price: service.retail_price,
-            respa_split_limit: service.respa_split_limit || 0,
-            price_duration: service.price_duration,
-            requires_quote: service.requires_quote,
+          service={service}
+          onProChoice={(service) => {
+            addDirectlyToCart('pro');
+            // Always open cart after adding an item
+            setTimeout(() => {
+              const cartEvent = new CustomEvent('openCart');
+              window.dispatchEvent(cartEvent);
+            }, 500);
           }}
-          onChooseProPrice={() => {
-            setIsPricingChoiceModalOpen(false);
-            addDirectlyToCart();
-          }}
-          onChooseCoPay={() => {
-            setIsPricingChoiceModalOpen(false);
-            setIsVendorSelectionModalOpen(true);
-          }}
-          onChooseAgentPoints={async () => {
-            setIsPricingChoiceModalOpen(false);
-            
-            try {
-              // Call the agent points purchase edge function
-              const { data, error } = await supabase.functions.invoke('process-agent-points-purchase', {
-                body: {
-                  service_id: service.id,
-                  agent_id: user?.id,
-                  vendor_id: service.vendor?.id,
-                  total_amount: parseFloat(service.pro_price?.replace(/[^\d.]/g, '') || '0')
-                }
-              });
-
-              if (error) {
-                throw error;
-              }
-
-              if (data.success) {
-                toast({
-                  title: "Purchase Successful! 🎉",
-                  description: `Purchased ${service.title} using ${data.respa_compliance.respa_points_used + data.respa_compliance.non_respa_points_used} agent points`,
-                });
-                
-                // Show RESPA compliance details if relevant
-                if (data.respa_compliance.respa_points_used > 0) {
-                  toast({
-                    title: "RESPA Compliance Applied",
-                    description: `RESPA points: ${data.respa_compliance.respa_points_used}, Non-RESPA: ${data.respa_compliance.non_respa_points_used}`,
-                    variant: "default",
-                  });
-                }
-              } else {
-                throw new Error(data.error || 'Purchase failed');
-              }
-            } catch (error) {
-              console.error('Agent points purchase error:', error);
-              toast({
-                title: "Purchase Failed",
-                description: error.message || "Failed to complete purchase with agent points",
-                variant: "destructive",
-              });
-              
-              // Fallback: add to cart for manual processing
-              addToCart({
-                id: service.id,
-                title: service.title,
-                price: parseFloat(service.pro_price?.replace(/[^\d.]/g, '') || '0'),
-                image_url: service.image_url,
-                vendor: service.vendor?.name || 'Unknown Vendor',
-                type: 'service',
-                description: `Agent points purchase failed - ${error.message}`,
-              });
-            }
+          onCoPayChoice={(service, vendor) => {
+            addDirectlyToCart('copay', vendor);
+            // Always open cart after adding an item
+            setTimeout(() => {
+              const cartEvent = new CustomEvent('openCart');
+              window.dispatchEvent(cartEvent);
+            }, 500);
           }}
         />
 

@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useCart } from "@/contexts/CartContext";
-import { ShoppingCart, Plus, Minus, Trash2, CreditCard, MessageCircle, Calendar } from "lucide-react";
+import { ShoppingCart, Plus, Minus, Trash2, CreditCard, MessageCircle, Calendar, ExternalLink } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -22,7 +22,6 @@ export const CartDrawer = () => {
     isOpen, 
     setIsOpen 
   } = useCart();
-  
   
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [isConsultationFlowOpen, setIsConsultationFlowOpen] = useState(false);
@@ -51,109 +50,120 @@ export const CartDrawer = () => {
       return;
     }
 
-    const purchasableItems = cartItems.filter(item => !item.requiresQuote && item.type !== 'co-pay-request');
-    const coPayItems = cartItems.filter(item => item.type === 'co-pay-request' && item.status === 'approved');
-    const quoteItems = cartItems.filter(item => item.requiresQuote);
-    
-    // Handle regular purchasable items
-    if (purchasableItems.length > 0) {
-      setIsCheckingOut(true);
+    if (cartItems.length === 0) return;
+    setIsCheckingOut(true);
+
+    try {
+      // Check for items that need coverage selection first
+      const itemsNeedingCoverage = cartItems.filter(item => 
+        !item.coverageType || item.coverageStatus === 'pending-selection'
+      );
+
+      if (itemsNeedingCoverage.length > 0) {
+        toast({
+          title: "Coverage Selection Required",
+          description: "Please select how you want to cover each service before checkout.",
+          variant: "destructive",
+        });
+        setIsCheckingOut(false);
+        return;
+      }
+
+      // Separate items by coverage type and special handling
+      const proItems = cartItems.filter(item => 
+        item.coverageType === 'pro' && !item.affiliateUrl && !item.requiresConsultation
+      );
       
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        
+      const affiliateProItems = cartItems.filter(item => 
+        item.coverageType === 'pro' && item.affiliateUrl
+      );
+      
+      const coPayItems = cartItems.filter(item => 
+        item.coverageType === 'copay'
+      );
+      
+      const consultationItems = cartItems.filter(item => 
+        item.requiresConsultation || item.requiresQuote
+      );
+
+      // Handle consultation items first
+      if (consultationItems.length > 0) {
+        setIsConsultationFlowOpen(true);
+        return;
+      }
+
+      // Handle affiliate items with pro coverage - redirect to vendor
+      for (const item of affiliateProItems) {
+        if (item.affiliateUrl) {
+          window.open(item.affiliateUrl, '_blank');
+          removeFromCart(item.id);
+          toast({
+            title: "Redirected to vendor",
+            description: `Complete your purchase of "${item.title}" on the vendor's website.`,
+          });
+        }
+      }
+
+      // Handle co-pay items (affiliate or regular)
+      if (coPayItems.length > 0) {
+        for (const item of coPayItems) {
+          if (item.affiliateUrl) {
+            window.open(item.affiliateUrl, '_blank');
+            toast({
+              title: "Purchase initiated",
+              description: `Proceed with purchase. Vendor coverage for "${item.title}" is pending approval.`,
+            });
+          }
+        }
+
+        // Handle regular co-pay checkout for non-affiliate items
+        const regularCoPayItems = coPayItems.filter(item => !item.affiliateUrl);
+        if (regularCoPayItems.length > 0) {
+          const { data, error } = await supabase.functions.invoke('copay-checkout', {
+            body: {
+              items: regularCoPayItems.map(item => ({
+                co_pay_request_id: item.id,
+                agent_notes: item.description || ''
+              }))
+            }
+          });
+
+          if (error) throw error;
+
+          if (data?.url) {
+            window.open(data.url, '_blank');
+          }
+        }
+      }
+
+      // Handle standard pro payment items
+      if (proItems.length > 0) {
         const { data, error } = await supabase.functions.invoke('create-checkout', {
-          body: { 
-            items: purchasableItems.map(item => ({
-              title: item.title,
-              price: item.price,
+          body: {
+            items: proItems.map(item => ({
+              service_id: item.id,
               quantity: item.quantity,
-              vendor: item.vendor,
-              image_url: item.image_url
+              price_override: item.price
             }))
-          },
-          headers: session?.access_token ? {
-            Authorization: `Bearer ${session.access_token}`,
-          } : {},
+          }
         });
 
         if (error) throw error;
 
         if (data?.url) {
           window.open(data.url, '_blank');
-          purchasableItems.forEach(item => removeFromCart(item.id));
-          
-          toast({
-            title: "Redirecting to checkout",
-            description: "Opening Stripe checkout in new tab...",
-          });
-        } else {
-          throw new Error("No checkout URL received");
         }
-      } catch (error) {
-        toast({
-          title: "Checkout failed",
-          description: "Unable to process checkout. Please try again.",
-          variant: "destructive",
-        });
-      } finally {
-        setIsCheckingOut(false);
       }
-    }
 
-    // Handle co-pay items
-    if (coPayItems.length > 0) {
-      setIsCheckingOut(true);
-      
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        
-        const { data, error } = await supabase.functions.invoke('copay-checkout', {
-          body: { 
-            coPayRequests: coPayItems.map(item => ({
-              requestId: item.id, // Using the cart item id which should correspond to request id
-              serviceId: item.service?.title || item.title, // Service identifier
-              vendorId: typeof item.vendor === 'object' ? item.vendor.id : item.vendor,
-              splitPercentage: item.requestedSplit || 50,
-              totalAmount: item.price.toString()
-            }))
-          },
-          headers: session?.access_token ? {
-            Authorization: `Bearer ${session.access_token}`,
-          } : {},
-        });
-
-        if (error) throw error;
-
-        if (data?.url) {
-          window.open(data.url, '_blank');
-          coPayItems.forEach(item => removeFromCart(item.id));
-          
-          toast({
-            title: "Co-Pay Checkout Started! 🎉",
-            description: "Processing your co-pay assisted purchase...",
-          });
-        }
-      } catch (error) {
-        toast({
-          title: "Co-Pay Checkout Failed",
-          description: "Unable to process co-pay checkout. Please try again.",
-          variant: "destructive",
-        });
-      } finally {
-        setIsCheckingOut(false);
-      }
-    }
-
-    if (quoteItems.length > 0) {
-      // Handle quote requests
+    } catch (error: any) {
+      console.error('Checkout error:', error);
       toast({
-        title: "Quote requested",
-        description: `Quote requested for ${quoteItems.length} item(s). You'll be contacted within 24 hours.`,
+        title: "Checkout Error",
+        description: error?.message || "Failed to process checkout. Please try again.",
+        variant: "destructive",
       });
-      
-      // Remove quote items from cart after requesting
-      quoteItems.forEach(item => removeFromCart(item.id));
+    } finally {
+      setIsCheckingOut(false);
     }
   };
 
@@ -180,13 +190,35 @@ export const CartDrawer = () => {
     quoteItems.forEach(item => removeFromCart(item.id));
     toast({
       title: "Consultations Scheduled",
-      description: "All consultations have been booked and preparation courses completed!",
+      description: "All consultations have been booked!",
     });
   };
 
-  const purchasableItems = cartItems.filter(item => !item.requiresQuote && item.type !== 'co-pay-request');
-  const coPayItems = cartItems.filter(item => item.type === 'co-pay-request' && item.status === 'approved');
-  const quoteItems = cartItems.filter(item => item.requiresQuote);
+  const getStatusBadge = (item: any) => {
+    if (item.coverageStatus === 'pending-selection') {
+      return <Badge variant="outline" className="text-amber-600">Needs Coverage Selection</Badge>;
+    }
+    if (item.coverageType === 'copay' && item.coverageStatus === 'pending-vendor-approval') {
+      return <Badge variant="outline" className="text-blue-600">Pending Vendor Approval</Badge>;
+    }
+    if (item.coverageType === 'copay' && item.coverageStatus === 'approved') {
+      return <Badge variant="outline" className="text-green-600">Vendor Approved</Badge>;
+    }
+    if (item.affiliateUrl) {
+      return <Badge variant="outline" className="text-purple-600">Vendor Website</Badge>;
+    }
+    if (item.requiresConsultation) {
+      return <Badge variant="outline" className="text-blue-600">Consultation Required</Badge>;
+    }
+    return null;
+  };
+
+  const purchasableItems = cartItems.filter(item => 
+    item.coverageType === 'pro' && !item.requiresConsultation
+  );
+  const consultationItems = cartItems.filter(item => 
+    item.requiresConsultation || item.requiresQuote
+  );
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -225,130 +257,46 @@ export const CartDrawer = () => {
             <>
               <div className="flex-1 overflow-auto py-4 space-y-4">
                 {cartItems.map((item) => (
-                   <div key={item.id} className="flex gap-3 p-3 border rounded-lg">
-                      <div className="w-20 h-16 bg-muted rounded-lg overflow-hidden relative">
-                         {item.type === 'co-pay-request' ? (
-                           <>
-                             {/* Main service image */}
-                                <img
-                                  src={item.service?.image_url || item.image_url || item.image || (typeof item.vendor === 'object' && item.vendor?.logo_url) || "/placeholder.svg"}
-                                 alt={item.title}
-                                 className="w-full h-full object-cover"
-                               />
-                             {/* Vendor logo overlay in bottom right */}
-                             {typeof item.vendor === 'object' && item.vendor?.logo_url && (
-                               <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-white rounded-full border-2 border-white overflow-hidden shadow-sm">
-                                 <img
-                                   src={item.vendor.logo_url}
-                                   alt={item.vendorName || item.vendor.name}
-                                   className="w-full h-full object-cover"
-                                 />
-                               </div>
-                             )}
-                           </>
-                         ) : (
-                           <img
-                             src={item.image_url || "/placeholder.svg"}
-                             alt={item.title}
-                             className="w-full h-full object-cover"
-                           />
-                         )}
-                       </div>
-                     
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-sm line-clamp-2">
-                          {item.title}
-                        </h4>
-                        <p className="text-xs text-muted-foreground">
-                          {item.type === 'co-pay-request' 
-                            ? `Co-Pay with ${item.vendorName || (typeof item.vendor === 'string' ? item.vendor : item.vendor?.name)}` 
-                            : item.vendor}
-                        </p>
-                       
-                         {/* Show pricing structure for co-pay requests */}
-                         {item.type === 'co-pay-request' && (
-                           (() => {
-                             let pricing = { retail_price: '$299/mo', co_pay_price: '$209/mo', pro_price: '$269/mo' };
-                             try {
-                               if (item.description) {
-                                 pricing = JSON.parse(item.description);
-                               }
-                             } catch (e) {
-                               // Use default pricing if parsing fails
-                             }
-                             
-                             return (
-                               <div className="text-xs text-muted-foreground mt-1 space-y-0.5">
-                                 <div className="flex justify-between">
-                                   <span>Retail Price:</span>
-                                   <span className="line-through text-muted-foreground">{pricing.retail_price || '$299/mo'}</span>
-                                 </div>
-                                  <div className="flex justify-between">
-                                    <span>Pro Price (if denied):</span>
-                                    <span className="text-amber-600">{pricing.pro_price || '$269/mo'}</span>
-                                  </div>
-                                  <div className="flex justify-between">
-                                    <span>Co-Pay Price:</span>
-                                    <span className="text-green-600 font-medium">{pricing.co_pay_price || '$209/mo'}</span>
-                                  </div>
-                                 <div className="flex justify-between">
-                                   <span>Your Split:</span>
-                                   <span className="text-blue-600">{100 - (item.requestedSplit || 50)}%</span>
-                                 </div>
-                                 <div className="flex justify-between">
-                                   <span>Vendor Split:</span>
-                                   <span className="text-orange-600">{item.requestedSplit || 50}%</span>
-                                 </div>
-                               </div>
-                             );
-                           })()
-                         )}
-                       
-                       <div className="flex items-center justify-between mt-2">
-                          <div className="flex items-center gap-2">
-                            {item.type === 'co-pay-request' ? (
-                              <div className="flex items-center gap-2">
-                                <Badge 
-                                  variant="secondary" 
-                                  className={`text-xs ${
-                                    item.status === 'pending-approval' ? 'text-yellow-600 border-yellow-600' :
-                                    item.status === 'approved' ? 'text-green-600 border-green-600' :
-                                    'text-red-600 border-red-600'
-                                  }`}
-                                >
-                                  <MessageCircle className="w-3 h-3 mr-1" />
-                                  {item.status === 'pending-approval' ? 'Pending Vendor Approval' : 
-                                   item.status === 'approved' ? 'Approved' : 'Denied'}
-                                </Badge>
-                                <span className="font-semibold text-muted-foreground text-xs">
-                                  {item.requestedSplit}% split
-                                </span>
-                                {item.requiresQuote && item.status === 'approved' && (
-                                  <Badge variant="outline" className="text-blue-600 border-blue-600 text-xs">
-                                    <Calendar className="w-3 h-3 mr-1" />
-                                    Consultation Required
-                                  </Badge>
-                                )}
-                              </div>
-                            ) : item.requiresQuote ? (
-                             <div className="flex items-center gap-2">
-                               <Badge variant="outline" className="text-blue-600 border-blue-600 text-xs">
-                                 <Calendar className="w-3 h-3 mr-1" />
-                                 Consultation
-                               </Badge>
-                               <span className="font-semibold text-muted-foreground line-through">
-                                 ${item.price}
-                               </span>
-                             </div>
-                           ) : (
-                             <span className="font-semibold text-circle-primary">
-                               ${item.price}
-                             </span>
-                           )}
-                         </div>
+                  <div key={item.id} className="flex gap-3 p-3 border rounded-lg">
+                    <div className="w-20 h-16 bg-muted rounded-lg overflow-hidden">
+                      <img
+                        src={item.image_url || "/placeholder.svg"}
+                        alt={item.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-medium text-sm line-clamp-2">
+                        {item.title}
+                      </h4>
+                      <p className="text-xs text-muted-foreground">
+                        {item.coverageType === 'copay' && item.selectedVendor
+                          ? `Co-Pay with ${item.selectedVendor.name}`
+                          : item.vendor}
+                      </p>
+                      
+                      {/* Status Badge */}
+                      <div className="mt-1">
+                        {getStatusBadge(item)}
+                      </div>
+                      
+                      <div className="flex items-center justify-between mt-2">
+                        <div className="flex items-center gap-2">
+                          {item.affiliateUrl ? (
+                            <div className="flex items-center gap-1 text-purple-600">
+                              <ExternalLink className="w-3 h-3" />
+                              <span className="text-xs">Vendor Site</span>
+                            </div>
+                          ) : (
+                            <span className="font-semibold text-primary">
+                              ${item.price}
+                            </span>
+                          )}
+                        </div>
                         
                         <div className="flex items-center gap-1">
-                          {!item.requiresQuote && item.type !== 'co-pay-request' && (
+                          {!item.requiresQuote && (
                             <>
                               <Button
                                 variant="outline"
@@ -382,7 +330,6 @@ export const CartDrawer = () => {
                     </div>
                   </div>
                 ))}
-
               </div>
 
               <div className="border-t pt-4 space-y-4">
@@ -395,11 +342,11 @@ export const CartDrawer = () => {
                     </div>
                   )}
                   
-                  {quoteItems.length > 0 && (
+                  {consultationItems.length > 0 && (
                     <div className="flex justify-between">
                       <span className="flex items-center gap-1">
                         <Calendar className="w-3 h-3" />
-                        Consultation items ({quoteItems.length}):
+                        Consultation items ({consultationItems.length}):
                       </span>
                       <span className="text-blue-600 font-medium">Consultation required</span>
                     </div>
@@ -410,37 +357,24 @@ export const CartDrawer = () => {
 
                 {/* Actions */}
                 <div className="space-y-2">
-                  {purchasableItems.length > 0 && (
+                  <Button 
+                    className="w-full" 
+                    onClick={handleCheckout}
+                    disabled={isCheckingOut || cartItems.length === 0}
+                  >
+                    <CreditCard className="w-4 h-4 mr-2" />
+                    {isCheckingOut ? "Processing..." : "Proceed with Cart"}
+                  </Button>
+                  
+                  {consultationItems.length > 0 && (
                     <Button 
-                      className="w-full" 
-                      onClick={handleCheckout}
-                      disabled={isCheckingOut}
+                      className="w-full"
+                      onClick={handleRequestQuotes}
                     >
-                      <CreditCard className="w-4 h-4 mr-2" />
-                      {isCheckingOut ? "Processing..." : `Checkout ${purchasableItems.length} item(s) - $${getCartTotal()}`}
+                      <Calendar className="w-4 h-4 mr-2" />
+                      Schedule Consultations ({consultationItems.length} item(s))
                     </Button>
                   )}
-                  
-                  {coPayItems.length > 0 && (
-                    <Button 
-                      className="w-full bg-green-600 hover:bg-green-700" 
-                      onClick={handleCheckout}
-                      disabled={isCheckingOut}
-                    >
-                      <CreditCard className="w-4 h-4 mr-2" />
-                      {isCheckingOut ? "Processing..." : `Co-Pay Checkout (${coPayItems.length} item(s))`}
-                    </Button>
-                  )}
-                  
-                   {quoteItems.length > 0 && (
-                     <Button 
-                       className="w-full"
-                       onClick={handleRequestQuotes}
-                     >
-                       <Calendar className="w-4 h-4 mr-2" />
-                       Schedule Consultations ({quoteItems.length} item(s))
-                     </Button>
-                   )}
                   
                   <Button 
                     variant="ghost" 
@@ -451,23 +385,23 @@ export const CartDrawer = () => {
                   </Button>
                 </div>
               </div>
-             </>
-           )}
-         </div>
-       </SheetContent>
-       
-       <ConsultationSequenceFlow
-         isOpen={isConsultationFlowOpen}
-         onClose={() => setIsConsultationFlowOpen(false)}
-         consultationItems={quoteItems.map(item => ({
-           serviceId: item.id,
-           title: item.title,
-           vendor: item.vendor,
-           image_url: item.image_url,
-           price: item.price
-         }))}
-         onComplete={handleConsultationComplete}
-       />
-     </Sheet>
-   );
- };
+            </>
+          )}
+        </div>
+      </SheetContent>
+      
+      <ConsultationSequenceFlow
+        isOpen={isConsultationFlowOpen}
+        onClose={() => setIsConsultationFlowOpen(false)}
+        consultationItems={consultationItems.map(item => ({
+          serviceId: item.id,
+          title: item.title,
+          vendor: item.vendor,
+          image_url: item.image_url,
+          price: item.price
+        }))}
+        onComplete={handleConsultationComplete}
+      />
+    </Sheet>
+  );
+};
