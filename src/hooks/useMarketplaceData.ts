@@ -88,8 +88,8 @@ export const QUERY_KEYS = {
   savedServices: (userId: string) => ['marketplace', 'savedServices', userId],
 } as const;
 
-// Helper: timeout wrapper - reduced timeout for faster recovery
-const withTimeout = async <T,>(promise: PromiseLike<T>, ms = 8000, label?: string): Promise<T> => {
+// Helper: timeout wrapper - increased timeout for stability
+const withTimeout = async <T,>(promise: PromiseLike<T>, ms = 30000, label?: string): Promise<T> => {
   let timer: number | undefined;
   return Promise.race<T>([
     promise as Promise<T>,
@@ -115,7 +115,7 @@ const fetchServices = async (): Promise<Service[]> => {
       supabase
         .from('services')
         .select('*', { count: 'exact', head: true }),
-      3000,
+      10000,
       'services-count'
     );
     if (!error && typeof count === 'number') {
@@ -146,7 +146,7 @@ const fetchServices = async (): Promise<Service[]> => {
       .order('sort_order', { ascending: true })
       .order('created_at', { ascending: false })
       .limit(200), // Increased from 100 to 200 to accommodate all services
-      8000, // Reduced to 8s timeout for faster recovery
+      30000, // Increased timeout for stability  
       'fetchServices'
     );
 
@@ -217,7 +217,7 @@ const fetchVendors = async (): Promise<Vendor[]> => {
       .order('sort_order', { ascending: true })
       .order('rating', { ascending: false })
       .limit(50),
-      8000, // Reduced to 8s timeout for faster recovery
+      30000, // Increased timeout for stability
       'fetchVendors'
     );
 
