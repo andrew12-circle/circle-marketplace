@@ -121,10 +121,10 @@ export const PaymentChoiceModal = ({
                   <CreditCard className="w-5 h-5 text-primary" />
                   <h3 className="font-semibold">Pay Circle Pro Price</h3>
                 </div>
-                <div className="text-2xl font-bold text-primary mb-2">${proPrice}/mo</div>
+                <div className="text-2xl font-bold text-primary mb-2">{proPrice}/mo</div>
                 <p className="text-sm text-muted-foreground mb-4">Pay your discounted member price and get started immediately.</p>
                 <Button onClick={handleProChoice} className="w-full">
-                  Add to Cart - ${proPrice}/mo
+                  Add to Cart - {proPrice}/mo
                 </Button>
               </CardContent>
             </Card>
