@@ -718,6 +718,14 @@ export const ServiceCard = ({
               window.dispatchEvent(cartEvent);
             }, 500);
           }}
+          onPointsChoice={(service) => {
+            addDirectlyToCart('pro'); // Handle points same as pro choice
+            // Always open cart after adding an item
+            setTimeout(() => {
+              const cartEvent = new CustomEvent('openCart');
+              window.dispatchEvent(cartEvent);
+            }, 500);
+          }}
           onCoPayChoice={(service, vendor) => {
             addDirectlyToCart('copay', vendor);
             // Always open cart after adding an item
