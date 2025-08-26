@@ -598,17 +598,7 @@ export const ServiceCard = ({
                 </Button>
               ) : service.direct_purchase_enabled && service.website_url ? (
                 <>
-                  {/* Buy Now Button for Direct Purchase */}
-                  <Button
-                    size="sm"
-                    className="flex-1 h-9"
-                    onClick={handleBuyNow}
-                  >
-                    <ShoppingCart className="w-4 h-4 mr-1" />
-                    Buy Now
-                  </Button>
-                  
-                  {/* Add to Cart Button - Only show this, not Book Consultation */}
+                  {/* Only Add to Cart Button - Buy Now will be handled in cart */}
                   <Button
                     variant="outline"
                     size="sm"
