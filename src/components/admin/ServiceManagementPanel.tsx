@@ -32,6 +32,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { ServiceConsultationEmails } from './ServiceConsultationEmails';
 import { AdminNotes } from './AdminNotes';
 import { ServiceDisclaimerSection } from './ServiceDisclaimerSection';
+import { ServiceAIResearchEditor } from './ServiceAIResearchEditor';
 
 interface PricingFeature {
   id: string;
@@ -1089,9 +1090,10 @@ export const ServiceManagementPanel = () => {
           </CardHeader>
           <CardContent>
             <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
+              <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="details">Service Details</TabsTrigger>
                 <TabsTrigger value="disclaimer">Disclaimer</TabsTrigger>
+                <TabsTrigger value="ai-research">AI Research</TabsTrigger>
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -1437,6 +1439,13 @@ export const ServiceManagementPanel = () => {
 
               <TabsContent value="disclaimer" className="space-y-4">
                 <ServiceDisclaimerSection
+                  serviceId={selectedService.id}
+                  serviceName={selectedService.title}
+                />
+              </TabsContent>
+
+              <TabsContent value="ai-research" className="space-y-4">
+                <ServiceAIResearchEditor
                   serviceId={selectedService.id}
                   serviceName={selectedService.title}
                 />

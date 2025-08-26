@@ -43,11 +43,15 @@ serve(async (req) => {
     const marketAnalysis = await analyzeMarketData(supabase);
     console.log('Market analysis completed');
 
+    // Get curated AI knowledge for services
+    const curatedKnowledge = await getCuratedServiceKnowledge(supabase, message, userContext);
+    console.log('Curated knowledge fetched:', curatedKnowledge?.length || 0, 'entries');
+
     // Create sanitized prompt (no proprietary data to OpenAI)
     const sanitizedPrompt = createSanitizedPrompt(message, userContext, marketAnalysis, context);
     
-    // Generate local recommendation based on your data
-    const localRecommendation = generateLocalRecommendation(userContext, marketAnalysis);
+    // Generate local recommendation based on your data with curated knowledge
+    const localRecommendation = generateLocalRecommendation(userContext, marketAnalysis, curatedKnowledge);
     console.log('Local recommendation generated');
 
     // Enhanced prompt created
@@ -420,6 +424,87 @@ function analyzeVendorData(vendors: any[]) {
   };
 }
 
+async function getCuratedServiceKnowledge(supabase: any, userMessage: string, userContext: any) {
+  try {
+    // Get keywords from user message for semantic matching
+    const messageKeywords = userMessage.toLowerCase().split(/\s+/);
+    
+    // Get user's interests from saved services and recent views
+    const userCategories = userContext.uniqueCategories || [];
+    const userTags = [
+      ...(userContext.savedServices?.flatMap((s: any) => s.services?.tags || []) || []),
+      ...(userContext.recentViews?.flatMap((v: any) => v.services?.tags || []) || [])
+    ].filter(Boolean);
+
+    // Build query to fetch relevant AI knowledge
+    let query = supabase
+      .from('service_ai_knowledge')
+      .select(`
+        id, service_id, title, knowledge_type, content, tags, priority,
+        services (id, title, category, tags)
+      `)
+      .eq('is_active', true)
+      .order('priority', { ascending: false });
+
+    // Get all active knowledge entries (we'll filter client-side for better matching)
+    const { data: allKnowledge } = await query.limit(100);
+    
+    if (!allKnowledge || allKnowledge.length === 0) {
+      return [];
+    }
+
+    // Score and filter knowledge entries based on relevance
+    const scoredKnowledge = allKnowledge
+      .map((entry: any) => {
+        let relevanceScore = entry.priority; // Base score from priority
+        
+        // Boost if message keywords match entry content or tags
+        const entryText = `${entry.title} ${entry.content} ${entry.tags?.join(' ') || ''}`.toLowerCase();
+        const keywordMatches = messageKeywords.filter(keyword => 
+          keyword.length > 3 && entryText.includes(keyword)
+        ).length;
+        relevanceScore += keywordMatches * 2;
+        
+        // Boost if user has shown interest in this service category
+        if (entry.services?.category && userCategories.includes(entry.services.category)) {
+          relevanceScore += 3;
+        }
+        
+        // Boost if user has interacted with similar tagged services
+        const commonTags = (entry.tags || []).filter((tag: string) => 
+          userTags.some((userTag: string) => 
+            userTag.toLowerCase().includes(tag.toLowerCase()) || 
+            tag.toLowerCase().includes(userTag.toLowerCase())
+          )
+        ).length;
+        relevanceScore += commonTags * 1.5;
+        
+        // Boost specific knowledge types for certain queries
+        if (userMessage.toLowerCase().includes('roi') && entry.knowledge_type === 'roi_insights') {
+          relevanceScore += 2;
+        }
+        if (userMessage.toLowerCase().includes('implement') && entry.knowledge_type === 'implementation') {
+          relevanceScore += 2;
+        }
+        if (userMessage.toLowerCase().includes('compare') && entry.knowledge_type === 'comparisons') {
+          relevanceScore += 2;
+        }
+        
+        return { ...entry, relevanceScore };
+      })
+      .filter((entry: any) => entry.relevanceScore > 0)
+      .sort((a: any, b: any) => b.relevanceScore - a.relevanceScore)
+      .slice(0, 10); // Top 10 most relevant entries
+
+    console.log('Knowledge entries scored and filtered:', scoredKnowledge.length);
+    return scoredKnowledge;
+    
+  } catch (error) {
+    console.error('Error fetching curated service knowledge:', error);
+    return [];
+  }
+}
+
 async function getSimilarUsers(supabase: any, profile: any) {
   if (!profile) return [];
   
@@ -493,11 +578,34 @@ function createSanitizedPrompt(userMessage: string, userContext: any, marketAnal
   return prompt;
 }
 
-function generateLocalRecommendation(userContext: any, marketAnalysis: any) {
+function generateLocalRecommendation(userContext: any, marketAnalysis: any, curatedKnowledge: any[] = []) {
   const { profile, savedServices, similarUserPurchases, trendingInCategories, purchasingPower } = userContext;
   
   let recommendation = "";
   let confidence = 0;
+  
+  // Add curated AI knowledge first if available
+  if (curatedKnowledge?.length > 0) {
+    recommendation += `\n🧠 **Expert Insights:**\n`;
+    
+    // Add top 3 most relevant knowledge entries
+    curatedKnowledge.slice(0, 3).forEach((entry: any, index: number) => {
+      recommendation += `\n**${entry.title}**\n`;
+      
+      // Add first 150 characters of content + ellipsis if longer
+      const content = entry.content.length > 150 
+        ? entry.content.substring(0, 150) + '...' 
+        : entry.content;
+      recommendation += `${content}\n`;
+      
+      if (entry.services?.title) {
+        recommendation += `*Related to: ${entry.services.title} [ID: ${entry.service_id}]*\n`;
+      }
+    });
+    
+    recommendation += `\n`;
+    confidence += 0.4; // High confidence boost for curated knowledge
+  }
   
   // Start with personalized insight
   if (profile?.city && profile?.state) {
