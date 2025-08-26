@@ -1,14 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
-// Calculate total offset including header
-const getTotalOffset = () => {
+// Calculate header height only (no extra spacing)
+const getHeaderHeight = () => {
   const header = document.querySelector('header') as HTMLElement;
-  
-  const headerHeight = header ? header.offsetHeight : 76;
-  const spacing = 16; // spacing below header
-  
-  return headerHeight + spacing;
+  return header ? header.offsetHeight : 76;
 };
 
 interface StickySearchContainerProps {
@@ -18,20 +14,20 @@ interface StickySearchContainerProps {
 
 export const StickySearchContainer = ({ children, className }: StickySearchContainerProps) => {
   const [isSticky, setIsSticky] = useState(false);
-  const [totalOffset, setTotalOffset] = useState(144); // default fallback
+  const [headerHeight, setHeaderHeight] = useState(76); // default fallback
   const containerRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Update total offset on mount and resize
-    const updateTotalOffset = () => {
-      setTotalOffset(getTotalOffset());
+    // Update header height on mount and resize
+    const updateHeaderHeight = () => {
+      setHeaderHeight(getHeaderHeight());
     };
     
-    updateTotalOffset();
-    window.addEventListener('resize', updateTotalOffset);
+    updateHeaderHeight();
+    window.addEventListener('resize', updateHeaderHeight);
     
-    return () => window.removeEventListener('resize', updateTotalOffset);
+    return () => window.removeEventListener('resize', updateHeaderHeight);
   }, []);
 
   useEffect(() => {
@@ -44,7 +40,7 @@ export const StickySearchContainer = ({ children, className }: StickySearchConta
         setIsSticky(!entry.isIntersecting);
       },
       {
-        rootMargin: `-${totalOffset}px 0px -1px 0px`, // Account for total offset
+        rootMargin: `-${headerHeight}px 0px -1px 0px`, // Account for header height only
         threshold: 0
       }
     );
@@ -54,7 +50,7 @@ export const StickySearchContainer = ({ children, className }: StickySearchConta
     return () => {
       observer.disconnect();
     };
-  }, [totalOffset]);
+  }, [headerHeight]);
 
   return (
     <>
@@ -71,7 +67,7 @@ export const StickySearchContainer = ({ children, className }: StickySearchConta
           className
         )}
         style={{
-          top: isSticky ? `${totalOffset + 21}px` : undefined,
+          top: isSticky ? `${headerHeight}px` : undefined,
           transform: isSticky ? "translateY(0)" : undefined,
         }}
       >
