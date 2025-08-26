@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAdminStatus } from "@/hooks/useAdminStatus";
 import { useToast } from "@/hooks/use-toast";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -27,6 +28,7 @@ interface VendorInfo {
 
 export const UserMenu = () => {
   const { user, profile, signOut } = useAuth();
+  const { data: isAdmin } = useAdminStatus();
   const { toast } = useToast();
   
   const [isSigningOut, setIsSigningOut] = useState(false);
@@ -175,7 +177,7 @@ export const UserMenu = () => {
         )}
         
         {/* Admin Dashboard Link */}
-        {profile?.is_admin && (
+        {isAdmin && (
           <>
             <DropdownMenuItem asChild>
               <Link to="/admin" className="flex items-center">
