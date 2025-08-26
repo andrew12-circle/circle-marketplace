@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Search, Eye, Save, X } from "lucide-react";
+import { Search, Eye, X } from "lucide-react";
 import { useRESPADisclaimers } from "@/hooks/useRESPADisclaimers";
 
 interface Service {
@@ -36,7 +36,6 @@ export const ServiceDisclaimerManager = () => {
   const [updating, setUpdating] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [previewDisclaimer, setPreviewDisclaimer] = useState<DisclaimerPreview | null>(null);
-  const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null);
   const { disclaimers, refetch } = useRESPADisclaimers();
   const { toast } = useToast();
 
@@ -48,6 +47,7 @@ export const ServiceDisclaimerManager = () => {
   useEffect(() => {
     const filtered = services.filter(service =>
       service.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      service.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
       service.vendor?.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
     setFilteredServices(filtered);
@@ -55,7 +55,6 @@ export const ServiceDisclaimerManager = () => {
 
   const fetchServices = async () => {
     try {
-      setLoading(true);
       const { data, error } = await supabase
         .from('services')
         .select(`
@@ -65,10 +64,9 @@ export const ServiceDisclaimerManager = () => {
           disclaimer_id,
           copay_allowed,
           respa_split_limit,
-          vendor:vendor_id (
-            name
-          )
+          vendor:vendors(name)
         `)
+        .eq('is_active', true)
         .order('title');
 
       if (error) throw error;
@@ -77,7 +75,7 @@ export const ServiceDisclaimerManager = () => {
       console.error('Error fetching services:', error);
       toast({
         title: "Error",
-        description: "Failed to load services",
+        description: "Failed to fetch services",
         variant: "destructive",
       });
     } finally {
@@ -86,8 +84,8 @@ export const ServiceDisclaimerManager = () => {
   };
 
   const updateServiceDisclaimer = async (serviceId: string, disclaimerId: string | null) => {
+    setUpdating(serviceId);
     try {
-      setUpdating(serviceId);
       const { error } = await supabase
         .from('services')
         .update({ disclaimer_id: disclaimerId })
@@ -95,18 +93,17 @@ export const ServiceDisclaimerManager = () => {
 
       if (error) throw error;
 
-      // Update local state
-      setServices(prev => 
-        prev.map(service => 
-          service.id === serviceId 
-            ? { ...service, disclaimer_id: disclaimerId || undefined }
-            : service
-        )
-      );
+      setServices(prev => prev.map(service => 
+        service.id === serviceId 
+          ? { ...service, disclaimer_id: disclaimerId }
+          : service
+      ));
 
       toast({
         title: "Success",
-        description: "Service disclaimer updated successfully",
+        description: disclaimerId 
+          ? "Disclaimer assigned successfully" 
+          : "Disclaimer removed successfully",
       });
     } catch (error) {
       console.error('Error updating service disclaimer:', error);
@@ -122,67 +119,31 @@ export const ServiceDisclaimerManager = () => {
 
   const previewServiceDisclaimer = async (disclaimerId: string, serviceId: string) => {
     try {
-      const disclaimer = disclaimers.find(d => d.id === disclaimerId);
-      if (disclaimer) {
-        setPreviewDisclaimer(disclaimer);
-        setSelectedServiceId(serviceId);
-      }
+      const { data, error } = await supabase
+        .from('respa_disclaimers')
+        .select('*')
+        .eq('id', disclaimerId)
+        .single();
+
+      if (error) throw error;
+      setPreviewDisclaimer(data);
     } catch (error) {
-      console.error('Error previewing disclaimer:', error);
-    }
-  };
-
-  const bulkAssignDisclaimer = async (disclaimerId: string | null, criteria: 'copay' | 'all') => {
-    try {
-      setLoading(true);
-      
-      let servicesToUpdate = services;
-      if (criteria === 'copay') {
-        servicesToUpdate = services.filter(s => s.copay_allowed);
-      }
-
-      // Update services one by one instead of bulk upsert
-      for (const service of servicesToUpdate) {
-        await supabase
-          .from('services')
-          .update({ disclaimer_id: disclaimerId })
-          .eq('id', service.id);
-      }
-
-      await fetchServices(); // Refresh data
-
-      toast({
-        title: "Success",
-        description: `Bulk updated ${servicesToUpdate.length} services`,
-      });
-    } catch (error) {
-      console.error('Error bulk updating disclaimers:', error);
+      console.error('Error fetching disclaimer:', error);
       toast({
         title: "Error",
-        description: "Failed to bulk update disclaimers",
+        description: "Failed to load disclaimer preview",
         variant: "destructive",
       });
-    } finally {
-      setLoading(false);
     }
   };
 
   const getDisclaimerBadge = (disclaimerId?: string) => {
-    if (!disclaimerId) {
-      return <Badge variant="outline">No Disclaimer</Badge>;
-    }
+    if (!disclaimerId) return <Badge variant="secondary" className="text-xs">No Disclaimer</Badge>;
     
     const disclaimer = disclaimers.find(d => d.id === disclaimerId);
-    if (!disclaimer) {
-      return <Badge variant="destructive">Invalid Disclaimer</Badge>;
-    }
-    
     return (
-      <Badge 
-        variant={disclaimer.is_active ? "default" : "secondary"}
-        className="max-w-32 truncate"
-      >
-        {disclaimer.title}
+      <Badge variant="default" className="text-xs">
+        {disclaimer?.title || 'Unknown Disclaimer'}
       </Badge>
     );
   };
@@ -190,8 +151,11 @@ export const ServiceDisclaimerManager = () => {
   if (loading) {
     return (
       <Card>
-        <CardContent className="p-6">
-          <div className="text-center">Loading services...</div>
+        <CardContent className="p-8">
+          <div className="flex items-center justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <span className="ml-2">Loading services...</span>
+          </div>
         </CardContent>
       </Card>
     );
@@ -203,12 +167,12 @@ export const ServiceDisclaimerManager = () => {
         <CardHeader>
           <CardTitle>Service Disclaimer Management</CardTitle>
           <p className="text-sm text-muted-foreground">
-            Assign specific disclaimers to services or manage them in bulk
+            Assign specific disclaimers to services and manage co-pay settings
           </p>
         </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Search and Bulk Actions */}
-          <div className="flex flex-col sm:flex-row gap-4">
+        <CardContent>
+          {/* Search */}
+          <div className="flex flex-col sm:flex-row gap-4 mb-6">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
               <Input
@@ -218,89 +182,94 @@ export const ServiceDisclaimerManager = () => {
                 className="pl-9"
               />
             </div>
-            <div className="flex gap-2">
-              <Select onValueChange={(value) => bulkAssignDisclaimer(value === 'none' ? null : value, 'copay')}>
-                <SelectTrigger className="w-48">
-                  <SelectValue placeholder="Bulk assign to co-pay services" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">Remove all disclaimers</SelectItem>
-                  {disclaimers.filter(d => d.is_active).map((disclaimer) => (
-                    <SelectItem key={disclaimer.id} value={disclaimer.id}>
-                      {disclaimer.title}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
           </div>
 
-          {/* Services List */}
-          <div className="space-y-3">
+          {/* Service Cards */}
+          <div className="space-y-4">
             {filteredServices.map((service) => (
-              <div
-                key={service.id}
-                className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 border rounded-lg bg-card"
-              >
-                <div className="flex-1 min-w-0">
-                  <h4 className="font-medium truncate">{service.title}</h4>
-                  <p className="text-sm text-muted-foreground">
-                    {service.vendor?.name || 'No vendor'}
-                  </p>
-                  <div className="flex items-center gap-2 mt-1">
-                    {service.copay_allowed && (
-                      <Badge variant="outline" className="text-xs">Co-Pay Enabled</Badge>
-                    )}
-                    {service.respa_split_limit && (
-                      <Badge variant="outline" className="text-xs">
-                        {service.respa_split_limit}% RESPA Limit
-                      </Badge>
-                    )}
-                  </div>
-                </div>
+              <Card key={service.id} className="hover:shadow-md transition-shadow">
+                <CardContent className="p-4">
+                  <div className="flex flex-col lg:flex-row gap-4">
+                    {/* Service Info */}
+                    <div className="flex-1">
+                      <div className="flex flex-col sm:flex-row sm:items-start gap-3">
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-base">{service.title}</h3>
+                          <p className="text-sm text-muted-foreground mb-2">{service.description}</p>
+                          <p className="text-xs text-muted-foreground">
+                            Vendor: {service.vendor?.name || 'Unknown'}
+                          </p>
+                          
+                          <div className="flex items-center gap-2 mt-2">
+                            {service.copay_allowed && (
+                              <Badge variant="outline" className="text-xs">Co-Pay Enabled</Badge>
+                            )}
+                            {service.respa_split_limit && (
+                              <Badge variant="outline" className="text-xs">
+                                {service.respa_split_limit}% RESPA Limit
+                              </Badge>
+                            )}
+                            {getDisclaimerBadge(service.disclaimer_id)}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
 
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
-                  {getDisclaimerBadge(service.disclaimer_id)}
-                  
-                  <div className="flex gap-1">
-                    <Select
-                      value={service.disclaimer_id || "none"}
-                      onValueChange={(value) => 
-                        updateServiceDisclaimer(service.id, value === 'none' ? null : value)
-                      }
-                      disabled={updating === service.id}
-                    >
-                      <SelectTrigger className="w-48">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">No Disclaimer</SelectItem>
-                        {disclaimers.filter(d => d.is_active).map((disclaimer) => (
-                          <SelectItem key={disclaimer.id} value={disclaimer.id}>
-                            {disclaimer.title}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    {/* Disclaimer Controls */}
+                    <div className="flex flex-col gap-3 lg:w-80">
+                      <div className="flex items-center gap-2">
+                        <label className="text-sm font-medium text-muted-foreground min-w-0">
+                          Disclaimer:
+                        </label>
+                        <Select
+                          value={service.disclaimer_id || "none"}
+                          onValueChange={(value) => 
+                            updateServiceDisclaimer(service.id, value === 'none' ? null : value)
+                          }
+                          disabled={updating === service.id}
+                        >
+                          <SelectTrigger className="flex-1">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="none">No Disclaimer</SelectItem>
+                            {disclaimers.filter(d => d.is_active).map((disclaimer) => (
+                              <SelectItem key={disclaimer.id} value={disclaimer.id}>
+                                {disclaimer.title}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
 
-                    {service.disclaimer_id && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => previewServiceDisclaimer(service.disclaimer_id!, service.id)}
-                      >
-                        <Eye className="w-4 h-4" />
-                      </Button>
-                    )}
+                        {service.disclaimer_id && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => previewServiceDisclaimer(service.disclaimer_id!, service.id)}
+                            className="shrink-0"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                        )}
+                      </div>
+                      
+                      {updating === service.id && (
+                        <div className="text-xs text-muted-foreground flex items-center gap-1">
+                          <div className="w-3 h-3 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                          Updating...
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
 
           {filteredServices.length === 0 && (
-            <div className="text-center py-8 text-muted-foreground">
-              No services found matching your search.
+            <div className="text-center py-12 text-muted-foreground">
+              <Search className="w-12 h-12 mx-auto mb-4 opacity-50" />
+              <p>No services found matching your search.</p>
             </div>
           )}
         </CardContent>
@@ -320,19 +289,30 @@ export const ServiceDisclaimerManager = () => {
                 <X className="w-4 h-4" />
               </Button>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="p-4 bg-gradient-to-br from-yellow-400 via-yellow-500 to-yellow-600 rounded-lg text-yellow-900">
-                <h3 className="font-bold text-lg mb-2">{previewDisclaimer.title}</h3>
-                <p className="text-sm leading-relaxed mb-4">
-                  {previewDisclaimer.content}
-                </p>
-                <button className="text-sm font-medium hover:underline">
-                  {previewDisclaimer.button_text}
-                </button>
+            <CardContent>
+              <div className="space-y-4">
+                <div>
+                  <h4 className="font-semibold text-sm mb-2">{previewDisclaimer.title}</h4>
+                  <div className="text-sm text-muted-foreground whitespace-pre-wrap">
+                    {previewDisclaimer.content}
+                  </div>
+                </div>
+                
+                {previewDisclaimer.button_text && (
+                  <div className="pt-4 border-t">
+                    <Button 
+                      className="w-full"
+                      onClick={() => {
+                        if (previewDisclaimer.button_url) {
+                          window.open(previewDisclaimer.button_url, '_blank');
+                        }
+                      }}
+                    >
+                      {previewDisclaimer.button_text}
+                    </Button>
+                  </div>
+                )}
               </div>
-              <p className="text-xs text-muted-foreground">
-                This is how the disclaimer will appear when users hover over the info icon on the service card.
-              </p>
             </CardContent>
           </Card>
         </div>
