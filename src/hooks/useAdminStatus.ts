@@ -12,21 +12,36 @@ export const useAdminStatus = () => {
       
       console.log('🔐 Admin status check starting for user:', user.id);
       
-      const { data, error } = await supabase.rpc('get_user_admin_status');
-      if (error) {
-        console.error('🚨 Admin RPC failed, falling back to profile.is_admin:', error);
-        // Graceful fallback to profile admin status
+      // Create a timeout promise that rejects after 7 seconds
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('RPC timeout after 7 seconds')), 7000);
+      });
+      
+      try {
+        // Race between RPC call and timeout
+        const { data, error } = await Promise.race([
+          supabase.rpc('get_user_admin_status'),
+          timeoutPromise
+        ]) as any;
+        
+        if (error) {
+          throw error;
+        }
+        
+        const result = !!data;
+        console.log('✅ Admin status from RPC:', result);
+        return result;
+      } catch (error) {
+        console.error('🚨 Admin RPC failed/timeout, falling back to profile.is_admin:', error);
+        // Immediate fallback to profile admin status for network issues
         const fallbackResult = !!profile?.is_admin;
-        console.log('🔄 Fallback admin status:', fallbackResult);
+        console.log('🔄 Fallback admin status (Safe Mode):', fallbackResult);
         return fallbackResult;
       }
-      
-      const result = !!data;
-      console.log('✅ Admin status from RPC:', result);
-      return result;
     },
     enabled: !!user,
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
+    retry: 0, // Don't retry to avoid additional delays
   });
 };
