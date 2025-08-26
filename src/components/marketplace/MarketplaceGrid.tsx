@@ -501,7 +501,7 @@ export const MarketplaceGrid = () => {
           {/* Hero Section */}
           <div className="mb-12">
             <h1 className="text-3xl sm:text-6xl font-bold text-black mb-4 lcp-content">Agent Marketplace.</h1>
-            <p className="text-gray-600 max-w-2xl text-sm lcp-content">This isn't just another directory. It's a curated, vetted, agent-verified list — at a fraction of the cost. And with vendors ready to step in, you'll often cover nearly half the cost on average. We did the homework for you: tracking what top agents actually use, what really works, and what delivers ROI. Tell us your growth path, and we'll guide you there faster.</p>
+            <p className="text-gray-600 max-w-2xl text-sm lcp-content">This isn't just another directory you can Google. It's a curated, vetted, agent-verified list — at prices you won't find on your own. We've done the homework: tracking what top agents actually use, what works, and what delivers ROI. Tell us your growth path and we'll guide you there faster. And with vendors just a couple clicks away, you'll often cover nearly half of the already reduced cost. No awkward conversations — just real tools, real savings, and real growth.</p>
             
             {/* QA Diagnostics in Hero when in QA mode */}
             {isQAMode && (
