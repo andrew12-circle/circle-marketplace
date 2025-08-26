@@ -584,7 +584,6 @@ export const ServiceCard = ({
               )}
             </div>
 
-
             {/* Action Buttons - Fixed at bottom */}
             <div className="flex gap-2 mt-auto">
               {service.requires_quote ? (
@@ -609,18 +608,15 @@ export const ServiceCard = ({
                     Buy Now
                   </Button>
                   
-                  {/* Book Consultation Button */}
+                  {/* Add to Cart Button - Only show this, not Book Consultation */}
                   <Button
                     variant="outline"
                     size="sm"
                     className="flex-1 h-9"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setIsConsultationFlowOpen(true);
-                    }}
+                    onClick={handleAddToCart}
                   >
-                    <Calendar className="w-4 h-4 mr-1" />
-                    Book Consultation
+                    <ShoppingCart className="w-4 h-4 mr-1" />
+                    Add to Cart
                   </Button>
                 </>
               ) : (
