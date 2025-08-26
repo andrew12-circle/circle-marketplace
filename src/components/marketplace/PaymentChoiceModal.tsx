@@ -194,12 +194,6 @@ export const PaymentChoiceModal = ({
               </Card>
             )}
           </div>
-
-          <div className="flex justify-end gap-2 mt-6">
-            <Button variant="outline" onClick={onClose}>
-              Cancel
-            </Button>
-          </div>
         </DialogContent>
       </Dialog>
 
