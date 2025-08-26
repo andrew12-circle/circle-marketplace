@@ -11,6 +11,9 @@ import { logger } from '@/utils/logger';
 // Set to true to enable strict security verification (not recommended until RPC is stable)
 const STRICT_ADMIN_SECURITY = false;
 
+// Hard allowlist for immediate admin access (bypasses all RPCs)
+const ADMIN_ALLOWLIST = ['robert@circlenetwork.io'];
+
 interface SecureAdminGuardProps {
   children: ReactNode;
   requireElevatedPrivileges?: boolean;
@@ -26,6 +29,7 @@ export const SecureAdminGuard: React.FC<SecureAdminGuardProps> = ({
   const [securityWarning, setSecurityWarning] = useState<string | null>(null);
   const [verificationLoading, setVerificationLoading] = useState(true);
   const [safeMode, setSafeMode] = useState(false);
+  const [allowlisted, setAllowlisted] = useState(false);
 
   useEffect(() => {
     const verifyAdminSecurity = async () => {
@@ -34,6 +38,18 @@ export const SecureAdminGuard: React.FC<SecureAdminGuardProps> = ({
         return;
       }
       
+      // Check allowlist first - immediate access for critical users
+      if (user?.email && ADMIN_ALLOWLIST.includes(user.email.toLowerCase())) {
+        logger.log('SecureAdminGuard: User in allowlist - granting immediate access', {
+          userEmail: user.email,
+          userId: user.id
+        });
+        setAllowlisted(true);
+        setSecurityVerified(true);
+        setVerificationLoading(false);
+        return;
+      }
+
       // Only proceed with verification if we have a user and admin status
       if (!user || !isAdmin) {
         logger.log('SecureAdminGuard: User or admin status check failed', { 
@@ -190,7 +206,18 @@ export const SecureAdminGuard: React.FC<SecureAdminGuardProps> = ({
         </div>
       )}
       
-      {safeMode && (
+      {allowlisted && (
+        <div className="container mx-auto py-2 px-4">
+          <Alert variant="default" className="border-blue-200 bg-blue-50">
+            <CheckCircle className="h-4 w-4 text-blue-600" />
+            <AlertDescription className="text-blue-800">
+              <strong>Admin Access (Allowlisted):</strong> Immediate access granted - all security checks bypassed.
+            </AlertDescription>
+          </Alert>
+        </div>
+      )}
+
+      {safeMode && !allowlisted && (
         <div className="container mx-auto py-2 px-4">
           <Alert variant="default" className="border-green-200 bg-green-50">
             <CheckCircle className="h-4 w-4 text-green-600" />
