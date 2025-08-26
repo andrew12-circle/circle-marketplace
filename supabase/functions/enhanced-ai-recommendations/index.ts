@@ -458,6 +458,11 @@ async function getCuratedServiceKnowledge(supabase: any, userMessage: string, us
       .map((entry: any) => {
         let relevanceScore = entry.priority; // Base score from priority
         
+        // Boost research entries significantly
+        if (entry.knowledge_type === 'research') {
+          relevanceScore += 3;
+        }
+        
         // Boost if message keywords match entry content or tags
         const entryText = `${entry.title} ${entry.content} ${entry.tags?.join(' ') || ''}`.toLowerCase();
         const keywordMatches = messageKeywords.filter(keyword => 

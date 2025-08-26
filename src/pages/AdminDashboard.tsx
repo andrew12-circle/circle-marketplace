@@ -43,6 +43,7 @@ import VendorPointAllocationPanel from '@/components/admin/VendorPointAllocation
 import AntiScrapingSystem from '@/components/security/AntiScrapingSystem';
 import { CreatorPayoutDashboard } from '@/components/admin/CreatorPayoutDashboard';
 import BulkFAQGenerator from '@/components/admin/BulkFAQGenerator';
+import BulkServiceResearch from '@/components/admin/BulkServiceResearch';
 import { VendorQuestionsManager } from '@/components/admin/VendorQuestionsManager';
 import { AdminHealthDashboard } from '@/components/admin/AdminHealthDashboard';
 import { RetentionAnalyticsDashboard } from '@/components/admin/RetentionAnalyticsDashboard';
@@ -923,7 +924,10 @@ export default function AdminDashboard() {
 
         <TabsContent value="services" className="space-y-6">
           <ServiceManagementPanel />
-          <BulkFAQGenerator />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <BulkFAQGenerator />
+            <BulkServiceResearch />
+          </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <ServiceImportPanel />
           </div>
