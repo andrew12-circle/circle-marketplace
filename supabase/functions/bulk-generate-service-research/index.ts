@@ -1,3 +1,4 @@
+
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.53.0';
@@ -91,11 +92,26 @@ serve(async (req) => {
       throw new Error('Authentication failed');
     }
 
-    // Verify admin status
-    const { data: adminCheck } = await supabase.rpc('get_user_admin_status');
-    if (!adminCheck) {
+    console.log('🔐 User authenticated:', user.id);
+
+    // Check admin status from profiles table
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('is_admin')
+      .eq('user_id', user.id)
+      .single();
+
+    if (profileError) {
+      console.error('❌ Profile lookup error:', profileError);
+      throw new Error('Failed to verify user profile');
+    }
+
+    if (!profile?.is_admin) {
+      console.error('❌ User is not admin:', user.id, 'Profile admin status:', profile?.is_admin);
       throw new Error('Admin privileges required');
     }
+
+    console.log('✅ Admin status confirmed for user:', user.id);
 
     const {
       masterPrompt = DEFAULT_MASTER_PROMPT,
@@ -382,7 +398,7 @@ async function generateResearchContent(prompt: string): Promise<string> {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'gpt-5-2025-08-07',
+      model: 'gpt-4o',
       messages: [
         {
           role: 'system',
@@ -393,7 +409,8 @@ async function generateResearchContent(prompt: string): Promise<string> {
           content: prompt
         }
       ],
-      max_completion_tokens: 4000,
+      max_tokens: 4000,
+      temperature: 0.7,
     }),
   });
 
