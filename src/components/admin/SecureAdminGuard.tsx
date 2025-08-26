@@ -55,11 +55,11 @@ export const SecureAdminGuard: React.FC<SecureAdminGuardProps> = ({
         setSecurityVerified(true);
         setVerificationLoading(false);
 
-        // Run security verification in background (non-blocking)
+        // Run security verification in background (non-blocking) with increased timeout
         setTimeout(async () => {
           try {
             const timeoutPromise = new Promise((_, reject) =>
-              setTimeout(() => reject(new Error('Security check timeout')), 3000)
+              setTimeout(() => reject(new Error('Security check timeout')), 10000) // Increased to 10s
             );
             
             // Use enhanced admin session validation for better stability
@@ -68,7 +68,10 @@ export const SecureAdminGuard: React.FC<SecureAdminGuardProps> = ({
             const { data, error } = await Promise.race([securityPromise, timeoutPromise]) as any;
             
             if (error || !data) {
-              setSecurityWarning('Background security check failed - this is informational only');
+              // Only show warning on non-timeout errors
+              if (error && !error.message?.includes('timeout')) {
+                setSecurityWarning('Background security check failed - this is informational only');
+              }
               logger.warn('Background security verification failed:', error);
             } else {
               logger.log('Background security verification passed');
@@ -89,7 +92,10 @@ export const SecureAdminGuard: React.FC<SecureAdminGuardProps> = ({
               }
             }
           } catch (error) {
-            setSecurityWarning('Background security check timed out - this is informational only');
+            // Suppress timeout messages for better UX
+            if (!error?.message?.includes('timeout')) {
+              setSecurityWarning('Background security check failed - this is informational only');
+            }
             logger.warn('Background security check failed:', error);
           }
         }, 100);

@@ -72,14 +72,29 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     try {
+      // Use the new safe profile function that handles duplicates
       const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('user_id', userId)
+        .rpc('get_user_profile_safe', { p_user_id: userId })
         .maybeSingle();
 
       if (error) {
         logger.error('Error fetching profile:', error);
+        // Fallback to direct query if RPC fails
+        try {
+          const { data: fallbackData, error: fallbackError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('user_id', userId)
+            .limit(1)
+            .maybeSingle();
+          
+          if (!fallbackError && fallbackData) {
+            setProfile(fallbackData);
+            return;
+          }
+        } catch (fallbackErr) {
+          logger.error('Fallback profile fetch also failed:', fallbackErr);
+        }
         return;
       }
 

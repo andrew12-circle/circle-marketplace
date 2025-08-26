@@ -8077,6 +8077,19 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      get_user_profile_safe: {
+        Args: { p_user_id: string }
+        Returns: {
+          created_at: string
+          display_name: string
+          is_admin: boolean
+          is_creator: boolean
+          is_pro: boolean
+          is_verified: boolean
+          updated_at: string
+          user_id: string
+        }[]
+      }
       get_vendor_dashboard_stats: {
         Args: { p_vendor_id: string }
         Returns: Json
