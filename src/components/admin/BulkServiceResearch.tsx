@@ -65,6 +65,7 @@ export default function BulkServiceResearch() {
   const [mode, setMode] = useState<'overwrite' | 'missing-only'>('missing-only');
   const [marketIntelligence, setMarketIntelligence] = useState(false);
   const [sources, setSources] = useState('');
+  const [batchSize, setBatchSize] = useState(1);
 
   const appendLog = (msg: string) => setLogs((l) => [msg, ...l].slice(0, 50));
 
@@ -77,7 +78,8 @@ export default function BulkServiceResearch() {
     setLogs([]);
 
     try {
-      const limit = 10; // Process 10 services per batch to respect rate limits
+      // Use smaller batch sizes for Generate to avoid timeouts
+      const limit = dryRun ? 20 : batchSize;
       let offset = 0;
       let totalProcessed = 0;
       let totalUpdated = 0;
@@ -97,25 +99,45 @@ export default function BulkServiceResearch() {
         batchIndex += 1;
         appendLog(`🚀 Running batch ${batchIndex} (limit ${limit}, offset ${offset})...`);
 
-        const response = await supabase.functions.invoke('bulk-generate-service-research', {
-          body: {
-            masterPrompt,
-            mode,
-            limit,
-            offset,
-            dryRun,
-            marketIntelligence,
-            sources: sourceList
-          },
-        });
+        let response;
+        let currentLimit = limit;
+        let retryCount = 0;
+        const maxRetries = 3;
+
+        // Retry logic with decreasing batch size on timeout
+        while (retryCount < maxRetries) {
+          try {
+            response = await supabase.functions.invoke('bulk-generate-service-research', {
+              body: {
+                masterPrompt,
+                mode,
+                limit: currentLimit,
+                offset,
+                dryRun,
+                marketIntelligence,
+                sources: sourceList
+              },
+            });
+            break; // Success, exit retry loop
+          } catch (error: any) {
+            retryCount++;
+            if (error.name === 'FunctionsFetchError' && retryCount < maxRetries) {
+              currentLimit = 1; // Reduce to single item on timeout
+              appendLog(`⚠️ Timeout detected, retrying with batch size 1 (attempt ${retryCount}/${maxRetries})`);
+              await new Promise(resolve => setTimeout(resolve, 2000)); // Wait before retry
+            } else {
+              throw error; // Re-throw if not a timeout or max retries reached
+            }
+          }
+        }
 
         // Detailed logging for debugging
-        if (response.error) {
+        if (response?.error) {
           appendLog(`❌ Edge function error: ${JSON.stringify(response.error)}`);
           throw response.error;
         }
 
-        if (!response.data) {
+        if (!response?.data) {
           appendLog(`❌ No data received from edge function`);
           throw new Error('No data received from edge function');
         }
@@ -129,7 +151,7 @@ export default function BulkServiceResearch() {
           processed: p = 0,
           updated: u = 0,
           skipped: s = 0,
-          nextOffset = offset + limit,
+          nextOffset = offset + currentLimit,
           hasMore = false,
           totalCount: tc = 0,
           errors = [],
@@ -207,6 +229,7 @@ export default function BulkServiceResearch() {
     setMode('missing-only');
     setMarketIntelligence(false);
     setSources('');
+    setBatchSize(1);
   };
 
   return (
@@ -253,7 +276,7 @@ export default function BulkServiceResearch() {
         <Separator />
 
         {/* Configuration */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="space-y-2">
             <Label htmlFor="mode">Generation Mode</Label>
             <Select value={mode} onValueChange={(value: 'overwrite' | 'missing-only') => setMode(value)} disabled={isRunning}>
@@ -269,6 +292,24 @@ export default function BulkServiceResearch() {
               {mode === 'missing-only' 
                 ? 'Only generates research for services without existing research entries'
                 : 'Replaces existing research entries (destructive)'}
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="batchSize">Batch Size (Generate)</Label>
+            <Select value={batchSize.toString()} onValueChange={(value) => setBatchSize(parseInt(value))} disabled={isRunning}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="1">1 (Safest)</SelectItem>
+                <SelectItem value="3">3</SelectItem>
+                <SelectItem value="5">5</SelectItem>
+                <SelectItem value="10">10</SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              Items per batch. Use 1 to avoid timeouts on Generate mode.
             </p>
           </div>
 
@@ -335,7 +376,7 @@ export default function BulkServiceResearch() {
           <Alert>
             <AlertCircle className="h-4 w-4" />
             <AlertDescription className="text-xs">
-              Research generation uses OpenAI GPT-5 and may take several minutes for large batches. 
+              Research generation uses OpenAI GPT-5 and may take several minutes. Generate mode processes {batchSize} service{batchSize !== 1 ? 's' : ''} at a time to avoid timeouts.
               Each service gets comprehensive research covering agent tiers, ROI models, implementation plans, and compliance considerations.
             </AlertDescription>
           </Alert>
