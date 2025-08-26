@@ -115,9 +115,9 @@ export default function AdminDashboard() {
   const loadUsers = async () => {
     setLoadingUsers(true);
     try {
-      // Add 8-second timeout for user data loading
+      // Add 15-second timeout for user data loading - increased for Puerto Vallarta network
       const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('User data load timeout')), 8000);
+        setTimeout(() => reject(new Error('User data load timeout')), 15000);
       });
 
       let query = supabase
@@ -164,15 +164,24 @@ export default function AdminDashboard() {
     } catch (error) {
       console.error('Error loading users:', error);
       
-      // Enter degraded mode
-      setDegradedMode(true);
-      setFailedEndpoints(prev => [...new Set([...prev, 'user_profiles'])]);
-      
-      toast({
-        title: 'Degraded Mode',
-        description: 'User data failed to load - some features may be limited',
-        variant: 'destructive',
-      });
+      // Only enter degraded mode if no users are currently loaded
+      if (users.length === 0) {
+        setDegradedMode(true);
+        setFailedEndpoints(prev => [...new Set([...prev, 'user_profiles'])]);
+        
+        toast({
+          title: 'Degraded Mode',
+          description: 'User data failed to load - some features may be limited',
+          variant: 'destructive',
+        });
+      } else {
+        // If we have existing data, just show a warning toast
+        toast({
+          title: 'Refresh Failed',
+          description: 'Could not refresh user data, showing cached results',
+          variant: 'default',
+        });
+      }
     } finally {
       setLoadingUsers(false);
     }
