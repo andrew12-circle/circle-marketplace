@@ -113,96 +113,83 @@ export const PaymentChoiceModal = ({
             </DialogTitle>
           </DialogHeader>
 
-          <div className="grid gap-4 mt-4">
+          <div className="space-y-4 mt-4">
             {/* Circle Pro Price Option */}
-            <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={handleProChoice}>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-primary/10 rounded-lg">
-                      <CreditCard className="w-5 h-5 text-primary" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold">Circle Pro Price</h3>
-                      <p className="text-sm text-muted-foreground">Pay directly and complete purchase</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-xl font-bold">${proPrice}</div>
-                    <Badge variant="secondary">Self-Pay</Badge>
-                  </div>
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3 mb-3">
+                  <CreditCard className="w-5 h-5 text-primary" />
+                  <h3 className="font-semibold">Pay Circle Pro Price</h3>
                 </div>
+                <div className="text-2xl font-bold text-primary mb-2">${proPrice}/mo</div>
+                <p className="text-sm text-muted-foreground mb-4">Pay your discounted member price and get started immediately.</p>
+                <Button onClick={handleProChoice} className="w-full">
+                  Add to Cart - ${proPrice}/mo
+                </Button>
               </CardContent>
             </Card>
 
             {/* Agent Points Option */}
             {loadingPoints ? (
-              <Card className="opacity-50">
-                <CardContent className="p-6">
+              <Card>
+                <CardContent className="p-4">
                   <div className="flex items-center justify-center">
-                    <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                    <span>Loading agent points...</span>
-                  </div>
-                </CardContent>
-              </Card>
-            ) : agentPoints > 0 ? (
-              <Card 
-                className={`cursor-pointer hover:shadow-md transition-shadow ${!pointsBreakdown.canUsePoints ? 'opacity-50 cursor-not-allowed' : ''}`}
-                onClick={pointsBreakdown.canUsePoints ? handlePointsChoice : undefined}
-              >
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-blue-100 rounded-lg">
-                        <Coins className="w-5 h-5 text-blue-600" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold">Pay with Agent Points</h3>
-                        <p className="text-sm text-muted-foreground">
-                          Use your earned points • {pointsBreakdown.respaNote}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-xl font-bold">{pointsBreakdown.pointsNeeded} pts</div>
-                      <div className="flex items-center gap-1">
-                        <Badge variant="outline" className="bg-blue-50">
-                          <Coins className="w-3 h-3 mr-1" />
-                          {agentPoints} available
-                        </Badge>
-                      </div>
-                    </div>
+                    <span>Loading your points...</span>
                   </div>
                 </CardContent>
               </Card>
             ) : null}
 
+            {agentPoints > 0 && !loadingPoints && (
+              <>
+                <div className="text-center text-sm text-muted-foreground my-4">
+                  OR get your bill reduced
+                </div>
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3 mb-3">
+                      <Coins className="w-5 h-5 text-blue-600" />
+                      <h3 className="font-semibold">Use Agent Points</h3>
+                    </div>
+                    <div className="text-2xl font-bold text-blue-600 mb-2">{pointsBreakdown.pointsNeeded} points</div>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      {pointsBreakdown.respaNote} • {agentPoints} available
+                    </p>
+                    <Button 
+                      onClick={pointsBreakdown.canUsePoints ? handlePointsChoice : undefined}
+                      disabled={!pointsBreakdown.canUsePoints}
+                      variant="outline"
+                      className="w-full"
+                    >
+                      Use Points
+                    </Button>
+                  </CardContent>
+                </Card>
+              </>
+            )}
+
             {/* Co-Pay Option */}
             {coPayPrice && (
-              <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={handleCoPayChoice}>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-green-100 rounded-lg">
-                        <Users className="w-5 h-5 text-green-600" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold">Co-Pay Price</h3>
-                        <p className="text-sm text-muted-foreground">
-                          Invite a vendor to help cover {coPaySplit}% of the cost
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-xl font-bold">${coPayPrice}</div>
-                      <div className="flex items-center gap-1">
-                        <Badge variant="outline" className="bg-green-50">
-                          <DollarSign className="w-3 h-3 mr-1" />
-                          Vendor Help
-                        </Badge>
-                      </div>
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3 mb-3">
+                    <Users className="w-5 h-5 text-green-600" />
+                    <h3 className="font-semibold">Get Vendor Help (Co-Pay)</h3>
+                  </div>
+                  <div className="text-2xl font-bold text-green-600 mb-1">${coPayPrice}/mo</div>
+                  <div className="text-sm text-muted-foreground mb-4">SSP</div>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Get connected with a vendor partner. SSP vendors limited to 20% by RESPA compliance.
+                  </p>
+                  <div className="bg-orange-50 border border-orange-200 rounded p-3 mb-4">
+                    <div className="flex items-center gap-2 text-orange-600 text-sm">
+                      <span className="text-orange-500">⚠</span>
+                      Final pricing depends on vendor approval and compliance requirements.
                     </div>
                   </div>
+                  <Button onClick={handleCoPayChoice} variant="outline" className="w-full">
+                    Find Vendor Partner
+                  </Button>
                 </CardContent>
               </Card>
             )}
