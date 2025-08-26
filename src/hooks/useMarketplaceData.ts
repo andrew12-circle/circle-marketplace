@@ -331,13 +331,8 @@ const fetchCombinedMarketplaceData = async (): Promise<MarketplaceData> => {
 
     const data = { services, vendors };
 
-    // Warm the cache in background (fire-and-forget)
-    setTimeout(() => {
-      const t1 = performance.now();
-      withTimeout(supabase.functions.invoke('warm-marketplace-cache'), 3000, 'warm-marketplace-cache')
-        .then(() => performanceMonitor.trackRequest('/functions/warm-marketplace-cache', 'INVOKE', performance.now() - t1, true, false))
-        .catch((error) => logger.log('Cache warming failed (background):', error));
-    }, 100);
+    // Cache warming via edge function disabled - function doesn't exist
+    // TODO: Implement warm-marketplace-cache edge function if needed
 
     performanceMonitor.track('fetchCombinedMarketplaceData', performance.now() - overallStart, {
       services: data.services.length,

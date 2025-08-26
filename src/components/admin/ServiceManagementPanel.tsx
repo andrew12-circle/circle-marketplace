@@ -603,8 +603,8 @@ export const ServiceManagementPanel = () => {
         };
         return updated;
       });
-      // Warm the marketplace cache and invalidate queries (non-blocking)
-      supabase.functions.invoke('warm-marketplace-cache').catch((e) => console.warn('Cache warm failed', e));
+      // Cache warming disabled - edge function doesn't exist
+      // TODO: Implement warm-marketplace-cache edge function if needed
       invalidateCache.invalidateAll();
       
       toast({
@@ -834,8 +834,8 @@ export const ServiceManagementPanel = () => {
         title: 'Success',
         description: verified ? 'Service funnel saved and verified' : 'Service funnel saved',
       });
-      // Refresh marketplace data so changes are visible immediately (non-blocking)
-      supabase.functions.invoke('warm-marketplace-cache').catch((e) => console.warn('Cache warm failed', e));
+      // Cache warming disabled - edge function doesn't exist
+      // TODO: Implement warm-marketplace-cache edge function if needed
       invalidateCache.invalidateAll();
 
       return { savedAt, verified };
