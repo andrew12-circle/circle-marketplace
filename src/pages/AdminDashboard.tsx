@@ -460,6 +460,11 @@ export default function AdminDashboard() {
                   <div className="h-2 w-2 bg-emerald-500 rounded-full animate-pulse" />
                   <span className="text-sm font-medium text-emerald-700">System Operational</span>
                 </div>
+                {/* Admin Identity Indicator */}
+                <div className="flex items-center gap-2 text-xs text-muted-foreground bg-slate-50 px-3 py-1.5 rounded-lg border">
+                  <Badge variant="outline" className="text-xs">Admin</Badge>
+                  <span>{user?.email} • {user?.id.slice(0, 8)}...</span>
+                </div>
                 <Badge variant="outline" className="bg-slate-50 border-slate-300 text-slate-700">
                   v2.4.1
                 </Badge>
