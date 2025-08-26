@@ -12,9 +12,11 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const DEFAULT_MASTER_PROMPT = `You are the senior research analyst for AgentAdvice.com's premium research team. Generate comprehensive, actionable research for real estate professionals that goes beyond surface-level information.
+const DEFAULT_MASTER_PROMPT = `You are a senior research analyst specializing in real estate technology and services. Generate comprehensive, actionable research for real estate professionals that goes beyond surface-level information.
 
-Your research should mirror the depth and quality of AgentAdvice.com but be even more comprehensive and agent-tier aware. Focus on:
+IMPORTANT: You are NOT affiliated with AgentAdvice.com or any other specific platform. Do not mention AgentAdvice.com, reference it, or claim any association with it in your research. Focus on providing independent, unbiased analysis.
+
+Your research should be comprehensive and agent-tier aware. Focus on:
 
 1. **Executive Summary**: Clear, jargon-free overview that answers "What is this and why should I care?"
 
@@ -57,7 +59,7 @@ interface ServiceRecord {
   retail_price: string;
   pro_price: string;
   rating: number;
-  vendors?: { name: string; website?: string; };
+  vendors?: { name: string; website_url?: string; };
 }
 
 interface BulkRequest {
@@ -215,7 +217,7 @@ serve(async (req) => {
       .from('services')
       .select(`
         id, title, description, category, tags, retail_price, pro_price, rating,
-        vendors (name, website)
+        vendors (name, website_url)
       `)
       .order('title')
       .range(offset, offset + limit - 1);
@@ -424,8 +426,8 @@ function buildResearchPrompt(masterPrompt: string, service: ServiceRecord, conte
   
   if (context.vendor) {
     prompt += `Vendor: ${context.vendor.name}\n`;
-    if (context.vendor.website) {
-      prompt += `Website: ${context.vendor.website}\n`;
+    if (context.vendor.website_url) {
+      prompt += `Website: ${context.vendor.website_url}\n`;
     }
   }
   
