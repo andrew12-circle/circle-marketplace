@@ -20,7 +20,7 @@ import { ContentPromotionPanel } from '@/components/admin/ContentPromotionPanel'
 import { YouTubeImportPanel } from '@/components/admin/YouTubeImportPanel';
 import { YouTubeChannelImportPanel } from '@/components/admin/YouTubeChannelImportPanel';
 
-import { RESPAComplianceManager } from '@/components/admin/RESPAComplianceManager';
+// Lazy-loaded via LazyAdminPanel
 import { RESPADisclaimerManager } from '@/components/admin/RESPADisclaimerManager';
 
 import { ServiceReviewsManager } from '@/components/admin/ServiceReviewsManager';
@@ -29,24 +29,29 @@ import VendorSSPManager from '@/components/admin/VendorSSPManager';
 import RESPAServiceManager from '@/components/admin/RESPAServiceManager';
 import { AdvancedSplitCalculator } from '@/components/admin/AdvancedSplitCalculator';
 import { ServiceImportPanel } from '@/components/admin/ServiceImportPanel';
-import { ServiceManagementPanel } from '@/components/admin/ServiceManagementPanel';
 import { VendorImportPanel } from '@/components/admin/VendorImportPanel';
 import RankImpactMonitor from '@/components/admin/RankImpactMonitor';
-import { VendorManagementPanel } from '@/components/admin/VendorManagementPanel';
 import { VendorBudgetManager } from '@/components/admin/VendorBudgetManager';
 import { VendorRESPAManager } from '@/components/admin/VendorRESPAManager';
 import { VendorSortOrderManager } from '@/components/admin/VendorSortOrderManager';
-import { VendorActivityAnalytics } from '@/components/admin/VendorActivityAnalytics';
+import { 
+  ServiceManagementPanelWrapper, 
+  VendorManagementPanelWrapper, 
+  RESPAComplianceManagerWrapper,
+  VendorActivityAnalyticsWrapper,
+  CreatorPayoutDashboardWrapper,
+  RetentionAnalyticsDashboardWrapper
+} from '@/components/admin/LazyAdminPanel';
 import { VendorInvitationPanel } from '@/components/admin/VendorInvitationPanel';
 import { AgentInvitationPanel } from '@/components/admin/AgentInvitationPanel';
 import VendorPointAllocationPanel from '@/components/admin/VendorPointAllocationPanel';
 import AntiScrapingSystem from '@/components/security/AntiScrapingSystem';
-import { CreatorPayoutDashboard } from '@/components/admin/CreatorPayoutDashboard';
+// Lazy-loaded via LazyAdminPanel
 import BulkFAQGenerator from '@/components/admin/BulkFAQGenerator';
 import BulkServiceResearch from '@/components/admin/BulkServiceResearch';
 import { VendorQuestionsManager } from '@/components/admin/VendorQuestionsManager';
 import { AdminHealthDashboard } from '@/components/admin/AdminHealthDashboard';
-import { RetentionAnalyticsDashboard } from '@/components/admin/RetentionAnalyticsDashboard';
+// Lazy-loaded via LazyAdminPanel
 import { SponsoredPlacementsManager } from '@/components/admin/SponsoredPlacementsManager';
 import { ServiceVisibilityManager } from '@/components/admin/ServiceVisibilityManager';
 
@@ -619,7 +624,7 @@ export default function AdminDashboard() {
           </div>
 
         <TabsContent value="creators" className="space-y-6">
-          <CreatorPayoutDashboard />
+          <CreatorPayoutDashboardWrapper />
         </TabsContent>
 
         <TabsContent value="users" className="space-y-8">
@@ -923,7 +928,7 @@ export default function AdminDashboard() {
         </TabsContent>
 
         <TabsContent value="services" className="space-y-6">
-          <ServiceManagementPanel />
+          <ServiceManagementPanelWrapper />
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <BulkFAQGenerator />
             <BulkServiceResearch />
@@ -939,7 +944,7 @@ export default function AdminDashboard() {
 
         <TabsContent value="vendors" className="space-y-6">
           <div className="space-y-6">
-            <VendorManagementPanel />
+            <VendorManagementPanelWrapper />
             
           </div>
           <VendorSSPManager />
@@ -957,7 +962,7 @@ export default function AdminDashboard() {
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-6">
-          <VendorActivityAnalytics />
+          <VendorActivityAnalyticsWrapper />
         </TabsContent>
 
         <TabsContent value="sponsored" className="space-y-6">
@@ -990,7 +995,7 @@ export default function AdminDashboard() {
         <TabsContent value="respa" className="space-y-6">
           <RESPADisclaimerManager />
           <RESPAServiceManager />
-          <RESPAComplianceManager />
+          <RESPAComplianceManagerWrapper />
           <RESPADocumentationViewer />
         </TabsContent>
 
@@ -999,7 +1004,7 @@ export default function AdminDashboard() {
             </TabsContent>
 
             <TabsContent value="retention" className="space-y-6">
-              <RetentionAnalyticsDashboard />
+              <RetentionAnalyticsDashboardWrapper />
             </TabsContent>
 
         <TabsContent value="calculator" className="space-y-6">

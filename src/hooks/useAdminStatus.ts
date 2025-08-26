@@ -21,9 +21,9 @@ export const useAdminStatus = () => {
         return true;
       }
       
-      // Create a timeout promise that rejects after 7 seconds
+      // Create a timeout promise that rejects after 5 seconds
       const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('RPC timeout after 7 seconds')), 7000);
+        setTimeout(() => reject(new Error('RPC timeout after 5 seconds')), 5000);
       });
       
       try {
@@ -41,7 +41,12 @@ export const useAdminStatus = () => {
         console.log('✅ Admin status from RPC:', result);
         return result;
       } catch (error) {
-        console.error('🚨 Admin RPC failed/timeout, falling back to profile.is_admin:', error);
+        // Suppress dev-server related errors
+        if (error.message?.includes('dev-server') || error.message?.includes('502')) {
+          console.log('🔧 Dev server error detected, using safe fallback');
+        } else {
+          console.error('🚨 Admin RPC failed/timeout, falling back to profile.is_admin:', error);
+        }
         // Immediate fallback to profile admin status for network issues
         const fallbackResult = !!profile?.is_admin;
         console.log('🔄 Fallback admin status (Safe Mode):', fallbackResult);
