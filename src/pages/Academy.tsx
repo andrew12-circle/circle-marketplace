@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 import { Link } from "react-router-dom";
 import { AcademySidebar } from "@/components/academy/AcademySidebar";
-import { NavigationTabs } from "@/components/NavigationTabs";
+
 import { UserMenu } from "@/components/UserMenu";
 import { useAuth } from "@/contexts/AuthContext";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
@@ -1694,9 +1694,8 @@ const AcademyContent = () => {
             }} />
               </div>
               
-              {/* Navigation Tabs - Desktop */}
+              {/* Navigation - Desktop */}
               <div className="flex flex-1 justify-center">
-                {/* <NavigationTabs /> */}
               </div>
               
               <div className="flex items-center gap-2 sm:gap-4">

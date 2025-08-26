@@ -1,16 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
-// Calculate total offset including header and navigation tabs
+// Calculate total offset including header
 const getTotalOffset = () => {
   const header = document.querySelector('header') as HTMLElement;
-  const navTabs = document.querySelector('[class*="NavigationTabs"], .navigation-tabs, [class*="rounded-xl"][class*="mx-auto"]') as HTMLElement;
   
   const headerHeight = header ? header.offsetHeight : 76;
-  const navTabsHeight = navTabs ? navTabs.offsetHeight : 52; // typical tab height
-  const spacing = 16; // spacing below nav tabs
+  const spacing = 16; // spacing below header
   
-  return headerHeight + navTabsHeight + spacing;
+  return headerHeight + spacing;
 };
 
 interface StickySearchContainerProps {

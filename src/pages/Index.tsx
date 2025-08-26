@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { Link, useLocation } from "react-router-dom";
-import { NavigationTabs } from "@/components/NavigationTabs";
+
 import { Marketplace } from "./Marketplace";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -67,44 +67,6 @@ const Index = () => {
                   </div>
                 </div>
                 
-                {/* Bottom row - Navigation Tabs */}
-                <div className="flex justify-center">
-                  <div className="flex bg-muted rounded-full p-1 w-full max-w-xs">
-                    <Link
-                      to="/"
-                      data-tour="marketplace-tab"
-                      className={`flex-1 text-xs py-1.5 px-3 rounded-full font-medium transition-all text-center ${
-                        location.pathname === "/" 
-                          ? "bg-background text-foreground shadow-sm" 
-                          : "text-muted-foreground"
-                      }`}
-                    >
-                      {t('marketplace')}
-                    </Link>
-                     <Link
-                       to="/academy"
-                       data-tour="academy-tab"
-                       className={`flex-1 text-xs py-1.5 px-3 rounded-full font-medium transition-all text-center ${
-                         location.pathname === "/academy" 
-                           ? "bg-background text-foreground shadow-sm" 
-                           : "text-muted-foreground"
-                       }`}
-                     >
-                       {t('academy')}
-                     </Link>
-                     <Link
-                       to="/ministry"
-                       data-tour="ministry-tab"
-                       className={`flex-1 text-xs py-1.5 px-3 rounded-full font-medium transition-all text-center ${
-                         location.pathname === "/ministry" 
-                           ? "bg-background text-foreground shadow-sm" 
-                           : "text-muted-foreground"
-                       }`}
-                     >
-                       Ministry
-                     </Link>
-                  </div>
-                </div>
               </div>
             ) : (
               // Desktop Header Layout (unchanged)
@@ -126,9 +88,8 @@ const Index = () => {
                   />
                 </div>
                 
-                {/* Navigation Tabs - Desktop */}
+                {/* Tour Discovery Button - Desktop */}
                 <div className="flex flex-1 justify-center items-center gap-4">
-                  {/* <NavigationTabs activeTab="marketplace" /> */}
                   <TourDiscoveryButton />
                 </div>
                 
