@@ -13,6 +13,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { useAdminStatus } from "@/hooks/useAdminStatus";
 
 import { supabase } from "@/integrations/supabase/client";
 import { User, Settings, ShoppingBag, Crown, LogOut, Loader2, Heart, BarChart3, Shield, Building2, DollarSign, Store, Briefcase, Package, Brain, Command } from "lucide-react";
@@ -28,6 +29,7 @@ interface VendorInfo {
 export const UserMenu = () => {
   const { user, profile, signOut } = useAuth();
   const { toast } = useToast();
+  const { data: isAdmin } = useAdminStatus();
   
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [vendorInfo, setVendorInfo] = useState<VendorInfo | null>(null);
@@ -175,7 +177,7 @@ export const UserMenu = () => {
         )}
         
         {/* Admin Dashboard Link */}
-        {profile?.is_admin && (
+        {isAdmin && (
           <>
             <DropdownMenuItem asChild>
               <Link to="/admin" className="flex items-center">
