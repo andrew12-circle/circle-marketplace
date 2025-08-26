@@ -94,7 +94,7 @@ export default function BulkServiceResearch() {
         batchIndex += 1;
         appendLog(`🚀 Running batch ${batchIndex} (limit ${limit}, offset ${offset})...`);
 
-        const { data, error } = await supabase.functions.invoke('bulk-generate-service-research', {
+        const response = await supabase.functions.invoke('bulk-generate-service-research', {
           body: {
             masterPrompt,
             mode,
@@ -106,8 +106,21 @@ export default function BulkServiceResearch() {
           },
         });
 
-        if (error) throw error;
-        if (data?.error) throw new Error(data.error);
+        // Detailed logging for debugging
+        if (response.error) {
+          appendLog(`❌ Edge function error: ${JSON.stringify(response.error)}`);
+          throw response.error;
+        }
+
+        if (!response.data) {
+          appendLog(`❌ No data received from edge function`);
+          throw new Error('No data received from edge function');
+        }
+
+        if (response.data?.error) {
+          appendLog(`❌ Function returned error: ${response.data.error}`);
+          throw new Error(response.data.error);
+        }
 
         const {
           processed: p = 0,
@@ -116,7 +129,7 @@ export default function BulkServiceResearch() {
           nextOffset = offset + limit,
           hasMore = false,
           errors = [],
-        } = data || {};
+        } = response.data || {};
 
         totalProcessed += p;
         totalUpdated += u;
@@ -150,16 +163,22 @@ export default function BulkServiceResearch() {
       });
       appendLog(`🎉 All done! Generated research for ${totalUpdated} services.`);
     } catch (e: any) {
-      console.error(e);
+      console.error('Batch generation error:', e);
+      const errorMessage = e.message || e.toString() || 'Failed to run research generator';
       toast({ 
         title: 'Error', 
-        description: e.message || 'Failed to run research generator', 
+        description: errorMessage, 
         variant: 'destructive' 
       });
-      appendLog(`❌ Error: ${e.message || e}`);
-    } finally {
+      appendLog(`❌ Error: ${errorMessage}`);
+      
+      // Preserve UI state on error - don't reset progress
       setIsRunning(false);
-      setProgress(100);
+    } finally {
+      // Only reset if we completed successfully
+      if (!isRunning) {
+        setProgress(100);
+      }
     }
   };
 
@@ -188,6 +207,7 @@ export default function BulkServiceResearch() {
           <div className="flex items-center justify-between">
             <Label htmlFor="masterPrompt" className="text-sm font-medium">Master Research Prompt</Label>
             <Button 
+              type="button"
               variant="ghost" 
               size="sm" 
               onClick={resetToDefaults}
@@ -272,6 +292,7 @@ export default function BulkServiceResearch() {
         <div className="space-y-4">
           <div className="flex gap-2">
             <Button 
+              type="button"
               disabled={isRunning} 
               variant="outline" 
               onClick={() => runBatch(true)}
@@ -281,6 +302,7 @@ export default function BulkServiceResearch() {
               Dry Run (Preview)
             </Button>
             <Button 
+              type="button"
               disabled={isRunning} 
               onClick={() => runBatch(false)}
               className="flex items-center gap-2"
