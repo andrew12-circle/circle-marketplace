@@ -210,9 +210,7 @@ serve(async (req) => {
       sources = []
     }: BulkRequest = await req.json();
 
-    console.log(`🚀 Starting bulk research generation - mode: ${mode}, limit: ${limit}, offset: ${offset}, dryRun: ${dryRun}`);
-
-    // Fetch services to process
+    console.log(`🚀 Starting bulk research generation v2 - mode: ${mode}, limit: ${limit}, offset: ${offset}, dryRun: ${dryRun}`);
     const { data: services, error: servicesError } = await supabase
       .from('services')
       .select(`
