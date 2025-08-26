@@ -94,24 +94,109 @@ serve(async (req) => {
 
     console.log('🔐 User authenticated:', user.id);
 
-    // Check admin status from profiles table
-    const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .select('is_admin')
-      .eq('user_id', user.id)
-      .single();
+    // Enhanced admin verification with multiple fallback methods
+    let isAdmin = false;
+    let adminCheckDetails = {};
 
-    if (profileError) {
-      console.error('❌ Profile lookup error:', profileError);
-      throw new Error('Failed to verify user profile');
+    try {
+      // Method 1: Try enhanced admin self-check RPC
+      console.log('🔍 Attempting enhanced admin self-check...');
+      const { data: enhancedCheck, error: enhancedError } = await supabase.rpc('admin_self_check_enhanced');
+      
+      if (!enhancedError && enhancedCheck?.admin_checks?.any_admin_method) {
+        isAdmin = true;
+        adminCheckDetails.method = 'enhanced_rpc';
+        adminCheckDetails.result = enhancedCheck;
+        console.log('✅ Admin verified via enhanced RPC');
+      } else {
+        console.log('⚠️ Enhanced RPC failed or returned false:', enhancedError || 'No admin access');
+        adminCheckDetails.enhanced_error = enhancedError;
+      }
+    } catch (error) {
+      console.log('⚠️ Enhanced RPC error:', error);
+      adminCheckDetails.enhanced_exception = error.message;
     }
 
-    if (!profile?.is_admin) {
-      console.error('❌ User is not admin:', user.id, 'Profile admin status:', profile?.is_admin);
-      throw new Error('Admin privileges required');
+    // Method 2: Fallback to basic admin status RPC
+    if (!isAdmin) {
+      try {
+        console.log('🔍 Attempting basic admin status RPC...');
+        const { data: basicCheck, error: basicError } = await supabase.rpc('get_user_admin_status');
+        
+        if (!basicError && basicCheck === true) {
+          isAdmin = true;
+          adminCheckDetails.method = 'basic_rpc';
+          console.log('✅ Admin verified via basic RPC');
+        } else {
+          console.log('⚠️ Basic RPC failed or returned false:', basicError || 'No admin access');
+          adminCheckDetails.basic_error = basicError;
+        }
+      } catch (error) {
+        console.log('⚠️ Basic RPC error:', error);
+        adminCheckDetails.basic_exception = error.message;
+      }
     }
 
-    console.log('✅ Admin status confirmed for user:', user.id);
+    // Method 3: Fallback to direct profile lookup
+    if (!isAdmin) {
+      try {
+        console.log('🔍 Attempting direct profile lookup...');
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('is_admin, specialties, display_name')
+          .eq('user_id', user.id)
+          .single();
+
+        if (profileError) {
+          console.error('❌ Profile lookup error:', profileError);
+          adminCheckDetails.profile_error = profileError;
+        } else {
+          console.log('📄 Profile found:', { 
+            is_admin: profile?.is_admin, 
+            specialties: profile?.specialties,
+            display_name: profile?.display_name 
+          });
+          
+          // Check both is_admin flag and specialties array
+          const hasAdminFlag = profile?.is_admin === true;
+          const hasAdminSpecialty = profile?.specialties && Array.isArray(profile.specialties) && 
+                                  profile.specialties.includes('admin');
+          
+          if (hasAdminFlag || hasAdminSpecialty) {
+            isAdmin = true;
+            adminCheckDetails.method = 'profile_lookup';
+            adminCheckDetails.profile = profile;
+            console.log('✅ Admin verified via profile lookup');
+          } else {
+            console.log('❌ Profile does not indicate admin access');
+            adminCheckDetails.profile = profile;
+          }
+        }
+      } catch (error) {
+        console.log('⚠️ Profile lookup error:', error);
+        adminCheckDetails.profile_exception = error.message;
+      }
+    }
+
+    // Final admin verification
+    if (!isAdmin) {
+      console.error('❌ Admin verification failed for user:', user.id);
+      console.error('Admin check details:', JSON.stringify(adminCheckDetails, null, 2));
+      
+      return new Response(
+        JSON.stringify({ 
+          error: 'Admin privileges required',
+          details: adminCheckDetails,
+          user_id: user.id
+        }),
+        { 
+          status: 403, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
+
+    console.log('✅ Admin status confirmed for user:', user.id, 'Method:', adminCheckDetails.method);
 
     const {
       masterPrompt = DEFAULT_MASTER_PROMPT,
