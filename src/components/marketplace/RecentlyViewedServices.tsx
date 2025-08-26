@@ -77,20 +77,22 @@ export const RecentlyViewedServices = ({ onServiceClick, className = "" }: Recen
         </Button>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
           {recentServices.map((service) => (
-            <div key={service.id} className="relative group">
-              <ServiceCard 
-                service={service} 
-                variant="compact"
-                onViewDetails={onServiceClick}
-                onView={() => {}} // Recently viewed services don't need to track views again
-              />
+            <div key={service.id} className="relative group max-w-[280px]">
+              <div className="scale-75 origin-top-left transform">
+                <ServiceCard 
+                  service={service} 
+                  variant="compact"
+                  onViewDetails={onServiceClick}
+                  onView={() => {}} // Recently viewed services don't need to track views again
+                />
+              </div>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => removeService(service.id)}
-                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1 h-6 w-6 bg-background/80 hover:bg-background"
+                className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity p-1 h-5 w-5 bg-background/80 hover:bg-background"
               >
                 <X className="w-3 h-3" />
               </Button>
