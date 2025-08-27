@@ -309,16 +309,7 @@ export const ServiceCard = ({
         >
           {/* Top Badges */}
           <div className="absolute top-3 left-3 z-10 flex gap-2">
-            {service.is_featured && (
-              <Badge className="bg-circle-primary text-primary-foreground text-xs font-medium">
-                {t('featured')}
-              </Badge>
-            )}
-            {service.is_top_pick && (
-              <Badge className="bg-circle-accent text-foreground text-xs font-medium">
-                {t('topPick')}
-              </Badge>
-            )}
+            {/* Removed duplicate badges - ServiceBadges component will handle these */}
           </div>
 
           {/* Sponsored Badge */}
