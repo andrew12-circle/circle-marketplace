@@ -3,6 +3,8 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { ConsultationBookingModal } from './ConsultationBookingModal';
 import { LeadCaptureModal } from './LeadCaptureModal';
 import { PreparationCourse } from './PreparationCourse';
+import { VendorSelectionModal } from './VendorSelectionModal';
+import { VendorReferralModal } from './VendorReferralModal';
 import { supabase } from '@/integrations/supabase/client';
 
 interface ConsultationFlowProps {
@@ -14,16 +16,19 @@ interface ConsultationFlowProps {
     vendor: {
       name: string;
     };
+    image_url?: string;
   };
 }
 
-type FlowStep = 'booking' | 'lead_capture' | 'course' | 'complete';
+type FlowStep = 'booking' | 'lead_capture' | 'course' | 'complete' | 'meeting_confirmed';
 
 export const ConsultationFlow = ({ isOpen, onClose, service }: ConsultationFlowProps) => {
   const [currentStep, setCurrentStep] = useState<FlowStep>('booking');
   const [consultationId, setConsultationId] = useState<string>('');
   const [serviceConfig, setServiceConfig] = useState<any>(null);
   const [isLoadingConfig, setIsLoadingConfig] = useState(true);
+  const [showVendorSelection, setShowVendorSelection] = useState(false);
+  const [showVendorReferral, setShowVendorReferral] = useState(false);
 
   useEffect(() => {
     const fetchServiceConfig = async () => {
@@ -51,22 +56,37 @@ export const ConsultationFlow = ({ isOpen, onClose, service }: ConsultationFlowP
 
   const handleBookingConfirmed = (id: string) => {
     setConsultationId(id);
-    setCurrentStep('course');
+    setCurrentStep('meeting_confirmed');
   };
 
   const handleLeadCaptured = () => {
-    // Lead captured, external booking will handle the rest
-    setCurrentStep('complete');
+    setCurrentStep('meeting_confirmed');
   };
 
   const handleReset = () => {
     setCurrentStep(serviceConfig?.booking_type === 'external' ? 'lead_capture' : 'booking');
     setConsultationId('');
+    setShowVendorSelection(false);
+    setShowVendorReferral(false);
   };
 
   const handleClose = () => {
     handleReset();
     onClose();
+  };
+
+  const handleContinueFromMeetingConfirmed = () => {
+    if (serviceConfig?.booking_type === 'external') {
+      setCurrentStep('complete');
+    } else {
+      setCurrentStep('course');
+    }
+  };
+
+  const handleVendorModalClose = () => {
+    setShowVendorSelection(false);
+    setShowVendorReferral(false);
+    handleContinueFromMeetingConfirmed();
   };
 
   if (isLoadingConfig) {
@@ -106,6 +126,48 @@ export const ConsultationFlow = ({ isOpen, onClose, service }: ConsultationFlowP
         </Dialog>
       )}
 
+      {currentStep === 'meeting_confirmed' && (
+        <Dialog open={isOpen} onOpenChange={handleClose}>
+          <DialogContent className="max-w-md">
+            <div className="text-center space-y-6 p-6">
+              <div className="text-3xl">✅</div>
+              <h3 className="text-xl font-semibold">Meeting Confirmed!</h3>
+              <div className="space-y-4 text-left">
+                <p className="text-muted-foreground">
+                  Want vendor help to make your bill less if you decide to purchase? Here are vetted vendors looking for partnerships.
+                </p>
+                <p className="text-muted-foreground font-medium">
+                  OR you can add your current vendors and our concierge team will reach out and do the asking for you.
+                </p>
+                <p className="text-sm text-muted-foreground italic">
+                  Our goal is to make sure vendors still get a shot to help you at every step.
+                </p>
+              </div>
+              <div className="space-y-3">
+                <button 
+                  onClick={() => setShowVendorSelection(true)}
+                  className="w-full bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90"
+                >
+                  See Vetted Vendors
+                </button>
+                <button 
+                  onClick={() => setShowVendorReferral(true)}
+                  className="w-full bg-secondary text-secondary-foreground px-4 py-2 rounded-md hover:bg-secondary/90"
+                >
+                  Add My Current Vendor
+                </button>
+                <button 
+                  onClick={handleContinueFromMeetingConfirmed}
+                  className="w-full bg-muted text-muted-foreground px-4 py-2 rounded-md hover:bg-muted/80"
+                >
+                  Continue
+                </button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
       {currentStep === 'complete' && serviceConfig?.booking_type === 'external' && (
         <Dialog open={isOpen} onOpenChange={handleClose}>
           <DialogContent className="max-w-md">
@@ -125,6 +187,23 @@ export const ConsultationFlow = ({ isOpen, onClose, service }: ConsultationFlowP
           </DialogContent>
         </Dialog>
       )}
+
+      <VendorSelectionModal
+        isOpen={showVendorSelection}
+        onClose={handleVendorModalClose}
+        onVendorSelect={handleVendorModalClose}
+        service={{
+          id: service.id,
+          title: service.title,
+          image_url: service.image_url || ''
+        }}
+      />
+
+      <VendorReferralModal
+        isOpen={showVendorReferral}
+        onClose={handleVendorModalClose}
+        serviceTitle={service.title}
+      />
     </>
   );
 };
