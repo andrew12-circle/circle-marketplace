@@ -305,6 +305,11 @@ export const ServiceFunnelModal = ({
     }
   }, [packages, selectedPackage]);
   const handleAddToCart = () => {
+    // Always show payment choice modal first - this is the unified flow
+    setIsPricingChoiceOpen(true);
+  };
+  
+  const addDirectlyToCart = () => {
     addToCart({
       id: service.id,
       title: `${service.title} - ${selectedPkg.name}`,
@@ -326,7 +331,7 @@ export const ServiceFunnelModal = ({
   };
   const handleChooseProPrice = () => {
     setIsPricingChoiceOpen(false);
-    handleAddToCart();
+    addDirectlyToCart();
   };
   const handleChooseCoPay = () => {
     setIsPricingChoiceOpen(false);
