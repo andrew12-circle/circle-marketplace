@@ -824,7 +824,12 @@ export const ServiceFunnelModal = ({
                        <h3 className="text-xl font-bold text-gray-900 mb-6">Quick Actions</h3>
                        
                         {/* Action Buttons */}
-                        <div className="space-y-3">
+                         <div className="space-y-3">
+                          <Button onClick={handleAddToCart} className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all">
+                            <ShoppingCart className="w-5 h-5 mr-2" />
+                            Add to Cart
+                          </Button>
+                          
                           {service.direct_purchase_enabled && service.website_url ? (
                             <Button onClick={handleBuyNow} className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all">
                               <ShoppingCart className="w-5 h-5 mr-2" />
@@ -836,7 +841,7 @@ export const ServiceFunnelModal = ({
                               Book Consultation
                             </Button>
                           )}
-                          
+                           
                            <Button variant="outline" onClick={() => {
                           const rawUrl = service.website_url || service.vendor?.website_url;
                           if (rawUrl) {
@@ -846,11 +851,6 @@ export const ServiceFunnelModal = ({
                                 <Building className="w-5 h-5 mr-2" />
                                 {service.website_url || service.vendor?.website_url ? 'View Our Website' : 'Website Not Available'}
                               </Button>
-                          
-                          <Button onClick={handleAddToCart} className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all">
-                            <ShoppingCart className="w-5 h-5 mr-2" />
-                            Add to Cart
-                          </Button>
                          
                           
                            {service.pricing_tiers?.length > 0 && <Button variant="outline" onClick={() => {
