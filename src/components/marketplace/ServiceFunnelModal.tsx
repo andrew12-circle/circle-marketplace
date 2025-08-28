@@ -837,15 +837,20 @@ export const ServiceFunnelModal = ({
                             </Button>
                           )}
                           
-                            <Button variant="outline" onClick={() => {
-                         const rawUrl = service.website_url || service.vendor?.website_url;
-                         if (rawUrl) {
-                           trackWebsiteClick(rawUrl, service.vendor?.id, 'vendor_website');
-                         }
-                       }} disabled={!service.website_url && !service.vendor?.website_url} className="w-full border-2 border-gray-300 hover:border-gray-400 py-3 rounded-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed">
-                               <Building className="w-5 h-5 mr-2" />
-                               {service.website_url || service.vendor?.website_url ? 'View Our Website' : 'Website Not Available'}
-                             </Button>
+                           <Button variant="outline" onClick={() => {
+                          const rawUrl = service.website_url || service.vendor?.website_url;
+                          if (rawUrl) {
+                            trackWebsiteClick(rawUrl, service.vendor?.id, 'vendor_website');
+                          }
+                        }} disabled={!service.website_url && !service.vendor?.website_url} className="w-full border-2 border-gray-300 hover:border-gray-400 py-3 rounded-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed">
+                                <Building className="w-5 h-5 mr-2" />
+                                {service.website_url || service.vendor?.website_url ? 'View Our Website' : 'Website Not Available'}
+                              </Button>
+                          
+                          <Button onClick={handleAddToCart} className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all">
+                            <ShoppingCart className="w-5 h-5 mr-2" />
+                            Add to Cart
+                          </Button>
                          
                           
                            {service.pricing_tiers?.length > 0 && <Button variant="outline" onClick={() => {
