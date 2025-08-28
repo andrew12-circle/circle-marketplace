@@ -188,7 +188,6 @@ export const ServiceFunnelModal = ({
   const [selectedPackage, setSelectedPackage] = useState<string>("");
   const [quantity, setQuantity] = useState(1);
   const [isConsultationFlowOpen, setIsConsultationFlowOpen] = useState(false);
-  const [showPaymentChoiceAfterBooking, setShowPaymentChoiceAfterBooking] = useState(false);
   const [isPricingChoiceOpen, setIsPricingChoiceOpen] = useState(false);
   const [isVendorSelectionOpen, setIsVendorSelectionOpen] = useState(false);
   const [activeMediaUrl, setActiveMediaUrl] = useState<string | null>(null);
@@ -306,11 +305,6 @@ export const ServiceFunnelModal = ({
     }
   }, [packages, selectedPackage]);
   const handleAddToCart = () => {
-    // Always show payment choice modal first - this is the unified flow
-    setIsPricingChoiceOpen(true);
-  };
-  
-  const addDirectlyToCart = () => {
     addToCart({
       id: service.id,
       title: `${service.title} - ${selectedPkg.name}`,
@@ -332,7 +326,7 @@ export const ServiceFunnelModal = ({
   };
   const handleChooseProPrice = () => {
     setIsPricingChoiceOpen(false);
-    addDirectlyToCart();
+    handleAddToCart();
   };
   const handleChooseCoPay = () => {
     setIsPricingChoiceOpen(false);
@@ -340,26 +334,10 @@ export const ServiceFunnelModal = ({
   };
   const handleChooseAgentPoints = () => {
     setIsPricingChoiceOpen(false);
-    setShowPaymentChoiceAfterBooking(false);
     // Handle agent points payment here
     toast("Processing payment with agent points...", {
       description: "Your points will be deducted upon successful processing."
     });
-    onClose();
-  };
-
-  const handleConsultationBooked = () => {
-    setIsConsultationFlowOpen(false);
-    setShowPaymentChoiceAfterBooking(true);
-  };
-
-  const handleConsultationLeadCaptured = () => {
-    setIsConsultationFlowOpen(false);
-    setShowPaymentChoiceAfterBooking(true);
-  };
-
-  const handlePaymentChoiceAfterBookingClose = () => {
-    setShowPaymentChoiceAfterBooking(false);
     onClose();
   };
 
@@ -846,12 +824,7 @@ export const ServiceFunnelModal = ({
                        <h3 className="text-xl font-bold text-gray-900 mb-6">Quick Actions</h3>
                        
                         {/* Action Buttons */}
-                         <div className="space-y-3">
-                          <Button onClick={handleAddToCart} className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all">
-                            <ShoppingCart className="w-5 h-5 mr-2" />
-                            Add to Cart
-                          </Button>
-                          
+                        <div className="space-y-3">
                           {service.direct_purchase_enabled && service.website_url ? (
                             <Button onClick={handleBuyNow} className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all">
                               <ShoppingCart className="w-5 h-5 mr-2" />
@@ -863,16 +836,16 @@ export const ServiceFunnelModal = ({
                               Book Consultation
                             </Button>
                           )}
-                           
-                           <Button variant="outline" onClick={() => {
-                          const rawUrl = service.website_url || service.vendor?.website_url;
-                          if (rawUrl) {
-                            trackWebsiteClick(rawUrl, service.vendor?.id, 'vendor_website');
-                          }
-                        }} disabled={!service.website_url && !service.vendor?.website_url} className="w-full border-2 border-gray-300 hover:border-gray-400 py-3 rounded-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed">
-                                <Building className="w-5 h-5 mr-2" />
-                                {service.website_url || service.vendor?.website_url ? 'View Our Website' : 'Website Not Available'}
-                              </Button>
+                          
+                            <Button variant="outline" onClick={() => {
+                         const rawUrl = service.website_url || service.vendor?.website_url;
+                         if (rawUrl) {
+                           trackWebsiteClick(rawUrl, service.vendor?.id, 'vendor_website');
+                         }
+                       }} disabled={!service.website_url && !service.vendor?.website_url} className="w-full border-2 border-gray-300 hover:border-gray-400 py-3 rounded-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed">
+                               <Building className="w-5 h-5 mr-2" />
+                               {service.website_url || service.vendor?.website_url ? 'View Our Website' : 'Website Not Available'}
+                             </Button>
                          
                           
                            {service.pricing_tiers?.length > 0 && <Button variant="outline" onClick={() => {
@@ -1173,13 +1146,7 @@ export const ServiceFunnelModal = ({
         </div>
 
         {/* Consultation Flow Modal */}
-        {isConsultationFlowOpen && <ConsultationFlow 
-          isOpen={isConsultationFlowOpen} 
-          onClose={() => setIsConsultationFlowOpen(false)} 
-          service={service}
-          onBooked={handleConsultationBooked}
-          onLeadCaptured={handleConsultationLeadCaptured}
-        />}
+        {isConsultationFlowOpen && <ConsultationFlow isOpen={isConsultationFlowOpen} onClose={() => setIsConsultationFlowOpen(false)} service={service} />}
 
         {/* Pricing Choice Modal */}
         {isPricingChoiceOpen && <PricingChoiceModal isOpen={isPricingChoiceOpen} onClose={() => setIsPricingChoiceOpen(false)} service={{
@@ -1215,31 +1182,6 @@ export const ServiceFunnelModal = ({
             respa_split_limit: 50,
             requires_quote: selectedPkg?.requestPricing || service.requires_quote
           }}
-        />}
-
-        {/* Payment Choice Modal After Booking */}
-        {showPaymentChoiceAfterBooking && <PricingChoiceModal 
-          isOpen={showPaymentChoiceAfterBooking} 
-          onClose={handlePaymentChoiceAfterBookingClose} 
-          service={{
-            id: service.id,
-            title: `${service.title} - Consultation Booked`,
-            pro_price: selectedPkg?.price?.toString() || '0',
-            retail_price: selectedPkg?.originalPrice?.toString() || selectedPkg?.price?.toString() || '0',
-            respa_split_limit: 50,
-            price_duration: service.duration,
-            requires_quote: selectedPkg?.requestPricing || service.requires_quote,
-            max_split_percentage_non_ssp: (service as any).max_split_percentage_non_ssp
-          }} 
-          onChooseProPrice={() => {
-            setShowPaymentChoiceAfterBooking(false);
-            addDirectlyToCart();
-          }} 
-          onChooseCoPay={() => {
-            setShowPaymentChoiceAfterBooking(false);
-            setIsVendorSelectionOpen(true);
-          }} 
-          onChooseAgentPoints={handleChooseAgentPoints} 
         />}
       </DialogContent>
     </Dialog>;
