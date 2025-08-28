@@ -188,6 +188,7 @@ export const ServiceFunnelModal = ({
   const [selectedPackage, setSelectedPackage] = useState<string>("");
   const [quantity, setQuantity] = useState(1);
   const [isConsultationFlowOpen, setIsConsultationFlowOpen] = useState(false);
+  const [showPaymentChoiceAfterBooking, setShowPaymentChoiceAfterBooking] = useState(false);
   const [isPricingChoiceOpen, setIsPricingChoiceOpen] = useState(false);
   const [isVendorSelectionOpen, setIsVendorSelectionOpen] = useState(false);
   const [activeMediaUrl, setActiveMediaUrl] = useState<string | null>(null);
@@ -339,10 +340,26 @@ export const ServiceFunnelModal = ({
   };
   const handleChooseAgentPoints = () => {
     setIsPricingChoiceOpen(false);
+    setShowPaymentChoiceAfterBooking(false);
     // Handle agent points payment here
     toast("Processing payment with agent points...", {
       description: "Your points will be deducted upon successful processing."
     });
+    onClose();
+  };
+
+  const handleConsultationBooked = () => {
+    setIsConsultationFlowOpen(false);
+    setShowPaymentChoiceAfterBooking(true);
+  };
+
+  const handleConsultationLeadCaptured = () => {
+    setIsConsultationFlowOpen(false);
+    setShowPaymentChoiceAfterBooking(true);
+  };
+
+  const handlePaymentChoiceAfterBookingClose = () => {
+    setShowPaymentChoiceAfterBooking(false);
     onClose();
   };
 
@@ -1156,7 +1173,13 @@ export const ServiceFunnelModal = ({
         </div>
 
         {/* Consultation Flow Modal */}
-        {isConsultationFlowOpen && <ConsultationFlow isOpen={isConsultationFlowOpen} onClose={() => setIsConsultationFlowOpen(false)} service={service} />}
+        {isConsultationFlowOpen && <ConsultationFlow 
+          isOpen={isConsultationFlowOpen} 
+          onClose={() => setIsConsultationFlowOpen(false)} 
+          service={service}
+          onBooked={handleConsultationBooked}
+          onLeadCaptured={handleConsultationLeadCaptured}
+        />}
 
         {/* Pricing Choice Modal */}
         {isPricingChoiceOpen && <PricingChoiceModal isOpen={isPricingChoiceOpen} onClose={() => setIsPricingChoiceOpen(false)} service={{
@@ -1192,6 +1215,31 @@ export const ServiceFunnelModal = ({
             respa_split_limit: 50,
             requires_quote: selectedPkg?.requestPricing || service.requires_quote
           }}
+        />}
+
+        {/* Payment Choice Modal After Booking */}
+        {showPaymentChoiceAfterBooking && <PricingChoiceModal 
+          isOpen={showPaymentChoiceAfterBooking} 
+          onClose={handlePaymentChoiceAfterBookingClose} 
+          service={{
+            id: service.id,
+            title: `${service.title} - Consultation Booked`,
+            pro_price: selectedPkg?.price?.toString() || '0',
+            retail_price: selectedPkg?.originalPrice?.toString() || selectedPkg?.price?.toString() || '0',
+            respa_split_limit: 50,
+            price_duration: service.duration,
+            requires_quote: selectedPkg?.requestPricing || service.requires_quote,
+            max_split_percentage_non_ssp: (service as any).max_split_percentage_non_ssp
+          }} 
+          onChooseProPrice={() => {
+            setShowPaymentChoiceAfterBooking(false);
+            addDirectlyToCart();
+          }} 
+          onChooseCoPay={() => {
+            setShowPaymentChoiceAfterBooking(false);
+            setIsVendorSelectionOpen(true);
+          }} 
+          onChooseAgentPoints={handleChooseAgentPoints} 
         />}
       </DialogContent>
     </Dialog>;

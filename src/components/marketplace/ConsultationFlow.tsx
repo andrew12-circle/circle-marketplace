@@ -15,11 +15,13 @@ interface ConsultationFlowProps {
       name: string;
     };
   };
+  onBooked?: () => void;
+  onLeadCaptured?: () => void;
 }
 
 type FlowStep = 'booking' | 'lead_capture' | 'course' | 'complete';
 
-export const ConsultationFlow = ({ isOpen, onClose, service }: ConsultationFlowProps) => {
+export const ConsultationFlow = ({ isOpen, onClose, service, onBooked, onLeadCaptured }: ConsultationFlowProps) => {
   const [currentStep, setCurrentStep] = useState<FlowStep>('booking');
   const [consultationId, setConsultationId] = useState<string>('');
   const [serviceConfig, setServiceConfig] = useState<any>(null);
@@ -52,11 +54,15 @@ export const ConsultationFlow = ({ isOpen, onClose, service }: ConsultationFlowP
   const handleBookingConfirmed = (id: string) => {
     setConsultationId(id);
     setCurrentStep('course');
+    // Trigger payment choice flow
+    onBooked?.();
   };
 
   const handleLeadCaptured = () => {
     // Lead captured, external booking will handle the rest
     setCurrentStep('complete');
+    // Trigger payment choice flow for external bookings too
+    onLeadCaptured?.();
   };
 
   const handleReset = () => {
