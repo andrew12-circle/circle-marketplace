@@ -182,7 +182,7 @@ interface ServiceFunnelModalProps {
   onClose: () => void;
   service: Service;
 }
-export const ServiceFunnelModal = memo(({
+const ServiceFunnelModal = memo(({
   isOpen,
   onClose,
   service
@@ -1246,4 +1246,4 @@ export const ServiceFunnelModal = memo(({
   );
 });
 
-export default ServiceFunnelModal;
+export { ServiceFunnelModal as default };
