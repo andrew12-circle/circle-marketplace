@@ -1246,4 +1246,4 @@ const ServiceFunnelModal = memo(({
   );
 });
 
-export { ServiceFunnelModal as default };
+export default ServiceFunnelModal;
