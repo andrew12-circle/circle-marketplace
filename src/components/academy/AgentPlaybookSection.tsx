@@ -77,9 +77,9 @@ export const AgentPlaybookSection = () => {
             avatar_url
           )
         `)
-        .eq('content_type', 'playbook')
-        .eq('is_agent_playbook', true)
-        .eq('is_published', true);
+        .eq('content_type', 'playbook' as any)
+        .eq('is_agent_playbook', true as any)
+        .eq('is_published', true as any);
 
       // Apply filters
       if (searchTerm) {
@@ -87,11 +87,11 @@ export const AgentPlaybookSection = () => {
       }
 
       if (filterTier !== 'all') {
-        query = query.eq('agent_tier', filterTier);
+        query = query.eq('agent_tier', filterTier as any);
       }
 
       if (filterAudience !== 'all') {
-        query = query.eq('target_audience', filterAudience);
+        query = query.eq('target_audience', filterAudience as any);
       }
 
       // Apply sorting
@@ -115,10 +115,18 @@ export const AgentPlaybookSection = () => {
       const { data, error } = await query.limit(20);
 
       if (error) throw error;
-      setPlaybooks((data || []).map(item => ({
-        ...item,
-        tools_mentioned: Array.isArray(item.tools_mentioned) ? item.tools_mentioned : []
-      })));
+      
+      setPlaybooks((data || []).map(item => {
+        // Handle the case where item might be an error object
+        if (!item || typeof item !== 'object' || 'message' in item) {
+          return null;
+        }
+        
+        return {
+          ...(item as any),
+          tools_mentioned: Array.isArray((item as any).tools_mentioned) ? (item as any).tools_mentioned : []
+        };
+      }).filter(Boolean) as AgentPlaybook[]);
     } catch (error) {
       console.error('Error fetching playbooks:', error);
     } finally {

@@ -128,7 +128,7 @@ export const ContentUpload = ({ contentType, onSuccess, onCancel }: ContentUploa
 
       const { error: insertError } = await supabase
         .from('content')
-        .insert(contentData);
+        .insert(contentData as any);
 
       if (insertError) throw insertError;
 

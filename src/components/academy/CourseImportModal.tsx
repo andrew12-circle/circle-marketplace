@@ -122,7 +122,7 @@ export const CourseImportModal = ({ isOpen, onClose, onSuccess }: CourseImportMo
 
       const { error: insertError } = await supabase
         .from('content')
-        .insert(contentData);
+        .insert(contentData as any);
 
       if (insertError) throw insertError;
 

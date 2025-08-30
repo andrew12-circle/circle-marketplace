@@ -67,10 +67,21 @@ export const PlaybookCreator = () => {
         .order('template_name');
 
       if (error) throw error;
-      setTemplates((data || []).map(template => ({
-        ...template,
-        sections: Array.isArray(template.sections) ? template.sections : []
-      })));
+      
+      setTemplates((data || []).map(template => {
+        // Handle the case where template might be an error object or null
+        if (!template || typeof template !== 'object' || 'message' in template) {
+          return null;
+        }
+        
+        const templateAny = template as any;
+        if (!templateAny) return null; // Additional null check
+        
+        return {
+          ...templateAny,
+          sections: Array.isArray(templateAny.sections) ? templateAny.sections : []
+        } as PlaybookTemplate;
+      }).filter((template): template is PlaybookTemplate => template !== null));
     } catch (error) {
       console.error('Error fetching templates:', error);
     } finally {
@@ -83,23 +94,24 @@ export const PlaybookCreator = () => {
       const { data, error } = await supabase
         .from('playbook_creation_progress')
         .select('*, agent_playbook_templates(*)')
-        .eq('creator_id', user?.id)
-        .eq('status', 'draft')
-        .single();
+        .eq('creator_id', user?.id as any)
+        .eq('status', 'draft' as any)
+        .maybeSingle();
 
-      if (!error && data) {
+      if (!error && data && typeof data === 'object' && !('message' in data)) {
+        const dataAny = data as any;
         const mappedProgress = {
-          ...data,
-          completed_sections: Array.isArray(data.completed_sections) ? data.completed_sections : []
+          ...(dataAny),
+          completed_sections: Array.isArray(dataAny.completed_sections) ? dataAny.completed_sections : []
         };
         const mappedTemplate = {
-          ...data.agent_playbook_templates,
-          sections: Array.isArray(data.agent_playbook_templates.sections) ? data.agent_playbook_templates.sections : []
+          ...(dataAny.agent_playbook_templates),
+          sections: Array.isArray(dataAny.agent_playbook_templates?.sections) ? dataAny.agent_playbook_templates.sections : []
         };
-        setProgress(mappedProgress);
-        setSelectedTemplate(mappedTemplate);
-        setCurrentStep(data.current_section);
-        setPlaybookData(data.draft_data || {});
+        setProgress(mappedProgress as any);
+        setSelectedTemplate(mappedTemplate as any);
+        setCurrentStep(dataAny.current_section || 0);
+        setPlaybookData(dataAny.draft_data || {});
       }
     } catch (error) {
       console.error('Error checking progress:', error);
@@ -121,7 +133,7 @@ export const PlaybookCreator = () => {
           playbook_price: 99.00,
           revenue_share_percentage: 70.00,
           is_published: false
-        })
+        } as any)
         .select()
         .single();
 
@@ -133,18 +145,18 @@ export const PlaybookCreator = () => {
         .insert({
           creator_id: user?.id,
           template_id: template.id,
-          content_id: contentData.id,
+          content_id: (contentData as any)?.id,
           current_section: 0,
           status: 'draft'
-        })
+        } as any)
         .select()
         .single();
 
       if (progressError) throw progressError;
 
       const mappedProgress = {
-        ...progressData,
-        completed_sections: Array.isArray(progressData.completed_sections) ? progressData.completed_sections : []
+        ...(progressData as any),
+        completed_sections: Array.isArray((progressData as any).completed_sections) ? (progressData as any).completed_sections : []
       };
 
       setSelectedTemplate(template);
@@ -186,8 +198,8 @@ export const PlaybookCreator = () => {
           completed_sections: completedSections,
           draft_data: updatedDraftData,
           updated_at: new Date().toISOString()
-        })
-        .eq('id', progress.id);
+        } as any)
+        .eq('id', progress.id as any);
 
       if (error) throw error;
 
@@ -228,8 +240,8 @@ export const PlaybookCreator = () => {
           },
           is_published: true,
           published_at: new Date().toISOString()
-        })
-        .eq('id', progress.content_id);
+        } as any)
+        .eq('id', progress.content_id as any);
 
       if (contentError) throw contentError;
 
@@ -239,8 +251,8 @@ export const PlaybookCreator = () => {
         .update({
           status: 'published',
           updated_at: new Date().toISOString()
-        })
-        .eq('id', progress.id);
+        } as any)
+        .eq('id', progress.id as any);
 
       if (progressError) throw progressError;
 
