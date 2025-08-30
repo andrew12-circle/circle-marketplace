@@ -1,14 +1,17 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { Search, Filter, X, DollarSign, Star, ChevronDown } from "lucide-react";
+import { Search, Filter, X, DollarSign, Star, ChevronDown, TrendingUp, Clock, RotateCw } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { useServicePriceRange } from "@/hooks/useServicePriceRange";
 import { useServiceCount } from "@/hooks/useServiceCount";
+import { sbInvoke } from "@/utils/sb";
+import { useToast } from "@/hooks/use-toast";
 import { logger } from "@/utils/logger";
 
 // Debounce hook for search input
@@ -33,6 +36,10 @@ interface EnhancedSearchProps {
   availableCategories: string[];
   availableTags: string[];
   viewMode?: 'services' | 'products' | 'vendors';
+  // Sorting props
+  sortStrategy?: 'ranked' | 'recent' | 'price-low' | 'price-high';
+  onSortChange?: (strategy: 'ranked' | 'recent' | 'price-low' | 'price-high') => void;
+  isAdmin?: boolean;
 }
 
 export interface SearchFilters {
@@ -56,7 +63,10 @@ export const EnhancedSearch = ({
   onSearchChange, 
   availableCategories, 
   availableTags,
-  viewMode = 'services'
+  viewMode = 'services',
+  sortStrategy = 'ranked',
+  onSortChange,
+  isAdmin = false
 }: EnhancedSearchProps) => {
   const { min: minPrice, max: maxPrice, isLoading: priceRangeLoading } = useServicePriceRange();
   
@@ -82,6 +92,8 @@ export const EnhancedSearch = ({
 
   const { data: serviceCount } = useServiceCount();
   const [activeFiltersCount, setActiveFiltersCount] = useState(0);
+  const { toast } = useToast();
+  const [isReranking, setIsReranking] = useState(false);
   
   // Debounce the filters to prevent excessive calls
   const debouncedFilters = useDebounce(filters, 300);
@@ -146,6 +158,42 @@ export const EnhancedSearch = ({
       features: []
     });
   };
+
+  const handleRerank = async () => {
+    if (!isAdmin) return;
+    
+    setIsReranking(true);
+    try {
+      const { error } = await sbInvoke('auto-rerank-services');
+      if (error) throw error;
+      
+      toast({
+        title: "Reranking Complete",
+        description: "Services have been re-ranked based on latest metrics.",
+      });
+    } catch (error) {
+      console.error('Rerank error:', error);
+      toast({
+        title: "Rerank Failed",
+        description: "Failed to trigger service reranking.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsReranking(false);
+    }
+  };
+
+  const getSortLabel = () => {
+    switch (sortStrategy) {
+      case 'ranked': return { icon: TrendingUp, label: 'Ranked' };
+      case 'recent': return { icon: Clock, label: 'Newest' };
+      case 'price-low': return { icon: DollarSign, label: 'Price: Low to High' };
+      case 'price-high': return { icon: DollarSign, label: 'Price: High to Low' };
+      default: return { icon: TrendingUp, label: 'Ranked' };
+    }
+  };
+
+  const { icon: SortIcon, label } = getSortLabel();
 
   const removeFilter = (type: string, value?: string) => {
     switch (type) {
@@ -294,6 +342,65 @@ export const EnhancedSearch = ({
             </div>
           </DropdownMenuContent>
         </DropdownMenu>
+
+        {/* Sort Controls - only show for services */}
+        {viewMode === 'services' && onSortChange && (
+          <div className="flex items-center gap-2">
+            <Select value={sortStrategy} onValueChange={onSortChange}>
+              <SelectTrigger className="w-[160px] h-10">
+                <SelectValue>
+                  <div className="flex items-center gap-2">
+                    <SortIcon className="h-4 w-4" />
+                    <span className="hidden sm:inline">{label}</span>
+                    <span className="sm:hidden">Sort</span>
+                  </div>
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ranked">
+                  <div className="flex items-center gap-2">
+                    <TrendingUp className="h-4 w-4" />
+                    Ranked
+                  </div>
+                </SelectItem>
+                <SelectItem value="recent">
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4" />
+                    Newest
+                  </div>
+                </SelectItem>
+                <SelectItem value="price-low">
+                  <div className="flex items-center gap-2">
+                    <DollarSign className="h-4 w-4" />
+                    Price: Low to High
+                  </div>
+                </SelectItem>
+                <SelectItem value="price-high">
+                  <div className="flex items-center gap-2">
+                    <DollarSign className="h-4 w-4" />
+                    Price: High to Low
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+
+            {/* Admin Rerank Button */}
+            {isAdmin && (
+              <Button
+                variant="outline"
+                size="default"
+                onClick={handleRerank}
+                disabled={isReranking}
+                className="h-10 px-3"
+              >
+                <RotateCw className={`h-4 w-4 ${isReranking ? 'animate-spin' : ''}`} />
+                <span className="hidden sm:inline ml-2">
+                  {isReranking ? 'Reranking...' : 'Rerank'}
+                </span>
+              </Button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Filter Controls */}

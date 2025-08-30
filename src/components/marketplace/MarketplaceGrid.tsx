@@ -555,7 +555,15 @@ export const MarketplaceGrid = () => {
 
               {/* Sticky Enhanced Search Component */}
               <StickySearchContainer>
-                <EnhancedSearch onSearchChange={handleEnhancedSearchChange} availableCategories={getCategories()} availableTags={getTags()} viewMode={viewMode} />
+                <EnhancedSearch 
+                  onSearchChange={handleEnhancedSearchChange} 
+                  availableCategories={getCategories()} 
+                  availableTags={getTags()} 
+                  viewMode={viewMode}
+                  sortStrategy={orderStrategy}
+                  onSortChange={setOrderStrategy}
+                  isAdmin={profile?.is_admin}
+                />
               </StickySearchContainer>
 
               {/* View Mode Toggle */}
@@ -574,16 +582,6 @@ export const MarketplaceGrid = () => {
                 </Button>
               </div>
 
-              {/* Sorting Controls - show for services view */}
-              {viewMode === "services" && (
-                <div className="mb-6">
-                  <MarketplaceSortingControls
-                    currentStrategy={orderStrategy}
-                    onStrategyChange={setOrderStrategy}
-                    isAdmin={profile?.is_admin}
-                  />
-                </div>
-              )}
 
               {/* Grid - Mobile Responsive */}
               {viewMode === "services" && (
