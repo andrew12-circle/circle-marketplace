@@ -60,13 +60,13 @@ const VendorPointAllocationPanel = () => {
       const { data, error } = await supabase
         .from('profiles')
         .select('user_id, display_name')
-        .neq('user_id', user?.id);
+        .neq('user_id' as any, user?.id as any);
 
       if (error) throw error;
 
       // Get email from auth.users via function
       const agentsWithEmail = await Promise.all(
-        data.map(async (agent) => {
+        (data as any[]).map(async (agent: any) => {
           const { data: authData } = await supabase.auth.admin.getUserById(agent.user_id);
           return {
             user_id: agent.user_id,
@@ -87,24 +87,24 @@ const VendorPointAllocationPanel = () => {
       const { data, error } = await supabase
         .from('point_allocations')
         .select('*')
-        .eq('vendor_id', user?.id)
+        .eq('vendor_id' as any, user?.id as any)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
 
       // Get agent names separately
-      const agentIds = [...new Set(data.map(allocation => allocation.agent_id))];
+      const agentIds = [...new Set((data as any[]).map((allocation: any) => allocation.agent_id))];
       const { data: profiles } = await supabase
         .from('profiles')
         .select('user_id, display_name')
-        .in('user_id', agentIds);
+        .in('user_id' as any, agentIds);
 
-      const profileMap = profiles?.reduce((acc, profile) => {
+      const profileMap = (profiles as any[])?.reduce((acc: any, profile: any) => {
         acc[profile.user_id] = profile.display_name;
         return acc;
       }, {} as Record<string, string>) || {};
 
-      const formattedAllocations = data.map(allocation => ({
+      const formattedAllocations = (data as any[]).map((allocation: any) => ({
         ...allocation,
         agent_name: profileMap[allocation.agent_id] || 'Unknown Agent'
       }));
@@ -143,7 +143,7 @@ const VendorPointAllocationPanel = () => {
           notes: allocationForm.notes,
           created_by: user?.id,
           charge_on_use: true
-        });
+        } as any);
 
       if (error) throw error;
 

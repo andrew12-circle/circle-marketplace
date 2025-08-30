@@ -63,16 +63,16 @@ export function VendorPointsManager() {
       if (allocationsError) throw allocationsError;
 
       // Then get agent profile info separately
-      const agentIds = allocationsData?.map(a => a.agent_id) || [];
+      const agentIds = (allocationsData as any[])?.map((a: any) => a.agent_id) || [];
       const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
         .select('user_id, display_name')
-        .in('user_id', agentIds);
+        .in('user_id' as any, agentIds);
 
       if (profilesError) throw profilesError;
 
-      const formattedAllocations = allocationsData?.map(allocation => {
-        const profile = profilesData?.find(p => p.user_id === allocation.agent_id);
+      const formattedAllocations = (allocationsData as any[])?.map((allocation: any) => {
+        const profile = (profilesData as any[])?.find((p: any) => p.user_id === allocation.agent_id);
         
         return {
           ...allocation,
@@ -104,7 +104,7 @@ export function VendorPointsManager() {
 
       if (profilesError) throw profilesError;
 
-      setAgents(profilesData?.map(profile => ({
+      setAgents((profilesData as any[])?.map((profile: any) => ({
         id: profile.user_id,
         display_name: profile.display_name || 'User',
         email: 'Available in profile'
@@ -158,7 +158,7 @@ export function VendorPointsManager() {
           end_date: formData.end_date,
           notes: formData.notes,
           status: 'active'
-        });
+        } as any);
 
       if (error) throw error;
 
@@ -193,8 +193,8 @@ export function VendorPointsManager() {
       
       const { error } = await supabase
         .from('point_allocations')
-        .update({ status: newStatus })
-        .eq('id', id);
+        .update({ status: newStatus } as any)
+        .eq('id' as any, id as any);
 
       if (error) throw error;
 

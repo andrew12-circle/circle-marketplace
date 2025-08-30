@@ -116,8 +116,8 @@ export const VendorManagementPanel = () => {
     try {
       const { error } = await supabase
         .from('vendors')
-        .update(updatedData)
-        .eq('id', selectedVendor.id);
+        .update(updatedData as any)
+        .eq('id' as any, selectedVendor.id as any);
 
       if (error) throw error;
 
@@ -162,7 +162,7 @@ export const VendorManagementPanel = () => {
     try {
       const { error } = await supabase
         .from('vendors')
-        .update({ is_verified: !currentStatus })
+        .update({ is_verified: !currentStatus } as any)
         .eq('id' as any, vendorId as any);
 
       if (error) throw error;
@@ -194,8 +194,8 @@ export const VendorManagementPanel = () => {
     try {
       const { error } = await supabase
         .from('vendors')
-        .update({ is_premium_provider: !currentStatus })
-        .eq('id', vendorId);
+        .update({ is_premium_provider: !currentStatus } as any)
+        .eq('id' as any, vendorId as any);
 
       if (error) throw error;
 

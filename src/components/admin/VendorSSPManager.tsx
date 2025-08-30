@@ -40,11 +40,11 @@ const VendorSSPManager = () => {
       const { data, error } = await supabase
         .from('profiles')
         .select('user_id, business_name, display_name, is_settlement_service_provider, specialties, vendor_enabled')
-        .eq('vendor_enabled', true)
+        .eq('vendor_enabled' as any, true as any)
         .order('business_name');
 
       if (error) throw error;
-      setVendors(data || []);
+      setVendors(data as any || []);
     } catch (error) {
       console.error('Error loading vendors:', error);
       toast({
@@ -75,8 +75,8 @@ const VendorSSPManager = () => {
     try {
       const { error } = await supabase
         .from('profiles')
-        .update({ is_settlement_service_provider: isSSP })
-        .eq('user_id', vendorId);
+        .update({ is_settlement_service_provider: isSSP } as any)
+        .eq('user_id' as any, vendorId as any);
 
       if (error) throw error;
 

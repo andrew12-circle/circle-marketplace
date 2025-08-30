@@ -34,7 +34,7 @@ export const VendorRESPAManager = () => {
         .order('name');
 
       if (error) throw error;
-      setVendors(data || []);
+      setVendors(data as any || []);
     } catch (error) {
       console.error('Error fetching vendors:', error);
       toast({
@@ -56,8 +56,8 @@ export const VendorRESPAManager = () => {
         .update({
           is_respa_regulated: isRegulated,
           respa_risk_level: riskLevel,
-        })
-        .eq('id', vendorId);
+        } as any)
+        .eq('id' as any, vendorId as any);
 
       if (error) throw error;
 
