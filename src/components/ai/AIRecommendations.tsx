@@ -93,7 +93,7 @@ export const AIRecommendations = ({
           service_title: service.title,
           recommendation_source: source
         }
-      });
+      } as any);
 
     if (onServiceSelect) {
       onServiceSelect(service);

@@ -63,7 +63,7 @@ export const CoPayAnalyticsDashboard = () => {
           vendors(name),
           agent_profile:profiles!co_pay_requests_agent_id_fkey(display_name)
         `)
-        .eq('agent_id', user.id)
+        .eq('agent_id' as any, user.id as any)
         .gte('created_at', startDate.toISOString())
         .order('created_at', { ascending: false });
 

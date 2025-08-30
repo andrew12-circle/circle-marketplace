@@ -196,7 +196,7 @@ export const YouTubeImportPanel = () => {
 
       const { error } = await supabase
         .from('content')
-        .insert([contentData]);
+        .insert([contentData] as any);
 
       if (error) throw error;
 

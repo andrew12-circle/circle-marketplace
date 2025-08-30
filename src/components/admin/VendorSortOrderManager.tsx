@@ -33,7 +33,7 @@ export const VendorSortOrderManager = () => {
         .order('name');
 
       if (error) throw error;
-      setVendors(data || []);
+      setVendors(data as any || []);
     } catch (error) {
       console.error('Error fetching vendors:', error);
       toast({
@@ -52,8 +52,8 @@ export const VendorSortOrderManager = () => {
     try {
       const { error } = await supabase
         .from('vendors')
-        .update({ sort_order: sortOrder })
-        .eq('id', vendorId);
+        .update({ sort_order: sortOrder } as any)
+        .eq('id' as any, vendorId as any);
 
       if (error) throw error;
 
