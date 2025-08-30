@@ -30,13 +30,19 @@ export const useProviderTracking = (serviceId: string, enabled: boolean = true, 
   const trackEvent = useCallback(async (event: Omit<TrackingEvent, 'service_id'>) => {
     if (!enabled) return false;
     if (!serviceId) return false;
+    
+    // Skip tracking for unauthenticated users to prevent 400 errors
+    if (!user?.id) {
+      console.debug('Skipping tracking for unauthenticated user');
+      return false;
+    }
 
     try {
       // Persist event to Supabase
       const { error } = await supabase.from('service_tracking_events').insert({
         service_id: serviceId,
         vendor_id: (event as any).vendor_id || null,
-        user_id: user?.id || null,
+        user_id: user.id,
         event_type: event.event_type,
         event_data: event.event_data || {},
         revenue_attributed: event.revenue_attributed || 0

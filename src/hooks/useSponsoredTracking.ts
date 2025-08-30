@@ -26,9 +26,15 @@ export const useSponsoredTracking = () => {
         return;
       }
 
+      // Skip tracking for unauthenticated users to prevent 400 errors
+      if (!user?.id) {
+        console.debug('Skipping sponsored impression for unauthenticated user');
+        return;
+      }
+
       const { error } = await supabase.from('service_tracking_events').insert({
         service_id: serviceId,
-        user_id: user?.id || null,
+        user_id: user.id,
         event_type: 'sponsored_impression',
         event_data: {
           placement,
@@ -48,9 +54,15 @@ export const useSponsoredTracking = () => {
 
   const trackClick = useCallback(async ({ serviceId, placement, context }: TrackingEvent) => {
     try {
+      // Skip tracking for unauthenticated users to prevent 400 errors
+      if (!user?.id) {
+        console.debug('Skipping sponsored click for unauthenticated user');
+        return;
+      }
+
       const { error } = await supabase.from('service_tracking_events').insert({
         service_id: serviceId,
-        user_id: user?.id || null,
+        user_id: user.id,
         event_type: 'sponsored_click',
         event_data: {
           placement,

@@ -256,6 +256,7 @@ export const ServiceManagementPanel = () => {
   const [filteredServices, setFilteredServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [saveInProgress, setSaveInProgress] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [isEditingDetails, setIsEditingDetails] = useState(false);
@@ -488,12 +489,27 @@ export const ServiceManagementPanel = () => {
   };
 
   const handleServiceUpdate = async () => {
-    if (!selectedService || saving) return;
+    if (!selectedService || saving || saveInProgress) return;
 
-    // Debug admin status first
+    // Prevent multiple simultaneous saves
+    setSaveInProgress(true);
+    setSaving(true);
+
     try {
+      // Check authentication first
+      const { data: session } = await supabase.auth.getSession();
+      if (!session?.session?.user) {
+        toast({
+          title: 'Authentication Required',
+          description: 'Please log in to update services.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      // Check admin status
       const { data: adminStatus, error: adminError } = await supabase.rpc('get_user_admin_status');
-      console.log('Admin status check:', { adminStatus, adminError });
+      console.debug('Admin status check:', { adminStatus, adminError });
       
       if (!adminStatus) {
         toast({
@@ -503,28 +519,16 @@ export const ServiceManagementPanel = () => {
         });
         return;
       }
-    } catch (adminCheckError) {
-      console.error('Admin status check failed:', adminCheckError);
-      toast({
-        title: 'Permission Check Failed',
-        description: 'Could not verify admin status. Please try again.',
-        variant: 'destructive',
-      });
-      return;
-    }
 
-    // Basic required field validation to prevent silent failures
-    if (!editForm.title || !editForm.category) {
-      toast({
-        title: 'Missing required fields',
-        description: 'Please provide both Title and Category before saving.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    setSaving(true);
-    try {
+      // Basic required field validation
+      if (!editForm.title || !editForm.category) {
+        toast({
+          title: 'Missing required fields',
+          description: 'Please provide both Title and Category before saving.',
+          variant: 'destructive',
+        });
+        return;
+      }
       // Normalize numeric fields to match DB constraints
       let roi = editForm.estimated_roi ?? null;
       let respa = editForm.respa_split_limit ?? null;
@@ -661,6 +665,7 @@ export const ServiceManagementPanel = () => {
       });
     } finally {
       setSaving(false);
+      setSaveInProgress(false);
     }
   };
 
@@ -1478,8 +1483,8 @@ export const ServiceManagementPanel = () => {
                     </div>
 
                     <div className="flex gap-2">
-                      <Button onClick={handleServiceUpdate} disabled={!isDetailsDirty || saving}>
-                        {saving ? 'Saving...' : 'Save Changes'}
+                      <Button onClick={handleServiceUpdate} disabled={!isDetailsDirty || saving || saveInProgress}>
+                        {saving || saveInProgress ? 'Saving...' : 'Save Changes'}
                       </Button>
                       <Button 
                         variant="outline" 
