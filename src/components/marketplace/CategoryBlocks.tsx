@@ -29,7 +29,9 @@ import { type Service } from "@/hooks/useMarketplaceData";
 
 interface CategoryBlocksProps {
   onCategoryClick: (searchTerm: string, categoryName: string) => void;
-  services: Service[];
+  services: Service[]; // Filtered services for display
+  allServices: Service[]; // All services for counting
+  activeFilters?: string[]; // Currently active category filters
 }
 
 // Digital-first categories - for tech-savvy realtors focused on fast growth
@@ -224,12 +226,13 @@ const OLD_SCHOOL_CATEGORIES = [
   }
 ];
 
-export const CategoryBlocks = ({ onCategoryClick, services }: CategoryBlocksProps) => {
+export const CategoryBlocks = ({ onCategoryClick, services, allServices, activeFilters = [] }: CategoryBlocksProps) => {
   const categoryCounts = useMemo(() => {
     const counts = new Map<string, number>();
     const allCategories = [...DIGITAL_CATEGORIES, ...OLD_SCHOOL_CATEGORIES];
     
-    services.forEach(service => {
+    // Always use allServices for counting to maintain consistent numbers
+    allServices.forEach(service => {
       const serviceTags = service.tags || [];
       
       allCategories.forEach(cat => {
@@ -242,7 +245,7 @@ export const CategoryBlocks = ({ onCategoryClick, services }: CategoryBlocksProp
     });
     
     return counts;
-  }, [services]);
+  }, [allServices]); // Only depend on allServices, not filtered services
 
   const handleCategoryClick = (tags: string[], categoryName: string) => {
     logger.log('category_block_clicked', { tags, categoryName });
@@ -258,21 +261,28 @@ export const CategoryBlocks = ({ onCategoryClick, services }: CategoryBlocksProp
       <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
         {categories.map((category) => {
           const IconComponent = category.icon;
+          const isActive = activeFilters.some(filter => category.tags.includes(filter));
           
           return (
             <Card 
               key={category.name}
-              className="hover:shadow-md transition-all duration-200 cursor-pointer group hover:border-primary/50"
+              className={`hover:shadow-md transition-all duration-200 cursor-pointer group hover:border-primary/50 ${
+                isActive ? 'ring-2 ring-primary border-primary bg-primary/5' : ''
+              }`}
               onClick={() => handleCategoryClick(category.tags, category.name)}
             >
               <CardContent className="p-4 text-center">
                 <div className="space-y-3">
                   <div className="relative mx-auto w-12 h-12">
-                    <div className={`w-12 h-12 ${category.color} rounded-full flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                    <div className={`w-12 h-12 ${category.color} rounded-full flex items-center justify-center group-hover:scale-110 transition-transform ${
+                      isActive ? 'scale-110' : ''
+                    }`}>
                       <IconComponent className={`w-6 h-6 ${category.iconColor}`} />
                     </div>
                     {categoryCounts.get(category.name) && (
-                      <div className="absolute -top-1 -right-1 min-w-[20px] h-5 bg-primary rounded-full flex items-center justify-center">
+                      <div className={`absolute -top-1 -right-1 min-w-[20px] h-5 rounded-full flex items-center justify-center ${
+                        isActive ? 'bg-primary ring-2 ring-white' : 'bg-primary'
+                      }`}>
                         <span className="text-xs font-medium text-primary-foreground px-1">
                           {categoryCounts.get(category.name)}
                         </span>
@@ -280,7 +290,9 @@ export const CategoryBlocks = ({ onCategoryClick, services }: CategoryBlocksProp
                     )}
                   </div>
                   <div>
-                    <h4 className="font-semibold text-sm group-hover:text-primary transition-colors">
+                    <h4 className={`font-semibold text-sm group-hover:text-primary transition-colors ${
+                      isActive ? 'text-primary' : ''
+                    }`}>
                       {category.name}
                     </h4>
                     <p className="text-xs text-muted-foreground">

@@ -533,6 +533,8 @@ export const MarketplaceGrid = () => {
               <CategoryBlocks 
                 onCategoryClick={handleCategoryClick}
                 services={flattenServices}
+                allServices={services}
+                activeFilters={searchTerm ? [searchTerm] : []}
               />
 
               {/* Recently Viewed Services */}
