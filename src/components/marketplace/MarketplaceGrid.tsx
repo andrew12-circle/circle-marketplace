@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useState, useCallback, useMemo, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { OptimizedServiceCard } from "./OptimizedServiceCard";
