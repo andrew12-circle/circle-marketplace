@@ -123,13 +123,13 @@ export const SponsoredPlacementsManager = () => {
       const { data, error } = await supabase
         .from('service_tracking_events')
         .select('event_type')
-        .eq('service_id', serviceId)
+        .eq('service_id' as any, serviceId as any)
         .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
 
       if (error) throw error;
 
-      const impressions = data?.filter(e => e.event_type === 'sponsored_impression').length || 0;
-      const clicks = data?.filter(e => e.event_type === 'sponsored_click').length || 0;
+      const impressions = (data as any)?.filter((e: any) => e.event_type === 'sponsored_impression').length || 0;
+      const clicks = (data as any)?.filter((e: any) => e.event_type === 'sponsored_click').length || 0;
       const ctr = impressions > 0 ? (clicks / impressions) * 100 : 0;
 
       return { impressions, clicks, ctr };
@@ -149,12 +149,12 @@ export const SponsoredPlacementsManager = () => {
       const { data, error } = await supabase
         .from('service_tracking_events')
         .select('event_type, created_at')
-        .in('event_type', ['sponsored_impression', 'sponsored_click'])
+        .in('event_type' as any, ['sponsored_impression', 'sponsored_click'] as any)
         .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString());
 
       if (!error && data) {
-        const impressions = data.filter(e => e.event_type === 'sponsored_impression').length;
-        const clicks = data.filter(e => e.event_type === 'sponsored_click').length;
+        const impressions = (data as any).filter((e: any) => e.event_type === 'sponsored_impression').length;
+        const clicks = (data as any).filter((e: any) => e.event_type === 'sponsored_click').length;
         console.log('Sponsored stats (7 days):', { impressions, clicks, ctr: impressions > 0 ? (clicks / impressions) * 100 : 0 });
       }
     } catch (error) {
@@ -176,10 +176,10 @@ export const SponsoredPlacementsManager = () => {
 
   const toggleServiceActive = async (serviceId: string, currentActiveStatus: boolean) => {
     try {
-      const { error } = await supabase
+      const { error } = await (supabase
         .from('services')
-        .update({ is_active: !currentActiveStatus })
-        .eq('id', serviceId);
+        .update as any)({ is_active: !currentActiveStatus })
+        .eq('id' as any, serviceId);
 
       if (error) throw error;
 
@@ -201,10 +201,10 @@ export const SponsoredPlacementsManager = () => {
 
   const handleSponsoredToggle = async (serviceId: string, currentValue: boolean) => {
     try {
-      const { error } = await supabase
+      const { error } = await (supabase
         .from('services')
-        .update({ is_sponsored: !currentValue })
-        .eq('id', serviceId);
+        .update as any)({ is_sponsored: !currentValue })
+        .eq('id' as any, serviceId);
 
       if (error) throw error;
 
@@ -230,10 +230,10 @@ export const SponsoredPlacementsManager = () => {
 
   const handleRankBoostChange = async (serviceId: string, boost: number) => {
     try {
-      const { error } = await supabase
+      const { error } = await (supabase
         .from('services')
-        .update({ sponsored_rank_boost: boost })
-        .eq('id', serviceId);
+        .update as any)({ sponsored_rank_boost: boost })
+        .eq('id' as any, serviceId);
 
       if (error) throw error;
 

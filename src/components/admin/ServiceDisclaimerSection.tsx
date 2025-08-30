@@ -40,7 +40,7 @@ export const ServiceDisclaimerSection = ({ serviceId, serviceName }: ServiceDisc
     const { data, error } = await supabase
       .from('services')
       .select('disclaimer_id')
-      .eq('id' as any, serviceId)
+      .eq('id' as any, serviceId as any)
       .single();
 
     if (error) throw error;

@@ -576,7 +576,7 @@ export const ServiceManagementPanel = () => {
           vendors (name, logo_url),
           service_providers (name, logo_url)
         `)
-        .eq('id' as any, selectedService.id)
+        .eq('id' as any, selectedService.id as any)
         .single();
 
       if (fetchError) {
@@ -810,7 +810,7 @@ export const ServiceManagementPanel = () => {
       const { data: verifyRow, error: fetchError } = await supabase
         .from('services')
         .select('id, funnel_content, pricing_tiers, updated_at')
-        .eq('id' as any, selectedService.id)
+        .eq('id' as any, selectedService.id as any)
         .maybeSingle();
 
       if (fetchError) throw fetchError;

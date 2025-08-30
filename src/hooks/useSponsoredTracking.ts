@@ -32,10 +32,9 @@ export const useSponsoredTracking = () => {
         event_data: {
           placement,
           context,
-          timestamp: now
-        },
-        ip_address: null, // Will be filled by server if needed
-        user_agent: navigator.userAgent
+          timestamp: now,
+          user_agent: navigator.userAgent
+        }
       });
 
       if (!error) {
@@ -55,10 +54,9 @@ export const useSponsoredTracking = () => {
         event_data: {
           placement,
           context,
-          timestamp: Date.now()
-        },
-        ip_address: null,
-        user_agent: navigator.userAgent
+          timestamp: Date.now(),
+          user_agent: navigator.userAgent
+        }
       });
 
       if (error) {

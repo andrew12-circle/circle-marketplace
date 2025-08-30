@@ -38,7 +38,7 @@ export function SpiritualDashboard() {
     try {
       // Get daily scripture
       const scripture = await getDailyScripture(['blessing', 'protection']);
-      setDailyScripture(scripture);
+      setDailyScripture(scripture as any);
 
       // Get recent prayers
       const { data: prayers, error } = await supabase
@@ -48,7 +48,7 @@ export function SpiritualDashboard() {
         .limit(5);
 
       if (error) throw error;
-      setRecentPrayers(prayers || []);
+      setRecentPrayers((prayers as any) || []);
     } catch (error) {
       console.error('Error loading spiritual data:', error);
       toast({

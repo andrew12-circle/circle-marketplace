@@ -177,18 +177,18 @@ export const StreamlinedVendorEditor = ({ vendorData, onSave, onCancel }: Stream
         }
       };
 
-      const { error } = await supabase
+      const { error } = await (supabase
         .from('vendors')
-        .update(updatedData)
-        .eq('id', vendorData.id);
+        .update as any)(updatedData)
+        .eq('id' as any, vendorData.id);
 
       if (error) throw error;
 
       // Also save calendar link to vendor_availability table
       if (formData.calendar_link) {
-        const { error: availabilityError } = await supabase
+        const { error: availabilityError } = await (supabase
           .from('vendor_availability')
-          .upsert({
+          .upsert as any)({
             vendor_id: vendorData.id,
             calendar_link: formData.calendar_link,
             is_available_now: true,

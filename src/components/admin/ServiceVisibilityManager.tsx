@@ -54,7 +54,7 @@ export const ServiceVisibilityManager = () => {
 
       if (error) throw error;
 
-      const formattedServices = (data || []).map(service => ({
+      const formattedServices = (data || []).map((service: any) => ({
         ...service,
         vendor_name: service.vendors?.name || 'No Vendor'
       }));
@@ -78,10 +78,10 @@ export const ServiceVisibilityManager = () => {
     setUpdating(prev => new Set(prev).add(serviceId));
 
     try {
-      const { error } = await supabase
+      const { error } = await (supabase
         .from('services')
-        .update({ is_active: !currentState })
-        .eq('id', serviceId);
+        .update as any)({ is_active: !currentState })
+        .eq('id' as any, serviceId);
 
       if (error) throw error;
 
@@ -134,10 +134,10 @@ export const ServiceVisibilityManager = () => {
     try {
       const serviceIds = servicesToUpdate.map(s => s.id);
       
-      const { error } = await supabase
+      const { error } = await (supabase
         .from('services')
-        .update({ is_active: activate })
-        .in('id', serviceIds);
+        .update as any)({ is_active: activate })
+        .in('id' as any, serviceIds as any);
 
       if (error) throw error;
 

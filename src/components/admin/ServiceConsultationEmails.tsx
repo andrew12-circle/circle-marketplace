@@ -35,7 +35,7 @@ export const ServiceConsultationEmails = ({ serviceId, serviceName }: ServiceCon
       const { data, error } = await supabase
         .from('services')
         .select('consultation_emails')
-        .eq('id' as any, serviceId)
+        .eq('id' as any, serviceId as any)
         .single();
 
       if (error) throw error;
