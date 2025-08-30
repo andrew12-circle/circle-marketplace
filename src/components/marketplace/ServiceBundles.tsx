@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, memo } from "react";
 import { Package, Star, Zap, TrendingUp, DollarSign } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -29,7 +29,7 @@ interface ServiceBundlesProps {
   className?: string;
 }
 
-export const ServiceBundles = ({ 
+export const ServiceBundles = memo(({ 
   currentService, 
   category,
   maxBundles = 3,
@@ -237,4 +237,4 @@ export const ServiceBundles = ({
       </CardContent>
     </Card>
   );
-};
+});

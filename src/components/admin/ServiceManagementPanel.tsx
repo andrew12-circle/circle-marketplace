@@ -611,7 +611,7 @@ export const ServiceManagementPanel = () => {
           vendors (name, logo_url),
           service_providers (name, logo_url)
         `)
-        .eq('id' as any, selectedService.id as any)
+        .eq('id', selectedService.id)
         .single();
 
       if (fetchError) {
