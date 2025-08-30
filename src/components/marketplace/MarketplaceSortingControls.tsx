@@ -1,14 +1,15 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { RotateCw, TrendingUp, Clock } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { RotateCw, TrendingUp, Clock, DollarSign, ArrowUpDown } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 
 interface MarketplaceSortingControlsProps {
-  currentStrategy: 'ranked' | 'recent';
-  onStrategyChange: (strategy: 'ranked' | 'recent') => void;
+  currentStrategy: 'ranked' | 'recent' | 'price-low' | 'price-high';
+  onStrategyChange: (strategy: 'ranked' | 'recent' | 'price-low' | 'price-high') => void;
   isAdmin?: boolean;
 }
 
@@ -44,51 +45,73 @@ export const MarketplaceSortingControls = ({
     }
   };
 
+  const getSortLabel = () => {
+    switch (currentStrategy) {
+      case 'ranked': return { icon: TrendingUp, label: 'Ranked' };
+      case 'recent': return { icon: Clock, label: 'Newest' };
+      case 'price-low': return { icon: DollarSign, label: 'Price: Low to High' };
+      case 'price-high': return { icon: DollarSign, label: 'Price: High to Low' };
+      default: return { icon: TrendingUp, label: 'Ranked' };
+    }
+  };
+
+  const { icon: SortIcon, label } = getSortLabel();
+
   return (
-    <div className="flex items-center gap-2 flex-wrap">
-      {/* Sorting Strategy Indicator */}
+    <div className="flex items-center gap-3 flex-wrap">
+      {/* Sort By Dropdown */}
       <div className="flex items-center gap-2">
-        <span className="text-sm text-muted-foreground">Sorting by:</span>
-        <Badge 
-          variant={currentStrategy === 'ranked' ? 'default' : 'secondary'}
-          className="flex items-center gap-1"
-        >
-          {currentStrategy === 'ranked' ? (
-            <>
-              <TrendingUp className="h-3 w-3" />
-              Ranked
-            </>
-          ) : (
-            <>
-              <Clock className="h-3 w-3" />
-              Newest
-            </>
-          )}
-        </Badge>
+        <span className="text-sm text-muted-foreground">Sort by:</span>
+        <Select value={currentStrategy} onValueChange={onStrategyChange}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue>
+              <div className="flex items-center gap-2">
+                <SortIcon className="h-4 w-4" />
+                {label}
+              </div>
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ranked">
+              <div className="flex items-center gap-2">
+                <TrendingUp className="h-4 w-4" />
+                Ranked
+              </div>
+            </SelectItem>
+            <SelectItem value="recent">
+              <div className="flex items-center gap-2">
+                <Clock className="h-4 w-4" />
+                Newest
+              </div>
+            </SelectItem>
+            <SelectItem value="price-low">
+              <div className="flex items-center gap-2">
+                <DollarSign className="h-4 w-4" />
+                Price: Low to High
+              </div>
+            </SelectItem>
+            <SelectItem value="price-high">
+              <div className="flex items-center gap-2">
+                <DollarSign className="h-4 w-4" />
+                Price: High to Low
+              </div>
+            </SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Admin Controls */}
       {isAdmin && (
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onStrategyChange(currentStrategy === 'ranked' ? 'recent' : 'ranked')}
-          >
-            {currentStrategy === 'ranked' ? 'Show Newest' : 'Show Ranked'}
-          </Button>
-          
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleRerank}
-            disabled={isReranking}
-            className="flex items-center gap-1"
-          >
-            <RotateCw className={`h-3 w-3 ${isReranking ? 'animate-spin' : ''}`} />
-            {isReranking ? 'Reranking...' : 'Rerank Now'}
-          </Button>
-        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleRerank}
+          disabled={isReranking}
+          className="flex items-center gap-1"
+        >
+          <RotateCw className={`h-3 w-3 ${isReranking ? 'animate-spin' : ''}`} />
+          {isReranking ? 'Reranking...' : 'Rerank Now'}
+        </Button>
       )}
     </div>
   );

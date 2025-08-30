@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { OptimizedServiceCard } from "./OptimizedServiceCard";
 import { MarketplaceVendorCard } from "./MarketplaceVendorCard";
 import { MarketplaceFilters } from "./MarketplaceFilters";
+import { MarketplaceSortingControls } from "./MarketplaceSortingControls";
 import { CampaignServicesHeader } from "./CampaignServicesHeader";
 import { CircleProBanner } from "./CircleProBanner";
 import { ServiceDetailsModal } from "./ServiceDetailsModal";
@@ -225,8 +226,8 @@ export const MarketplaceGrid = () => {
   // Enable new landing experience for all users
   const showNewLanding = true;
 
-  // Always use ranked sorting for now
-  const orderStrategy = 'ranked';
+  // Sort strategy state
+  const [orderStrategy, setOrderStrategy] = useState<'ranked' | 'recent' | 'price-low' | 'price-high'>('ranked');
   const [enablePagination, setEnablePagination] = useState(true); // Enable by default to show services immediately
 
   // Only enable pagination if marketplace is enabled by admin
@@ -572,6 +573,17 @@ export const MarketplaceGrid = () => {
                   {t('vendors')}
                 </Button>
               </div>
+
+              {/* Sorting Controls - show for services view */}
+              {viewMode === "services" && (
+                <div className="mb-6">
+                  <MarketplaceSortingControls
+                    currentStrategy={orderStrategy}
+                    onStrategyChange={setOrderStrategy}
+                    isAdmin={profile?.is_admin}
+                  />
+                </div>
+              )}
 
               {/* Grid - Mobile Responsive */}
               {viewMode === "services" && (

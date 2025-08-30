@@ -9,7 +9,7 @@ interface PaginatedFilters {
   featured?: boolean;
   verified?: boolean; // Note: applied client-side for now
   coPayEligible?: boolean;
-  orderStrategy?: 'ranked' | 'recent';
+  orderStrategy?: 'ranked' | 'recent' | 'price-low' | 'price-high';
 }
 
 interface PaginatedPage {
@@ -42,6 +42,14 @@ async function fetchServicesPage(offset: number, filters: PaginatedFilters): Pro
   if (orderStrategy === 'recent') {
     query = query
       .order('created_at', { ascending: false })
+      .order('sort_order', { ascending: true });
+  } else if (orderStrategy === 'price-low') {
+    query = query
+      .order('retail_price', { ascending: true })
+      .order('sort_order', { ascending: true });
+  } else if (orderStrategy === 'price-high') {
+    query = query
+      .order('retail_price', { ascending: false })
       .order('sort_order', { ascending: true });
   } else {
     query = query
