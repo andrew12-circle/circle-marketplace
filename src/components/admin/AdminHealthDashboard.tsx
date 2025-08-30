@@ -92,7 +92,7 @@ export function AdminHealthDashboard() {
       const { count: activeIncidents } = await supabase
         .from('incidents')
         .select('*', { count: 'exact', head: true })
-        .eq('status', 'open');
+        .eq('status' as any, 'open' as any);
 
       // Test DB response time
       const dbStart = Date.now();
@@ -118,7 +118,7 @@ export function AdminHealthDashboard() {
       .limit(10);
 
     if (data) {
-      setIncidents(data);
+      setIncidents(data as any[]);
     }
   };
 
@@ -158,7 +158,7 @@ export function AdminHealthDashboard() {
             source: 'admin_dashboard',
             timestamp: new Date().toISOString()
           })
-        });
+        } as any);
 
       if (error) throw error;
 
@@ -179,8 +179,8 @@ export function AdminHealthDashboard() {
         .update({
           status: 'resolved',
           resolved_at: new Date().toISOString()
-        })
-        .eq('id', incidentId);
+        } as any)
+        .eq('id' as any, incidentId as any);
 
       if (error) throw error;
 

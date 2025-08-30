@@ -45,11 +45,11 @@ export const AdminNotes = ({ serviceId, serviceName }: AdminNotesProps) => {
       const { data, error } = await supabase
         .from('admin_notes')
         .select('*')
-        .eq('service_id', serviceId)
+        .eq('service_id' as any, serviceId as any)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setNotes(data || []);
+      setNotes((data as any[]) || []);
     } catch (error) {
       console.error('Error loading admin notes:', error);
       toast.error('Failed to load admin notes');
@@ -74,7 +74,7 @@ export const AdminNotes = ({ serviceId, serviceName }: AdminNotesProps) => {
           note_text: newNote.trim(),
           service_id: serviceId,
           created_by: user?.id
-        }]);
+        }] as any);
 
       if (error) throw error;
 
@@ -95,7 +95,7 @@ export const AdminNotes = ({ serviceId, serviceName }: AdminNotesProps) => {
       const { error } = await supabase
         .from('admin_notes')
         .delete()
-        .eq('id', noteId);
+        .eq('id' as any, noteId as any);
 
       if (error) throw error;
 

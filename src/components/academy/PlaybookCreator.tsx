@@ -70,12 +70,12 @@ export const PlaybookCreator = () => {
       
       setTemplates((data || []).map(template => {
         // Handle the case where template might be an error object or null
-        if (!template || typeof template !== 'object' || 'message' in template) {
+        if (!template || template === null || typeof template !== 'object' || (template && 'message' in template)) {
           return null;
         }
         
         const templateAny = template as any;
-        if (!templateAny) return null; // Additional null check
+        if (!templateAny?.sections) return null; // Optional chaining to handle null template
         
         return {
           ...templateAny,
