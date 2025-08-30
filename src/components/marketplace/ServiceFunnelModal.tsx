@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { useState, useEffect, useRef, Suspense, lazy, useMemo, memo } from "react";
 import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -1246,3 +1245,5 @@ export const ServiceFunnelModal = memo(({
     </Dialog>
   );
 });
+
+export default ServiceFunnelModal;
