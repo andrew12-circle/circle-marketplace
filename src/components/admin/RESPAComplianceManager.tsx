@@ -238,7 +238,7 @@ export const RESPAComplianceManager = () => {
             compliance_checklist: update.compliance_checklist,
             respa_compliance_notes: update.respa_compliance_notes
           } as any) // Use any to bypass type checking temporarily
-          .eq('id', update.id);
+          .eq('id' as any, update.id as any);
 
         if (error) throw error;
       }
@@ -274,8 +274,8 @@ export const RESPAComplianceManager = () => {
 
       const { error } = await supabase
         .from('services')
-        .update(updateData)
-        .eq('id', serviceId);
+        .update(updateData as any)
+        .eq('id' as any, serviceId as any);
 
       if (error) {
         console.error('Update error:', error);

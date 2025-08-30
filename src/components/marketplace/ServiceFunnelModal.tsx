@@ -306,6 +306,32 @@ export const ServiceFunnelModal = ({
     }
   }, [packages, selectedPackage]);
   const handleAddToCart = () => {
+    if (!user) {
+      // Store the item for after sign in
+      const pendingItem = {
+        id: service.id,
+        title: `${service.title} - ${selectedPkg.name}`,
+        price: selectedPkg.price * quantity,
+        vendor: service.vendor?.name || 'Direct Service',
+        image_url: service.image_url,
+        requiresQuote: service.requires_quote,
+        type: 'service' as const,
+      };
+      
+      localStorage.setItem('circle-pending-cart-item', JSON.stringify(pendingItem));
+      
+      toast({
+        title: "Sign in required",
+        description: "Create a free account or sign in to add items to your cart.",
+      });
+      
+      // Redirect to auth page
+      setTimeout(() => {
+        window.location.href = '/auth?mode=signup&redirect=' + encodeURIComponent(window.location.pathname);
+      }, 1000);
+      return;
+    }
+
     addToCart({
       id: service.id,
       title: `${service.title} - ${selectedPkg.name}`,

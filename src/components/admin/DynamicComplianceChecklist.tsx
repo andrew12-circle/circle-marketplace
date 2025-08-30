@@ -192,8 +192,8 @@ export const DynamicComplianceChecklist = ({
         .update({ 
           compliance_checklist: checklist as any,
           updated_at: new Date().toISOString()
-        })
-        .eq('id', service.id);
+        } as any)
+        .eq('id' as any, service.id);
 
       if (error) throw error;
 

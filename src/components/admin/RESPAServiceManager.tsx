@@ -141,7 +141,7 @@ const RESPAServiceManager = () => {
       const { error } = await supabase
         .from('services')
         .update(dbUpdates)
-        .eq('id', serviceId);
+        .eq('id' as any, serviceId);
 
       if (error) throw error;
 
@@ -186,7 +186,7 @@ const RESPAServiceManager = () => {
       const { error } = await supabase
         .from('services')
         .update(dbUpdates)
-        .in('id', selectedServices);
+        .in('id' as any, selectedServices as any);
 
       if (error) throw error;
 

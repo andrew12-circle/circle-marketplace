@@ -77,6 +77,25 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.removeItem('circle-cart');
       }
     }
+
+    // Check for pending item after sign in
+    const pendingItem = localStorage.getItem('circle-pending-cart-item');
+    if (pendingItem) {
+      try {
+        const item = JSON.parse(pendingItem);
+        // Add the pending item to cart
+        setCartItems(prev => [...prev, { ...item, quantity: 1 }]);
+        // Clear the pending item
+        localStorage.removeItem('circle-pending-cart-item');
+        
+        toast({
+          title: "Item added to cart",
+          description: `"${item.title}" has been added to your cart`,
+        });
+      } catch (error) {
+        localStorage.removeItem('circle-pending-cart-item');
+      }
+    }
   }, []);
 
   // Save cart to localStorage whenever it changes
