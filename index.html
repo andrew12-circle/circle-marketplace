@@ -12,10 +12,11 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     
-    <!-- Preload critical logo image and potential LCP images -->
+    <!-- Preload critical logo image only -->
     <link rel="preload" href="/lovable-uploads/97692497-6d98-46a8-b6fc-05cd68bdc160.png" as="image" type="image/png">
-    <link rel="preload" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS0RwXfXLmbYhwqqBNPxARooTBBuRX8EA2DPA&s" as="image" type="image/jpeg">
-    <link rel="preload" href="https://storage.googleapis.com/msgsndr/UjxJODh2Df0UKjTnKpcP/media/68255d47c398f6cc6978ed74.png" as="image" type="image/png">
+    <!-- Prefetch other images for better performance without blocking -->
+    <link rel="prefetch" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS0RwXfXLmbYhwqqBNPxARooTBBuRX8EA2DPA&s">
+    <link rel="prefetch" href="https://storage.googleapis.com/msgsndr/UjxJODh2Df0UKjTnKpcP/media/68255d47c398f6cc6978ed74.png">
     
     <title>Circle Network</title>
     <meta name="description" content="Empowering real estate professionals to grow smarter with Circle's marketplace and academy." />

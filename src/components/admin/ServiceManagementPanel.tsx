@@ -255,6 +255,7 @@ export const ServiceManagementPanel = () => {
   const [services, setServices] = useState<Service[]>([]);
   const [filteredServices, setFilteredServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [isEditingDetails, setIsEditingDetails] = useState(false);
@@ -487,7 +488,7 @@ export const ServiceManagementPanel = () => {
   };
 
   const handleServiceUpdate = async () => {
-    if (!selectedService) return;
+    if (!selectedService || saving) return;
 
     // Basic required field validation to prevent silent failures
     if (!editForm.title || !editForm.category) {
@@ -499,6 +500,7 @@ export const ServiceManagementPanel = () => {
       return;
     }
 
+    setSaving(true);
     try {
       // Normalize numeric fields to match DB constraints
       let roi = editForm.estimated_roi ?? null;
@@ -556,7 +558,7 @@ export const ServiceManagementPanel = () => {
         updated_at: new Date().toISOString()
       };
 
-      console.log('Updating service with data:', updateData);
+      console.debug('Updating service with data:', updateData);
 
       const { error } = await (supabase
         .from('services')
@@ -628,6 +630,8 @@ export const ServiceManagementPanel = () => {
             : `${details}${code ? ` (code: ${code})` : ''}`,
         variant: 'destructive',
       });
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -1419,8 +1423,8 @@ export const ServiceManagementPanel = () => {
                     </div>
 
                     <div className="flex gap-2">
-                      <Button onClick={handleServiceUpdate} disabled={!isDetailsDirty}>
-                        Save Changes
+                      <Button onClick={handleServiceUpdate} disabled={!isDetailsDirty || saving}>
+                        {saving ? 'Saving...' : 'Save Changes'}
                       </Button>
                       <Button 
                         variant="outline" 
