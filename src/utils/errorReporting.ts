@@ -32,3 +32,8 @@ export async function reportClientError(payload: ClientErrorPayload) {
     console.debug('client error reporting skipped:', e);
   }
 }
+
+// Make error reporting available globally for cookie utilities
+if (typeof window !== 'undefined') {
+  (window as any).reportClientError = reportClientError;
+}

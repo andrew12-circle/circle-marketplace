@@ -11,6 +11,8 @@ import { globalErrorMonitor } from "./utils/globalErrorMonitor";
 import { ReloadReasonBanner } from "./components/common/ReloadReasonBanner";
 import { SecurityProvider } from "@/components/security/SecurityEnhancementSystem";
 import { ErrorBoundaryWithQA } from "@/components/common/ErrorBoundaryWithQA";
+import { removeLegacyAuthCookies, initCookieMonitoring, checkCookieSize, clearAllSupabaseAuthCookies } from "./lib/cookies";
+import { reportClientError } from "./utils/errorReporting";
 import "./index.css";
 import "./i18n";
 
@@ -97,6 +99,18 @@ cacheManager.checkAndClearCache();
 
 // Initialize global error monitoring
 globalErrorMonitor.initialize();
+
+// Initialize cookie management for auth optimization
+removeLegacyAuthCookies();
+initCookieMonitoring();
+
+// Make utilities available globally for debugging and recovery
+if (typeof window !== 'undefined') {
+  (window as any).checkCookieSize = checkCookieSize;
+  (window as any).removeLegacyAuthCookies = removeLegacyAuthCookies;
+  (window as any).clearAllSupabaseAuthCookies = clearAllSupabaseAuthCookies;
+  (window as any).reportClientError = reportClientError;
+}
 
 createRoot(document.getElementById("root")!).render(
   <ErrorBoundaryWithQA section="Application Root">

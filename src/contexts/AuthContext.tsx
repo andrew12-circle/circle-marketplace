@@ -1,6 +1,7 @@
 import { useState, useEffect, createContext, useContext } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { removeLegacyAuthCookies, initCookieMonitoring } from '@/lib/cookies';
 
 import { logger } from '@/utils/logger';
 import { useQueryClient } from '@tanstack/react-query';
@@ -117,7 +118,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   useEffect(() => {
-    // Set up auth state listener FIRST
+    // Initialize cookie cleanup and monitoring on first load
+    removeLegacyAuthCookies();
+    initCookieMonitoring();
+    
+    // Set up auth state listener FIRST (single instance)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         logger.log('Auth state change:', { event, hasUser: !!session?.user });

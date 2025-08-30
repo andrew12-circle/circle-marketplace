@@ -10,8 +10,43 @@ const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiO
 
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: {
-    storage: localStorage,
+    // Optimized storage configuration to minimize cookies
+    storage: {
+      getItem: (key: string) => {
+        try {
+          return localStorage.getItem(key);
+        } catch {
+          return null;
+        }
+      },
+      setItem: (key: string, value: string) => {
+        try {
+          // Keep localStorage entries small and clean
+          localStorage.setItem(key, value);
+        } catch {
+          console.warn('Failed to store auth session');
+        }
+      },
+      removeItem: (key: string) => {
+        try {
+          localStorage.removeItem(key);
+        } catch {
+          // Gracefully handle cleanup errors
+        }
+      }
+    },
     persistSession: true,
     autoRefreshToken: true,
+    detectSessionInUrl: true,
+    // Use minimal storage key
+    storageKey: 'sb-session',
+    // Minimal cookie configuration
+    cookieOptions: {
+      name: 'sb-session',
+      maxAge: 60 * 60 * 24 * 7, // 1 week
+      sameSite: 'lax',
+      secure: window.location?.protocol === 'https:',
+      path: '/'
+    }
   }
 });
