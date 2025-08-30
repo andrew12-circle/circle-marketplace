@@ -51,7 +51,7 @@ export const ReviewImportPanel = () => {
         .order('title');
 
       if (error) throw error;
-      setServices(data || []);
+      setServices((data as any) || []);
     } catch (error) {
       console.error('Error fetching services:', error);
     }
@@ -80,7 +80,7 @@ export const ReviewImportPanel = () => {
           source_url: form.source_url || null,
           admin_notes: form.admin_notes || null,
           user_id: '00000000-0000-0000-0000-000000000000' // Placeholder for non-user reviews
-        });
+        } as any);
 
       if (error) throw error;
 

@@ -38,7 +38,7 @@ const SecurityMonitoringPanel = () => {
         return;
       }
 
-      setSecurityEvents((data || []) as SecurityEvent[]);
+      setSecurityEvents(((data as any) || []) as SecurityEvent[]);
     } catch (error) {
       logger.error('Error:', error);
       toast.error('Failed to fetch security events');

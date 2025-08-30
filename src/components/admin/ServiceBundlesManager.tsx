@@ -62,7 +62,7 @@ export const ServiceBundlesManager = () => {
         .order("created_at", { ascending: false });
 
       if (response.error) throw response.error;
-      setBundles(response.data || []);
+      setBundles((response.data as any) || []);
     } catch (error) {
       console.error("Error loading bundles:", error);
       toast({

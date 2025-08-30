@@ -59,12 +59,12 @@ export const ServiceAIResearchEditor = ({ serviceId, serviceName }: ServiceAIRes
       const { data, error } = await supabase
         .from('service_ai_knowledge')
         .select('*')
-        .eq('service_id', serviceId)
+        .eq('service_id' as any, serviceId as any)
         .order('priority', { ascending: false })
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setEntries(data || []);
+      setEntries((data as any) || []);
     } catch (error) {
       console.error('Error fetching AI knowledge:', error);
       toast({
@@ -119,17 +119,17 @@ export const ServiceAIResearchEditor = ({ serviceId, serviceName }: ServiceAIRes
           .single();
 
         if (error) throw error;
-        setEntries(prev => [data, ...prev]);
+        setEntries(prev => [(data as any), ...prev]);
       } else {
         const { data, error } = await supabase
           .from('service_ai_knowledge')
-          .update(editForm)
-          .eq('id', isEditing)
+          .update(editForm as any)
+          .eq('id' as any, isEditing as any)
           .select()
           .single();
 
         if (error) throw error;
-        setEntries(prev => prev.map(e => e.id === isEditing ? data : e));
+        setEntries(prev => prev.map(e => e.id === isEditing ? (data as any) : e));
       }
 
       setIsEditing(null);
@@ -157,7 +157,7 @@ export const ServiceAIResearchEditor = ({ serviceId, serviceName }: ServiceAIRes
       const { error } = await supabase
         .from('service_ai_knowledge')
         .delete()
-        .eq('id', id);
+        .eq('id' as any, id as any);
 
       if (error) throw error;
       
@@ -191,8 +191,8 @@ export const ServiceAIResearchEditor = ({ serviceId, serviceName }: ServiceAIRes
     try {
       const { error } = await supabase
         .from('service_ai_knowledge')
-        .update({ priority: clampedPriority })
-        .eq('id', id);
+        .update({ priority: clampedPriority } as any)
+        .eq('id' as any, id as any);
 
       if (error) throw error;
       

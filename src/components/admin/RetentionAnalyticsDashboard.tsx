@@ -56,10 +56,10 @@ export const RetentionAnalyticsDashboard = () => {
       if (eventsError) throw eventsError;
 
       // Calculate metrics
-      const cancellations = eventsData?.filter(e => e.event_type === 'subscription_canceled') || [];
+      const cancellations = (eventsData as any)?.filter((e: any) => e.event_type === 'subscription_canceled') || [];
       const reasons: Record<string, number> = {};
       
-      cancellations.forEach(event => {
+      cancellations.forEach((event: any) => {
         const eventData = event.event_data as any;
         const reason = eventData?.cancellation_reason || 'not_specified';
         reasons[reason] = (reasons[reason] || 0) + 1;
@@ -70,11 +70,11 @@ export const RetentionAnalyticsDashboard = () => {
         cancellationReasons: reasons,
         monthlyChurnRate: (cancellations.length / 30) * 100, // Simplified calculation
         avgSubscriptionLength: 6.2, // Mock data - would need more complex calculation
-        reactivations: eventsData?.filter(e => e.event_type === 'subscription_resumed').length || 0
+        reactivations: (eventsData as any)?.filter((e: any) => e.event_type === 'subscription_resumed').length || 0
       };
 
       setMetrics(calculatedMetrics);
-      setEvents(eventsData || []);
+      setEvents((eventsData as any) || []);
     } catch (error) {
       console.error('Error fetching retention data:', error);
       toast({

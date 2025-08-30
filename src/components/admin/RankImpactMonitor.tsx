@@ -36,15 +36,15 @@ export function RankImpactMonitor() {
         if (sErr) throw sErr;
 
         const results: ServiceRow[] = [];
-        for (const s of services || []) {
+        for (const s of (services as any) || []) {
           const { data: metrics, error: mErr } = await supabase
-            .rpc('get_service_tracking_metrics', { p_service_id: s.id, p_time_period: '30d' });
+            .rpc('get_service_tracking_metrics', { p_service_id: (s as any).id, p_time_period: '30d' });
           if (mErr) throw mErr;
           const m = (metrics ?? {}) as any;
           results.push({
-            id: s.id,
-            title: s.title,
-            sort_order: s.sort_order,
+            id: (s as any).id,
+            title: (s as any).title,
+            sort_order: (s as any).sort_order,
             metrics: {
               total_views: Number(m?.total_views ?? 0),
               total_clicks: Number(m?.total_clicks ?? 0),

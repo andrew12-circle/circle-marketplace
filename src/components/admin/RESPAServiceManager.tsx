@@ -72,20 +72,20 @@ const RESPAServiceManager = () => {
       if (servicesError) throw servicesError;
 
       // Then get vendor profiles for these services
-      const vendorIds = [...new Set(servicesData?.map(s => s.vendor_id).filter(Boolean))];
+      const vendorIds = [...new Set((servicesData as any)?.map((s: any) => s.vendor_id).filter(Boolean))];
       const { data: vendorsData, error: vendorsError } = await supabase
         .from('profiles')
         .select('user_id, business_name, display_name, specialties')
-        .in('user_id', vendorIds);
+        .in('user_id' as any, vendorIds as any);
 
       if (vendorsError) throw vendorsError;
 
       // Merge the data
-      const vendorMap = new Map(vendorsData?.map(v => [v.user_id, v]) || []);
-      const servicesWithVendors = servicesData?.map(service => ({
-        ...service,
-        supporting_documents: (service.supporting_documents as any) || [],
-        vendor: service.vendor_id ? vendorMap.get(service.vendor_id) : undefined
+      const vendorMap = new Map((vendorsData as any)?.map((v: any) => [v.user_id, v]) || []);
+      const servicesWithVendors = (servicesData as any)?.map((service: any) => ({
+        ...(service as any),
+        supporting_documents: (service as any).supporting_documents || [],
+        vendor: (service as any).vendor_id ? vendorMap.get((service as any).vendor_id) : undefined
       })) || [];
 
       setServices(servicesWithVendors as Service[]);
@@ -141,7 +141,7 @@ const RESPAServiceManager = () => {
       const { error } = await supabase
         .from('services')
         .update(dbUpdates)
-        .eq('id' as any, serviceId);
+        .eq('id' as any, serviceId as any);
 
       if (error) throw error;
 
@@ -239,8 +239,8 @@ const RESPAServiceManager = () => {
             is_respa_regulated: update.is_respa_regulated,
             respa_risk_level: update.respa_risk_level,
             respa_split_limit: update.respa_split_limit
-          })
-          .eq('id', update.id);
+          } as any)
+          .eq('id' as any, update.id as any);
 
         if (error) throw error;
       }
