@@ -89,7 +89,7 @@ export const VendorManagementPanel = () => {
         .order('name');
 
       if (error) throw error;
-      setVendors(data || []);
+      setVendors(data as any || []);
     } catch (error) {
       console.error('Error fetching vendors:', error);
       const errorMessage = error instanceof Error ? error.message : 'Failed to fetch vendors';
@@ -163,7 +163,7 @@ export const VendorManagementPanel = () => {
       const { error } = await supabase
         .from('vendors')
         .update({ is_verified: !currentStatus })
-        .eq('id', vendorId);
+        .eq('id' as any, vendorId as any);
 
       if (error) throw error;
 

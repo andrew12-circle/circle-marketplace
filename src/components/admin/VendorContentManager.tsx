@@ -96,11 +96,11 @@ export const VendorContentManager = ({ vendorId, vendorName }: VendorContentMana
       const { data, error } = await supabase
         .from('vendor_content')
         .select('*')
-        .eq('vendor_id', vendorId)
+        .eq('vendor_id' as any, vendorId as any)
         .order('display_order', { ascending: true });
 
       if (error) throw error;
-      setContent((data || []) as VendorContent[]);
+      setContent((data || []) as any);
     } catch (error) {
       console.error('Error loading content:', error);
       toast.error('Failed to load vendor content');
@@ -114,7 +114,7 @@ export const VendorContentManager = ({ vendorId, vendorName }: VendorContentMana
       const { data, error } = await supabase
         .from('services')
         .select('id, title, vendor_id')
-        .eq('vendor_id', vendorId)
+        .eq('vendor_id' as any, vendorId as any)
         .order('title');
 
       if (error) throw error;
@@ -193,17 +193,17 @@ export const VendorContentManager = ({ vendorId, vendorName }: VendorContentMana
       };
 
       if (editingContent) {
-        const { error } = await supabase
+        const { error } = await (supabase
           .from('vendor_content')
-          .update(contentData)
-          .eq('id', editingContent.id);
+          .update as any)(contentData)
+          .eq('id' as any, editingContent.id as any);
         
         if (error) throw error;
         toast.success('Content updated successfully');
       } else {
-        const { error } = await supabase
+        const { error } = await (supabase
           .from('vendor_content')
-          .insert(contentData);
+          .insert as any)(contentData);
         
         if (error) throw error;
         toast.success('Content added successfully');
@@ -233,7 +233,7 @@ export const VendorContentManager = ({ vendorId, vendorName }: VendorContentMana
       const { error } = await supabase
         .from('vendor_content')
         .delete()
-        .eq('id', id);
+        .eq('id' as any, id as any);
 
       if (error) throw error;
       toast.success('Content deleted successfully');
@@ -246,10 +246,10 @@ export const VendorContentManager = ({ vendorId, vendorName }: VendorContentMana
 
   const toggleActive = async (id: string, isActive: boolean) => {
     try {
-      const { error } = await supabase
+      const { error } = await (supabase
         .from('vendor_content')
-        .update({ is_active: !isActive })
-        .eq('id', id);
+        .update as any)({ is_active: !isActive })
+        .eq('id' as any, id as any);
 
       if (error) throw error;
       toast.success(`Content ${!isActive ? 'activated' : 'deactivated'}`);
@@ -271,15 +271,15 @@ export const VendorContentManager = ({ vendorId, vendorName }: VendorContentMana
       const item1 = content[currentIndex];
       const item2 = content[newIndex];
 
-      await supabase
+      await (supabase
         .from('vendor_content')
-        .update({ display_order: item2.display_order })
-        .eq('id', item1.id);
+        .update as any)({ display_order: item2.display_order })
+        .eq('id' as any, item1.id as any);
 
-      await supabase
+      await (supabase
         .from('vendor_content')
-        .update({ display_order: item1.display_order })
-        .eq('id', item2.id);
+        .update as any)({ display_order: item1.display_order })
+        .eq('id' as any, item2.id as any);
 
       toast.success('Display order updated');
       loadContent();

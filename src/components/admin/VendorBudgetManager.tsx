@@ -36,7 +36,7 @@ export const VendorBudgetManager = () => {
         .order('name');
 
       if (error) throw error;
-      setVendors(data || []);
+      setVendors(data as any || []);
     } catch (error) {
       console.error('Error fetching vendors:', error);
       toast({
@@ -53,13 +53,13 @@ export const VendorBudgetManager = () => {
     setUpdating(prev => ({ ...prev, [vendorId]: true }));
     
     try {
-      const { error } = await supabase
+      const { error } = await (supabase
         .from('vendors')
-        .update({
+        .update as any)({
           ad_budget_min: minBudget ? minBudget * 100 : null, // Convert to cents
           ad_budget_max: maxBudget ? maxBudget * 100 : null, // Convert to cents
         })
-        .eq('id', vendorId);
+        .eq('id' as any, vendorId as any);
 
       if (error) throw error;
 

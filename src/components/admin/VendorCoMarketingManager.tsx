@@ -47,11 +47,11 @@ export const VendorCoMarketingManager = () => {
           seed_expires_at,
           seed_notes
         `)
-        .eq('is_active', true)
+        .eq('is_active' as any, true as any)
         .order('name');
 
       if (error) throw error;
-      setVendors(vendorData || []);
+      setVendors(vendorData as any || []);
     } catch (error) {
       console.error('Error loading vendors:', error);
       toast({
@@ -68,20 +68,20 @@ export const VendorCoMarketingManager = () => {
     setUpdatingVendor(vendorId);
     
     try {
-      const { error } = await supabase
+      const { error } = await (supabase
         .from('vendors')
-        .update({ 
+        .update as any)({ 
           co_marketing_agents: newCount,
           updated_at: new Date().toISOString()
         })
-        .eq('id', vendorId);
+        .eq('id' as any, vendorId as any);
 
       if (error) throw error;
 
       // Log the manual update
-      await supabase
+      await (supabase
         .from('audit_log')
-        .insert({
+        .insert as any)({
           table_name: 'vendors',
           operation: 'UPDATE',
           user_id: (await supabase.auth.getUser()).data.user?.id,
@@ -129,14 +129,14 @@ export const VendorCoMarketingManager = () => {
       const computedCoMarketingAgents = (data as any)?.computed_co_marketing_agents || 0;
       const campaignsFunded = (data as any)?.campaigns_funded || 0;
 
-      await supabase
+      await (supabase
         .from('vendors')
-        .update({ 
+        .update as any)({ 
           computed_co_marketing_agents: computedCoMarketingAgents,
           campaigns_funded: campaignsFunded,
           updated_at: new Date().toISOString()
         })
-        .eq('id', vendorId);
+        .eq('id' as any, vendorId as any);
 
       // Reload vendors to get updated effective count
       await loadVendors();
@@ -161,16 +161,16 @@ export const VendorCoMarketingManager = () => {
     setUpdatingVendor(vendorId);
     
     try {
-      const { error } = await supabase
+      const { error } = await (supabase
         .from('vendors')
-        .update({ 
+        .update as any)({ 
           seeded_co_marketing_agents: seedData.seeded_co_marketing_agents,
           seed_active: seedData.seed_active,
           seed_expires_at: seedData.seed_expires_at,
           seed_notes: seedData.seed_notes,
           updated_at: new Date().toISOString()
         })
-        .eq('id', vendorId);
+        .eq('id' as any, vendorId as any);
 
       if (error) throw error;
 
@@ -197,16 +197,16 @@ export const VendorCoMarketingManager = () => {
     setUpdatingVendor(vendorId);
     
     try {
-      const { error } = await supabase
+      const { error } = await (supabase
         .from('vendors')
-        .update({ 
+        .update as any)({
           seeded_co_marketing_agents: 0,
           seed_active: false,
           seed_expires_at: null,
           seed_notes: null,
           updated_at: new Date().toISOString()
         })
-        .eq('id', vendorId);
+        .eq('id' as any, vendorId as any);
 
       if (error) throw error;
 

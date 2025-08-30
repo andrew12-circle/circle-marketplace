@@ -44,7 +44,7 @@ export const VendorApprovalsManager = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setVendors(data || []);
+      setVendors(data as any || []);
     } catch (error) {
       console.error('Error fetching vendors:', error);
       toast({
@@ -61,9 +61,9 @@ export const VendorApprovalsManager = () => {
     setProcessing(prev => new Set(prev).add(vendorId));
     
     try {
-      const { error } = await supabase
+      const { error } = await (supabase
         .from('vendors')
-        .update({
+        .update as any)({
           approval_status: 'approved',
           is_active: true,
           is_verified: true,
@@ -71,7 +71,7 @@ export const VendorApprovalsManager = () => {
           approved_by: user?.id,
           verification_notes: 'Manually approved by admin'
         })
-        .eq('id', vendorId);
+        .eq('id' as any, vendorId as any);
 
       if (error) throw error;
 
@@ -101,15 +101,15 @@ export const VendorApprovalsManager = () => {
     setProcessing(prev => new Set(prev).add(vendorId));
     
     try {
-      const { error } = await supabase
+      const { error } = await (supabase
         .from('vendors')
-        .update({
+        .update as any)({
           approval_status: 'rejected',
           is_active: false,
           is_verified: false,
           verification_notes: 'Rejected by admin'
         })
-        .eq('id', vendorId);
+        .eq('id' as any, vendorId as any);
 
       if (error) throw error;
 
