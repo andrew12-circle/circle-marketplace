@@ -35,12 +35,12 @@ export const ServiceConsultationEmails = ({ serviceId, serviceName }: ServiceCon
       const { data, error } = await supabase
         .from('services')
         .select('consultation_emails')
-        .eq('id', serviceId)
+        .eq('id' as any, serviceId)
         .single();
 
       if (error) throw error;
 
-      const consultationEmails = data?.consultation_emails || [];
+      const consultationEmails = (data as any)?.consultation_emails || [];
       // Always show at least one empty field
       setEmails(consultationEmails.length > 0 ? consultationEmails : ['']);
     } catch (error) {
@@ -106,10 +106,10 @@ export const ServiceConsultationEmails = ({ serviceId, serviceName }: ServiceCon
 
       console.log('About to update with emails:', uniqueEmails);
 
-      const { data, error } = await supabase
+      const { data, error } = await (supabase
         .from('services')
-        .update({ consultation_emails: uniqueEmails })
-        .eq('id', serviceId)
+        .update as any)({ consultation_emails: uniqueEmails })
+        .eq('id' as any, serviceId)
         .select();
 
       console.log('Update response:', { data, error });

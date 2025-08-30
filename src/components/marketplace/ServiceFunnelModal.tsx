@@ -1033,7 +1033,19 @@ export const ServiceFunnelModal = ({
                       <Button 
                         onClick={() => {
                           if (!user) {
-                            toast.error("Please sign in or create an account to add items to cart");
+                            // Store the pending item in localStorage
+                            const pendingItem = {
+                              type: 'service',
+                              serviceId: service.id,
+                              serviceName: service.title,
+                              packageName: selectedPkg?.name || 'Default Package',
+                              price: selectedPkg?.price || 0,
+                              timestamp: Date.now()
+                            };
+                            localStorage.setItem('pendingCartItem', JSON.stringify(pendingItem));
+                            
+                            // Redirect to auth page
+                            window.location.href = '/auth';
                             return;
                           }
                           setIsPricingChoiceOpen(true);
