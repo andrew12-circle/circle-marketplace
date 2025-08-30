@@ -334,11 +334,13 @@ export const ServiceCard = ({
             />
           </Button>
 
-          {/* Image - Fixed height */}
+          {/* Image - Fixed height with explicit dimensions for CLS prevention */}
           <div className="relative h-48 overflow-hidden bg-white flex-shrink-0 p-4">
             <img
               src={service.image_url || "/lovable-uploads/placeholder.svg"}
               alt={service.title}
+              width="200"
+              height="150"
               className="w-full h-full object-contain object-center transition-transform duration-300 group-hover:scale-105"
             />
           </div>

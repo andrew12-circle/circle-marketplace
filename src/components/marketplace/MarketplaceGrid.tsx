@@ -28,6 +28,7 @@ import { EnhancedSearch, SearchFilters } from "./EnhancedSearch";
 import { StickySearchContainer } from "./StickySearchContainer";
 import { VendorCallToAction } from "./VendorCallToAction";
 import { useMarketplaceData, useSavedServices, useInvalidateMarketplace, type Service, type Vendor } from "@/hooks/useMarketplaceData";
+import { toArray } from "@/utils/arrays";
 import { useMarketplaceFilters } from "@/hooks/useMarketplaceFilters";
 import { useBulkServiceRatings } from "@/hooks/useBulkServiceRatings";
 import { logger } from "@/utils/logger";
@@ -161,15 +162,15 @@ export const MarketplaceGrid = () => {
     setShowRecovery(false);
   }, [invalidateAll, queryClient, resetFailureState]);
 
-  // Memoize extracted data to prevent unnecessary re-renders
-  const services = useMemo(() => (marketplaceData as {
+  // Memoize extracted data to prevent unnecessary re-renders with safe array conversion
+  const services = useMemo(() => toArray((marketplaceData as {
     services: Service[];
     vendors: Vendor[];
-  })?.services || [], [marketplaceData]);
-  const vendors = useMemo(() => (marketplaceData as {
+  })?.services), [marketplaceData]);
+  const vendors = useMemo(() => toArray((marketplaceData as {
     services: Service[];
     vendors: Vendor[];
-  })?.vendors || [], [marketplaceData]);
+  })?.vendors), [marketplaceData]);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>("services");
