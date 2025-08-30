@@ -490,6 +490,29 @@ export const ServiceManagementPanel = () => {
   const handleServiceUpdate = async () => {
     if (!selectedService || saving) return;
 
+    // Debug admin status first
+    try {
+      const { data: adminStatus, error: adminError } = await supabase.rpc('get_user_admin_status');
+      console.log('Admin status check:', { adminStatus, adminError });
+      
+      if (!adminStatus) {
+        toast({
+          title: 'Permission Error',
+          description: 'You need admin privileges to update services.',
+          variant: 'destructive',
+        });
+        return;
+      }
+    } catch (adminCheckError) {
+      console.error('Admin status check failed:', adminCheckError);
+      toast({
+        title: 'Permission Check Failed',
+        description: 'Could not verify admin status. Please try again.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     // Basic required field validation to prevent silent failures
     if (!editForm.title || !editForm.category) {
       toast({
@@ -560,13 +583,19 @@ export const ServiceManagementPanel = () => {
 
       console.debug('Updating service with data:', updateData);
 
-      const { error } = await (supabase
+      const { error } = await supabase
         .from('services')
-        .update as any)(updateData)
-        .eq('id' as any, selectedService.id);
+        .update(updateData as any)
+        .eq('id', selectedService.id as any);
 
       if (error) {
-        console.error('Update error:', error);
+        console.error('Update error details:', {
+          error,
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint
+        });
         throw error;
       }
 
@@ -924,6 +953,32 @@ export const ServiceManagementPanel = () => {
           <CardTitle className="flex items-center gap-2">
             <Package className="h-5 w-5" />
             Service Management - Edit Service Cards & Funnels
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={async () => {
+                try {
+                  const { data: adminStatus, error } = await supabase.rpc('get_user_admin_status');
+                  const { data: session } = await supabase.auth.getSession();
+                  console.log('Debug - Admin Status:', adminStatus);
+                  console.log('Debug - Session:', session);
+                  console.log('Debug - User ID:', session?.session?.user?.id);
+                  toast({
+                    title: 'Debug Info',
+                    description: `Admin: ${adminStatus}, User: ${session?.session?.user?.id ? 'Logged in' : 'Not logged in'}`,
+                  });
+                } catch (err) {
+                  console.error('Debug error:', err);
+                  toast({
+                    title: 'Debug Error',
+                    description: String(err),
+                    variant: 'destructive',
+                  });
+                }
+              }}
+            >
+              Test Admin Status
+            </Button>
           </CardTitle>
           <p className="text-sm text-muted-foreground">
             Select a service to edit its details, pricing, and funnel pages
