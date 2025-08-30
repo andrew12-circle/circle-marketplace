@@ -81,10 +81,10 @@ export const ServiceDisclaimerSection = ({ serviceId, serviceName }: ServiceDisc
 
   const previewServiceDisclaimer = async (disclaimerId: string) => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase
         .from('respa_disclaimers')
-        .select('*')
-        .eq('id' as any, disclaimerId)
+        .select as any)('*')
+        .eq('id' as any, disclaimerId as any)
         .single();
 
       if (error) throw error;

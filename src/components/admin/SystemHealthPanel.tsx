@@ -77,26 +77,26 @@ export const SystemHealthPanel = () => {
           <div className="grid grid-cols-2 gap-2 text-sm">
             <div className="flex justify-between">
               <span>Marketplace:</span>
-              <Badge variant={config?.marketplace_enabled ? "default" : "secondary"}>
-                {config?.marketplace_enabled ? "Enabled" : "Disabled"}
+            <Badge variant={(config as any)?.marketplace_enabled ? "default" : "secondary"}>
+              {(config as any)?.marketplace_enabled ? "Enabled" : "Disabled"}
               </Badge>
             </div>
             <div className="flex justify-between">
               <span>Auto-heal:</span>
-              <Badge variant={config?.auto_heal_enabled ? "default" : "secondary"}>
-                {config?.auto_heal_enabled ? "Enabled" : "Disabled"}
+            <Badge variant={(config as any)?.auto_heal_enabled ? "default" : "secondary"}>
+              {(config as any)?.auto_heal_enabled ? "Enabled" : "Disabled"}
               </Badge>
             </div>
             <div className="flex justify-between">
               <span>Top Deals:</span>
-              <Badge variant={config?.top_deals_enabled ? "default" : "secondary"}>
-                {config?.top_deals_enabled ? "Enabled" : "Disabled"}
+            <Badge variant={(config as any)?.top_deals_enabled ? "default" : "secondary"}>
+              {(config as any)?.top_deals_enabled ? "Enabled" : "Disabled"}
               </Badge>
             </div>
             <div className="flex justify-between">
               <span>Security Global:</span>
-              <Badge variant={config?.security_monitoring_global ? "destructive" : "default"}>
-                {config?.security_monitoring_global ? "Global" : "Scoped"}
+            <Badge variant={(config as any)?.security_monitoring_global ? "destructive" : "default"}>
+              {(config as any)?.security_monitoring_global ? "Global" : "Scoped"}
               </Badge>
             </div>
           </div>

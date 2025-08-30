@@ -75,72 +75,72 @@ export const VendorActivityAnalytics = () => {
       if (vendorError) throw vendorError;
 
       // Get activity counts for each vendor
-      const analyticsPromises = vendorData.map(async (vendor) => {
+      const analyticsPromises = (vendorData as any[] || []).map(async (vendor: any) => {
         // Get total activities for this vendor
         const { count: totalActivitiesCount } = await supabase
           .from('vendor_agent_activities')
           .select('*', { count: 'exact', head: true })
-          .eq('vendor_id', vendor.id);
+          .eq('vendor_id' as any, vendor.id);
 
         // Get recent activities (last 30 days)
         const { count: recentActivitiesCount } = await supabase
           .from('vendor_agent_activities')
           .select('*', { count: 'exact', head: true })
-          .eq('vendor_id', vendor.id)
+          .eq('vendor_id' as any, vendor.id)
           .gte('created_at', new Date(Date.now() - timeframe * 24 * 60 * 60 * 1000).toISOString());
 
         // Get activity breakdown
         const { count: consultationBookingsCount } = await supabase
           .from('vendor_agent_activities')
           .select('*', { count: 'exact', head: true })
-          .eq('vendor_id', vendor.id)
-          .eq('activity_type', 'consultation_booking');
+          .eq('vendor_id' as any, vendor.id)
+          .eq('activity_type' as any, 'consultation_booking' as any);
 
         const { count: serviceSavesCount } = await supabase
           .from('vendor_agent_activities')
           .select('*', { count: 'exact', head: true })
-          .eq('vendor_id', vendor.id)
-          .eq('activity_type', 'service_save');
+          .eq('vendor_id' as any, vendor.id)
+          .eq('activity_type' as any, 'service_save' as any);
 
         const { count: funnelViewsCount } = await supabase
           .from('vendor_agent_activities')
           .select('*', { count: 'exact', head: true })
-          .eq('vendor_id', vendor.id)
-          .eq('activity_type', 'funnel_view');
+          .eq('vendor_id' as any, vendor.id)
+          .eq('activity_type' as any, 'funnel_view' as any);
 
         const { count: contactRequestsCount } = await supabase
           .from('vendor_agent_activities')
           .select('*', { count: 'exact', head: true })
-          .eq('vendor_id', vendor.id)
-          .eq('activity_type', 'contact_request');
+          .eq('vendor_id' as any, vendor.id)
+          .eq('activity_type' as any, 'contact_request' as any);
 
         const { count: coPayRequestsCount } = await supabase
           .from('vendor_agent_activities')
           .select('*', { count: 'exact', head: true })
-          .eq('vendor_id', vendor.id)
-          .eq('activity_type', 'co_pay_request');
+          .eq('vendor_id' as any, vendor.id)
+          .eq('activity_type' as any, 'co_pay_request' as any);
 
         // Get unique agents for different timeframes
         const { data: activeAgents30d } = await supabase
           .from('vendor_agent_activities')
           .select('agent_id')
-          .eq('vendor_id', vendor.id)
+          .eq('vendor_id' as any, vendor.id)
           .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
 
         const { data: activeAgents90d } = await supabase
           .from('vendor_agent_activities')
           .select('agent_id')
-          .eq('vendor_id', vendor.id)
+          .eq('vendor_id' as any, vendor.id)
           .gte('created_at', new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString());
 
-        const uniqueAgents30d = new Set(activeAgents30d?.map(a => a.agent_id) || []).size;
-        const uniqueAgents90d = new Set(activeAgents90d?.map(a => a.agent_id) || []).size;
+        const uniqueAgents30d = new Set((activeAgents30d as any[])?.map((a: any) => a.agent_id) || []).size;
+        const uniqueAgents90d = new Set((activeAgents90d as any[])?.map((a: any) => a.agent_id) || []).size;
 
         // Calculate growth rate (30d vs previous 30d)
         const { count: previousPeriodActivitiesCount } = await supabase
           .from('vendor_agent_activities')
           .select('*', { count: 'exact', head: true })
-          .eq('vendor_id', vendor.id)
+          .eq('vendor_id' as any, vendor.id)
           .gte('created_at', new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString())
           .lt('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
 
@@ -199,10 +199,10 @@ export const VendorActivityAnalytics = () => {
       if (error) throw error;
       
       // Transform the data to match our interface
-      const activitiesWithProfiles = data?.map(activity => ({
-        ...activity,
+      const activitiesWithProfiles = (data as any[])?.map((activity: any) => ({
+        ...(activity as any),
         profiles: { display_name: 'Agent' }, // Simplified for now
-        vendors: activity.vendors
+        vendors: (activity as any).vendors
       })) || [];
       
       setRecentActivities(activitiesWithProfiles);
