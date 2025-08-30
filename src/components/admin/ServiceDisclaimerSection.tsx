@@ -37,14 +37,14 @@ export const ServiceDisclaimerSection = ({ serviceId, serviceName }: ServiceDisc
 
   const fetchCurrentDisclaimer = async () => {
     try {
-      const { data, error } = await supabase
-        .from('services')
-        .select('disclaimer_id')
-        .eq('id', serviceId)
-        .single();
+    const { data, error } = await supabase
+      .from('services')
+      .select('disclaimer_id')
+      .eq('id' as any, serviceId)
+      .single();
 
-      if (error) throw error;
-      setCurrentDisclaimerId(data?.disclaimer_id || null);
+    if (error) throw error;
+    setCurrentDisclaimerId((data as any)?.disclaimer_id || null);
     } catch (error) {
       console.error('Error fetching current disclaimer:', error);
     }
@@ -53,10 +53,10 @@ export const ServiceDisclaimerSection = ({ serviceId, serviceName }: ServiceDisc
   const updateServiceDisclaimer = async (disclaimerId: string | null) => {
     setIsUpdating(true);
     try {
-      const { error } = await supabase
-        .from('services')
-        .update({ disclaimer_id: disclaimerId })
-        .eq('id', serviceId);
+    const { error } = await (supabase
+      .from('services')
+      .update as any)({ disclaimer_id: disclaimerId })
+      .eq('id' as any, serviceId);
 
       if (error) throw error;
 
@@ -84,17 +84,18 @@ export const ServiceDisclaimerSection = ({ serviceId, serviceName }: ServiceDisc
       const { data, error } = await supabase
         .from('respa_disclaimers')
         .select('*')
-        .eq('id', disclaimerId)
+        .eq('id' as any, disclaimerId)
         .single();
 
       if (error) throw error;
 
+      const disclaimerData = data as any;
       setPreviewDisclaimer({
-        id: data.id,
-        title: data.title,
-        content: data.content,
-        button_text: data.button_text,
-        button_url: data.button_url
+        id: disclaimerData.id,
+        title: disclaimerData.title,
+        content: disclaimerData.content,
+        button_text: disclaimerData.button_text,
+        button_url: disclaimerData.button_url
       });
       setIsPreviewOpen(true);
     } catch (error) {

@@ -256,9 +256,13 @@ export const DealsTable = ({ deals, onDealUpdate }: DealsTableProps) => {
                     </div>
                   ) : (
                     <Button
+                      type="button"
                       size="sm"
                       variant="outline"
-                      onClick={() => startEdit(deal)}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        startEdit(deal);
+                      }}
                       disabled={deal.status === 'closed'}
                     >
                       Edit

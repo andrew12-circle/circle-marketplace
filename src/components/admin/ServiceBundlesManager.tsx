@@ -154,9 +154,9 @@ export const ServiceBundlesManager = () => {
     }
 
     try {
-      const { error } = await supabase
+      const { error } = await (supabase
         .from("ai_service_bundles")
-        .insert({
+        .insert as any)({
           bundle_name: newBundle.bundle_name,
           bundle_type: newBundle.bundle_type,
           description: newBundle.description,
@@ -198,10 +198,10 @@ export const ServiceBundlesManager = () => {
 
   const toggleBundleActive = async (bundleId: string, isActive: boolean) => {
     try {
-      const { error } = await supabase
+      const { error } = await (supabase
         .from("ai_service_bundles")
-        .update({ is_active: !isActive })
-        .eq("id", bundleId);
+        .update as any)({ is_active: !isActive })
+        .eq("id" as any, bundleId);
 
       if (error) throw error;
       

@@ -427,7 +427,7 @@ export const ServiceManagementPanel = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setServices(data || []);
+      setServices((data as any) || []);
     } catch (error) {
       console.error('Error fetching services:', error);
       const errorMessage = error instanceof Error ? error.message : 'Failed to fetch services';
@@ -558,10 +558,10 @@ export const ServiceManagementPanel = () => {
 
       console.log('Updating service with data:', updateData);
 
-      const { error } = await supabase
+      const { error } = await (supabase
         .from('services')
-        .update(updateData)
-        .eq('id', selectedService.id);
+        .update as any)(updateData)
+        .eq('id' as any, selectedService.id);
 
       if (error) {
         console.error('Update error:', error);
@@ -576,7 +576,7 @@ export const ServiceManagementPanel = () => {
           vendors (name, logo_url),
           service_providers (name, logo_url)
         `)
-        .eq('id', selectedService.id)
+        .eq('id' as any, selectedService.id)
         .single();
 
       if (fetchError) {
@@ -585,9 +585,9 @@ export const ServiceManagementPanel = () => {
       }
 
       // Update local state with fresh data
-      setSelectedService(updatedServiceData);
-      setServices(services.map(s => s.id === selectedService.id ? updatedServiceData : s));
-      setEditForm(updatedServiceData);
+      setSelectedService(updatedServiceData as any);
+      setServices(services.map(s => s.id === selectedService.id ? updatedServiceData as any : s));
+      setEditForm(updatedServiceData as any);
       
       // Optimistically update marketplace cache so front-end reflects changes immediately
       queryClient.setQueryData(QUERY_KEYS.marketplaceCombined, (prev: any) => {
@@ -597,7 +597,7 @@ export const ServiceManagementPanel = () => {
           services: Array.isArray(prev.services)
             ? prev.services.map((s: any) =>
                 s.id === selectedService.id
-                  ? { ...s, ...updatedServiceData }
+                  ? { ...s, ...(updatedServiceData as any) }
                   : s
               )
             : prev.services,
@@ -637,10 +637,10 @@ export const ServiceManagementPanel = () => {
     }
     
     try {
-      const { error } = await supabase
+      const { error } = await (supabase
         .from('services')
-        .update({ is_verified: !currentStatus })
-        .eq('id', serviceId);
+        .update as any)({ is_verified: !currentStatus })
+        .eq('id' as any, serviceId);
 
       if (error) throw error;
 
@@ -677,10 +677,10 @@ export const ServiceManagementPanel = () => {
     }
     
     try {
-      const { error } = await supabase
+      const { error } = await (supabase
         .from('services')
-        .update({ is_active: !currentStatus })
-        .eq('id', serviceId);
+        .update as any)({ is_active: !currentStatus })
+        .eq('id' as any, serviceId);
 
       if (error) throw error;
 
@@ -717,10 +717,10 @@ export const ServiceManagementPanel = () => {
     }
     
     try {
-      const { error } = await supabase
+      const { error } = await (supabase
         .from('services')
-        .update({ is_affiliate: !currentStatus })
-        .eq('id', serviceId);
+        .update as any)({ is_affiliate: !currentStatus })
+        .eq('id' as any, serviceId);
 
       if (error) throw error;
 
@@ -757,10 +757,10 @@ export const ServiceManagementPanel = () => {
     }
     
     try {
-      const { error } = await supabase
+      const { error } = await (supabase
         .from('services')
-        .update({ is_booking_link: !currentStatus })
-        .eq('id', serviceId);
+        .update as any)({ is_booking_link: !currentStatus })
+        .eq('id' as any, serviceId);
 
       if (error) throw error;
 
@@ -796,13 +796,13 @@ export const ServiceManagementPanel = () => {
 
     try {
       // Save the funnel content to the database
-      const { error: updateError } = await supabase
+      const { error: updateError } = await (supabase
         .from('services')
-        .update({ 
+        .update as any)({ 
           funnel_content: JSON.parse(JSON.stringify(funnelContent)),
           pricing_tiers: JSON.parse(JSON.stringify(pricingTiers))
         })
-        .eq('id', selectedService.id);
+        .eq('id' as any, selectedService.id);
 
       if (updateError) throw updateError;
 
@@ -810,15 +810,16 @@ export const ServiceManagementPanel = () => {
       const { data: verifyRow, error: fetchError } = await supabase
         .from('services')
         .select('id, funnel_content, pricing_tiers, updated_at')
-        .eq('id', selectedService.id)
+        .eq('id' as any, selectedService.id)
         .maybeSingle();
 
       if (fetchError) throw fetchError;
 
-      const savedAt = verifyRow?.updated_at || new Date().toISOString();
-      const verified = !!verifyRow &&
-        JSON.stringify(verifyRow.funnel_content ?? null) === JSON.stringify(funnelContent) &&
-        JSON.stringify(verifyRow.pricing_tiers ?? null) === JSON.stringify(pricingTiers);
+      const rowData = verifyRow as any;
+      const savedAt = rowData?.updated_at || new Date().toISOString();
+      const verified = !!rowData &&
+        JSON.stringify(rowData.funnel_content ?? null) === JSON.stringify(funnelContent) &&
+        JSON.stringify(rowData.pricing_tiers ?? null) === JSON.stringify(pricingTiers);
 
       // Update local state
       const updatedService = { 

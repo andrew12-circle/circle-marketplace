@@ -72,7 +72,7 @@ export const ServiceReviewsManager = () => {
         .order('title');
 
       if (error) throw error;
-      setServices(data || []);
+      setServices((data as any) || []);
     } catch (error) {
       console.error('Error fetching services:', error);
     }
@@ -137,7 +137,7 @@ export const ServiceReviewsManager = () => {
       const { error } = await supabase
         .from('service_reviews')
         .delete()
-        .eq('id', reviewId);
+        .eq('id' as any, reviewId);
 
       if (error) throw error;
 

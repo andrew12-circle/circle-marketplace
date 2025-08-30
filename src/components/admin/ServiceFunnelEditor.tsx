@@ -226,14 +226,14 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
       });
       
       // Create the database update promise
-      const updatePromise = supabase
+      const updatePromise = (supabase
         .from('services')
-        .update({
+        .update as any)({
           funnel_content: sanitizedFunnel,
           pricing_tiers: sanitizedPricing,
           updated_at: new Date().toISOString()
         })
-        .eq('id', service.id);
+        .eq('id' as any, service.id);
 
       console.log("[Admin ServiceFunnelEditor] Waiting for response with timeout...");
       
