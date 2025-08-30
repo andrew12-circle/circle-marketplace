@@ -14,21 +14,23 @@ export const useAdminStatus = () => {
     queryFn: async () => {
       if (!user) return false;
       
-      console.log('🔐 Admin status check starting for user:', user.id);
-      
       // Check allowlist first - immediate admin access for critical users
       if (user.email && ADMIN_ALLOWLIST.includes(user.email.toLowerCase())) {
-        console.log('✅ User in admin allowlist - granting immediate access:', user.email);
         return true;
       }
       
-      // Create a timeout promise that rejects after 5 seconds
+      // If we have profile data available, use it immediately for faster response
+      if (profile?.is_admin === true) {
+        return true;
+      }
+      
+      // Create a shorter timeout to fail faster and prevent hanging
       const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('RPC timeout after 5 seconds')), 5000);
+        setTimeout(() => reject(new Error('RPC timeout after 2 seconds')), 2000);
       });
       
       try {
-        // Race between RPC call and timeout
+        // Race between RPC call and timeout with shorter timeout
         const { data, error } = await Promise.race([
           supabase.rpc('get_user_admin_status'),
           timeoutPromise
@@ -38,25 +40,17 @@ export const useAdminStatus = () => {
           throw error;
         }
         
-        const result = !!data;
-        console.log('✅ Admin status from RPC:', result);
-        return result;
+        return !!data;
       } catch (error) {
-        // Suppress dev-server related errors
-        if (error.message?.includes('dev-server') || error.message?.includes('502')) {
-          console.log('🔧 Dev server error detected, using safe fallback');
-        } else {
-          console.error('🚨 Admin RPC failed/timeout, falling back to profile.is_admin:', error);
-        }
-        // Immediate fallback to profile admin status for network issues
+        // Always fall back to profile data to prevent hanging
         const fallbackResult = !!profile?.is_admin;
-        console.log('🔄 Fallback admin status (Safe Mode):', fallbackResult);
         return fallbackResult;
       }
     },
     enabled: !!user,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
-    retry: 0, // Don't retry to avoid additional delays
+    staleTime: 2 * 60 * 1000, // Shorter cache time
+    gcTime: 5 * 60 * 1000, // Shorter garbage collection
+    retry: false, // Never retry to prevent cascading timeouts
+    refetchOnWindowFocus: false, // Prevent refetch on focus to avoid timeout storms
   });
 };
