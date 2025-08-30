@@ -1003,9 +1003,18 @@ export const ServiceFunnelModal = ({
                       <ArrowRight className="w-5 h-5 ml-2" />
                     </Button>
                     {!selectedPkg?.requestPricing && (
-                      <Button onClick={() => setIsPricingChoiceOpen(true)} className="bg-primary text-primary-foreground hover:bg-primary/90 px-8 py-4 rounded-xl font-semibold text-lg flex-1">
+                      <Button 
+                        onClick={() => {
+                          if (!user) {
+                            toast.error("Please sign in or create an account to add items to cart");
+                            return;
+                          }
+                          setIsPricingChoiceOpen(true);
+                        }} 
+                        className="bg-primary text-primary-foreground hover:bg-primary/90 px-8 py-4 rounded-xl font-semibold text-lg flex-1"
+                      >
                         <ShoppingCart className="w-5 h-5 mr-2" />
-                        Add to Cart - ${selectedPkg?.price || '0'}
+                        {!user ? "Sign In to Add to Cart" : `Add to Cart - $${selectedPkg?.price || '0'}`}
                       </Button>
                     )}
                   </>
