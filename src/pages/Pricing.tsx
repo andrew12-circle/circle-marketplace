@@ -5,6 +5,7 @@ import { Check, X, ChevronDown, ChevronUp } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { sbInvoke } from "@/utils/sb";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 const circleLogoUrl = "/circle-logo-updated.png";
@@ -36,7 +37,7 @@ export const Pricing = () => {
       const {
         data,
         error
-      } = await supabase.functions.invoke('create-subscription-checkout', {
+      } = await sbInvoke('create-subscription-checkout', {
         body: {
           plan
         }

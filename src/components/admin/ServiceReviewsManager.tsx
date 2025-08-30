@@ -137,7 +137,7 @@ export const ServiceReviewsManager = () => {
       const { error } = await supabase
         .from('service_reviews')
         .delete()
-        .eq('id' as any, reviewId as any);
+        .eq('id', reviewId);
 
       if (error) throw error;
 

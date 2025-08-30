@@ -130,6 +130,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setSession(session);
         setUser(session?.user ?? null);
         
+        switch (event) {
+          case 'TOKEN_REFRESHED':
+          case 'USER_UPDATED':
+            // nothing heavy; state above is enough
+            break;
+          case 'SIGNED_OUT':
+            setProfile(null);
+            queryClient.clear();
+            break;
+        }
+        
         // Defer any Supabase calls to prevent deadlock
         if (session?.user) {
           setTimeout(() => {

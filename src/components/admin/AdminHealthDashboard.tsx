@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { sbInvoke } from '@/utils/sb';
 import { supabase } from '@/integrations/supabase/client';
 import { AlertTriangle, Activity, Send, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
@@ -126,7 +127,7 @@ export function AdminHealthDashboard() {
     try {
       setSending(true);
       
-      const { data, error } = await supabase.functions.invoke('monitor-health', {
+      const { data, error } = await sbInvoke('monitor-health', {
         body: { source: 'manual_admin_check' }
       });
 

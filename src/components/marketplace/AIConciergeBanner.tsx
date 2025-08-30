@@ -7,7 +7,7 @@ import { Brain, Target, Send, Sparkles, ShoppingCart, TrendingUp, Eye, Mic, MicO
 import { useAuth } from "@/contexts/AuthContext";
 import { AskCircleAIModal } from "./AskCircleAIModal";
 import { Input } from "@/components/ui/input";
-import { supabase } from "@/integrations/supabase/client";
+import { sbInvoke } from "@/utils/sb";
 import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
 import { GoalAssessmentModal } from "./GoalAssessmentModal";
@@ -72,7 +72,7 @@ export const AIConciergeBanner = () => {
       const {
         data,
         error
-      } = await supabase.functions.invoke('generate-ai-recommendations', {
+      } = await sbInvoke('generate-ai-recommendations', {
         body: {
           agent_id: user.id
         }
@@ -211,7 +211,7 @@ export const AIConciergeBanner = () => {
 
   const logAIInteraction = async (query: string, recommendation: string, intentType: string) => {
     try {
-      await supabase.functions.invoke('log-ai-interaction', {
+      await sbInvoke('log-ai-interaction', {
         body: {
           userId: user?.id,
           query,

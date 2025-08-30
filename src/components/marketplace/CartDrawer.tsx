@@ -5,7 +5,7 @@ import { Separator } from "@/components/ui/separator";
 import { useCart } from "@/contexts/CartContext";
 import { ShoppingCart, Plus, Minus, Trash2, CreditCard, MessageCircle, Calendar, ExternalLink } from "lucide-react";
 import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { sbInvoke } from "@/utils/sb";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -119,7 +119,7 @@ export const CartDrawer = () => {
         // Handle regular co-pay checkout for non-affiliate items
         const regularCoPayItems = coPayItems.filter(item => !item.affiliateUrl);
         if (regularCoPayItems.length > 0) {
-          const { data, error } = await supabase.functions.invoke('copay-checkout', {
+          const { data, error } = await sbInvoke('copay-checkout', {
             body: {
               items: regularCoPayItems.map(item => ({
                 co_pay_request_id: item.id,
@@ -138,7 +138,7 @@ export const CartDrawer = () => {
 
       // Handle standard pro payment items
       if (proItems.length > 0) {
-        const { data, error } = await supabase.functions.invoke('create-checkout', {
+        const { data, error } = await sbInvoke('create-checkout', {
           body: {
             items: proItems.map(item => ({
               service_id: item.id,

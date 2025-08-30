@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Sparkles, X, MapPin, TrendingUp, Clock, BarChart, Target, Brain } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { sbInvoke } from "@/utils/sb";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -125,7 +125,7 @@ export const AskCircleAIModal = ({ open, onOpenChange, initialPrompt }: AskCircl
       
       console.log('Getting contextual recommendation for:', prompt);
       
-      const { data, error } = await supabase.functions.invoke('enhanced-ai-recommendations', {
+      const { data, error } = await sbInvoke('enhanced-ai-recommendations', {
         body: {
           message: prompt.trim(),
           userId: user.id,
@@ -143,7 +143,7 @@ export const AskCircleAIModal = ({ open, onOpenChange, initialPrompt }: AskCircl
         console.error('Error getting contextual recommendation:', error);
         // Fallback to original service
         console.log('Falling back to original AI service');
-        const fallbackData = await supabase.functions.invoke('ask-circle-ai', {
+        const fallbackData = await sbInvoke('ask-circle-ai', {
           body: { 
             type: 'quick',
             prompt: prompt.trim() 
@@ -189,7 +189,7 @@ export const AskCircleAIModal = ({ open, onOpenChange, initialPrompt }: AskCircl
     try {
       setLoading(true);
       
-      const { data, error } = await supabase.functions.invoke('ask-circle-ai', {
+      const { data, error } = await sbInvoke('ask-circle-ai', {
         body: { 
           type: 'quick',
           prompt: prompt.trim() 
@@ -224,7 +224,7 @@ export const AskCircleAIModal = ({ open, onOpenChange, initialPrompt }: AskCircl
     try {
       setLoading(true);
       
-      const { data, error } = await supabase.functions.invoke('ask-circle-ai', {
+      const { data, error } = await sbInvoke('ask-circle-ai', {
         body: { 
           type: 'detailed',
           currentPerformance,
