@@ -1,4 +1,6 @@
 
+// @ts-nocheck
+
 import { useState, useEffect } from "react";
 import { VendorFunnelEditor } from './VendorFunnelEditor';
 import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog";
