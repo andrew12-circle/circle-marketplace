@@ -848,7 +848,7 @@ export const ServiceManagementPanel = () => {
       const { data: verifyRow, error: fetchError } = await supabase
         .from('services')
         .select('id, funnel_content, pricing_tiers, updated_at')
-        .eq('id' as any, selectedService.id as any)
+        .eq('id', selectedService.id)
         .maybeSingle();
 
       if (fetchError) throw fetchError;

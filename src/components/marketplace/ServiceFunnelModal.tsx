@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Suspense, lazy, useMemo, memo } from "react";
 import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,8 +21,10 @@ import { EnhancedProviderIntegration } from "./EnhancedProviderIntegration";
 import { useProviderTracking } from "@/hooks/useProviderTracking";
 import { supabase } from "@/integrations/supabase/client";
 import { ReviewRatingSystem } from "@/components/marketplace/ReviewRatingSystem";
-import { CustomersAlsoViewed } from "@/components/marketplace/CustomersAlsoViewed";
 import { SafeHTML } from "@/utils/htmlSanitizer";
+
+// Lazy load heavy components to improve initial load time
+const CustomersAlsoViewed = lazy(() => import("@/components/marketplace/CustomersAlsoViewed").then(m => ({ default: m.CustomersAlsoViewed })));
 import { computePotentialCopayForService, extractNumericPrice } from "@/utils/dealPricing";
 import { useSponsoredTracking } from '@/hooks/useSponsoredTracking';
 
@@ -181,7 +183,7 @@ interface ServiceFunnelModalProps {
   onClose: () => void;
   service: Service;
 }
-export const ServiceFunnelModal = ({
+export const ServiceFunnelModal = memo(({
   isOpen,
   onClose,
   service
@@ -210,74 +212,79 @@ export const ServiceFunnelModal = ({
   } = useAuth();
   const isProMember = profile?.is_pro_member || false;
   const riskLevel = determineServiceRisk(service.title, service.description);
+  
+  // Only initialize tracking hooks when modal is open for better performance
   const {
     trackBooking,
     trackPurchase,
     trackOutboundClick,
     trackEvent,
     trackWebsiteClick
-  } = useProviderTracking(service.id, isOpen);
+  } = useProviderTracking(isOpen ? service.id : "", isOpen);
   const { trackClick } = useSponsoredTracking();
   const [openItem, setOpenItem] = useState<string | undefined>("question-1");
 
   // Use service verification status from database  
   const isVerified = service.is_verified;
 
-  // Fetch real reviews for this service
+  // Only fetch reviews when modal is actually open to improve performance
   const {
     reviews,
     loading: reviewsLoading,
     error: reviewsError
-  } = useServiceReviews(service.id);
+  } = useServiceReviews(isOpen ? service.id : "");
 
-  // Normalize funnel content variants
-  const subHeadline = (service.funnel_content as any)?.subHeadline || (service.funnel_content as any)?.subheadline;
-  const benefits = (service.funnel_content as any)?.benefits || (service.funnel_content as any)?.whyChooseUs?.benefits || [];
-  const customSections = (service.funnel_content as any)?.customSections || [];
-  const fc = service.funnel_content as any;
-  const ctaTitle = fc?.callToAction?.title || fc?.callToAction?.primaryHeadline || 'Ready to Transform Your Business?';
-  const ctaDescription = fc?.callToAction?.description || fc?.callToAction?.primaryDescription || '';
-  const scheduleText = fc?.callToAction?.primaryButtonText || 'Schedule Consultation';
-  const faqSections: Array<{
-    id: string;
-    title: string;
-    content: string;
-  }> = fc?.faqSections as any || [];
+  // Memoize funnel content processing to avoid recalculation on re-renders
+  const processedFunnelContent = useMemo(() => {
+    const fc = service.funnel_content as any;
+    return {
+      subHeadline: fc?.subHeadline || fc?.subheadline,
+      benefits: fc?.benefits || fc?.whyChooseUs?.benefits || [],
+      customSections: fc?.customSections || [],
+      ctaTitle: fc?.callToAction?.title || fc?.callToAction?.primaryHeadline || 'Ready to Transform Your Business?',
+      ctaDescription: fc?.callToAction?.description || fc?.callToAction?.primaryDescription || '',
+      scheduleText: fc?.callToAction?.primaryButtonText || 'Schedule Consultation',
+      faqSections: fc?.faqSections || []
+    };
+  }, [service.funnel_content]);
 
-  // Use pricing tiers if available, otherwise fallback to default packages
-  const packages = service.pricing_tiers?.length ? service.pricing_tiers.map(tier => ({
-    id: tier.id,
-    name: tier.name,
-    price: tier.requestPricing ? 0 : parseFloat(tier.price || "100"),
-    originalPrice: tier.originalPrice ? parseFloat(tier.originalPrice) : undefined,
-    yearlyPrice: tier.yearlyPrice ? parseFloat(tier.yearlyPrice) : undefined,
-    yearlyOriginalPrice: tier.yearlyOriginalPrice ? parseFloat(tier.yearlyOriginalPrice) : undefined,
-    duration: tier.duration,
-    description: tier.description,
-    features: tier.features?.map(f => f.text) || [],
-    popular: tier.isPopular,
-    requestPricing: tier.requestPricing
-  })) : [{
-    id: "basic",
-    name: "Basic Package",
-    price: parseFloat(service.retail_price || "100") * 0.75,
-    originalPrice: parseFloat(service.retail_price || "100"),
-    yearlyPrice: undefined,
-    yearlyOriginalPrice: undefined,
-    duration: "monthly",
-    description: "Essential service features for getting started",
-    features: ["Core service delivery", "Email support", "Basic reporting"],
-    requestPricing: false
-  }, {
-    id: "standard",
-    name: "Standard Package",
-    price: parseFloat(service.retail_price || "100"),
-    originalPrice: parseFloat(service.retail_price || "100") * 1.33,
-    yearlyPrice: undefined,
-    yearlyOriginalPrice: undefined,
-    duration: "monthly",
-    description: "Complete solution for most needs",
-    features: ["Everything in Basic", "Priority support", "Advanced reporting", "Custom consultation"],
+  const { subHeadline, benefits, customSections, ctaTitle, ctaDescription, scheduleText, faqSections } = processedFunnelContent;
+
+  // Memoize packages processing for better performance
+  const packages = useMemo(() => {
+    return service.pricing_tiers?.length ? service.pricing_tiers.map(tier => ({
+      id: tier.id,
+      name: tier.name,
+      price: tier.requestPricing ? 0 : parseFloat(tier.price || "100"),
+      originalPrice: tier.originalPrice ? parseFloat(tier.originalPrice) : undefined,
+      yearlyPrice: tier.yearlyPrice ? parseFloat(tier.yearlyPrice) : undefined,
+      yearlyOriginalPrice: tier.yearlyOriginalPrice ? parseFloat(tier.yearlyOriginalPrice) : undefined,
+      duration: tier.duration,
+      description: tier.description,
+      features: tier.features?.map(f => f.text) || [],
+      popular: tier.isPopular,
+      requestPricing: tier.requestPricing
+    })) : [{
+      id: "basic",
+      name: "Basic Package",
+      price: parseFloat(service.retail_price || "100") * 0.75,
+      originalPrice: parseFloat(service.retail_price || "100"),
+      yearlyPrice: undefined,
+      yearlyOriginalPrice: undefined,
+      duration: "monthly",
+      description: "Essential service features for getting started",
+      features: ["Core service delivery", "Email support", "Basic reporting"],
+      requestPricing: false
+    }, {
+      id: "standard",
+      name: "Standard Package",
+      price: parseFloat(service.retail_price || "100"),
+      originalPrice: parseFloat(service.retail_price || "100") * 1.33,
+      yearlyPrice: undefined,
+      yearlyOriginalPrice: undefined,
+      duration: "monthly",
+      description: "Complete solution for most needs",
+      features: ["Everything in Basic", "Priority support", "Advanced reporting", "Custom consultation"],
     popular: true,
     requestPricing: false
   }, {
@@ -410,7 +417,8 @@ export const ServiceFunnelModal = ({
       })}
       </div>;
   };
-  return <Dialog open={isOpen} onOpenChange={open => !open && onClose()} modal={true}>
+  return (
+    <Dialog open={isOpen} onOpenChange={open => !open && onClose()} modal={true}>
       <DialogContent className="max-w-[90vw] lg:max-w-6xl max-h-[90vh] overflow-hidden p-0 animate-scale-in">
         <DialogHeader className="sr-only">
           <span>Service Details</span>
@@ -1066,7 +1074,9 @@ export const ServiceFunnelModal = ({
 
           {/* Customers Also Viewed Section */}
           <div className="max-w-6xl mx-auto px-6 py-8">
-            <CustomersAlsoViewed currentService={service} maxSuggestions={6} />
+            <Suspense fallback={<div className="animate-pulse bg-muted h-32 rounded-lg" />}>
+              <CustomersAlsoViewed currentService={service} maxSuggestions={6} />
+            </Suspense>
           </div>
 
           {/* Disclaimer Section for Non-Verified Services */}
@@ -1233,5 +1243,6 @@ export const ServiceFunnelModal = ({
           }}
         />}
       </DialogContent>
-    </Dialog>;
-};
+    </Dialog>
+  );
+});
