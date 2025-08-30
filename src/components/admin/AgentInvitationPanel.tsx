@@ -81,7 +81,7 @@ P.S. We're starting with a small group of elite agents, so spots are limited.`
         .order('invited_at', { ascending: false });
 
       if (error) throw error;
-      setInvitations(data || []);
+      setInvitations((data as any[]) || []);
     } catch (error) {
       console.error('Error fetching invitations:', error);
       toast({
@@ -112,7 +112,7 @@ P.S. We're starting with a small group of elite agents, so spots are limited.`
           agent_company: formData.agent_company,
           invitation_message: formData.invitation_message.replace('[Agent Name]', formData.agent_name),
           invited_by: user?.id
-        });
+        } as any);
 
       if (error) throw error;
 

@@ -204,7 +204,8 @@ export const ServiceFunnelModal = ({
     addToCart
   } = useCart();
   const {
-    profile
+    profile,
+    user
   } = useAuth();
   const isProMember = profile?.is_pro_member || false;
   const riskLevel = determineServiceRisk(service.title, service.description);
