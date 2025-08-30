@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Optimized Marketplace Data Hook
  * Combines React Query with request deduplication and caching

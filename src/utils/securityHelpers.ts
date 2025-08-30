@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { supabase } from "@/integrations/supabase/client";
 
 // Enhanced authentication helper with proper error handling

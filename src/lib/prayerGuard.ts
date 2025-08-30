@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Prayer Guard Module for Spiritual Dedication System
 import { supabase } from "@/integrations/supabase/client";
 

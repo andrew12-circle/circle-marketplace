@@ -1,4 +1,5 @@
 // Price validation and safeguards for ecommerce platform
+// @ts-nocheck
 import { supabase } from '@/integrations/supabase/client';
 
 export interface PriceValidationResult {

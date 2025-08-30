@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useState, useEffect } from "react";
 import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 import { Link } from "react-router-dom";

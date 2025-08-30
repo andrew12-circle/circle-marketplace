@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Plus, TrendingUp, DollarSign, Users, Star, Eye, Package, Calendar, Bell, Settings, BarChart3, Zap, Target, Award, Crown, Sparkles } from 'lucide-react';

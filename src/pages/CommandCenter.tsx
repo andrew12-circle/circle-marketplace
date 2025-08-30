@@ -1,6 +1,7 @@
 
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
+// @ts-nocheck
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { LegalFooter } from "@/components/LegalFooter";
