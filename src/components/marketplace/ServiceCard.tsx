@@ -314,12 +314,6 @@ export const ServiceCard = ({
             {/* Removed duplicate badges - ServiceBadges component will handle these */}
           </div>
 
-          {/* Sponsored Badge */}
-          {isSponsored && (
-            <div className="absolute top-3 right-12 z-10">
-              <SponsoredLabel variant="small" />
-            </div>
-          )}
 
           {/* Header with profile picture and title */}
           <div className="p-4 pb-2 flex items-start gap-2">
@@ -340,6 +334,12 @@ export const ServiceCard = ({
               <h3 className="font-semibold text-foreground leading-tight text-base line-clamp-2 mb-1">
                 {service.title.split(' - ').pop() || service.title.split(': ').pop() || service.title}
               </h3>
+              {/* Sponsored label right underneath the name, like Facebook */}
+              {isSponsored && (
+                <div className="mb-1">
+                  <SponsoredLabel variant="minimal" />
+                </div>
+              )}
             </div>
           </div>
 
