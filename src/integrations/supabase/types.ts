@@ -5508,6 +5508,39 @@ export type Database = {
         }
         Relationships: []
       }
+      service_update_tracking: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string | null
+          section_name: string
+          service_id: string
+          update_type: string
+          updated_at: string
+          updated_by: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          section_name: string
+          service_id: string
+          update_type?: string
+          updated_at?: string
+          updated_by: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          section_name?: string
+          service_id?: string
+          update_type?: string
+          updated_at?: string
+          updated_by?: string
+        }
+        Relationships: []
+      }
       service_views: {
         Row: {
           id: string

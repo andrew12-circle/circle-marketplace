@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Bot, Sparkles, CheckCircle, AlertCircle, Loader2, FileText, Zap, Share, Lightbulb, HelpCircle, Shield, Clock } from 'lucide-react';
+import { Bot, Sparkles, CheckCircle, AlertCircle, Loader2, FileText, Zap, Share, Lightbulb, HelpCircle, Shield, Clock, Check } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AutoRecoverySystem } from '@/components/marketplace/AutoRecoverySystem';
 import { useAutoRecovery } from '@/hooks/useAutoRecovery';
@@ -52,6 +52,14 @@ interface UpdateProgress {
   sections: SectionStatus;
   error?: string;
   research_data?: any;
+  updatedSections?: { [key: string]: { date: string; notes?: string } };
+}
+
+interface ServiceUpdateTracking {
+  service_id: string;
+  section_name: string;
+  updated_at: string;
+  notes?: string;
 }
 
 export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdaterProps) => {
@@ -59,6 +67,7 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
   const [isRunning, setIsRunning] = useState(false);
   const [serviceProgress, setServiceProgress] = useState<Record<string, UpdateProgress>>({});
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
+  const [updateTracking, setUpdateTracking] = useState<Record<string, ServiceUpdateTracking[]>>({});
   const [customPrompts, setCustomPrompts] = useState({
     details: '',
     disclaimer: '',
@@ -77,6 +86,80 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
     errorThreshold: 1,
     autoTriggerDelay: 2000
   });
+
+  // Load update tracking data
+  useEffect(() => {
+    loadUpdateTracking();
+  }, []);
+
+  const loadUpdateTracking = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('service_update_tracking')
+        .select('service_id, section_name, updated_at, notes')
+        .order('updated_at', { ascending: false });
+
+      if (error) {
+        console.error('Error loading update tracking:', error);
+        return;
+      }
+
+      // Group by service_id
+      const trackingByService: Record<string, ServiceUpdateTracking[]> = {};
+      data?.forEach(track => {
+        if (!trackingByService[track.service_id]) {
+          trackingByService[track.service_id] = [];
+        }
+        trackingByService[track.service_id].push(track);
+      });
+
+      setUpdateTracking(trackingByService);
+    } catch (error) {
+      console.error('Error loading update tracking:', error);
+    }
+  };
+
+  const recordSectionUpdate = async (serviceId: string, sectionName: string, notes?: string) => {
+    try {
+      const { data: user } = await supabase.auth.getUser();
+      if (!user.user) return;
+
+      const { error } = await supabase
+        .from('service_update_tracking')
+        .insert({
+          service_id: serviceId,
+          section_name: sectionName,
+          updated_by: user.user.id,
+          notes: notes || `AI generated ${sectionName} section`
+        });
+
+      if (error) {
+        console.error('Error recording section update:', error);
+      } else {
+        // Reload tracking data
+        await loadUpdateTracking();
+      }
+    } catch (error) {
+      console.error('Error recording section update:', error);
+    }
+  };
+
+  const getSectionUpdateInfo = (serviceId: string, sectionName: string) => {
+    const serviceTracking = updateTracking[serviceId] || [];
+    const sectionUpdate = serviceTracking.find(t => t.section_name === sectionName);
+    return sectionUpdate;
+  };
+
+  const formatUpdateDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      month: 'short', 
+      day: 'numeric',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
 
   // Monitor for stuck states during AI generation
   const monitorStuckState = () => {
@@ -180,6 +263,7 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
       if (error) throw error;
       
       updateSectionProgress(service.id, 'details', 'completed');
+      await recordSectionUpdate(service.id, 'details', 'AI generated service details including pricing and RESPA assessment');
       return data;
     } catch (error) {
       console.error('Error generating details:', error);
@@ -207,6 +291,7 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
       if (error) throw error;
       
       updateSectionProgress(service.id, 'disclaimer', 'completed');
+      await recordSectionUpdate(service.id, 'disclaimer', 'AI generated disclaimer content');
       return data;
     } catch (error) {
       console.error('Error generating disclaimer:', error);
@@ -234,6 +319,7 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
       if (error) throw error;
       
       updateSectionProgress(service.id, 'funnel', 'completed');
+      await recordSectionUpdate(service.id, 'funnel', 'AI generated sales funnel and pricing tiers');
       return data;
     } catch (error) {
       console.error('Error generating funnel:', error);
@@ -269,6 +355,7 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
       }
       
       updateSectionProgress(service.id, 'research', 'completed');
+      await recordSectionUpdate(service.id, 'research', 'AI generated market research and analysis');
       return data;
     } catch (error) {
       console.warn('Research generation failed, continuing without research context:', error);
@@ -295,6 +382,7 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
       if (error) throw error;
       
       updateSectionProgress(service.id, 'faqs', 'completed');
+      await recordSectionUpdate(service.id, 'faqs', 'AI generated frequently asked questions');
       return data;
     } catch (error) {
       console.error('Error generating FAQs:', error);
@@ -408,6 +496,7 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
         
         console.log(`✅ Service ${service.title} verified successfully`);
         updateSectionProgress(service.id, 'verification', 'completed');
+        await recordSectionUpdate(service.id, 'verification', 'Service auto-verified - all required fields complete');
         return true;
       } else {
         console.log(`❌ Service ${service.title} missing required fields for verification`);
@@ -925,17 +1014,28 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
                       </div>
                       
                       <div className="space-y-2">
-                        {['details', 'disclaimer', 'funnel', 'research', 'faqs', 'verification'].map((section) => (
-                          <div key={section} className="space-y-1">
-                            <div className="flex items-center gap-2">
-                              {getSectionIcon(progress.sections[section as keyof SectionStatus])}
-                              <span className="text-sm font-medium">{getSectionName(section)}</span>
-                            </div>
-                            <p className="text-xs text-muted-foreground ml-6">
-                              {getSectionDescription(section)}
-                            </p>
-                          </div>
-                        ))}
+                         {['details', 'disclaimer', 'funnel', 'research', 'faqs', 'verification'].map((section) => {
+                           const updateInfo = getSectionUpdateInfo(progress.serviceId, section);
+                           return (
+                             <div key={section} className="space-y-1">
+                               <div className="flex items-center justify-between">
+                                 <div className="flex items-center gap-2">
+                                   {getSectionIcon(progress.sections[section as keyof SectionStatus])}
+                                   <span className="text-sm font-medium">{getSectionName(section)}</span>
+                                 </div>
+                                 {updateInfo && (
+                                   <div className="flex items-center gap-1 text-xs text-green-600">
+                                     <Check className="h-3 w-3" />
+                                     <span>{formatUpdateDate(updateInfo.updated_at)}</span>
+                                   </div>
+                                 )}
+                               </div>
+                               <p className="text-xs text-muted-foreground ml-6">
+                                 {getSectionDescription(section)}
+                               </p>
+                             </div>
+                           );
+                         })}
                       </div>
                       
                       {progress.error && (
