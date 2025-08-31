@@ -736,6 +736,7 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
       try {
         // Process services sequentially to avoid rate limits
         for (const service of servicesToUpdate) {
+          console.log(`🔄 Starting service ${service.title} (${completedCount + 1}/${servicesToUpdate.length})`);
           updateProgress(service.id, { status: 'updating' });
           
           try {
@@ -744,24 +745,34 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
             completedCount++;
             onServiceUpdate(service.id);
             
+            console.log(`✅ Completed service ${service.title} (${completedCount}/${servicesToUpdate.length})`);
+            
             if (!runInBackground) {
               toast({
                 title: "Service updated",
-                description: `Successfully updated ${service.title}`,
+                description: `Successfully updated ${service.title} (${completedCount}/${servicesToUpdate.length})`,
               });
             }
           } catch (error) {
-            console.error(`Error processing service ${service.title}:`, error);
+            console.error(`❌ Error processing service ${service.title}:`, error);
             updateProgress(service.id, { 
               status: 'error', 
               error: error instanceof Error ? error.message : 'Unknown error' 
             });
             errorCount++;
             setErrorCount(prev => prev + 1);
+            
+            // Continue to next service even on error
+            console.log(`⏭️ Continuing to next service despite error in ${service.title}`);
           }
           
-          // Small delay between services
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          // Small delay between services - but check if still running
+          if (isRunning) {
+            await new Promise(resolve => setTimeout(resolve, 2000));
+          } else {
+            console.log('🛑 Processing stopped by user');
+            break;
+          }
         }
 
         if (runInBackground) {
