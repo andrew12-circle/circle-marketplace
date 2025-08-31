@@ -40,10 +40,12 @@ Answer these 6 questions for agents:
 5. What do I get with it?
 6. Does it require a quote or can I buy now?
 
-Focus on proven results, real testimonials, and measurable outcomes.`;
+Focus on proven results, real testimonials, and measurable outcomes.
+
+IMPORTANT: Return ONLY valid JSON, no markdown formatting or code blocks.`;
 
         userPrompt = `Generate optimized service details for: ${service.title}
-Category: ${service.category}
+Category: ${service.category || 'Not specified'}
 Website: ${service.website_url || 'Not provided'}
 ${service.existing_research ? `Research Data: ${JSON.stringify(service.existing_research)}` : ''}
 ${customPrompt ? `Additional Instructions: ${customPrompt}` : ''}
@@ -58,10 +60,12 @@ Return JSON with:
         break;
 
       case 'disclaimer':
-        systemPrompt = `Generate professional legal disclaimers for real estate service providers. Include RESPA compliance, co-marketing limitations, and standard legal protections.`;
+        systemPrompt = `Generate professional legal disclaimers for real estate service providers. Include RESPA compliance, co-marketing limitations, and standard legal protections.
+
+IMPORTANT: Return ONLY valid JSON, no markdown formatting or code blocks.`;
 
         userPrompt = `Generate a comprehensive disclaimer for: ${service.title}
-Category: ${service.category}
+Category: ${service.category || 'Not specified'}
 Website: ${service.website_url || 'Not provided'}
 ${customPrompt ? `Additional Instructions: ${customPrompt}` : ''}
 
@@ -78,11 +82,13 @@ Return JSON with:
         break;
 
       case 'funnel':
-        systemPrompt = `You are Andrew Heisley creating high-converting sales funnels for Circle Marketplace. Write in your voice: clear, direct, confident. Focus on ROI, proven results, and agent success stories. Create compelling funnels that convert browsers into customers.`;
+        systemPrompt = `You are Andrew Heisley creating high-converting sales funnels for Circle Marketplace. Write in your voice: clear, direct, confident. Focus on ROI, proven results, and agent success stories. Create compelling funnels that convert browsers into customers.
+
+IMPORTANT: Return ONLY valid JSON, no markdown formatting or code blocks.`;
 
         userPrompt = `Create a complete sales funnel for: ${service.title}
 Description: ${service.description || ''}
-Category: ${service.category}
+Category: ${service.category || 'Not specified'}
 Website: ${service.website_url || 'Not provided'}
 Retail Price: ${service.retail_price || 'Not provided'}
 Pro Price: ${service.pro_price || 'Not provided'}
@@ -194,11 +200,16 @@ Return JSON with:
     const data = await response.json();
     const content = data.choices[0].message.content;
 
+    console.log('Raw AI response:', content);
+
     let parsedContent;
     try {
-      parsedContent = JSON.parse(content);
+      // Remove markdown code blocks if present
+      const cleanContent = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+      parsedContent = JSON.parse(cleanContent);
     } catch (parseError) {
       console.error('Failed to parse AI response:', content);
+      console.error('Parse error:', parseError);
       throw new Error('AI response was not valid JSON');
     }
 
