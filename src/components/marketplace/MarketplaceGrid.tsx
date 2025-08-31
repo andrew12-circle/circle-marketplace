@@ -283,6 +283,14 @@ export const MarketplaceGrid = () => {
     setCurrentPage(1);
   }, [searchTerm, filters.category, filters.featured, filters.verified, filters.coPayEligible, orderStrategy, pageSize]);
 
+  // Scroll to top when page changes
+  useEffect(() => {
+    const servicesGrid = document.getElementById('services-grid');
+    if (servicesGrid) {
+      servicesGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [currentPage]);
+
   const {
     data: paginatedData,
     isLoading: isLoadingServices
@@ -638,7 +646,7 @@ export const MarketplaceGrid = () => {
               {/* Grid - Mobile Responsive */}
               {viewMode === "services" && (
                 <>
-                  <div className="mobile-grid gap-4 sm:gap-6">
+                   <div id="services-grid" className="mobile-grid gap-4 sm:gap-6">
                     {flattenServices.map((service, index) => (
                       <OptimizedServiceCard 
                         key={`service-${service.id}-${index}`} 
