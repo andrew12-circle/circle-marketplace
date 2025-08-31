@@ -68,6 +68,7 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
   const [activeTab, setActiveTab] = useState('select');
   const [errorCount, setErrorCount] = useState(0);
   const [hasStuckState, setHasStuckState] = useState(false);
+  const [runInBackground, setRunInBackground] = useState(false);
 
   // Auto-recovery system
   const { triggerRecovery, isRecovering, canAutoRecover } = useAutoRecovery({
@@ -545,42 +546,74 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
     const servicesToUpdate = services.filter(s => selectedServices.includes(s.id));
     setServiceProgress(initializeProgress(selectedServices));
 
-    let completedCount = 0;
-    let errorCount = 0;
-
-    try {
-      // Process services sequentially to avoid rate limits
-      for (const service of servicesToUpdate) {
-        updateProgress(service.id, { status: 'updating' });
-        
-        try {
-          await processService(service);
-          updateProgress(service.id, { status: 'completed' });
-          completedCount++;
-          onServiceUpdate(service.id);
-        } catch (error) {
-          console.error(`Error processing service ${service.title}:`, error);
-          updateProgress(service.id, { 
-            status: 'error', 
-            error: error instanceof Error ? error.message : 'Unknown error' 
-          });
-          errorCount++;
-          setErrorCount(prev => prev + 1);
-        }
-        
-        // Small delay between services
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      }
-
+    if (runInBackground) {
       toast({
-        title: 'AI Update Complete',
-        description: `Processed ${servicesToUpdate.length} services. ${completedCount} completed, ${errorCount} errors.`,
+        title: "Running in background",
+        description: "AI updater is processing services in the background. You can navigate away and check back later.",
+        duration: 5000,
       });
-    } catch (error) {
-      console.error('AI updater failed:', error);
-      setErrorCount(prev => prev + 1);
-    } finally {
-      setIsRunning(false);
+    }
+
+    const processInBackground = async () => {
+      let completedCount = 0;
+      let errorCount = 0;
+
+      try {
+        // Process services sequentially to avoid rate limits
+        for (const service of servicesToUpdate) {
+          updateProgress(service.id, { status: 'updating' });
+          
+          try {
+            await processService(service);
+            updateProgress(service.id, { status: 'completed' });
+            completedCount++;
+            onServiceUpdate(service.id);
+            
+            if (!runInBackground) {
+              toast({
+                title: "Service updated",
+                description: `Successfully updated ${service.title}`,
+              });
+            }
+          } catch (error) {
+            console.error(`Error processing service ${service.title}:`, error);
+            updateProgress(service.id, { 
+              status: 'error', 
+              error: error instanceof Error ? error.message : 'Unknown error' 
+            });
+            errorCount++;
+            setErrorCount(prev => prev + 1);
+          }
+          
+          // Small delay between services
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+
+        if (runInBackground) {
+          toast({
+            title: 'Background processing complete',
+            description: `Processed ${servicesToUpdate.length} services. ${completedCount} completed, ${errorCount} errors.`,
+            duration: 7000,
+          });
+        } else {
+          toast({
+            title: 'AI Update Complete',
+            description: `Processed ${servicesToUpdate.length} services. ${completedCount} completed, ${errorCount} errors.`,
+          });
+        }
+      } catch (error) {
+        console.error('AI updater failed:', error);
+        setErrorCount(prev => prev + 1);
+      } finally {
+        setIsRunning(false);
+      }
+    };
+
+    if (runInBackground) {
+      // Start processing without awaiting it
+      processInBackground();
+    } else {
+      await processInBackground();
     }
   };
 
@@ -832,30 +865,45 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
           </TabsContent>
         </Tabs>
 
-        <div className="flex justify-center mt-6">
-          <Button 
-            onClick={runAIUpdater}
-            disabled={isRunning || selectedServices.length === 0 || isRecovering}
-            size="lg"
-            className="min-w-48"
-          >
-            {isRunning ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Processing Services...
-              </>
-            ) : isRecovering ? (
-              <>
-                <Sparkles className="w-4 h-4 mr-2" />
-                Recovering System...
-              </>
-            ) : (
-              <>
-                <Bot className="w-4 h-4 mr-2" />
-                Generate All Sections ({selectedServices.length})
-              </>
-            )}
-          </Button>
+        <div className="space-y-4 mt-6">
+          <div className="flex items-center gap-3 justify-center">
+            <input
+              type="checkbox"
+              id="background-mode"
+              checked={runInBackground}
+              onChange={(e) => setRunInBackground(e.target.checked)}
+              className="rounded border-input"
+            />
+            <label htmlFor="background-mode" className="text-sm font-medium">
+              Run in background (allows navigation)
+            </label>
+          </div>
+          
+          <div className="flex justify-center">
+            <Button 
+              onClick={runAIUpdater}
+              disabled={isRunning || selectedServices.length === 0 || isRecovering}
+              size="lg"
+              className="min-w-48"
+            >
+              {isRunning ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  {runInBackground ? 'Running in background...' : 'Processing Services...'}
+                </>
+              ) : isRecovering ? (
+                <>
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Recovering System...
+                </>
+              ) : (
+                <>
+                  <Bot className="w-4 h-4 mr-2" />
+                  Generate All Sections ({selectedServices.length})
+                </>
+              )}
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>
