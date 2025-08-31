@@ -449,7 +449,7 @@ export const ServiceCard = ({
             </div>
 
             {/* Mobile-Optimized Pricing for Launch */}
-            <div className="space-y-3 mb-3 mt-auto">
+            <div className="space-y-3 mb-3 mt-6">
               {isProMember ? (
                 <>
                   {/* Pro Member View: Show pro price prominently */}
