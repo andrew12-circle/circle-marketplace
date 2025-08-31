@@ -534,8 +534,10 @@ async function generateResearchContent(prompt: string): Promise<string> {
 function extractTags(content: string, service: ServiceRecord): string[] {
   const tags = new Set<string>();
   
-  // Add service category and existing tags
-  tags.add(service.category.toLowerCase());
+  // Add service category and existing tags (with null checks)
+  if (service.category) {
+    tags.add(service.category.toLowerCase());
+  }
   service.tags?.forEach(tag => tags.add(tag.toLowerCase()));
   
   // Extract keywords from content
