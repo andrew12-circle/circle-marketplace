@@ -283,13 +283,13 @@ export const MarketplaceGrid = () => {
     setCurrentPage(1);
   }, [searchTerm, filters.category, filters.featured, filters.verified, filters.coPayEligible, orderStrategy, pageSize]);
 
-  // Scroll to top when page changes
-  useEffect(() => {
+  // Function to scroll to services grid
+  const scrollToServicesGrid = () => {
     const servicesGrid = document.getElementById('services-grid');
     if (servicesGrid) {
       servicesGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
-  }, [currentPage]);
+  };
 
   const {
     data: paginatedData,
@@ -673,7 +673,10 @@ export const MarketplaceGrid = () => {
                         <Button 
                           variant="outline" 
                           size="sm"
-                          onClick={() => setCurrentPage(1)}
+                          onClick={() => {
+                            setCurrentPage(1);
+                            scrollToServicesGrid();
+                          }}
                           disabled={!paginatedData.hasPreviousPage}
                         >
                           First
@@ -681,7 +684,10 @@ export const MarketplaceGrid = () => {
                         <Button 
                           variant="outline" 
                           size="sm"
-                          onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                          onClick={() => {
+                            setCurrentPage(prev => Math.max(1, prev - 1));
+                            scrollToServicesGrid();
+                          }}
                           disabled={!paginatedData.hasPreviousPage}
                         >
                           Previous
@@ -692,7 +698,10 @@ export const MarketplaceGrid = () => {
                         <Button 
                           variant="outline" 
                           size="sm"
-                          onClick={() => setCurrentPage(prev => prev + 1)}
+                          onClick={() => {
+                            setCurrentPage(prev => prev + 1);
+                            scrollToServicesGrid();
+                          }}
                           disabled={!paginatedData.hasNextPage}
                         >
                           Next
@@ -700,7 +709,10 @@ export const MarketplaceGrid = () => {
                         <Button 
                           variant="outline" 
                           size="sm"
-                          onClick={() => setCurrentPage(paginatedData.totalPages)}
+                          onClick={() => {
+                            setCurrentPage(paginatedData.totalPages);
+                            scrollToServicesGrid();
+                          }}
                           disabled={!paginatedData.hasNextPage}
                         >
                           Last
