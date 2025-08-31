@@ -56,6 +56,8 @@ import { AdminHealthDashboard } from '@/components/admin/AdminHealthDashboard';
 // Lazy-loaded via LazyAdminPanel
 import { SponsoredPlacementsManager } from '@/components/admin/SponsoredPlacementsManager';
 import { ServiceVisibilityManager } from '@/components/admin/ServiceVisibilityManager';
+import { useAutoRecovery } from '@/hooks/useAutoRecovery';
+import { AutoRecoverySystem } from '@/components/marketplace/AutoRecoverySystem';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Upload, Building, Youtube, DollarSign, BarChart3, Coins, Shield as ShieldIcon, Users2, Send, BookOpen, Heart, MessageSquare } from 'lucide-react';
@@ -84,6 +86,15 @@ export default function AdminDashboard() {
   const [filteredUsers, setFilteredUsers] = useState<UserProfile[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(true);
   const [securityWarnings, setSecurityWarnings] = useState<string[]>([]);
+  const [errorCount, setErrorCount] = useState(0);
+  const [isError, setIsError] = useState(false);
+
+  // Auto-recovery system for admin portal
+  const { triggerRecovery, isRecovering } = useAutoRecovery({
+    enabled: true,
+    errorThreshold: 1,
+    autoTriggerDelay: 3000
+  });
   
   // Enhanced user management state
   const [userSearchTerm, setUserSearchTerm] = useState('');
@@ -118,6 +129,7 @@ export default function AdminDashboard() {
 
   const loadUsers = async () => {
     setLoadingUsers(true);
+    setIsError(false);
     try {
       let query = supabase
         .from('profiles')
@@ -154,6 +166,8 @@ export default function AdminDashboard() {
       
     } catch (error) {
       console.error('Error loading users:', error);
+      setIsError(true);
+      setErrorCount(prev => prev + 1);
       toast({
         title: 'Error',
         description: 'Failed to load users',
@@ -425,11 +439,22 @@ export default function AdminDashboard() {
     return <Navigate to="/" replace />;
   }
 
+  const handleRecoveryComplete = () => {
+    setIsError(false);
+    setErrorCount(0);
+    loadUsers(); // Reload users after recovery
+  };
+
   return (
     <SpiritualAdminGuard operation="admin_dashboard_access">
       <SecureAdminGuard requireElevatedPrivileges={true}>
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
         <AdminStabilityRibbon />
+        <AutoRecoverySystem
+          isError={isError}
+          errorCount={errorCount}
+          onRecoveryComplete={handleRecoveryComplete}
+        />
         {/* Professional Header */}
         <div className="bg-white border-b border-slate-200 shadow-sm">
           <div className="container mx-auto px-6 py-4">
