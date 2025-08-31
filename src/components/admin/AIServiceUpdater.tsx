@@ -222,45 +222,58 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
 
   // Monitor for stuck states during AI generation
   const monitorStuckState = () => {
+    console.log('🔍 Monitoring stuck state - isRunning:', isRunning);
+    
     if (isRunning) {
       const stuckServices = Object.values(serviceProgress).filter(p => {
         const hasStuckSection = Object.values(p.sections).some(status => status === 'generating');
         const hasBeenGeneratingTooLong = p.status === 'updating' && hasStuckSection;
-        // Only consider it stuck if it's been generating for more than 5 minutes
         return hasBeenGeneratingTooLong;
       });
 
-      // Only trigger stuck state if we have services that have been stuck for multiple checks
+      console.log('🔍 Found potentially stuck services:', stuckServices.length);
+
       if (stuckServices.length > 0) {
-        console.log('⚠️ Potential stuck AI service generation detected:', stuckServices);
-        console.log('🔄 Giving more time for AI generation to complete...');
-        
-        // Don't immediately stop - AI generation can take time
-        // Only stop if we detect the same services stuck for multiple consecutive checks
+        console.log('⚠️ Detected stuck AI service generation:', stuckServices);
         setHasStuckState(true);
+        setErrorCount(prev => prev + 1);
         
-        // Don't force stop immediately - let the process continue
-        // The auto-recovery system will handle persistent issues
+        // Force stop the process to trigger auto-recovery
+        setIsRunning(false);
+        stuckServices.forEach(service => {
+          updateProgress(service.serviceId, { 
+            status: 'error', 
+            error: 'Process appears stuck - triggering auto-recovery' 
+          });
+        });
+        
         toast({
-          title: "AI generation taking longer than expected",
-          description: "Monitoring for potential issues. Process will auto-recover if needed.",
-          duration: 3000,
+          title: "Process appears stuck",
+          description: "Auto-recovery system will attempt to fix this issue.",
+          variant: "destructive",
+          duration: 5000,
         });
       }
     }
   };
 
-  // Set up monitoring interval when AI generation starts - but be less aggressive
+  // Set up monitoring interval when AI generation starts - check every 2 minutes for stuck states
   useEffect(() => {
     let interval: NodeJS.Timeout;
     
     if (isRunning) {
-      // Check every 3 minutes instead of 1 minute to allow for longer AI processing
-      interval = setInterval(monitorStuckState, 180000); // 3 minutes
+      console.log('⏰ Starting stuck state monitoring every 2 minutes');
+      // Check every 2 minutes for stuck states
+      interval = setInterval(monitorStuckState, 120000); // 2 minutes
+    } else {
+      console.log('⏰ Stopped stuck state monitoring');
     }
     
     return () => {
-      if (interval) clearInterval(interval);
+      if (interval) {
+        console.log('🧹 Cleaning up stuck state monitoring');
+        clearInterval(interval);
+      }
     };
   }, [isRunning, serviceProgress]);
 
@@ -886,10 +899,15 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
   };
 
   const handleRecoveryComplete = () => {
+    console.log('🎯 Recovery complete - resetting all states');
     setErrorCount(0);
     setHasStuckState(false);
     setIsRunning(false);
     setServiceProgress({});
+    
+    // Clear any stuck states and refresh
+    setSelectedServices([]);
+    setActiveTab('select');
     
     toast({
       title: "System refreshed",
