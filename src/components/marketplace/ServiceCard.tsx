@@ -321,10 +321,30 @@ export const ServiceCard = ({
             </div>
           )}
 
-          {/* Title - Positioned at top left */}
-          <h3 className="absolute top-3 left-3 z-10 font-semibold text-foreground leading-tight mobile-title text-sm max-w-[65%] line-clamp-2 bg-background/90 backdrop-blur-sm px-2 py-1 rounded">
-            {service.title.split(' - ').pop() || service.title.split(': ').pop() || service.title}
-          </h3>
+          {/* Title and Description - Positioned at top */}
+          <div className="absolute top-3 left-3 z-10 max-w-[65%]">
+            <h3 className="font-semibold text-foreground leading-tight mobile-title text-sm bg-background/90 backdrop-blur-sm px-2 py-1 rounded mb-1">
+              {service.title.split(' - ').pop() || service.title.split(': ').pop() || service.title}
+            </h3>
+            
+            {/* Description with Facebook-style expand */}
+            <div className="bg-background/90 backdrop-blur-sm px-2 py-1 rounded">
+              <p className={`text-xs text-muted-foreground leading-tight transition-all duration-300 ${isDescriptionExpanded ? '' : 'line-clamp-2'}`}>
+                {service.description}
+              </p>
+              {service.description && service.description.length > 100 && (
+                <button
+                  className="text-xs text-primary hover:text-primary/80 font-medium mt-1 transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsDescriptionExpanded(!isDescriptionExpanded);
+                  }}
+                >
+                  {isDescriptionExpanded ? 'See less' : 'See more'}
+                </button>
+              )}
+            </div>
+          </div>
 
           {/* Save Button */}
           <Button
@@ -386,23 +406,6 @@ export const ServiceCard = ({
               </div>
             )}
 
-            {/* Description with Facebook-style expand */}
-            <div className="mb-3">
-              <p className={`text-sm text-muted-foreground leading-tight transition-all duration-300 ${isDescriptionExpanded ? '' : 'line-clamp-2'}`}>
-                {service.description}
-              </p>
-              {service.description && service.description.length > 100 && (
-                <button
-                  className="text-sm text-primary hover:text-primary/80 font-medium mt-1 transition-colors"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setIsDescriptionExpanded(!isDescriptionExpanded);
-                  }}
-                >
-                  {isDescriptionExpanded ? 'See less' : 'See more'}
-                </button>
-              )}
-            </div>
 
             {/* Service Badges - Rich visual indicators */}
             <div className="h-8 mb-3">
