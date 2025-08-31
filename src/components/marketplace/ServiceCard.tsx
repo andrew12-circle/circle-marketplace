@@ -349,22 +349,26 @@ export const ServiceCard = ({
             />
           </Button>
 
-          {/* Description with Facebook-style expand */}
-          <div className="p-4 pb-2">
-            <p className={`text-sm text-muted-foreground leading-tight transition-all duration-300 ${isDescriptionExpanded ? '' : 'line-clamp-2'}`}>
-              {service.description}
+          {/* Description with uniform height */}
+          <div className="p-4 pb-2 h-20 flex flex-col">
+            <p className="text-sm text-muted-foreground leading-tight flex-1 overflow-hidden">
+              {service.description && service.description.length > 80 ? (
+                <>
+                  {isDescriptionExpanded ? service.description : `${service.description.substring(0, 80)}...`}
+                  <button
+                    className="text-primary hover:text-primary/80 font-medium ml-1 inline"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsDescriptionExpanded(!isDescriptionExpanded);
+                    }}
+                  >
+                    {isDescriptionExpanded ? 'See less' : 'See more'}
+                  </button>
+                </>
+              ) : (
+                service.description
+              )}
             </p>
-            {service.description && service.description.length > 100 && (
-              <button
-                className="text-sm text-primary hover:text-primary/80 font-medium mt-1 transition-colors"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsDescriptionExpanded(!isDescriptionExpanded);
-                }}
-              >
-                {isDescriptionExpanded ? 'See less' : 'See more'}
-              </button>
-            )}
           </div>
 
           {/* Image - 4:5 Portrait */}
