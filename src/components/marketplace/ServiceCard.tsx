@@ -652,7 +652,7 @@ export const ServiceCard = ({
                 className="h-9 px-3"
                 onClick={handleViewDetailsButton}
               >
-                <ArrowRight className="w-4 h-4" />
+                See more
               </Button>
             </div>
           </CardContent>
