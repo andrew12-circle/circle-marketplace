@@ -638,7 +638,28 @@ export const MarketplaceGrid = () => {
                 onClick={() => {
                   const servicesSection = document.querySelector('[data-testid="services-grid"]');
                   if (servicesSection) {
-                    servicesSection.scrollIntoView({ behavior: 'smooth' });
+                    // Slower, custom scroll animation to show categories and content
+                    const startY = window.pageYOffset;
+                    const targetY = servicesSection.getBoundingClientRect().top + window.pageYOffset - 80;
+                    const distance = targetY - startY;
+                    const duration = 2000; // 2 seconds for slower scroll
+                    let startTime = null;
+
+                    function scrollAnimation(currentTime) {
+                      if (!startTime) startTime = currentTime;
+                      const timeElapsed = currentTime - startTime;
+                      const progress = Math.min(timeElapsed / duration, 1);
+                      
+                      // Ease-out animation for smooth deceleration
+                      const easeOut = 1 - Math.pow(1 - progress, 3);
+                      window.scrollTo(0, startY + distance * easeOut);
+                      
+                      if (progress < 1) {
+                        requestAnimationFrame(scrollAnimation);
+                      }
+                    }
+                    
+                    requestAnimationFrame(scrollAnimation);
                   }
                 }}
               >
