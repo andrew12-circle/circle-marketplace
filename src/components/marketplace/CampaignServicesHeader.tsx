@@ -20,7 +20,6 @@ export const CampaignServicesHeader = () => {
       <div className="mb-6 sm:mb-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <p className="mt-1 text-muted-foreground max-w-[65ch]">Shop agent solutions side-by-side, and save up to 80% on the tools you already use — with one-click co-pay (automatic vendor co-marketing).</p>
           </div>
           
           <div className="flex flex-col sm:flex-row gap-3">
