@@ -241,12 +241,14 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
         }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.warn('Research generation failed, continuing without research context:', error);
+        return null; // Return null instead of throwing
+      }
       return data;
     } catch (error) {
-      console.error('Error generating research:', error);
-      setErrorCount(prev => prev + 1);
-      throw error;
+      console.warn('Research generation failed, continuing without research context:', error);
+      return null; // Don't throw error, just continue without research
     }
   };
 
@@ -290,8 +292,12 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
       // Generate AI Research first (this provides context for other sections)
       updateSectionProgress(service.id, 'research', 'updating');
       const researchData = await generateResearch(service);
-      await storeResearchInKnowledge(service.id, researchData);
-      updateSectionProgress(service.id, 'research', 'completed');
+      if (researchData) {
+        await storeResearchInKnowledge(service.id, researchData);
+        updateSectionProgress(service.id, 'research', 'completed');
+      } else {
+        updateSectionProgress(service.id, 'research', 'error');
+      }
 
       // Generate Service Details (now with research context)
       updateSectionProgress(service.id, 'details', 'updating');
