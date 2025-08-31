@@ -412,6 +412,30 @@ export const MarketplaceGrid = () => {
   const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
   const [isAddProductModalOpen, setIsAddProductModalOpen] = useState(false);
   const [showQAOverlay, setShowQAOverlay] = useState(false);
+
+  // Handle deep linking to services from shared URLs
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const serviceId = urlParams.get('service');
+    
+    if (serviceId && services.length > 0) {
+      const service = services.find(s => s.id === serviceId);
+      if (service) {
+        setSelectedService(service);
+        setIsServiceModalOpen(true);
+      }
+    }
+  }, [services]);
+
+  const handleCloseServiceModal = () => {
+    setIsServiceModalOpen(false);
+    setSelectedService(null);
+    
+    // Remove service parameter from URL when closing modal
+    const url = new URL(window.location.href);
+    url.searchParams.delete('service');
+    window.history.replaceState({}, '', url.toString());
+  };
   
   // Check for QA mode
   const isQAMode = new URLSearchParams(window.location.search).get('qa') === '1';
@@ -521,11 +545,6 @@ export const MarketplaceGrid = () => {
       setIsServiceModalOpen(true);
     }
   }, [flattenServices, services]);
-
-  const handleCloseServiceModal = () => {
-    setIsServiceModalOpen(false);
-    setSelectedService(null);
-  };
 
   return (
     <>

@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Heart, Star, ArrowRight, ShoppingCart, MessageCircle, Lock, Crown, Calendar, Users } from "lucide-react";
+import { Heart, Star, ArrowRight, ShoppingCart, MessageCircle, Lock, Crown, Calendar, Users, Share2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -70,6 +70,7 @@ export const ServiceCard = ({
   const [disclaimerContent, setDisclaimerContent] = useState<any>(null);
   const [showOverlay, setShowOverlay] = useState(false);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+  const [isSharePopoverOpen, setIsSharePopoverOpen] = useState(false);
   const { toast } = useToast();
   const { addToCart } = useCart();
   const { profile, user } = useAuth();
@@ -298,6 +299,127 @@ export const ServiceCard = ({
     window.open(url.toString(), '_blank', 'noopener,noreferrer');
   };
 
+  // Share functionality
+  const buildShareUrl = () => {
+    const baseUrl = window.location.origin;
+    const url = new URL(baseUrl);
+    url.searchParams.set('service', service.id);
+    url.searchParams.set('utm_source', 'circle_marketplace');
+    url.searchParams.set('utm_medium', 'share');
+    url.searchParams.set('utm_campaign', 'deal_share');
+    if (user?.id) {
+      url.searchParams.set('ref', user.id);
+    }
+    return url.toString();
+  };
+
+  const buildShareMessage = () => {
+    const dealInfo = getDealDisplayPrice(service);
+    const shareUrl = buildShareUrl();
+    
+    return `Check out this deal: ${service.title} - ${formatPrice(dealInfo.price)} ${dealInfo.label}${service.description ? `\n\n${service.description.substring(0, 100)}${service.description.length > 100 ? '...' : ''}` : ''}\n\n${shareUrl}`;
+  };
+
+  const getSmsHref = (message: string) => {
+    const encodedMessage = encodeURIComponent(message);
+    // iOS uses different SMS URL format than Android
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    return isIOS ? `sms:&body=${encodedMessage}` : `sms:?body=${encodedMessage}`;
+  };
+
+  const handleShare = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    const shareUrl = buildShareUrl();
+    const shareMessage = buildShareMessage();
+    
+    // Track share event
+    trackEvent({
+      event_type: 'share',
+      event_data: { 
+        context: 'service_card', 
+        service_id: service.id,
+        method: 'button_click'
+      }
+    } as any);
+
+    // Use native share if available (mobile)
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `Circle Marketplace - ${service.title}`,
+          text: shareMessage,
+          url: shareUrl,
+        });
+        
+        trackEvent({
+          event_type: 'share_completed',
+          event_data: { 
+            context: 'service_card', 
+            service_id: service.id,
+            method: 'native_share'
+          }
+        } as any);
+        
+        return;
+      } catch (error) {
+        // User cancelled or error occurred, fall through to manual options
+      }
+    }
+
+    // Open popover for desktop share options
+    setIsSharePopoverOpen(true);
+  };
+
+  const handleShareOption = async (method: 'sms' | 'email' | 'copy') => {
+    const shareUrl = buildShareUrl();
+    const shareMessage = buildShareMessage();
+    
+    trackEvent({
+      event_type: 'share_completed',
+      event_data: { 
+        context: 'service_card', 
+        service_id: service.id,
+        method
+      }
+    } as any);
+
+    switch (method) {
+      case 'sms':
+        window.open(getSmsHref(shareMessage), '_self');
+        break;
+      case 'email':
+        const emailSubject = encodeURIComponent(`Circle Marketplace Deal: ${service.title}`);
+        const emailBody = encodeURIComponent(shareMessage);
+        window.open(`mailto:?subject=${emailSubject}&body=${emailBody}`, '_self');
+        break;
+      case 'copy':
+        try {
+          await navigator.clipboard.writeText(shareMessage);
+          toast({
+            title: "Link copied!",
+            description: "Deal link has been copied to your clipboard.",
+          });
+        } catch (error) {
+          // Fallback for older browsers
+          const textArea = document.createElement('textarea');
+          textArea.value = shareMessage;
+          document.body.appendChild(textArea);
+          textArea.select();
+          document.execCommand('copy');
+          document.body.removeChild(textArea);
+          
+          toast({
+            title: "Link copied!",
+            description: "Deal link has been copied to your clipboard.",
+          });
+        }
+        break;
+    }
+    
+    setIsSharePopoverOpen(false);
+  };
+
   const discountPercentage = calculateDiscountPercentage();
 
   return (
@@ -343,19 +465,65 @@ export const ServiceCard = ({
             </div>
           </div>
 
-          {/* Save Button */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute top-3 right-3 z-10 h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background"
-            onClick={handleSave}
-          >
-            <Heart 
-              className={`h-4 w-4 transition-colors ${
-                isSaved ? "fill-red-500 text-red-500" : "text-muted-foreground"
-              }`} 
-            />
-          </Button>
+          {/* Save and Share Buttons */}
+          <div className="absolute top-3 right-3 z-10 flex gap-1">
+            <Popover open={isSharePopoverOpen} onOpenChange={setIsSharePopoverOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background"
+                  onClick={handleShare}
+                >
+                  <Share2 className="h-4 w-4 text-muted-foreground" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-48 p-2" align="end">
+                <div className="space-y-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full justify-start"
+                    onClick={() => handleShareOption('sms')}
+                  >
+                    <MessageCircle className="h-4 w-4 mr-2" />
+                    Text Message
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full justify-start"
+                    onClick={() => handleShareOption('email')}
+                  >
+                    <MessageCircle className="h-4 w-4 mr-2" />
+                    Email
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full justify-start"
+                    onClick={() => handleShareOption('copy')}
+                  >
+                    <ArrowRight className="h-4 w-4 mr-2" />
+                    Copy Link
+                  </Button>
+                </div>
+              </PopoverContent>
+            </Popover>
+            
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background"
+              onClick={handleSave}
+            >
+              <Heart 
+                className={`h-4 w-4 transition-colors ${
+                  isSaved ? "fill-red-500 text-red-500" : "text-muted-foreground"
+                }`} 
+              />
+            </Button>
+          </div>
 
           {/* Description with dynamic height for expansion */}
           <div className={`px-4 pt-1 pb-2 flex flex-col transition-all duration-300 ${isDescriptionExpanded ? 'h-auto' : 'h-20'}`}>
