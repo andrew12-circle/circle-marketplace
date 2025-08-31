@@ -43,9 +43,9 @@ const Index = () => {
                     <img 
                       src={circleLogoUrl}
                       alt="Circle Logo" 
-                      className="w-10 h-10 object-contain"
-                      width="40"
-                      height="40"
+                      className="w-14 h-14 object-contain"
+                      width="56"
+                      height="56"
                       loading="eager"
                       decoding="async"
                       style={{
