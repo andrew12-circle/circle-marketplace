@@ -13,6 +13,7 @@ import { AddProductModal } from "./AddProductModal";
 import { VendorSelectionModal } from "./VendorSelectionModal";
 import { TopDealsCarousel } from "./TopDealsCarousel";
 import { CategoryBlocks } from "./CategoryBlocks";
+import { AutoRecoverySystem } from "./AutoRecoverySystem";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,6 +44,7 @@ import { SmartSearchAutocomplete } from "./SmartSearchAutocomplete";
 import { RecentlyViewedServices } from "./RecentlyViewedServices";
 import { ServiceBundles } from "./ServiceBundles";
 import { QAOverlay } from "../common/QAOverlay";
+import { useAutoRecovery } from "@/hooks/useAutoRecovery";
 
 interface FilterState {
   category: string;
@@ -75,6 +77,13 @@ export const MarketplaceGrid = () => {
   const marketplaceEnabled = useMarketplaceEnabled(); // Use server-backed config
   
   const { toast } = useToast();
+
+  // Auto-recovery system
+  const { triggerRecovery, isRecovering, canAutoRecover } = useAutoRecovery({
+    enabled: true,
+    errorThreshold: 1,
+    autoTriggerDelay: 1000
+  });
 
   const handleClearCachePreserveSession = async () => {
     try {
@@ -125,6 +134,26 @@ export const MarketplaceGrid = () => {
   } = useInvalidateMarketplace();
   const queryClient = useQueryClient();
   const [showRecovery, setShowRecovery] = useState(false);
+  const [errorCount, setErrorCount] = useState(0);
+
+  // Track errors and trigger auto-recovery
+  useEffect(() => {
+    if (error && !marketplaceData) {
+      setErrorCount(prev => prev + 1);
+      
+      // Auto-trigger recovery on first error if we can
+      if (canAutoRecover && errorCount === 0) {
+        console.log('🔧 Auto-triggering recovery due to marketplace error');
+        setTimeout(() => {
+          triggerRecovery();
+        }, 1000);
+      }
+    } else if (marketplaceData && !error) {
+      // Reset error count when data loads successfully
+      setErrorCount(0);
+      setShowRecovery(false);
+    }
+  }, [error, marketplaceData, canAutoRecover, triggerRecovery, errorCount]);
 
   useEffect(() => {
     if (isLoading && !marketplaceData) {
@@ -160,6 +189,12 @@ export const MarketplaceGrid = () => {
     invalidateAll();
     setShowRecovery(false);
   }, [invalidateAll, queryClient, resetFailureState]);
+
+  const handleRecoveryComplete = useCallback(() => {
+    setErrorCount(0);
+    setShowRecovery(false);
+    handleReloadDataQuick();
+  }, [handleReloadDataQuick]);
 
   // Memoize extracted data to prevent unnecessary re-renders
   const services = useMemo(() => (marketplaceData as {
@@ -500,6 +535,15 @@ export const MarketplaceGrid = () => {
             </div>
           )}
 
+          {/* Auto Recovery System - Show when there are errors */}
+          {(error || errorCount > 0) && (
+            <AutoRecoverySystem
+              isError={!!error}
+              errorCount={errorCount}
+              onRecoveryComplete={handleRecoveryComplete}
+            />
+          )}
+
           {/* Hero Section */}
           <div className="mb-12">
             <h1 className="text-3xl sm:text-6xl font-bold text-black mb-4 lcp-content font-playfair">Agent Marketplace.</h1>
@@ -512,6 +556,8 @@ export const MarketplaceGrid = () => {
                 <div><strong>Vendors:</strong> {vendors.length} active</div>
                 <div><strong>Location:</strong> {location?.state || 'Unknown'}</div>
                 <div><strong>Auth:</strong> {user ? `Authenticated (${user.id.slice(0, 8)}...)` : 'Not authenticated'}</div>
+                <div><strong>Errors:</strong> {errorCount} detected</div>
+                <div><strong>Recovery:</strong> {isRecovering ? 'In progress...' : 'Ready'}</div>
               </div>
             )}
           </div>
@@ -581,7 +627,6 @@ export const MarketplaceGrid = () => {
                   {t('vendors')}
                 </Button>
               </div>
-
 
               {/* Grid - Mobile Responsive */}
               {viewMode === "services" && (
@@ -736,16 +781,9 @@ export const MarketplaceGrid = () => {
                     <div className="mb-6">
                       <div className="rounded-lg border bg-card text-card-foreground p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                         <span className="text-sm text-center sm:text-left">
-                          Oops! Our apologies, the services are not loading. This is common because of a browser error. Please clear your cache and reload.
+                          Our apologies, we hit a snag. The system has been automatically refreshed for you.
                         </span>
                         <div className="flex gap-2 justify-center flex-wrap">
-                          <Button variant="outline" onClick={() => {
-                            // Clear browser storage
-                            localStorage.clear();
-                            sessionStorage.clear();
-                            // Force hard refresh with cache bypass
-                            window.location.reload();
-                          }}>Clear Cache</Button>
                           <Button variant="outline" onClick={handleReloadDataQuick}>Reload data</Button>
                           <Button onClick={handleHardRefresh}>Try again</Button>
                         </div>
