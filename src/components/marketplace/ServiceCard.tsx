@@ -367,12 +367,12 @@ export const ServiceCard = ({
             )}
           </div>
 
-          {/* Image - Full width with 1.91:1 aspect ratio */}
-          <div className="relative w-full overflow-hidden bg-white flex-shrink-0" style={{ aspectRatio: '1.91/1' }}>
+          {/* Image - Fixed height */}
+          <div className="relative h-48 overflow-hidden bg-white flex-shrink-0 p-4">
             <img
               src={service.image_url || "/lovable-uploads/placeholder.svg"}
               alt={service.title}
-              className="w-full h-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
+              className="w-full h-full object-contain object-center transition-transform duration-300 group-hover:scale-105"
             />
           </div>
 
