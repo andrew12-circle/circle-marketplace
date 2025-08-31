@@ -174,19 +174,21 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
         setHasStuckState(true);
         setErrorCount(prev => prev + 1);
         
-        if (canAutoRecover && errorCount === 0) {
-          toast({
-            title: "Our apologies, we hit a snag",
-            description: "Let me refresh the system for you...",
-            duration: 3000,
+        // Force stop the process and show error
+        setIsRunning(false);
+        stuckServices.forEach(service => {
+          updateProgress(service.serviceId, { 
+            status: 'error', 
+            error: 'Process timed out - please try again' 
           });
-          
-          setTimeout(() => {
-            triggerRecovery();
-            setIsRunning(false);
-            setServiceProgress({});
-          }, 2000);
-        }
+        });
+        
+        toast({
+          title: "Process timed out",
+          description: "The AI updater got stuck. Please try again.",
+          variant: "destructive",
+          duration: 5000,
+        });
       }
     }
   };
