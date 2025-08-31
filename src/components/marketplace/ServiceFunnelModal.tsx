@@ -1250,4 +1250,6 @@ export const ServiceFunnelModal = memo(({
          prevProps.service.id === nextProps.service.id;
 });
 
-export default ServiceFunnelModal;
+ServiceFunnelModal.displayName = "ServiceFunnelModal";
+
+export default ServiceFunnelModal;;

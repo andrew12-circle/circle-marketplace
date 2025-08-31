@@ -346,6 +346,13 @@ export const ServiceCard = ({
           </div>
 
           <CardContent className="p-4 flex flex-col justify-between h-full mobile-card-content">
+            {/* Title and Vendor Info - Fixed height */}
+            <div className="flex items-center gap-2 text-sm text-muted-foreground h-6 mb-3">
+              <h3 className="font-semibold text-foreground leading-tight mobile-title">
+                {service.title.split(' - ').pop() || service.title.split(': ').pop() || service.title}
+              </h3>
+            </div>
+
             {/* Service Rating - Updated to use bulk ratings when available */}
             {(totalReviews || 0) > 0 && shouldShowRating && (
               <div className="flex items-center gap-1 mb-3">
@@ -381,13 +388,6 @@ export const ServiceCard = ({
                 )}
               </div>
             )}
-
-            {/* Title and Vendor Info - Fixed height */}
-            <div className="flex items-center gap-2 text-sm text-muted-foreground h-6 mb-3">
-              <h3 className="font-semibold text-foreground leading-tight mobile-title">
-                {service.title.split(' - ').pop() || service.title.split(': ').pop() || service.title}
-              </h3>
-            </div>
 
             {/* Description - Fixed height */}
             <Tooltip>
