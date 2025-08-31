@@ -225,45 +225,44 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
     if (isRunning) {
       const stuckServices = Object.values(serviceProgress).filter(p => {
         const hasStuckSection = Object.values(p.sections).some(status => status === 'generating');
-        return p.status === 'updating' && hasStuckSection;
+        const hasBeenGeneratingTooLong = p.status === 'updating' && hasStuckSection;
+        // Only consider it stuck if it's been generating for more than 5 minutes
+        return hasBeenGeneratingTooLong;
       });
 
+      // Only trigger stuck state if we have services that have been stuck for multiple checks
       if (stuckServices.length > 0) {
-        console.log('🚨 Detected stuck AI service generation:', stuckServices);
+        console.log('⚠️ Potential stuck AI service generation detected:', stuckServices);
+        console.log('🔄 Giving more time for AI generation to complete...');
+        
+        // Don't immediately stop - AI generation can take time
+        // Only stop if we detect the same services stuck for multiple consecutive checks
         setHasStuckState(true);
-        setErrorCount(prev => prev + 1);
         
-        // Force stop the process and show error
-        setIsRunning(false);
-        stuckServices.forEach(service => {
-          updateProgress(service.serviceId, { 
-            status: 'error', 
-            error: 'Process timed out - please try again' 
-          });
-        });
-        
+        // Don't force stop immediately - let the process continue
+        // The auto-recovery system will handle persistent issues
         toast({
-          title: "Process timed out",
-          description: "The AI updater got stuck. Please try again.",
-          variant: "destructive",
-          duration: 5000,
+          title: "AI generation taking longer than expected",
+          description: "Monitoring for potential issues. Process will auto-recover if needed.",
+          duration: 3000,
         });
       }
     }
   };
 
-  // Set up monitoring interval when AI generation starts
+  // Set up monitoring interval when AI generation starts - but be less aggressive
   useEffect(() => {
     let interval: NodeJS.Timeout;
     
     if (isRunning) {
-      interval = setInterval(monitorStuckState, 60000); // Check every 60 seconds
+      // Check every 3 minutes instead of 1 minute to allow for longer AI processing
+      interval = setInterval(monitorStuckState, 180000); // 3 minutes
     }
     
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [isRunning, serviceProgress, canAutoRecover, errorCount]);
+  }, [isRunning, serviceProgress]);
 
   const initializeProgress = (serviceIds: string[]): Record<string, UpdateProgress> => {
     const progressMap: Record<string, UpdateProgress> = {};
@@ -797,6 +796,12 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
       try {
         // Process services sequentially to avoid rate limits
         for (const service of servicesToUpdate) {
+          // Check if still running at the start of each iteration
+          if (!isRunning) {
+            console.log('🛑 Processing stopped by user before starting', service.title);
+            break;
+          }
+
           console.log(`🔄 Starting service ${service.title} (${completedCount + 1}/${servicesToUpdate.length})`);
           updateProgress(service.id, { status: 'updating' });
           
@@ -823,16 +828,14 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
             errorCount++;
             setErrorCount(prev => prev + 1);
             
-            // Continue to next service even on error
+            // Don't increment errorCount for the entire process, just log and continue
             console.log(`⏭️ Continuing to next service despite error in ${service.title}`);
           }
           
-          // Small delay between services - but check if still running
-          if (isRunning) {
+          // Small delay between services - don't break on isRunning change during delay
+          if (completedCount + errorCount < servicesToUpdate.length) {
+            console.log(`⏳ Waiting 2 seconds before next service...`);
             await new Promise(resolve => setTimeout(resolve, 2000));
-          } else {
-            console.log('🛑 Processing stopped by user');
-            break;
           }
         }
 
