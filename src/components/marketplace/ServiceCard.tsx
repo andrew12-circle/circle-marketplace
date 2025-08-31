@@ -434,14 +434,14 @@ export const ServiceCard = ({
               
               {service.tags && service.tags.length > 0 && (
                 <div className="flex flex-wrap gap-2">
-                  {service.tags.slice(0, 1).map((tag, index) => (
+                  {service.tags.slice(0, 2).map((tag, index) => (
                     <Badge key={`${service.id}-tag-${index}`} variant="outline" className="text-xs px-2 py-1 whitespace-nowrap">
                       {tag.length > 12 ? `${tag.substring(0, 12)}...` : tag}
                     </Badge>
                   ))}
-                  {service.tags.length > 1 && (
+                  {service.tags.length > 2 && (
                     <span className="text-xs text-muted-foreground self-center">
-                      +{service.tags.length - 1}
+                      +{service.tags.length - 2}
                     </span>
                   )}
                 </div>
