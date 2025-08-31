@@ -6,14 +6,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/simpleClient";
+import { useAutoRecovery } from "@/hooks/useAutoRecovery";
 import { 
   Plus, 
   Trash2, 
   Mail, 
   AlertCircle,
   CheckCircle,
-  Save
+  Save,
+  RefreshCw
 } from "lucide-react";
 
 interface ServiceConsultationEmailsProps {
@@ -25,10 +27,21 @@ export const ServiceConsultationEmails = ({ serviceId, serviceName }: ServiceCon
   const [emails, setEmails] = useState<string[]>(['']);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const { triggerRecovery, isRecovering } = useAutoRecovery();
 
   useEffect(() => {
     loadEmails();
-  }, [serviceId]);
+    
+    // Auto-recovery for stuck loading states
+    const timeout = setTimeout(() => {
+      if (loading) {
+        console.warn('ServiceConsultationEmails stuck in loading state, triggering recovery');
+        triggerRecovery();
+      }
+    }, 10000); // 10 seconds timeout
+    
+    return () => clearTimeout(timeout);
+  }, [serviceId, loading, triggerRecovery]);
 
   const loadEmails = async () => {
     try {
@@ -145,7 +158,25 @@ export const ServiceConsultationEmails = ({ serviceId, serviceName }: ServiceCon
     return (
       <Card>
         <CardContent className="p-6">
-          <div className="text-center">Loading consultation emails...</div>
+          <div className="flex flex-col items-center gap-3">
+            <div className="text-center">Loading consultation emails...</div>
+            {isRecovering && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <RefreshCw className="w-4 h-4 animate-spin" />
+                Refreshing system...
+              </div>
+            )}
+            <Button
+              variant="outline" 
+              size="sm"
+              onClick={triggerRecovery}
+              disabled={isRecovering}
+              className="mt-2"
+            >
+              <RefreshCw className={`w-4 h-4 mr-2 ${isRecovering ? 'animate-spin' : ''}`} />
+              {isRecovering ? 'Refreshing...' : 'Refresh'}
+            </Button>
+          </div>
         </CardContent>
       </Card>
     );
