@@ -601,8 +601,61 @@ export const MarketplaceGrid = () => {
 
           {/* Hero Section */}
           <div className="mb-12">
-            <h1 className="text-3xl sm:text-6xl font-bold text-black mb-4 lcp-content font-playfair">Agent Marketplace.</h1>
-            <p className="text-gray-600 max-w-2xl text-sm lcp-content">This isn't just another directory you can Google. It's a curated, vetted, agent-verified list — at prices you won't find on your own. We've done the homework: tracking what top agents actually use, what works, and what delivers ROI. Tell us your growth path and we'll guide you there faster. And with vendors just a couple clicks away, you'll often cover nearly half of the already reduced cost. No awkward conversations — just real tools, real savings, and real growth.</p>
+            <h1 className="text-4xl sm:text-6xl font-bold text-black mb-6 lcp-content font-playfair">
+              The Agent Marketplace for <span className="text-blue-600">real growth.</span>
+            </h1>
+            <p className="text-gray-600 max-w-3xl text-lg mb-8 lcp-content leading-relaxed">
+              Not another directory. A vetted, agent-verified marketplace with negotiated pricing and proven vendors. Share your goals, and we'll route you to what top agents actually use — faster, cheaper, and without awkward sales calls.
+            </p>
+            
+            {/* Feature Highlights */}
+            <div className="flex flex-wrap gap-6 mb-8">
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center">
+                  <span className="text-green-600 text-sm">%</span>
+                </div>
+                <span className="text-gray-700 font-medium">Up to 80% off top tools</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center">
+                  <span className="text-blue-600 text-sm">✓</span>
+                </div>
+                <span className="text-gray-700 font-medium">Pre-vetted vendors</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-5 bg-purple-100 rounded-full flex items-center justify-center">
+                  <span className="text-purple-600 text-sm">$</span>
+                </div>
+                <span className="text-gray-700 font-medium">Transparent, flat-fee co-pay</span>
+              </div>
+            </div>
+
+            {/* Call to Action Buttons */}
+            <div className="flex flex-wrap gap-4 mb-6">
+              <Button 
+                size="lg" 
+                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 font-semibold"
+                onClick={() => {
+                  const servicesSection = document.querySelector('[data-testid="services-grid"]');
+                  if (servicesSection) {
+                    servicesSection.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
+              >
+                Explore Marketplace →
+              </Button>
+              <Button 
+                variant="outline" 
+                size="lg" 
+                className="border-gray-300 text-gray-700 hover:bg-gray-50 px-8 py-3 font-semibold"
+                onClick={() => {
+                  // Navigate to pro trial - replace with actual route
+                  window.location.href = '/pro-trial';
+                }}
+              >
+                Start Pro Trial →
+              </Button>
+            </div>
             
             {/* QA Diagnostics in Hero when in QA mode */}
             {isQAMode && (
