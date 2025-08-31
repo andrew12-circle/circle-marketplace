@@ -56,8 +56,8 @@ export const VendorRESPAManager = () => {
         .update({
           is_respa_regulated: isRegulated,
           respa_risk_level: riskLevel,
-        } as any)
-        .eq('id' as any, vendorId as any);
+        })
+        .eq('id', vendorId);
 
       if (error) throw error;
 

@@ -406,9 +406,6 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
           throw updateError;
         }
         
-        // Log AI update note
-        await logAIUpdateNote(service.id, service.title);
-        
         console.log(`✅ Service ${service.title} verified successfully`);
         updateSectionProgress(service.id, 'verification', 'completed');
         return true;
@@ -568,6 +565,9 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
       if (researchData) {
         await storeResearchInKnowledge(service.id, researchData);
       }
+      
+      // Log AI update note for every successful update
+      await logAIUpdateNote(service.id, service.title);
       
       // Verify completion and auto-verify if all fields are present
       await verifyServiceCompletion(service);
