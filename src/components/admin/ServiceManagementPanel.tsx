@@ -34,6 +34,7 @@ import { ServiceConsultationEmails } from './ServiceConsultationEmails';
 import { AdminNotes } from './AdminNotes';
 import { ServiceDisclaimerSection } from './ServiceDisclaimerSection';
 import { ServiceAIResearchEditor } from './ServiceAIResearchEditor';
+import { ServiceImageUploader } from './ServiceImageUploader';
 import { AIServiceUpdater } from './AIServiceUpdater';
 
 interface PricingFeature {
@@ -1203,6 +1204,17 @@ export const ServiceManagementPanel = () => {
               <TabsContent value="details" className="space-y-4">
                 {isEditingDetails ? (
                   <div className="space-y-4">
+                    {/* Service Image Upload Section */}
+                    <ServiceImageUploader 
+                      serviceId={selectedService.id}
+                      serviceName={selectedService.title}
+                      currentImageUrl={selectedService.profile_image_url}
+                      onImageUpdated={(newImageUrl) => {
+                        setEditForm({ ...editForm, profile_image_url: newImageUrl });
+                        setSelectedService({ ...selectedService, profile_image_url: newImageUrl });
+                      }}
+                    />
+                    
                     {isDetailsDirty && (
                       <Badge variant="outline" className="text-xs">Unsaved changes</Badge>
                     )}
