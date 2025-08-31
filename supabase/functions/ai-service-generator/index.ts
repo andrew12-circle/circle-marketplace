@@ -186,14 +186,39 @@ ${pricingData ? `Website Pricing Found: ${JSON.stringify(pricingData)}` : ''}
 ${service.existing_research ? `Research Data: ${JSON.stringify(service.existing_research)}` : ''}
 ${customPrompt ? `Additional Instructions: ${customPrompt}` : ''}
 
+IMPORTANT: For tags, select relevant category tags from Circle's official tag system. Choose tags that fit the service:
+
+Circle Category Tags:
+- cat:crms (CRM systems)
+- cat:ads-lead-gen (Advertising & Lead Generation)
+- cat:website-idx (Websites & IDX)
+- cat:seo (SEO services)
+- cat:coaching (Coaching & Training)
+- cat:marketing-automation (Marketing Automation & Content)
+- cat:video-media (Video & Media Tools)
+- cat:listing-showing (Listing & Showing Tools)
+- cat:data-analytics (Data & Analytics)
+- cat:finance-business (Finance & Business Tools)
+- cat:productivity-collaboration (Productivity & Collaboration)
+- cat:virtual-assistants (Virtual Assistants & Dialers)
+- cat:team-recruiting (Team & Recruiting Tools)
+- cat:ce-licensing (CE & Licensing)
+- cat:client-events (Client Event Kits)
+- cat:print-mail (Print & Mail)
+- cat:signage-branding (Signage & Branding)
+- cat:presentations (Presentations)
+- cat:branding (Branding)
+- cat:client-retention (Client Retention)
+- cat:transaction-coordinator (Transaction Coordinator)
+
 Return JSON with:
 {
   "description": "Compelling 120-160 char card subheadline that sells the service",
   "estimated_roi": number (percentage like 1200 for 1200%),
   "duration": "Time to see results (e.g., '30 days')",
-  "tags": ["10", "relevant", "category", "tags", "from", "our", "system"],
+  "tags": ["cat:relevant-category", "cat:another-category", "additional", "descriptive", "tags"],
   "retail_price": "${pricingData?.prices?.[0] || service.retail_price || 'TBD'}",
-  "price_duration": "${pricingData?.duration || service.price_duration || 'monthly'}"
+  "price_duration": "${pricingData?.duration || service.price_duration || 'mo'}"
 }`;
         
         if (respaAssessment) {
