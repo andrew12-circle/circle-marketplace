@@ -315,6 +315,20 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
 
       if (error) throw error;
 
+      console.log('Service data for verification:', {
+        id: updatedService.id,
+        title: updatedService.title,
+        description: updatedService.description ? 'present' : 'missing',
+        estimated_roi: updatedService.estimated_roi ? 'present' : 'missing',
+        duration: updatedService.duration ? 'present' : 'missing',
+        tags: updatedService.tags ? `present (${updatedService.tags.length} items)` : 'missing',
+        retail_price: updatedService.retail_price ? 'present' : 'missing',
+        price_duration: updatedService.price_duration ? 'present' : 'missing',
+        disclaimer_id: updatedService.disclaimer_id ? 'present' : 'missing',
+        funnel_content: updatedService.funnel_content ? 'present' : 'missing',
+        pricing_tiers: updatedService.pricing_tiers ? 'present' : 'missing'
+      });
+
       const hasAllFields = !!(
         updatedService.description &&
         updatedService.estimated_roi &&
@@ -328,16 +342,25 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
         updatedService.pricing_tiers
       );
 
+      console.log(`All required fields present: ${hasAllFields}`);
+
       if (hasAllFields) {
         // Auto-verify the service
-        await supabase
+        const { error: updateError } = await supabase
           .from('services')
           .update({ is_verified: true })
           .eq('id', service.id);
+          
+        if (updateError) {
+          console.error('Error updating verification status:', updateError);
+          throw updateError;
+        }
         
+        console.log(`✅ Service ${service.title} verified successfully`);
         updateSectionProgress(service.id, 'verification', 'completed');
         return true;
       } else {
+        console.log(`❌ Service ${service.title} missing required fields for verification`);
         updateSectionProgress(service.id, 'verification', 'error');
         return false;
       }

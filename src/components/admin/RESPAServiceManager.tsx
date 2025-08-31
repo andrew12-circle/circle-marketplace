@@ -72,11 +72,11 @@ const RESPAServiceManager = () => {
       if (servicesError) throw servicesError;
 
       // Then get vendor profiles for these services
-      const vendorIds = [...new Set((servicesData as any)?.map((s: any) => s.vendor_id).filter(Boolean))];
+      const vendorIds = [...new Set(servicesData?.map((s: any) => s.vendor_id).filter(Boolean))];
       const { data: vendorsData, error: vendorsError } = await supabase
         .from('profiles')
         .select('user_id, business_name, display_name, specialties')
-        .in('user_id' as any, vendorIds as any);
+        .in('user_id', vendorIds);
 
       if (vendorsError) throw vendorsError;
 
@@ -141,7 +141,7 @@ const RESPAServiceManager = () => {
       const { error } = await supabase
         .from('services')
         .update(dbUpdates)
-        .eq('id' as any, serviceId as any);
+        .eq('id', serviceId);
 
       if (error) throw error;
 
@@ -186,7 +186,7 @@ const RESPAServiceManager = () => {
       const { error } = await supabase
         .from('services')
         .update(dbUpdates)
-        .in('id' as any, selectedServices as any);
+        .in('id', selectedServices);
 
       if (error) throw error;
 
@@ -239,8 +239,8 @@ const RESPAServiceManager = () => {
             is_respa_regulated: update.is_respa_regulated,
             respa_risk_level: update.respa_risk_level,
             respa_split_limit: update.respa_split_limit
-          } as any)
-          .eq('id' as any, update.id as any);
+          })
+          .eq('id', update.id);
 
         if (error) throw error;
       }
