@@ -68,6 +68,8 @@ interface ServiceUpdateTracking {
 }
 
 export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdaterProps) => {
+  console.log('🏗️ AIServiceUpdater rendering with', services.length, 'services');
+  
   const { toast } = useToast();
   const [isRunning, setIsRunning] = useState(false);
   const isRunningRef = useRef(false);
@@ -371,10 +373,11 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
   };
 
   const generateServiceDetails = async (service: Service, progress: UpdateProgress): Promise<any> => {
-    console.log(`Generating details for ${service.title}...`);
+    console.log(`📝 Generating details for ${service.title}...`);
     updateSectionProgress(service.id, 'details', 'generating');
     
     try {
+      console.log(`📡 Calling ai-service-generator for details: ${service.title}`);
       const { data, error } = await supabase.functions.invoke('ai-service-generator', {
         body: {
           type: 'details',
@@ -386,13 +389,17 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
         }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error(`❌ Details generation failed for ${service.title}:`, error);
+        throw error;
+      }
       
+      console.log(`✅ Details completed for ${service.title}`);
       updateSectionProgress(service.id, 'details', 'completed');
       await recordSectionUpdate(service.id, 'details', 'AI generated service details including pricing and RESPA assessment');
       return data;
     } catch (error) {
-      console.error('Error generating details:', error);
+      console.error(`❌ Details generation error for ${service.title}:`, error);
       updateSectionProgress(service.id, 'details', 'error');
       throw error;
     }
@@ -455,12 +462,19 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
   };
 
   const generateResearch = async (service: Service): Promise<any> => {
-    console.log(`Generating research for ${service.title}...`);
+    console.log(`🔬 Generating research for ${service.title}...`);
     updateSectionProgress(service.id, 'research', 'generating');
     
     try {
       const { data: session } = await supabase.auth.getSession();
       
+      if (!session.session?.access_token) {
+        console.warn('⚠️ No session token available for research generation');
+        updateSectionProgress(service.id, 'research', 'error');
+        return null;
+      }
+
+      console.log(`📡 Calling research function for ${service.title}...`);
       const { data, error } = await supabase.functions.invoke('bulk-generate-service-research', {
         body: {
           serviceId: service.id,
@@ -475,16 +489,17 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
       });
 
       if (error) {
-        console.warn('Research generation failed, continuing without research context:', error);
+        console.warn(`⚠️ Research generation failed for ${service.title}:`, error);
         updateSectionProgress(service.id, 'research', 'error');
         return null;
       }
       
+      console.log(`✅ Research completed for ${service.title}`);
       updateSectionProgress(service.id, 'research', 'completed');
       await recordSectionUpdate(service.id, 'research', 'AI generated market research and analysis');
       return data;
     } catch (error) {
-      console.warn('Research generation failed, continuing without research context:', error);
+      console.warn(`⚠️ Research generation exception for ${service.title}:`, error);
       updateSectionProgress(service.id, 'research', 'error');
       return null;
     }
@@ -546,6 +561,8 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
 
   const checkIfAIUpdated = async (serviceId: string): Promise<boolean> => {
     try {
+      console.log(`🔍 Checking AI update status for service: ${serviceId}`);
+      
       const { data, error } = await supabase
         .from('admin_notes')
         .select('id')
@@ -558,7 +575,9 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
         return false;
       }
 
-      return data.length > 0;
+      const isUpdated = data.length > 0;
+      console.log(`📊 Service ${serviceId} AI update status: ${isUpdated ? 'already updated' : 'needs update'}`);
+      return isUpdated;
     } catch (error) {
       console.error('Error checking AI update status:', error);
       return false;
@@ -824,19 +843,31 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
     
     // Filter out already AI-updated services if overwrite is disabled
     if (!overwriteAIUpdated) {
+      const originalCount = servicesToUpdate.length;
       const filteredServices = [];
+      
+      console.log('🔍 Checking AI update status for', originalCount, 'services...');
+      
       for (const service of servicesToUpdate) {
-        const isAIUpdated = await checkIfAIUpdated(service.id);
-        if (!isAIUpdated) {
+        try {
+          const isAIUpdated = await checkIfAIUpdated(service.id);
+          if (!isAIUpdated) {
+            filteredServices.push(service);
+            console.log(`✅ ${service.title} - will be updated`);
+          } else {
+            console.log(`⏭️ ${service.title} - already AI updated, skipping`);
+          }
+        } catch (error) {
+          console.error(`Error checking AI status for ${service.title}:`, error);
+          // Include service in update if check fails
           filteredServices.push(service);
-        } else {
-          console.log(`⏭️ Skipping ${service.title} - already AI updated`);
         }
       }
-      servicesToUpdate = filteredServices;
       
-      if (filteredServices.length !== servicesToUpdate.length) {
-        const skippedCount = servicesToUpdate.length - filteredServices.length;
+      servicesToUpdate = filteredServices;
+      const skippedCount = originalCount - filteredServices.length;
+      
+      if (skippedCount > 0) {
         toast({
           title: `Skipping ${skippedCount} services`,
           description: `${skippedCount} services already AI-updated. Enable "Overwrite AI-updated services" to update them again.`,
@@ -873,11 +904,12 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
 
     const processInBackground = async () => {
       console.log('🔄 processInBackground started with', servicesToUpdate.length, 'services');
+      console.log('📋 Services to process:', servicesToUpdate.map(s => `${s.title} (${s.id})`));
+      
       let completedCount = 0;
       let errorCount = 0;
 
       try {
-        console.log('📊 Initializing progress for services:', servicesToUpdate.map(s => s.id));
         // Process services sequentially to avoid rate limits
         for (const service of servicesToUpdate) {
           // Check if still running using ref to avoid stale state
@@ -946,11 +978,23 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
       }
     };
 
+    console.log('🚀 About to start processing in', runInBackground ? 'background' : 'foreground', 'mode');
+    
     if (runInBackground) {
       // Start processing without awaiting it
-      processInBackground();
+      processInBackground().catch(error => {
+        console.error('Background processing failed:', error);
+        setIsRunning(false);
+        setErrorCount(prev => prev + 1);
+      });
     } else {
-      await processInBackground();
+      try {
+        await processInBackground();
+      } catch (error) {
+        console.error('Foreground processing failed:', error);
+        setIsRunning(false);
+        setErrorCount(prev => prev + 1);
+      }
     }
   };
 
@@ -972,19 +1016,44 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
   };
 
   const toggleServiceSelection = (serviceId: string) => {
-    setSelectedServices(prev => 
-      prev.includes(serviceId) 
+    const isCurrentlySelected = selectedServices.includes(serviceId);
+    const serviceName = services.find(s => s.id === serviceId)?.title || 'Unknown';
+    
+    console.log(`🔄 Toggling service ${serviceName} (${serviceId}):`, 
+                isCurrentlySelected ? 'deselecting' : 'selecting');
+    
+    setSelectedServices(prev => {
+      const newSelection = prev.includes(serviceId) 
         ? prev.filter(id => id !== serviceId)
-        : [...prev, serviceId]
-    );
+        : [...prev, serviceId];
+      
+      console.log(`📋 Updated selection: ${newSelection.length} services selected`);
+      return newSelection;
+    });
   };
 
   const selectAllServices = () => {
-    setSelectedServices(services.map(s => s.id));
+    console.log('📋 Select All Services clicked - total services:', services.length);
+    const allServiceIds = services.map(s => s.id);
+    console.log('📋 Setting selected services to:', allServiceIds.length, 'services');
+    setSelectedServices(allServiceIds);
+    
+    toast({
+      title: "All services selected",
+      description: `Selected ${allServiceIds.length} services for AI processing`,
+      duration: 2000,
+    });
   };
 
   const clearSelection = () => {
+    console.log('🧹 Clear Selection clicked');
     setSelectedServices([]);
+    
+    toast({
+      title: "Selection cleared",
+      description: "No services selected",
+      duration: 2000,
+    });
   };
 
   const getSectionIcon = (status: 'pending' | 'generating' | 'completed' | 'error') => {
