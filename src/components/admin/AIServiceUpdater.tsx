@@ -323,7 +323,7 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
         updatedService.tags.length > 0 &&
         updatedService.retail_price &&
         updatedService.price_duration &&
-        updatedService.disclaimer_content &&
+        updatedService.disclaimer_id &&
         updatedService.funnel_content &&
         updatedService.pricing_tiers
       );
