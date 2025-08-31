@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, memo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Users, ChevronLeft, ChevronRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,7 @@ interface CustomersAlsoViewedProps {
   maxSuggestions?: number;
 }
 
-export const CustomersAlsoViewed = memo(({ 
+export const CustomersAlsoViewed = ({ 
   currentService, 
   maxSuggestions = 6 
 }: CustomersAlsoViewedProps) => {
@@ -163,4 +163,4 @@ export const CustomersAlsoViewed = memo(({
       </CardContent>
     </Card>
   );
-});
+};

@@ -66,8 +66,8 @@ const RESPADocumentUpload: React.FC<RESPADocumentUploadProps> = ({
       // Update the service record with new document list
       const { error: updateError } = await supabase
         .from('services')
-        .update({ supporting_documents: updatedDocuments })
-        .eq('id', serviceId);
+        .update({ supporting_documents: updatedDocuments as any } as any)
+        .eq('id' as any, serviceId as any);
 
       if (updateError) throw updateError;
 
@@ -130,8 +130,8 @@ const RESPADocumentUpload: React.FC<RESPADocumentUploadProps> = ({
       
       const { error: updateError } = await supabase
         .from('services')
-        .update({ supporting_documents: updatedDocuments })
-        .eq('id', serviceId);
+        .update({ supporting_documents: updatedDocuments as any } as any)
+        .eq('id' as any, serviceId as any);
 
       if (updateError) throw updateError;
 

@@ -29,7 +29,7 @@ import {
   HelpCircle,
   Settings
 } from "lucide-react";
-import ServiceFunnelModal from "@/components/marketplace/ServiceFunnelModal";
+import { ServiceFunnelModal } from "@/components/marketplace/ServiceFunnelModal";
 
 interface Service {
   id: string;

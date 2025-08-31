@@ -3,7 +3,7 @@ import { useTopDealsEnabled } from "@/hooks/useAppConfig";
 import { useABTest } from "@/hooks/useABTest";
 import { useSponsoredTracking } from "@/hooks/useSponsoredTracking";
 import { SponsoredLabel } from "./SponsoredLabel";
-import ServiceFunnelModal from "./ServiceFunnelModal";
+import { ServiceFunnelModal } from "./ServiceFunnelModal";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

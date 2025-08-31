@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 import { ServiceFunnelEditor } from './ServiceFunnelEditor';
 import { ServicePricingTiersEditor } from '@/components/marketplace/ServicePricingTiersEditor';
-import ServiceFunnelModal from '@/components/marketplace/ServiceFunnelModal';
+import { ServiceFunnelModal } from '@/components/marketplace/ServiceFunnelModal';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
@@ -611,7 +611,7 @@ export const ServiceManagementPanel = () => {
           vendors (name, logo_url),
           service_providers (name, logo_url)
         `)
-        .eq('id', selectedService.id)
+        .eq('id' as any, selectedService.id as any)
         .single();
 
       if (fetchError) {
@@ -848,7 +848,7 @@ export const ServiceManagementPanel = () => {
       const { data: verifyRow, error: fetchError } = await supabase
         .from('services')
         .select('id, funnel_content, pricing_tiers, updated_at')
-        .eq('id', selectedService.id)
+        .eq('id' as any, selectedService.id as any)
         .maybeSingle();
 
       if (fetchError) throw fetchError;

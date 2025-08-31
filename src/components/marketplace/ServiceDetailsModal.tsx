@@ -1,4 +1,4 @@
-import React, { useState, Suspense, lazy } from "react";
+import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -26,11 +26,9 @@ import { useToast } from "@/hooks/use-toast";
 import { ReviewRatingSystem } from "./ReviewRatingSystem";
 import { useServiceRatings } from "@/hooks/useServiceRatings";
 import { useServiceReviews } from "@/hooks/useServiceReviews";
+import { CustomersAlsoViewed } from "./CustomersAlsoViewed";
+import { ServiceBundles } from "./ServiceBundles";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
-
-// Lazy load heavy components
-const CustomersAlsoViewed = lazy(() => import("./CustomersAlsoViewed").then(m => ({ default: m.CustomersAlsoViewed })));
-const ServiceBundles = lazy(() => import("./ServiceBundles").then(m => ({ default: m.ServiceBundles })));
 interface Service {
   id: string;
   title: string;
@@ -408,24 +406,20 @@ export const ServiceDetailsModal = ({ service, isOpen, onClose }: ServiceDetails
 
           {/* Customers Also Viewed */}
           <div className="mb-8">
-            <Suspense fallback={<div className="animate-pulse bg-muted h-32 rounded-lg" />}>
-              <CustomersAlsoViewed 
-                currentService={service}
-                maxSuggestions={6}
-              />
-            </Suspense>
+            <CustomersAlsoViewed 
+              currentService={service}
+              maxSuggestions={6}
+            />
           </div>
 
           {/* Related Service Bundles */}
           {bundlesEnabled && (
             <div className="mb-8">
-              <Suspense fallback={<div className="animate-pulse bg-muted h-32 rounded-lg" />}>
-                <ServiceBundles 
-                  currentService={service}
-                  category={service.category}
-                  maxBundles={2}
-                />
-              </Suspense>
+              <ServiceBundles 
+                currentService={service}
+                category={service.category}
+                maxBundles={2}
+              />
             </div>
           )}
 

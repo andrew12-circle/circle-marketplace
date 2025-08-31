@@ -383,7 +383,7 @@ export const Auth = () => {
           >
             {/* Email Field */}
             <div className="space-y-2">
-              <Label htmlFor="email">Email Address</Label>
+              <Label htmlFor="email">Email</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
@@ -393,14 +393,9 @@ export const Auth = () => {
                   placeholder="Enter your email"
                   className="pl-10"
                   required
-                  aria-label="Email address"
-                  aria-describedby="email-help"
                   value={formData.email}
                   onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                 />
-              </div>
-              <div id="email-help" className="sr-only">
-                Enter your email address to sign in or create an account
               </div>
             </div>
 
@@ -417,12 +412,7 @@ export const Auth = () => {
                     placeholder="Enter your full name"
                     className="pl-10"
                     required
-                    aria-label="Full name"
-                    aria-describedby="name-help"
                   />
-                </div>
-                <div id="name-help" className="sr-only">
-                  Enter your full name for your account profile
                 </div>
               </div>
             )}
@@ -441,8 +431,6 @@ export const Auth = () => {
                     className="pl-10 pr-10"
                     required
                     minLength={8}
-                    aria-label="Password"
-                    aria-describedby="password-help"
                     value={formData.password}
                     onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
                   />
@@ -452,7 +440,6 @@ export const Auth = () => {
                     size="sm"
                     className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                     onClick={() => setShowPassword(!showPassword)}
-                    aria-label={showPassword ? "Hide password" : "Show password"}
                   >
                     {showPassword ? (
                       <EyeOff className="w-4 h-4 text-muted-foreground" />
@@ -460,9 +447,6 @@ export const Auth = () => {
                       <Eye className="w-4 h-4 text-muted-foreground" />
                     )}
                   </Button>
-                </div>
-                <div id="password-help" className="sr-only">
-                  {isLogin ? "Enter your password to sign in" : "Choose a secure password with at least 8 characters"}
                 </div>
                 
                 {/* Password Strength Indicator (Signup only) */}

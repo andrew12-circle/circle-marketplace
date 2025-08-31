@@ -98,9 +98,7 @@ export const useServiceReviews = (serviceId: string) => {
       }
     };
 
-    // Add debounce to prevent rapid successive calls
-    const timeoutId = setTimeout(fetchReviews, 100);
-    return () => clearTimeout(timeoutId);
+    fetchReviews();
   }, [serviceId]);
 
   return { reviews, loading, error };

@@ -45,7 +45,7 @@ import {
   Verified,
   Maximize2
 } from 'lucide-react';
-import ServiceFunnelModal from './ServiceFunnelModal';
+import { ServiceFunnelModal } from './ServiceFunnelModal';
 
 interface MediaItem {
   id: string;
