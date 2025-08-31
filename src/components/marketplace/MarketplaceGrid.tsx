@@ -8,6 +8,7 @@ import { MarketplaceSortingControls } from "./MarketplaceSortingControls";
 import { CampaignServicesHeader } from "./CampaignServicesHeader";
 import { CircleProBanner } from "./CircleProBanner";
 import { ServiceDetailsModal } from "./ServiceDetailsModal";
+import { ServiceFunnelModal } from "./ServiceFunnelModal";
 import { AIConciergeBanner } from "./AIConciergeBanner";
 import { AddProductModal } from "./AddProductModal";
 import { VendorSelectionModal } from "./VendorSelectionModal";
@@ -414,15 +415,23 @@ export const MarketplaceGrid = () => {
   const [showQAOverlay, setShowQAOverlay] = useState(false);
 
   // Handle deep linking to services from shared URLs
+  const [isFunnelModalOpen, setIsFunnelModalOpen] = useState(false);
+  
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const serviceId = urlParams.get('service');
+    const view = urlParams.get('view');
     
     if (serviceId && services.length > 0) {
       const service = services.find(s => s.id === serviceId);
       if (service) {
         setSelectedService(service);
-        setIsServiceModalOpen(true);
+        // Default to funnel modal, but support details view for backwards compatibility
+        if (view === 'details') {
+          setIsServiceModalOpen(true);
+        } else {
+          setIsFunnelModalOpen(true);
+        }
       }
     }
   }, [services]);
@@ -434,6 +443,18 @@ export const MarketplaceGrid = () => {
     // Remove service parameter from URL when closing modal
     const url = new URL(window.location.href);
     url.searchParams.delete('service');
+    url.searchParams.delete('view');
+    window.history.replaceState({}, '', url.toString());
+  };
+
+  const handleCloseFunnelModal = () => {
+    setIsFunnelModalOpen(false);
+    setSelectedService(null);
+    
+    // Remove service parameter from URL when closing modal
+    const url = new URL(window.location.href);
+    url.searchParams.delete('service');
+    url.searchParams.delete('view');
     window.history.replaceState({}, '', url.toString());
   };
   
@@ -928,6 +949,15 @@ export const MarketplaceGrid = () => {
           service={selectedService} 
           isOpen={isServiceModalOpen} 
           onClose={handleCloseServiceModal} 
+        />
+      )}
+
+      {/* Service Funnel Modal */}
+      {selectedService && (
+        <ServiceFunnelModal 
+          service={selectedService} 
+          isOpen={isFunnelModalOpen} 
+          onClose={handleCloseFunnelModal} 
         />
       )}
 

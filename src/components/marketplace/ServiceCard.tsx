@@ -302,8 +302,9 @@ export const ServiceCard = ({
   // Share functionality
   const buildShareUrl = () => {
     const baseUrl = window.location.origin;
-    const url = new URL(baseUrl);
+    const url = new URL(`${baseUrl}/marketplace`);
     url.searchParams.set('service', service.id);
+    url.searchParams.set('view', 'funnel');
     url.searchParams.set('utm_source', 'circle_marketplace');
     url.searchParams.set('utm_medium', 'share');
     url.searchParams.set('utm_campaign', 'deal_share');
@@ -395,7 +396,7 @@ export const ServiceCard = ({
         break;
       case 'copy':
         try {
-          await navigator.clipboard.writeText(shareMessage);
+          await navigator.clipboard.writeText(shareUrl);
           toast({
             title: "Link copied!",
             description: "Deal link has been copied to your clipboard.",
@@ -403,7 +404,7 @@ export const ServiceCard = ({
         } catch (error) {
           // Fallback for older browsers
           const textArea = document.createElement('textarea');
-          textArea.value = shareMessage;
+          textArea.value = shareUrl;
           document.body.appendChild(textArea);
           textArea.select();
           document.execCommand('copy');
