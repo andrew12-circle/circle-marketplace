@@ -22,7 +22,6 @@ interface Service {
   tags?: string[];
   funnel_content?: any;
   disclaimer_content?: any;
-  ai_research?: any;
 }
 
 interface AIServiceUpdaterProps {
@@ -83,6 +82,15 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
   };
 
   const generateServiceDetails = async (service: Service) => {
+    // Get existing research data to enhance generation
+    const { data: existingResearch } = await supabase
+      .from('service_ai_knowledge')
+      .select('content')
+      .eq('service_id', service.id)
+      .eq('knowledge_type', 'research')
+      .eq('is_active', true)
+      .single();
+
     const { data, error } = await supabase.functions.invoke('ai-service-generator', {
       body: {
         type: 'details',
@@ -90,7 +98,7 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
           title: service.title,
           category: service.category,
           website_url: service.website_url,
-          existing_research: service.ai_research
+          existing_research: existingResearch?.content
         },
         customPrompt
       }
@@ -118,6 +126,15 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
   };
 
   const generateFunnel = async (service: Service) => {
+    // Get existing research data to enhance generation
+    const { data: existingResearch } = await supabase
+      .from('service_ai_knowledge')
+      .select('content')
+      .eq('service_id', service.id)
+      .eq('knowledge_type', 'research')
+      .eq('is_active', true)
+      .single();
+
     const { data, error } = await supabase.functions.invoke('ai-service-generator', {
       body: {
         type: 'funnel',
@@ -130,7 +147,7 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
           pro_price: service.pro_price,
           estimated_roi: service.estimated_roi,
           duration: service.duration,
-          existing_research: service.ai_research
+          existing_research: existingResearch?.content
         },
         customPrompt
       }
@@ -164,17 +181,41 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
     if (error) throw error;
   };
 
+  const storeResearchInKnowledge = async (serviceId: string, researchData: any) => {
+    // First, deactivate existing research entries
+    await supabase
+      .from('service_ai_knowledge')
+      .update({ is_active: false })
+      .eq('service_id', serviceId)
+      .eq('knowledge_type', 'research');
+
+    // Create new research entry
+    const { error } = await supabase
+      .from('service_ai_knowledge')
+      .insert({
+        service_id: serviceId,
+        title: `AI Generated Research`,
+        knowledge_type: 'research',
+        content: typeof researchData === 'string' ? researchData : JSON.stringify(researchData),
+        tags: ['ai-generated', 'research'],
+        priority: 8,
+        is_active: true
+      });
+
+    if (error) throw error;
+  };
+
   const processService = async (service: Service) => {
     updateProgress(service.id, { status: 'updating' });
 
     try {
-      // Generate AI Research
+      // Generate AI Research first (this provides context for other sections)
       updateSectionProgress(service.id, 'research', 'updating');
       const researchData = await generateResearch(service);
-      await updateServiceInDatabase(service.id, { ai_research: researchData });
+      await storeResearchInKnowledge(service.id, researchData);
       updateSectionProgress(service.id, 'research', 'completed');
 
-      // Generate Service Details
+      // Generate Service Details (now with research context)
       updateSectionProgress(service.id, 'details', 'updating');
       const detailsData = await generateServiceDetails(service);
       await updateServiceInDatabase(service.id, {
@@ -191,7 +232,7 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
       await updateServiceInDatabase(service.id, { disclaimer_content: disclaimerData });
       updateSectionProgress(service.id, 'disclaimer', 'completed');
 
-      // Generate Funnel
+      // Generate Funnel (with research context)
       updateSectionProgress(service.id, 'funnel', 'updating');
       const funnelData = await generateFunnel(service);
       await updateServiceInDatabase(service.id, { 
@@ -327,9 +368,6 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
                           {!service.disclaimer_content && (
                             <Badge variant="outline" className="text-xs">No Disclaimer</Badge>
                           )}
-                          {!service.ai_research && (
-                            <Badge variant="outline" className="text-xs">No Research</Badge>
-                          )}
                         </div>
                       </div>
                       <div className="shrink-0">
@@ -367,7 +405,7 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
             <div className="p-4 bg-blue-50 rounded-lg">
               <h4 className="font-medium text-sm mb-2">What will be generated:</h4>
               <ul className="text-sm space-y-1 text-muted-foreground">
-                <li>• AI Research - Comprehensive service analysis</li>
+                <li>• AI Research - Comprehensive service analysis (stored in knowledge base)</li>
                 <li>• Service Details - Description, ROI, duration, tags</li>
                 <li>• Disclaimer Content - Legal and compliance information</li>
                 <li>• Funnel Content - Complete sales funnel with pricing tiers</li>
