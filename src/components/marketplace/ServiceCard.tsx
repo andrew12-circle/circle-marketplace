@@ -69,6 +69,7 @@ export const ServiceCard = ({
   const [isDirectPurchaseModalOpen, setIsDirectPurchaseModalOpen] = useState(false);
   const [disclaimerContent, setDisclaimerContent] = useState<any>(null);
   const [showOverlay, setShowOverlay] = useState(false);
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const { toast } = useToast();
   const { addToCart } = useCart();
   const { profile, user } = useAuth();
@@ -321,9 +322,29 @@ export const ServiceCard = ({
           )}
 
           {/* Title - Positioned at top left */}
-          <h3 className="absolute top-3 left-3 z-10 font-semibold text-foreground leading-tight mobile-title text-sm max-w-[60%] line-clamp-2 bg-background/80 backdrop-blur-sm px-2 py-1 rounded">
-            {service.title.split(' - ').pop() || service.title.split(': ').pop() || service.title}
-          </h3>
+          <div className="absolute top-3 left-3 z-10 max-w-[65%]">
+            <h3 className="font-semibold text-foreground leading-tight mobile-title text-sm bg-background/90 backdrop-blur-sm px-2 py-1 rounded mb-1">
+              {service.title.split(' - ').pop() || service.title.split(': ').pop() || service.title}
+            </h3>
+            
+            {/* Description with See More functionality */}
+            <div className="bg-background/90 backdrop-blur-sm px-2 py-1 rounded">
+              <p className={`text-xs text-muted-foreground leading-tight ${isDescriptionExpanded ? '' : 'line-clamp-2'}`}>
+                {service.description}
+              </p>
+              {service.description && service.description.length > 100 && (
+                <button
+                  className="text-xs text-primary hover:text-primary/80 font-medium mt-1 transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsDescriptionExpanded(!isDescriptionExpanded);
+                  }}
+                >
+                  {isDescriptionExpanded ? 'See less' : 'See more'}
+                </button>
+              )}
+            </div>
+          </div>
 
           {/* Save Button */}
           <Button
@@ -385,17 +406,6 @@ export const ServiceCard = ({
               </div>
             )}
 
-            {/* Description - Fixed height */}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <p className="text-sm text-muted-foreground line-clamp-2 h-10 mb-3 cursor-help">
-                  {service.description}
-                </p>
-              </TooltipTrigger>
-              <TooltipContent className="max-w-[250px] p-5 text-sm bg-popover border border-border rounded-lg shadow-lg z-[60]" side="top" align="start" sideOffset={5} alignOffset={5}>
-                <p className="text-popover-foreground break-words">{service.description}</p>
-              </TooltipContent>
-            </Tooltip>
 
             {/* Service Badges - Rich visual indicators */}
             <div className="h-8 mb-3">
