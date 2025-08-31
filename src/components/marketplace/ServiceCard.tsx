@@ -340,24 +340,6 @@ export const ServiceCard = ({
             />
           </Button>
 
-          {/* Description with Facebook-style expand - Right below title */}
-          <div className="absolute top-12 left-3 right-3 z-10 bg-background/90 backdrop-blur-sm rounded px-2 py-1">
-            <p className={`text-xs text-muted-foreground leading-tight transition-all duration-300 ${isDescriptionExpanded ? '' : 'line-clamp-2'}`}>
-              {service.description}
-            </p>
-            {service.description && service.description.length > 100 && (
-              <button
-                className="text-xs text-primary hover:text-primary/80 font-medium mt-1 transition-colors"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsDescriptionExpanded(!isDescriptionExpanded);
-                }}
-              >
-                {isDescriptionExpanded ? 'See less' : 'See more'}
-              </button>
-            )}
-          </div>
-
           {/* Image - Fixed height */}
           <div className="relative h-48 overflow-hidden bg-white flex-shrink-0 p-4">
             <img
@@ -404,6 +386,23 @@ export const ServiceCard = ({
               </div>
             )}
 
+            {/* Description with Facebook-style expand */}
+            <div className="mb-3">
+              <p className={`text-sm text-muted-foreground leading-tight transition-all duration-300 ${isDescriptionExpanded ? '' : 'line-clamp-2'}`}>
+                {service.description}
+              </p>
+              {service.description && service.description.length > 100 && (
+                <button
+                  className="text-sm text-primary hover:text-primary/80 font-medium mt-1 transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsDescriptionExpanded(!isDescriptionExpanded);
+                  }}
+                >
+                  {isDescriptionExpanded ? 'See less' : 'See more'}
+                </button>
+              )}
+            </div>
 
             {/* Service Badges - Rich visual indicators */}
             <div className="h-8 mb-3">
