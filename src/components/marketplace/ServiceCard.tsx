@@ -350,7 +350,7 @@ export const ServiceCard = ({
           </Button>
 
           {/* Description with dynamic height for expansion */}
-          <div className={`p-4 pb-2 flex flex-col transition-all duration-300 ${isDescriptionExpanded ? 'h-auto' : 'h-20'}`}>
+          <div className={`px-4 pt-1 pb-2 flex flex-col transition-all duration-300 ${isDescriptionExpanded ? 'h-auto' : 'h-20'}`}>
             <p className={`text-sm text-muted-foreground leading-tight transition-all duration-300 ${isDescriptionExpanded ? 'overflow-visible' : 'line-clamp-2 overflow-hidden'}`}>
               {service.description}
             </p>
