@@ -186,9 +186,9 @@ ${pricingData ? `Website Pricing Found: ${JSON.stringify(pricingData)}` : ''}
 ${service.existing_research ? `Research Data: ${JSON.stringify(service.existing_research)}` : ''}
 ${customPrompt ? `Additional Instructions: ${customPrompt}` : ''}
 
-IMPORTANT: For tags, select relevant category tags from Circle's official tag system. Choose tags that fit the service:
+CRITICAL: For tags, you MUST select 2-4 category tags from Circle's official tag system that start with "cat:". These are required for the category toggles to work.
 
-Circle Category Tags:
+Circle Category Tags (REQUIRED - pick 2-4 that fit):
 - cat:crms (CRM systems)
 - cat:ads-lead-gen (Advertising & Lead Generation)
 - cat:website-idx (Websites & IDX)
@@ -199,24 +199,27 @@ Circle Category Tags:
 - cat:listing-showing (Listing & Showing Tools)
 - cat:data-analytics (Data & Analytics)
 - cat:finance-business (Finance & Business Tools)
-- cat:productivity-collaboration (Productivity & Collaboration)
+- cat:productivity (Productivity & Collaboration)
 - cat:virtual-assistants (Virtual Assistants & Dialers)
 - cat:team-recruiting (Team & Recruiting Tools)
 - cat:ce-licensing (CE & Licensing)
 - cat:client-events (Client Event Kits)
 - cat:print-mail (Print & Mail)
-- cat:signage-branding (Signage & Branding)
+- cat:signs (Signage & Branding)
 - cat:presentations (Presentations)
 - cat:branding (Branding)
 - cat:client-retention (Client Retention)
 - cat:transaction-coordinator (Transaction Coordinator)
+
+For Hello Leverage, which appears to be a business coordination and productivity service, you should choose:
+cat:productivity, cat:virtual-assistants, cat:finance-business
 
 Return JSON with:
 {
   "description": "Compelling 120-160 char card subheadline that sells the service",
   "estimated_roi": number (percentage like 1200 for 1200%),
   "duration": "Time to see results (e.g., '30 days')",
-  "tags": ["cat:relevant-category", "cat:another-category", "additional", "descriptive", "tags"],
+  "tags": ["cat:productivity", "cat:virtual-assistants", "cat:finance-business", "coordination", "efficiency"],
   "retail_price": "${pricingData?.prices?.[0] || service.retail_price || 'TBD'}",
   "price_duration": "${pricingData?.duration || service.price_duration || 'mo'}"
 }`;
