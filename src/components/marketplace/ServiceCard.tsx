@@ -322,14 +322,14 @@ export const ServiceCard = ({
           )}
 
           {/* Header with profile picture and title */}
-          <div className="p-4 pb-2 flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-              <span className="text-blue-600 font-semibold text-lg">
+          <div className="p-4 pb-2 flex items-start gap-2">
+            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 mt-1">
+              <span className="text-blue-600 font-semibold text-sm">
                 {service.vendor?.name?.charAt(0) || service.title.charAt(0)}
               </span>
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-foreground leading-tight text-lg line-clamp-2">
+              <h3 className="font-semibold text-foreground leading-tight text-base line-clamp-2 mb-1">
                 {service.title.split(' - ').pop() || service.title.split(': ').pop() || service.title}
               </h3>
             </div>
@@ -349,26 +349,22 @@ export const ServiceCard = ({
             />
           </Button>
 
-          {/* Description with uniform height */}
-          <div className="p-4 pb-2 h-20 flex flex-col">
-            <p className="text-sm text-muted-foreground leading-tight flex-1 overflow-hidden">
-              {service.description && service.description.length > 80 ? (
-                <>
-                  {isDescriptionExpanded ? service.description : `${service.description.substring(0, 80)}...`}
-                  <button
-                    className="text-primary hover:text-primary/80 font-medium ml-1 inline"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setIsDescriptionExpanded(!isDescriptionExpanded);
-                    }}
-                  >
-                    {isDescriptionExpanded ? 'See less' : 'See more'}
-                  </button>
-                </>
-              ) : (
-                service.description
-              )}
+          {/* Description with Facebook-style expand */}
+          <div className="p-4 pb-2">
+            <p className={`text-sm text-muted-foreground leading-tight transition-all duration-300 ${isDescriptionExpanded ? '' : 'line-clamp-2'}`}>
+              {service.description}
             </p>
+            {service.description && service.description.length > 100 && (
+              <button
+                className="text-sm text-primary hover:text-primary/80 font-medium mt-1 transition-colors"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsDescriptionExpanded(!isDescriptionExpanded);
+                }}
+              >
+                {isDescriptionExpanded ? 'See less' : 'See more'}
+              </button>
+            )}
           </div>
 
           {/* Image - 4:5 Portrait */}
