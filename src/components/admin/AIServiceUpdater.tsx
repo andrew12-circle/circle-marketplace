@@ -341,18 +341,65 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
   };
 
   const updateProgress = (serviceId: string, updates: Partial<UpdateProgress>) => {
-    setServiceProgress(prev => ({
-      ...prev,
-      [serviceId]: { 
-        ...prev[serviceId], 
-        ...updates,
-        lastActivity: Date.now()
+    setServiceProgress(prev => {
+      if (!prev[serviceId]) {
+        console.warn(`⚠️ Progress not initialized for service ${serviceId}, initializing...`);
+        const service = services.find(s => s.id === serviceId);
+        const initialProgress = {
+          serviceId,
+          serviceName: service?.title || 'Unknown Service',
+          status: 'pending' as const,
+          sections: {
+            details: 'pending' as const,
+            disclaimer: 'pending' as const,
+            funnel: 'pending' as const,
+            research: 'pending' as const,
+            faqs: 'pending' as const,
+            verification: 'pending' as const
+          }
+        };
+        return {
+          ...prev,
+          [serviceId]: { 
+            ...initialProgress, 
+            ...updates,
+            lastActivity: Date.now()
+          }
+        };
       }
-    }));
+      
+      return {
+        ...prev,
+        [serviceId]: { 
+          ...prev[serviceId], 
+          ...updates,
+          lastActivity: Date.now()
+        }
+      };
+    });
   };
 
   const updateSectionProgress = (serviceId: string, section: keyof SectionStatus, status: SectionStatus[keyof SectionStatus]) => {
     setServiceProgress(prev => {
+      if (!prev[serviceId]) {
+        console.warn(`⚠️ Progress not initialized for service ${serviceId}, initializing...`);
+        const service = services.find(s => s.id === serviceId);
+        const initialProgress = {
+          serviceId,
+          serviceName: service?.title || 'Unknown Service',
+          status: 'pending' as const,
+          sections: {
+            details: 'pending' as const,
+            disclaimer: 'pending' as const,
+            funnel: 'pending' as const,
+            research: 'pending' as const,
+            faqs: 'pending' as const,
+            verification: 'pending' as const
+          }
+        };
+        prev[serviceId] = initialProgress;
+      }
+      
       const currentProgress = prev[serviceId];
       const now = Date.now();
       
@@ -775,8 +822,22 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
     let progress = serviceProgress[service.id];
 
     if (!progress) {
-      console.error('❌ No progress object found for service:', service.id);
-      throw new Error('Progress tracking not initialized');
+      console.warn(`⚠️ Progress not found for service ${service.id}, initializing on-the-fly...`);
+      const initialProgress = {
+        serviceId: service.id,
+        serviceName: service.title,
+        status: 'updating' as const,
+        sections: {
+          details: 'pending' as const,
+          disclaimer: 'pending' as const,
+          funnel: 'pending' as const,
+          research: 'pending' as const,
+          faqs: 'pending' as const,
+          verification: 'pending' as const
+        }
+      };
+      updateProgress(service.id, initialProgress);
+      progress = { ...initialProgress };
     }
 
     try {
@@ -890,6 +951,10 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
     const initialProgress = initializeProgress(servicesToUpdate.map(s => s.id));
     console.log('📈 Initial progress:', Object.keys(initialProgress));
     setServiceProgress(initialProgress);
+    
+    // Wait for a microtick to ensure progress state is synchronized
+    await new Promise(resolve => setTimeout(resolve, 0));
+    console.log('✅ Progress state synchronized');
 
     if (runInBackground) {
       console.log('⚡ Running in background mode');

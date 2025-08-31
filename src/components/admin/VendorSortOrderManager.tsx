@@ -52,8 +52,8 @@ export const VendorSortOrderManager = () => {
     try {
       const { error } = await supabase
         .from('vendors')
-        .update({ sort_order: sortOrder } as any)
-        .eq('id' as any, vendorId as any);
+        .update({ sort_order: sortOrder })
+        .eq('id', vendorId);
 
       if (error) throw error;
 
