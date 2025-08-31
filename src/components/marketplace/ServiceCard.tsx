@@ -321,10 +321,12 @@ export const ServiceCard = ({
             </div>
           )}
 
-          {/* Title - Positioned at top left */}
-          <h3 className="absolute top-3 left-3 z-10 font-semibold text-foreground leading-tight mobile-title text-sm max-w-[65%] line-clamp-2 bg-background/90 backdrop-blur-sm px-2 py-1 rounded">
-            {service.title.split(' - ').pop() || service.title.split(': ').pop() || service.title}
-          </h3>
+          {/* Header with title */}
+          <div className="p-4 pb-2">
+            <h3 className="font-semibold text-foreground leading-tight text-lg line-clamp-2">
+              {service.title.split(' - ').pop() || service.title.split(': ').pop() || service.title}
+            </h3>
+          </div>
 
           {/* Save Button */}
           <Button
