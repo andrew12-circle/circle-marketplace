@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,6 +7,8 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Bot, Sparkles, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { AutoRecoverySystem } from '@/components/marketplace/AutoRecoverySystem';
+import { useAutoRecovery } from '@/hooks/useAutoRecovery';
 
 interface Service {
   id: string;
@@ -49,6 +50,59 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [customPrompt, setCustomPrompt] = useState('');
   const [activeTab, setActiveTab] = useState('select');
+  const [errorCount, setErrorCount] = useState(0);
+  const [hasStuckState, setHasStuckState] = useState(false);
+
+  // Auto-recovery system
+  const { triggerRecovery, isRecovering, canAutoRecover } = useAutoRecovery({
+    enabled: true,
+    errorThreshold: 1,
+    autoTriggerDelay: 2000
+  });
+
+  // Monitor for stuck states during AI generation
+  const monitorStuckState = () => {
+    if (isRunning) {
+      // Check if any service has been "updating" for more than 60 seconds
+      const stuckServices = progress.filter(p => {
+        const hasStuckSection = Object.values(p.sections).some(status => status === 'updating');
+        return p.status === 'updating' && hasStuckSection;
+      });
+
+      if (stuckServices.length > 0) {
+        console.log('🚨 Detected stuck AI service generation:', stuckServices);
+        setHasStuckState(true);
+        setErrorCount(prev => prev + 1);
+        
+        if (canAutoRecover && errorCount === 0) {
+          toast({
+            title: "Our apologies, we hit a snag",
+            description: "Let me refresh the system for you...",
+            duration: 3000,
+          });
+          
+          setTimeout(() => {
+            triggerRecovery();
+            setIsRunning(false);
+            setProgress([]);
+          }, 2000);
+        }
+      }
+    }
+  };
+
+  // Set up monitoring interval when AI generation starts
+  React.useEffect(() => {
+    let interval: NodeJS.Timeout;
+    
+    if (isRunning) {
+      interval = setInterval(monitorStuckState, 60000); // Check every 60 seconds
+    }
+    
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isRunning, progress, canAutoRecover, errorCount]);
 
   const initializeProgress = (serviceIds: string[]) => {
     return serviceIds.map(id => {
@@ -82,94 +136,118 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
   };
 
   const generateServiceDetails = async (service: Service) => {
-    // Get existing research data to enhance generation
-    const { data: existingResearch } = await supabase
-      .from('service_ai_knowledge')
-      .select('content')
-      .eq('service_id', service.id)
-      .eq('knowledge_type', 'research')
-      .eq('is_active', true)
-      .single();
+    try {
+      // Get existing research data to enhance generation
+      const { data: existingResearch } = await supabase
+        .from('service_ai_knowledge')
+        .select('content')
+        .eq('service_id', service.id)
+        .eq('knowledge_type', 'research')
+        .eq('is_active', true)
+        .single();
 
-    const { data, error } = await supabase.functions.invoke('ai-service-generator', {
-      body: {
-        type: 'details',
-        service: {
-          title: service.title,
-          category: service.category,
-          website_url: service.website_url,
-          existing_research: existingResearch?.content
-        },
-        customPrompt
-      }
-    });
+      const { data, error } = await supabase.functions.invoke('ai-service-generator', {
+        body: {
+          type: 'details',
+          service: {
+            title: service.title,
+            category: service.category,
+            website_url: service.website_url,
+            existing_research: existingResearch?.content
+          },
+          customPrompt
+        }
+      });
 
-    if (error) throw error;
-    return data;
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error generating service details:', error);
+      setErrorCount(prev => prev + 1);
+      throw error;
+    }
   };
 
   const generateDisclaimer = async (service: Service) => {
-    const { data, error } = await supabase.functions.invoke('ai-service-generator', {
-      body: {
-        type: 'disclaimer',
-        service: {
-          title: service.title,
-          category: service.category,
-          website_url: service.website_url
-        },
-        customPrompt
-      }
-    });
+    try {
+      const { data, error } = await supabase.functions.invoke('ai-service-generator', {
+        body: {
+          type: 'disclaimer',
+          service: {
+            title: service.title,
+            category: service.category,
+            website_url: service.website_url
+          },
+          customPrompt
+        }
+      });
 
-    if (error) throw error;
-    return data;
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error generating disclaimer:', error);
+      setErrorCount(prev => prev + 1);
+      throw error;
+    }
   };
 
   const generateFunnel = async (service: Service) => {
-    // Get existing research data to enhance generation
-    const { data: existingResearch } = await supabase
-      .from('service_ai_knowledge')
-      .select('content')
-      .eq('service_id', service.id)
-      .eq('knowledge_type', 'research')
-      .eq('is_active', true)
-      .single();
+    try {
+      // Get existing research data to enhance generation
+      const { data: existingResearch } = await supabase
+        .from('service_ai_knowledge')
+        .select('content')
+        .eq('service_id', service.id)
+        .eq('knowledge_type', 'research')
+        .eq('is_active', true)
+        .single();
 
-    const { data, error } = await supabase.functions.invoke('ai-service-generator', {
-      body: {
-        type: 'funnel',
-        service: {
-          title: service.title,
-          description: service.description,
-          category: service.category,
-          website_url: service.website_url,
-          retail_price: service.retail_price,
-          pro_price: service.pro_price,
-          estimated_roi: service.estimated_roi,
-          duration: service.duration,
-          existing_research: existingResearch?.content
-        },
-        customPrompt
-      }
-    });
+      const { data, error } = await supabase.functions.invoke('ai-service-generator', {
+        body: {
+          type: 'funnel',
+          service: {
+            title: service.title,
+            description: service.description,
+            category: service.category,
+            website_url: service.website_url,
+            retail_price: service.retail_price,
+            pro_price: service.pro_price,
+            estimated_roi: service.estimated_roi,
+            duration: service.duration,
+            existing_research: existingResearch?.content
+          },
+          customPrompt
+        }
+      });
 
-    if (error) throw error;
-    return data;
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error generating funnel:', error);
+      setErrorCount(prev => prev + 1);
+      throw error;
+    }
   };
 
   const generateResearch = async (service: Service) => {
-    const { data, error } = await supabase.functions.invoke('bulk-generate-service-research', {
-      body: {
-        serviceId: service.id,
-        serviceName: service.title,
-        serviceCategory: service.category,
-        websiteUrl: service.website_url,
-        customPrompt
-      }
-    });
+    try {
+      const { data, error } = await supabase.functions.invoke('bulk-generate-service-research', {
+        body: {
+          serviceId: service.id,
+          serviceName: service.title,
+          serviceCategory: service.category,
+          websiteUrl: service.website_url,
+          customPrompt
+        }
+      });
 
-    if (error) throw error;
-    return data;
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error generating research:', error);
+      setErrorCount(prev => prev + 1);
+      throw error;
+    }
   };
 
   const updateServiceInDatabase = async (serviceId: string, updates: any) => {
@@ -250,6 +328,7 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
         status: 'error', 
         error: error instanceof Error ? error.message : 'Unknown error' 
       });
+      setErrorCount(prev => prev + 1);
     }
   };
 
@@ -265,21 +344,42 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
 
     setIsRunning(true);
     setActiveTab('progress');
+    setHasStuckState(false);
+    setErrorCount(0);
     
     const servicesToUpdate = services.filter(s => selectedServices.includes(s.id));
     setProgress(initializeProgress(selectedServices));
 
-    // Process services sequentially to avoid rate limits
-    for (const service of servicesToUpdate) {
-      await processService(service);
-      // Small delay between services
-      await new Promise(resolve => setTimeout(resolve, 1000));
-    }
+    try {
+      // Process services sequentially to avoid rate limits
+      for (const service of servicesToUpdate) {
+        await processService(service);
+        // Small delay between services
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
 
+      toast({
+        title: 'AI Update Complete',
+        description: `Processed ${servicesToUpdate.length} services. Check results and verify content.`,
+      });
+    } catch (error) {
+      console.error('AI updater failed:', error);
+      setErrorCount(prev => prev + 1);
+    } finally {
+      setIsRunning(false);
+    }
+  };
+
+  const handleRecoveryComplete = () => {
+    setErrorCount(0);
+    setHasStuckState(false);
     setIsRunning(false);
+    setProgress([]);
+    
     toast({
-      title: 'AI Update Complete',
-      description: `Processed ${servicesToUpdate.length} services. Check results and verify content.`,
+      title: "System refreshed",
+      description: "AI Service Updater is ready to go!",
+      duration: 2000,
     });
   };
 
@@ -321,6 +421,16 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
         </p>
       </CardHeader>
       <CardContent>
+        {(errorCount > 0 || hasStuckState) && (
+          <div className="mb-6">
+            <AutoRecoverySystem
+              isError={errorCount > 0 || hasStuckState}
+              errorCount={errorCount}
+              onRecoveryComplete={handleRecoveryComplete}
+            />
+          </div>
+        )}
+
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="select">Select Services</TabsTrigger>
@@ -479,13 +589,18 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
           </div>
           <Button 
             onClick={runAIUpdater}
-            disabled={isRunning || selectedServices.length === 0}
+            disabled={isRunning || selectedServices.length === 0 || isRecovering}
             className="flex items-center gap-2"
           >
             {isRunning ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
                 Generating...
+              </>
+            ) : isRecovering ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Refreshing System...
               </>
             ) : (
               <>
