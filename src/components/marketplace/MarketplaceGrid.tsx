@@ -264,6 +264,7 @@ export const MarketplaceGrid = () => {
   // Sort strategy state
   const [orderStrategy, setOrderStrategy] = useState<'ranked' | 'recent' | 'price-low' | 'price-high'>('ranked');
   const [enablePagination, setEnablePagination] = useState(true); // Enable by default to show services immediately
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Only enable pagination if marketplace is enabled by admin
   const shouldEnablePagination = enablePagination && marketplaceEnabled;
@@ -275,11 +276,13 @@ export const MarketplaceGrid = () => {
     }
   }, [searchTerm, filters.category, filters.featured, filters.verified, filters.coPayEligible]);
 
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filters.category, filters.featured, filters.verified, filters.coPayEligible, orderStrategy]);
+
   const {
     data: paginatedData,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
     isLoading: isLoadingServices
   } = usePaginatedServices({
     searchTerm,
@@ -287,11 +290,12 @@ export const MarketplaceGrid = () => {
     featured: filters.featured,
     verified: filters.verified,
     coPayEligible: filters.coPayEligible,
-    orderStrategy
+    orderStrategy,
+    page: currentPage
   }, { enabled: shouldEnablePagination });
 
   const flattenServices = useMemo(() => {
-    const items = paginatedData?.pages?.flatMap(p => p.items) || [];
+    const items = paginatedData?.items || [];
     const extractNumericPrice = (priceString?: string | null): number => {
       if (!priceString) return 0;
       const cleaned = priceString.replace(/[^0-9.]/g, '');
@@ -305,7 +309,7 @@ export const MarketplaceGrid = () => {
     });
   }, [paginatedData, filters.priceRange, filters.verified]);
 
-  const totalServicesCount = paginatedData?.pages?.[0]?.totalCount ?? 0;
+  const totalServicesCount = paginatedData?.totalCount ?? 0;
   const baseForFilters = services.length ? services : flattenServices;
 
   // Memoize service IDs to prevent unnecessary re-fetching of ratings
@@ -643,14 +647,48 @@ export const MarketplaceGrid = () => {
                       />
                     ))}
                   </div>
-                  <div className="mt-6 flex items-center justify-center gap-4">
+                  <div className="mt-6 flex flex-col items-center gap-4">
                     <span className="text-sm text-muted-foreground">
-                      Showing {flattenServices.length} of {totalServicesCount} results
+                      Showing page {paginatedData?.currentPage || 1} of {paginatedData?.totalPages || 1} ({totalServicesCount} total results)
                     </span>
-                    {hasNextPage && (
-                      <Button onClick={() => fetchNextPage()} disabled={isFetchingNextPage}>
-                        {isFetchingNextPage ? 'Loading…' : 'Load more'}
-                      </Button>
+                    {paginatedData && paginatedData.totalPages > 1 && (
+                      <div className="flex items-center gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => setCurrentPage(1)}
+                          disabled={!paginatedData.hasPreviousPage}
+                        >
+                          First
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                          disabled={!paginatedData.hasPreviousPage}
+                        >
+                          Previous
+                        </Button>
+                        <span className="px-4 py-2 text-sm">
+                          Page {paginatedData.currentPage} of {paginatedData.totalPages}
+                        </span>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => setCurrentPage(prev => prev + 1)}
+                          disabled={!paginatedData.hasNextPage}
+                        >
+                          Next
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => setCurrentPage(paginatedData.totalPages)}
+                          disabled={!paginatedData.hasNextPage}
+                        >
+                          Last
+                        </Button>
+                      </div>
                     )}
                   </div>
                 </>

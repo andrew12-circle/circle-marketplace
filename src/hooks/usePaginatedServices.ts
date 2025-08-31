@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import type { Service } from './useMarketplaceData';
 
@@ -10,17 +10,23 @@ interface PaginatedFilters {
   verified?: boolean; // Note: applied client-side for now
   coPayEligible?: boolean;
   orderStrategy?: 'ranked' | 'recent' | 'price-low' | 'price-high';
+  page?: number; // Current page number (1-based)
 }
 
 interface PaginatedPage {
   items: Service[];
   totalCount: number;
-  nextOffset: number;
+  currentPage: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
 }
 
 const PAGE_SIZE = 50;
 
-async function fetchServicesPage(offset: number, filters: PaginatedFilters): Promise<PaginatedPage> {
+async function fetchServicesPage(filters: PaginatedFilters): Promise<PaginatedPage> {
+  const page = filters.page || 1;
+  const offset = (page - 1) * PAGE_SIZE;
   let query = supabase
     .from('services')
     .select(`
@@ -121,26 +127,31 @@ async function fetchServicesPage(offset: number, filters: PaginatedFilters): Pro
   }));
 
   const totalCount = typeof count === 'number' ? count : formattedServices.length;
-  const nextOffset = offset + PAGE_SIZE;
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE);
+  const currentPage = page;
+  const hasNextPage = currentPage < totalPages;
+  const hasPreviousPage = currentPage > 1;
 
-  return { items: formattedServices, totalCount, nextOffset };
+  return { 
+    items: formattedServices, 
+    totalCount, 
+    currentPage,
+    totalPages,
+    hasNextPage,
+    hasPreviousPage
+  };
 }
 
 export function usePaginatedServices(filters: PaginatedFilters, options = { enabled: true }) {
-  return useInfiniteQuery<PaginatedPage>({
+  return useQuery<PaginatedPage>({
     queryKey: ['services', 'paginated', filters],
-    queryFn: ({ pageParam = 0 }) => 
+    queryFn: () => 
       Promise.race([
-        fetchServicesPage(pageParam as number, filters),
+        fetchServicesPage(filters),
         new Promise((_, reject) => 
           setTimeout(() => reject(new Error('Paginated query timeout')), 8000)
         )
       ]) as Promise<PaginatedPage>,
-    initialPageParam: 0,
-    getNextPageParam: (lastPage) => {
-      if (!lastPage) return undefined;
-      return lastPage.nextOffset < lastPage.totalCount ? lastPage.nextOffset : undefined;
-    },
     enabled: options.enabled,
     staleTime: 5 * 60 * 1000,
     gcTime: 15 * 60 * 1000,
