@@ -1245,4 +1245,9 @@ export const ServiceFunnelModal = memo(({
       </DialogContent>
     </Dialog>
   );
+}, (prevProps, nextProps) => {
+  return prevProps.isOpen === nextProps.isOpen && 
+         prevProps.service.id === nextProps.service.id;
 });
+
+export default ServiceFunnelModal;
