@@ -636,7 +636,10 @@ export const MarketplaceGrid = () => {
                 size="lg" 
                 className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 font-semibold"
                 onClick={() => {
-                  const servicesSection = document.querySelector('[data-testid="services-grid"]');
+                  console.log('Explore Marketplace button clicked');
+                  const servicesSection = document.getElementById('services-grid');
+                  console.log('Services section found:', servicesSection);
+                  
                   if (servicesSection) {
                     // Slower, custom scroll animation to show categories and content
                     const startY = window.pageYOffset;
@@ -644,6 +647,8 @@ export const MarketplaceGrid = () => {
                     const distance = targetY - startY;
                     const duration = 2000; // 2 seconds for slower scroll
                     let startTime = null;
+                    
+                    console.log('Starting scroll animation', { startY, targetY, distance });
 
                     function scrollAnimation(currentTime) {
                       if (!startTime) startTime = currentTime;
@@ -656,10 +661,16 @@ export const MarketplaceGrid = () => {
                       
                       if (progress < 1) {
                         requestAnimationFrame(scrollAnimation);
+                      } else {
+                        console.log('Scroll animation completed');
                       }
                     }
                     
                     requestAnimationFrame(scrollAnimation);
+                  } else {
+                    console.log('Services section not found, trying fallback scroll');
+                    // Fallback: scroll to category blocks or just down the page
+                    window.scrollTo({ top: window.innerHeight, behavior: 'smooth' });
                   }
                 }}
               >
