@@ -5521,6 +5521,7 @@ export type Database = {
           created_at: string | null
           description: string | null
           direct_purchase_enabled: boolean | null
+          disclaimer_content: Json | null
           disclaimer_id: string | null
           discount_percentage: string | null
           duration: string | null
@@ -5579,6 +5580,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           direct_purchase_enabled?: boolean | null
+          disclaimer_content?: Json | null
           disclaimer_id?: string | null
           discount_percentage?: string | null
           duration?: string | null
@@ -5637,6 +5639,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           direct_purchase_enabled?: boolean | null
+          disclaimer_content?: Json | null
           disclaimer_id?: string | null
           discount_percentage?: string | null
           duration?: string | null
