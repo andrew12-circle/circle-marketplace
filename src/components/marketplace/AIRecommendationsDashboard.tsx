@@ -9,22 +9,64 @@ import { ConversationalRefinement } from "./ConversationalRefinement";
 import { RecommendationsHeader } from "./RecommendationsHeader";
 import { ProfileCompletionAlert } from "./ProfileCompletionAlert";
 import { SimplePlanDisplay } from "./SimplePlanDisplay";
+import { AutoRecoverySystem } from "./AutoRecoverySystem";
+import { useAutoRecovery } from "@/hooks/useAutoRecovery";
 
 export function AIRecommendationsDashboard() {
   const { user, profile } = useAuth();
   const { toast } = useToast();
-  const { agent, stats: agentStats, loading: agentLoading } = useAgentData();
+  const { agent, stats: agentStats, loading: agentLoading, error: agentError } = useAgentData();
   const [isLoading, setIsLoading] = useState(true);
   const [isGoalAssessmentOpen, setIsGoalAssessmentOpen] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentPlan, setCurrentPlan] = useState<any>(null);
   const [showRefinement, setShowRefinement] = useState(false);
+  const [errorCount, setErrorCount] = useState(0);
+  
+  // Auto-recovery system
+  const { triggerRecovery, isRecovering, canAutoRecover } = useAutoRecovery({
+    enabled: true,
+    errorThreshold: 1,
+    autoTriggerDelay: 1000
+  });
 
   useEffect(() => {
     if (user?.id) {
       setIsLoading(false);
     }
   }, [user?.id]);
+
+  // Handle agent data loading errors
+  useEffect(() => {
+    if (agentError && !agentLoading) {
+      setErrorCount(prev => prev + 1);
+      
+      // Auto-trigger recovery on first error if we can
+      if (canAutoRecover && errorCount === 0) {
+        console.log('🔧 AI Dashboard: Auto-triggering recovery due to agent data error');
+        setTimeout(() => {
+          triggerRecovery();
+        }, 1000);
+      }
+    } else if (agent && !agentError) {
+      // Reset error count when data loads successfully
+      setErrorCount(0);
+    }
+  }, [agentError, agentLoading, agent, canAutoRecover, triggerRecovery, errorCount]);
+
+  // Handle prolonged loading states
+  useEffect(() => {
+    if (agentLoading && !agent) {
+      // If loading for more than 8 seconds, show recovery option
+      const timeout = setTimeout(() => {
+        if (agentLoading && !agent) {
+          setErrorCount(prev => prev + 1);
+        }
+      }, 8000);
+      
+      return () => clearTimeout(timeout);
+    }
+  }, [agentLoading, agent]);
 
   const checkDataRequirements = () => {
     const hasProfile = user?.id;
@@ -103,11 +145,35 @@ export function AIRecommendationsDashboard() {
     }
   };
 
-  if (isLoading || agentLoading) {
+  const handleRecoveryComplete = () => {
+    setErrorCount(0);
+    // Force a refresh of agent data by clearing any cached state
+    window.location.reload();
+  };
+
+  if (isLoading || (agentLoading && !agentError)) {
     return (
       <div className="space-y-4">
+        {/* Show recovery system if we have errors or prolonged loading */}
+        {(agentError || errorCount > 0) && (
+          <AutoRecoverySystem
+            isError={!!agentError || errorCount > 0}
+            errorCount={errorCount}
+            onRecoveryComplete={handleRecoveryComplete}
+          />
+        )}
+        
         <div className="h-32 bg-muted rounded-lg animate-pulse" />
         <div className="h-48 bg-muted rounded-lg animate-pulse" />
+        
+        {/* Show helpful message if loading takes too long */}
+        {agentLoading && (
+          <div className="text-center py-4">
+            <p className="text-sm text-muted-foreground">
+              Loading your personalized recommendations...
+            </p>
+          </div>
+        )}
       </div>
     );
   }
@@ -119,6 +185,15 @@ export function AIRecommendationsDashboard() {
 
   return (
     <div className="space-y-6">
+      {/* Show recovery system if we have errors */}
+      {(agentError || errorCount > 0) && (
+        <AutoRecoverySystem
+          isError={!!agentError || errorCount > 0}
+          errorCount={errorCount}
+          onRecoveryComplete={handleRecoveryComplete}
+        />
+      )}
+
       <RecommendationsHeader
         personalityType={personalityType}
         currentTransactions={currentTransactions}
