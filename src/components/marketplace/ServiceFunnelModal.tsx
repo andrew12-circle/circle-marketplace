@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { useState, useEffect, useRef, Suspense, lazy, useMemo, memo } from "react";
+import { useState, useEffect, useRef, Suspense, lazy, useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -183,7 +183,7 @@ interface ServiceFunnelModalProps {
   onClose: () => void;
   service: Service;
 }
-export const ServiceFunnelModal = memo(({
+const ServiceFunnelModal = ({
   isOpen,
   onClose,
   service
@@ -1245,11 +1245,6 @@ export const ServiceFunnelModal = memo(({
       </DialogContent>
     </Dialog>
   );
-}, (prevProps, nextProps) => {
-  return prevProps.isOpen === nextProps.isOpen && 
-         prevProps.service.id === nextProps.service.id;
-});
+};
 
-ServiceFunnelModal.displayName = "ServiceFunnelModal";
-
-export default ServiceFunnelModal;;
+export default ServiceFunnelModal;
