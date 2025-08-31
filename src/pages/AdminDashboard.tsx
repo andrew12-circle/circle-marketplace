@@ -47,6 +47,7 @@ import { VendorInvitationPanel } from '@/components/admin/VendorInvitationPanel'
 import { AgentInvitationPanel } from '@/components/admin/AgentInvitationPanel';
 import VendorPointAllocationPanel from '@/components/admin/VendorPointAllocationPanel';
 import AntiScrapingSystem from '@/components/security/AntiScrapingSystem';
+import { UserProfileManager } from '@/components/admin/UserProfileManager';
 // Lazy-loaded via LazyAdminPanel
 import BulkFAQGenerator from '@/components/admin/BulkFAQGenerator';
 import BulkServiceResearch from '@/components/admin/BulkServiceResearch';
@@ -629,6 +630,9 @@ export default function AdminDashboard() {
         </TabsContent>
 
         <TabsContent value="users" className="space-y-8">
+          {/* User Profile Manager */}
+          <UserProfileManager />
+          
           <Card className="bg-white border-slate-200 shadow-sm">
             <CardHeader className="bg-gradient-to-r from-slate-50 to-white border-b border-slate-100">
               <div className="flex items-center justify-between">
