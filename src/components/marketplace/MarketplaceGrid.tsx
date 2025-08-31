@@ -649,8 +649,8 @@ export const MarketplaceGrid = () => {
                 size="lg" 
                 className="border-gray-300 text-gray-700 hover:bg-gray-50 px-8 py-3 font-semibold"
                 onClick={() => {
-                  // Navigate to pro trial - replace with actual route
-                  window.location.href = '/pro-trial';
+                  // Navigate to pricing screen
+                  window.location.href = '/pricing';
                 }}
               >
                 Start Pro Trial →
