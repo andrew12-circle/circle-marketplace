@@ -134,7 +134,7 @@ const fetchServices = async (): Promise<Service[]> => {
       .from('services')
       .select(`
         *,
-        vendors (
+        vendor:vendors!vendor_id (
           id,
           name,
           rating,
@@ -177,15 +177,15 @@ const fetchServices = async (): Promise<Service[]> => {
       discount_percentage: service.discount_percentage ? String(service.discount_percentage) : undefined,
       is_verified: service.is_verified || false,
       pricing_tiers: Array.isArray(pricing_tiers) ? pricing_tiers : null,
-      vendor: service.vendors ? {
-        id: service.vendors.id,
-        name: service.vendors.name,
-        rating: service.vendors.rating || 4.5,
-        review_count: service.vendors.review_count || 0,
-        is_verified: service.vendors.is_verified || false,
-        website_url: service.vendors.website_url,
-        logo_url: service.vendors.logo_url,
-        support_hours: service.vendors.support_hours || 'Business Hours',
+      vendor: service.vendor ? {
+        id: service.vendor.id,
+        name: service.vendor.name,
+        rating: service.vendor.rating || 4.5,
+        review_count: service.vendor.review_count || 0,
+        is_verified: service.vendor.is_verified || false,
+        website_url: service.vendor.website_url,
+        logo_url: service.vendor.logo_url,
+        support_hours: service.vendor.support_hours || 'Business Hours',
       } : null,
     };
   });
