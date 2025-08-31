@@ -69,6 +69,7 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
   const [errorCount, setErrorCount] = useState(0);
   const [hasStuckState, setHasStuckState] = useState(false);
   const [runInBackground, setRunInBackground] = useState(false);
+  const [overwriteAIUpdated, setOverwriteAIUpdated] = useState(false);
 
   // Auto-recovery system
   const { triggerRecovery, isRecovering, canAutoRecover } = useAutoRecovery({
@@ -302,6 +303,54 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
     }
   };
 
+  const logAIUpdateNote = async (serviceId: string, serviceName: string): Promise<void> => {
+    try {
+      const updateSummary = Object.entries(serviceProgress[serviceId]?.sections || {})
+        .filter(([_, status]) => status === 'completed')
+        .map(([section, _]) => section)
+        .join(', ');
+      
+      const noteText = `🤖 AI Auto-Update Complete\n\nSections updated: ${updateSummary}\nCompleted: ${new Date().toLocaleString()}\n\n⚠️ Please review all AI-generated content for accuracy and compliance before publishing.`;
+      
+      const { error } = await supabase
+        .from('admin_notes')
+        .insert({
+          service_id: serviceId,
+          note_text: noteText,
+          created_by: (await supabase.auth.getUser()).data.user?.id
+        });
+
+      if (error) {
+        console.error('Error logging AI update note:', error);
+      } else {
+        console.log(`✅ Logged AI update note for ${serviceName}`);
+      }
+    } catch (error) {
+      console.error('Error logging AI update note:', error);
+    }
+  };
+
+  const checkIfAIUpdated = async (serviceId: string): Promise<boolean> => {
+    try {
+      const { data, error } = await supabase
+        .from('admin_notes')
+        .select('id')
+        .eq('service_id', serviceId)
+        .like('note_text', '%AI Auto-Update Complete%')
+        .limit(1);
+
+      if (error) {
+        console.error('Error checking AI update status:', error);
+        return false;
+      }
+
+      return data.length > 0;
+    } catch (error) {
+      console.error('Error checking AI update status:', error);
+      return false;
+    }
+  };
+
   const verifyServiceCompletion = async (service: Service): Promise<boolean> => {
     console.log(`Verifying completion for ${service.title}...`);
     updateSectionProgress(service.id, 'verification', 'generating');
@@ -356,6 +405,9 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
           console.error('Error updating verification status:', updateError);
           throw updateError;
         }
+        
+        // Log AI update note
+        await logAIUpdateNote(service.id, service.title);
         
         console.log(`✅ Service ${service.title} verified successfully`);
         updateSectionProgress(service.id, 'verification', 'completed');
@@ -543,8 +595,42 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
     setHasStuckState(false);
     setErrorCount(0);
     
-    const servicesToUpdate = services.filter(s => selectedServices.includes(s.id));
-    setServiceProgress(initializeProgress(selectedServices));
+    let servicesToUpdate = services.filter(s => selectedServices.includes(s.id));
+    
+    // Filter out already AI-updated services if overwrite is disabled
+    if (!overwriteAIUpdated) {
+      const filteredServices = [];
+      for (const service of servicesToUpdate) {
+        const isAIUpdated = await checkIfAIUpdated(service.id);
+        if (!isAIUpdated) {
+          filteredServices.push(service);
+        } else {
+          console.log(`⏭️ Skipping ${service.title} - already AI updated`);
+        }
+      }
+      servicesToUpdate = filteredServices;
+      
+      if (filteredServices.length !== servicesToUpdate.length) {
+        const skippedCount = servicesToUpdate.length - filteredServices.length;
+        toast({
+          title: `Skipping ${skippedCount} services`,
+          description: `${skippedCount} services already AI-updated. Enable "Overwrite AI-updated services" to update them again.`,
+          duration: 5000,
+        });
+      }
+    }
+    
+    if (servicesToUpdate.length === 0) {
+      toast({
+        title: 'No services to update',
+        description: 'All selected services have already been AI-updated. Enable overwrite mode to update them again.',
+        variant: 'default'
+      });
+      setIsRunning(false);
+      return;
+    }
+    
+    setServiceProgress(initializeProgress(servicesToUpdate.map(s => s.id)));
 
     if (runInBackground) {
       toast({
@@ -866,17 +952,32 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
         </Tabs>
 
         <div className="space-y-4 mt-6">
-          <div className="flex items-center gap-3 justify-center">
-            <input
-              type="checkbox"
-              id="background-mode"
-              checked={runInBackground}
-              onChange={(e) => setRunInBackground(e.target.checked)}
-              className="rounded border-input"
-            />
-            <label htmlFor="background-mode" className="text-sm font-medium">
-              Run in background (allows navigation)
-            </label>
+          <div className="flex flex-col gap-3 items-center">
+            <div className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                id="background-mode"
+                checked={runInBackground}
+                onChange={(e) => setRunInBackground(e.target.checked)}
+                className="rounded border-input"
+              />
+              <label htmlFor="background-mode" className="text-sm font-medium">
+                Run in background (allows navigation)
+              </label>
+            </div>
+            
+            <div className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                id="overwrite-ai-updated"
+                checked={overwriteAIUpdated}
+                onChange={(e) => setOverwriteAIUpdated(e.target.checked)}
+                className="rounded border-input"
+              />
+              <label htmlFor="overwrite-ai-updated" className="text-sm font-medium">
+                Overwrite AI-updated services
+              </label>
+            </div>
           </div>
           
           <div className="flex justify-center">
