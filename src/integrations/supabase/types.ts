@@ -5543,6 +5543,7 @@ export type Database = {
           price_duration: string | null
           pricing_tiers: Json | null
           pro_price: string | null
+          profile_image_url: string | null
           rating: number | null
           regulatory_findings: string | null
           request_pricing: boolean | null
@@ -5600,6 +5601,7 @@ export type Database = {
           price_duration?: string | null
           pricing_tiers?: Json | null
           pro_price?: string | null
+          profile_image_url?: string | null
           rating?: number | null
           regulatory_findings?: string | null
           request_pricing?: boolean | null
@@ -5657,6 +5659,7 @@ export type Database = {
           price_duration?: string | null
           pricing_tiers?: Json | null
           pro_price?: string | null
+          profile_image_url?: string | null
           rating?: number | null
           regulatory_findings?: string | null
           request_pricing?: boolean | null

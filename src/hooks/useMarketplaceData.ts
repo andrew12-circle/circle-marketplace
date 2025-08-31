@@ -25,6 +25,7 @@ export interface Service {
   co_pay_price?: string;
   price_duration?: string; // Added missing field
   image_url?: string;
+  profile_image_url?: string;
   tags?: string[];
   is_featured: boolean;
   is_top_pick: boolean;
