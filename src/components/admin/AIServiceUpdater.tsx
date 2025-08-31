@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -92,7 +92,7 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
   };
 
   // Set up monitoring interval when AI generation starts
-  React.useEffect(() => {
+  useEffect(() => {
     let interval: NodeJS.Timeout;
     
     if (isRunning) {
@@ -307,7 +307,8 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
       // Generate Disclaimer
       updateSectionProgress(service.id, 'disclaimer', 'updating');
       const disclaimerData = await generateDisclaimer(service);
-      await updateServiceInDatabase(service.id, { disclaimer_content: disclaimerData });
+      const disclaimerContent = disclaimerData?.disclaimer_content ?? disclaimerData;
+      await updateServiceInDatabase(service.id, { disclaimer_content: disclaimerContent });
       updateSectionProgress(service.id, 'disclaimer', 'completed');
 
       // Generate Funnel (with research context)
