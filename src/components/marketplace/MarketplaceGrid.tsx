@@ -35,6 +35,7 @@ import { logger } from "@/utils/logger";
 import { useQueryClient } from "@tanstack/react-query";
 import { marketplaceCircuitBreaker } from "@/utils/circuitBreaker";
 import { usePaginatedServices } from "@/hooks/usePaginatedServices";
+import { PageSizeSelector } from "@/components/ui/page-size-selector";
 import { useABTest } from "@/hooks/useABTest";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { useMarketplaceEnabled } from "@/hooks/useAppConfig";
@@ -265,6 +266,7 @@ export const MarketplaceGrid = () => {
   const [orderStrategy, setOrderStrategy] = useState<'ranked' | 'recent' | 'price-low' | 'price-high'>('ranked');
   const [enablePagination, setEnablePagination] = useState(true); // Enable by default to show services immediately
   const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(50);
 
   // Only enable pagination if marketplace is enabled by admin
   const shouldEnablePagination = enablePagination && marketplaceEnabled;
@@ -279,7 +281,7 @@ export const MarketplaceGrid = () => {
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, filters.category, filters.featured, filters.verified, filters.coPayEligible, orderStrategy]);
+  }, [searchTerm, filters.category, filters.featured, filters.verified, filters.coPayEligible, orderStrategy, pageSize]);
 
   const {
     data: paginatedData,
@@ -291,7 +293,8 @@ export const MarketplaceGrid = () => {
     verified: filters.verified,
     coPayEligible: filters.coPayEligible,
     orderStrategy,
-    page: currentPage
+    page: currentPage,
+    pageSize
   }, { enabled: shouldEnablePagination });
 
   const flattenServices = useMemo(() => {
@@ -648,9 +651,15 @@ export const MarketplaceGrid = () => {
                     ))}
                   </div>
                   <div className="mt-6 flex flex-col items-center gap-4">
-                    <span className="text-sm text-muted-foreground">
-                      Showing page {paginatedData?.currentPage || 1} of {paginatedData?.totalPages || 1} ({totalServicesCount} total results)
-                    </span>
+                    <div className="flex flex-col sm:flex-row items-center gap-4">
+                      <span className="text-sm text-muted-foreground">
+                        Showing page {paginatedData?.currentPage || 1} of {paginatedData?.totalPages || 1} ({totalServicesCount} total results)
+                      </span>
+                      <PageSizeSelector 
+                        pageSize={pageSize}
+                        onPageSizeChange={setPageSize}
+                      />
+                    </div>
                     {paginatedData && paginatedData.totalPages > 1 && (
                       <div className="flex items-center gap-2">
                         <Button 

@@ -11,6 +11,7 @@ interface PaginatedFilters {
   coPayEligible?: boolean;
   orderStrategy?: 'ranked' | 'recent' | 'price-low' | 'price-high';
   page?: number; // Current page number (1-based)
+  pageSize?: number; // Items per page
 }
 
 interface PaginatedPage {
@@ -22,11 +23,12 @@ interface PaginatedPage {
   hasPreviousPage: boolean;
 }
 
-const PAGE_SIZE = 50;
+const DEFAULT_PAGE_SIZE = 50;
 
 async function fetchServicesPage(filters: PaginatedFilters): Promise<PaginatedPage> {
   const page = filters.page || 1;
-  const offset = (page - 1) * PAGE_SIZE;
+  const pageSize = filters.pageSize || DEFAULT_PAGE_SIZE;
+  const offset = (page - 1) * pageSize;
   let query = supabase
     .from('services')
     .select(`
@@ -64,7 +66,7 @@ async function fetchServicesPage(filters: PaginatedFilters): Promise<PaginatedPa
   }
 
   // Apply pagination at the end
-  query = query.range(offset, offset + PAGE_SIZE - 1);
+  query = query.range(offset, offset + pageSize - 1);
 
   // Server-side filters
   const term = (filters.searchTerm || '').trim();
@@ -127,7 +129,7 @@ async function fetchServicesPage(filters: PaginatedFilters): Promise<PaginatedPa
   }));
 
   const totalCount = typeof count === 'number' ? count : formattedServices.length;
-  const totalPages = Math.ceil(totalCount / PAGE_SIZE);
+  const totalPages = Math.ceil(totalCount / pageSize);
   const currentPage = page;
   const hasNextPage = currentPage < totalPages;
   const hasPreviousPage = currentPage > 1;
