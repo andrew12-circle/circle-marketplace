@@ -344,12 +344,10 @@ export const ServiceCard = ({
           </div>
 
           <CardContent className="p-4 flex flex-col justify-between h-full mobile-card-content">
-            {/* Title and Vendor Info - Fixed height */}
-            <div className="flex items-center gap-2 text-sm text-muted-foreground h-6 mb-3">
-              <h3 className="font-semibold text-foreground leading-tight mobile-title">
-                {service.title.split(' - ').pop() || service.title.split(': ').pop() || service.title}
-              </h3>
-            </div>
+            {/* Title - Moved to top */}
+            <h3 className="font-semibold text-foreground leading-tight mobile-title mb-3">
+              {service.title.split(' - ').pop() || service.title.split(': ').pop() || service.title}
+            </h3>
 
             {/* Service Rating - Updated to use bulk ratings when available */}
             {(totalReviews || 0) > 0 && shouldShowRating && (
