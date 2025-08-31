@@ -34,6 +34,7 @@ import { ServiceConsultationEmails } from './ServiceConsultationEmails';
 import { AdminNotes } from './AdminNotes';
 import { ServiceDisclaimerSection } from './ServiceDisclaimerSection';
 import { ServiceAIResearchEditor } from './ServiceAIResearchEditor';
+import { AIServiceUpdater } from './AIServiceUpdater';
 
 interface PricingFeature {
   id: string;
@@ -954,6 +955,19 @@ export const ServiceManagementPanel = () => {
 
   return (
     <div className="space-y-6">
+      {/* AI Service Updater */}
+      <AIServiceUpdater 
+        services={services}
+        onServiceUpdate={(serviceId) => {
+          // Refresh the specific service or refetch all services
+          fetchServices();
+          toast({
+            title: 'Service Updated',
+            description: 'Service has been updated by AI. Please review and verify the changes.',
+          });
+        }}
+      />
+
       {/* Service Selection */}
       <Card>
         <CardHeader>
@@ -988,7 +1002,7 @@ export const ServiceManagementPanel = () => {
             </Button>
           </CardTitle>
           <p className="text-sm text-muted-foreground">
-            Select a service to edit its details, pricing, and funnel pages
+            Use AI to auto-generate service content, or manually select a service to edit its details, pricing, and funnel pages
           </p>
         </CardHeader>
         <CardContent>
