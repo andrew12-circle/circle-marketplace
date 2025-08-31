@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Bot, Sparkles, CheckCircle, AlertCircle, Loader2, FileText, Zap, Share, Lightbulb, HelpCircle, Shield, Clock, Check } from 'lucide-react';
+import { Bot, Sparkles, CheckCircle, AlertCircle, Loader2, FileText, Zap, Share, Lightbulb, HelpCircle, Shield, Clock, Check, Activity } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AutoRecoverySystem } from '@/components/marketplace/AutoRecoverySystem';
 import { useAutoRecovery } from '@/hooks/useAutoRecovery';
@@ -54,6 +55,9 @@ interface UpdateProgress {
   error?: string;
   research_data?: any;
   updatedSections?: { [key: string]: { date: string; notes?: string } };
+  sectionTimestamps?: { [key: string]: number };
+  currentSection?: string;
+  lastActivity?: number;
 }
 
 interface ServiceUpdateTracking {
@@ -66,6 +70,7 @@ interface ServiceUpdateTracking {
 export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdaterProps) => {
   const { toast } = useToast();
   const [isRunning, setIsRunning] = useState(false);
+  const isRunningRef = useRef(false);
   const [serviceProgress, setServiceProgress] = useState<Record<string, UpdateProgress>>({});
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [updateTracking, setUpdateTracking] = useState<Record<string, ServiceUpdateTracking[]>>({});
@@ -80,6 +85,7 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
   const [hasStuckState, setHasStuckState] = useState(false);
   const [runInBackground, setRunInBackground] = useState(false);
   const [overwriteAIUpdated, setOverwriteAIUpdated] = useState(false);
+  const [stuckCheckCount, setStuckCheckCount] = useState(0);
 
   // Auto-recovery system
   const { triggerRecovery, isRecovering, canAutoRecover } = useAutoRecovery({
@@ -220,51 +226,83 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
     };
   };
 
-  // Monitor for stuck states during AI generation
+  // Enhanced stuck state monitoring with time-based detection
   const monitorStuckState = () => {
-    console.log('🔍 Monitoring stuck state - isRunning:', isRunning);
+    console.log('🔍 Monitoring stuck state - isRunning:', isRunningRef.current);
     
-    if (isRunning) {
-      const stuckServices = Object.values(serviceProgress).filter(p => {
-        const hasStuckSection = Object.values(p.sections).some(status => status === 'generating');
-        const hasBeenGeneratingTooLong = p.status === 'updating' && hasStuckSection;
-        return hasBeenGeneratingTooLong;
+    if (!isRunningRef.current) return;
+
+    const now = Date.now();
+    const stuckServices = Object.values(serviceProgress).filter(p => {
+      if (p.status !== 'updating') return false;
+      
+      // Check each section for stuck state
+      const stuckSections = Object.entries(p.sections).filter(([section, status]) => {
+        if (status !== 'generating') return false;
+        
+        const sectionStartTime = p.sectionTimestamps?.[section] || now;
+        const timeElapsed = now - sectionStartTime;
+        
+        // Different timeouts for different sections
+        const timeoutLimits = {
+          research: 8 * 60 * 1000, // 8 minutes for research
+          details: 5 * 60 * 1000,  // 5 minutes for details
+          disclaimer: 5 * 60 * 1000, // 5 minutes for disclaimer
+          funnel: 5 * 60 * 1000,    // 5 minutes for funnel
+          faqs: 5 * 60 * 1000,      // 5 minutes for FAQs
+          verification: 2 * 60 * 1000 // 2 minutes for verification
+        };
+        
+        const limit = timeoutLimits[section as keyof typeof timeoutLimits] || 5 * 60 * 1000;
+        return timeElapsed > limit;
       });
+      
+      return stuckSections.length > 0;
+    });
 
-      console.log('🔍 Found potentially stuck services:', stuckServices.length);
+    console.log('🔍 Found stuck services:', stuckServices.length);
 
-      if (stuckServices.length > 0) {
-        console.log('⚠️ Detected stuck AI service generation:', stuckServices);
+    if (stuckServices.length > 0) {
+      setStuckCheckCount(prev => prev + 1);
+      
+      // Only trigger recovery after 2 consecutive stuck checks
+      if (stuckCheckCount >= 1) {
+        console.log('⚠️ Confirmed stuck state - triggering recovery');
         setHasStuckState(true);
         setErrorCount(prev => prev + 1);
         
-        // Force stop the process to trigger auto-recovery
-        setIsRunning(false);
-        stuckServices.forEach(service => {
-          updateProgress(service.serviceId, { 
-            status: 'error', 
-            error: 'Process appears stuck - triggering auto-recovery' 
-          });
-        });
-        
         toast({
-          title: "Process appears stuck",
-          description: "Auto-recovery system will attempt to fix this issue.",
+          title: "Services appear stuck",
+          description: "Auto-recovery will refresh the system if the issue persists.",
           variant: "destructive",
           duration: 5000,
         });
+      } else {
+        console.log('⏳ First stuck detection - monitoring for next check');
+        toast({
+          title: "Long-running process detected",
+          description: "Monitoring for potential issues. Process will continue...",
+          duration: 3000,
+        });
       }
+    } else {
+      setStuckCheckCount(0); // Reset if no stuck services
     }
   };
 
-  // Set up monitoring interval when AI generation starts - check every 2 minutes for stuck states
+  // Sync ref with state
+  useEffect(() => {
+    isRunningRef.current = isRunning;
+  }, [isRunning]);
+
+  // Set up monitoring interval when AI generation starts
   useEffect(() => {
     let interval: NodeJS.Timeout;
     
     if (isRunning) {
-      console.log('⏰ Starting stuck state monitoring every 2 minutes');
-      // Check every 2 minutes for stuck states
-      interval = setInterval(monitorStuckState, 120000); // 2 minutes
+      console.log('⏰ Starting stuck state monitoring every 3 minutes');
+      // Check every 3 minutes for stuck states - less aggressive
+      interval = setInterval(monitorStuckState, 180000); // 3 minutes
     } else {
       console.log('⏰ Stopped stuck state monitoring');
     }
@@ -303,18 +341,33 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
   const updateProgress = (serviceId: string, updates: Partial<UpdateProgress>) => {
     setServiceProgress(prev => ({
       ...prev,
-      [serviceId]: { ...prev[serviceId], ...updates }
+      [serviceId]: { 
+        ...prev[serviceId], 
+        ...updates,
+        lastActivity: Date.now()
+      }
     }));
   };
 
   const updateSectionProgress = (serviceId: string, section: keyof SectionStatus, status: SectionStatus[keyof SectionStatus]) => {
-    setServiceProgress(prev => ({
-      ...prev,
-      [serviceId]: {
-        ...prev[serviceId],
-        sections: { ...prev[serviceId].sections, [section]: status }
-      }
-    }));
+    setServiceProgress(prev => {
+      const currentProgress = prev[serviceId];
+      const now = Date.now();
+      
+      return {
+        ...prev,
+        [serviceId]: {
+          ...currentProgress,
+          sections: { ...currentProgress.sections, [section]: status },
+          currentSection: status === 'generating' ? section : currentProgress.currentSection,
+          sectionTimestamps: {
+            ...currentProgress.sectionTimestamps,
+            [section]: status === 'generating' ? now : currentProgress.sectionTimestamps?.[section]
+          },
+          lastActivity: now
+        }
+      };
+    });
   };
 
   const generateServiceDetails = async (service: Service, progress: UpdateProgress): Promise<any> => {
@@ -827,22 +880,25 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
         console.log('📊 Initializing progress for services:', servicesToUpdate.map(s => s.id));
         // Process services sequentially to avoid rate limits
         for (const service of servicesToUpdate) {
-          // Check if still running at the start of each iteration
-          if (!isRunning) {
+          // Check if still running using ref to avoid stale state
+          if (!isRunningRef.current) {
             console.log('🛑 Processing stopped by user before starting', service.title);
             break;
           }
 
           console.log(`🔄 Starting service ${service.title} (${completedCount + 1}/${servicesToUpdate.length})`);
-          updateProgress(service.id, { status: 'updating' });
+          updateProgress(service.id, { status: 'updating', currentSection: 'research' });
           
           try {
             await processService(service);
-            updateProgress(service.id, { status: 'completed' });
+            updateProgress(service.id, { status: 'completed', currentSection: undefined });
             completedCount++;
             onServiceUpdate(service.id);
             
             console.log(`✅ Completed service ${service.title} (${completedCount}/${servicesToUpdate.length})`);
+            
+            // Refresh tracking data
+            await loadUpdateTracking();
             
             if (!runInBackground) {
               toast({
@@ -854,16 +910,16 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
             console.error(`❌ Error processing service ${service.title}:`, error);
             updateProgress(service.id, { 
               status: 'error', 
-              error: error instanceof Error ? error.message : 'Unknown error' 
+              error: error instanceof Error ? error.message : 'Unknown error',
+              currentSection: undefined
             });
             errorCount++;
             setErrorCount(prev => prev + 1);
             
-            // Don't increment errorCount for the entire process, just log and continue
             console.log(`⏭️ Continuing to next service despite error in ${service.title}`);
           }
           
-          // Small delay between services - don't break on isRunning change during delay
+          // Small delay between services
           if (completedCount + errorCount < servicesToUpdate.length) {
             console.log(`⏳ Waiting 2 seconds before next service...`);
             await new Promise(resolve => setTimeout(resolve, 2000));
@@ -899,19 +955,18 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
   };
 
   const handleRecoveryComplete = () => {
-    console.log('🎯 Recovery complete - resetting all states');
+    console.log('🎯 Recovery complete - performing soft reset');
     setErrorCount(0);
     setHasStuckState(false);
     setIsRunning(false);
-    setServiceProgress({});
+    setStuckCheckCount(0);
     
-    // Clear any stuck states and refresh
-    setSelectedServices([]);
-    setActiveTab('select');
+    // Soft reset - don't clear selected services, just reset progress
+    setServiceProgress({});
     
     toast({
       title: "System refreshed",
-      description: "AI Service Updater is ready to go!",
+      description: "AI Service Updater is ready to continue!",
       duration: 2000,
     });
   };
@@ -1024,10 +1079,41 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
                   <CardContent className="p-3">
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0 flex-1">
-                        <h4 className="font-medium text-sm truncate">{service.title}</h4>
+                        <div className="flex items-start justify-between gap-2">
+                          <h4 className="font-medium text-sm truncate">{service.title}</h4>
+                          {(() => {
+                            const progress = serviceProgress[service.id];
+                            if (progress?.status === 'updating') {
+                              return (
+                                <Badge variant="secondary" className="text-xs shrink-0">
+                                  <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                                  Updating...
+                                </Badge>
+                              );
+                            }
+                            return null;
+                          })()}
+                        </div>
                         <p className="text-xs text-muted-foreground mt-1">
                           {service.category}
                         </p>
+                        
+                        {/* Show current section being processed */}
+                        {(() => {
+                          const progress = serviceProgress[service.id];
+                          if (progress?.status === 'updating' && progress.currentSection) {
+                            return (
+                              <div className="mt-2 p-1 bg-blue-50 border border-blue-200 rounded text-xs">
+                                <div className="flex items-center gap-1 text-blue-800">
+                                  <Loader2 className="h-3 w-3 animate-spin" />
+                                  <span>Processing: {getSectionName(progress.currentSection)}</span>
+                                </div>
+                              </div>
+                            );
+                          }
+                          return null;
+                        })()}
+                        
                         <div className="flex items-center justify-between mt-2 mb-2">
                           <div className="flex flex-wrap gap-1">
                             {!service.is_verified && (
@@ -1133,54 +1219,175 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
                 <p>No services being processed. Select services and start the AI updater.</p>
               </div>
             ) : (
-              <div className="space-y-4 max-h-96 overflow-y-auto">
-                {Object.values(serviceProgress).map((progress) => (
-                  <Card key={progress.serviceId}>
+              <div className="space-y-4">
+                {/* Overall Progress Summary */}
+                {isRunning && (
+                  <Card className="border-primary/20 bg-primary/5">
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between mb-3">
-                        <h4 className="font-medium">{progress.serviceName}</h4>
-                        <Badge variant={
-                          progress.status === 'completed' ? 'default' :
-                          progress.status === 'error' ? 'destructive' :
-                          progress.status === 'updating' ? 'secondary' : 'outline'
-                        }>
-                          {progress.status}
+                        <div className="flex items-center gap-2">
+                          <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                          <h4 className="font-medium">AI Processing Active</h4>
+                        </div>
+                        <Badge variant="secondary">
+                          {Object.values(serviceProgress).filter(p => p.status === 'completed').length} / {Object.values(serviceProgress).length} complete
                         </Badge>
                       </div>
                       
-                      <div className="space-y-2">
-                         {['details', 'disclaimer', 'funnel', 'research', 'faqs', 'verification'].map((section) => {
-                           const updateInfo = getSectionUpdateInfo(progress.serviceId, section);
-                           return (
-                             <div key={section} className="space-y-1">
-                               <div className="flex items-center justify-between">
-                                 <div className="flex items-center gap-2">
-                                   {getSectionIcon(progress.sections[section as keyof SectionStatus])}
-                                   <span className="text-sm font-medium">{getSectionName(section)}</span>
-                                 </div>
-                                 {updateInfo && (
-                                   <div className="flex items-center gap-1 text-xs text-green-600">
-                                     <Check className="h-3 w-3" />
-                                     <span>{formatUpdateDate(updateInfo.updated_at)}</span>
-                                   </div>
-                                 )}
-                               </div>
-                               <p className="text-xs text-muted-foreground ml-6">
-                                 {getSectionDescription(section)}
-                               </p>
-                             </div>
-                           );
-                         })}
-                      </div>
+                      {/* Currently updating service indicator */}
+                      {(() => {
+                        const currentlyUpdating = Object.values(serviceProgress).find(p => p.status === 'updating');
+                        if (currentlyUpdating) {
+                          return (
+                            <div className="flex items-center gap-2 text-sm">
+                              <span className="text-muted-foreground">Currently updating:</span>
+                              <span className="font-medium">{currentlyUpdating.serviceName}</span>
+                              {currentlyUpdating.currentSection && (
+                                <>
+                                  <span className="text-muted-foreground">•</span>
+                                  <Badge variant="outline" className="text-xs">
+                                    {getSectionName(currentlyUpdating.currentSection)}
+                                  </Badge>
+                                </>
+                              )}
+                            </div>
+                          );
+                        }
+                        return null;
+                      })()}
                       
-                      {progress.error && (
-                        <div className="mt-3 p-2 bg-red-50 border border-red-200 rounded text-sm text-red-700">
-                          {progress.error}
-                        </div>
-                      )}
+                      {/* Overall progress bar */}
+                      <div className="mt-3">
+                        <Progress 
+                          value={(Object.values(serviceProgress).filter(p => p.status === 'completed').length / Object.values(serviceProgress).length) * 100}
+                          className="h-2"
+                        />
+                      </div>
                     </CardContent>
                   </Card>
-                ))}
+                )}
+                
+                {/* Service Progress Cards */}
+                <div className="space-y-4 max-h-80 overflow-y-auto">
+                  {Object.values(serviceProgress)
+                    .sort((a, b) => {
+                      // Sort active services first, then by status
+                      if (a.status === 'updating' && b.status !== 'updating') return -1;
+                      if (b.status === 'updating' && a.status !== 'updating') return 1;
+                      if (a.status === 'completed' && b.status !== 'completed') return 1;
+                      if (b.status === 'completed' && a.status !== 'completed') return -1;
+                      return a.serviceName.localeCompare(b.serviceName);
+                    })
+                    .map((progress) => {
+                      const completedSections = Object.values(progress.sections).filter(s => s === 'completed').length;
+                      const totalSections = Object.keys(progress.sections).length;
+                      const progressPercentage = (completedSections / totalSections) * 100;
+                      
+                      return (
+                        <Card key={progress.serviceId} className={
+                          progress.status === 'updating' ? 'border-primary/40 bg-primary/5' :
+                          progress.status === 'completed' ? 'border-green-200 bg-green-50' :
+                          progress.status === 'error' ? 'border-red-200 bg-red-50' : ''
+                        }>
+                          <CardContent className="p-4">
+                            <div className="flex items-center justify-between mb-3">
+                              <div className="flex items-center gap-2">
+                                <h4 className="font-medium">{progress.serviceName}</h4>
+                                {progress.status === 'updating' && (
+                                  <Badge variant="secondary" className="text-xs">
+                                    <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                                    Updating...
+                                  </Badge>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs text-muted-foreground">
+                                  {completedSections}/{totalSections} sections
+                                </span>
+                                <Badge variant={
+                                  progress.status === 'completed' ? 'default' :
+                                  progress.status === 'error' ? 'destructive' :
+                                  progress.status === 'updating' ? 'secondary' : 'outline'
+                                }>
+                                  {progress.status}
+                                </Badge>
+                              </div>
+                            </div>
+                            
+                            {/* Per-service progress bar */}
+                            <div className="mb-3">
+                              <Progress value={progressPercentage} className="h-1.5" />
+                            </div>
+                            
+                            {/* Current section indicator */}
+                            {progress.status === 'updating' && progress.currentSection && (
+                              <div className="mb-3 p-2 bg-blue-50 border border-blue-200 rounded-md">
+                                <div className="flex items-center gap-2 text-sm">
+                                  <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+                                  <span className="font-medium text-blue-800">
+                                    Currently generating: {getSectionName(progress.currentSection)}
+                                  </span>
+                                </div>
+                                <p className="text-xs text-blue-600 mt-1 ml-6">
+                                  {getSectionDescription(progress.currentSection)}
+                                </p>
+                              </div>
+                            )}
+                            
+                            {/* Activity indicator */}
+                            {progress.lastActivity && (
+                              <div className="mb-3 flex items-center gap-1 text-xs text-muted-foreground">
+                                <Activity className="h-3 w-3" />
+                                <span>Last activity: {new Date(progress.lastActivity).toLocaleTimeString()}</span>
+                              </div>
+                            )}
+                            
+                            {/* Section details */}
+                            <div className="space-y-2">
+                               {['research', 'details', 'disclaimer', 'funnel', 'faqs', 'verification'].map((section) => {
+                                 const sectionStatus = progress.sections[section as keyof SectionStatus];
+                                 const updateInfo = getSectionUpdateInfo(progress.serviceId, section);
+                                 const isCurrentSection = progress.currentSection === section;
+                                 
+                                 return (
+                                   <div key={section} className={`space-y-1 ${isCurrentSection ? 'bg-blue-50 p-2 rounded border border-blue-200' : ''}`}>
+                                     <div className="flex items-center justify-between">
+                                       <div className="flex items-center gap-2">
+                                         {getSectionIcon(sectionStatus)}
+                                         <span className={`text-sm ${isCurrentSection ? 'font-medium text-blue-800' : 'font-medium'}`}>
+                                           {getSectionName(section)}
+                                         </span>
+                                         {isCurrentSection && (
+                                           <Badge variant="secondary" className="text-xs">
+                                             Active
+                                           </Badge>
+                                         )}
+                                       </div>
+                                       {updateInfo && (
+                                         <div className="flex items-center gap-1 text-xs text-green-600">
+                                           <Check className="h-3 w-3" />
+                                           <span>{formatUpdateDate(updateInfo.updated_at)}</span>
+                                         </div>
+                                       )}
+                                     </div>
+                                     <p className={`text-xs ml-6 ${isCurrentSection ? 'text-blue-600' : 'text-muted-foreground'}`}>
+                                       {getSectionDescription(section)}
+                                     </p>
+                                   </div>
+                                 );
+                               })}
+                            </div>
+                            
+                            {progress.error && (
+                              <div className="mt-3 p-2 bg-red-50 border border-red-200 rounded text-sm text-red-700">
+                                {progress.error}
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                </div>
               </div>
             )}
           </TabsContent>
