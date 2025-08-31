@@ -6,8 +6,10 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent } from "@/components/ui/card";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
 import { useServiceReviews } from "@/hooks/useServiceReviews";
 import { AnswerDropdown } from "./AnswerDropdown";
 import { PricingChoiceModal } from "./PricingChoiceModal";
@@ -194,6 +196,7 @@ export const ServiceFunnelModal = ({
   const [activeMediaUrl, setActiveMediaUrl] = useState<string | null>(null);
   const [expandedFeatures, setExpandedFeatures] = useState<{[key: string]: boolean}>({});
   const [showYearlyPricing, setShowYearlyPricing] = useState(false);
+  const [isSharePopoverOpen, setIsSharePopoverOpen] = useState(false);
   // Get support stats visibility from service funnel content
   const showSupportStats = service.funnel_content && typeof service.funnel_content === 'object' && 'showSupportStats' in service.funnel_content ? service.funnel_content.showSupportStats : false;
   const [vendorAvailability, setVendorAvailability] = useState<{
@@ -218,6 +221,7 @@ export const ServiceFunnelModal = ({
     trackWebsiteClick
   } = useProviderTracking(service.id, isOpen);
   const { trackClick } = useSponsoredTracking();
+  const { toast: toastHook } = useToast();
   const [openItem, setOpenItem] = useState<string | undefined>("question-1");
 
   // Use service verification status from database  
@@ -392,6 +396,137 @@ export const ServiceFunnelModal = ({
     window.open(url.toString(), '_blank', 'noopener,noreferrer');
     onClose();
   };
+
+  // Share functionality
+  const buildShareUrl = () => {
+    const baseUrl = window.location.origin;
+    const url = new URL(`${baseUrl}/marketplace`);
+    url.searchParams.set('service', service.id);
+    url.searchParams.set('view', 'funnel');
+    url.searchParams.set('utm_source', 'circle_marketplace');
+    url.searchParams.set('utm_medium', 'share');
+    url.searchParams.set('utm_campaign', 'deal_share');
+    if (user?.id) {
+      url.searchParams.set('ref', user.id);
+    }
+    return url.toString();
+  };
+
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    }).format(price);
+  };
+
+  const buildShareMessage = () => {
+    const currentPrice = showYearlyPricing ? selectedPkg.yearlyPrice || selectedPkg.price : selectedPkg.price;
+    const shareUrl = buildShareUrl();
+    
+    return `Check out this deal: ${service.title} - ${formatPrice(currentPrice)}${service.description ? `\n\n${service.description.substring(0, 100)}${service.description.length > 100 ? '...' : ''}` : ''}\n\n${shareUrl}`;
+  };
+
+  const getSmsHref = (message: string) => {
+    const encodedMessage = encodeURIComponent(message);
+    // iOS uses different SMS URL format than Android
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    return isIOS ? `sms:&body=${encodedMessage}` : `sms:?body=${encodedMessage}`;
+  };
+
+  const handleShare = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    const shareUrl = buildShareUrl();
+    const shareMessage = buildShareMessage();
+    
+    // Track share event
+    trackEvent({
+      event_type: 'share',
+      event_data: { 
+        context: 'service_funnel', 
+        service_id: service.id,
+        method: 'button_click'
+      }
+    } as any);
+
+    // Use native share if available (mobile)
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `Circle Marketplace - ${service.title}`,
+          text: shareMessage,
+          url: shareUrl,
+        });
+        
+        trackEvent({
+          event_type: 'share_completed',
+          event_data: { 
+            context: 'service_funnel', 
+            service_id: service.id,
+            method: 'native_share'
+          }
+        } as any);
+        
+        return;
+      } catch (error) {
+        // User cancelled or error occurred, fall through to manual options
+      }
+    }
+
+    // Open popover for desktop share options
+    setIsSharePopoverOpen(true);
+  };
+
+  const handleShareOption = async (method: 'sms' | 'email' | 'copy') => {
+    const shareUrl = buildShareUrl();
+    const shareMessage = buildShareMessage();
+    
+    trackEvent({
+      event_type: 'share_completed',
+      event_data: { 
+        context: 'service_funnel', 
+        service_id: service.id,
+        method
+      }
+    } as any);
+
+    switch (method) {
+      case 'sms':
+        window.open(getSmsHref(shareMessage), '_self');
+        break;
+      case 'email':
+        const emailSubject = encodeURIComponent(`Circle Marketplace Deal: ${service.title}`);
+        const emailBody = encodeURIComponent(shareMessage);
+        window.open(`mailto:?subject=${emailSubject}&body=${emailBody}`, '_self');
+        break;
+      case 'copy':
+        try {
+          await navigator.clipboard.writeText(shareUrl);
+          toastHook({
+            title: "Link copied!",
+            description: "Deal link has been copied to your clipboard.",
+          });
+        } catch (error) {
+          // Fallback for older browsers
+          const textArea = document.createElement('textarea');
+          textArea.value = shareUrl;
+          document.body.appendChild(textArea);
+          textArea.select();
+          document.execCommand('copy');
+          document.body.removeChild(textArea);
+          
+          toastHook({
+            title: "Link copied!",
+            description: "Deal link has been copied to your clipboard.",
+          });
+        }
+        break;
+    }
+    
+    setIsSharePopoverOpen(false);
+  };
   const renderStarRating = (rating: number, size = "sm") => {
     return <div className="flex items-center gap-1">
         {[...Array(5)].map((_, i) => {
@@ -416,10 +551,53 @@ export const ServiceFunnelModal = ({
           <span>Service Details</span>
         </DialogHeader>
         
-        {/* Close Button - Fixed Position */}
-        <Button variant="ghost" size="icon" className="absolute top-4 right-4 z-50 h-8 w-8 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white shadow-lg border border-white/20" onClick={onClose}>
-          <X className="h-4 w-4 text-gray-700" />
-        </Button>
+        {/* Action Buttons - Fixed Position */}
+        <div className="absolute top-4 right-4 z-50 flex gap-2">
+          <Popover open={isSharePopoverOpen} onOpenChange={setIsSharePopoverOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white shadow-lg border border-white/20"
+                onClick={handleShare}
+              >
+                <Share2 className="h-4 w-4 text-gray-700" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-48 p-2" align="end">
+              <div className="space-y-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-full justify-start"
+                  onClick={() => handleShareOption('sms')}
+                >
+                  Text Message
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-full justify-start"
+                  onClick={() => handleShareOption('email')}
+                >
+                  Email
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-full justify-start"
+                  onClick={() => handleShareOption('copy')}
+                >
+                  Copy Link
+                </Button>
+              </div>
+            </PopoverContent>
+          </Popover>
+          
+          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white shadow-lg border border-white/20" onClick={onClose}>
+            <X className="h-4 w-4 text-gray-700" />
+          </Button>
+        </div>
 
 
         <div className="overflow-y-auto max-h-[90vh]">
