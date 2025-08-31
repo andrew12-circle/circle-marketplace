@@ -185,10 +185,16 @@ export default function BulkServiceResearch() {
         setProgress(progressPercent);
         appendLog(`📈 Progress: ${offset}/${actualTotal} (${progressPercent}%)`);
 
-        // Stop conditions: no more data, no items processed, or reached total
-        if (!hasMore || p === 0 || (totalCount > 0 && offset >= totalCount)) {
-          appendLog(`🛑 Stopping: hasMore=${hasMore}, processed=${p}, offset=${offset}, total=${totalCount}`);
+        // Stop conditions: no more data or reached total
+        // Don't stop just because this batch processed 0 items - continue if hasMore=true
+        if (!hasMore || (totalCount > 0 && offset >= totalCount)) {
+          appendLog(`🛑 Stopping: hasMore=${hasMore}, offset=${offset}, total=${totalCount}, processed=${p}`);
           break;
+        }
+        
+        // Log when we processed 0 items but continue anyway
+        if (p === 0) {
+          appendLog(`⏩ Batch ${batchIndex} processed 0 items but continuing (hasMore=${hasMore})`);
         }
 
         // Small delay between batches to be respectful to rate limits
