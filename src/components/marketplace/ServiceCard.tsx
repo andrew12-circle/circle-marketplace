@@ -322,14 +322,14 @@ export const ServiceCard = ({
           )}
 
           {/* Header with profile picture and title */}
-          <div className="p-4 pb-2 flex items-start gap-2">
-            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 mt-1">
-              <span className="text-blue-600 font-semibold text-sm">
+          <div className="p-4 pb-2 flex items-center gap-3">
+            <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+              <span className="text-blue-600 font-semibold text-lg">
                 {service.vendor?.name?.charAt(0) || service.title.charAt(0)}
               </span>
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-foreground leading-tight text-base line-clamp-2 mb-1">
+              <h3 className="font-semibold text-foreground leading-tight text-lg line-clamp-2">
                 {service.title.split(' - ').pop() || service.title.split(': ').pop() || service.title}
               </h3>
             </div>
