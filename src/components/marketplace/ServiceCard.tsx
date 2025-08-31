@@ -320,6 +320,11 @@ export const ServiceCard = ({
             </div>
           )}
 
+          {/* Title - Positioned at top left */}
+          <h3 className="absolute top-3 left-3 z-10 font-semibold text-foreground leading-tight mobile-title text-sm max-w-[60%] line-clamp-2 bg-background/80 backdrop-blur-sm px-2 py-1 rounded">
+            {service.title.split(' - ').pop() || service.title.split(': ').pop() || service.title}
+          </h3>
+
           {/* Save Button */}
           <Button
             variant="ghost"
@@ -344,11 +349,6 @@ export const ServiceCard = ({
           </div>
 
           <CardContent className="p-4 flex flex-col justify-between h-full mobile-card-content">
-            {/* Title - Moved to top */}
-            <h3 className="font-semibold text-foreground leading-tight mobile-title mb-3">
-              {service.title.split(' - ').pop() || service.title.split(': ').pop() || service.title}
-            </h3>
-
             {/* Service Rating - Updated to use bulk ratings when available */}
             {(totalReviews || 0) > 0 && shouldShowRating && (
               <div className="flex items-center gap-1 mb-3">
