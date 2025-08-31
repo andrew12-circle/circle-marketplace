@@ -88,39 +88,75 @@ async function handleFetchError(error: Error, input: RequestInfo | URL): Promise
  */
 async function performCookieRecovery(reason: string): Promise<void> {
   try {
-    console.log('Performing cookie recovery:', reason);
+    console.log('Performing enhanced cookie recovery:', reason);
+    
+    // Import cache manager dynamically to avoid circular dependencies
+    const { cacheManager } = await import('../utils/cacheManager');
     
     // Report the recovery event
     if (typeof window !== 'undefined' && (window as any).reportClientError) {
       (window as any).reportClientError({
         error_type: 'other',
-        message: 'Cookie recovery performed',
+        message: 'Enhanced cookie recovery performed',
         metadata: { 
           reason,
           cookieSizeBefore: document.cookie.length,
           timestamp: new Date().toISOString(),
-          url: window.location.href
+          url: window.location.href,
+          recoveryType: 'cookie_error_auto_recovery'
         }
       });
     }
     
+    // Set reload reason for user feedback
+    const reloadReason = reason.includes('cookie_error') ? 'cookie_recovery' : 'self_heal';
+    sessionStorage.setItem('last_reload_reason', reloadReason);
+    sessionStorage.setItem('recovery_context', JSON.stringify({
+      originalReason: reason,
+      timestamp: new Date().toISOString(),
+      cookieSize: document.cookie.length
+    }));
+    
     // Clear auth cookies
     clearAllSupabaseAuthCookies();
     
-    // Wait a moment for cookies to clear
-    await new Promise(resolve => setTimeout(resolve, 100));
+    // Clear application caches to ensure fresh start
+    await cacheManager.clearAllCachePreserveSession();
     
-    // Reload the page to start fresh
-    window.location.reload();
+    // Clear any problematic localStorage items (but preserve auth session)
+    const preserveKeys = ['sb-ihzyuyfawapweamqzzlj-auth-token'];
+    const itemsToRemove: string[] = [];
+    
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && !preserveKeys.some(preserve => key.includes(preserve))) {
+        // Clear cache-related and potentially problematic items
+        if (key.includes('cache') || key.includes('temp') || key.includes('error')) {
+          itemsToRemove.push(key);
+        }
+      }
+    }
+    
+    itemsToRemove.forEach(key => localStorage.removeItem(key));
+    
+    // Wait for cleanup to complete
+    await new Promise(resolve => setTimeout(resolve, 200));
+    
+    // Force reload with cache busting
+    const url = new URL(window.location.href);
+    url.searchParams.set('recovery', Date.now().toString());
+    window.location.href = url.toString();
     
   } catch (error) {
-    console.error('Cookie recovery failed:', error);
+    console.error('Enhanced cookie recovery failed:', error);
     
-    // Last resort: try to reload anyway
+    // Fallback: basic recovery
     try {
+      sessionStorage.setItem('last_reload_reason', 'recovery_fallback');
+      clearAllSupabaseAuthCookies();
       window.location.reload();
     } catch {
-      // If even reload fails, redirect to home
+      // Ultimate fallback: redirect to home
       window.location.href = '/';
     }
   }

@@ -96,7 +96,7 @@ export const VendorContentManager = ({ vendorId, vendorName }: VendorContentMana
       const { data, error } = await supabase
         .from('vendor_content')
         .select('*')
-        .eq('vendor_id' as any, vendorId as any)
+        .eq('vendor_id', vendorId)
         .order('display_order', { ascending: true });
 
       if (error) throw error;
@@ -114,7 +114,7 @@ export const VendorContentManager = ({ vendorId, vendorName }: VendorContentMana
       const { data, error } = await supabase
         .from('services')
         .select('id, title, vendor_id')
-        .eq('vendor_id' as any, vendorId as any)
+        .eq('vendor_id', vendorId)
         .order('title');
 
       if (error) throw error;
@@ -233,7 +233,7 @@ export const VendorContentManager = ({ vendorId, vendorName }: VendorContentMana
       const { error } = await supabase
         .from('vendor_content')
         .delete()
-        .eq('id' as any, id as any);
+        .eq('id', id);
 
       if (error) throw error;
       toast.success('Content deleted successfully');

@@ -32,17 +32,32 @@ class CacheManager {
    */
   async clearAllCachePreserveSession(): Promise<void> {
     try {
-      console.log('🧹 Clearing cache while preserving session...');
+      console.log('🧹 Enhanced cache clearing while preserving session...');
       
-      // Preserve Supabase session data
+      // Preserve Supabase session data and recovery context
       const sessionData: Record<string, string | null> = {};
       SUPABASE_SESSION_KEYS.forEach(key => {
         sessionData[key] = localStorage.getItem(key);
       });
 
-      // Clear localStorage
-      localStorage.clear();
+      // Preserve recovery-related session storage
+      const reloadReason = sessionStorage.getItem('last_reload_reason');
+      const recoveryContext = sessionStorage.getItem('recovery_context');
+
+      // Clear localStorage (except preserved items)
+      const preserveKeys = [...SUPABASE_SESSION_KEYS, 'app_version', 'user_preferences'];
+      const allKeys = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key) allKeys.push(key);
+      }
       
+      allKeys.forEach(key => {
+        if (!preserveKeys.some(preserve => key.includes(preserve))) {
+          localStorage.removeItem(key);
+        }
+      });
+
       // Restore session data
       Object.entries(sessionData).forEach(([key, value]) => {
         if (value) {
@@ -50,18 +65,47 @@ class CacheManager {
         }
       });
 
-      // Clear sessionStorage
+      // Clear sessionStorage (except for recovery info)
       sessionStorage.clear();
-      
-      // Clear service worker cache if available - await for completion
-      if ('caches' in window) {
-        const cacheNames = await caches.keys();
-        await Promise.all(cacheNames.map(name => caches.delete(name)));
+      if (reloadReason) {
+        sessionStorage.setItem('last_reload_reason', reloadReason);
       }
-      
-      console.log('✅ Cache cleared successfully (session preserved)');
+      if (recoveryContext) {
+        sessionStorage.setItem('recovery_context', recoveryContext);
+      }
+
+      // Clear service worker caches with retry logic
+      if ('caches' in window) {
+        try {
+          const cacheNames = await caches.keys();
+          const deletePromises = cacheNames.map(async (cacheName) => {
+            try {
+              await caches.delete(cacheName);
+              console.log(`Cleared cache: ${cacheName}`);
+            } catch (error) {
+              console.warn(`Failed to clear cache ${cacheName}:`, error);
+            }
+          });
+          await Promise.allSettled(deletePromises);
+        } catch (error) {
+          console.warn('Failed to clear some service worker caches:', error);
+        }
+      }
+
+      // Clear any browser-specific caches if available
+      if ('storage' in navigator && 'estimate' in navigator.storage) {
+        try {
+          const estimate = await navigator.storage.estimate();
+          console.log('Storage usage after cleanup:', estimate);
+        } catch (error) {
+          console.warn('Could not estimate storage usage:', error);
+        }
+      }
+
+      console.log('✅ Enhanced cache cleared successfully, session preserved');
     } catch (error) {
       console.error('Failed to clear cache:', error);
+      throw new Error(`Cache clearing failed: ${error.message}`);
     }
   }
   
