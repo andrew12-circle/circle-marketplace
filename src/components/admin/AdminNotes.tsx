@@ -4,13 +4,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/simpleClient";
+import { useAutoRecovery } from "@/hooks/useAutoRecovery";
 import { 
   Plus, 
   MessageSquare,
   Calendar,
   User,
-  Trash2
+  Trash2,
+  RefreshCw
 } from "lucide-react";
 
 interface AdminNote {
@@ -33,12 +35,23 @@ export const AdminNotes = ({ serviceId, serviceName }: AdminNotesProps) => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
+  const { triggerRecovery, isRecovering } = useAutoRecovery();
 
   useEffect(() => {
     if (serviceId) {
       loadNotes();
+      
+      // Auto-recovery for stuck loading states
+      const timeout = setTimeout(() => {
+        if (loading) {
+          console.warn('AdminNotes stuck in loading state, triggering recovery');
+          triggerRecovery();
+        }
+      }, 10000); // 10 seconds timeout
+      
+      return () => clearTimeout(timeout);
     }
-  }, [serviceId]);
+  }, [serviceId, loading, triggerRecovery]);
 
   const loadNotes = async () => {
     try {
@@ -119,7 +132,25 @@ export const AdminNotes = ({ serviceId, serviceName }: AdminNotesProps) => {
     return (
       <Card>
         <CardContent className="p-6">
-          <div className="text-center">Loading admin notes...</div>
+          <div className="flex flex-col items-center gap-3">
+            <div className="text-center">Loading admin notes...</div>
+            {isRecovering && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <RefreshCw className="w-4 h-4 animate-spin" />
+                Refreshing system...
+              </div>
+            )}
+            <Button
+              variant="outline" 
+              size="sm"
+              onClick={triggerRecovery}
+              disabled={isRecovering}
+              className="mt-2"
+            >
+              <RefreshCw className={`w-4 h-4 mr-2 ${isRecovering ? 'animate-spin' : ''}`} />
+              {isRecovering ? 'Refreshing...' : 'Refresh'}
+            </Button>
+          </div>
         </CardContent>
       </Card>
     );
