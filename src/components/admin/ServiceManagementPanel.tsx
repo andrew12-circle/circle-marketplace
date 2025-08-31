@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 import { ServiceFunnelEditor } from './ServiceFunnelEditor';
 import { ServicePricingTiersEditor } from '@/components/marketplace/ServicePricingTiersEditor';
-import { ServiceFunnelModal } from '@/components/marketplace/ServiceFunnelModal';
+import ServiceFunnelModal from '@/components/marketplace/ServiceFunnelModal';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
