@@ -376,8 +376,8 @@ export const ServiceCard = ({
             )}
           </div>
 
-          {/* Image - 4:5 Portrait */}
-          <div className="relative aspect-square overflow-hidden bg-white flex-shrink-0 p-4">
+          {/* Image - 2:1 Landscape */}
+          <div className="relative aspect-[2/1] overflow-hidden bg-white flex-shrink-0 p-4">
             <img
               src={service.image_url || "/lovable-uploads/placeholder.svg"}
               alt={service.title}
