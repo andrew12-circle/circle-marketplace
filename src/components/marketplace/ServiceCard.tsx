@@ -323,7 +323,7 @@ export const ServiceCard = ({
 
           {/* Header with profile picture and title */}
           <div className="p-4 pb-2 flex items-start gap-2">
-            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 mt-1">
+            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
               <span className="text-blue-600 font-semibold text-sm">
                 {service.vendor?.name?.charAt(0) || service.title.charAt(0)}
               </span>
