@@ -5020,6 +5020,47 @@ export type Database = {
         }
         Relationships: []
       }
+      service_faqs: {
+        Row: {
+          answer: string
+          category: string | null
+          created_at: string
+          display_order: number
+          id: string
+          question: string
+          service_id: string
+          updated_at: string
+        }
+        Insert: {
+          answer: string
+          category?: string | null
+          created_at?: string
+          display_order?: number
+          id?: string
+          question: string
+          service_id: string
+          updated_at?: string
+        }
+        Update: {
+          answer?: string
+          category?: string | null
+          created_at?: string
+          display_order?: number
+          id?: string
+          question?: string
+          service_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_faqs_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       service_integrations: {
         Row: {
           api_connected: boolean
@@ -5507,6 +5548,7 @@ export type Database = {
       }
       services: {
         Row: {
+          allowed_split_percentage: number | null
           average_rating: number | null
           booking_time_rules: Json | null
           booking_type: string | null
@@ -5566,6 +5608,7 @@ export type Database = {
           website_url: string | null
         }
         Insert: {
+          allowed_split_percentage?: number | null
           average_rating?: number | null
           booking_time_rules?: Json | null
           booking_type?: string | null
@@ -5625,6 +5668,7 @@ export type Database = {
           website_url?: string | null
         }
         Update: {
+          allowed_split_percentage?: number | null
           average_rating?: number | null
           booking_time_rules?: Json | null
           booking_type?: string | null
