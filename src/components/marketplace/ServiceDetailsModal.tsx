@@ -141,7 +141,7 @@ export const ServiceDetailsModal = ({ service, isOpen, onClose }: ServiceDetails
       id: service.id,
       title: `${service.title} - ${packageType.charAt(0).toUpperCase() + packageType.slice(1)} Package`,
       price,
-      vendor: service.vendor.name,
+      vendor: service.vendor?.name || 'Unknown Vendor',
       image_url: service.image_url,
       requiresQuote: service.requires_quote,
       type: 'service'
@@ -213,7 +213,7 @@ export const ServiceDetailsModal = ({ service, isOpen, onClose }: ServiceDetails
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-2">
                 <h2 className="text-3xl font-bold">{service.funnel_content?.headline || service.title}</h2>
-                {service.vendor.is_verified && (
+                {service.vendor?.is_verified && (
                   <Badge className="bg-white/20 text-white border-white/30">
                     <Shield className="w-3 h-3 mr-1" />
                     Verified
@@ -224,7 +224,7 @@ export const ServiceDetailsModal = ({ service, isOpen, onClose }: ServiceDetails
               <p className="text-lg text-white/90 mb-4">{service.funnel_content?.heroDescription || service.description}</p>
               
               <div className="flex items-center gap-6 text-sm">
-                {reviews.length > 0 && (
+                {reviews.length > 0 && service.vendor && (
                   <div className="flex items-center gap-1">
                     <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
                     <span>{service.vendor.rating} ({reviews.length} reviews)</span>
@@ -431,12 +431,12 @@ export const ServiceDetailsModal = ({ service, isOpen, onClose }: ServiceDetails
               <CardContent className="p-6 text-center">
                 <h4 className="text-xl font-bold mb-2">{service.funnel_content?.callToAction?.primaryHeadline || "Need More Information?"}</h4>
                 <p className="text-muted-foreground mb-4">
-                  {service.funnel_content?.callToAction?.primaryDescription || `Visit the official ${service.vendor.name} website for detailed documentation and resources.`}
+                  {service.funnel_content?.callToAction?.primaryDescription || `Visit the official ${service.vendor?.name || 'vendor'} website for detailed documentation and resources.`}
                 </p>
                 <Button 
                   variant="outline" 
                   className="w-full"
-                  onClick={() => window.open(service.funnel_content?.callToAction?.contactInfo?.website || `https://${service.vendor.name.toLowerCase().replace(' ', '')}.com`, '_blank')}
+                  onClick={() => window.open(service.funnel_content?.callToAction?.contactInfo?.website || `https://${(service.vendor?.name || 'vendor').toLowerCase().replace(' ', '')}.com`, '_blank')}
                 >
                   <ExternalLink className="w-4 h-4 mr-2" />
                   {service.funnel_content?.callToAction?.primaryButtonText || "Visit Official Website"}
