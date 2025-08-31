@@ -681,13 +681,18 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
   };
 
   const processService = async (service: Service): Promise<void> => {
-    console.log(`🔄 Processing service: ${service.title}`);
+    console.log(`🔄 Processing service: ${service.title} (ID: ${service.id})`);
     
     let detailsData = null;
     let disclaimerData = null;
     let funnelData = null;
     let faqsData = null;
     let progress = serviceProgress[service.id];
+
+    if (!progress) {
+      console.error('❌ No progress object found for service:', service.id);
+      throw new Error('Progress tracking not initialized');
+    }
 
     try {
       // Generate research first
@@ -730,7 +735,10 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
   };
 
   const runAIUpdater = async () => {
+    console.log('🚀 runAIUpdater called with selectedServices:', selectedServices);
+    
     if (selectedServices.length === 0) {
+      console.log('❌ No services selected');
       toast({
         title: 'No Services Selected',
         description: 'Please select at least one service to update.',
@@ -739,12 +747,14 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
       return;
     }
 
+    console.log('✅ Starting AI updater with', selectedServices.length, 'services');
     setIsRunning(true);
     setActiveTab('progress');
     setHasStuckState(false);
     setErrorCount(0);
     
     let servicesToUpdate = services.filter(s => selectedServices.includes(s.id));
+    console.log('📋 Services to update:', servicesToUpdate.map(s => s.title));
     
     // Filter out already AI-updated services if overwrite is disabled
     if (!overwriteAIUpdated) {
@@ -779,21 +789,29 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
       return;
     }
     
-    setServiceProgress(initializeProgress(servicesToUpdate.map(s => s.id)));
+    console.log('🎯 Setting progress for', servicesToUpdate.length, 'services');
+    const initialProgress = initializeProgress(servicesToUpdate.map(s => s.id));
+    console.log('📈 Initial progress:', Object.keys(initialProgress));
+    setServiceProgress(initialProgress);
 
     if (runInBackground) {
+      console.log('⚡ Running in background mode');
       toast({
         title: "Running in background",
         description: "AI updater is processing services in the background. You can navigate away and check back later.",
         duration: 5000,
       });
+    } else {
+      console.log('🎯 Running in foreground mode');
     }
 
     const processInBackground = async () => {
+      console.log('🔄 processInBackground started with', servicesToUpdate.length, 'services');
       let completedCount = 0;
       let errorCount = 0;
 
       try {
+        console.log('📊 Initializing progress for services:', servicesToUpdate.map(s => s.id));
         // Process services sequentially to avoid rate limits
         for (const service of servicesToUpdate) {
           // Check if still running at the start of each iteration
