@@ -829,7 +829,7 @@ export const ServiceCard = ({
                 className="h-9 px-3"
                 onClick={handleViewDetailsButton}
               >
-                See more
+                Learn more
               </Button>
             </div>
           </CardContent>
