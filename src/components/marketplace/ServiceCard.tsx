@@ -349,14 +349,14 @@ export const ServiceCard = ({
             />
           </Button>
 
-          {/* Description with Facebook-style expand */}
-          <div className="p-4 pb-2">
-            <p className={`text-sm text-muted-foreground leading-tight transition-all duration-300 ${isDescriptionExpanded ? '' : 'line-clamp-2'}`}>
+          {/* Description with fixed height for uniformity */}
+          <div className="p-4 pb-2 h-20 flex flex-col">
+            <p className={`text-sm text-muted-foreground leading-tight transition-all duration-300 flex-1 ${isDescriptionExpanded ? '' : 'line-clamp-2'}`}>
               {service.description}
             </p>
             {service.description && service.description.length > 100 && (
               <button
-                className="text-sm text-primary hover:text-primary/80 font-medium mt-1 transition-colors"
+                className="text-sm text-primary hover:text-primary/80 font-medium mt-1 transition-colors self-start"
                 onClick={(e) => {
                   e.stopPropagation();
                   setIsDescriptionExpanded(!isDescriptionExpanded);
