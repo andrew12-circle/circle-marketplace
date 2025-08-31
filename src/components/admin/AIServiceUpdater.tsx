@@ -941,6 +941,23 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
                             <Badge variant="outline" className="text-xs">Unverified</Badge>
                           )}
                         </div>
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {service.description && (
+                            <Badge variant="secondary" className="text-xs">✓ Details</Badge>
+                          )}
+                          {service.disclaimer_content && (
+                            <Badge variant="secondary" className="text-xs">✓ Disclaimer</Badge>
+                          )}
+                          {service.funnel_content && (
+                            <Badge variant="secondary" className="text-xs">✓ Funnel</Badge>
+                          )}
+                          {updateTracking[service.id]?.some(t => t.section_name === 'research') && (
+                            <Badge variant="secondary" className="text-xs">✓ Research</Badge>
+                          )}
+                          {updateTracking[service.id]?.some(t => t.section_name === 'faqs') && (
+                            <Badge variant="secondary" className="text-xs">✓ FAQ</Badge>
+                          )}
+                        </div>
                       </div>
                       <div className="shrink-0">
                         <div className={`w-4 h-4 rounded border-2 ${
