@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Bot, Sparkles, CheckCircle, AlertCircle, Loader2, FileText, Zap, Share, Lightbulb, HelpCircle, Shield, Clock, Check } from 'lucide-react';
@@ -159,6 +160,64 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
       hour: '2-digit',
       minute: '2-digit'
     });
+  };
+
+  const getSectionBadgeInfo = (service: Service, sectionName: string) => {
+    const aiUpdate = getSectionUpdateInfo(service.id, sectionName);
+    let hasContent = false;
+    
+    switch (sectionName) {
+      case 'details':
+        hasContent = !!service.description;
+        break;
+      case 'disclaimer':
+        hasContent = !!service.disclaimer_content;
+        break;
+      case 'funnel':
+        hasContent = !!service.funnel_content;
+        break;
+      case 'research':
+      case 'faqs':
+        hasContent = !!aiUpdate; // These only exist if AI updated
+        break;
+    }
+
+    if (aiUpdate) {
+      return {
+        status: 'ai_updated',
+        text: `AI Updated`,
+        variant: 'default' as const,
+        tooltip: `AI updated on ${formatUpdateDate(aiUpdate.updated_at)}`
+      };
+    } else if (hasContent) {
+      return {
+        status: 'has_content',
+        text: `Has Content`,
+        variant: 'secondary' as const,
+        tooltip: 'Content added manually'
+      };
+    } else {
+      return {
+        status: 'missing',
+        text: `Missing`,
+        variant: 'outline' as const,
+        tooltip: 'No content available'
+      };
+    }
+  };
+
+  const getCompletionSummary = (service: Service) => {
+    const sections = ['details', 'disclaimer', 'funnel', 'research', 'faqs'];
+    const completed = sections.filter(section => {
+      const badgeInfo = getSectionBadgeInfo(service, section);
+      return badgeInfo.status === 'ai_updated' || badgeInfo.status === 'has_content';
+    });
+    
+    return {
+      completed: completed.length,
+      total: sections.length,
+      percentage: Math.round((completed.length / sections.length) * 100)
+    };
   };
 
   // Monitor for stuck states during AI generation
@@ -930,34 +989,41 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
                         <p className="text-xs text-muted-foreground mt-1">
                           {service.category}
                         </p>
-                        <div className="flex flex-wrap gap-1 mt-2">
-                          {!service.funnel_content && (
-                            <Badge variant="outline" className="text-xs">No Funnel</Badge>
-                          )}
-                          {!service.disclaimer_content && (
-                            <Badge variant="outline" className="text-xs">No Disclaimer</Badge>
-                          )}
-                          {!service.is_verified && (
-                            <Badge variant="outline" className="text-xs">Unverified</Badge>
-                          )}
+                        <div className="flex items-center justify-between mt-2 mb-2">
+                          <div className="flex flex-wrap gap-1">
+                            {!service.is_verified && (
+                              <Badge variant="outline" className="text-xs">Unverified</Badge>
+                            )}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {(() => {
+                              const summary = getCompletionSummary(service);
+                              return `${summary.completed}/${summary.total} sections complete (${summary.percentage}%)`;
+                            })()}
+                          </div>
                         </div>
-                        <div className="flex flex-wrap gap-1 mt-2">
-                          {service.description && (
-                            <Badge variant="secondary" className="text-xs">✓ Details</Badge>
-                          )}
-                          {service.disclaimer_content && (
-                            <Badge variant="secondary" className="text-xs">✓ Disclaimer</Badge>
-                          )}
-                          {service.funnel_content && (
-                            <Badge variant="secondary" className="text-xs">✓ Funnel</Badge>
-                          )}
-                          {updateTracking[service.id]?.some(t => t.section_name === 'research') && (
-                            <Badge variant="secondary" className="text-xs">✓ Research</Badge>
-                          )}
-                          {updateTracking[service.id]?.some(t => t.section_name === 'faqs') && (
-                            <Badge variant="secondary" className="text-xs">✓ FAQ</Badge>
-                          )}
-                        </div>
+                        <TooltipProvider>
+                          <div className="flex flex-wrap gap-1">
+                            {['details', 'disclaimer', 'funnel', 'research', 'faqs'].map(sectionName => {
+                              const badgeInfo = getSectionBadgeInfo(service, sectionName);
+                              return (
+                                <Tooltip key={sectionName}>
+                                  <TooltipTrigger asChild>
+                                    <Badge variant={badgeInfo.variant} className="text-xs cursor-help">
+                                      {badgeInfo.status === 'ai_updated' && '🤖 '}
+                                      {badgeInfo.status === 'has_content' && '✓ '}
+                                      {badgeInfo.status === 'missing' && '⚠️ '}
+                                      {sectionName.charAt(0).toUpperCase() + sectionName.slice(1)}
+                                    </Badge>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>{badgeInfo.tooltip}</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              );
+                            })}
+                          </div>
+                        </TooltipProvider>
                       </div>
                       <div className="shrink-0">
                         <div className={`w-4 h-4 rounded border-2 ${
