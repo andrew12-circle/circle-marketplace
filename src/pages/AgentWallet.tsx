@@ -130,7 +130,7 @@ export const AgentWallet = () => {
     .filter(t => t.created_at.startsWith(thisMonth) && t.transaction_type === 'deduction')
     .reduce((sum, t) => sum + t.points_used, 0);
 
-  const availablePoints = pointsData?.total_available_points || 0;
+  const availablePoints = pointsData?.total_available_points || profile?.circle_points || 0;
   
   const walletData = {
     availablePoints,
