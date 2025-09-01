@@ -716,7 +716,7 @@ export const MarketplaceGrid = () => {
               <Button 
                 variant="outline" 
                 size="lg" 
-                className="border-gray-300 text-gray-700 hover:bg-gray-50 px-8 py-3 font-semibold"
+                className="border-purple-500 text-purple-600 hover:bg-purple-500 hover:text-white px-8 py-3 font-semibold transition-colors"
                 onClick={() => {
                   // Navigate to pricing screen
                   window.location.href = '/pricing';
