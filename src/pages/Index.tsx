@@ -1,3 +1,4 @@
+
 // @ts-nocheck
 import { useTranslation } from "react-i18next";
 import { Link, useLocation } from "react-router-dom";
@@ -22,12 +23,33 @@ import { ProactiveHelpMonitor } from "@/components/help/ProactiveHelpMonitor";
 import { TourDiscoveryButton } from "@/components/marketplace/TourDiscoveryButton";
 import { Building, Store, BookOpen } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
-  const { user, profile } = useAuth();
+  const { user, profile, refreshProfile } = useAuth();
   const { t } = useTranslation();
   const location = useLocation();
   const isMobile = useIsMobile();
+
+  // Refresh profile data when component mounts or when returning to this page
+  useEffect(() => {
+    if (user && profile) {
+      refreshProfile();
+    }
+  }, [user, refreshProfile]);
+
+  // Also refresh when the page becomes visible (user returns from another tab/app)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden && user && profile) {
+        refreshProfile();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [user, profile, refreshProfile]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -60,7 +82,7 @@ const Index = () => {
                     {user && profile && (
                       <Link to="/wallet" className="flex items-center gap-1 text-xs hover:bg-accent hover:text-accent-foreground rounded-md px-1.5 py-1 transition-colors cursor-pointer touch-target">
                         <Crown className="w-3 h-3 text-yellow-500" />
-                        <span className="font-medium text-xs">{profile.circle_points}</span>
+                        <span className="font-medium text-xs" key={profile.circle_points}>{profile.circle_points}</span>
                       </Link>
                     )}
                     
@@ -108,7 +130,7 @@ const Index = () => {
                   {user && profile && (
                     <Link to="/wallet" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm hover:bg-accent hover:text-accent-foreground rounded-md px-2 sm:px-3 py-1.5 sm:py-2 transition-colors cursor-pointer touch-target">
                       <Crown className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-500" />
-                      <span className="font-medium">{profile.circle_points}</span>
+                      <span className="font-medium" key={profile.circle_points}>{profile.circle_points}</span>
                       <span className="text-muted-foreground hidden sm:inline">Points</span>
                     </Link>
                   )}
