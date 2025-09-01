@@ -663,7 +663,7 @@ export const MarketplaceGrid = () => {
                 <div className="w-5 h-5 bg-purple-100 rounded-full flex items-center justify-center">
                   <span className="text-purple-600 text-sm">$</span>
                 </div>
-                <span className="text-gray-700 font-medium">Transparent, flat-fee co-pay</span>
+                <span className="text-gray-700 font-medium">Vendors cover up to 50% of costs</span>
               </div>
             </div>
 
