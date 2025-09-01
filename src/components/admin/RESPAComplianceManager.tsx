@@ -230,15 +230,18 @@ export const RESPAComplianceManager = () => {
       });
 
       for (const update of updates) {
-        const { error } = await supabase
+        // Bypass complex type checking for Supabase update
+        const supabaseUpdate: any = {
+          respa_risk_level: update.respa_risk_level,
+          respa_split_limit: update.respa_split_limit,
+          compliance_checklist: update.compliance_checklist,
+          respa_compliance_notes: update.respa_compliance_notes
+        };
+        
+        const { error } = await (supabase as any)
           .from('services')
-          .update({
-            respa_risk_level: update.respa_risk_level,
-            respa_split_limit: update.respa_split_limit,
-            compliance_checklist: update.compliance_checklist,
-            respa_compliance_notes: update.respa_compliance_notes
-          } as any) // Use any to bypass type checking temporarily
-          .eq('id' as any, update.id as any);
+          .update(supabaseUpdate)
+          .eq('id', update.id);
 
         if (error) throw error;
       }
@@ -272,10 +275,11 @@ export const RESPAComplianceManager = () => {
 
       console.log('Updating service with data:', updateData);
 
-      const { error } = await supabase
+      // Use simplified approach to avoid TypeScript complexity
+      const { error } = await (supabase as any)
         .from('services')
-        .update(updateData as any)
-        .eq('id' as any, serviceId as any);
+        .update(updateData)
+        .eq('id', serviceId);
 
       if (error) {
         console.error('Update error:', error);

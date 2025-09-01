@@ -956,19 +956,6 @@ export const ServiceManagementPanel = () => {
 
   return (
     <div className="space-y-6">
-      {/* AI Service Updater */}
-      <AIServiceUpdater 
-        services={services}
-        onServiceUpdate={(serviceId) => {
-          // Refresh the specific service or refetch all services
-          fetchServices();
-          toast({
-            title: 'Service Updated',
-            description: 'Service has been updated by AI. Please review and verify the changes.',
-          });
-        }}
-      />
-
       {/* Service Selection */}
       <Card>
         <CardHeader>
@@ -1641,6 +1628,19 @@ export const ServiceManagementPanel = () => {
           } as any}
         />
       )}
+
+      {/* AI Service Updater */}
+      <AIServiceUpdater 
+        services={services}
+        onServiceUpdate={(serviceId) => {
+          // Refresh the specific service or refetch all services
+          fetchServices();
+          toast({
+            title: 'Service Updated',
+            description: 'Service has been updated by AI. Please review and verify the changes.',
+          });
+        }}
+      />
     </div>
   );
 };
