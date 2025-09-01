@@ -722,7 +722,7 @@ export const MarketplaceGrid = () => {
                   window.location.href = '/pricing';
                 }}
               >
-                Start Pro Trial →
+                Get Vendor Co-Pay →
               </Button>
             </div>
             
