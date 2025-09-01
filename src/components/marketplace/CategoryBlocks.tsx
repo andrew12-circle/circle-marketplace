@@ -169,14 +169,6 @@ const OLD_SCHOOL_CATEGORIES = [
     iconColor: "text-white"
   },
   {
-    name: "Community Sponsorships",
-    icon: Award,
-    tags: ["cat:community-sponsorships"],
-    description: "Local Community Support",
-    color: "bg-amber-600",
-    iconColor: "text-white"
-  },
-  {
     name: "Print & Mail",
     icon: Mail,
     tags: ["cat:print-mail"],

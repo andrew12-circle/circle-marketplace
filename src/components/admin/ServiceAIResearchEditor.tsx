@@ -59,7 +59,7 @@ export const ServiceAIResearchEditor = ({ serviceId, serviceName }: ServiceAIRes
       const { data, error } = await supabase
         .from('service_ai_knowledge')
         .select('*')
-        .eq('service_id' as any, serviceId as any)
+        .eq('service_id', serviceId)
         .order('priority', { ascending: false })
         .order('created_at', { ascending: false });
 
@@ -124,7 +124,7 @@ export const ServiceAIResearchEditor = ({ serviceId, serviceName }: ServiceAIRes
         const { data, error } = await supabase
           .from('service_ai_knowledge')
           .update(editForm as any)
-          .eq('id' as any, isEditing as any)
+          .eq('id', isEditing)
           .select()
           .single();
 
@@ -157,7 +157,7 @@ export const ServiceAIResearchEditor = ({ serviceId, serviceName }: ServiceAIRes
       const { error } = await supabase
         .from('service_ai_knowledge')
         .delete()
-        .eq('id' as any, id as any);
+        .eq('id', id);
 
       if (error) throw error;
       
@@ -191,8 +191,8 @@ export const ServiceAIResearchEditor = ({ serviceId, serviceName }: ServiceAIRes
     try {
       const { error } = await supabase
         .from('service_ai_knowledge')
-        .update({ priority: clampedPriority } as any)
-        .eq('id' as any, id as any);
+        .update({ priority: clampedPriority })
+        .eq('id', id);
 
       if (error) throw error;
       
