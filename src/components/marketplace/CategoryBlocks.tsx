@@ -11,7 +11,6 @@ import {
   Mail,
   FileText,
   Presentation,
-  Palette,
   Globe,
   Bot,
   Play,
@@ -21,7 +20,9 @@ import {
   Zap,
   Headphones,
   UserPlus,
-  Award
+  Award,
+  Lock,
+  ShieldCheck
 } from "lucide-react";
 import { logger } from "@/utils/logger";
 import { useMemo } from "react";
@@ -37,115 +38,131 @@ interface CategoryBlocksProps {
 // Digital-first categories - for tech-savvy realtors focused on fast growth
 const DIGITAL_CATEGORIES = [
   {
-    name: "CRMs",
+    name: "CRM",
     icon: Users,
-    tags: ["cat:crms"],
-    description: "Customer Management",
+    tags: ["cat:crms", "tag:customer-management", "tag:contact-management"],
+    description: "Manage client relationships",
     color: "bg-blue-500",
     iconColor: "text-white"
   },
   {
     name: "Ads & Lead Gen", 
     icon: TrendingUp,
-    tags: ["cat:ads-lead-gen"],
-    description: "Digital Advertising",
+    tags: ["cat:ads-lead-gen", "tag:facebook-ads", "tag:google-ads", "tag:lead-generation"],
+    description: "Generate quality leads",
     color: "bg-green-500",
     iconColor: "text-white"
   },
   {
-    name: "Website / IDX",
+    name: "Website",
     icon: Globe,
-    tags: ["cat:website-idx"],
-    description: "Websites & Property Search",
+    tags: ["cat:website-idx", "tag:websites", "tag:idx", "tag:property-search"],
+    description: "Professional agent websites",
     color: "bg-cyan-500",
+    iconColor: "text-white"
+  },
+  {
+    name: "Photography",
+    icon: Camera,
+    tags: ["cat:photography", "tag:photos", "tag:virtual-tours", "tag:3d-tours"],
+    description: "Stunning listing visuals",
+    color: "bg-purple-500",
     iconColor: "text-white"
   },
   {
     name: "SEO",
     icon: Search,
-    tags: ["cat:seo"],
-    description: "Search Optimization",
-    color: "bg-purple-500",
+    tags: ["cat:seo", "tag:search-optimization", "tag:local-seo"],
+    description: "Rank higher online",
+    color: "bg-orange-500",
     iconColor: "text-white"
   },
   {
     name: "Coaching",
     icon: GraduationCap,
-    tags: ["cat:coaching"],
-    description: "Professional Training",
-    color: "bg-orange-500",
-    iconColor: "text-white"
-  },
-  {
-    name: "Marketing Automation & Content",
-    icon: Bot,
-    tags: ["cat:marketing-automation"],
-    description: "Automated Marketing Tools",
+    tags: ["cat:coaching", "tag:training", "tag:mentoring"],
+    description: "Accelerate your growth",
     color: "bg-indigo-500",
     iconColor: "text-white"
   },
   {
-    name: "Video & Media Tools",
-    icon: Play,
-    tags: ["cat:video-media"],
-    description: "Video & Media Production",
+    name: "Automation",
+    icon: Bot,
+    tags: ["cat:marketing-automation", "tag:email-marketing", "tag:drip-campaigns"],
+    description: "Automate your marketing",
     color: "bg-pink-500",
     iconColor: "text-white"
   },
   {
-    name: "Listing & Showing Tools",
-    icon: Home,
-    tags: ["cat:listing-showing"],
-    description: "Property Management Tools",
+    name: "Video & Media",
+    icon: Play,
+    tags: ["cat:video-media", "tag:video-production", "tag:social-media"],
+    description: "Create engaging content",
     color: "bg-yellow-500",
+    iconColor: "text-white"
+  },
+  {
+    name: "Listing & Showing",
+    icon: Home,
+    tags: ["cat:listing-showing", "tag:listing-management", "tag:showing-tools"],
+    description: "Streamline property sales",
+    color: "bg-emerald-600",
     iconColor: "text-white"
   },
   {
     name: "Data & Analytics",
     icon: BarChart3,
-    tags: ["cat:data-analytics"],
-    description: "Business Intelligence",
-    color: "bg-emerald-600",
-    iconColor: "text-white"
-  },
-  {
-    name: "Finance & Business Tools",
-    icon: Calculator,
-    tags: ["cat:finance-business"],
-    description: "Financial Management",
+    tags: ["cat:data-analytics", "tag:market-data", "tag:reporting"],
+    description: "Make data-driven decisions",
     color: "bg-stone-500",
     iconColor: "text-white"
   },
   {
-    name: "Productivity & Collaboration",
-    icon: Zap,
-    tags: ["cat:productivity"],
-    description: "Team & Task Management",
+    name: "Finance & Ops",
+    icon: Calculator,
+    tags: ["cat:finance-business", "tag:accounting", "tag:business-tools"],
+    description: "Manage your finances",
     color: "bg-amber-500",
+    iconColor: "text-white"
+  },
+  {
+    name: "Productivity",
+    icon: Zap,
+    tags: ["cat:productivity", "tag:task-management", "tag:collaboration"],
+    description: "Work more efficiently",
+    color: "bg-red-500",
     iconColor: "text-white"
   },
   {
     name: "Virtual Assistants & Dialers",
     icon: Headphones,
-    tags: ["cat:virtual-assistants"],
-    description: "Remote Support & Calling",
-    color: "bg-red-500",
+    tags: ["cat:virtual-assistants", "tag:vas", "tag:dialers", "tag:calling"],
+    description: "Scale with remote support",
+    color: "bg-teal-600",
     iconColor: "text-white"
   },
   {
-    name: "Team & Recruiting Tools",
+    name: "Team & Recruiting",
     icon: UserPlus,
-    tags: ["cat:team-recruiting"],
-    description: "Staff Management & Hiring",
-    color: "bg-teal-600",
+    tags: ["cat:team-recruiting", "tag:hiring", "tag:team-management"],
+    description: "Build your dream team",
+    color: "bg-sky-500",
+    iconColor: "text-white"
+  },
+  {
+    name: "Insurance & Compliance",
+    icon: ShieldCheck,
+    tags: ["cat:insurance-compliance", "tag:insurance", "tag:compliance", "tag:e-o"],
+    description: "Protect your business",
+    color: "bg-slate-500",
     iconColor: "text-white"
   },
   {
     name: "CE & Licensing",
     icon: Award,
-    tags: ["cat:ce-licensing"],
-    description: "Continuing Education & Licenses",
-    color: "bg-sky-500",
+    tags: ["cat:ce-licensing", "tag:continuing-education", "tag:licenses"],
+    description: "Stay licensed & current",
+    color: "bg-violet-500",
     iconColor: "text-white"
   }
 ];
@@ -155,73 +172,73 @@ const OLD_SCHOOL_CATEGORIES = [
   {
     name: "Client Event Kits",
     icon: Gift,
-    tags: ["cat:client-events"],
-    description: "Event Hosting Supplies",
+    tags: ["cat:client-events", "tag:events", "tag:hosting"],
+    description: "Host memorable events",
     color: "bg-emerald-500",
     iconColor: "text-white"
   },
   {
     name: "Client Gifting",
     icon: Gift,
-    tags: ["cat:client-gifting"],
-    description: "Client Appreciation Gifts",
+    tags: ["cat:client-gifting", "tag:gifts", "tag:appreciation", "tag:closing-gifts"],
+    description: "Show client appreciation",
     color: "bg-lime-500",
     iconColor: "text-white"
   },
   {
-    name: "Open House Kits",
+    name: "Open House",
     icon: Home,
-    tags: ["cat:open-house-kits"],
-    description: "Open House Supplies & Materials",
+    tags: ["cat:open-house-kits", "tag:open-house", "tag:signage"],
+    description: "Professional open houses",
     color: "bg-orange-500",
     iconColor: "text-white"
   },
   {
     name: "Print & Mail",
     icon: Mail,
-    tags: ["cat:print-mail"],
-    description: "Physical Marketing",
+    tags: ["cat:print-mail", "tag:postcards", "tag:mailers", "tag:print"],
+    description: "Direct mail campaigns",
     color: "bg-teal-500",
     iconColor: "text-white"
   },
   {
     name: "Signage & Branding",
     icon: FileText,
-    tags: ["cat:signs"],
-    description: "Yard signs, riders, car wraps, branded merchandise",
+    tags: ["cat:signs", "tag:branding", "tag:yard-signs", "tag:car-wraps", "tag:merchandise"],
+    description: "Stand-out signs & swag",
     color: "bg-slate-500",
     iconColor: "text-white"
   },
   {
     name: "Presentations",
     icon: Presentation,
-    tags: ["cat:presentations"],
-    description: "Client Presentations",
+    tags: ["cat:presentations", "tag:listing-presentations", "tag:buyer-presentations"],
+    description: "Win more listings",
     color: "bg-violet-500",
     iconColor: "text-white"
   },
   {
-    name: "Branding",
-    icon: Palette,
-    tags: ["cat:branding"],
-    description: "Brand Identity",
-    color: "bg-rose-500",
+    name: "Lockboxes",
+    icon: Lock,
+    tags: ["cat:lockboxes", "tag:lockbox", "tag:access-tools", "tag:showing-tools"],
+    description: "Secure property access",
+    color: "bg-blue-600",
     iconColor: "text-white"
   },
   {
-    name: "Client Retention",
-    icon: Camera,
-    tags: ["cat:client-retention"],
-    description: "Relationship Building",
-    color: "bg-red-500",
+    name: "Pop-By Kits",
+    icon: Gift,
+    tags: ["cat:pop-by-kits", "tag:popby", "tag:pop-by", "tag:client-touch"],
+    description: "Stay top-of-mind",
+    color: "bg-rose-500",
     iconColor: "text-white"
   },
   {
     name: "Transaction Coordinator",
     icon: FileText,
-    tags: ["cat:transaction-coordinator"],
-    description: "Transaction Management",
-    color: "bg-blue-600",
+    tags: ["cat:transaction-coordinator", "tag:tc", "tag:transaction-management"],
+    description: "Smooth transactions",
+    color: "bg-amber-600",
     iconColor: "text-white"
   }
 ];
