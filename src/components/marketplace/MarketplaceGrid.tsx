@@ -307,19 +307,51 @@ export const MarketplaceGrid = () => {
   }, { enabled: shouldEnablePagination });
 
   const flattenServices = useMemo(() => {
-    const items = paginatedData?.items || [];
+    // Prioritize paginated data when available, fallback to main marketplace data
+    const items = paginatedData?.items?.length ? paginatedData.items : services;
     const extractNumericPrice = (priceString?: string | null): number => {
       if (!priceString) return 0;
       const cleaned = priceString.replace(/[^0-9.]/g, '');
       return parseFloat(cleaned) || 0;
     };
-    return items.filter(s => {
+    
+    // Apply client-side filters to ensure services show even when pagination fails
+    let filteredItems = items;
+    
+    // Apply search filter
+    if (searchTerm.trim()) {
+      const term = searchTerm.toLowerCase().trim();
+      filteredItems = filteredItems.filter(service => 
+        service.title?.toLowerCase().includes(term) ||
+        service.description?.toLowerCase().includes(term) ||
+        service.category?.toLowerCase().includes(term) ||
+        service.tags?.some(tag => tag?.toLowerCase().includes(term))
+      );
+    }
+    
+    // Apply category filter
+    if (filters.category && filters.category !== 'all' && filters.category !== 'All') {
+      filteredItems = filteredItems.filter(service => service.category === filters.category);
+    }
+    
+    // Apply featured filter
+    if (filters.featured) {
+      filteredItems = filteredItems.filter(service => service.is_featured);
+    }
+    
+    // Apply co-pay eligible filter  
+    if (filters.coPayEligible) {
+      filteredItems = filteredItems.filter(service => service.copay_allowed);
+    }
+    
+    // Apply price range and verified filters
+    return filteredItems.filter(s => {
       const price = extractNumericPrice(s.retail_price);
       const withinPrice = price >= filters.priceRange[0] && price <= filters.priceRange[1];
       const matchesVerified = !filters.verified || !!s.vendor?.is_verified;
       return withinPrice && matchesVerified;
     });
-  }, [paginatedData, filters.priceRange, filters.verified]);
+  }, [paginatedData, services, searchTerm, filters]);
 
   const totalServicesCount = paginatedData?.totalCount ?? 0;
   const baseForFilters = services.length ? services : flattenServices;
