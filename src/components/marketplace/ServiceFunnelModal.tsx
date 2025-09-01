@@ -1203,7 +1203,7 @@ export const ServiceFunnelModal = ({
                   </>
                 ) : (
                   <>
-                    <Button onClick={() => setIsConsultationFlowOpen(true)} className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all flex-1">
+                    <Button onClick={() => setIsConsultationFlowOpen(true)} className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all flex-1">
                       <Calendar className="w-5 h-5 mr-2" />
                       Book Consultation {selectedPkg?.name || 'Selected Package'}
                       <ArrowRight className="w-5 h-5 ml-2" />
