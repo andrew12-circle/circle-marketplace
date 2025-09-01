@@ -22,7 +22,8 @@ export function OnboardingGoalsStep({ onNext }: OnboardingGoalsStepProps) {
 
   const handleSubmit = async () => {
     setIsLoading(true);
-    console.log('OnboardingGoalsStep: Saving goals data:', formData);
+    console.log('OnboardingGoalsStep: Starting submit', formData);
+    console.log('OnboardingGoalsStep: Profile before update', profile);
     
     try {
       const result = await updateProfile(formData as any);
@@ -37,11 +38,12 @@ export function OnboardingGoalsStep({ onNext }: OnboardingGoalsStepProps) {
         return;
       }
       
-      console.log('OnboardingGoalsStep: Save successful');
+      console.log('OnboardingGoalsStep: Save successful, calling onNext');
       toast({
         title: "Goals Saved",
         description: "Your goals have been saved successfully!"
       });
+      console.log('OnboardingGoalsStep: About to call onNext');
       onNext();
     } catch (error) {
       console.error('OnboardingGoalsStep: Error updating profile:', error);

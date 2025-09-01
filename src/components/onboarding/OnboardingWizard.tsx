@@ -48,11 +48,20 @@ export function OnboardingWizard() {
   const progress = ((currentStepIndex + 1) / STEPS.length) * 100;
 
   const handleNext = async () => {
+    console.log('OnboardingWizard: handleNext called', { 
+      currentStepIndex, 
+      currentStep: currentStep.id,
+      totalSteps: STEPS.length 
+    });
+    
     if (currentStepIndex < STEPS.length - 1) {
       const nextStep = STEPS[currentStepIndex + 1];
+      console.log('OnboardingWizard: Moving to next step', nextStep.id);
       await moveToStep(nextStep.id);
       setCurrentStepIndex(currentStepIndex + 1);
+      console.log('OnboardingWizard: Step updated to', currentStepIndex + 1);
     } else {
+      console.log('OnboardingWizard: Completing onboarding');
       await handleComplete();
     }
   };

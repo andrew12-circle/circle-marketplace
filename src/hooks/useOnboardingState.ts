@@ -82,6 +82,7 @@ export function useOnboardingState() {
   };
 
   const moveToStep = async (step: string) => {
+    console.log('useOnboardingState: moveToStep called', { step, currentState: onboardingState });
     await updateOnboardingState({ current_step: step });
   };
 
