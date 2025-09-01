@@ -6,7 +6,8 @@ import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Upload, Image as ImageIcon } from 'lucide-react';
+import { Upload, Image as ImageIcon, AlertCircle } from 'lucide-react';
+import { ImageCropper } from '@/components/ui/image-cropper';
 
 interface ServiceImageUploaderProps {
   serviceId: string;
@@ -24,10 +25,15 @@ export const ServiceImageUploader = ({
   const { toast } = useToast();
   const [uploading, setUploading] = useState(false);
   const [imageUrl, setImageUrl] = useState(currentImageUrl || '');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [showCropper, setShowCropper] = useState(false);
 
-  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
+
+    // Reset input value to allow selecting the same file again
+    event.target.value = '';
 
     // Validate file type
     if (!file.type.startsWith('image/')) {
@@ -39,27 +45,52 @@ export const ServiceImageUploader = ({
       return;
     }
 
-    // Validate file size (5MB max)
-    if (file.size > 5 * 1024 * 1024) {
+    // Validate file size (10MB max)
+    if (file.size > 10 * 1024 * 1024) {
       toast({
         title: "File too large",
-        description: "Please select an image smaller than 5MB",
+        description: "Please select an image smaller than 10MB",
         variant: "destructive"
       });
       return;
     }
 
+    // Check if image is square - if not, show cropper
+    const img = new Image();
+    img.onload = () => {
+      if (Math.abs(img.width - img.height) > img.width * 0.1) {
+        // Image is not square (allow 10% tolerance), show cropper
+        setSelectedFile(file);
+        setShowCropper(true);
+      } else {
+        // Image is already square, upload directly
+        uploadImage(file);
+      }
+    };
+    img.src = URL.createObjectURL(file);
+  };
+
+  const handleCroppedImage = (croppedFile: File) => {
+    setShowCropper(false);
+    setSelectedFile(null);
+    uploadImage(croppedFile);
+  };
+
+  const uploadImage = async (file: File) => {
     setUploading(true);
     try {
       // Upload to Supabase Storage
-      const fileExt = file.name.split('.').pop();
-      const fileName = `services/${serviceId}/profile.${fileExt}`;
+      const fileExt = file.name.split('.').pop() || 'jpg';
+      const fileName = `services/${serviceId}/profile-${Date.now()}.${fileExt}`;
       
       const { error: uploadError } = await supabase.storage
         .from('avatars')
         .upload(fileName, file, { upsert: true });
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('Storage upload error:', uploadError);
+        throw new Error(`Upload failed: ${uploadError.message}`);
+      }
 
       // Get the public URL
       const { data: { publicUrl } } = supabase.storage
@@ -72,21 +103,25 @@ export const ServiceImageUploader = ({
         .update({ profile_image_url: publicUrl })
         .eq('id', serviceId);
 
-      if (updateError) throw updateError;
+      if (updateError) {
+        console.error('Database update error:', updateError);
+        throw new Error(`Database update failed: ${updateError.message}`);
+      }
 
-      // Update local state
-      setImageUrl(publicUrl);
+      // Update local state with cache buster
+      const cacheBustedUrl = `${publicUrl}?t=${Date.now()}`;
+      setImageUrl(cacheBustedUrl);
       onImageUpdated?.(publicUrl);
 
       toast({
         title: "Service image updated",
         description: `Successfully updated the profile image for ${serviceName}`,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error uploading service image:', error);
       toast({
         title: "Upload failed",
-        description: "Could not update service image. Please try again.",
+        description: error.message || "Could not update service image. Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -164,7 +199,7 @@ export const ServiceImageUploader = ({
               id="service-image-upload"
               type="file"
               accept="image/*"
-              onChange={handleImageUpload}
+              onChange={handleFileSelect}
               className="hidden"
               disabled={uploading}
             />
@@ -181,12 +216,35 @@ export const ServiceImageUploader = ({
             </Button>
           )}
 
-          <p className="text-xs text-muted-foreground">
-            Recommended: Square image (1:1 ratio), 512x512px or larger. 
-            Supports JPG, PNG, GIF, WebP. Max size: 5MB.
-          </p>
+          <div className="flex items-start gap-2 p-3 bg-muted/50 rounded-lg">
+            <AlertCircle className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+            <div className="text-xs text-muted-foreground">
+              <p className="font-medium mb-1">Image Guidelines:</p>
+              <ul className="space-y-1">
+                <li>• Square images (1:1 ratio) work best</li>
+                <li>• Non-square images will show a cropping tool</li>
+                <li>• Minimum 512x512px recommended</li>
+                <li>• Supports JPG, PNG, GIF, WebP</li>
+                <li>• Maximum file size: 10MB</li>
+              </ul>
+            </div>
+          </div>
         </div>
       </CardContent>
+
+      {/* Image Cropper Dialog */}
+      {selectedFile && (
+        <ImageCropper
+          imageFile={selectedFile}
+          open={showCropper}
+          onClose={() => {
+            setShowCropper(false);
+            setSelectedFile(null);
+          }}
+          onCrop={handleCroppedImage}
+          aspectRatio={1}
+        />
+      )}
     </Card>
   );
 };
