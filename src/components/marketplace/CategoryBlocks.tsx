@@ -169,6 +169,14 @@ const OLD_SCHOOL_CATEGORIES = [
     iconColor: "text-white"
   },
   {
+    name: "Open House Kits",
+    icon: Home,
+    tags: ["cat:open-house-kits"],
+    description: "Open House Supplies & Materials",
+    color: "bg-orange-500",
+    iconColor: "text-white"
+  },
+  {
     name: "Print & Mail",
     icon: Mail,
     tags: ["cat:print-mail"],
