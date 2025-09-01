@@ -92,15 +92,6 @@ export const ServiceBadges = ({
   }
 
 
-  // High ROI
-  if (service.estimated_roi && service.estimated_roi >= 300) {
-    badges.push({
-      label: 'High ROI',
-      icon: <Target className="w-3 h-3" />,
-      className: 'bg-gradient-to-r from-green-600 to-lime-500 text-white border-0',
-      priority: 9
-    });
-  }
 
   // New service (created in last 30 days) - mock for now
   const isNew = Math.random() < 0.1; // 10% chance for demo
