@@ -639,7 +639,7 @@ export const MarketplaceGrid = () => {
           {/* Hero Section */}
           <div className="mb-12">
             <h1 className="text-4xl sm:text-6xl font-bold text-black mb-6 lcp-content font-playfair">
-              The Marketplace <span className="bg-gradient-to-r from-gray-600 via-gray-500 to-gray-400 bg-clip-text text-transparent">Built for Agents</span>
+              The Marketplace <span className="bg-gradient-to-r from-blue-600 via-blue-500 to-purple-600 bg-clip-text text-transparent">Built for Agents</span>
             </h1>
             <p className="text-gray-600 max-w-3xl text-lg mb-8 lcp-content leading-relaxed">
               Not another directory. A vetted, agent-verified marketplace with negotiated pricing and proven vendors. Share your goals, and we'll route you to what top agents actually use — faster, cheaper, and without awkward sales calls.
