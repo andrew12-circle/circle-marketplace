@@ -60,7 +60,7 @@ const VendorPointAllocationPanel = () => {
       const { data, error } = await supabase
         .from('profiles')
         .select('user_id, display_name')
-        .neq('user_id' as any, user?.id as any);
+        .neq('user_id', user?.id);
 
       if (error) throw error;
 
@@ -87,7 +87,7 @@ const VendorPointAllocationPanel = () => {
       const { data, error } = await supabase
         .from('point_allocations')
         .select('*')
-        .eq('vendor_id' as any, user?.id as any)
+        .eq('vendor_id', user?.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -97,7 +97,7 @@ const VendorPointAllocationPanel = () => {
       const { data: profiles } = await supabase
         .from('profiles')
         .select('user_id, display_name')
-        .in('user_id' as any, agentIds);
+        .in('user_id', agentIds);
 
       const profileMap = (profiles as any[])?.reduce((acc: any, profile: any) => {
         acc[profile.user_id] = profile.display_name;

@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -40,7 +40,8 @@ import { AgentCoPayDashboard } from '@/components/agent/AgentCoPayDashboard';
 import { CoPayAnalyticsDashboard } from '@/components/agent/CoPayAnalyticsDashboard';
 
 export const AgentWallet = () => {
-  const { user, profile } = useAuth();
+  const { user, profile, updateProfile } = useAuth();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("overview");
   const [pointsData, setPointsData] = useState<any>(null);
   const [transactions, setTransactions] = useState<any[]>([]);
@@ -66,6 +67,11 @@ export const AgentWallet = () => {
 
       if (error) throw error;
       setPointsData(data);
+      
+      // Sync wallet balance with profile circle_points
+      if (data?.total_available_points !== profile?.circle_points) {
+        await updateProfile({ circle_points: data?.total_available_points || 0 });
+      }
     } catch (error) {
       console.error('Error loading points data:', error);
     } finally {
@@ -185,11 +191,17 @@ export const AgentWallet = () => {
           <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20" />
           <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
-              <Button asChild variant="secondary" size="sm" className="self-start bg-white/10 hover:bg-white/20 text-white border-white/20">
-                <Link to="/" className="flex items-center space-x-2">
+              <Button 
+                asChild 
+                variant="secondary" 
+                size="sm" 
+                className="self-start bg-white/10 hover:bg-white/20 text-white border-white/20"
+                onClick={() => navigate('/')}
+              >
+                <span className="flex items-center space-x-2 cursor-pointer">
                   <ArrowLeft className="h-4 w-4" />
                   <span>Back</span>
-                </Link>
+                </span>
               </Button>
               <div>
                 <div className="flex items-center space-x-3 mb-2">

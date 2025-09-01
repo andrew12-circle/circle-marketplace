@@ -123,7 +123,7 @@ export const SponsoredPlacementsManager = () => {
       const { data, error } = await supabase
         .from('service_tracking_events')
         .select('event_type')
-        .eq('service_id' as any, serviceId as any)
+        .eq('service_id', serviceId)
         .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
 
       if (error) throw error;
@@ -149,7 +149,7 @@ export const SponsoredPlacementsManager = () => {
       const { data, error } = await supabase
         .from('service_tracking_events')
         .select('event_type, created_at')
-        .in('event_type' as any, ['sponsored_impression', 'sponsored_click'] as any)
+        .in('event_type', ['sponsored_impression', 'sponsored_click'])
         .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString());
 
       if (!error && data) {

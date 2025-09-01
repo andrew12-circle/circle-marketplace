@@ -40,6 +40,7 @@ interface AuthContextType {
   loading: boolean;
   signOut: () => Promise<{ error: Error | null }>;
   updateProfile: (updates: Partial<Profile>) => Promise<{ error: Error | null }>;
+  refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -49,6 +50,7 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
   signOut: async () => ({ error: null }),
   updateProfile: async () => ({ error: null }),
+  refreshProfile: async () => {},
 });
 
 export const useAuth = () => {
@@ -257,6 +259,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  const refreshProfile = async () => {
+    if (user?.id) {
+      await fetchProfile(user.id);
+    }
+  };
+
   const value = {
     user,
     session,
@@ -264,6 +272,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     loading,
     signOut,
     updateProfile,
+    refreshProfile,
   };
 
   return (
