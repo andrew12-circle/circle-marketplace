@@ -56,19 +56,20 @@ serve(async (req) => {
   }
 
   try {
-    // Create Supabase client
+    // Create Supabase client using service role for reliable data access
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
     )
 
     console.log('🔄 Fetching combined marketplace data from edge function...');
 
-    // Fetch services and vendors in parallel for optimal performance
+    // Fetch services and vendors in parallel for optimal performance with proper filtering
     const [servicesResponse, vendorsResponse] = await Promise.all([
       supabaseClient
         .from('services')
         .select('*')
+        .eq('is_active', true)
         .order('sort_order', { ascending: true })
         .order('created_at', { ascending: false })
         .limit(100),
@@ -76,6 +77,8 @@ serve(async (req) => {
       supabaseClient
         .from('vendors')
         .select('*')
+        .eq('is_active', true)
+        .in('approval_status', ['approved', 'auto_approved', 'pending'])
         .order('sort_order', { ascending: true })
         .order('rating', { ascending: false })
         .limit(50)

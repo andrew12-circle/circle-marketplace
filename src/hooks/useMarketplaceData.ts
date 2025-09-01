@@ -286,8 +286,26 @@ const fetchCombinedMarketplaceData = async (): Promise<MarketplaceData> => {
     }
   }
 
-  // Helper to fetch live data (services + vendors) with fallback to edge func
-  const fetchLive = async (): Promise<MarketplaceData> => {
+  // Helper to fetch data - first try edge function, then fallback to direct queries
+  const fetchData = async (): Promise<MarketplaceData> => {
+    // First try the edge function for reliable public access
+    try {
+      logger.log('🔍 Trying edge function for marketplace data...');
+      const edgeFunctionResult = await withTimeout(
+        supabase.functions.invoke('get-marketplace-data'),
+        6000,
+        'edge_function'
+      );
+
+      if (edgeFunctionResult.data && !edgeFunctionResult.error) {
+        logger.log('✅ Using edge function marketplace data');
+        return edgeFunctionResult.data;
+      }
+    } catch (error) {
+      logger.warn('⚠️ Edge function fetch failed, falling back to direct queries:', error);
+    }
+
+    // Fallback to direct table queries
     const [servicesResult, vendorsResult] = await Promise.allSettled([
       fetchServices(),
       fetchVendors(),
@@ -298,29 +316,27 @@ const fetchCombinedMarketplaceData = async (): Promise<MarketplaceData> => {
 
     if (servicesResult.status === 'fulfilled') services = servicesResult.value;
     else {
-      logger.error('Services fetch failed:', servicesResult.reason);
+      logger.error('❌ Services fetch failed:', servicesResult.reason);
       reportClientError({
         error_type: 'network',
-        message: 'Services fetch failed',
+        message: servicesResult.reason?.message || 'Services fetch failed',
         component: 'useMarketplaceData',
         section: 'marketplace',
-        metadata: { reason: String(servicesResult.reason) }
+        metadata: { reason: servicesResult.reason }
       });
     }
 
     if (vendorsResult.status === 'fulfilled') vendors = vendorsResult.value;
     else {
-      logger.error('Vendors fetch failed:', vendorsResult.reason);
+      logger.error('❌ Vendors fetch failed:', vendorsResult.reason);
       reportClientError({
         error_type: 'network',
-        message: 'Vendors fetch failed',
+        message: vendorsResult.reason?.message || 'Vendors fetch failed',
         component: 'useMarketplaceData',
         section: 'marketplace',
-        metadata: { reason: String(vendorsResult.reason) }
+        metadata: { reason: vendorsResult.reason }
       });
     }
-
-    // Skip edge function fallback for faster recovery - removed to prevent cascade delays
 
     if (services.length === 0 && vendors.length === 0) {
       reportClientError({
@@ -334,9 +350,6 @@ const fetchCombinedMarketplaceData = async (): Promise<MarketplaceData> => {
 
     const data = { services, vendors };
 
-    // Cache warming via edge function disabled - function doesn't exist
-    // TODO: Implement warm-marketplace-cache edge function if needed
-
     performanceMonitor.track('fetchCombinedMarketplaceData', performance.now() - overallStart, {
       services: data.services.length,
       vendors: data.vendors.length,
@@ -348,7 +361,7 @@ const fetchCombinedMarketplaceData = async (): Promise<MarketplaceData> => {
   // If forced fresh, bypass DB cache immediately
   if (forceFresh) {
     logger.log('⚡ Force fresh fetch activated');
-    return fetchLive();
+    return fetchData();
   }
 
   // Try database cache unless circuit breaker is OPEN
@@ -380,8 +393,8 @@ const fetchCombinedMarketplaceData = async (): Promise<MarketplaceData> => {
     logger.log('🚫 Skipping DB cache due to circuit breaker OPEN');
   }
 
-  // Fallback to live fetch
-  return fetchLive();
+  // Fallback to fresh data fetch
+  return fetchData();
 };
 
 /**
