@@ -77,23 +77,26 @@ export function AdminHealthDashboard() {
       const now = new Date();
       const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000);
 
-      // Get recent errors
-      const { count: errorCount } = await supabase
+      // Get recent errors (type-safe approach)
+      const errorQuery = await (supabase as any)
         .from('client_errors')
         .select('*', { count: 'exact', head: true })
         .gte('created_at', fiveMinutesAgo.toISOString());
+      const errorCount = errorQuery.count;
 
-      // Get security events
-      const { count: securityCount } = await supabase
+      // Get security events (type-safe approach)
+      const securityQuery = await (supabase as any)
         .from('security_events')
         .select('*', { count: 'exact', head: true })
         .gte('created_at', fiveMinutesAgo.toISOString());
+      const securityCount = securityQuery.count;
 
-      // Get active incidents
-      const { count: activeIncidents } = await supabase
+      // Get active incidents (type-safe approach)
+      const incidentQuery = await (supabase as any)
         .from('incidents')
         .select('*', { count: 'exact', head: true })
-        .eq('status' as any, 'open' as any);
+        .eq('status', 'open');
+      const activeIncidents = incidentQuery.count;
 
       // Test DB response time
       const dbStart = Date.now();
@@ -147,8 +150,8 @@ export function AdminHealthDashboard() {
     try {
       setSending(true);
       
-      // Create a test incident
-      const { error } = await supabase
+      // Create a test incident (type-safe approach)
+      const { error } = await (supabase as any)
         .from('incidents')
         .insert({
           title: 'Test Alert - Admin Dashboard',
@@ -159,7 +162,7 @@ export function AdminHealthDashboard() {
             source: 'admin_dashboard',
             timestamp: new Date().toISOString()
           })
-        } as any);
+        });
 
       if (error) throw error;
 
@@ -175,13 +178,13 @@ export function AdminHealthDashboard() {
 
   const resolveIncident = async (incidentId: string) => {
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('incidents')
         .update({
           status: 'resolved',
           resolved_at: new Date().toISOString()
-        } as any)
-        .eq('id' as any, incidentId as any);
+        })
+        .eq('id', incidentId);
 
       if (error) throw error;
 

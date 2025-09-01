@@ -309,6 +309,11 @@ export const MarketplaceGrid = () => {
   const flattenServices = useMemo(() => {
     // Prioritize paginated data when available, fallback to main marketplace data
     const items = paginatedData?.items?.length ? paginatedData.items : services;
+    
+    // Log fallback usage for debugging
+    if (!paginatedData?.items?.length && services?.length) {
+      console.log('📊 MarketplaceGrid: Using fallback services data', { servicesCount: services.length });
+    }
     const extractNumericPrice = (priceString?: string | null): number => {
       if (!priceString) return 0;
       const cleaned = priceString.replace(/[^0-9.]/g, '');
