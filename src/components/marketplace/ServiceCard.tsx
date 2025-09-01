@@ -555,43 +555,6 @@ export const ServiceCard = ({
           </div>
 
           <CardContent className="p-4 flex flex-col justify-between h-full mobile-card-content">
-            {/* Service Rating - Updated to use bulk ratings when available */}
-            {(totalReviews || 0) > 0 && shouldShowRating && (
-              <div className="flex items-center gap-1 mb-3">
-                {[...Array(5)].map((_, i) => {
-                  const isFullStar = i < Math.floor(averageRating);
-                  const isPartialStar = i === Math.floor(averageRating) && averageRating % 1 !== 0;
-                  const fillPercentage = isPartialStar ? (averageRating % 1) * 100 : 0;
-                  
-                  return (
-                    <div key={i} className="relative h-4 w-4">
-                      <Star className="h-4 w-4 text-gray-300 absolute" />
-                      {isFullStar && (
-                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 absolute" />
-                      )}
-                      {isPartialStar && (
-                        <div 
-                          className="overflow-hidden absolute"
-                          style={{ width: `${fillPercentage}%` }}
-                        >
-                          <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-                <span className="text-sm text-muted-foreground ml-1">
-                  {`${averageRating.toFixed(1)} (${totalReviews})`}
-                </span>
-                {totalReviews > 0 && (
-                  <span className="text-xs text-muted-foreground ml-2">
-                    • Mixed sources
-                  </span>
-                )}
-              </div>
-            )}
-
-
             {/* Service Badges - Rich visual indicators */}
             <div className="h-8 mb-3">
               <ServiceBadges 
