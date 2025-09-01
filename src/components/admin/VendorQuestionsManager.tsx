@@ -98,9 +98,9 @@ export const VendorQuestionsManager = ({ vendorId, vendorName }: VendorQuestions
           .update({ 
             answer_text: answerText,
             manually_updated: true
-          } as any)
-          .eq('vendor_id' as any, vendorId as any)
-          .eq('question_number' as any, questionNumber as any);
+          })
+          .eq('vendor_id', vendorId)
+          .eq('question_number', questionNumber);
 
         if (error) throw error;
 

@@ -13,6 +13,7 @@ import { SecurityProvider } from "@/components/security/SecurityEnhancementSyste
 import { ErrorBoundaryWithQA } from "@/components/common/ErrorBoundaryWithQA";
 import { removeLegacyAuthCookies, initCookieMonitoring, checkCookieSize, clearAllSupabaseAuthCookies } from "./lib/cookies";
 import { reportClientError } from "./utils/errorReporting";
+import "./utils/pageRecovery"; // Initialize page recovery
 import "./index.css";
 import "./i18n";
 

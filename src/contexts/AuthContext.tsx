@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { useState, useEffect, createContext, useContext } from 'react';
+import { useState, useEffect, createContext, useContext, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { removeLegacyAuthCookies, initCookieMonitoring } from '@/lib/cookies';
@@ -64,7 +64,34 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [retryCount, setRetryCount] = useState(0);
   const queryClient = useQueryClient();
+
+  // Add recovery mechanism for stuck states
+  const recoverFromStuckState = useCallback(() => {
+    logger.log('🔄 Attempting to recover from stuck state...');
+    
+    // Clear all caches
+    queryClient.invalidateQueries();
+    localStorage.removeItem('sb-session');
+    
+    // Reset retry count
+    setRetryCount(0);
+    
+    // Force auth session refresh
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        setTimeout(() => fetchProfile(session.user.id), 100);
+      }
+    });
+  }, [queryClient]);
+
+  // Expose recovery function globally for debugging
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      (window as any).authRecovery = recoverFromStuckState;
+    }
+  }, [recoverFromStuckState]);
 
   const fetchProfile = async (userId: string) => {
     // Guard against undefined/invalid userId - this prevents UUID errors
@@ -74,47 +101,61 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     try {
-      // Use the new safe profile function that handles duplicates
-      const { data, error } = await supabase
-        .rpc('get_user_profile_safe', { p_user_id: userId })
+      // Try direct query first with timeout for better reliability
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Profile fetch timeout')), 5000);
+      });
+
+      const profilePromise = supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(1)
         .maybeSingle();
 
-      if (error) {
-        logger.error('Error fetching profile via RPC:', error);
-        // Fallback to direct query with defensive handling
-        try {
-          const { data: fallbackData, error: fallbackError } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('user_id', userId)
-            .order('created_at', { ascending: false }) // Get newest first
-            .limit(1)
-            .maybeSingle();
-          
-          if (!fallbackError && fallbackData) {
-            logger.log('Profile fetched via fallback query');
-            setProfile(fallbackData);
-            return;
-          } else if (fallbackError) {
-            logger.error('Fallback profile fetch error:', fallbackError);
-          }
-        } catch (fallbackErr) {
-          logger.error('Fallback profile fetch exception:', fallbackErr);
-        }
+      const { data: profileData, error: profileError } = await Promise.race([
+        profilePromise,
+        timeoutPromise
+      ]) as any;
+
+      if (!profileError && profileData) {
+        logger.log('Profile fetched via direct query:', { 
+          userId, 
+          isAdmin: profileData.is_admin,
+          displayName: profileData.display_name 
+        });
+        setProfile(profileData);
         return;
       }
 
-      if (data) {
-        logger.log('Profile fetched successfully via RPC');
-        // Cast the RPC result to match our Profile interface
-        setProfile(data as any);
-      } else {
-        logger.warn('No profile found for user:', userId);
-        setProfile(null);
+      // Fallback to RPC if direct query fails
+      logger.warn('Direct profile query failed, trying RPC fallback:', profileError);
+      const { data: rpcData, error: rpcError } = await supabase
+        .rpc('get_user_profile_safe', { p_user_id: userId })
+        .maybeSingle();
+
+      if (!rpcError && rpcData) {
+        logger.log('Profile fetched via RPC fallback');
+        setProfile(rpcData as any);
+        return;
       }
+
+      // If all else fails, check if we need to create a profile
+      logger.warn('All profile fetch methods failed, user may need profile creation');
+      setProfile(null);
     } catch (error) {
       logger.error('fetchProfile exception:', error);
-      setProfile(null);
+      
+      // Retry logic for stuck states
+      if (retryCount < 3) {
+        setTimeout(() => {
+          setRetryCount(prev => prev + 1);
+          fetchProfile(userId);
+        }, 1000 * (retryCount + 1));
+      } else {
+        setProfile(null);
+      }
     }
   };
 
