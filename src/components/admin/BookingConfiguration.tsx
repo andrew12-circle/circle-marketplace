@@ -55,8 +55,8 @@ export const BookingConfiguration = ({ serviceId, currentConfig, onConfigUpdate 
           external_booking_url: config.external_booking_url,
           booking_time_rules: config.booking_time_rules,
           sync_to_ghl: config.sync_to_ghl
-        } as any)
-        .eq('id' as any, serviceId as any);
+        })
+        .eq('id', serviceId);
 
       if (error) throw error;
 

@@ -713,21 +713,19 @@ export const ServiceCard = ({
                   )}
                   
                   {showDiscountPending ? (
-                    <div className="space-y-3">
+                    <div className="space-y-2">
                       {/* Discount Pending for Non-Pro Members */}
-                      <div className="p-3 bg-amber-50 rounded-lg border border-amber-200">
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-2">
-                            <div className="inline-flex items-center gap-1 bg-amber-100 text-amber-800 text-xs font-medium px-2 py-1 rounded-full">
-                              <span>Discount Pending</span>
-                            </div>
+                      <div className="p-2 bg-amber-50 rounded-lg border border-amber-200">
+                        <div className="flex items-center justify-center mb-1">
+                          <div className="inline-flex items-center gap-1 bg-amber-100 text-amber-800 text-xs font-medium px-2 py-0.5 rounded-full">
+                            <span>Discount Pending</span>
                           </div>
                         </div>
                         
                         <Button
                           variant="outline"
                           size="sm"
-                          className="w-full mb-2"
+                          className="w-full"
                           onClick={(e) => {
                             e.stopPropagation();
                             demandSignals.likeService();
