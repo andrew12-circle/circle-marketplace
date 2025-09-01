@@ -45,7 +45,14 @@ export function useOnboardingState() {
     
     try {
       setLoading(true);
-      const updatedState = { ...onboardingState, ...updates };
+      // Create safe base state for new users
+      const baseState = onboardingState || {
+        current_step: 'welcome',
+        steps: {},
+        is_completed: false,
+        dismissed: false
+      };
+      const updatedState = { ...baseState, ...updates };
       
       const { error } = await supabase
         .from('user_onboarding_states')
@@ -69,7 +76,8 @@ export function useOnboardingState() {
   };
 
   const markStepComplete = async (step: string) => {
-    const newSteps = { ...onboardingState?.steps, [step]: true };
+    const currentSteps = onboardingState?.steps || {};
+    const newSteps = { ...currentSteps, [step]: true };
     await updateOnboardingState({ steps: newSteps });
   };
 
@@ -91,7 +99,10 @@ export function useOnboardingState() {
   };
 
   const dismissOnboarding = async () => {
-    await updateOnboardingState({ dismissed: true });
+    await updateOnboardingState({ 
+      dismissed: true,
+      is_completed: true 
+    });
   };
 
   useEffect(() => {

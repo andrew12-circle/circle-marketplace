@@ -190,10 +190,10 @@ export const DynamicComplianceChecklist = ({
       const { error } = await supabase
         .from('services')
         .update({ 
-          compliance_checklist: checklist as any,
+          compliance_checklist: checklist,
           updated_at: new Date().toISOString()
-        } as any)
-        .eq('id' as any, service.id);
+        })
+        .eq('id', service.id);
 
       if (error) throw error;
 
