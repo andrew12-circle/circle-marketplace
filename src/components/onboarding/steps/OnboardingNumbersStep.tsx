@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAgentData } from '@/hooks/useAgentData';
+import { useToast } from '@/hooks/use-toast';
 import { TrendingUp, CheckCircle } from 'lucide-react';
 
 interface OnboardingNumbersStepProps {
@@ -13,6 +14,7 @@ interface OnboardingNumbersStepProps {
 
 export function OnboardingNumbersStep({ onNext }: OnboardingNumbersStepProps) {
   const { profile, updateProfile } = useAuth();
+  const { toast } = useToast();
   const { stats } = useAgentData(12); // Get last 12 months
   const [formData, setFormData] = useState({
     years_experience: profile?.years_experience || 3,
@@ -34,16 +36,39 @@ export function OnboardingNumbersStep({ onNext }: OnboardingNumbersStepProps) {
 
   const handleSubmit = async () => {
     setIsLoading(true);
+    const updateData = {
+      years_experience: formData.years_experience,
+      annual_goal_transactions: formData.annual_transactions,
+      annual_goal_volume: formData.annual_volume
+    };
+    console.log('OnboardingNumbersStep: Saving numbers data:', updateData);
+    
     try {
-      await updateProfile({
-        years_experience: formData.years_experience,
-        // Store additional fields that might be used by AI
-        annual_goal_transactions: formData.annual_transactions,
-        annual_goal_volume: formData.annual_volume
-      } as any);
+      const result = await updateProfile(updateData as any);
+      
+      if (result?.error) {
+        console.error('OnboardingNumbersStep: Save failed:', result.error);
+        toast({
+          title: "Save Failed",
+          description: "Unable to save your experience details. Please try again.",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      console.log('OnboardingNumbersStep: Save successful');
+      toast({
+        title: "Experience Saved",
+        description: "Your experience details have been saved successfully!"
+      });
       onNext();
     } catch (error) {
-      console.error('Error updating profile:', error);
+      console.error('OnboardingNumbersStep: Error updating profile:', error);
+      toast({
+        title: "Save Failed",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive"
+      });
     } finally {
       setIsLoading(false);
     }

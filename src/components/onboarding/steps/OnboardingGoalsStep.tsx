@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
 import { Target, Sparkles } from 'lucide-react';
 
 interface OnboardingGoalsStepProps {
@@ -11,20 +12,44 @@ interface OnboardingGoalsStepProps {
 }
 
 export function OnboardingGoalsStep({ onNext }: OnboardingGoalsStepProps) {
-  const { updateProfile } = useAuth();
+  const { profile, updateProfile } = useAuth();
+  const { toast } = useToast();
   const [formData, setFormData] = useState({
-    primary_challenge: '',
-    budget_preference: 'balanced'
+    primary_challenge: (profile as any)?.primary_challenge || '',
+    budget_preference: (profile as any)?.budget_preference || 'balanced'
   });
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async () => {
     setIsLoading(true);
+    console.log('OnboardingGoalsStep: Saving goals data:', formData);
+    
     try {
-      await updateProfile(formData as any);
+      const result = await updateProfile(formData as any);
+      
+      if (result?.error) {
+        console.error('OnboardingGoalsStep: Save failed:', result.error);
+        toast({
+          title: "Save Failed",
+          description: "Unable to save your goals. Please try again.",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      console.log('OnboardingGoalsStep: Save successful');
+      toast({
+        title: "Goals Saved",
+        description: "Your goals have been saved successfully!"
+      });
       onNext();
     } catch (error) {
-      console.error('Error updating profile:', error);
+      console.error('OnboardingGoalsStep: Error updating profile:', error);
+      toast({
+        title: "Save Failed", 
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive"
+      });
     } finally {
       setIsLoading(false);
     }

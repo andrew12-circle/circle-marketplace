@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
 import { User, MapPin } from 'lucide-react';
 
 interface OnboardingProfileStepProps {
@@ -12,6 +13,7 @@ interface OnboardingProfileStepProps {
 
 export function OnboardingProfileStep({ onNext }: OnboardingProfileStepProps) {
   const { profile, updateProfile } = useAuth();
+  const { toast } = useToast();
   const [formData, setFormData] = useState({
     display_name: profile?.display_name || '',
     business_name: profile?.business_name || '',
@@ -22,11 +24,34 @@ export function OnboardingProfileStep({ onNext }: OnboardingProfileStepProps) {
 
   const handleSubmit = async () => {
     setIsLoading(true);
+    console.log('OnboardingProfileStep: Saving profile data:', formData);
+    
     try {
-      await updateProfile(formData);
+      const result = await updateProfile(formData);
+      
+      if (result?.error) {
+        console.error('OnboardingProfileStep: Save failed:', result.error);
+        toast({
+          title: "Save Failed",
+          description: "Unable to save your profile. Please try again.",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      console.log('OnboardingProfileStep: Save successful');
+      toast({
+        title: "Profile Saved",
+        description: "Your profile has been saved successfully!"
+      });
       onNext();
     } catch (error) {
-      console.error('Error updating profile:', error);
+      console.error('OnboardingProfileStep: Error updating profile:', error);
+      toast({
+        title: "Save Failed",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive"
+      });
     } finally {
       setIsLoading(false);
     }
