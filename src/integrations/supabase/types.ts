@@ -5020,6 +5020,39 @@ export type Database = {
         }
         Relationships: []
       }
+      service_discount_interest: {
+        Row: {
+          agent_id: string
+          created_at: string
+          id: string
+          ip_address: unknown | null
+          service_id: string
+          source: string
+          user_agent: string | null
+          vendor_id: string | null
+        }
+        Insert: {
+          agent_id: string
+          created_at?: string
+          id?: string
+          ip_address?: unknown | null
+          service_id: string
+          source?: string
+          user_agent?: string | null
+          vendor_id?: string | null
+        }
+        Update: {
+          agent_id?: string
+          created_at?: string
+          id?: string
+          ip_address?: unknown | null
+          service_id?: string
+          source?: string
+          user_agent?: string | null
+          vendor_id?: string | null
+        }
+        Relationships: []
+      }
       service_faqs: {
         Row: {
           answer: string
@@ -5100,6 +5133,24 @@ export type Database = {
           tracking_active?: boolean
           updated_at?: string
           webhook_configured?: boolean
+        }
+        Relationships: []
+      }
+      service_interest_counters: {
+        Row: {
+          service_id: string
+          total_likes: number
+          updated_at: string
+        }
+        Insert: {
+          service_id: string
+          total_likes?: number
+          updated_at?: string
+        }
+        Update: {
+          service_id?: string
+          total_likes?: number
+          updated_at?: string
         }
         Relationships: []
       }

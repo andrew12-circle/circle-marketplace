@@ -1,5 +1,8 @@
 project_id = "ihzyuyfawapweamqzzlj"
 
+[functions.vendor-demand-digest]
+verify_jwt = false
+
 [functions.ask-circle-ai]
 verify_jwt = false
 
