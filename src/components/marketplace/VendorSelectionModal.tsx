@@ -9,7 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Search, MapPin, Star, Users, TrendingUp, Building, Plus, CheckCircle, Info, AlertTriangle } from "lucide-react";
 import confirmationImage from "@/assets/confirmation-image.png";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "@/hooks/useLocation";
@@ -73,8 +73,8 @@ export const VendorSelectionModal = ({
   const [expandedCompanyId, setExpandedCompanyId] = useState<string | null>(null);
   const [pledgedPointsMap, setPledgedPointsMap] = useState<Record<string, number>>({});
 
-  // Helper function to get state abbreviation - must be defined before useMemo
-  const getStateAbbreviation = (stateName: string) => {
+  // Helper function to get state abbreviation - memoized to prevent infinite re-renders
+  const getStateAbbreviation = useCallback((stateName: string) => {
     const stateMap: { [key: string]: string } = {
       'Alabama': 'AL', 'Alaska': 'AK', 'Arizona': 'AZ', 'Arkansas': 'AR', 'California': 'CA',
       'Colorado': 'CO', 'Connecticut': 'CT', 'Delaware': 'DE', 'Florida': 'FL', 'Georgia': 'GA',
@@ -88,7 +88,7 @@ export const VendorSelectionModal = ({
       'Virginia': 'VA', 'Washington': 'WA', 'West Virginia': 'WV', 'Wisconsin': 'WI', 'Wyoming': 'WY'
     };
     return stateMap[stateName];
-  };
+  }, []);
 
   // Memoized filtered vendors to avoid re-computation
   const filteredVendors = useMemo(() => {
