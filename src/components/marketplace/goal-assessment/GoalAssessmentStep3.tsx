@@ -28,19 +28,19 @@ export function GoalAssessmentStep3({ formData, onUpdate }: StepProps) {
               console.log('Primary challenge selected:', value);
               onUpdate('primary_challenge', value);
             }}
-          >
-            <SelectTrigger className="bg-background">
-              <SelectValue placeholder="Select your biggest challenge" />
-            </SelectTrigger>
-            <SelectContent className="bg-background border z-50 pointer-events-auto">
-              <SelectItem value="lead_generation">Lead Generation</SelectItem>
-              <SelectItem value="branding">Personal Branding</SelectItem>
-              <SelectItem value="systems">Business Systems</SelectItem>
-              <SelectItem value="conversion">Lead Conversion</SelectItem>
-              <SelectItem value="follow_up">Follow-up & Nurturing</SelectItem>
-              <SelectItem value="pricing">Pricing Strategy</SelectItem>
-              <SelectItem value="market_knowledge">Market Knowledge</SelectItem>
-            </SelectContent>
+            >
+              <SelectTrigger className="w-full bg-background border">
+                <SelectValue placeholder="Select your biggest challenge" />
+              </SelectTrigger>
+              <SelectContent className="bg-popover border shadow-lg z-[100] max-h-[300px] overflow-y-auto">
+                <SelectItem value="lead_generation" className="cursor-pointer">Lead Generation</SelectItem>
+                <SelectItem value="branding" className="cursor-pointer">Personal Branding</SelectItem>
+                <SelectItem value="systems" className="cursor-pointer">Business Systems</SelectItem>
+                <SelectItem value="conversion" className="cursor-pointer">Lead Conversion</SelectItem>
+                <SelectItem value="follow_up" className="cursor-pointer">Follow-up & Nurturing</SelectItem>
+                <SelectItem value="pricing" className="cursor-pointer">Pricing Strategy</SelectItem>
+                <SelectItem value="market_knowledge" className="cursor-pointer">Market Knowledge</SelectItem>
+              </SelectContent>
           </Select>
         </div>
       </CardContent>
