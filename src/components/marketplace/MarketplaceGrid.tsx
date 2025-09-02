@@ -48,6 +48,8 @@ import { RecentlyViewedServices } from "./RecentlyViewedServices";
 import { ServiceBundles } from "./ServiceBundles";
 import { QAOverlay } from "../common/QAOverlay";
 import { useAutoRecovery } from "@/hooks/useAutoRecovery";
+import { CacheStatusIndicator } from "@/components/admin/CacheStatusIndicator";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface FilterState {
   category: string;
@@ -716,7 +718,14 @@ export const MarketplaceGrid = () => {
                 </Button>
               </div>
 
-              {/* Grid - Mobile Responsive */}
+               {/* Cache Status Indicator for Admins */}
+               {profile?.is_admin && (
+                 <div className="mb-4 flex justify-end">
+                   <CacheStatusIndicator />
+                 </div>
+               )}
+
+               {/* Grid - Mobile Responsive */}
               {viewMode === "services" && (
                 <>
                    <div id="services-grid" className="mobile-grid gap-4 sm:gap-6">

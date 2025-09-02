@@ -8275,6 +8275,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      get_admin_analytics_summary: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       get_agent_points_summary: {
         Args: { p_agent_id: string }
         Returns: Json
@@ -8377,6 +8381,17 @@ export type Database = {
           specialties: string[]
           website_url: string
           years_experience: number
+        }[]
+      }
+      get_service_metrics_summary: {
+        Args: { days_back?: number }
+        Returns: {
+          conversion_rate: number
+          revenue_attributed: number
+          service_id: string
+          total_clicks: number
+          total_purchases: number
+          total_views: number
         }[]
       }
       get_service_rating_stats: {

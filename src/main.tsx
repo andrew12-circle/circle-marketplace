@@ -30,7 +30,7 @@ const Marketplace = lazy(() => import("./pages/Marketplace").then(m => ({ defaul
 const Academy = lazy(() => import("./pages/Academy").then(m => ({ default: m.Academy })));
 const CreatorDashboard = lazy(() => import("./pages/CreatorDashboard").then(m => ({ default: m.CreatorDashboard })));
 const CreatorPaymentSetupPage = lazy(() => import("./pages/CreatorPaymentSetup"));
-const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const Admin = lazy(() => import("./pages/Admin").then(m => ({ default: m.Admin })));
 const ProfileSettings = lazy(() => import("./pages/ProfileSettings").then(m => ({ default: m.ProfileSettings })));
 const SavedItems = lazy(() => import("./pages/SavedItems").then(m => ({ default: m.SavedItems })));
 const OrderHistory = lazy(() => import("./pages/OrderHistory").then(m => ({ default: m.OrderHistory })));
@@ -135,7 +135,7 @@ createRoot(document.getElementById("root")!).render(
                 <Route path="/academy" element={<Academy />} />
                 <Route path="/creator-dashboard" element={<CreatorDashboard />} />
                 <Route path="/creator-payment-setup" element={<CreatorPaymentSetupPage />} />
-                <Route path="/admin" element={<AdminDashboard />} />
+                <Route path="/admin" element={<Admin />} />
                 <Route path="/profile-settings" element={<ProfileSettings />} />
                 <Route path="/saved" element={<SavedItems />} />
                 <Route path="/orders" element={<OrderHistory />} />
