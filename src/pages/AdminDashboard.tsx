@@ -29,7 +29,7 @@ import RESPADocumentationViewer from '@/components/admin/RESPADocumentationViewe
 import VendorSSPManager from '@/components/admin/VendorSSPManager';
 import RESPAServiceManager from '@/components/admin/RESPAServiceManager';
 import { AdvancedSplitCalculator } from '@/components/admin/AdvancedSplitCalculator';
-import { ServiceImportPanel } from '@/components/admin/ServiceImportPanel';
+
 import { VendorImportPanel } from '@/components/admin/VendorImportPanel';
 import RankImpactMonitor from '@/components/admin/RankImpactMonitor';
 import { VendorBudgetManager } from '@/components/admin/VendorBudgetManager';
@@ -963,9 +963,6 @@ export default function AdminDashboard() {
           <ServiceManagementPanelWrapper />
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <BulkServiceResearch />
-          </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <ServiceImportPanel />
           </div>
         </TabsContent>
 
