@@ -5,7 +5,7 @@ import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { useLogAssessmentViewOnce } from "@/lib/events";
+import { useLogPageViewOnce } from "@/hooks/useLogPageViewOnce";
 import { GoalFormData } from "./types";
 import { GoalAssessmentStep1 } from "./GoalAssessmentStep1";
 import { GoalAssessmentStep2 } from "./GoalAssessmentStep2";
@@ -42,7 +42,7 @@ const DEFAULT_FORM_DATA: GoalFormData = {
 export function GoalAssessmentModal({ open, onOpenChange, onComplete }: GoalAssessmentModalProps) {
   const { user, profile } = useAuth();
   const { toast } = useToast();
-  const { logView } = useLogAssessmentViewOnce('/assessment');
+  useLogPageViewOnce('assessment_viewed', '/assessment');
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState<GoalFormData>(DEFAULT_FORM_DATA);
@@ -73,13 +73,12 @@ export function GoalAssessmentModal({ open, onOpenChange, onComplete }: GoalAsse
     }
   }, [open, profile]);
 
-  // Reset to step 1 and log view when modal opens
+  // Reset to step 1 when modal opens
   useEffect(() => {
     if (open) {
       setCurrentStep(1);
-      logView(); // Log assessment view once per session
     }
-  }, [open, logView]);
+  }, [open]);
 
   const progress = (currentStep / TOTAL_STEPS) * 100;
 
