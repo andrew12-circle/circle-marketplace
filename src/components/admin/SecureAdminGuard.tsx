@@ -217,6 +217,9 @@ export const SecureAdminGuard: React.FC<SecureAdminGuardProps> = ({
         </div>
       )}
 
+      
+      {children}
+
       {safeMode && !allowlisted && (
         <div className="container mx-auto py-2 px-4">
           <Alert variant="default" className="border-green-200 bg-green-50">
@@ -227,8 +230,6 @@ export const SecureAdminGuard: React.FC<SecureAdminGuardProps> = ({
           </Alert>
         </div>
       )}
-      
-      {children}
     </>
   );
 };
