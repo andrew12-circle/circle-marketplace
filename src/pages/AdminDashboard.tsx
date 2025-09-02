@@ -75,6 +75,7 @@ interface UserProfile {
   specialties: string[] | null;
   is_admin: boolean | null;
   is_pro?: boolean | null;
+  is_pro_member?: boolean | null;
   created_at: string;
 }
 
@@ -397,7 +398,7 @@ export default function AdminDashboard() {
     try {
       const { error } = await supabase
         .from('profiles')
-        .update({ is_pro: !currentStatus })
+        .update({ is_pro_member: !currentStatus })
         .eq('user_id', userId);
 
       if (error) throw error;
@@ -405,7 +406,7 @@ export default function AdminDashboard() {
       // Update local state
       setUsers(users.map(user => 
         user.user_id === userId 
-          ? { ...user, is_pro: !currentStatus }
+          ? { ...user, is_pro_member: !currentStatus }
           : user
       ));
 
@@ -805,7 +806,7 @@ export default function AdminDashboard() {
                                   Verified
                                 </Badge>
                               )}
-                              {user.is_pro && (
+                              {user.is_pro_member && (
                                 <Badge className="bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100">
                                   <TrendingUp className="h-3 w-3 mr-1" />
                                   Pro Member
@@ -848,10 +849,10 @@ export default function AdminDashboard() {
                               
                               <div className="flex flex-col items-center gap-2">
                                 <label className="text-xs font-medium text-slate-600">Pro</label>
-                                <Switch
-                                  checked={user.is_pro || false}
-                                  disabled={operationLoading}
-                                  onCheckedChange={() => handleToggleProStatus(user.user_id, user.is_pro || false)}
+                                 <Switch
+                                   checked={user.is_pro_member || false}
+                                   disabled={operationLoading}
+                                   onCheckedChange={() => handleToggleProStatus(user.user_id, user.is_pro_member || false)}
                                   className="data-[state=checked]:bg-amber-600"
                                 />
                               </div>
