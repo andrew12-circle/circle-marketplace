@@ -714,58 +714,57 @@ export const ServiceCard = ({
                   
                   {showDiscountPending ? (
                     <div className="space-y-2">
-                      {/* Compact Pro Price Display */}
-                      {service.pro_price && (
+                      {/* Show Circle Pro price if available, otherwise show upvote section */}
+                      {service.pro_price ? (
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-muted-foreground">Circle Pro:</span>
                           <span className="font-semibold text-primary">
                             {formatPrice(extractNumericPrice(service.pro_price), service.price_duration || 'mo')}
                           </span>
                         </div>
-                      )}
-                      
-                      {/* Upvote Section */}
-                      <div className="p-2 bg-amber-50 rounded-lg border border-amber-200">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs text-amber-700">
-                            Upvote if you'd buy at a discount
-                          </span>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              demandSignals.likeService();
-                            }}
-                            disabled={demandSignals.hasLiked}
-                            className={`p-1 rounded transition-colors ${
-                              demandSignals.hasLiked 
-                                ? 'bg-amber-200 text-amber-800' 
-                                : 'hover:bg-amber-100 text-amber-600'
-                            }`}
-                          >
-                            <ThumbsUp className={`w-4 h-4 ${demandSignals.hasLiked ? 'fill-current' : ''}`} />
-                          </button>
-                        </div>
-                        
-                        {demandSignals.totalLikes > 0 && (
-                          <div className="text-xs text-amber-700 mb-2">
-                            {demandSignals.totalLikes} agent{demandSignals.totalLikes === 1 ? '' : 's'} interested
-                          </div>
-                        )}
-                        
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <button className="inline-flex items-center gap-1 text-xs text-amber-600 hover:text-amber-800 transition-colors">
-                              <Info className="w-3 h-3" />
-                              How this works
+                      ) : (
+                        <div className="p-2 bg-amber-50 rounded-lg border border-amber-200">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-amber-700">
+                              Upvote if you'd buy at a discount
+                            </span>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                demandSignals.likeService();
+                              }}
+                              disabled={demandSignals.hasLiked}
+                              className={`p-1 rounded transition-colors ${
+                                demandSignals.hasLiked 
+                                  ? 'bg-amber-200 text-amber-800' 
+                                  : 'hover:bg-amber-100 text-amber-600'
+                              }`}
+                            >
+                              <ThumbsUp className={`w-4 h-4 ${demandSignals.hasLiked ? 'fill-current' : ''}`} />
                             </button>
-                          </TooltipTrigger>
-                          <TooltipContent className="w-64 p-3">
-                            <p className="text-sm leading-relaxed">
-                              Vendors unlock Pro discounts when enough agents show interest. Every like notifies the vendor and increases the chance of Circle securing a discount.
-                            </p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </div>
+                          </div>
+                          
+                          {demandSignals.totalLikes > 0 && (
+                            <div className="text-xs text-amber-700 mt-1">
+                              {demandSignals.totalLikes} agent{demandSignals.totalLikes === 1 ? '' : 's'} interested
+                            </div>
+                          )}
+                          
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <button className="inline-flex items-center gap-1 text-xs text-amber-600 hover:text-amber-800 transition-colors mt-1">
+                                <Info className="w-3 h-3" />
+                                How this works
+                              </button>
+                            </TooltipTrigger>
+                            <TooltipContent className="w-64 p-3">
+                              <p className="text-sm leading-relaxed">
+                                Vendors unlock Pro discounts when enough agents show interest. Every like notifies the vendor and increases the chance of Circle securing a discount.
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </div>
+                      )}
                     </div>
                   ) : (
                     service.is_verified && service.pro_price && (
