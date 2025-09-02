@@ -450,7 +450,7 @@ export default function AdminDashboard() {
     <SpiritualAdminGuard operation="admin_dashboard_access">
       <SecureAdminGuard requireElevatedPrivileges={true}>
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
-        <AdminStabilityRibbon />
+        
         <AutoRecoverySystem
           isError={isError}
           errorCount={errorCount}
@@ -1040,6 +1040,7 @@ export default function AdminDashboard() {
         </TabsContent>
       </Tabs>
         </div>
+        <AdminStabilityRibbon />
       </div>
     </SecureAdminGuard>
     </SpiritualAdminGuard>
