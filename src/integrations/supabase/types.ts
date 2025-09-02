@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      action_tokens: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          ip_address: unknown
+          route: string
+          token_hash: string
+          used: boolean
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          ip_address: unknown
+          route: string
+          token_hash: string
+          used?: boolean
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          ip_address?: unknown
+          route?: string
+          token_hash?: string
+          used?: boolean
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       admin_notes: {
         Row: {
           created_at: string
@@ -817,6 +850,45 @@ export type Database = {
           security_monitoring_global?: boolean | null
           top_deals_enabled?: boolean | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      attack_logs: {
+        Row: {
+          attack_type: string
+          blocked: boolean
+          created_at: string
+          details: Json
+          endpoint: string | null
+          id: string
+          ip_address: unknown
+          risk_score: number | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          attack_type: string
+          blocked?: boolean
+          created_at?: string
+          details?: Json
+          endpoint?: string | null
+          id?: string
+          ip_address: unknown
+          risk_score?: number | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          attack_type?: string
+          blocked?: boolean
+          created_at?: string
+          details?: Json
+          endpoint?: string | null
+          id?: string
+          ip_address?: unknown
+          risk_score?: number | null
+          user_agent?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -4305,6 +4377,42 @@ export type Database = {
           },
         ]
       }
+      pow_challenges: {
+        Row: {
+          challenge_id: string
+          created_at: string
+          difficulty: number
+          expires_at: string
+          id: string
+          ip_address: unknown
+          solution_nonce: string | null
+          solved: boolean
+          target_hash: string
+        }
+        Insert: {
+          challenge_id: string
+          created_at?: string
+          difficulty: number
+          expires_at?: string
+          id?: string
+          ip_address: unknown
+          solution_nonce?: string | null
+          solved?: boolean
+          target_hash: string
+        }
+        Update: {
+          challenge_id?: string
+          created_at?: string
+          difficulty?: number
+          expires_at?: string
+          id?: string
+          ip_address?: unknown
+          solution_nonce?: string | null
+          solved?: boolean
+          target_hash?: string
+        }
+        Relationships: []
+      }
       prayers: {
         Row: {
           body: string
@@ -4534,6 +4642,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      rate_limit_tracking: {
+        Row: {
+          endpoint: string
+          id: string
+          identifier: string
+          last_request: string
+          request_count: number
+          window_start: string
+        }
+        Insert: {
+          endpoint: string
+          id?: string
+          identifier: string
+          last_request?: string
+          request_count?: number
+          window_start?: string
+        }
+        Update: {
+          endpoint?: string
+          id?: string
+          identifier?: string
+          last_request?: string
+          request_count?: number
+          window_start?: string
+        }
+        Relationships: []
       }
       referral_tokens: {
         Row: {
@@ -4935,6 +5070,36 @@ export type Database = {
           metadata?: Json | null
           severity?: string
           user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      security_risk_scores: {
+        Row: {
+          expires_at: string
+          id: string
+          ip_address: unknown
+          last_updated: string
+          risk_factors: Json
+          risk_score: number
+          user_id: string | null
+        }
+        Insert: {
+          expires_at?: string
+          id?: string
+          ip_address: unknown
+          last_updated?: string
+          risk_factors?: Json
+          risk_score?: number
+          user_id?: string | null
+        }
+        Update: {
+          expires_at?: string
+          id?: string
+          ip_address?: unknown
+          last_updated?: string
+          risk_factors?: Json
+          risk_score?: number
           user_id?: string | null
         }
         Relationships: []
@@ -8029,6 +8194,10 @@ export type Database = {
         Returns: unknown
       }
       cleanup_expired_cache: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      cleanup_expired_security_data: {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
