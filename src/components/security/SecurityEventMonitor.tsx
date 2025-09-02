@@ -1,188 +1,152 @@
-// @ts-nocheck
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import { RefreshCw, AlertTriangle, Shield, Zap } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { Shield, AlertTriangle, Eye, RefreshCw } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
 
 interface SecurityEvent {
   id: string;
-  event_type: string;
-  user_id: string;
-  event_data: any;
+  attack_type: string;
+  ip_address: string;
+  user_id?: string;
+  endpoint?: string;
+  risk_score?: number;
+  blocked: boolean;
+  details?: any;
   created_at: string;
-  ip_address?: unknown;
-  user_agent?: string;
 }
 
-export const SecurityEventMonitor = () => {
+export function SecurityEventMonitor() {
   const [events, setEvents] = useState<SecurityEvent[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const { profile } = useAuth();
+  const { toast } = useToast();
 
-  const fetchSecurityEvents = async () => {
-    if (!profile?.is_admin) {
-      setError('Admin access required');
-      setLoading(false);
-      return;
-    }
-
+  const fetchEvents = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const { data, error: fetchError } = await supabase
-        .from('security_events')
+      const { data, error } = await supabase
+        .from('attack_logs')
         .select('*')
         .order('created_at', { ascending: false })
         .limit(50);
 
-      if (fetchError) throw fetchError;
+      if (error) throw error;
       setEvents(data || []);
-      setError(null);
-    } catch (err) {
-      console.error('Error fetching security events:', err);
-      setError('Failed to load security events');
+    } catch (error) {
+      console.error('Failed to fetch security events:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load security events",
+        variant: "destructive"
+      });
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchSecurityEvents();
-  }, [profile?.is_admin]);
-
-  const getEventSeverity = (eventType: string) => {
-    const criticalEvents = [
-      'privilege_escalation_attempt',
-      'admin_specialty_escalation_attempt',
-      'unauthorized_profile_modification_attempt'
-    ];
+    fetchEvents();
     
-    const warningEvents = [
-      'admin_privilege_change',
-      'creator_verification_change',
-      'admin_rate_limit_exceeded'
-    ];
+    // Subscribe to real-time updates
+    const subscription = supabase
+      .channel('security_events')
+      .on('postgres_changes', 
+        { event: 'INSERT', schema: 'public', table: 'attack_logs' },
+        (payload) => {
+          setEvents(prev => [payload.new as SecurityEvent, ...prev.slice(0, 49)]);
+        }
+      )
+      .subscribe();
 
-    if (criticalEvents.includes(eventType)) return 'critical';
-    if (warningEvents.includes(eventType)) return 'warning';
-    return 'info';
-  };
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
-  const getEventColor = (severity: string) => {
-    switch (severity) {
-      case 'critical': return 'destructive';
-      case 'warning': return 'secondary';
-      default: return 'outline';
+  const getEventIcon = (eventType: string) => {
+    if (eventType.includes('blocked') || eventType.includes('attack')) {
+      return <AlertTriangle className="h-4 w-4 text-destructive" />;
     }
+    if (eventType.includes('captcha') || eventType.includes('pow')) {
+      return <Shield className="h-4 w-4 text-warning" />;
+    }
+    return <Zap className="h-4 w-4 text-primary" />;
   };
 
-  const formatEventType = (eventType: string) => {
-    return eventType
-      .split('_')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
+  const getRiskBadgeVariant = (riskScore?: number) => {
+    if (!riskScore) return 'secondary';
+    if (riskScore >= 80) return 'destructive';
+    if (riskScore >= 60) return 'destructive';
+    if (riskScore >= 40) return 'secondary';
+    return 'default';
   };
-
-  if (!profile?.is_admin) {
-    return (
-      <Alert>
-        <Shield className="h-4 w-4" />
-        <AlertDescription>
-          Admin access required to view security events.
-        </AlertDescription>
-      </Alert>
-    );
-  }
 
   return (
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
-            <Shield className="w-5 h-5" />
-            Security Event Monitor
-          </CardTitle>
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              <Shield className="h-5 w-5" />
+              Live Security Events
+            </CardTitle>
+            <CardDescription>
+              Real-time monitoring of security events and threats
+            </CardDescription>
+          </div>
           <Button
             variant="outline"
             size="sm"
-            onClick={fetchSecurityEvents}
+            onClick={fetchEvents}
             disabled={loading}
+            className="flex items-center gap-2"
           >
-            <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
             Refresh
           </Button>
         </div>
       </CardHeader>
       <CardContent>
-        {error && (
-          <Alert variant="destructive" className="mb-4">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
-
-        {loading ? (
-          <div className="flex items-center justify-center p-8">
-            <RefreshCw className="w-6 h-6 animate-spin mr-2" />
-            Loading security events...
-          </div>
-        ) : events.length === 0 ? (
-          <div className="text-center p-8 text-muted-foreground">
-            <Eye className="w-12 h-12 mx-auto mb-4 opacity-50" />
-            No security events found
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {events.map((event) => {
-              const severity = getEventSeverity(event.event_type);
-              return (
-                <div
-                  key={event.id}
-                  className="flex items-start justify-between p-3 border rounded-lg"
-                >
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Badge variant={getEventColor(severity) as any}>
-                        {formatEventType(event.event_type)}
-                      </Badge>
-                      <span className="text-xs text-muted-foreground">
-                        {new Date(event.created_at).toLocaleString()}
-                      </span>
-                    </div>
-                    
-                    <div className="text-sm space-y-1">
-                      <div>
-                        <span className="font-medium">User ID:</span> {event.user_id}
-                      </div>
-                      
-                      {event.ip_address && (
-                        <div>
-                          <span className="font-medium">IP:</span> {String(event.ip_address)}
-                        </div>
-                      )}
-                      
-                      {event.event_data && Object.keys(event.event_data).length > 0 && (
-                        <details className="mt-2">
-                          <summary className="cursor-pointer text-xs text-muted-foreground hover:text-foreground">
-                            Event Details
-                          </summary>
-                          <pre className="text-xs bg-muted p-2 rounded mt-1 overflow-auto">
-                            {JSON.stringify(event.event_data, null, 2)}
-                          </pre>
-                        </details>
-                      )}
-                    </div>
+        <div className="space-y-4 max-h-96 overflow-y-auto">
+          {events.map((event) => (
+            <div
+              key={event.id}
+              className="flex items-center justify-between p-4 border rounded-lg"
+            >
+              <div className="flex items-center gap-3">
+                {getEventIcon(event.attack_type)}
+                <div>
+                  <div className="font-medium">{event.attack_type}</div>
+                  <div className="text-sm text-muted-foreground">
+                    IP: {event.ip_address}
+                    {event.endpoint && ` • ${event.endpoint}`}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    {new Date(event.created_at).toLocaleString()}
                   </div>
                 </div>
-              );
-            })}
-          </div>
-        )}
+              </div>
+              <div className="flex items-center gap-2">
+                {event.risk_score && (
+                  <Badge variant={getRiskBadgeVariant(event.risk_score)}>
+                    Risk: {event.risk_score}
+                  </Badge>
+                )}
+                {event.blocked && (
+                  <Badge variant="destructive">Blocked</Badge>
+                )}
+              </div>
+            </div>
+          ))}
+          {events.length === 0 && !loading && (
+            <div className="text-center py-8 text-muted-foreground">
+              No security events recorded
+            </div>
+          )}
+        </div>
       </CardContent>
     </Card>
   );
-};
+}
