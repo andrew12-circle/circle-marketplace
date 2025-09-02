@@ -502,9 +502,6 @@ export default function AdminDashboard() {
                 <Badge variant="outline" className="bg-slate-50 border-slate-300 text-slate-700">
                   v2.4.1
                 </Badge>
-                <Button variant="secondary" onClick={() => navigate('/admin/commissions')}>
-                  Commissions Tracking
-                </Button>
               </div>
             </div>
           </div>
@@ -647,6 +644,13 @@ export default function AdminDashboard() {
               >
                 <Heart className="h-4 w-4" />
                 <span className="hidden sm:inline">Spiritual</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="commissions" 
+                className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
+              >
+                <DollarSign className="h-4 w-4" />
+                <span className="hidden sm:inline">Commissions</span>
               </TabsTrigger>
             </TabsList>
           </div>
@@ -1029,6 +1033,34 @@ export default function AdminDashboard() {
 
             <TabsContent value="spiritual" className="space-y-6">
               <SpiritualDashboard />
+            </TabsContent>
+
+            <TabsContent value="commissions" className="space-y-6">
+              <Card className="bg-white border-slate-200 shadow-sm">
+                <CardHeader className="bg-gradient-to-r from-slate-50 to-white border-b border-slate-100">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 bg-green-50 rounded-lg flex items-center justify-center">
+                      <DollarSign className="h-5 w-5 text-green-600" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-lg font-semibold text-slate-900">
+                        Commissions Tracking
+                      </CardTitle>
+                      <CardDescription className="text-sm text-slate-600">
+                        Monitor and manage commission structures
+                      </CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-center py-8">
+                    <Button onClick={() => navigate('/admin/commissions')} className="flex items-center gap-2">
+                      <DollarSign className="h-4 w-4" />
+                      Open Commissions Dashboard
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             </TabsContent>
 
             <TabsContent value="retention" className="space-y-6">
