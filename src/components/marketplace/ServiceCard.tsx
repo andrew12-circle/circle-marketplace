@@ -714,8 +714,8 @@ export const ServiceCard = ({
                   
                   {showDiscountPending ? (
                     <div className="space-y-2">
-                      {/* Show Circle Pro price if available, otherwise show upvote section */}
-                      {service.pro_price ? (
+                      {/* Show Circle Pro price only if service is verified and has pro price */}
+                      {service.is_verified && service.pro_price ? (
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-muted-foreground">Circle Pro:</span>
                           <span className="font-semibold text-primary">
