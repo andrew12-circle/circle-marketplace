@@ -26,7 +26,7 @@ export function GoalAssessmentStep3({ formData, onUpdate }: StepProps) {
             <SelectTrigger className="bg-background">
               <SelectValue placeholder="Select your biggest challenge" />
             </SelectTrigger>
-            <SelectContent className="bg-background border z-50">
+            <SelectContent className="bg-background border z-50 pointer-events-auto">
               <SelectItem value="lead_generation">Lead Generation</SelectItem>
               <SelectItem value="branding">Personal Branding</SelectItem>
               <SelectItem value="systems">Business Systems</SelectItem>
