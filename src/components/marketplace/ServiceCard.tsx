@@ -714,27 +714,37 @@ export const ServiceCard = ({
                   
                   {showDiscountPending ? (
                     <div className="space-y-2">
-                      {/* Discount Pending for Non-Pro Members */}
-                      <div className="p-2 bg-amber-50 rounded-lg border border-amber-200">
-                        <div className="flex items-center justify-center mb-1">
-                          <div className="inline-flex items-center gap-1 bg-amber-100 text-amber-800 text-xs font-medium px-2 py-0.5 rounded-full">
-                            <span>Discount Pending</span>
-                          </div>
+                      {/* Compact Pro Price Display */}
+                      {service.pro_price && (
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-muted-foreground">Circle Pro:</span>
+                          <span className="font-semibold text-primary">
+                            {formatPrice(extractNumericPrice(service.pro_price), service.price_duration || 'mo')}
+                          </span>
                         </div>
-                        
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="w-full"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            demandSignals.likeService();
-                          }}
-                          disabled={demandSignals.hasLiked}
-                        >
-                          <ThumbsUp className={`w-4 h-4 mr-2 ${demandSignals.hasLiked ? 'fill-current' : ''}`} />
-                          {demandSignals.hasLiked ? "Thanks! We'll keep you posted" : "I'd use this with a discount"}
-                        </Button>
+                      )}
+                      
+                      {/* Upvote Section */}
+                      <div className="p-2 bg-amber-50 rounded-lg border border-amber-200">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-amber-700">
+                            Upvote if you'd buy at a discount
+                          </span>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              demandSignals.likeService();
+                            }}
+                            disabled={demandSignals.hasLiked}
+                            className={`p-1 rounded transition-colors ${
+                              demandSignals.hasLiked 
+                                ? 'bg-amber-200 text-amber-800' 
+                                : 'hover:bg-amber-100 text-amber-600'
+                            }`}
+                          >
+                            <ThumbsUp className={`w-4 h-4 ${demandSignals.hasLiked ? 'fill-current' : ''}`} />
+                          </button>
+                        </div>
                         
                         {demandSignals.totalLikes > 0 && (
                           <div className="text-xs text-amber-700 mb-2">
