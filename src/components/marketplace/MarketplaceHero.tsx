@@ -22,7 +22,7 @@ export default function MarketplaceHero({ onExploreClick }: MarketplaceHeroProps
   return (
     <section className="bg-gradient-to-br from-gray-50 to-white py-20 px-6 text-center">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-6xl font-bold tracking-tight mb-4">
+        <h1 className="text-4xl font-bold tracking-tight mb-4">
           The Marketplace <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-500">Agents Actually Asked For</span>
         </h1>
         <p className="text-lg text-gray-600 mb-8">
