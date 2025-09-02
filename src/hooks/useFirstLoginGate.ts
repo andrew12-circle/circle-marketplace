@@ -8,8 +8,8 @@ export function useFirstLoginGate() {
   const { status: authStatus } = useAuthBoot();
   const { needsOnboarding, completeOnboarding: completeOnboardingState } = useOnboardingState();
   
-  // Only show onboarding if user is authenticated and auth is ready and needs onboarding
-  const showOnboarding = user && authStatus === 'ready' && needsOnboarding;
+  // TEMPORARILY DISABLED: Always skip onboarding
+  const showOnboarding = false;
 
   const completeOnboarding = async () => {
     try {
