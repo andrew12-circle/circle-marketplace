@@ -392,6 +392,7 @@ export const Auth = () => {
                   type="email"
                   placeholder="Enter your email"
                   className="pl-10"
+                  autoComplete="email"
                   required
                   value={formData.email}
                   onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
@@ -411,6 +412,7 @@ export const Auth = () => {
                     type="text"
                     placeholder="Enter your full name"
                     className="pl-10"
+                    autoComplete="name"
                     required
                   />
                 </div>
@@ -429,6 +431,7 @@ export const Auth = () => {
                     type={showPassword ? "text" : "password"}
                     placeholder="Enter your password"
                     className="pl-10 pr-10"
+                    autoComplete={isLogin ? "current-password" : "new-password"}
                     required
                     minLength={8}
                     value={formData.password}

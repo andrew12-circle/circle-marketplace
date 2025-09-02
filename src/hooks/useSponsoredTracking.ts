@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuthBoot } from '@/lib/auth-bootstrap';
 
 type PlacementType = 'top_deals' | 'search_grid' | 'category_entry' | 'vendor_profile';
 
@@ -12,7 +12,7 @@ interface TrackingEvent {
 }
 
 export const useSponsoredTracking = () => {
-  const { user } = useAuth();
+  const { userId } = useAuthBoot();
 
   const trackImpression = useCallback(async ({ serviceId, placement, context }: TrackingEvent) => {
     try {
@@ -26,15 +26,14 @@ export const useSponsoredTracking = () => {
         return;
       }
 
-      // Skip tracking for unauthenticated users to prevent 400 errors
-      if (!user?.id) {
-        console.debug('Skipping sponsored impression for unauthenticated user');
+      // Skip if not authenticated
+      if (!userId) {
         return;
       }
 
       const { error } = await supabase.from('service_tracking_events').insert({
         service_id: serviceId,
-        user_id: user.id,
+        user_id: userId,
         event_type: 'sponsored_impression',
         event_data: {
           placement,
@@ -50,19 +49,18 @@ export const useSponsoredTracking = () => {
     } catch (error) {
       console.error('Error tracking sponsored impression:', error);
     }
-  }, [user?.id]);
+  }, [userId]);
 
   const trackClick = useCallback(async ({ serviceId, placement, context }: TrackingEvent) => {
     try {
-      // Skip tracking for unauthenticated users to prevent 400 errors
-      if (!user?.id) {
-        console.debug('Skipping sponsored click for unauthenticated user');
+      // Skip if not authenticated
+      if (!userId) {
         return;
       }
 
       const { error } = await supabase.from('service_tracking_events').insert({
         service_id: serviceId,
-        user_id: user.id,
+        user_id: userId,
         event_type: 'sponsored_click',
         event_data: {
           placement,
@@ -78,7 +76,7 @@ export const useSponsoredTracking = () => {
     } catch (error) {
       console.error('Error tracking sponsored click:', error);
     }
-  }, [user?.id]);
+  }, [userId]);
 
   return {
     trackImpression,

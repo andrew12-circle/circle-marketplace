@@ -47,7 +47,7 @@ export const VendorCoMarketingManager = () => {
           seed_expires_at,
           seed_notes
         `)
-        .eq('is_active' as any, true as any)
+        .eq('is_active', true)
         .order('name');
 
       if (error) throw error;
