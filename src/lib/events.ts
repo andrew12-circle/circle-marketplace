@@ -10,9 +10,35 @@ export type ServiceEventInput = {
   user_id?: string | null; // pass explicitly if you already have it
 }
 
+// Whitelist of allowed event types to prevent CHECK constraint violations
+const ALLOWED_EVENT_TYPES: Record<string, true> = {
+  'assessment_viewed': true,
+  'assessment_step': true,
+  'assessment_completed': true,
+  'marketplace_viewed': true,
+  'vendor_selected': true,
+  'service_viewed': true,
+  'sponsored_impression': true,
+  'sponsored_click': true,
+  'discount_interest': true,
+  'view': true,
+  'click': true,
+  'booking': true,
+  'purchase': true
+};
+
+function sanitizeEventType(raw?: string): string {
+  const eventType = (raw ?? '').trim();
+  if (eventType && ALLOWED_EVENT_TYPES[eventType]) {
+    return eventType;
+  }
+  // Fallback to a safe default for unknown event types
+  return 'service_viewed';
+}
+
 /**
  * Safe event logger that conforms to service_tracking_events schema.
- * - Ensures event_type is present (falls back to event_name)
+ * - Ensures event_type is present and valid (falls back to event_name)
  * - Guarantees context is an object
  * - Prints detailed error payload on failure
  */
@@ -24,12 +50,11 @@ export async function logServiceEvent(evt: ServiceEventInput) {
 
   const authUserId = userRes?.user?.id ?? null;
 
-  const event_type =
-    (evt.event_type ?? evt.event_name ?? '').trim();
+  const event_type = sanitizeEventType(evt.event_type ?? evt.event_name);
 
   const payload = {
     user_id: evt.user_id ?? authUserId, // may be null if not signed in
-    event_type,                         // <-- REQUIRED by DB
+    event_type,                         // <-- REQUIRED by DB and validated
     page: evt.page ?? null,
     context: evt.context ?? {},         // ensure jsonb object
   };

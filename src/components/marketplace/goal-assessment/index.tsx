@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLogPageViewOnce } from "@/hooks/useLogPageViewOnce";
+import { logServiceEvent } from "@/lib/events";
 import { GoalFormData } from "./types";
 import { GoalAssessmentStep1 } from "./GoalAssessmentStep1";
 import { GoalAssessmentStep2 } from "./GoalAssessmentStep2";
@@ -13,6 +14,16 @@ import { GoalAssessmentStep3 } from "./GoalAssessmentStep3";
 import { GoalAssessmentStep4 } from "./GoalAssessmentStep4";
 import { GoalAssessmentStep5 } from "./GoalAssessmentStep5";
 import { GoalAssessmentStep6 } from "./GoalAssessmentStep6";
+import { X } from "lucide-react";
+import { 
+  AssessmentSchema, 
+  Step1Schema, 
+  Step2Schema, 
+  Step3Schema, 
+  Step4Schema, 
+  Step5Schema, 
+  Step6Schema 
+} from "@/features/assessment/schema";
 
 interface GoalAssessmentModalProps {
   open: boolean;
@@ -47,6 +58,7 @@ export function GoalAssessmentModal({ open, onOpenChange, onComplete }: GoalAsse
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState<GoalFormData>(DEFAULT_FORM_DATA);
   const [modalDismissed, setModalDismissed] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Load profile data when modal opens
   useEffect(() => {
@@ -77,6 +89,7 @@ export function GoalAssessmentModal({ open, onOpenChange, onComplete }: GoalAsse
   useEffect(() => {
     if (open) {
       setCurrentStep(1);
+      setError(null);
     }
   }, [open]);
 
@@ -87,36 +100,81 @@ export function GoalAssessmentModal({ open, onOpenChange, onComplete }: GoalAsse
       ...prev,
       [field]: value
     }));
+    setError(null); // Clear any validation errors when user makes changes
   };
 
-  const handleNext = () => {
-    if (currentStep < TOTAL_STEPS && isStepValid(currentStep)) {
+  // Improved validation using Zod schemas
+  const isStepValid = (step: number): boolean => {
+    try {
+      switch (step) {
+        case 1:
+          Step1Schema.parse({
+            annual_goal_transactions: formData.annual_goal_transactions,
+            annual_goal_volume: formData.annual_goal_volume
+          });
+          return true;
+        case 2:
+          Step2Schema.parse({
+            average_commission_per_deal: formData.average_commission_per_deal
+          });
+          return true;
+        case 3:
+          Step3Schema.parse({
+            primary_challenge: formData.primary_challenge
+          });
+          return true;
+        case 4:
+          Step4Schema.parse({
+            marketing_time_per_week: formData.marketing_time_per_week,
+            budget_preference: formData.budget_preference
+          });
+          return true;
+        case 5:
+          Step5Schema.parse({
+            personality_type: formData.personality_type,
+            work_style: formData.work_style,
+            communication_preference: formData.communication_preference
+          });
+          return true;
+        case 6:
+          Step6Schema.parse({
+            current_crm: formData.current_crm
+          });
+          return true;
+        default:
+          return true;
+      }
+    } catch {
+      return false;
+    }
+  };
+
+  const handleNext = async () => {
+    setError(null);
+    
+    if (!isStepValid(currentStep)) {
+      setError('Please complete all required fields before proceeding.');
+      return;
+    }
+
+    // Log step completion
+    void logServiceEvent({
+      event_type: 'assessment_step',
+      page: '/assessment',
+      context: { step: currentStep, totalSteps: TOTAL_STEPS }
+    });
+
+    if (currentStep < TOTAL_STEPS) {
       setCurrentStep(currentStep + 1);
+    } else {
+      await handleComplete();
     }
   };
 
   const handlePrevious = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
-    }
-  };
-
-  const isStepValid = (step: number): boolean => {
-    switch (step) {
-      case 1:
-        return formData.annual_goal_transactions > 0 && formData.annual_goal_volume > 0;
-      case 2:
-        return formData.average_commission_per_deal > 0;
-      case 3:
-        return !!formData.primary_challenge && formData.primary_challenge.trim() !== '';
-      case 4:
-        return formData.marketing_time_per_week >= 0;
-      case 5:
-        return !!formData.personality_type && !!formData.work_style;
-      case 6:
-        return !!formData.current_crm;
-      default:
-        return true;
+      setError(null);
     }
   };
 
@@ -124,7 +182,12 @@ export function GoalAssessmentModal({ open, onOpenChange, onComplete }: GoalAsse
     if (!user?.id) return;
 
     setIsLoading(true);
+    setError(null);
+    
     try {
+      // Final validation before submission
+      AssessmentSchema.parse(formData);
+      
       const personalityData = {
         personality_type: formData.personality_type,
         work_style: formData.work_style,
@@ -157,6 +220,13 @@ export function GoalAssessmentModal({ open, onOpenChange, onComplete }: GoalAsse
 
       if (error) throw error;
 
+      // Log completion
+      void logServiceEvent({
+        event_type: 'assessment_completed',
+        page: '/assessment',
+        context: { totalSteps: TOTAL_STEPS, formData }
+      });
+
       toast({
         title: "Goals Set Successfully!",
         description: "We'll now personalize your marketplace recommendations based on your goals.",
@@ -165,11 +235,13 @@ export function GoalAssessmentModal({ open, onOpenChange, onComplete }: GoalAsse
       onComplete?.();
       setModalDismissed(true);
       onOpenChange(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving goals:', error);
+      const errorMessage = error?.message || 'Failed to save your goals. Please try again.';
+      setError(errorMessage);
       toast({
         title: "Error",
-        description: "Failed to save your goals. Please try again.",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {
@@ -196,12 +268,16 @@ export function GoalAssessmentModal({ open, onOpenChange, onComplete }: GoalAsse
     }
   };
 
-  // Allow users to close modal even if not complete
-  const handleModalClose = (open: boolean) => {
-    if (!open) {
-      setModalDismissed(true);
-    }
-    onOpenChange(open);
+  // Proper modal close handler that respects onOpenChange
+  const handleModalClose = (shouldClose: boolean) => {
+    if (!shouldClose) return;
+    
+    setModalDismissed(true);
+    onOpenChange(false);
+  };
+
+  const handleCancel = () => {
+    handleModalClose(true);
   };
 
   // Don't show modal if user has dismissed it
@@ -211,12 +287,27 @@ export function GoalAssessmentModal({ open, onOpenChange, onComplete }: GoalAsse
 
   return (
     <Dialog open={open} onOpenChange={handleModalClose}>
-      <DialogContent className="max-w-md">
+      <DialogContent 
+        className="max-w-md"
+        onEscapeKeyDown={() => handleModalClose(true)}
+        onPointerDownOutside={() => handleModalClose(true)}
+      >
         <DialogHeader>
           <DialogTitle>Let's Set Your Goals</DialogTitle>
           <DialogDescription>
             Answer a few quick questions so we can tailor your marketplace recommendations to your specific business goals and preferences.
           </DialogDescription>
+          <DialogClose asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute right-4 top-4"
+              onClick={handleCancel}
+              aria-label="Close"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </DialogClose>
           <div className="space-y-2">
             <div className="flex justify-between text-sm text-muted-foreground">
               <span>Step {currentStep} of {TOTAL_STEPS}</span>
@@ -227,10 +318,17 @@ export function GoalAssessmentModal({ open, onOpenChange, onComplete }: GoalAsse
         </DialogHeader>
 
         <div className="space-y-6">
+          {error && (
+            <div className="p-3 rounded-md bg-destructive/10 border border-destructive/20 text-destructive text-sm">
+              {error}
+            </div>
+          )}
+          
           {renderCurrentStep()}
           
           <div className="flex justify-between">
             <Button
+              type="button"
               variant="outline"
               onClick={handlePrevious}
               disabled={currentStep === 1}
@@ -238,21 +336,33 @@ export function GoalAssessmentModal({ open, onOpenChange, onComplete }: GoalAsse
               Previous
             </Button>
             
-            {currentStep === TOTAL_STEPS ? (
-              <Button 
-                onClick={handleComplete}
-                disabled={isLoading || !isStepValid(currentStep)}
-              >
-                {isLoading ? "Saving..." : "Complete Setup"}
-              </Button>
-            ) : (
+            <div className="flex gap-2">
               <Button
-                onClick={handleNext}
-                disabled={!isStepValid(currentStep)}
+                type="button"
+                variant="ghost"
+                onClick={handleCancel}
               >
-                Next
+                Cancel
               </Button>
-            )}
+              
+              {currentStep === TOTAL_STEPS ? (
+                <Button 
+                  type="button"
+                  onClick={handleComplete}
+                  disabled={isLoading || !isStepValid(currentStep)}
+                >
+                  {isLoading ? "Saving..." : "Complete Setup"}
+                </Button>
+              ) : (
+                <Button
+                  type="button"
+                  onClick={handleNext}
+                  disabled={!isStepValid(currentStep)}
+                >
+                  Next
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       </DialogContent>
