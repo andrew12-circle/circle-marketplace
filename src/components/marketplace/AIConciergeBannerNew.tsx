@@ -36,10 +36,10 @@ export const AIConciergeBanner = () => {
       const profileWithGoals = profile as any;
       
       // Check if user needs goal assessment
-      if (!profileWithGoals.onboarding_completed) {
+      if (!profileWithGoals.goal_assessment_completed) {
         setIsGoalAssessmentOpen(true);
         setShowRecommendationsDashboard(false);
-      } else if (profileWithGoals.onboarding_completed && !showRecommendationsDashboard) {
+      } else if (profileWithGoals.goal_assessment_completed && !showRecommendationsDashboard) {
         setShowRecommendationsDashboard(true);
         generateRecommendations();
       }
@@ -91,7 +91,7 @@ export const AIConciergeBanner = () => {
   }, [isInputFocused, chatInput]);
 
   const generateRecommendations = async () => {
-    if (!user?.id || !(profile as any)?.onboarding_completed) return;
+    if (!user?.id || !(profile as any)?.goal_assessment_completed) return;
 
     try {
       const { data, error } = await supabase.functions.invoke('generate-ai-recommendations', {
@@ -212,7 +212,7 @@ export const AIConciergeBanner = () => {
             )}
 
             {/* Show AI Recommendations Dashboard or Goal Setup */}
-            {showRecommendationsDashboard && (profile as any)?.onboarding_completed && (
+            {showRecommendationsDashboard && (profile as any)?.goal_assessment_completed && (
               <AIRecommendationsDashboard />
             )}
 
