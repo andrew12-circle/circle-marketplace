@@ -24,17 +24,19 @@ export const ReloadReasonBanner = () => {
   const getReloadMessage = (reason: string) => {
     switch (reason) {
       case 'self_heal':
-        return 'App reloaded automatically to fix detected issues.';
+        return 'Circle worked some magic to keep everything running smoothly! ✨';
       case 'cookie_recovery':
-        return 'App reloaded to fix authentication cookies. You remain logged in.';
+        return 'We refreshed your session - you\'re still logged in and ready to go! ☕';
       case 'version_update':
-        return 'App reloaded due to version update.';
+        return 'Circle just got better! We updated a few things for you. 🚀';
       case 'recovery_fallback':
-        return 'App reloaded using fallback recovery. Your session is preserved.';
+        return 'Oops, our apologies! We smoothed that out. Your session is safe and sound! 💫';
       case 'manual':
-        return 'App was manually reloaded.';
+        return 'Fresh start! Everything\'s loaded and ready for you. ⭐';
+      case 'session_recovery':
+        return 'We noticed a little hiccup and fixed it right up. Welcome back! 🎯';
       default:
-        return 'App was reloaded.';
+        return 'All set! Circle is running perfectly for you now. ✅';
     }
   };
 

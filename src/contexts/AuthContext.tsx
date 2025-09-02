@@ -6,6 +6,7 @@ import { removeLegacyAuthCookies, initCookieMonitoring } from '@/lib/cookies';
 
 import { logger } from '@/utils/logger';
 import { useQueryClient } from '@tanstack/react-query';
+import { useSessionPersistence } from '@/hooks/useSessionPersistence';
 
 interface Profile {
   id: string;
@@ -68,6 +69,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [retryCount, setRetryCount] = useState(0);
   const queryClient = useQueryClient();
+  const { handleSessionError, triggerRecoveryBanner } = useSessionPersistence();
 
   // Add recovery mechanism for stuck states
   const recoverFromStuckState = useCallback(() => {

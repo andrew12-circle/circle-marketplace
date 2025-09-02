@@ -9,6 +9,7 @@ import { CartProvider } from "@/contexts/CartContext";
 import { cacheManager } from "./utils/cacheManager";
 import { globalErrorMonitor } from "./utils/globalErrorMonitor";
 import { ReloadReasonBanner } from "./components/common/ReloadReasonBanner";
+import { SessionRecoveryBanner } from "./components/auth/SessionRecoveryBanner";
 import { SecurityProvider } from "@/components/security/SecurityEnhancementSystem";
 import { ErrorBoundaryWithQA } from "@/components/common/ErrorBoundaryWithQA";
 import { removeLegacyAuthCookies, initCookieMonitoring, checkCookieSize, clearAllSupabaseAuthCookies } from "./lib/cookies";
@@ -199,6 +200,7 @@ createRoot(document.getElementById("root")!).render(
                   </Suspense>
                   <Toaster />
                   <ReloadReasonBanner />
+                  <SessionRecoveryBanner />
                 </CartProvider>
               </SecurityProvider>
           </BrowserRouter>
