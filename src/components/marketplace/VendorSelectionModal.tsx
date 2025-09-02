@@ -18,6 +18,7 @@ import { VendorFunnelModal } from "./VendorFunnelModal";
 import { VendorReferralModal } from "./VendorReferralModal";
 import { CoPayVendorCard } from "./CoPayVendorCard";
 import { isSSP, isNonSSP, getVendorTypeInfo, filterVendorsForService } from "@/utils/sspHelpers";
+import { debounce, markVendorModalDismissed } from "@/lib/vendors";
 
 interface Vendor {
   id: string;
@@ -38,6 +39,7 @@ interface Vendor {
 interface VendorSelectionModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onOpenChange?: (open: boolean) => void;
   onVendorSelect: (vendor: Vendor) => void;
   service: {
     id: string;
@@ -49,16 +51,20 @@ interface VendorSelectionModalProps {
     respa_split_limit?: number;
     requires_quote?: boolean;
   };
+  vendorsLoaded?: boolean;
 }
 
 export const VendorSelectionModal = ({ 
   isOpen, 
   onClose, 
+  onOpenChange,
   onVendorSelect, 
-  service 
+  service,
+  vendorsLoaded = false
 }: VendorSelectionModalProps) => {
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSelectingVendor, setIsSelectingVendor] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
@@ -90,19 +96,40 @@ export const VendorSelectionModal = ({
     return stateMap[stateName];
   }, []);
 
+  // Debounced search to prevent excessive filtering
+  const debouncedUpdateSearch = useCallback(
+    debounce((query: string) => {
+      setDebouncedSearchQuery(query);
+    }, 300),
+    []
+  );
+
+  useEffect(() => {
+    debouncedUpdateSearch(searchQuery);
+  }, [searchQuery, debouncedUpdateSearch]);
+
   // Memoized filtered vendors to avoid re-computation
   const filteredVendors = useMemo(() => {
-    console.log('VendorSelectionModal: Filtering vendors...', { 
-      totalVendors: vendors.length, 
-      searchQuery, 
-      userLocation: location?.state,
-      showAllVendors
-    });
+    // Don't filter until data is ready
+    if (!vendorsLoaded || vendors.length === 0) {
+      return [];
+    }
+
+    const qaEnabled = new URLSearchParams(window.location.search).get('qa') === '1';
+    if (qaEnabled) {
+      console.log('VendorSelectionModal: Filtering vendors...', { 
+        totalVendors: vendors.length, 
+        searchQuery: debouncedSearchQuery, 
+        userLocation: location?.state,
+        showAllVendors
+      });
+    }
 
     let filtered = filterVendorsForService(vendors, service, !showAllVendors);
 
-    // Apply location filter if available - but be more lenient
-    if (location?.state && vendors.length > 0) {
+    // Apply location filter if available - treat undefined location as "show all"
+    const effectiveShowAllVendors = showAllVendors || !location?.state;
+    if (location?.state && vendors.length > 0 && !effectiveShowAllVendors) {
       const locationFiltered = filtered.filter(vendor => {
         // Check service_states array
         if (vendor.service_states?.includes(location.state)) return true;
@@ -117,15 +144,12 @@ export const VendorSelectionModal = ({
       // Only apply location filter if we have matches, otherwise show all
       if (locationFiltered.length > 0) {
         filtered = locationFiltered;
-        console.log('VendorSelectionModal: Applied location filter, found matches:', locationFiltered.length);
-      } else {
-        console.log('VendorSelectionModal: No location matches, showing all vendors');
       }
     }
 
     // Apply search filter
-    if (searchQuery.trim()) {
-      const searchLower = searchQuery.toLowerCase();
+    if (debouncedSearchQuery.trim()) {
+      const searchLower = debouncedSearchQuery.toLowerCase();
       filtered = filtered.filter(vendor =>
         vendor.name.toLowerCase().includes(searchLower) ||
         vendor.description?.toLowerCase().includes(searchLower) ||
@@ -137,7 +161,7 @@ export const VendorSelectionModal = ({
     }
 
     // Sort with Non-SSP first if not showing all vendors
-    if (!showAllVendors) {
+    if (!effectiveShowAllVendors) {
       filtered.sort((a, b) => {
         const aIsNonSSP = isNonSSP(a);
         const bIsNonSSP = isNonSSP(b);
@@ -147,20 +171,22 @@ export const VendorSelectionModal = ({
       });
     }
 
-    console.log('VendorSelectionModal: Filtering complete', { 
-      filteredCount: filtered.length,
-      originalCount: vendors.length 
-    });
+    if (qaEnabled) {
+      console.log('VendorSelectionModal: Filtering complete', { 
+        filteredCount: filtered.length,
+        originalCount: vendors.length 
+      });
+    }
 
     return filtered;
-  }, [vendors, searchQuery, location?.state, getStateAbbreviation, service.id, showAllVendors]);
+  }, [vendorsLoaded, vendors, debouncedSearchQuery, location?.state, getStateAbbreviation, service.id, showAllVendors]);
 
   useEffect(() => {
     if (isOpen) {
-      console.log('VendorSelectionModal: Modal opened, loading vendors...');
       // Reset state immediately when modal opens
       setVendors([]);
       setSearchQuery("");
+      setDebouncedSearchQuery("");
       setSelectedVendor(null);
       setShowConfirmation(false);
       setShowFunnelModal(false);
@@ -170,8 +196,6 @@ export const VendorSelectionModal = ({
       setShowAllVendors(false); // Default to Non-SSP preferred
       
       loadVendors();
-    } else {
-      console.log('VendorSelectionModal: Modal closed, resetting state...');
     }
   }, [isOpen]);
 
@@ -436,9 +460,19 @@ export const VendorSelectionModal = ({
   const handleFinish = () => {
     setShowConfirmation(false);
     setSelectedVendor(null);
+    markVendorModalDismissed();
     onClose();
     const cartEvent = new CustomEvent('openCart');
     window.dispatchEvent(cartEvent);
+  };
+
+  const handleModalClose = () => {
+    markVendorModalDismissed();
+    if (onOpenChange) {
+      onOpenChange(false);
+    } else {
+      onClose();
+    }
   };
 
   const mockBudgetRange = (vendor: Vendor) => {
@@ -450,7 +484,7 @@ export const VendorSelectionModal = ({
 
   return (
     <>
-      <Dialog open={isOpen} onOpenChange={onClose}>
+      <Dialog open={isOpen} onOpenChange={handleModalClose}>
         <DialogContent 
           className="max-w-6xl max-h-[95vh] overflow-hidden z-[100]"
           onClick={(e) => e.stopPropagation()}

@@ -197,12 +197,14 @@ export const PaymentChoiceModal = ({
         </DialogContent>
       </Dialog>
 
-      <VendorSelectionModal
-        isOpen={isVendorModalOpen}
-        onClose={() => setIsVendorModalOpen(false)}
-        onVendorSelect={handleVendorSelected}
-        service={service}
-      />
+      {isVendorModalOpen && (
+        <VendorSelectionModal
+          isOpen={isVendorModalOpen}
+          onClose={() => setIsVendorModalOpen(false)}
+          onVendorSelect={handleVendorSelected}
+          service={service}
+        />
+      )}
     </>
   );
 };

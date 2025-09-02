@@ -940,20 +940,22 @@ export const ServiceCard = ({
         )}
         
         
-        <VendorSelectionModal
-          isOpen={isVendorSelectionModalOpen}
-          onClose={() => setIsVendorSelectionModalOpen(false)}
-          onVendorSelect={(vendor) => {
-            // Handle vendor selection logic here
-            console.log('Selected vendor:', vendor);
-          }}
-          service={{
-            id: service.id,
-            title: service.title,
-            co_pay_price: service.co_pay_price,
-            respa_split_limit: service.respa_split_limit,
-          }}
-        />
+        {isVendorSelectionModalOpen && (
+          <VendorSelectionModal
+            isOpen={isVendorSelectionModalOpen}
+            onClose={() => setIsVendorSelectionModalOpen(false)}
+            onVendorSelect={(vendor) => {
+              // Handle vendor selection logic here
+              console.log('Selected vendor:', vendor);
+            }}
+            service={{
+              id: service.id,
+              title: service.title,
+              co_pay_price: service.co_pay_price,
+              respa_split_limit: service.respa_split_limit,
+            }}
+          />
+        )}
 
         <PaymentChoiceModal
           isOpen={isPricingChoiceModalOpen}

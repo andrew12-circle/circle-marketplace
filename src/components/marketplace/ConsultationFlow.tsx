@@ -189,16 +189,18 @@ export const ConsultationFlow = ({ isOpen, onClose, service }: ConsultationFlowP
         </Dialog>
       )}
 
-      <VendorSelectionModal
-        isOpen={showVendorSelection}
-        onClose={handleVendorModalClose}
-        onVendorSelect={handleVendorModalClose}
-        service={{
-          id: service.id,
-          title: service.title,
-          image_url: service.image_url || ''
-        }}
-      />
+      {showVendorSelection && (
+        <VendorSelectionModal
+          isOpen={showVendorSelection}
+          onClose={handleVendorModalClose}
+          onVendorSelect={handleVendorModalClose}
+          service={{
+            id: service.id,
+            title: service.title,
+            image_url: service.image_url || ''
+          }}
+        />
+      )}
 
       <VendorReferralModal
         isOpen={showVendorReferral}
