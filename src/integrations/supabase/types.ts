@@ -5528,32 +5528,41 @@ export type Database = {
       }
       service_tracking_events: {
         Row: {
+          context: Json
           created_at: string
           event_data: Json | null
+          event_name: string | null
           event_type: string
           id: string
+          page: string | null
           revenue_attributed: number | null
-          service_id: string
+          service_id: string | null
           user_id: string | null
           vendor_id: string | null
         }
         Insert: {
+          context?: Json
           created_at?: string
           event_data?: Json | null
+          event_name?: string | null
           event_type: string
           id?: string
+          page?: string | null
           revenue_attributed?: number | null
-          service_id: string
+          service_id?: string | null
           user_id?: string | null
           vendor_id?: string | null
         }
         Update: {
+          context?: Json
           created_at?: string
           event_data?: Json | null
+          event_name?: string | null
           event_type?: string
           id?: string
+          page?: string | null
           revenue_attributed?: number | null
-          service_id?: string
+          service_id?: string | null
           user_id?: string | null
           vendor_id?: string | null
         }
