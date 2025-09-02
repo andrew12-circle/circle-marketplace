@@ -15,6 +15,7 @@ import { VendorSelectionModal } from "./VendorSelectionModal";
 import { TopDealsCarousel } from "./TopDealsCarousel";
 import { CategoryBlocks } from "./CategoryBlocks";
 import { AutoRecoverySystem } from "./AutoRecoverySystem";
+import MarketplaceHero from "./MarketplaceHero";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -637,107 +638,19 @@ export const MarketplaceGrid = () => {
           )}
 
           {/* Hero Section */}
-          <div className="mb-12">
-            <h1 className="text-4xl sm:text-6xl font-bold text-black mb-6 lcp-content font-playfair">
-              The Marketplace <span className="bg-gradient-to-r from-blue-600 via-blue-500 to-purple-600 bg-clip-text text-transparent">Built for Agents</span>
-            </h1>
-            <p className="text-gray-600 max-w-3xl text-lg mb-8 lcp-content leading-relaxed">
-              Not another directory. A vetted, agent-verified marketplace with negotiated pricing and proven vendors. Share your goals, and we'll route you to what top agents actually use — faster, cheaper, and without awkward sales calls.
-            </p>
-            
-            {/* Feature Highlights */}
-            <div className="flex flex-wrap gap-6 mb-8">
-              <div className="flex items-center gap-2">
-                <div className="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center">
-                  <span className="text-green-600 text-sm">%</span>
-                </div>
-                <span className="text-gray-700 font-medium">Up to 80% off top tools</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center">
-                  <span className="text-blue-600 text-sm">✓</span>
-                </div>
-                <span className="text-gray-700 font-medium">Pre-vetted vendors</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-5 h-5 bg-purple-100 rounded-full flex items-center justify-center">
-                  <span className="text-purple-600 text-sm">$</span>
-                </div>
-                <span className="text-gray-700 font-medium">Vendors cover up to 50% of costs</span>
-              </div>
+          <MarketplaceHero onExploreClick={scrollToServicesGrid} />
+          
+          {/* QA Diagnostics in Hero when in QA mode */}
+          {isQAMode && (
+            <div className="mt-4 p-2 bg-gray-50 border rounded text-xs space-y-1">
+              <div><strong>Services:</strong> {services.length} loaded, {flattenServices.length} after pagination</div>
+              <div><strong>Vendors:</strong> {vendors.length} active</div>
+              <div><strong>Location:</strong> {location?.state || 'Unknown'}</div>
+              <div><strong>Auth:</strong> {user ? `Authenticated (${user.id.slice(0, 8)}...)` : 'Not authenticated'}</div>
+              <div><strong>Errors:</strong> {errorCount} detected</div>
+              <div><strong>Recovery:</strong> {isRecovering ? 'In progress...' : 'Ready'}</div>
             </div>
-
-            {/* Call to Action Buttons */}
-            <div className="flex flex-wrap gap-4 mb-6">
-              <Button 
-                size="lg" 
-                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 font-semibold"
-                onClick={() => {
-                  console.log('Explore Marketplace button clicked');
-                  const servicesSection = document.getElementById('services-grid');
-                  console.log('Services section found:', servicesSection);
-                  
-                  if (servicesSection) {
-                    // Slower, custom scroll animation to show categories and content
-                    const startY = window.pageYOffset;
-                    const targetY = servicesSection.getBoundingClientRect().top + window.pageYOffset - 80;
-                    const distance = targetY - startY;
-                    const duration = 2000; // 2 seconds for slower scroll
-                    let startTime = null;
-                    
-                    console.log('Starting scroll animation', { startY, targetY, distance });
-
-                    function scrollAnimation(currentTime) {
-                      if (!startTime) startTime = currentTime;
-                      const timeElapsed = currentTime - startTime;
-                      const progress = Math.min(timeElapsed / duration, 1);
-                      
-                      // Ease-out animation for smooth deceleration
-                      const easeOut = 1 - Math.pow(1 - progress, 3);
-                      window.scrollTo(0, startY + distance * easeOut);
-                      
-                      if (progress < 1) {
-                        requestAnimationFrame(scrollAnimation);
-                      } else {
-                        console.log('Scroll animation completed');
-                      }
-                    }
-                    
-                    requestAnimationFrame(scrollAnimation);
-                  } else {
-                    console.log('Services section not found, trying fallback scroll');
-                    // Fallback: scroll to category blocks or just down the page
-                    window.scrollTo({ top: window.innerHeight, behavior: 'smooth' });
-                  }
-                }}
-              >
-                Explore Marketplace →
-              </Button>
-              <Button 
-                variant="outline" 
-                size="lg" 
-                className="border-gray-500 text-gray-600 hover:bg-gray-500 hover:text-white px-8 py-3 font-semibold transition-colors"
-                onClick={() => {
-                  // Navigate to pricing screen
-                  window.location.href = '/pricing';
-                }}
-              >
-                Get Vendor Co-Pay →
-              </Button>
-            </div>
-            
-            {/* QA Diagnostics in Hero when in QA mode */}
-            {isQAMode && (
-              <div className="mt-4 p-2 bg-gray-50 border rounded text-xs space-y-1">
-                <div><strong>Services:</strong> {services.length} loaded, {flattenServices.length} after pagination</div>
-                <div><strong>Vendors:</strong> {vendors.length} active</div>
-                <div><strong>Location:</strong> {location?.state || 'Unknown'}</div>
-                <div><strong>Auth:</strong> {user ? `Authenticated (${user.id.slice(0, 8)}...)` : 'Not authenticated'}</div>
-                <div><strong>Errors:</strong> {errorCount} detected</div>
-                <div><strong>Recovery:</strong> {isRecovering ? 'In progress...' : 'Ready'}</div>
-              </div>
-            )}
-          </div>
+          )}
 
 
           {/* AI Concierge Banner - Show for all users */}
