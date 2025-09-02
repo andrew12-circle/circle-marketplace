@@ -105,9 +105,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     try {
-      // Try direct query first with timeout for better reliability
+      // Try direct query first with longer timeout for stability
       const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Profile fetch timeout')), 5000);
+        setTimeout(() => reject(new Error('Profile fetch timeout')), 10000); // Increased to 10 seconds
       });
 
       const profilePromise = supabase
@@ -130,6 +130,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           displayName: profileData.display_name 
         });
         setProfile(profileData);
+        setRetryCount(0); // Reset retry count on success
         return;
       }
 
@@ -142,23 +143,28 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (!rpcError && rpcData) {
         logger.log('Profile fetched via RPC fallback');
         setProfile(rpcData as any);
+        setRetryCount(0); // Reset retry count on success
         return;
       }
 
       // If all else fails, check if we need to create a profile
       logger.warn('All profile fetch methods failed, user may need profile creation');
       setProfile(null);
+      setRetryCount(0); // Reset retry count when giving up
     } catch (error) {
       logger.error('fetchProfile exception:', error);
       
-      // Retry logic for stuck states
-      if (retryCount < 3) {
+      // More conservative retry logic with exponential backoff
+      if (retryCount < 2) { // Reduced from 3 to 2 retries
+        const backoffDelay = Math.min(5000, 1000 * Math.pow(2, retryCount)); // Exponential backoff, max 5s
         setTimeout(() => {
           setRetryCount(prev => prev + 1);
           fetchProfile(userId);
-        }, 1000 * (retryCount + 1));
+        }, backoffDelay);
       } else {
+        logger.warn('Max retries reached, stopping profile fetch attempts');
         setProfile(null);
+        setRetryCount(0); // Reset for future attempts
       }
     }
   };
