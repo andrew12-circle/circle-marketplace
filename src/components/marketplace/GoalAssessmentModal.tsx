@@ -87,9 +87,15 @@ export function GoalAssessmentModal({ open, onOpenChange, onComplete }: GoalAsse
         current_marketing_tools: currentTools.marketing_tools ?? [],
         social_media_usage: currentTools.social_media_usage ?? ''
       });
-      setCurrentStep(1);
     }
   }, [open, profile]);
+
+  // Reset to step 1 only when modal opens
+  useEffect(() => {
+    if (open) {
+      setCurrentStep(1);
+    }
+  }, [open]);
 
   const totalSteps = 6;
   const progress = (currentStep / totalSteps) * 100;
