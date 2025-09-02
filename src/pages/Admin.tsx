@@ -23,25 +23,38 @@ export const Admin = () => {
         return;
       }
 
+      // First check profile data if available
+      if (profile?.is_admin === true) {
+        console.log('Admin status confirmed via profile');
+        setIsAdmin(true);
+        setIsLoading(false);
+        return;
+      }
+
       try {
         console.log('Checking admin status for user:', user.id);
-        const { data, error } = await supabase.rpc('get_user_admin_status');
+        
+        // Use a shorter timeout for the RPC call
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('RPC timeout')), 3000);
+        });
+        
+        const rpcPromise = supabase.rpc('get_user_admin_status');
+        
+        const { data, error } = await Promise.race([rpcPromise, timeoutPromise]) as any;
         
         if (error) {
           console.error('Error checking admin status:', error);
-          toast({
-            title: "Access Check Failed",
-            description: "Unable to verify admin privileges",
-            variant: "destructive"
-          });
-          setIsAdmin(false);
+          // Fallback to profile data
+          setIsAdmin(!!profile?.is_admin);
         } else {
           console.log('Admin status result:', data);
           setIsAdmin(data || false);
         }
       } catch (error) {
         console.error('Admin check error:', error);
-        setIsAdmin(false);
+        // Fallback to profile data
+        setIsAdmin(!!profile?.is_admin);
       } finally {
         setIsLoading(false);
       }
@@ -50,13 +63,15 @@ export const Admin = () => {
     // Add a timeout to prevent infinite loading
     const timeoutId = setTimeout(() => {
       console.log('Admin check timeout - forcing loading to false');
+      // Use profile data as final fallback
+      setIsAdmin(!!profile?.is_admin);
       setIsLoading(false);
-    }, 10000); // 10 second timeout
+    }, 5000); // Reduced to 5 seconds
 
     checkAdminStatus();
 
     return () => clearTimeout(timeoutId);
-  }, [user, toast]);
+  }, [user, profile, toast]);
 
   // Handle cache refresh callback
   const handleCacheRefresh = () => {
