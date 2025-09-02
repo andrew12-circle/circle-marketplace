@@ -722,7 +722,7 @@ export const ServiceCard = ({
                             {formatPrice(extractNumericPrice(service.pro_price), service.price_duration || 'mo')}
                           </span>
                         </div>
-                      ) : (
+                      ) : (service.vendor?.contact_email && (
                         <div className="p-2 bg-amber-50 rounded-lg border border-amber-200">
                           <div className="flex items-center justify-between">
                             <span className="text-xs text-amber-700">
@@ -763,7 +763,7 @@ export const ServiceCard = ({
                             </div>
                           </div>
                         </div>
-                      )}
+                      ))}
                     </div>
                   ) : (
                     service.is_verified && service.pro_price && (

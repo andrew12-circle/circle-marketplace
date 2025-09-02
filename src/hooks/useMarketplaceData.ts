@@ -52,6 +52,7 @@ export interface Service {
     website_url?: string;
     logo_url?: string;
     support_hours?: string;
+    contact_email?: string; // Add contact email for upvote validation
   } | null;
 }
 
@@ -142,7 +143,8 @@ const fetchServices = async (): Promise<Service[]> => {
           is_verified,
           website_url,
           logo_url,
-          support_hours
+          support_hours,
+          contact_email
         )
       `)
       .eq('is_active', true)
@@ -186,6 +188,7 @@ const fetchServices = async (): Promise<Service[]> => {
         website_url: service.vendor.website_url,
         logo_url: service.vendor.logo_url,
         support_hours: service.vendor.support_hours || 'Business Hours',
+        contact_email: service.vendor.contact_email,
       } : null,
     };
   });
