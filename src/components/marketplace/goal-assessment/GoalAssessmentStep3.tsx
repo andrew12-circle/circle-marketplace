@@ -5,6 +5,9 @@ import { TrendingUp } from "lucide-react";
 import { StepProps } from "./types";
 
 export function GoalAssessmentStep3({ formData, onUpdate }: StepProps) {
+  console.log('Step3 formData:', formData);
+  console.log('primary_challenge value:', formData.primary_challenge);
+  
   return (
     <Card>
       <CardHeader>
@@ -19,9 +22,12 @@ export function GoalAssessmentStep3({ formData, onUpdate }: StepProps) {
       <CardContent className="space-y-4">
         <div>
           <Label htmlFor="challenge">Primary Challenge</Label>
-          <Select 
+            <Select 
             value={formData.primary_challenge} 
-            onValueChange={(value) => onUpdate('primary_challenge', value)}
+            onValueChange={(value) => {
+              console.log('Primary challenge selected:', value);
+              onUpdate('primary_challenge', value);
+            }}
           >
             <SelectTrigger className="bg-background">
               <SelectValue placeholder="Select your biggest challenge" />

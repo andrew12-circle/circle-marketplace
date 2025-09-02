@@ -96,10 +96,15 @@ export function GoalAssessmentModal({ open, onOpenChange, onComplete }: GoalAsse
   const progress = (currentStep / TOTAL_STEPS) * 100;
 
   const handleUpdate = (field: keyof GoalFormData, value: string | number | string[]) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    console.log('Updating field:', field, 'with value:', value);
+    setFormData(prev => {
+      const newData = {
+        ...prev,
+        [field]: value
+      };
+      console.log('New formData:', newData);
+      return newData;
+    });
     setError(null); // Clear any validation errors when user makes changes
   };
 
