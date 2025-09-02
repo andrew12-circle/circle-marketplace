@@ -6,7 +6,7 @@ export function useLogPageViewOnce(event_type: string, page: string) {
   useEffect(() => {
     if (fired.current) return;
     fired.current = true;
-    // fire and forget
+    // Fire and forget - now waits for session internally
     void logServiceEvent({ event_type, page });
   }, [event_type, page]);
 }

@@ -14,6 +14,7 @@ import { ErrorBoundaryWithQA } from "@/components/common/ErrorBoundaryWithQA";
 import { removeLegacyAuthCookies, initCookieMonitoring, checkCookieSize, clearAllSupabaseAuthCookies } from "./lib/cookies";
 import { reportClientError } from "./utils/errorReporting";
 import "./utils/pageRecovery"; // Initialize page recovery
+import "./lib/console-filter"; // Initialize console filtering for extension noise
 import "./index.css";
 import "./i18n";
 
