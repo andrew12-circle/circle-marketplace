@@ -200,18 +200,13 @@ export const checkAccountLockout = async (email: string): Promise<{
       return { isLocked: false, attemptsRemaining: 5, timeRemainingSeconds: 0 };
     }
     
-    // Type assertion for the database response
-    const result = data as {
-      is_locked: boolean;
-      attempt_count: number;
-      attempts_remaining: number;
-      time_remaining_seconds: number;
-    };
+    // The updated function returns JSON directly
+    const result = data || {};
     
     return {
-      isLocked: result.is_locked,
-      attemptsRemaining: result.attempts_remaining,
-      timeRemainingSeconds: result.time_remaining_seconds
+      isLocked: result.is_locked || false,
+      attemptsRemaining: result.attempts_remaining || 5,
+      timeRemainingSeconds: result.time_remaining_seconds || 0
     };
   } catch (error) {
     console.error('Lockout check error:', error);

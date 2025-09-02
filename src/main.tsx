@@ -15,6 +15,7 @@ import { removeLegacyAuthCookies, initCookieMonitoring, checkCookieSize, clearAl
 import { reportClientError } from "./utils/errorReporting";
 import "./utils/pageRecovery"; // Initialize page recovery
 import "./lib/console-filter"; // Initialize console filtering for extension noise
+import { bootstrapAuth } from "@/lib/auth-bootstrap";
 import "./index.css";
 import "./i18n";
 
@@ -105,6 +106,9 @@ globalErrorMonitor.initialize();
 // Initialize cookie management for auth optimization
 removeLegacyAuthCookies();
 initCookieMonitoring();
+
+// Initialize auth bootstrap once at app start
+bootstrapAuth();
 
 // Make utilities available globally for debugging and recovery
 if (typeof window !== 'undefined') {

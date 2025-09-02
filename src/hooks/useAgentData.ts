@@ -2,7 +2,7 @@
 // @ts-nocheck
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuthBoot } from '@/lib/auth-bootstrap';
 
 export interface Transaction {
   id: string;
@@ -55,7 +55,7 @@ export interface AgentStats {
 }
 
 export const useAgentData = (timeRange: number = 12) => {
-  const { user } = useAuth();
+  const { status, userId } = useAuthBoot();
   const [agent, setAgent] = useState<Agent | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [stats, setStats] = useState<AgentStats | null>(null);
@@ -63,19 +63,19 @@ export const useAgentData = (timeRange: number = 12) => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (user) {
+    if (status === 'ready' && userId) {
       fetchAgentData();
-    } else {
+    } else if (status === 'no-session') {
       setLoading(false);
     }
-  }, [user, timeRange]);
+  }, [status, userId, timeRange]);
 
   const fetchAgentData = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      if (!user) {
+      if (!userId) {
         setAgent(null);
         setTransactions([]);
         setStats(null);
@@ -87,7 +87,7 @@ export const useAgentData = (timeRange: number = 12) => {
       const { data: agentData, error: agentError } = await supabase
         .from('agents')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', userId)
         .maybeSingle();
 
       if (agentError) {

@@ -3542,6 +3542,7 @@ export type Database = {
           created_at: string
           id: string
           identifier: string
+          last_attempt_at: string | null
           locked_until: string | null
           updated_at: string
         }
@@ -3551,6 +3552,7 @@ export type Database = {
           created_at?: string
           id?: string
           identifier: string
+          last_attempt_at?: string | null
           locked_until?: string | null
           updated_at?: string
         }
@@ -3560,6 +3562,7 @@ export type Database = {
           created_at?: string
           id?: string
           identifier?: string
+          last_attempt_at?: string | null
           locked_until?: string | null
           updated_at?: string
         }

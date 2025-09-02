@@ -1,5 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
-import { waitForSession } from '@/lib/session-gate';
+import { useAuthBoot } from '@/lib/auth-bootstrap';
 import { devError } from '@/lib/dev-logger';
 
 export type ServiceEventInput = {
@@ -49,39 +49,36 @@ async function flushEventQueue() {
   
   flushing = true;
   try {
-    const userId = await waitForSession(3000); // 3 second timeout
+    // Wait until auth is booted and ready
+    while (useAuthBoot.getState().status === 'unknown') {
+      await new Promise(r => setTimeout(r, 100));
+    }
     
-    if (!userId) {
-      // No session established; drop queued events silently for this session
-      devError('No session available for event logging, dropping', eventQueue.length, 'events');
-      eventQueue.length = 0;
-      return;
+    const userId = useAuthBoot.getState().userId;
+    if (!userId) { 
+      // Unauthenticated: drop queued events silently
+      eventQueue.length = 0; 
+      return; 
     }
 
-    // Process queue in batches
-    const batchSize = 10;
+    // Process queue one event at a time
     while (eventQueue.length > 0) {
-      const batch = eventQueue.splice(0, batchSize);
+      const evt = eventQueue.shift()!;
       
-      const payloads = batch.map(evt => ({
-        user_id: evt.user_id || userId,
-        event_type: sanitizeEventType(evt.event_type),
-        page: evt.page ?? null,
-        context: evt.context ?? {}
-      }));
-
       const { error } = await supabase
         .from('service_tracking_events')
-        .insert(payloads)
-        .select();
+        .insert([{
+          user_id: evt.user_id || userId,
+          event_type: sanitizeEventType(evt.event_type),
+          page: evt.page ?? null,
+          context: evt.context ?? {}
+        }]);
 
       if (error) {
-        devError('service_tracking_events batch insert failed:', {
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
+        devError('service_tracking_events insert failed:', {
           code: error.code,
-          batchSize: payloads.length
+          message: error.message,
+          evt
         });
         // Don't retry failed events to avoid infinite loops
       }
