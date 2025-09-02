@@ -140,7 +140,13 @@ export function OnboardingWizard() {
             <img src="/circle-logo-updated.png" alt="Circle" className="h-8 w-8" />
             <h1 className="text-xl font-bold">Setup</h1>
           </div>
-          <Button variant="ghost" size="sm" onClick={handleSkip}>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={handleSkip}
+            className="hover:bg-muted"
+            aria-label="Skip onboarding setup"
+          >
             <X className="h-4 w-4 mr-1" />
             Skip for now
           </Button>

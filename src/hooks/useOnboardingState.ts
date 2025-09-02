@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAuthBoot } from '@/lib/auth-bootstrap';
 
 interface OnboardingState {
   current_step: string;
@@ -12,11 +13,12 @@ interface OnboardingState {
 
 export function useOnboardingState() {
   const { user } = useAuth();
+  const { status: authStatus } = useAuthBoot();
   const [onboardingState, setOnboardingState] = useState<OnboardingState | null>(null);
   const [loading, setLoading] = useState(false);
 
   const fetchOnboardingState = async () => {
-    if (!user?.id) return;
+    if (!user?.id || authStatus !== 'ready') return;
     
     try {
       const { data, error } = await supabase
@@ -107,12 +109,14 @@ export function useOnboardingState() {
   };
 
   useEffect(() => {
-    if (user?.id) {
+    if (user?.id && authStatus === 'ready') {
       fetchOnboardingState();
     }
-  }, [user?.id]);
+  }, [user?.id, authStatus]);
 
-  const needsOnboarding = user && !onboardingState?.is_completed && !onboardingState?.dismissed;
+  // Fix: User needs onboarding if authenticated but no completed onboarding state exists
+  const needsOnboarding = user && authStatus === 'ready' && 
+    (!onboardingState || (!onboardingState.is_completed && !onboardingState.dismissed));
 
   return {
     onboardingState,

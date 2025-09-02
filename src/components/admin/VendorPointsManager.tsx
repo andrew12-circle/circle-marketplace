@@ -67,7 +67,7 @@ export function VendorPointsManager() {
       const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
         .select('user_id, display_name')
-        .in('user_id' as any, agentIds);
+        .in('user_id', agentIds);
 
       if (profilesError) throw profilesError;
 
@@ -193,8 +193,8 @@ export function VendorPointsManager() {
       
       const { error } = await supabase
         .from('point_allocations')
-        .update({ status: newStatus } as any)
-        .eq('id' as any, id as any);
+        .update({ status: newStatus })
+        .eq('id', id);
 
       if (error) throw error;
 
