@@ -1,0 +1,308 @@
+# FILE: .github/workflows/security.yml
+
+name: Security Checks
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Run security checks daily at 2 AM UTC
+    - cron: '0 2 * * *'
+
+jobs:
+  lint-and-type-check:
+    name: Lint and Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run ESLint
+        run: npm run lint
+      
+      - name: Run TypeScript check
+        run: npx tsc --noEmit
+
+  dependency-audit:
+    name: Dependency Security Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run security audit
+        run: npm audit --audit-level=high
+      
+      - name: Check for known vulnerabilities
+        run: |
+          npx audit-ci --config audit-ci.json || true
+
+  semgrep-scan:
+    name: Semgrep Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Run Semgrep
+        uses: semgrep/semgrep-action@v1
+        with:
+          config: >-
+            p/security-audit
+            p/javascript
+            p/typescript
+            p/react
+        env:
+          SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
+
+  secret-scan:
+    name: Secret Detection
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Run TruffleHog
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: main
+          head: HEAD
+
+  rls-tests:
+    name: Database RLS Tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Setup test database
+        run: |
+          # Add your database setup commands here
+          # This would typically involve running migrations
+          echo "Setting up test database..."
+      
+      - name: Run RLS tests
+        run: |
+          # Add your RLS test commands here
+          echo "Running RLS tests..."
+          # node scripts/test-rls.js
+
+  security-headers:
+    name: Security Headers Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build application
+        run: npm run build
+      
+      - name: Start test server
+        run: |
+          npm run preview &
+          sleep 10
+      
+      - name: Test security headers
+        run: |
+          # Test for required security headers
+          curl -I http://localhost:4173 | grep -i "content-security-policy" || exit 1
+          curl -I http://localhost:4173 | grep -i "x-content-type-options" || exit 1
+          curl -I http://localhost:4173 | grep -i "strict-transport-security" || exit 1
+          curl -I http://localhost:4173 | grep -i "x-frame-options" || exit 1
+          echo "All required security headers present"
+
+  penetration-tests:
+    name: Basic Penetration Tests
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || contains(github.event.head_commit.message, '[pen-test]')
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build and start application
+        run: |
+          npm run build
+          npm run preview &
+          sleep 15
+      
+      - name: Run security tests
+        run: |
+          chmod +x scripts/test-security.js
+          TEST_BASE_URL=http://localhost:4173 node scripts/test-security.js
+
+  ossf-scorecard:
+    name: OSSF Scorecard
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    permissions:
+      security-events: write
+      id-token: write
+      contents: read
+      actions: read
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      
+      - name: Run analysis
+        uses: ossf/scorecard-action@v2.3.1
+        with:
+          results_file: results.sarif
+          results_format: sarif
+          publish_results: true
+      
+      - name: Upload SARIF results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: results.sarif
+
+  check-env-leaks:
+    name: Check for Environment Variable Leaks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Check for hardcoded secrets
+        run: |
+          # Check for potential secrets in code
+          if grep -r "sk_live_" src/ || grep -r "pk_live_" src/ || grep -r "rk_live_" src/; then
+            echo "Live Stripe keys found in source code!"
+            exit 1
+          fi
+          
+          if grep -r "AKIA" src/ || grep -r "aws_secret_access_key" src/; then
+            echo "AWS credentials found in source code!"
+            exit 1
+          fi
+          
+          if grep -r "password.*=" src/ --include="*.ts" --include="*.tsx" | grep -v "placeholder\|example\|demo"; then
+            echo "Potential hardcoded passwords found!"
+            exit 1
+          fi
+          
+          echo "No obvious secrets found in source code"
+
+  csp-validation:
+    name: Content Security Policy Validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Validate CSP
+        run: |
+          # Build the app to generate CSP
+          npm run build
+          
+          # Start server and check CSP header
+          npm run preview &
+          sleep 10
+          
+          # Extract and validate CSP
+          CSP=$(curl -s -I http://localhost:4173 | grep -i "content-security-policy" | cut -d' ' -f2-)
+          
+          if [[ $CSP == *"'unsafe-eval'"* ]]; then
+            echo "CSP contains unsafe-eval - security risk!"
+            exit 1
+          fi
+          
+          if [[ $CSP == *"'unsafe-inline'"* ]] && [[ $CSP != *"'nonce-"* ]]; then
+            echo "CSP contains unsafe-inline without nonce - security risk!"
+            exit 1
+          fi
+          
+          echo "CSP validation passed"
+
+  build-security:
+    name: Build Security Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build application
+        run: npm run build
+      
+      - name: Check build output for secrets
+        run: |
+          # Check built files for accidentally included secrets
+          if find dist/ -name "*.js" -o -name "*.css" | xargs grep -l "sk_live_\|pk_live_\|AKIA"; then
+            echo "Secrets found in build output!"
+            exit 1
+          fi
+          
+          echo "Build output clean of secrets"
