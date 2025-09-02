@@ -20,8 +20,14 @@ export function devLog(...args: any[]) {
     return;
   }
   
-  // eslint-disable-next-line no-console
-  console.log(...args);
+  // Use original console if available, otherwise fallback
+  const originalConsole = (window as any).__originalConsole;
+  if (originalConsole) {
+    originalConsole.log(...args);
+  } else {
+    // eslint-disable-next-line no-console
+    console.log(...args);
+  }
 }
 
 export function devWarn(...args: any[]) {
@@ -32,8 +38,14 @@ export function devWarn(...args: any[]) {
     return;
   }
   
-  // eslint-disable-next-line no-console
-  console.warn(...args);
+  // Use original console if available, otherwise fallback
+  const originalConsole = (window as any).__originalConsole;
+  if (originalConsole) {
+    originalConsole.warn(...args);
+  } else {
+    // eslint-disable-next-line no-console
+    console.warn(...args);
+  }
 }
 
 export function devError(...args: any[]) {
@@ -44,6 +56,12 @@ export function devError(...args: any[]) {
     return;
   }
   
-  // eslint-disable-next-line no-console
-  console.error(...args);
+  // Use original console if available, otherwise fallback
+  const originalConsole = (window as any).__originalConsole;
+  if (originalConsole) {
+    originalConsole.error(...args);
+  } else {
+    // eslint-disable-next-line no-console
+    console.error(...args);
+  }
 }

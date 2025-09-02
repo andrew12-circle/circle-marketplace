@@ -1,22 +1,60 @@
-import { devError, devWarn } from '@/lib/dev-logger';
+// Store original console methods before any imports
+const originalConsole = {
+  error: console.error,
+  warn: console.warn,
+  log: console.log
+};
 
 // Override console methods to filter extension noise
 if (typeof window !== 'undefined') {
-  const originalError = console.error;
-  const originalWarn = console.warn;
-  const originalLog = console.log;
+  // Make original methods available globally for dev-logger
+  (window as any).__originalConsole = originalConsole;
 
   console.error = (...args: any[]) => {
-    devError(...args);
+    const message = String(args[0] ?? '');
+    
+    // Filter out extension noise
+    const isExtensionError = [
+      'chrome-extension://',
+      'moz-extension://', 
+      'safari-extension://',
+      'ms-browser-extension://',
+      'Invalid frameId',
+      'Extension context invalidated',
+      'background-redux-new.js',
+      'LastPass',
+      'duplicate id'
+    ].some(pattern => message.includes(pattern));
+
+    if (!isExtensionError) {
+      originalConsole.error(...args);
+    }
   };
 
   console.warn = (...args: any[]) => {
-    devWarn(...args);
+    const message = String(args[0] ?? '');
+    
+    // Filter out extension noise
+    const isExtensionError = [
+      'chrome-extension://',
+      'moz-extension://',
+      'safari-extension://',
+      'ms-browser-extension://',
+      'Invalid frameId',
+      'Extension context invalidated',
+      'background-redux-new.js',
+      'LastPass',
+      'duplicate id'
+    ].some(pattern => message.includes(pattern));
+
+    if (!isExtensionError) {
+      originalConsole.warn(...args);
+    }
   };
 
   console.log = (...args: any[]) => {
     // Don't filter regular logs, but could be extended
-    originalLog(...args);
+    originalConsole.log(...args);
   };
 
   // Handle unhandled promise rejections
@@ -38,7 +76,7 @@ if (typeof window !== 'undefined') {
     ].some(pattern => message.includes(pattern));
 
     if (!isExtensionError) {
-      devError('Unhandled promise rejection:', reason);
+      originalConsole.error('Unhandled promise rejection:', reason);
     }
 
     // Prevent the default browser console.error behavior for extension errors
@@ -68,7 +106,7 @@ if (typeof window !== 'undefined') {
     );
 
     if (!isExtensionError) {
-      devError('Global error:', {
+      originalConsole.error('Global error:', {
         message: event.message,
         filename: event.filename,
         line: event.lineno,
