@@ -153,7 +153,7 @@ export const VendorSelectionModal = ({
     });
 
     return filtered;
-  }, [vendors, searchQuery, location?.state, getStateAbbreviation, service, showAllVendors]);
+  }, [vendors, searchQuery, location?.state, getStateAbbreviation, service.id, showAllVendors]);
 
   useEffect(() => {
     if (isOpen) {
