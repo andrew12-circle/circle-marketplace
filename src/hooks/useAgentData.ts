@@ -83,14 +83,15 @@ export const useAgentData = (timeRange: number = 12) => {
         return;
       }
 
-      // 1. Get agent profile
+      // 1. Get agent profile - use maybeSingle to avoid 406 errors
       const { data: agentData, error: agentError } = await supabase
         .from('agents')
         .select('*')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
-      if (agentError && agentError.code !== 'PGRST116') {
+      if (agentError) {
+        console.error('Error fetching agent data:', agentError);
         throw agentError;
       }
 
@@ -140,14 +141,18 @@ export const useAgentData = (timeRange: number = 12) => {
       let needsQuiz = false;
 
       if (!hasDataFeed) {
-        // Check for existing quiz response
-        const { data: quizData } = await supabase
+        // Check for existing quiz response - use maybeSingle to avoid 406 errors
+        const { data: quizData, error: quizError } = await supabase
           .from('agent_quiz_responses')
           .select('*')
           .eq('agent_id', agentData.id)
           .order('created_at', { ascending: false })
           .limit(1)
-          .single();
+          .maybeSingle();
+
+        if (quizError) {
+          console.error('Error fetching quiz data:', quizError);
+        }
 
         if (quizData) {
           // Generate transactions from quiz data for stats calculation
