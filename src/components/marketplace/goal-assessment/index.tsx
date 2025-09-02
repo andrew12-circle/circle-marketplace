@@ -81,35 +81,15 @@ export function GoalAssessmentModal({ open, onOpenChange, onComplete }: GoalAsse
   const progress = (currentStep / TOTAL_STEPS) * 100;
 
   const handleUpdate = (field: keyof GoalFormData, value: string | number | string[]) => {
-    console.log('Goal Assessment - Field updated:', field, 'Value:', value);
-    setFormData(prev => {
-      const newData = {
-        ...prev,
-        [field]: value
-      };
-      console.log('Goal Assessment - Updated form data:', newData);
-      return newData;
-    });
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
   const handleNext = () => {
-    const stepValid = isStepValid(currentStep);
-    console.log('Goal Assessment - handleNext called', {
-      currentStep, 
-      stepValid, 
-      totalSteps: TOTAL_STEPS,
-      willProgress: currentStep < TOTAL_STEPS && stepValid
-    });
-    
-    if (!stepValid) {
-      console.log('Goal Assessment - Cannot proceed, step validation failed');
-      return;
-    }
-    
-    if (currentStep < TOTAL_STEPS) {
-      const nextStep = currentStep + 1;
-      console.log('Goal Assessment - Progressing to step', nextStep);
-      setCurrentStep(nextStep);
+    if (currentStep < TOTAL_STEPS && isStepValid(currentStep)) {
+      setCurrentStep(currentStep + 1);
     }
   };
 
@@ -120,31 +100,22 @@ export function GoalAssessmentModal({ open, onOpenChange, onComplete }: GoalAsse
   };
 
   const isStepValid = (step: number): boolean => {
-    let isValid = false;
     switch (step) {
       case 1:
-        isValid = formData.annual_goal_transactions > 0 && formData.annual_goal_volume > 0;
-        break;
+        return formData.annual_goal_transactions > 0 && formData.annual_goal_volume > 0;
       case 2:
-        isValid = formData.average_commission_per_deal > 0;
-        break;
+        return formData.average_commission_per_deal > 0;
       case 3:
-        isValid = !!formData.primary_challenge && formData.primary_challenge.trim() !== '';
-        break;
+        return !!formData.primary_challenge && formData.primary_challenge.trim() !== '';
       case 4:
-        isValid = formData.marketing_time_per_week >= 0;
-        break;
+        return formData.marketing_time_per_week >= 0;
       case 5:
-        isValid = !!formData.personality_type && !!formData.work_style;
-        break;
+        return !!formData.personality_type && !!formData.work_style;
       case 6:
-        isValid = !!formData.current_crm;
-        break;
+        return !!formData.current_crm;
       default:
-        isValid = true;
+        return true;
     }
-    console.log(`Goal Assessment - Step ${step} validation:`, isValid, 'formData:', formData);
-    return isValid;
   };
 
   const handleComplete = async () => {
@@ -205,7 +176,6 @@ export function GoalAssessmentModal({ open, onOpenChange, onComplete }: GoalAsse
   };
 
   const renderCurrentStep = () => {
-    console.log('Goal Assessment - Rendering step', currentStep, 'with formData:', formData);
     switch (currentStep) {
       case 1:
         return <GoalAssessmentStep1 formData={formData} onUpdate={handleUpdate} />;
@@ -275,7 +245,7 @@ export function GoalAssessmentModal({ open, onOpenChange, onComplete }: GoalAsse
                 onClick={handleNext}
                 disabled={!isStepValid(currentStep)}
               >
-                {isStepValid(currentStep) ? 'Next' : `Next (Step ${currentStep} incomplete)`}
+                Next
               </Button>
             )}
           </div>

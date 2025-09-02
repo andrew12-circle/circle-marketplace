@@ -53,7 +53,8 @@ export const AIConciergeBanner = () => {
 
   // Check if user needs goal assessment or show recommendations dashboard
   useEffect(() => {
-    if (user && profile) {
+    // Only trigger for authenticated users with valid profiles
+    if (user && profile && user.id && (profile as any).user_id) {
       const profileWithGoals = profile as any;
 
       // Check if user needs goal assessment
@@ -64,6 +65,10 @@ export const AIConciergeBanner = () => {
         setShowRecommendationsDashboard(true);
         generateRecommendations();
       }
+    } else {
+      // For unauthenticated users, ensure modals are closed
+      setIsGoalAssessmentOpen(false);
+      setShowRecommendationsDashboard(false);
     }
   }, [user, profile]);
   const generateRecommendations = async () => {
