@@ -114,9 +114,8 @@ export function useOnboardingState() {
     }
   }, [user?.id, authStatus]);
 
-  // Fix: User needs onboarding if authenticated but no completed onboarding state exists
-  const needsOnboarding = user && authStatus === 'ready' && 
-    (!onboardingState || (!onboardingState.is_completed && !onboardingState.dismissed));
+  // TEMPORARILY DISABLED: Always skip onboarding
+  const needsOnboarding = false;
 
   return {
     onboardingState,
