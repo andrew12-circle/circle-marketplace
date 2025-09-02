@@ -525,27 +525,27 @@ export default function AdminDashboard() {
           {/* Modern Tab Navigation */}
           <Tabs defaultValue="users" className="w-full space-y-8">
           <div className="bg-card rounded-xl border border-border shadow-sm p-4 space-y-4">
-            <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 xl:grid-cols-12 gap-1 bg-muted/50 p-1 rounded-lg h-auto">
+            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 xl:grid-cols-16 gap-1 bg-muted/50 p-1 rounded-lg h-auto min-h-[60px]">
               {/* User Management Group */}
               <TabsTrigger 
                 value="users" 
                 className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
               >
-                <Users className="h-4 w-4" />
+                <Users className="h-5 w-5" />
                 <span className="hidden sm:inline">Users</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="creators" 
                 className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
               >
-                <Users2 className="h-4 w-4" />
+                <Users2 className="h-5 w-5" />
                 <span className="hidden sm:inline">Creators</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="agent-invites" 
                 className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
               >
-                <BookOpen className="h-4 w-4" />
+                <BookOpen className="h-5 w-5" />
                 <span className="hidden sm:inline">Invites</span>
               </TabsTrigger>
 
@@ -554,35 +554,35 @@ export default function AdminDashboard() {
                 value="content" 
                 className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
               >
-                <Star className="h-4 w-4" />
+                <Star className="h-5 w-5" />
                 <span className="hidden sm:inline">Content</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="services" 
                 className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
               >
-                <Upload className="h-4 w-4" />
+                <Upload className="h-5 w-5" />
                 <span className="hidden sm:inline">Services</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="reviews" 
                 className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
               >
-                <MessageSquare className="h-4 w-4" />
+                <MessageSquare className="h-5 w-5" />
                 <span className="hidden sm:inline">Reviews</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="vendors" 
                 className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
               >
-                <Building className="h-4 w-4" />
+                <Building className="h-5 w-5" />
                 <span className="hidden sm:inline">Vendors</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="youtube" 
                 className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
               >
-                <Youtube className="h-4 w-4" />
+                <Youtube className="h-5 w-5" />
                 <span className="hidden sm:inline">YouTube</span>
               </TabsTrigger>
 
@@ -591,28 +591,28 @@ export default function AdminDashboard() {
                 value="analytics" 
                 className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
               >
-                <BarChart3 className="h-4 w-4" />
+                <BarChart3 className="h-5 w-5" />
                 <span className="hidden sm:inline">Analytics</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="sponsored" 
                 className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
               >
-                <Star className="h-4 w-4" />
+                <Star className="h-5 w-5" />
                 <span className="hidden sm:inline">Sponsored</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="ranking" 
                 className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
               >
-                <Activity className="h-4 w-4" />
+                <Activity className="h-5 w-5" />
                 <span className="hidden sm:inline">Ranking</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="points" 
                 className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
               >
-                <Coins className="h-4 w-4" />
+                <Coins className="h-5 w-5" />
                 <span className="hidden sm:inline">Points</span>
               </TabsTrigger>
 
@@ -621,35 +621,35 @@ export default function AdminDashboard() {
                 value="security" 
                 className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
               >
-                <Lock className="h-4 w-4" />
+                <Lock className="h-5 w-5" />
                 <span className="hidden sm:inline">Security</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="health" 
                 className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
               >
-                <Activity className="h-4 w-4" />
+                <Activity className="h-5 w-5" />
                 <span className="hidden sm:inline">Health</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="respa" 
                 className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
               >
-                <ShieldIcon className="h-4 w-4" />
+                <ShieldIcon className="h-5 w-5" />
                 <span className="hidden sm:inline">RESPA</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="spiritual" 
                 className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
               >
-                <Heart className="h-4 w-4" />
+                <Heart className="h-5 w-5" />
                 <span className="hidden sm:inline">Spiritual</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="commissions" 
                 className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
               >
-                <DollarSign className="h-4 w-4" />
+                <DollarSign className="h-5 w-5" />
                 <span className="hidden sm:inline">Commissions</span>
               </TabsTrigger>
             </TabsList>
