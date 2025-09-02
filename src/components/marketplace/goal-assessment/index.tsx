@@ -297,17 +297,6 @@ export function GoalAssessmentModal({ open, onOpenChange, onComplete }: GoalAsse
           <DialogDescription>
             Answer a few quick questions so we can tailor your marketplace recommendations to your specific business goals and preferences.
           </DialogDescription>
-          <DialogClose asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute right-4 top-4"
-              onClick={handleCancel}
-              aria-label="Close"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </DialogClose>
           <div className="space-y-2">
             <div className="flex justify-between text-sm text-muted-foreground">
               <span>Step {currentStep} of {TOTAL_STEPS}</span>
