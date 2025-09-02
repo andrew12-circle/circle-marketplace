@@ -219,6 +219,7 @@ export function GoalAssessmentModal({ open, onOpenChange, onComplete }: GoalAsse
           personality_data: personalityData,
           current_tools: currentTools,
           goal_assessment_completed: true,
+          onboarding_completed: true,
           last_assessment_date: new Date().toISOString()
         })
         .eq('user_id', user.id);
