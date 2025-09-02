@@ -5,6 +5,9 @@ import { Target } from "lucide-react";
 import { StepProps } from "./types";
 
 export function GoalAssessmentStep5({ formData, onUpdate }: StepProps) {
+  console.log('Step5 formData:', formData);
+  console.log('personality_type value:', formData.personality_type);
+
   return (
     <Card>
       <CardHeader>
@@ -21,7 +24,10 @@ export function GoalAssessmentStep5({ formData, onUpdate }: StepProps) {
           <Label htmlFor="personality">Personality Type</Label>
           <Select 
             value={formData.personality_type} 
-            onValueChange={(value) => onUpdate('personality_type', value)}
+            onValueChange={(value) => {
+              console.log('Personality type selected:', value);
+              onUpdate('personality_type', value);
+            }}
           >
             <SelectTrigger className="bg-background">
               <SelectValue placeholder="Select your personality type" />
