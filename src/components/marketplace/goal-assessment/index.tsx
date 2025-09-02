@@ -44,6 +44,7 @@ export function GoalAssessmentModal({ open, onOpenChange, onComplete }: GoalAsse
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState<GoalFormData>(DEFAULT_FORM_DATA);
+  const [modalDismissed, setModalDismissed] = useState(false);
 
   // Load profile data when modal opens
   useEffect(() => {
@@ -80,13 +81,19 @@ export function GoalAssessmentModal({ open, onOpenChange, onComplete }: GoalAsse
   const progress = (currentStep / TOTAL_STEPS) * 100;
 
   const handleUpdate = (field: keyof GoalFormData, value: string | number | string[]) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    console.log('Goal Assessment - Field updated:', field, 'Value:', value);
+    setFormData(prev => {
+      const newData = {
+        ...prev,
+        [field]: value
+      };
+      console.log('Goal Assessment - Updated form data:', newData);
+      return newData;
+    });
   };
 
   const handleNext = () => {
+    console.log('Goal Assessment - handleNext called, currentStep:', currentStep, 'isValid:', isStepValid(currentStep), 'formData:', formData);
     if (currentStep < TOTAL_STEPS) {
       setCurrentStep(currentStep + 1);
     }
@@ -99,22 +106,31 @@ export function GoalAssessmentModal({ open, onOpenChange, onComplete }: GoalAsse
   };
 
   const isStepValid = (step: number): boolean => {
+    let isValid = false;
     switch (step) {
       case 1:
-        return formData.annual_goal_transactions > 0 && formData.annual_goal_volume > 0;
+        isValid = formData.annual_goal_transactions > 0 && formData.annual_goal_volume > 0;
+        break;
       case 2:
-        return formData.average_commission_per_deal > 0;
+        isValid = formData.average_commission_per_deal > 0;
+        break;
       case 3:
-        return !!formData.primary_challenge;
+        isValid = !!formData.primary_challenge && formData.primary_challenge.trim() !== '';
+        break;
       case 4:
-        return formData.marketing_time_per_week >= 0;
+        isValid = formData.marketing_time_per_week >= 0;
+        break;
       case 5:
-        return !!formData.personality_type && !!formData.work_style;
+        isValid = !!formData.personality_type && !!formData.work_style;
+        break;
       case 6:
-        return !!formData.current_crm;
+        isValid = !!formData.current_crm;
+        break;
       default:
-        return true;
+        isValid = true;
     }
+    console.log(`Goal Assessment - Step ${step} validation:`, isValid, 'formData:', formData);
+    return isValid;
   };
 
   const handleComplete = async () => {
@@ -160,6 +176,7 @@ export function GoalAssessmentModal({ open, onOpenChange, onComplete }: GoalAsse
       });
 
       onComplete?.();
+      setModalDismissed(true);
       onOpenChange(false);
     } catch (error) {
       console.error('Error saving goals:', error);
@@ -192,8 +209,21 @@ export function GoalAssessmentModal({ open, onOpenChange, onComplete }: GoalAsse
     }
   };
 
+  // Allow users to close modal even if not complete
+  const handleModalClose = (open: boolean) => {
+    if (!open) {
+      setModalDismissed(true);
+    }
+    onOpenChange(open);
+  };
+
+  // Don't show modal if user has dismissed it
+  if (modalDismissed && !open) {
+    return null;
+  }
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleModalClose}>
       <DialogContent className="max-w-md" aria-describedby="goal-assessment-description">
         <DialogHeader>
           <DialogTitle>Let's Set Your Goals</DialogTitle>
