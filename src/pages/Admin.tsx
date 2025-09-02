@@ -1,4 +1,4 @@
-import { AdminDashboard } from "@/components/admin/AdminDashboard";
+import AdminDashboard from "@/pages/AdminDashboard";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -108,9 +108,5 @@ export const Admin = () => {
     );
   }
 
-  return (
-    <div className="container mx-auto py-6">
-      <AdminDashboard onCacheRefresh={handleCacheRefresh} />
-    </div>
-  );
+  return <AdminDashboard />;
 };
