@@ -49,7 +49,7 @@ import VendorPointAllocationPanel from '@/components/admin/VendorPointAllocation
 import AntiScrapingSystem from '@/components/security/AntiScrapingSystem';
 import { ServiceImageUploader } from '@/components/admin/ServiceImageUploader';
 // Lazy-loaded via LazyAdminPanel
-import BulkFAQGenerator from '@/components/admin/BulkFAQGenerator';
+
 import BulkServiceResearch from '@/components/admin/BulkServiceResearch';
 import { VendorQuestionsManager } from '@/components/admin/VendorQuestionsManager';
 import { AdminHealthDashboard } from '@/components/admin/AdminHealthDashboard';
@@ -962,7 +962,6 @@ export default function AdminDashboard() {
         <TabsContent value="services" className="space-y-6">
           <ServiceManagementPanelWrapper />
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <BulkFAQGenerator />
             <BulkServiceResearch />
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
