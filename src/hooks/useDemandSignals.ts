@@ -23,7 +23,9 @@ export const useDemandSignals = (serviceId: string) => {
     try {
       setData(prev => ({ ...prev, isLoading: true }));
 
-      // Get total likes count
+      // Get total likes count with a slight delay to prevent request flooding
+      await new Promise(resolve => setTimeout(resolve, Math.random() * 100));
+      
       const { data: counterData, error: counterError } = await supabase
         .from('service_interest_counters')
         .select('total_likes')
@@ -169,7 +171,12 @@ export const useDemandSignals = (serviceId: string) => {
 
   useEffect(() => {
     if (serviceId) {
-      fetchDemandData();
+      // Debounce the fetch to reduce simultaneous requests
+      const timer = setTimeout(() => {
+        fetchDemandData();
+      }, Math.random() * 200); // Stagger requests randomly
+
+      return () => clearTimeout(timer);
     }
   }, [serviceId, user?.id]);
 
