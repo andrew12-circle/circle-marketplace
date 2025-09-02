@@ -8010,7 +8010,7 @@ export type Database = {
         Returns: boolean
       }
       check_and_update_lockout: {
-        Args: { p_attempt_type: string; p_identifier: string }
+        Args: { p_attempt_type?: string; p_identifier: string }
         Returns: Json
       }
       check_expiring_payment_schedules: {
