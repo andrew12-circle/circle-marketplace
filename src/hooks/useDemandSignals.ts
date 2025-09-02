@@ -125,20 +125,23 @@ export const useDemandSignals = (serviceId: string) => {
         return false;
       }
 
-      // Track the interest event (fire-and-forget)
-      supabase
-        .from('service_tracking_events')
-        .insert({
-          service_id: serviceId,
-          event_type: 'discount_interest',
-          user_id: user.id,
-          event_data: { source: 'marketplace' },
-        })
-        .then(({ error: trackingError }) => {
-          if (trackingError) {
-            console.warn('Failed to track discount interest event:', trackingError);
-          }
-        });
+      // Track the interest event (fire-and-forget) - only if user is authenticated
+      if (user?.id) {
+        supabase
+          .from('service_tracking_events')
+          .insert({
+            service_id: serviceId,
+            event_type: 'discount_interest',
+            user_id: user.id,
+            event_data: { source: 'marketplace' },
+            revenue_attributed: 0,
+          })
+          .then(({ error: trackingError }) => {
+            if (trackingError) {
+              console.warn('Failed to track discount interest event:', trackingError);
+            }
+          });
+      }
 
       toast({
         title: "Interest registered!",

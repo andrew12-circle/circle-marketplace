@@ -454,11 +454,12 @@ export const VendorSelectionModal = ({
         <DialogContent 
           className="max-w-6xl max-h-[95vh] overflow-hidden z-[100]"
           onClick={(e) => e.stopPropagation()}
+          aria-describedby="vendor-selection-description"
         >
         <DialogHeader className="flex flex-row items-start justify-between space-y-0 pb-4">
           <div className="flex-1">
             <DialogTitle>Select Co-Pay Partner</DialogTitle>
-            <p className="text-sm text-muted-foreground">
+            <p id="vendor-selection-description" className="text-sm text-muted-foreground">
               Choose a vendor to help with "{service.title}" - they'll cover {service.respa_split_limit}% of the cost
             </p>
             {location?.state && (
