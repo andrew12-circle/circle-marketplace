@@ -64,11 +64,23 @@ serve(async (req) => {
 
     console.log('🔄 Fetching combined marketplace data from edge function...');
 
-    // Fetch services and vendors in parallel for optimal performance with proper filtering
-    const [servicesResponse, vendorsResponse] = await Promise.all([
+    // Fetch services and vendors in parallel with enhanced data relationships
+    const [servicesResponse, vendorsResponse, trackingMetricsResponse, funnelContentResponse] = await Promise.all([
       supabaseClient
         .from('services')
-        .select('*')
+        .select(`
+          *,
+          vendors!inner (
+            id, name, rating, review_count, is_verified, website_url, logo_url, 
+            support_hours, vendor_type, service_states, mls_areas
+          ),
+          service_tracking_events (
+            event_type, created_at, revenue_attributed
+          ),
+          service_interest_counters (
+            total_likes, updated_at
+          )
+        `)
         .eq('is_active', true)
         .order('sort_order', { ascending: true })
         .order('created_at', { ascending: false })
@@ -76,12 +88,27 @@ serve(async (req) => {
       
       supabaseClient
         .from('vendors')
-        .select('*')
+        .select(`
+          *,
+          services!inner (
+            id, title, is_active, category
+          )
+        `)
         .eq('is_active', true)
         .in('approval_status', ['approved', 'auto_approved', 'pending'])
         .order('sort_order', { ascending: true })
         .order('rating', { ascending: false })
-        .limit(50)
+        .limit(50),
+
+      // Get aggregated tracking metrics for the last 30 days
+      supabaseClient
+        .rpc('get_service_metrics_summary', { days_back: 30 }),
+
+      // Get funnel content that may have been updated by admins
+      supabaseClient
+        .from('service_funnel_content')
+        .select('service_id, updated_at, content_data')
+        .gte('updated_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
     ]);
 
     // Check for errors
@@ -95,19 +122,58 @@ serve(async (req) => {
       throw vendorsResponse.error;
     }
 
-    // Format services data
-    const formattedServices = (servicesResponse.data || []).map((service: Service) => ({
-      ...service,
-      discount_percentage: service.discount_percentage ? String(service.discount_percentage) : undefined,
-      vendor: {
-        name: 'Service Provider',
-        rating: 4.5,
-        review_count: 0,
-        is_verified: true
-      }
-    }));
+    // Log warnings for missing data but don't fail
+    if (trackingMetricsResponse.error) {
+      console.warn('Tracking metrics unavailable:', trackingMetricsResponse.error);
+    }
 
-    // Format vendors data
+    if (funnelContentResponse.error) {
+      console.warn('Funnel content updates unavailable:', funnelContentResponse.error);
+    }
+
+    // Format services with enhanced vendor data and tracking metrics
+    const trackingMetrics = trackingMetricsResponse.data || [];
+    const funnelUpdates = (funnelContentResponse.data || []).reduce((acc: any, item: any) => {
+      acc[item.service_id] = item;
+      return acc;
+    }, {});
+
+    const formattedServices = (servicesResponse.data || []).map((service: Service) => {
+      const metrics = trackingMetrics.find((m: any) => m.service_id === service.id);
+      const funnelUpdate = funnelUpdates[service.id];
+      
+      return {
+        ...service,
+        discount_percentage: service.discount_percentage ? String(service.discount_percentage) : undefined,
+        vendor: service.vendors ? {
+          ...service.vendors,
+          name: service.vendors.name || 'Service Provider',
+          rating: service.vendors.rating || 4.5,
+          review_count: service.vendors.review_count || 0,
+          is_verified: service.vendors.is_verified || true
+        } : {
+          name: 'Service Provider',
+          rating: 4.5,
+          review_count: 0,
+          is_verified: true
+        },
+        // Enhanced tracking data
+        tracking_metrics: metrics ? {
+          total_views: metrics.total_views || 0,
+          total_clicks: metrics.total_clicks || 0,
+          total_purchases: metrics.total_purchases || 0,
+          conversion_rate: metrics.conversion_rate || 0,
+          revenue_attributed: metrics.revenue_attributed || 0
+        } : null,
+        // Funnel content freshness indicator
+        funnel_updated_recently: !!funnelUpdate,
+        funnel_last_updated: funnelUpdate?.updated_at,
+        // Interest metrics
+        total_likes: service.service_interest_counters?.[0]?.total_likes || 0
+      };
+    });
+
+    // Format vendors with enhanced service relationship data
     const formattedVendors = (vendorsResponse.data || []).map((vendor: Vendor) => ({
       ...vendor,
       id: vendor.id,
@@ -128,7 +194,10 @@ serve(async (req) => {
       latitude: vendor.latitude,
       longitude: vendor.longitude,
       vendor_type: vendor.vendor_type || 'company',
-      local_representatives: vendor.local_representatives || []
+      local_representatives: vendor.local_representatives || [],
+      // Enhanced service data
+      active_services_count: vendor.services?.filter((s: any) => s.is_active).length || 0,
+      service_categories: [...new Set(vendor.services?.map((s: any) => s.category) || [])]
     }));
 
     const result = {
@@ -138,7 +207,17 @@ serve(async (req) => {
         servicesCount: formattedServices.length,
         vendorsCount: formattedVendors.length,
         timestamp: new Date().toISOString(),
-        source: 'edge-function'
+        source: 'edge-function',
+        dataFreshness: {
+          servicesWithMetrics: formattedServices.filter(s => s.tracking_metrics).length,
+          servicesWithRecentFunnelUpdates: formattedServices.filter(s => s.funnel_updated_recently).length,
+          vendorsWithActiveServices: formattedVendors.filter(v => v.active_services_count > 0).length
+        },
+        cacheHealth: {
+          trackingMetricsAvailable: !trackingMetricsResponse.error,
+          funnelContentAvailable: !funnelContentResponse.error,
+          lastCacheRefresh: new Date().toISOString()
+        }
       }
     };
 
