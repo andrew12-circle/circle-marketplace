@@ -26,7 +26,7 @@ export function GoalAssessmentStep5({ formData, onUpdate }: StepProps) {
             <SelectTrigger className="bg-background">
               <SelectValue placeholder="Select your personality type" />
             </SelectTrigger>
-            <SelectContent className="bg-background border z-50">
+            <SelectContent className="bg-background border z-50 pointer-events-auto">
               <SelectItem value="extrovert">Extrovert - I energize from interaction</SelectItem>
               <SelectItem value="introvert">Introvert - I prefer focused, one-on-one work</SelectItem>
               <SelectItem value="ambivert">Ambivert - I'm comfortable with both</SelectItem>
@@ -43,7 +43,7 @@ export function GoalAssessmentStep5({ formData, onUpdate }: StepProps) {
             <SelectTrigger className="bg-background">
               <SelectValue placeholder="Select your work style" />
             </SelectTrigger>
-            <SelectContent className="bg-background border z-50">
+            <SelectContent className="bg-background border z-50 pointer-events-auto">
               <SelectItem value="hunter">Hunter - I love prospecting and cold outreach</SelectItem>
               <SelectItem value="farmer">Farmer - I prefer nurturing existing relationships</SelectItem>
               <SelectItem value="hybrid">Hybrid - I do both equally well</SelectItem>
@@ -61,7 +61,7 @@ export function GoalAssessmentStep5({ formData, onUpdate }: StepProps) {
             <SelectTrigger className="bg-background">
               <SelectValue placeholder="How do you prefer to communicate?" />
             </SelectTrigger>
-            <SelectContent className="bg-background border z-50">
+            <SelectContent className="bg-background border z-50 pointer-events-auto">
               <SelectItem value="phone_calls">Phone Calls</SelectItem>
               <SelectItem value="video_calls">Video Calls</SelectItem>
               <SelectItem value="text_email">Text & Email</SelectItem>
