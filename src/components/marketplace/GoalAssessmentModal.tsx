@@ -102,6 +102,7 @@ export function GoalAssessmentModal({ open, onOpenChange, onComplete }: GoalAsse
   };
 
   const handleNext = () => {
+    console.log('handleNext called, currentStep:', currentStep, 'formData:', formData);
     if (currentStep < totalSteps) {
       setCurrentStep(currentStep + 1);
     }
@@ -532,10 +533,10 @@ export function GoalAssessmentModal({ open, onOpenChange, onComplete }: GoalAsse
               <Button
                 onClick={handleNext}
                 disabled={
-                  (currentStep === 1 && (!formData.annual_goal_transactions || !formData.annual_goal_volume)) ||
-                  (currentStep === 2 && !formData.average_commission_per_deal) ||
+                  (currentStep === 1 && (!formData.annual_goal_transactions || formData.annual_goal_transactions <= 0 || !formData.annual_goal_volume || formData.annual_goal_volume <= 0)) ||
+                  (currentStep === 2 && (!formData.average_commission_per_deal || formData.average_commission_per_deal <= 0)) ||
                   (currentStep === 3 && !formData.primary_challenge) ||
-                  (currentStep === 4 && !formData.marketing_time_per_week) ||
+                  (currentStep === 4 && (!formData.marketing_time_per_week || formData.marketing_time_per_week < 0)) ||
                   (currentStep === 5 && (!formData.personality_type || !formData.work_style)) ||
                   (currentStep === 6 && !formData.current_crm)
                 }
