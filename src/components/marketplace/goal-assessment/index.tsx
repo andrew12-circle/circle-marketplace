@@ -93,9 +93,23 @@ export function GoalAssessmentModal({ open, onOpenChange, onComplete }: GoalAsse
   };
 
   const handleNext = () => {
-    console.log('Goal Assessment - handleNext called, currentStep:', currentStep, 'isValid:', isStepValid(currentStep), 'formData:', formData);
+    const stepValid = isStepValid(currentStep);
+    console.log('Goal Assessment - handleNext called', {
+      currentStep, 
+      stepValid, 
+      totalSteps: TOTAL_STEPS,
+      willProgress: currentStep < TOTAL_STEPS && stepValid
+    });
+    
+    if (!stepValid) {
+      console.log('Goal Assessment - Cannot proceed, step validation failed');
+      return;
+    }
+    
     if (currentStep < TOTAL_STEPS) {
-      setCurrentStep(currentStep + 1);
+      const nextStep = currentStep + 1;
+      console.log('Goal Assessment - Progressing to step', nextStep);
+      setCurrentStep(nextStep);
     }
   };
 
@@ -191,6 +205,7 @@ export function GoalAssessmentModal({ open, onOpenChange, onComplete }: GoalAsse
   };
 
   const renderCurrentStep = () => {
+    console.log('Goal Assessment - Rendering step', currentStep, 'with formData:', formData);
     switch (currentStep) {
       case 1:
         return <GoalAssessmentStep1 formData={formData} onUpdate={handleUpdate} />;
@@ -260,7 +275,7 @@ export function GoalAssessmentModal({ open, onOpenChange, onComplete }: GoalAsse
                 onClick={handleNext}
                 disabled={!isStepValid(currentStep)}
               >
-                Next
+                {isStepValid(currentStep) ? 'Next' : `Next (Step ${currentStep} incomplete)`}
               </Button>
             )}
           </div>
