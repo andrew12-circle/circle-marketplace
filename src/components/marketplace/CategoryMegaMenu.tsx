@@ -287,7 +287,7 @@ export const CategoryMegaMenu = ({ selectedCategory, onCategorySelect, viewMode 
                     </div>
                   </div>
                    <div className="grid grid-cols-2 gap-1">
-                    {['Print & Mail', 'Signage & Branding', 'Presentations', 'Branding', 'Client Event Kits', 'Client Retention', 'Transaction Coordinator', 'Marketing Automation & Content', 'Video & Media Tools', 'Listing & Showing Tools', 'Data & Analytics', 'Finance & Business Tools', 'Productivity & Collaboration', 'Virtual Assistants & Dialers', 'Team & Recruiting Tools', 'CE & Licensing'].map((category) => (
+                    {['AI Assistants', 'Analytics & Forecasting', 'Branding', 'Business Services', 'Client Gifting', 'Coaching', 'Compliance & Property Tools', 'CRM', 'CRM Software', 'Design Tools', 'Digital Ads', 'E-Signature & Compliance', 'Email & SMS Automation', 'Lead Generation', 'Lead Management', 'Listing Presentations', 'Marketing', 'Marketing Coaching', 'Photography & Visuals', 'SEO Optimization', 'Social Media Coaching', 'Social Media Management', 'Technology', 'Transaction Management', 'Video Marketing', 'Virtual Assistants', 'Virtual Staging', 'Websites / IDX'].map((category) => (
                       <button
                         key={category}
                         onClick={() => handleCategorySelect(category)}
