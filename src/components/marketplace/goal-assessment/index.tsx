@@ -62,7 +62,7 @@ export function GoalAssessmentModal({ open, onOpenChange, onComplete }: GoalAsse
 
   // Load profile data when modal opens
   useEffect(() => {
-    if (open && profile) {
+    if (open && profile && !formData.primary_challenge) {
       const personalityData = (profile as any).personality_data || {};
       const currentTools = (profile as any).current_tools || {};
       
