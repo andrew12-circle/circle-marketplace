@@ -49,7 +49,6 @@ import { ServiceBundles } from "./ServiceBundles";
 import { QAOverlay } from "../common/QAOverlay";
 import { useAutoRecovery } from "@/hooks/useAutoRecovery";
 import { CacheStatusIndicator } from "@/components/admin/CacheStatusIndicator";
-import { useAuth } from "@/contexts/AuthContext";
 
 interface FilterState {
   category: string;
