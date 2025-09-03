@@ -1528,7 +1528,21 @@ export const ServiceManagementPanel = () => {
                       <div>
                         <h4 className="font-medium">Basic Information</h4>
                         <p className="text-sm text-muted-foreground">Title: {selectedService.title}</p>
-                        <p className="text-sm text-muted-foreground">Category: {selectedService.category}</p>
+                        <div className="text-sm text-muted-foreground">
+                          <span>Primary Category: {selectedService.category || 'Not set'}</span>
+                          {selectedService.tags && selectedService.tags.length > 0 && (
+                            <div className="mt-1">
+                              <span>Tags: </span>
+                              <div className="flex flex-wrap gap-1 mt-1">
+                                {selectedService.tags.map((tag: string, index: number) => (
+                                  <Badge key={index} variant="outline" className="text-xs">
+                                    {tag}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
                         <p className="text-sm text-muted-foreground">Duration: {selectedService.duration || 'Not set'}</p>
                         <p className="text-sm text-muted-foreground">ROI: {selectedService.estimated_roi || 0}%</p>
                         <p className="text-sm text-muted-foreground">
