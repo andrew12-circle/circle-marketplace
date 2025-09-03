@@ -194,7 +194,7 @@ createRoot(document.getElementById("root")!).render(
                 <Route path="/qa" element={<QARunner />} />
                 
                 {/* Affiliate routes */}
-                <Route path="/affiliate" element={<AffiliatePage />} />
+                <Route path="/affiliate" element={<AffiliateLanding />} />
                 <Route path="/affiliate/apply" element={<AffiliateApplication />} />
                 <Route path="/affiliate/dashboard" element={<AffiliatePage />} />
                 
