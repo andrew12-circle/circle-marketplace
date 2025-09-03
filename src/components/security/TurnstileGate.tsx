@@ -39,6 +39,8 @@ export function TurnstileGate({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [scriptLoaded, setScriptLoaded] = useState(false);
+  const [isRendering, setIsRendering] = useState(false);
+  const mountedRef = useRef(true);
 
   useEffect(() => {
     // Check if Turnstile is already loaded
@@ -89,44 +91,70 @@ export function TurnstileGate({
   }, [onError]);
 
   useEffect(() => {
-    if (!scriptLoaded || !window.turnstile || !containerRef.current) {
+    if (!scriptLoaded || !window.turnstile || !containerRef.current || isRendering || widgetId) {
       return;
     }
 
+    setIsRendering(true);
+    
     try {
+      // Clear any existing widgets in the container first
+      if (containerRef.current) {
+        containerRef.current.innerHTML = '';
+      }
+
       const id = window.turnstile.render(containerRef.current, {
         sitekey: siteKey,
         theme,
         size,
         callback: (token: string) => {
+          if (!mountedRef.current) return;
           console.log('Turnstile success:', token);
           onSuccess(token);
         },
         'error-callback': (error: string) => {
+          if (!mountedRef.current) return;
           console.error('Turnstile error:', error);
           setError(error);
           onError?.(error);
         },
         'expired-callback': () => {
+          if (!mountedRef.current) return;
           console.log('Turnstile expired');
           setError('Verification expired');
           onError?.('Verification expired');
         },
         'timeout-callback': () => {
+          if (!mountedRef.current) return;
           console.log('Turnstile timeout');
           setError('Verification timed out');
           onError?.('Verification timed out');
         }
       });
 
-      setWidgetId(id);
+      if (mountedRef.current) {
+        setWidgetId(id);
+      }
     } catch (error) {
-      console.error('Error rendering Turnstile:', error);
-      setError('Failed to render verification');
-      onError?.('Failed to render verification');
+      if (mountedRef.current) {
+        console.error('Error rendering Turnstile:', error);
+        setError('Failed to render verification');
+        onError?.('Failed to render verification');
+      }
+    } finally {
+      if (mountedRef.current) {
+        setIsRendering(false);
+      }
     }
+  }, [scriptLoaded, siteKey, theme, size, onSuccess, onError, isRendering, widgetId]);
 
+  // Cleanup effect
+  useEffect(() => {
+    mountedRef.current = true;
+    
     return () => {
+      mountedRef.current = false;
+      
       if (widgetId && window.turnstile) {
         try {
           window.turnstile.remove(widgetId);
@@ -135,16 +163,32 @@ export function TurnstileGate({
         }
       }
     };
-  }, [scriptLoaded, siteKey, theme, size, onSuccess, onError]);
+  }, [widgetId]);
 
   const handleRetry = () => {
     setError(null);
+    
     if (widgetId && window.turnstile) {
       try {
         window.turnstile.reset(widgetId);
       } catch (e) {
         console.warn('Error resetting Turnstile:', e);
+        // If reset fails, remove and recreate the widget
+        try {
+          window.turnstile.remove(widgetId);
+          setWidgetId(null);
+          setIsRendering(false);
+        } catch (removeError) {
+          console.warn('Error removing widget after reset failure:', removeError);
+        }
       }
+    } else {
+      // No existing widget, clear the container and allow re-render
+      if (containerRef.current) {
+        containerRef.current.innerHTML = '';
+      }
+      setWidgetId(null);
+      setIsRendering(false);
     }
   };
 
