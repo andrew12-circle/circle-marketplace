@@ -162,15 +162,6 @@ export const PodcastPlayerModal = ({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl w-full p-0 gap-0 bg-gradient-to-b from-background to-muted/30">
-        {/* Close Button */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="absolute top-4 right-4 z-10"
-          onClick={onClose}
-        >
-          <X className="w-5 h-5" />
-        </Button>
 
         {/* Audio Element */}
         {audioUrl && (

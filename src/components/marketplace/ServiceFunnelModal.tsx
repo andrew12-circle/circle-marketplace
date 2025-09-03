@@ -593,10 +593,6 @@ export const ServiceFunnelModal = ({
               </div>
             </PopoverContent>
           </Popover>
-          
-          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white shadow-lg border border-white/20" onClick={onClose}>
-            <X className="h-4 w-4 text-gray-700" />
-          </Button>
         </div>
 
 
