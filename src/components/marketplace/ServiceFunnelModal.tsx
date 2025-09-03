@@ -948,6 +948,22 @@ export const ServiceFunnelModal = ({
                        <AccordionContent className="border-l-4 border-l-emerald-500 pl-4 bg-white rounded-b-lg shadow-sm pt-0">
                          <div className="p-6 pt-0">
                            <div className="space-y-6">
+                             {/* FAQ Answer Content */}
+                             {(() => {
+                               const faqContent = Array.isArray((fc as any)?.faqSections) 
+                                 ? (fc as any).faqSections.find((s: any) => s?.id === 'question-5') 
+                                 : null;
+                               const content = faqContent?.content || "Over 1000+ successful implementations with verified case studies and testimonials";
+                               
+                               return content && content.trim() ? (
+                                 <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4 mb-6">
+                                   <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+                                     {content}
+                                   </p>
+                                 </div>
+                               ) : null;
+                             })()}
+
                              {/* Intro Text */}
                               {service.funnel_content?.proofItWorks?.introText && <p className="text-gray-700 leading-relaxed whitespace-pre-wrap mb-6 pt-15">
                                   {service.funnel_content.proofItWorks.introText}
