@@ -1,60 +1,170 @@
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Zap, Users, FileText, Camera, Star, ArrowUpRight, DollarSign } from "lucide-react";
+import { Zap, Users, FileText, Camera, Star, ArrowUpRight, DollarSign, TrendingUp, Target, Briefcase } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+
+interface MarketplaceService {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  retail_price: string;
+  pro_price: string;
+  vendor_name: string;
+  tags: string[];
+  image_url?: string;
+  vendor_rating?: number;
+}
 
 export const MarketplaceOpportunities = () => {
-  // Mock data - will be replaced with AI-generated recommendations based on business context
-  const opportunities = [
-    {
-      id: 1,
-      title: "Boost Your New Listing",
-      category: "Marketing",
-      description: "Your new listing on Murfreesboro Road goes live tomorrow",
-      vendor: "Franklin Social Pro",
-      service: "Social Media Blast Package",
-      impact: "20,000 local views in first 48 hours",
-      price: 250,
-      rating: 5.0,
-      urgency: "Launch Tomorrow",
-      icon: Camera,
-      color: "text-blue-500",
-      bgColor: "bg-blue-500/10",
-      borderColor: "border-blue-500/20"
-    },
-    {
-      id: 2,
-      title: "Offload Administrative Work",
-      category: "Operations",
-      description: "Two closings in next 3 weeks will increase admin workload by 6 hours/week",
-      vendor: "TN Closings Co.",
-      service: "Transaction-as-a-Service",
-      impact: "Manage both closings completely",
-      price: 700,
-      rating: 4.8,
-      urgency: "Book This Week",
-      icon: FileText,
-      color: "text-green-500",
-      bgColor: "bg-green-500/10",
-      borderColor: "border-green-500/20"
-    },
-    {
-      id: 3,
-      title: "Accelerate Lead Generation",
-      category: "Lead Gen",
-      description: "Q3 goal requires 15% more leads to maintain current conversion rates",
-      vendor: "Music City Leads",
-      service: "Targeted Facebook Campaign",
-      impact: "50+ qualified leads in 30 days",
-      price: 1200,
-      rating: 4.9,
-      urgency: "Start ASAP",
-      icon: Users,
-      color: "text-purple-500",
-      bgColor: "bg-purple-500/10",
-      borderColor: "border-purple-500/20"
+  const { user } = useAuth();
+  const [opportunities, setOpportunities] = useState<MarketplaceService[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const getCategoryIcon = (category: string) => {
+    switch (category.toLowerCase()) {
+      case 'marketing': case 'ads & lead gen': return Camera;
+      case 'operations': case 'transaction coordinator': return FileText;
+      case 'lead gen': case 'crms': return Users;
+      case 'coaching': return Target;
+      case 'finance & business tools': return DollarSign;
+      default: return Briefcase;
     }
-  ];
+  };
+
+  const getCategoryColor = (category: string) => {
+    switch (category.toLowerCase()) {
+      case 'marketing': case 'ads & lead gen': return {
+        color: "text-blue-500",
+        bgColor: "bg-blue-500/10",
+        borderColor: "border-blue-500/20"
+      };
+      case 'operations': case 'transaction coordinator': return {
+        color: "text-green-500",
+        bgColor: "bg-green-500/10",
+        borderColor: "border-green-500/20"
+      };
+      case 'lead gen': case 'crms': return {
+        color: "text-purple-500",
+        bgColor: "bg-purple-500/10",
+        borderColor: "border-purple-500/20"
+      };
+      case 'coaching': return {
+        color: "text-orange-500",
+        bgColor: "bg-orange-500/10",
+        borderColor: "border-orange-500/20"
+      };
+      default: return {
+        color: "text-primary",
+        bgColor: "bg-primary/10",
+        borderColor: "border-primary/20"
+      };
+    }
+  };
+
+  useEffect(() => {
+    const fetchMarketplaceOpportunities = async () => {
+      try {
+        setLoading(true);
+        
+        // Call the get-marketplace-data edge function
+        const { data, error } = await supabase.functions.invoke('get-marketplace-data', {
+          body: { limit: 6 } // Get top 6 opportunities
+        });
+
+        if (error) {
+          console.error('Error fetching marketplace data:', error);
+          return;
+        }
+
+        if (data?.services) {
+          // Sort by various factors to show the most relevant opportunities
+          const sortedServices = data.services
+            .filter((service: any) => service.is_active)
+            .sort((a: any, b: any) => {
+              // Prioritize services with better ratings and lower prices
+              const aScore = (a.vendor_rating || 4.0) - (parseFloat(a.pro_price?.replace('$', '') || a.retail_price?.replace('$', '') || '0') / 1000);
+              const bScore = (b.vendor_rating || 4.0) - (parseFloat(b.pro_price?.replace('$', '') || b.retail_price?.replace('$', '') || '0') / 1000);
+              return bScore - aScore;
+            })
+            .slice(0, 6);
+
+          setOpportunities(sortedServices);
+        }
+      } catch (error) {
+        console.error('Error fetching marketplace opportunities:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (user) {
+      fetchMarketplaceOpportunities();
+    }
+  }, [user]);
+
+  if (loading) {
+    return (
+      <div>
+        <h3 className="text-2xl font-bold text-foreground mb-6 flex items-center gap-2">
+          <Zap className="h-6 w-6 text-yellow-500" />
+          Your Top Marketplace Opportunities
+        </h3>
+        <div className="grid lg:grid-cols-2 xl:grid-cols-3 gap-6">
+          {[...Array(6)].map((_, i) => (
+            <Card key={i} className="bg-card/50 backdrop-blur-sm border-border/50">
+              <CardHeader className="pb-4">
+                <div className="flex items-start justify-between">
+                  <div className="w-12 h-12 bg-muted/50 rounded-lg animate-pulse" />
+                  <div className="w-16 h-6 bg-muted/50 rounded animate-pulse" />
+                </div>
+                <div className="space-y-2">
+                  <div className="w-3/4 h-6 bg-muted/50 rounded animate-pulse" />
+                  <div className="w-1/2 h-4 bg-muted/50 rounded animate-pulse" />
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="w-full h-12 bg-muted/50 rounded animate-pulse" />
+                <div className="w-full h-20 bg-muted/50 rounded animate-pulse" />
+                <div className="flex justify-between items-center">
+                  <div className="w-20 h-6 bg-muted/50 rounded animate-pulse" />
+                  <div className="w-24 h-8 bg-muted/50 rounded animate-pulse" />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  const processedOpportunities = opportunities.map((service) => {
+    const categoryColors = getCategoryColor(service.category);
+    const IconComponent = getCategoryIcon(service.category);
+    const proPrice = service.pro_price ? parseFloat(service.pro_price.replace('$', '')) : null;
+    const retailPrice = service.retail_price ? parseFloat(service.retail_price.replace('$', '')) : null;
+    const displayPrice = proPrice || retailPrice || 0;
+
+    return {
+      id: service.id,
+      title: service.title,
+      category: service.category,
+      description: service.description.length > 120 ? 
+        service.description.substring(0, 120) + '...' : 
+        service.description,
+      vendor: service.vendor_name,
+      service: service.title,
+      impact: `See details for ROI estimates`,
+      price: displayPrice,
+      rating: service.vendor_rating || 4.5,
+      urgency: proPrice ? "Pro Price" : "Available",
+      icon: IconComponent,
+      ...categoryColors
+    };
+  });
 
   return (
     <div>
@@ -64,7 +174,7 @@ export const MarketplaceOpportunities = () => {
       </h3>
       
       <div className="grid lg:grid-cols-2 xl:grid-cols-3 gap-6">
-        {opportunities.map((opportunity) => {
+        {processedOpportunities.map((opportunity) => {
           const IconComponent = opportunity.icon;
           
           return (
@@ -109,10 +219,10 @@ export const MarketplaceOpportunities = () => {
                     <span className="font-bold text-lg">${opportunity.price}</span>
                   </div>
                   <Button size="sm" className="group-hover:bg-primary/90" onClick={() => {
-                    // TODO: Implement booking flow
-                    console.log('Booking opportunity:', opportunity.id);
+                    // Navigate to marketplace with this service
+                    window.location.href = `/marketplace?service=${opportunity.id}`;
                   }}>
-                    Book Now
+                    View Details
                     <ArrowUpRight className="h-3 w-3 ml-1" />
                   </Button>
                 </div>
@@ -124,8 +234,7 @@ export const MarketplaceOpportunities = () => {
       
       <div className="mt-8 text-center">
         <Button variant="outline" size="lg" className="bg-background/50 hover:bg-background" onClick={() => {
-          // TODO: Navigate to marketplace with filter applied
-          console.log('View all opportunities clicked');
+          window.location.href = '/marketplace';
         }}>
           View All Opportunities
           <ArrowUpRight className="h-4 w-4 ml-2" />
