@@ -117,16 +117,47 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
     setLastFetchAttempt(now);
 
-    // Circuit breaker: if too many failures, stop trying for a while
+    // Admin fallback: if circuit breaker is open but we're on admin route, try admin check
+    if (isCircuitBreakerOpen && window.location.pathname.includes('/admin')) {
+      logger.log('Circuit breaker open but admin route detected, trying admin fallback');
+      try {
+        const { data: adminData, error: adminError } = await supabase
+          .rpc('admin_self_check_enhanced')
+          .single();
+        
+        if (!adminError && adminData?.profile_data) {
+          logger.log('Admin profile fetched via admin_self_check_enhanced fallback');
+          const adminProfile = {
+            user_id: userId,
+            display_name: adminData.profile_data.display_name,
+            is_admin: adminData.profile_data.is_admin,
+            specialties: adminData.profile_data.specialties || [],
+            created_at: adminData.profile_data.created_at,
+            updated_at: new Date().toISOString(),
+            is_verified: false,
+            is_pro: false,
+            is_creator: false
+          };
+          setProfile(adminProfile);
+          setRetryCount(0);
+          setIsCircuitBreakerOpen(false); // Reset circuit breaker on admin success
+          return;
+        }
+      } catch (adminError) {
+        logger.warn('Admin fallback failed:', adminError);
+      }
+    }
+
+    // Circuit breaker: if too many failures, stop trying for a while (unless admin fallback worked)
     if (isCircuitBreakerOpen) {
       logger.warn('Circuit breaker open, skipping profile fetch');
       return;
     }
 
     try {
-      // Longer timeout for better reliability - simplified approach
+      // Shorter timeout for better UX - we have fallbacks
       const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Profile fetch timeout')), 15000); // Increased to 15 seconds
+        setTimeout(() => reject(new Error('Profile fetch timeout')), 8000); // Reduced to 8 seconds
       });
 
       // Simplified query without ordering for better performance
@@ -184,6 +215,36 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return;
       }
 
+      // Final admin fallback if on admin route
+      if (window.location.pathname.includes('/admin')) {
+        logger.warn('Regular methods failed on admin route, trying admin check fallback');
+        try {
+          const { data: adminData, error: adminError } = await supabase
+            .rpc('admin_self_check_enhanced')
+            .single();
+          
+          if (!adminError && adminData?.profile_data) {
+            logger.log('Profile recovered via admin_self_check_enhanced');
+            const adminProfile = {
+              user_id: userId,
+              display_name: adminData.profile_data.display_name,
+              is_admin: adminData.profile_data.is_admin,
+              specialties: adminData.profile_data.specialties || [],
+              created_at: adminData.profile_data.created_at,
+              updated_at: new Date().toISOString(),
+              is_verified: false,
+              is_pro: false,
+              is_creator: false
+            };
+            setProfile(adminProfile);
+            setRetryCount(0);
+            return;
+          }
+        } catch (adminError) {
+          logger.warn('Admin fallback failed:', adminError);
+        }
+      }
+
       // If all else fails, check if we need to create a profile
       logger.warn('All profile fetch methods failed, user may need profile creation');
       setProfile(null);
@@ -192,8 +253,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       logger.error('fetchProfile exception:', error);
       
       // More conservative retry logic with circuit breaker
-      if (retryCount < 2) { // Increased to 2 retries
-        const backoffDelay = Math.min(5000 * Math.pow(2, retryCount), 10000); // Exponential backoff, max 10s
+      if (retryCount < 1) { // Reduced to 1 retry since we have more fallbacks
+        const backoffDelay = 3000; // Fixed 3 second delay
         setTimeout(() => {
           setRetryCount(prev => prev + 1);
           fetchProfile(userId);
@@ -203,12 +264,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setProfile(null);
         setRetryCount(0);
         
-        // Open circuit breaker for 60 seconds instead of 30
+        // Open circuit breaker for shorter time since we have admin fallback
         setIsCircuitBreakerOpen(true);
         setTimeout(() => {
           setIsCircuitBreakerOpen(false);
           logger.log('Circuit breaker reset, profile fetch available again');
-        }, 60000);
+        }, 30000); // Reduced to 30 seconds
       }
     }
   };
