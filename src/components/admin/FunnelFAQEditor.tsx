@@ -63,12 +63,6 @@ const DEFAULT_FAQ_SECTIONS = [
     title: "What's Included?",
     content: "Complete system with IDX website, CRM with auto-drip, Facebook & Google ad integration, text & email automation, and lead routing",
     color: "red"
-  },
-  {
-    id: "question-5",
-    title: "Proof It Works",
-    content: "Over 1000+ successful implementations with verified case studies and testimonials",
-    color: "emerald"
   }
 ];
 
