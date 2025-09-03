@@ -339,6 +339,44 @@ export type Database = {
           },
         ]
       }
+      affiliate_email_logs: {
+        Row: {
+          affiliate_id: string | null
+          created_at: string
+          email_address: string
+          email_id: string | null
+          id: string
+          notification_type: string
+          sent_at: string
+        }
+        Insert: {
+          affiliate_id?: string | null
+          created_at?: string
+          email_address: string
+          email_id?: string | null
+          id?: string
+          notification_type: string
+          sent_at?: string
+        }
+        Update: {
+          affiliate_id?: string | null
+          created_at?: string
+          email_address?: string
+          email_id?: string | null
+          id?: string
+          notification_type?: string
+          sent_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "affiliate_email_logs_affiliate_id_fkey"
+            columns: ["affiliate_id"]
+            isOneToOne: false
+            referencedRelation: "affiliates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       affiliate_links: {
         Row: {
           affiliate_id: string

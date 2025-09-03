@@ -104,6 +104,34 @@ export const useAffiliateTracking = () => {
       
       window.history.replaceState({}, document.title, url.toString());
 
+      console.log('Affiliate click tracked:', data);
+      
+      // Send click notification email
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        await supabase.functions.invoke('send-affiliate-notification', {
+          body: {
+            notification_type: 'click_notification',
+            affiliate_id: data.affiliate_id,
+            click_data: {
+              source_url: window.location.href,
+              user_agent: navigator.userAgent,
+              referrer: document.referrer || 'Direct',
+              utm_source: urlParams.get('utm_source') || undefined,
+              utm_campaign: urlParams.get('utm_campaign') || undefined,
+              timestamp: new Date().toISOString()
+            }
+          }
+        });
+      } catch (emailError) {
+        console.log('Email notification failed (non-critical):', emailError);
+      }
+      
+      toast({
+        title: "Tracking activated",
+        description: "Affiliate tracking is now active for this session.",
+      });
+
     } catch (error) {
       console.error('Error in affiliate tracking:', error);
     }
@@ -142,6 +170,29 @@ export const useAffiliateTracking = () => {
       }
 
       console.log('Conversion tracked successfully:', data);
+
+      // Send conversion notification email
+      try {
+        if (data) {
+          await supabase.functions.invoke('send-affiliate-notification', {
+            body: {
+              notification_type: 'conversion_notification',
+              affiliate_id: data.affiliateId || attribution.affiliateId,
+              conversion_data: {
+                conversion_type: conversionData.conversion_type,
+                amount_gross: conversionData.amount_gross,
+                commission_amount: data.commissionAmount || 0,
+                order_id: conversionData.order_id,
+                subscription_id: conversionData.subscription_id,
+                service_title: data.serviceTitle,
+                timestamp: new Date().toISOString()
+              }
+            }
+          });
+        }
+      } catch (emailError) {
+        console.log('Email notification failed (non-critical):', emailError);
+      }
 
       // Show success notification
       toast({
