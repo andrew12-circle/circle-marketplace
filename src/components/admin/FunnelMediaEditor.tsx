@@ -17,11 +17,45 @@ interface MediaItem {
 
 interface FunnelMediaEditorProps {
   media: MediaItem[];
+  serviceImageUrl?: string;
   onChange: (media: MediaItem[]) => void;
 }
 
-export const FunnelMediaEditor = ({ media, onChange }: FunnelMediaEditorProps) => {
-  const [mediaItems, setMediaItems] = useState<MediaItem[]>(media || []);
+export const FunnelMediaEditor = ({ media, serviceImageUrl, onChange }: FunnelMediaEditorProps) => {
+  // Initialize media items with service image as first item if it exists
+  const initializeMediaItems = () => {
+    const existingMedia = media || [];
+    
+    // If there's a service image and no existing media, add it as the first item
+    if (serviceImageUrl && existingMedia.length === 0) {
+      return [{
+        url: serviceImageUrl,
+        type: 'image' as const,
+        title: 'Service Main Image',
+        description: 'Primary service image from marketplace'
+      }];
+    }
+    
+    // If there's a service image and existing media doesn't start with it, prepend it
+    if (serviceImageUrl && existingMedia.length > 0) {
+      const firstItem = existingMedia[0];
+      if (firstItem?.url !== serviceImageUrl) {
+        return [
+          {
+            url: serviceImageUrl,
+            type: 'image' as const,
+            title: 'Service Main Image',
+            description: 'Primary service image from marketplace'
+          },
+          ...existingMedia
+        ];
+      }
+    }
+    
+    return existingMedia;
+  };
+
+  const [mediaItems, setMediaItems] = useState<MediaItem[]>(initializeMediaItems);
 
   const addMediaItem = () => {
     const newItem: MediaItem = {
@@ -46,6 +80,15 @@ export const FunnelMediaEditor = ({ media, onChange }: FunnelMediaEditorProps) =
   };
 
   const removeMediaItem = (index: number) => {
+    const itemToRemove = mediaItems[index];
+    
+    // If this is the service main image (first item with service URL), show confirmation
+    if (index === 0 && serviceImageUrl && itemToRemove?.url === serviceImageUrl) {
+      if (!confirm("This will remove the main service image from the funnel. Are you sure?")) {
+        return;
+      }
+    }
+    
     const updatedMedia = mediaItems.filter((_, i) => i !== index);
     setMediaItems(updatedMedia);
     onChange(updatedMedia);
@@ -111,104 +154,130 @@ export const FunnelMediaEditor = ({ media, onChange }: FunnelMediaEditorProps) =
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          {mediaItems.map((item, index) => (
-            <div key={index} className="p-4 border rounded-lg bg-gray-50">
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                {/* Preview */}
-                <div className="space-y-2">
-                  <Label>Preview</Label>
-                  <div className="border rounded-lg overflow-hidden bg-white">
-                    {getMediaPreview(item) || (
-                      <div className="w-full h-32 bg-gray-100 flex items-center justify-center">
-                        {item.type === 'image' ? (
-                          <Image className="w-8 h-8 text-gray-400" />
-                        ) : item.type === 'video' ? (
-                          <Video className="w-8 h-8 text-gray-400" />
-                        ) : (
-                          <FileText className="w-8 h-8 text-gray-400" />
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Configuration */}
-                <div className="lg:col-span-2 space-y-4">
-                  <div className="flex items-center gap-4">
-                    <div className="flex-1">
-                      <Label>Media Type</Label>
-                      <Select
-                        value={item.type}
-                        onValueChange={(value: 'image' | 'video' | 'document') => 
-                          updateMediaItem(index, 'type', value)
-                        }
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="image">Image</SelectItem>
-                          <SelectItem value="video">Video</SelectItem>
-                          <SelectItem value="document">Document</SelectItem>
-                        </SelectContent>
-                      </Select>
+          {serviceImageUrl && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Image className="w-4 h-4 text-blue-600" />
+                <span className="text-sm font-medium text-blue-900">Service Main Image</span>
+                <Badge variant="outline" className="text-xs text-blue-600 border-blue-300">
+                  From Marketplace
+                </Badge>
+              </div>
+              <p className="text-xs text-blue-700">
+                Your service's main image will automatically appear first in the funnel. Add more media below or replace the main image by editing the first item.
+              </p>
+            </div>
+          )}
+          
+          {mediaItems.map((item, index) => {
+            const isServiceMainImage = index === 0 && serviceImageUrl && item.url === serviceImageUrl;
+            
+            return (
+              <div key={index} className={`p-4 border rounded-lg ${isServiceMainImage ? 'bg-blue-50 border-blue-200' : 'bg-gray-50'}`}>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                  {/* Preview */}
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Label>Preview</Label>
+                      {isServiceMainImage && (
+                        <Badge variant="outline" className="text-xs text-blue-600 border-blue-300">
+                          Main Image
+                        </Badge>
+                      )}
                     </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => removeMediaItem(index)}
-                      className="text-red-600 hover:text-red-700 mt-6"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-
-                  <div>
-                    <Label>URL</Label>
-                    <div className="flex gap-2">
-                      <Input
-                        value={item.url}
-                        onChange={(e) => updateMediaItem(index, 'url', e.target.value)}
-                        placeholder={
-                          item.type === 'document' 
-                            ? "https://example.com/document.pdf or Google Drive link"
-                            : "https://example.com/media.jpg or YouTube URL"
-                        }
-                      />
-                      {item.url && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => window.open(item.url, '_blank')}
-                        >
-                          <ExternalLink className="w-4 h-4" />
-                        </Button>
+                    <div className="border rounded-lg overflow-hidden bg-white">
+                      {getMediaPreview(item) || (
+                        <div className="w-full h-32 bg-gray-100 flex items-center justify-center">
+                          {item.type === 'image' ? (
+                            <Image className="w-8 h-8 text-gray-400" />
+                          ) : item.type === 'video' ? (
+                            <Video className="w-8 h-8 text-gray-400" />
+                          ) : (
+                            <FileText className="w-8 h-8 text-gray-400" />
+                          )}
+                        </div>
                       )}
                     </div>
                   </div>
 
-                  <div>
-                    <Label>Title (Optional)</Label>
-                    <Input
-                      value={item.title || ""}
-                      onChange={(e) => updateMediaItem(index, 'title', e.target.value)}
-                      placeholder="Media title..."
-                    />
-                  </div>
+                  {/* Configuration */}
+                  <div className="lg:col-span-2 space-y-4">
+                    <div className="flex items-center gap-4">
+                      <div className="flex-1">
+                        <Label>Media Type</Label>
+                        <Select
+                          value={item.type}
+                          onValueChange={(value: 'image' | 'video' | 'document') => 
+                            updateMediaItem(index, 'type', value)
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="image">Image</SelectItem>
+                            <SelectItem value="video">Video</SelectItem>
+                            <SelectItem value="document">Document</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => removeMediaItem(index)}
+                        className={`mt-6 ${isServiceMainImage ? "text-blue-600 hover:text-blue-700" : "text-red-600 hover:text-red-700"}`}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
 
-                  <div>
-                    <Label>Description (Optional)</Label>
-                    <Textarea
-                      value={item.description || ""}
-                      onChange={(e) => updateMediaItem(index, 'description', e.target.value)}
-                      placeholder="Media description..."
-                      rows={2}
-                    />
+                    <div>
+                      <Label>URL</Label>
+                      <div className="flex gap-2">
+                        <Input
+                          value={item.url}
+                          onChange={(e) => updateMediaItem(index, 'url', e.target.value)}
+                          placeholder={
+                            item.type === 'document' 
+                              ? "https://example.com/document.pdf or Google Drive link"
+                              : "https://example.com/media.jpg or YouTube URL"
+                          }
+                        />
+                        {item.url && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => window.open(item.url, '_blank')}
+                          >
+                            <ExternalLink className="w-4 h-4" />
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label>Title (Optional)</Label>
+                      <Input
+                        value={item.title || ""}
+                        onChange={(e) => updateMediaItem(index, 'title', e.target.value)}
+                        placeholder="Media title..."
+                      />
+                    </div>
+
+                    <div>
+                      <Label>Description (Optional)</Label>
+                      <Textarea
+                        value={item.description || ""}
+                        onChange={(e) => updateMediaItem(index, 'description', e.target.value)}
+                        placeholder="Media description..."
+                        rows={2}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
 
           {mediaItems.length === 0 && (
             <div className="text-center py-8 text-gray-500">

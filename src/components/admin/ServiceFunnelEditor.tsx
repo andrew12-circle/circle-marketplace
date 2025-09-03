@@ -35,6 +35,7 @@ interface Service {
   id: string;
   title: string;
   description: string;
+  image_url?: string;
   funnel_content?: any;
   pricing_tiers?: any[];
   category?: string;
@@ -422,6 +423,7 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
         <TabsContent value="media" className="space-y-4">
           <FunnelMediaEditor
             media={funnelData.media || []}
+            serviceImageUrl={service.image_url}
             onChange={(media) => handleDataChange('media', media)}
           />
         </TabsContent>
