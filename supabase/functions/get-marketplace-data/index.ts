@@ -65,7 +65,7 @@ serve(async (req) => {
     console.log('🔄 Fetching combined marketplace data from edge function...');
 
     // Fetch services and vendors in parallel with enhanced data relationships
-    const [servicesResponse, vendorsResponse, trackingMetricsResponse, funnelContentResponse] = await Promise.all([
+    const [servicesResponse, vendorsResponse, trackingMetricsResponse] = await Promise.all([
       supabaseClient
         .from('services')
         .select(`
@@ -73,9 +73,6 @@ serve(async (req) => {
           vendors!inner (
             id, name, rating, review_count, is_verified, website_url, logo_url, 
             support_hours, vendor_type, service_states, mls_areas
-          ),
-          service_tracking_events (
-            event_type, created_at, revenue_attributed
           ),
           service_interest_counters (
             total_likes, updated_at
@@ -102,13 +99,7 @@ serve(async (req) => {
 
       // Get aggregated tracking metrics for the last 30 days
       supabaseClient
-        .rpc('get_service_metrics_summary', { days_back: 30 }),
-
-      // Get funnel content that may have been updated by admins
-      supabaseClient
-        .from('service_funnel_content')
-        .select('service_id, updated_at, content_data')
-        .gte('updated_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
+        .rpc('get_service_metrics_summary', { days_back: 30 })
     ]);
 
     // Check for errors
@@ -127,20 +118,11 @@ serve(async (req) => {
       console.warn('Tracking metrics unavailable:', trackingMetricsResponse.error);
     }
 
-    if (funnelContentResponse.error) {
-      console.warn('Funnel content updates unavailable:', funnelContentResponse.error);
-    }
-
     // Format services with enhanced vendor data and tracking metrics
     const trackingMetrics = trackingMetricsResponse.data || [];
-    const funnelUpdates = (funnelContentResponse.data || []).reduce((acc: any, item: any) => {
-      acc[item.service_id] = item;
-      return acc;
-    }, {});
 
     const formattedServices = (servicesResponse.data || []).map((service: Service) => {
       const metrics = trackingMetrics.find((m: any) => m.service_id === service.id);
-      const funnelUpdate = funnelUpdates[service.id];
       
       return {
         ...service,
@@ -165,9 +147,6 @@ serve(async (req) => {
           conversion_rate: metrics.conversion_rate || 0,
           revenue_attributed: metrics.revenue_attributed || 0
         } : null,
-        // Funnel content freshness indicator
-        funnel_updated_recently: !!funnelUpdate,
-        funnel_last_updated: funnelUpdate?.updated_at,
         // Interest metrics
         total_likes: service.service_interest_counters?.[0]?.total_likes || 0
       };
@@ -210,12 +189,10 @@ serve(async (req) => {
         source: 'edge-function',
         dataFreshness: {
           servicesWithMetrics: formattedServices.filter(s => s.tracking_metrics).length,
-          servicesWithRecentFunnelUpdates: formattedServices.filter(s => s.funnel_updated_recently).length,
           vendorsWithActiveServices: formattedVendors.filter(v => v.active_services_count > 0).length
         },
         cacheHealth: {
           trackingMetricsAvailable: !trackingMetricsResponse.error,
-          funnelContentAvailable: !funnelContentResponse.error,
           lastCacheRefresh: new Date().toISOString()
         }
       }
