@@ -31,7 +31,7 @@ export const AffiliateLanding = () => {
             Circle Network Affiliate Program
           </Badge>
           
-          <h1 className="text-5xl font-bold mb-6 bg-gradient-to-r from-primary via-primary to-accent bg-clip-text text-transparent">
+          <h1 className="text-5xl font-bold mb-6 bg-gradient-to-r from-primary via-purple-500 to-purple-700 bg-clip-text text-transparent">
             Earn While You Help<br />Agents Build Better Businesses
           </h1>
           
