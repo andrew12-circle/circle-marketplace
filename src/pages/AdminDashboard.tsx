@@ -523,7 +523,7 @@ export default function AdminDashboard() {
           )}
 
           {/* Modern Tab Navigation */}
-          <Tabs defaultValue="users" className="w-full space-y-8">
+          <Tabs defaultValue="spiritual" className="w-full space-y-8">
           <div className="bg-card rounded-xl border border-border shadow-sm p-4 space-y-4">
             <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 xl:grid-cols-16 gap-1 bg-muted/50 p-1 rounded-lg h-auto min-h-[60px]">
               {/* Spiritual Group - Moved to first position */}
