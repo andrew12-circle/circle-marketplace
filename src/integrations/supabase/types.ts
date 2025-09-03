@@ -5131,6 +5131,7 @@ export type Database = {
           is_creator: boolean | null
           is_pro: boolean | null
           is_pro_member: boolean | null
+          is_respa_regulated: boolean | null
           is_settlement_service_provider: boolean | null
           last_assessment_date: string | null
           latitude: number | null
@@ -5147,6 +5148,7 @@ export type Database = {
           primary_challenge: string | null
           respa_max_copay_percentage: number | null
           respa_notes: string | null
+          respa_risk_level: string | null
           respa_service_categories: string[] | null
           revenue_share_percentage: number | null
           specialties: string[] | null
@@ -5196,6 +5198,7 @@ export type Database = {
           is_creator?: boolean | null
           is_pro?: boolean | null
           is_pro_member?: boolean | null
+          is_respa_regulated?: boolean | null
           is_settlement_service_provider?: boolean | null
           last_assessment_date?: string | null
           latitude?: number | null
@@ -5212,6 +5215,7 @@ export type Database = {
           primary_challenge?: string | null
           respa_max_copay_percentage?: number | null
           respa_notes?: string | null
+          respa_risk_level?: string | null
           respa_service_categories?: string[] | null
           revenue_share_percentage?: number | null
           specialties?: string[] | null
@@ -5261,6 +5265,7 @@ export type Database = {
           is_creator?: boolean | null
           is_pro?: boolean | null
           is_pro_member?: boolean | null
+          is_respa_regulated?: boolean | null
           is_settlement_service_provider?: boolean | null
           last_assessment_date?: string | null
           latitude?: number | null
@@ -5277,6 +5282,7 @@ export type Database = {
           primary_challenge?: string | null
           respa_max_copay_percentage?: number | null
           respa_notes?: string | null
+          respa_risk_level?: string | null
           respa_service_categories?: string[] | null
           revenue_share_percentage?: number | null
           specialties?: string[] | null
