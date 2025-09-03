@@ -23,7 +23,13 @@ if (typeof window !== 'undefined') {
       'Extension context invalidated',
       'background-redux-new.js',
       'LastPass',
-      'duplicate id'
+      'duplicate id',
+      'web-client-content-script.js',
+      'MutationObserver',
+      'Failed to execute \'observe\' on \'MutationObserver\'',
+      'parameter 1 is not of type \'Node\'',
+      'content-script',
+      'HTMLIFrameElement.<anonymous>'
     ].some(pattern => message.includes(pattern));
 
     if (!isExtensionError) {
@@ -44,7 +50,13 @@ if (typeof window !== 'undefined') {
       'Extension context invalidated',
       'background-redux-new.js',
       'LastPass',
-      'duplicate id'
+      'duplicate id',
+      'web-client-content-script.js',
+      'MutationObserver',
+      'Failed to execute \'observe\' on \'MutationObserver\'',
+      'parameter 1 is not of type \'Node\'',
+      'content-script',
+      'HTMLIFrameElement.<anonymous>'
     ].some(pattern => message.includes(pattern));
 
     if (!isExtensionError) {
@@ -72,7 +84,13 @@ if (typeof window !== 'undefined') {
       'Extension context invalidated',
       'background-redux-new.js',
       'LastPass',
-      'duplicate id'
+      'duplicate id',
+      'web-client-content-script.js',
+      'MutationObserver',
+      'Failed to execute \'observe\' on \'MutationObserver\'',
+      'parameter 1 is not of type \'Node\'',
+      'content-script',
+      'HTMLIFrameElement.<anonymous>'
     ].some(pattern => message.includes(pattern));
 
     if (!isExtensionError) {
@@ -100,7 +118,13 @@ if (typeof window !== 'undefined') {
       'Extension context invalidated',
       'background-redux-new.js',
       'LastPass',
-      'duplicate id'
+      'duplicate id',
+      'web-client-content-script.js',
+      'MutationObserver',
+      'Failed to execute \'observe\' on \'MutationObserver\'',
+      'parameter 1 is not of type \'Node\'',
+      'content-script',
+      'HTMLIFrameElement.<anonymous>'
     ].some(pattern => 
       message.includes(pattern) || filename.includes(pattern)
     );
