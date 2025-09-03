@@ -15,6 +15,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ServiceCard } from '@/components/marketplace/ServiceCard';
 import { ServiceDetailsModal } from '@/components/marketplace/ServiceDetailsModal';
 import { ServiceFunnelEditorModal } from '@/components/marketplace/ServiceFunnelEditorModal';
+import { SponsoredPositionsModal } from '@/components/vendor/SponsoredPositionsModal';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useVendorActivityTracking } from '@/hooks/useVendorActivityTracking';
@@ -198,6 +199,7 @@ export const VendorDashboard = () => {
   });
   const [selectedService, setSelectedService] = useState<VendorService | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [isSponsoredModalOpen, setIsSponsoredModalOpen] = useState(false);
 
   useEffect(() => {
     fetchVendorData();
@@ -675,7 +677,11 @@ export const VendorDashboard = () => {
                 <Plus className="w-4 h-4 mr-2" />
                 Add New Service
               </Button>
-              <Button variant="outline" className="w-full justify-start">
+              <Button 
+                variant="outline" 
+                className="w-full justify-start"
+                onClick={() => setIsSponsoredModalOpen(true)}
+              >
                 <Zap className="w-4 h-4 mr-2" />
                 Boost Visibility
               </Button>
@@ -1021,6 +1027,14 @@ export const VendorDashboard = () => {
               is_verified: true
             }
           }}
+        />
+      )}
+
+      {vendorId && (
+        <SponsoredPositionsModal
+          isOpen={isSponsoredModalOpen}
+          onClose={() => setIsSponsoredModalOpen(false)}
+          vendorId={vendorId}
         />
       )}
     </div>
