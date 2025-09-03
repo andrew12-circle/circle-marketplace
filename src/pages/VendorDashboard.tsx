@@ -18,6 +18,7 @@ import { ServiceFunnelEditorModal } from '@/components/marketplace/ServiceFunnel
 import { SponsoredPositionsModal } from '@/components/vendor/SponsoredPositionsModal';
 import { ReviewsManagementModal } from '@/components/vendor/ReviewsManagementModal';
 import { CustomerInsightsModal } from '@/components/vendor/CustomerInsightsModal';
+import { NotificationsModal } from '@/components/vendor/NotificationsModal';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useVendorActivityTracking } from '@/hooks/useVendorActivityTracking';
@@ -204,6 +205,7 @@ export const VendorDashboard = () => {
   const [isSponsoredModalOpen, setIsSponsoredModalOpen] = useState(false);
   const [isReviewsModalOpen, setIsReviewsModalOpen] = useState(false);
   const [isCustomerInsightsModalOpen, setIsCustomerInsightsModalOpen] = useState(false);
+  const [isNotificationsModalOpen, setIsNotificationsModalOpen] = useState(false);
 
   useEffect(() => {
     fetchVendorData();
@@ -490,7 +492,11 @@ export const VendorDashboard = () => {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Button variant="outline" size="sm">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setIsNotificationsModalOpen(true)}
+              >
                 <Bell className="w-4 h-4 mr-2" />
                 Notifications
               </Button>
@@ -1057,6 +1063,11 @@ export const VendorDashboard = () => {
           <CustomerInsightsModal
             isOpen={isCustomerInsightsModalOpen}
             onClose={() => setIsCustomerInsightsModalOpen(false)}
+            vendorId={vendorId}
+          />
+          <NotificationsModal
+            isOpen={isNotificationsModalOpen}
+            onClose={() => setIsNotificationsModalOpen(false)}
             vendorId={vendorId}
           />
         </>
