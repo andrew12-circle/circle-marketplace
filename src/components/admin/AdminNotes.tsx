@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/simpleClient";
+import { supabase } from "@/integrations/supabase/client";
 import { useAutoRecovery } from "@/hooks/useAutoRecovery";
 import { 
   Plus, 

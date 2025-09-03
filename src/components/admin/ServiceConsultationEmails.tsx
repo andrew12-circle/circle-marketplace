@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/simpleClient";
+import { supabase } from "@/integrations/supabase/client";
 import { useAutoRecovery } from "@/hooks/useAutoRecovery";
 import { 
   Plus, 
@@ -48,7 +48,7 @@ export const ServiceConsultationEmails = ({ serviceId, serviceName }: ServiceCon
       const { data, error } = await supabase
         .from('services')
         .select('consultation_emails')
-        .eq('id' as any, serviceId as any)
+        .eq('id', serviceId)
         .single();
 
       if (error) throw error;
