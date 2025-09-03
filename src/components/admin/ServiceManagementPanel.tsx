@@ -1253,7 +1253,7 @@ export const ServiceManagementPanel = () => {
                         <Input
                           value={editForm.pro_price ?? ''}
                           onChange={(e) => setEditForm({ ...editForm, pro_price: e.target.value })}
-                          placeholder="Set Price"
+                          placeholder="e.g., $0.00"
                         />
                       </div>
                       <div className="space-y-2">
