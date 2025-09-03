@@ -115,6 +115,42 @@ export type Database = {
         }
         Relationships: []
       }
+      affiliate_approval_workflow: {
+        Row: {
+          affiliate_id: string
+          approval_criteria_met: Json
+          auto_approval_score: number
+          created_at: string
+          current_stage: string
+          id: string
+          manual_review_required: boolean
+          stage_history: Json
+          updated_at: string
+        }
+        Insert: {
+          affiliate_id: string
+          approval_criteria_met?: Json
+          auto_approval_score?: number
+          created_at?: string
+          current_stage?: string
+          id?: string
+          manual_review_required?: boolean
+          stage_history?: Json
+          updated_at?: string
+        }
+        Update: {
+          affiliate_id?: string
+          approval_criteria_met?: Json
+          auto_approval_score?: number
+          created_at?: string
+          current_stage?: string
+          id?: string
+          manual_review_required?: boolean
+          stage_history?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
       affiliate_attributions: {
         Row: {
           affiliate_id: string
@@ -377,6 +413,42 @@ export type Database = {
           },
         ]
       }
+      affiliate_fraud_checks: {
+        Row: {
+          affiliate_id: string
+          check_type: string
+          created_at: string
+          details: Json
+          flagged: boolean
+          id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          risk_score: number
+        }
+        Insert: {
+          affiliate_id: string
+          check_type: string
+          created_at?: string
+          details?: Json
+          flagged?: boolean
+          id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          risk_score?: number
+        }
+        Update: {
+          affiliate_id?: string
+          check_type?: string
+          created_at?: string
+          details?: Json
+          flagged?: boolean
+          id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          risk_score?: number
+        }
+        Relationships: []
+      }
       affiliate_links: {
         Row: {
           affiliate_id: string
@@ -470,6 +542,72 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      affiliate_social_shares: {
+        Row: {
+          affiliate_id: string
+          clicks_tracked: number
+          content_type: string
+          conversions_tracked: number
+          created_at: string
+          id: string
+          platform: string
+          share_url: string
+          tracking_parameters: Json
+        }
+        Insert: {
+          affiliate_id: string
+          clicks_tracked?: number
+          content_type: string
+          conversions_tracked?: number
+          created_at?: string
+          id?: string
+          platform: string
+          share_url: string
+          tracking_parameters?: Json
+        }
+        Update: {
+          affiliate_id?: string
+          clicks_tracked?: number
+          content_type?: string
+          conversions_tracked?: number
+          created_at?: string
+          id?: string
+          platform?: string
+          share_url?: string
+          tracking_parameters?: Json
+        }
+        Relationships: []
+      }
+      affiliate_terms_acceptance: {
+        Row: {
+          acceptance_method: string
+          accepted_at: string
+          affiliate_id: string
+          id: string
+          ip_address: unknown | null
+          terms_version: string
+          user_agent: string | null
+        }
+        Insert: {
+          acceptance_method?: string
+          accepted_at?: string
+          affiliate_id: string
+          id?: string
+          ip_address?: unknown | null
+          terms_version: string
+          user_agent?: string | null
+        }
+        Update: {
+          acceptance_method?: string
+          accepted_at?: string
+          affiliate_id?: string
+          id?: string
+          ip_address?: unknown | null
+          terms_version?: string
+          user_agent?: string | null
+        }
+        Relationships: []
       }
       affiliates: {
         Row: {
@@ -4165,6 +4303,39 @@ export type Database = {
           expires_at?: string
           id?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      mobile_tracking_events: {
+        Row: {
+          affiliate_id: string | null
+          app_version: string | null
+          created_at: string
+          device_info: Json
+          event_type: string
+          id: string
+          platform: string
+          session_id: string
+        }
+        Insert: {
+          affiliate_id?: string | null
+          app_version?: string | null
+          created_at?: string
+          device_info?: Json
+          event_type: string
+          id?: string
+          platform: string
+          session_id: string
+        }
+        Update: {
+          affiliate_id?: string | null
+          app_version?: string | null
+          created_at?: string
+          device_info?: Json
+          event_type?: string
+          id?: string
+          platform?: string
+          session_id?: string
         }
         Relationships: []
       }
@@ -8737,6 +8908,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      detect_affiliate_fraud: {
+        Args: { p_affiliate_id: string }
+        Returns: Json
+      }
       detect_suspicious_activity: {
         Args: Record<PropertyKey, never>
         Returns: Json
@@ -9071,6 +9246,10 @@ export type Database = {
           p_user_context?: Json
         }
         Returns: string
+      }
+      process_affiliate_approval: {
+        Args: { p_affiliate_id: string }
+        Returns: Json
       }
       process_automatic_copay: {
         Args: {

@@ -22,6 +22,9 @@ import {
   CheckCircle,
   AlertCircle
 } from "lucide-react";
+import { TermsAcceptance } from "./TermsAcceptance";
+import { SocialSharingTools } from "./SocialSharingTools";
+import { AutomatedApprovalWorkflow } from "./AutomatedApprovalWorkflow";
 
 interface AffiliateStats {
   totalClicks: number;
@@ -268,6 +271,8 @@ export const AffiliateDashboard = () => {
           <TabsTrigger value="commissions">Commissions</TabsTrigger>
           <TabsTrigger value="links">Links & Tools</TabsTrigger>
           <TabsTrigger value="activity">Activity</TabsTrigger>
+          <TabsTrigger value="approval">Approval</TabsTrigger>
+          <TabsTrigger value="tools">Marketing Tools</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
@@ -471,6 +476,39 @@ export const AffiliateDashboard = () => {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="approval" className="space-y-4">
+          <AutomatedApprovalWorkflow 
+            affiliateId="current-affiliate-id" // This would come from the user's affiliate profile
+            onStatusChange={(status) => {
+              console.log('Approval status changed:', status);
+              // Could trigger UI updates or notifications
+            }}
+          />
+        </TabsContent>
+
+        <TabsContent value="tools" className="space-y-4">
+          <div className="grid gap-6">
+            <TermsAcceptance 
+              onAccepted={(accepted) => {
+                if (accepted) {
+                  // Refresh approval workflow or update UI
+                  console.log('Terms accepted, triggering approval workflow');
+                }
+              }}
+              required={true}
+            />
+            
+            <SocialSharingTools 
+              affiliateCode={affiliateCode}
+              baseUrls={{
+                pro: "https://circle.realestate/pro",
+                marketplace: "https://circle.realestate/marketplace",
+                academy: "https://circle.realestate/academy"
+              }}
+            />
+          </div>
         </TabsContent>
       </Tabs>
     </div>
