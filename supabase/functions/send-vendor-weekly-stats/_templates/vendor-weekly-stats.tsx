@@ -23,6 +23,11 @@ interface VendorWeeklyStatsEmailProps {
   revenue: number
   hasAgreement: boolean
   dashboardUrl: string
+  includeViews?: boolean
+  includeBookings?: boolean
+  includeRevenue?: boolean
+  includeConversions?: boolean
+  showAgreementCTA?: boolean
 }
 
 export const VendorWeeklyStatsEmail = ({
@@ -35,6 +40,11 @@ export const VendorWeeklyStatsEmail = ({
   revenue,
   hasAgreement,
   dashboardUrl,
+  includeViews = true,
+  includeBookings = true,
+  includeRevenue = true,
+  includeConversions = true,
+  showAgreementCTA = true,
 }: VendorWeeklyStatsEmailProps) => (
   <Html>
     <Head />
@@ -52,25 +62,33 @@ export const VendorWeeklyStatsEmail = ({
         </Text>
 
         <Section style={statsContainer}>
-          <div style={statItem}>
-            <div style={statNumber}>{cardViews.toLocaleString()}</div>
-            <div style={statLabel}>Card Views</div>
-          </div>
-          <div style={statItem}>
-            <div style={statNumber}>{funnelViews.toLocaleString()}</div>
-            <div style={statLabel}>Funnel Views</div>
-          </div>
-          <div style={statItem}>
-            <div style={statNumber}>{bookings.toLocaleString()}</div>
-            <div style={statLabel}>Bookings</div>
-          </div>
-          <div style={statItem}>
-            <div style={statNumber}>${revenue.toLocaleString()}</div>
-            <div style={statLabel}>Revenue Generated</div>
-          </div>
+          {includeViews && (
+            <div style={statItem}>
+              <div style={statNumber}>{cardViews.toLocaleString()}</div>
+              <div style={statLabel}>Card Views</div>
+            </div>
+          )}
+          {includeConversions && (
+            <div style={statItem}>
+              <div style={statNumber}>{funnelViews.toLocaleString()}</div>
+              <div style={statLabel}>Funnel Views</div>
+            </div>
+          )}
+          {includeBookings && (
+            <div style={statItem}>
+              <div style={statNumber}>{bookings.toLocaleString()}</div>
+              <div style={statLabel}>Bookings</div>
+            </div>
+          )}
+          {includeRevenue && (
+            <div style={statItem}>
+              <div style={statNumber}>${revenue.toLocaleString()}</div>
+              <div style={statLabel}>Revenue Generated</div>
+            </div>
+          )}
         </Section>
 
-        {!hasAgreement && (
+        {showAgreementCTA && !hasAgreement && (
           <>
             <Hr style={hr} />
             <Section style={ctaSection}>

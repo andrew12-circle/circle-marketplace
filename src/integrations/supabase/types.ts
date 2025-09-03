@@ -8149,6 +8149,7 @@ export type Database = {
           ad_budget_min: number | null
           agreement_documents: Json | null
           agreement_notes: string | null
+          agreement_reminders_enabled: boolean | null
           agreement_renewal_date: string | null
           agreement_start_date: string | null
           approval_status: string | null
@@ -8156,6 +8157,7 @@ export type Database = {
           approved_by: string | null
           auto_score: number | null
           automated_checks: Json | null
+          booking_notifications_enabled: boolean | null
           brand_colors: Json | null
           budget_currency: string | null
           campaigns_funded: number | null
@@ -8201,6 +8203,7 @@ export type Database = {
           requires_circle_payout: boolean | null
           respa_risk_level: string | null
           review_count: number | null
+          review_notifications_enabled: boolean | null
           seed_active: boolean | null
           seed_expires_at: string | null
           seed_notes: string | null
@@ -8209,12 +8212,18 @@ export type Database = {
           service_states: string[] | null
           service_zip_codes: string[] | null
           sort_order: number | null
+          stats_include_bookings: boolean | null
+          stats_include_conversions: boolean | null
+          stats_include_revenue: boolean | null
+          stats_include_views: boolean | null
           support_hours: string | null
           updated_at: string
           value_statement: string | null
           vendor_type: string | null
           verification_notes: string | null
           website_url: string | null
+          weekly_stats_enabled: boolean | null
+          weekly_stats_frequency: string | null
         }
         Insert: {
           accepts_split_payments?: boolean | null
@@ -8222,6 +8231,7 @@ export type Database = {
           ad_budget_min?: number | null
           agreement_documents?: Json | null
           agreement_notes?: string | null
+          agreement_reminders_enabled?: boolean | null
           agreement_renewal_date?: string | null
           agreement_start_date?: string | null
           approval_status?: string | null
@@ -8229,6 +8239,7 @@ export type Database = {
           approved_by?: string | null
           auto_score?: number | null
           automated_checks?: Json | null
+          booking_notifications_enabled?: boolean | null
           brand_colors?: Json | null
           budget_currency?: string | null
           campaigns_funded?: number | null
@@ -8274,6 +8285,7 @@ export type Database = {
           requires_circle_payout?: boolean | null
           respa_risk_level?: string | null
           review_count?: number | null
+          review_notifications_enabled?: boolean | null
           seed_active?: boolean | null
           seed_expires_at?: string | null
           seed_notes?: string | null
@@ -8282,12 +8294,18 @@ export type Database = {
           service_states?: string[] | null
           service_zip_codes?: string[] | null
           sort_order?: number | null
+          stats_include_bookings?: boolean | null
+          stats_include_conversions?: boolean | null
+          stats_include_revenue?: boolean | null
+          stats_include_views?: boolean | null
           support_hours?: string | null
           updated_at?: string
           value_statement?: string | null
           vendor_type?: string | null
           verification_notes?: string | null
           website_url?: string | null
+          weekly_stats_enabled?: boolean | null
+          weekly_stats_frequency?: string | null
         }
         Update: {
           accepts_split_payments?: boolean | null
@@ -8295,6 +8313,7 @@ export type Database = {
           ad_budget_min?: number | null
           agreement_documents?: Json | null
           agreement_notes?: string | null
+          agreement_reminders_enabled?: boolean | null
           agreement_renewal_date?: string | null
           agreement_start_date?: string | null
           approval_status?: string | null
@@ -8302,6 +8321,7 @@ export type Database = {
           approved_by?: string | null
           auto_score?: number | null
           automated_checks?: Json | null
+          booking_notifications_enabled?: boolean | null
           brand_colors?: Json | null
           budget_currency?: string | null
           campaigns_funded?: number | null
@@ -8347,6 +8367,7 @@ export type Database = {
           requires_circle_payout?: boolean | null
           respa_risk_level?: string | null
           review_count?: number | null
+          review_notifications_enabled?: boolean | null
           seed_active?: boolean | null
           seed_expires_at?: string | null
           seed_notes?: string | null
@@ -8355,12 +8376,18 @@ export type Database = {
           service_states?: string[] | null
           service_zip_codes?: string[] | null
           sort_order?: number | null
+          stats_include_bookings?: boolean | null
+          stats_include_conversions?: boolean | null
+          stats_include_revenue?: boolean | null
+          stats_include_views?: boolean | null
           support_hours?: string | null
           updated_at?: string
           value_statement?: string | null
           vendor_type?: string | null
           verification_notes?: string | null
           website_url?: string | null
+          weekly_stats_enabled?: boolean | null
+          weekly_stats_frequency?: string | null
         }
         Relationships: [
           {

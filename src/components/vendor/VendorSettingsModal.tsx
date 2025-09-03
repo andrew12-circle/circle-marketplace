@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
@@ -19,7 +21,14 @@ import {
   Mail,
   Phone,
   MapPin,
-  Clock
+  Clock,
+  BarChart3,
+  Eye,
+  Calendar,
+  DollarSign,
+  BookOpen,
+  Star,
+  FileText
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -42,6 +51,15 @@ interface VendorSettings {
   business_hours?: string;
   email_notifications_enabled?: boolean;
   sms_notifications_enabled?: boolean;
+  weekly_stats_enabled?: boolean;
+  weekly_stats_frequency?: string;
+  stats_include_views?: boolean;
+  stats_include_bookings?: boolean;
+  stats_include_revenue?: boolean;
+  stats_include_conversions?: boolean;
+  booking_notifications_enabled?: boolean;
+  review_notifications_enabled?: boolean;
+  agreement_reminders_enabled?: boolean;
 }
 
 export const VendorSettingsModal = ({ isOpen, onClose, vendorId }: VendorSettingsModalProps) => {
@@ -57,6 +75,15 @@ export const VendorSettingsModal = ({ isOpen, onClose, vendorId }: VendorSetting
     business_hours: '',
     email_notifications_enabled: true,
     sms_notifications_enabled: false,
+    weekly_stats_enabled: true,
+    weekly_stats_frequency: 'weekly',
+    stats_include_views: true,
+    stats_include_bookings: true,
+    stats_include_revenue: true,
+    stats_include_conversions: true,
+    booking_notifications_enabled: true,
+    review_notifications_enabled: true,
+    agreement_reminders_enabled: true,
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -120,6 +147,15 @@ export const VendorSettingsModal = ({ isOpen, onClose, vendorId }: VendorSetting
           business_hours: data.business_hours || '',
           email_notifications_enabled: data.email_notifications_enabled ?? true,
           sms_notifications_enabled: data.sms_notifications_enabled ?? false,
+          weekly_stats_enabled: data.weekly_stats_enabled ?? true,
+          weekly_stats_frequency: data.weekly_stats_frequency || 'weekly',
+          stats_include_views: data.stats_include_views ?? true,
+          stats_include_bookings: data.stats_include_bookings ?? true,
+          stats_include_revenue: data.stats_include_revenue ?? true,
+          stats_include_conversions: data.stats_include_conversions ?? true,
+          booking_notifications_enabled: data.booking_notifications_enabled ?? true,
+          review_notifications_enabled: data.review_notifications_enabled ?? true,
+          agreement_reminders_enabled: data.agreement_reminders_enabled ?? true,
         });
       }
     } catch (error) {
@@ -151,6 +187,15 @@ export const VendorSettingsModal = ({ isOpen, onClose, vendorId }: VendorSetting
           business_hours: settings.business_hours,
           email_notifications_enabled: settings.email_notifications_enabled,
           sms_notifications_enabled: settings.sms_notifications_enabled,
+          weekly_stats_enabled: settings.weekly_stats_enabled,
+          weekly_stats_frequency: settings.weekly_stats_frequency,
+          stats_include_views: settings.stats_include_views,
+          stats_include_bookings: settings.stats_include_bookings,
+          stats_include_revenue: settings.stats_include_revenue,
+          stats_include_conversions: settings.stats_include_conversions,
+          booking_notifications_enabled: settings.booking_notifications_enabled,
+          review_notifications_enabled: settings.review_notifications_enabled,
+          agreement_reminders_enabled: settings.agreement_reminders_enabled,
         })
         .eq('id', vendorId);
 
@@ -363,11 +408,12 @@ export const VendorSettingsModal = ({ isOpen, onClose, vendorId }: VendorSetting
           </TabsContent>
 
           <TabsContent value="notifications" className="space-y-6">
+            {/* General Notification Settings */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Bell className="w-5 h-5" />
-                  Notification Preferences
+                  General Notifications
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -378,7 +424,7 @@ export const VendorSettingsModal = ({ isOpen, onClose, vendorId }: VendorSetting
                       <Label htmlFor="email_notifications">Email Notifications</Label>
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      Receive email alerts for new reviews, bookings, and important updates
+                      Master toggle for all email notifications
                     </p>
                   </div>
                   <Switch
@@ -402,6 +448,166 @@ export const VendorSettingsModal = ({ isOpen, onClose, vendorId }: VendorSetting
                     id="sms_notifications"
                     checked={settings.sms_notifications_enabled}
                     onCheckedChange={(checked) => handleInputChange('sms_notifications_enabled', checked)}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Weekly Stats Email Settings */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BarChart3 className="w-5 h-5" />
+                  Weekly Performance Reports
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <Label htmlFor="weekly_stats">Weekly Statistics Email</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Get regular performance reports with your service metrics
+                    </p>
+                  </div>
+                  <Switch
+                    id="weekly_stats"
+                    checked={settings.weekly_stats_enabled}
+                    onCheckedChange={(checked) => handleInputChange('weekly_stats_enabled', checked)}
+                  />
+                </div>
+
+                {settings.weekly_stats_enabled && (
+                  <>
+                    <Separator />
+                    
+                    <div className="space-y-2">
+                      <Label className="flex items-center gap-2">
+                        <Calendar className="w-4 h-4" />
+                        Email Frequency
+                      </Label>
+                      <Select
+                        value={settings.weekly_stats_frequency}
+                        onValueChange={(value) => handleInputChange('weekly_stats_frequency', value)}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select frequency" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="weekly">Weekly (Every Monday)</SelectItem>
+                          <SelectItem value="biweekly">Bi-weekly (Every 2 weeks)</SelectItem>
+                          <SelectItem value="monthly">Monthly (First Monday of month)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-4">
+                      <Label className="text-sm font-medium">Include in Reports:</Label>
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Eye className="w-4 h-4 text-muted-foreground" />
+                            <span className="text-sm">Card Views</span>
+                          </div>
+                          <Switch
+                            checked={settings.stats_include_views}
+                            onCheckedChange={(checked) => handleInputChange('stats_include_views', checked)}
+                          />
+                        </div>
+
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <BookOpen className="w-4 h-4 text-muted-foreground" />
+                            <span className="text-sm">Bookings</span>
+                          </div>
+                          <Switch
+                            checked={settings.stats_include_bookings}
+                            onCheckedChange={(checked) => handleInputChange('stats_include_bookings', checked)}
+                          />
+                        </div>
+
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <DollarSign className="w-4 h-4 text-muted-foreground" />
+                            <span className="text-sm">Revenue</span>
+                          </div>
+                          <Switch
+                            checked={settings.stats_include_revenue}
+                            onCheckedChange={(checked) => handleInputChange('stats_include_revenue', checked)}
+                          />
+                        </div>
+
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <BarChart3 className="w-4 h-4 text-muted-foreground" />
+                            <span className="text-sm">Conversions</span>
+                          </div>
+                          <Switch
+                            checked={settings.stats_include_conversions}
+                            onCheckedChange={(checked) => handleInputChange('stats_include_conversions', checked)}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Specific Notification Types */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Bell className="w-5 h-5" />
+                  Activity Notifications
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <BookOpen className="w-4 h-4" />
+                      <Label>New Bookings</Label>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Get notified when agents book your services
+                    </p>
+                  </div>
+                  <Switch
+                    checked={settings.booking_notifications_enabled}
+                    onCheckedChange={(checked) => handleInputChange('booking_notifications_enabled', checked)}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <Star className="w-4 h-4" />
+                      <Label>Reviews & Ratings</Label>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Get notified about new reviews and ratings
+                    </p>
+                  </div>
+                  <Switch
+                    checked={settings.review_notifications_enabled}
+                    onCheckedChange={(checked) => handleInputChange('review_notifications_enabled', checked)}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <FileText className="w-4 h-4" />
+                      <Label>Agreement Reminders</Label>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Receive reminders about completing your vendor agreement
+                    </p>
+                  </div>
+                  <Switch
+                    checked={settings.agreement_reminders_enabled}
+                    onCheckedChange={(checked) => handleInputChange('agreement_reminders_enabled', checked)}
                   />
                 </div>
               </CardContent>

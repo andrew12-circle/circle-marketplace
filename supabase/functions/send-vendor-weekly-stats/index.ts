@@ -54,7 +54,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log(`📅 Fetching stats for week: ${weekStartStr} - ${weekEndStr}`);
 
-    // Fetch active vendors with their stats
+    // Fetch active vendors with their stats and notification preferences
     const { data: vendors, error: vendorsError } = await supabase
       .from('vendors')
       .select(`
@@ -62,12 +62,22 @@ const handler = async (req: Request): Promise<Response> => {
         name,
         contact_email,
         circle_commission_percentage,
+        email_notifications_enabled,
+        weekly_stats_enabled,
+        weekly_stats_frequency,
+        stats_include_views,
+        stats_include_bookings,
+        stats_include_revenue,
+        stats_include_conversions,
+        agreement_reminders_enabled,
         services!inner(
           id,
           title
         )
       `)
       .eq('is_active', true)
+      .eq('email_notifications_enabled', true)
+      .eq('weekly_stats_enabled', true)
       .not('contact_email', 'is', null)
       .not('contact_email', 'eq', '');
 
@@ -130,18 +140,23 @@ const handler = async (req: Request): Promise<Response> => {
           return null;
         }
 
-        // Render the email template
+        // Render the email template with vendor preferences
         const html = await renderAsync(
           React.createElement(VendorWeeklyStatsEmail, {
             vendorName: vendor.name,
             weekStartDate: weekStartStr,
             weekEndDate: weekEndStr,
-            cardViews,
-            funnelViews,
-            bookings,
-            revenue,
+            cardViews: vendor.stats_include_views ? cardViews : 0,
+            funnelViews: vendor.stats_include_conversions ? funnelViews : 0,
+            bookings: vendor.stats_include_bookings ? bookings : 0,
+            revenue: vendor.stats_include_revenue ? revenue : 0,
             hasAgreement,
             dashboardUrl: `${Deno.env.get('SITE_URL') || 'https://app.circle.com'}/vendor-dashboard`,
+            includeViews: vendor.stats_include_views ?? true,
+            includeBookings: vendor.stats_include_bookings ?? true,
+            includeRevenue: vendor.stats_include_revenue ?? true,
+            includeConversions: vendor.stats_include_conversions ?? true,
+            showAgreementCTA: !hasAgreement && (vendor.agreement_reminders_enabled ?? true),
           })
         );
 
