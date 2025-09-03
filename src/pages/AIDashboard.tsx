@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Brain, TrendingUp, Target, Shield, Sparkles } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { CriticalOutcomes } from "@/components/ai-dashboard/CriticalOutcomes";
+
 import { BusinessHealthOverview } from "@/components/ai-dashboard/BusinessHealthOverview";
 import { MarketplaceOpportunities } from "@/components/ai-dashboard/MarketplaceOpportunities";
 import { AIRecommendationsDashboard } from "@/components/marketplace/AIRecommendationsDashboard";
@@ -134,10 +134,6 @@ const AIDashboard = () => {
 
         {/* Dashboard Content */}
         <div className="space-y-8">
-          {/* Critical Business Outcomes */}
-          <div className="bg-card/30 backdrop-blur-sm border border-border/50 rounded-xl p-6">
-            <CriticalOutcomes />
-          </div>
 
           {/* Business Health Overview */}
           <div className="bg-card/30 backdrop-blur-sm border border-border/50 rounded-xl p-6">
