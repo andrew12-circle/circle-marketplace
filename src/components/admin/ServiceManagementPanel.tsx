@@ -1129,45 +1129,6 @@ export const ServiceManagementPanel = () => {
                   </a>
                 </Button>
               )}
-              <div className="flex flex-wrap gap-2">
-                {selectedService.tags
-                  ?.filter(tag => tag.startsWith('cat:'))
-                  .map(tag => {
-                    const label = {
-                      'cat:crms': 'CRMs',
-                      'cat:ads-lead-gen': 'Ads & Lead Gen',
-                      'cat:website-idx': 'Website / IDX',
-                      'cat:seo': 'SEO',
-                      'cat:coaching': 'Coaching',
-                      'cat:marketing-automation': 'Marketing Automation',
-                      'cat:video-media': 'Video & Media',
-                      'cat:listing-showing': 'Listing & Showing',
-                      'cat:data-analytics': 'Data & Analytics',
-                      'cat:finance-business': 'Finance & Business',
-                      'cat:productivity': 'Productivity',
-                      'cat:virtual-assistants': 'Virtual Assistants',
-                      'cat:team-recruiting': 'Team & Recruiting',
-                      'cat:ce-licensing': 'CE & Licensing',
-                      'cat:client-events': 'Client Events',
-                      'cat:print-mail': 'Print & Mail',
-                      'cat:signs': 'Signage & Branding',
-                      'cat:presentations': 'Presentations',
-                      'cat:branding': 'Branding',
-                       'cat:client-retention': 'Client Retention',
-                       'cat:transaction-coordinator': 'Transaction Coordinator'
-                    }[tag] || tag.replace('cat:', '');
-                    return (
-                      <Badge key={tag} variant="secondary" className="text-xs">
-                        {label}
-                      </Badge>
-                    );
-                  })}
-                {(!selectedService.tags?.some(tag => tag.startsWith('cat:')) && selectedService.category) && (
-                  <Badge variant="outline" className="text-xs opacity-60">
-                    Legacy: {selectedService.category}
-                  </Badge>
-                )}
-              </div>
             </div>
           </CardHeader>
           <CardContent>
