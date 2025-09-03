@@ -60,6 +60,9 @@ verify_jwt = false
 [functions.send-consultation-notification]
 verify_jwt = false
 
+[functions.send-vendor-notification]
+verify_jwt = false
+
 [functions.vectorize-images]
 verify_jwt = false
 

@@ -13,7 +13,9 @@ import {
   AlertCircle,
   CheckCircle,
   Clock,
-  Trash2
+  Trash2,
+  Mail,
+  Settings
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -52,6 +54,17 @@ export const NotificationsModal = ({ isOpen, onClose, vendorId }: NotificationsM
   const fetchNotifications = async () => {
     try {
       setLoading(true);
+      
+      // Fetch vendor email notification settings
+      const { data: vendorData } = await supabase
+        .from('vendors')
+        .select('email_notifications_enabled')
+        .eq('id', vendorId)
+        .single();
+
+      if (vendorData) {
+        setEmailNotificationsEnabled(vendorData.email_notifications_enabled || false);
+      }
       
       // Generate notifications based on recent activity
       const notifications: Notification[] = [];
@@ -193,6 +206,30 @@ export const NotificationsModal = ({ isOpen, onClose, vendorId }: NotificationsM
     });
   };
 
+  const toggleEmailNotifications = async () => {
+    try {
+      const { error } = await supabase
+        .from('vendors')
+        .update({ email_notifications_enabled: !emailNotificationsEnabled })
+        .eq('id', vendorId);
+
+      if (error) throw error;
+      
+      setEmailNotificationsEnabled(!emailNotificationsEnabled);
+      toast({
+        title: "Success",
+        description: `Email notifications ${!emailNotificationsEnabled ? 'enabled' : 'disabled'}`,
+      });
+    } catch (error) {
+      console.error('Error updating email notification settings:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update notification settings",
+        variant: "destructive",
+      });
+    }
+  };
+
   const getNotificationIcon = (type: string) => {
     switch (type) {
       case 'review':
@@ -229,14 +266,24 @@ export const NotificationsModal = ({ isOpen, onClose, vendorId }: NotificationsM
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold flex items-center gap-2">
-            <Bell className="w-6 h-6" />
-            Notifications
-            {unreadCount > 0 && (
-              <Badge variant="destructive" className="ml-2">
-                {unreadCount} unread
-              </Badge>
-            )}
+          <DialogTitle className="text-2xl font-bold flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Bell className="w-6 h-6" />
+              Notifications
+              {unreadCount > 0 && (
+                <Badge variant="destructive" className="ml-2">
+                  {unreadCount} unread
+                </Badge>
+              )}
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowSettings(!showSettings)}
+              className="ml-auto"
+            >
+              <Settings className="w-4 h-4" />
+            </Button>
           </DialogTitle>
           <p className="text-muted-foreground">
             Stay updated with your latest activity and important updates
@@ -244,6 +291,28 @@ export const NotificationsModal = ({ isOpen, onClose, vendorId }: NotificationsM
         </DialogHeader>
 
         <div className="space-y-6">
+          {/* Email Settings */}
+          {showSettings && (
+            <Card className="p-4 bg-muted/50 border-2 border-primary/20">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <Mail className="w-5 h-5 text-primary" />
+                  <span className="font-semibold text-lg">Email Notifications</span>
+                </div>
+                <Button
+                  variant={emailNotificationsEnabled ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={toggleEmailNotifications}
+                >
+                  {emailNotificationsEnabled ? 'Enabled' : 'Disabled'}
+                </Button>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Receive email notifications for new reviews, bookings, and important updates directly to your inbox.
+              </p>
+            </Card>
+          )}
+
           {/* Filter Buttons */}
           <div className="flex justify-between items-center">
             <div className="flex gap-2">

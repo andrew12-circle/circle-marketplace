@@ -8168,6 +8168,7 @@ export type Database = {
           created_at: string
           custom_cta_text: string | null
           description: string | null
+          email_notifications_enabled: boolean | null
           facilitator_fee_percentage: number | null
           funnel_enabled: boolean | null
           funnel_template_id: string | null
@@ -8240,6 +8241,7 @@ export type Database = {
           created_at?: string
           custom_cta_text?: string | null
           description?: string | null
+          email_notifications_enabled?: boolean | null
           facilitator_fee_percentage?: number | null
           funnel_enabled?: boolean | null
           funnel_template_id?: string | null
@@ -8312,6 +8314,7 @@ export type Database = {
           created_at?: string
           custom_cta_text?: string | null
           description?: string | null
+          email_notifications_enabled?: boolean | null
           facilitator_fee_percentage?: number | null
           funnel_enabled?: boolean | null
           funnel_template_id?: string | null
