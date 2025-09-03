@@ -117,3 +117,7 @@ verify_jwt = true
 
 [functions.process-affiliate-stripe-payouts]
 verify_jwt = true
+
+[functions.send-vendor-weekly-stats]
+verify_jwt = false
+schedule = "0 9 * * 1"
