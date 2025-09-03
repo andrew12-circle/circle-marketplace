@@ -101,6 +101,13 @@ export const ServiceConsultationEmails = ({ serviceId, serviceName }: ServiceCon
 
   const handleSave = async () => {
     console.log('=== SAVE BUTTON CLICKED ===');
+    console.log('Current user session check...');
+    
+    // Check current session
+    const { data: { session } } = await supabase.auth.getSession();
+    console.log('Current session exists:', !!session);
+    console.log('User ID:', session?.user?.id);
+    
     setSaving(true);
     try {
       console.log('Starting save process with emails:', emails);
@@ -116,6 +123,7 @@ export const ServiceConsultationEmails = ({ serviceId, serviceName }: ServiceCon
       // Validate all emails
       const invalidEmails = filteredEmails.filter(email => !isValidEmail(email));
       if (invalidEmails.length > 0) {
+        console.log('Invalid emails found:', invalidEmails);
         toast.error(`Invalid email addresses: ${invalidEmails.join(', ')}`);
         return;
       }
@@ -123,20 +131,35 @@ export const ServiceConsultationEmails = ({ serviceId, serviceName }: ServiceCon
       // Check for duplicates
       const uniqueEmails = [...new Set(filteredEmails)];
       if (uniqueEmails.length !== filteredEmails.length) {
+        console.log('Duplicate emails detected');
         toast.error('Duplicate email addresses found. Please remove duplicates.');
         return;
       }
 
       console.log('About to update with emails:', uniqueEmails);
+      console.log('Update query details:', {
+        table: 'services',
+        serviceId,
+        updateData: { consultation_emails: uniqueEmails }
+      });
 
-      const { data, error } = await (supabase
+      const { data, error } = await supabase
         .from('services')
-        .update as any)({ consultation_emails: uniqueEmails })
-        .eq('id' as any, serviceId)
+        .update({ consultation_emails: uniqueEmails })
+        .eq('id', serviceId)
         .select();
 
-      console.log('Update response:', { data, error });
+      console.log('Update response data:', data);
       console.log('Update error details:', error);
+      
+      if (error) {
+        console.error('Supabase update error:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
+      }
 
       if (error) {
         console.error('Supabase error details:', error);
