@@ -16,6 +16,7 @@ import {
 import { Link } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { LegalFooter } from "@/components/LegalFooter";
+import { EarningsCalculator } from "@/components/affiliate/EarningsCalculator";
 
 export const AffiliateLanding = () => {
   return (
@@ -169,6 +170,17 @@ export const AffiliateLanding = () => {
               Copy to Clipboard
             </Button>
           </div>
+        </div>
+      </section>
+
+      {/* Earnings Calculator */}
+      <section className="py-20 px-4">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-3xl font-bold text-center mb-6">Calculate Your Potential</h2>
+          <p className="text-lg text-muted-foreground text-center mb-12 max-w-2xl mx-auto">
+            Use our calculator to see how much you could earn based on your network size and referral activity.
+          </p>
+          <EarningsCalculator />
         </div>
       </section>
 
