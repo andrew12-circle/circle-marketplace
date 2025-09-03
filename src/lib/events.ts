@@ -3,12 +3,35 @@ import { supabase } from '@/integrations/supabase/client'
 
 export async function logEvent(name: string, payload?: Record<string, any>) {
   try {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
-    await supabase.from('app_events').insert({ user_id: user.id, name, payload })
+    // Get current session to ensure consistency with RLS policy
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session?.user) {
+      console.log('📊 Skipping event log - no authenticated session:', name)
+      return
+    }
+
+    console.log('📊 Logging event:', name, 'for user:', session.user.id.slice(0, 8))
+    
+    const { error } = await supabase.from('app_events').insert({ 
+      user_id: session.user.id, 
+      name, 
+      payload: payload || null 
+    })
+    
+    if (error) {
+      console.warn('📊 Event log failed:', error.message, 'for event:', name)
+      
+      // If RLS policy fails, try without user_id (let RLS handle it)
+      if (error.code === 'PGRST301' || error.message.includes('policy')) {
+        console.log('📊 Retrying event without explicit user_id:', name)
+        await supabase.from('app_events').insert({ name, payload: payload || null })
+      }
+    } else {
+      console.log('📊 Event logged successfully:', name)
+    }
   } catch (error) {
     // Silently fail to avoid disrupting user experience
-    console.warn('Failed to log event:', error)
+    console.warn('📊 Failed to log event:', name, error)
   }
 }
 
