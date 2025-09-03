@@ -1420,6 +1420,38 @@ export type Database = {
         }
         Relationships: []
       }
+      app_events: {
+        Row: {
+          created_at: string | null
+          id: number
+          name: string
+          payload: Json | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+          name: string
+          payload?: Json | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: number
+          name?: string
+          payload?: Json | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "app_events_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       attack_logs: {
         Row: {
           attack_type: string
@@ -8745,6 +8777,10 @@ export type Database = {
       admin_self_check_enhanced: {
         Args: Record<PropertyKey, never>
         Returns: Json
+      }
+      admin_set_pro_status: {
+        Args: { actor?: string; pro: boolean; target_user: string }
+        Returns: undefined
       }
       audit_security_definer_functions: {
         Args: Record<PropertyKey, never>
