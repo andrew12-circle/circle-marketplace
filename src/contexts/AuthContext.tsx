@@ -68,6 +68,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [retryCount, setRetryCount] = useState(0);
+  const [lastFetchAttempt, setLastFetchAttempt] = useState(0);
+  const [isCircuitBreakerOpen, setIsCircuitBreakerOpen] = useState(false);
   const queryClient = useQueryClient();
   const { handleSessionError, triggerRecoveryBanner } = useSessionPersistence();
 
@@ -104,10 +106,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       return;
     }
 
+    // Circuit breaker: prevent rapid successive calls
+    const now = Date.now();
+    if (now - lastFetchAttempt < 2000) {
+      logger.warn('Profile fetch called too recently, throttling...');
+      return;
+    }
+    setLastFetchAttempt(now);
+
+    // Circuit breaker: if too many failures, stop trying for a while
+    if (isCircuitBreakerOpen) {
+      logger.warn('Circuit breaker open, skipping profile fetch');
+      return;
+    }
+
     try {
-      // Try direct query first with longer timeout for stability
+      // Shorter timeout for better responsiveness
       const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Profile fetch timeout')), 10000); // Increased to 10 seconds
+        setTimeout(() => reject(new Error('Profile fetch timeout')), 5000); // Reduced to 5 seconds
       });
 
       const profilePromise = supabase
@@ -131,6 +147,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         });
         setProfile(profileData);
         setRetryCount(0); // Reset retry count on success
+        setIsCircuitBreakerOpen(false); // Reset circuit breaker on success
         return;
       }
 
@@ -144,6 +161,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         logger.log('Profile fetched via RPC fallback');
         setProfile(rpcData as any);
         setRetryCount(0); // Reset retry count on success
+        setIsCircuitBreakerOpen(false); // Reset circuit breaker on success
         return;
       }
 
@@ -154,9 +172,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     } catch (error) {
       logger.error('fetchProfile exception:', error);
       
-      // More conservative retry logic with exponential backoff
-      if (retryCount < 2) { // Reduced from 3 to 2 retries
-        const backoffDelay = Math.min(5000, 1000 * Math.pow(2, retryCount)); // Exponential backoff, max 5s
+      // Conservative retry logic with circuit breaker
+      if (retryCount < 1) { // Reduced to 1 retry only
+        const backoffDelay = 3000; // Fixed 3s delay
         setTimeout(() => {
           setRetryCount(prev => prev + 1);
           fetchProfile(userId);
@@ -164,7 +182,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       } else {
         logger.warn('Max retries reached, stopping profile fetch attempts');
         setProfile(null);
-        setRetryCount(0); // Reset for future attempts
+        setRetryCount(0);
+        
+        // Open circuit breaker for 30 seconds
+        setIsCircuitBreakerOpen(true);
+        setTimeout(() => {
+          setIsCircuitBreakerOpen(false);
+          logger.log('Circuit breaker reset, profile fetch available again');
+        }, 30000);
       }
     }
   };
