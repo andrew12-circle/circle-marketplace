@@ -40,6 +40,11 @@ interface Service {
   image_url?: string;
   funnel_content?: any;
   pricing_tiers?: any[];
+  pricing_mode?: string;
+  pricing_external_url?: string;
+  pricing_cta_label?: string;
+  pricing_cta_type?: string;
+  pricing_note?: string;
   category?: string;
   is_featured?: boolean;
   is_top_pick?: boolean;
@@ -222,6 +227,11 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
       .update({
         funnel_content: sanitizedFunnel,
         pricing_tiers: sanitizedPricing,
+        pricing_mode: service.pricing_mode,
+        pricing_external_url: service.pricing_external_url,
+        pricing_cta_label: service.pricing_cta_label,
+        pricing_cta_type: service.pricing_cta_type,
+        pricing_note: service.pricing_note,
         updated_at: new Date().toISOString()
       })
       .eq('id', service.id)
@@ -400,6 +410,23 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
           <FunnelPricingEditor
             pricingTiers={pricingTiers}
             onChange={handlePricingChange}
+            pricingMode={service.pricing_mode}
+            pricingExternalUrl={service.pricing_external_url}
+            pricingCtaLabel={service.pricing_cta_label}
+            pricingCtaType={service.pricing_cta_type}
+            pricingNote={service.pricing_note}
+            onPricingModeChange={(mode) => {
+              // Update service pricing mode immediately for UI responsiveness
+              const updatedService = { ...service, pricing_mode: mode };
+              onUpdate(updatedService);
+              setHasChanges(true);
+            }}
+            onPricingFieldChange={(field, value) => {
+              // Update service pricing fields immediately for UI responsiveness
+              const updatedService = { ...service, [field]: value };
+              onUpdate(updatedService);
+              setHasChanges(true);
+            }}
           />
         </TabsContent>
 

@@ -26,6 +26,7 @@ interface Service {
   funnel_content?: any;
   disclaimer_content?: any;
   pricing_tiers?: any;
+  pricing_mode?: string;
   is_verified?: boolean;
   price_duration?: string;
   copay_allowed?: boolean;
@@ -785,7 +786,7 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
         updateData.disclaimer_content = disclaimerData.disclaimer_content;
       }
       
-      // Handle funnel content and pricing tiers with validation
+        // Handle funnel content and pricing tiers with validation
       if (funnelData?.funnel_content) {
         let funnelContent = { ...funnelData.funnel_content };
         
@@ -827,6 +828,17 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
         
         console.log(`✅ Normalized ${pricingTiers.length} pricing tiers for ${service.title}`);
         updateData.pricing_tiers = pricingTiers;
+
+        // Auto-detect pricing mode if service is set to 'auto' or doesn't have one
+        if (!service.pricing_mode || service.pricing_mode === 'auto') {
+          // Simple detection logic inline
+          const hasValidPricing = pricingTiers.some((tier: any) => 
+            tier.price && parseFloat(tier.price) > 0 && !tier.requestPricing
+          );
+          const detectedMode = hasValidPricing ? 'fixed' : 'custom_quote';
+          updateData.pricing_mode = detectedMode;
+          console.log(`🎯 Auto-detected pricing mode for ${service.title}: ${detectedMode}`);
+        }
       }
 
       // Store FAQs in service_faqs table

@@ -6505,6 +6505,11 @@ export type Database = {
           is_verified: boolean | null
           max_split_percentage_non_ssp: number | null
           price_duration: string | null
+          pricing_cta_label: string | null
+          pricing_cta_type: string
+          pricing_external_url: string | null
+          pricing_mode: string
+          pricing_note: string | null
           pricing_tiers: Json | null
           pro_price: string | null
           profile_image_url: string | null
@@ -6565,6 +6570,11 @@ export type Database = {
           is_verified?: boolean | null
           max_split_percentage_non_ssp?: number | null
           price_duration?: string | null
+          pricing_cta_label?: string | null
+          pricing_cta_type?: string
+          pricing_external_url?: string | null
+          pricing_mode?: string
+          pricing_note?: string | null
           pricing_tiers?: Json | null
           pro_price?: string | null
           profile_image_url?: string | null
@@ -6625,6 +6635,11 @@ export type Database = {
           is_verified?: boolean | null
           max_split_percentage_non_ssp?: number | null
           price_duration?: string | null
+          pricing_cta_label?: string | null
+          pricing_cta_type?: string
+          pricing_external_url?: string | null
+          pricing_mode?: string
+          pricing_note?: string | null
           pricing_tiers?: Json | null
           pro_price?: string | null
           profile_image_url?: string | null
