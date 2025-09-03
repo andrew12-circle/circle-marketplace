@@ -57,11 +57,17 @@ export const AIConciergeBanner = () => {
     if (user && profile && user.id && (profile as any).user_id) {
       const profileWithGoals = profile as any;
 
-      // Check if user needs goal assessment
-      if (!profileWithGoals.goal_assessment_completed) {
+      // Check if user needs goal assessment - but only if profile is properly loaded
+      // Add extra safety checks to prevent modal from reopening due to profile fetch issues
+      if (profileWithGoals.goal_assessment_completed === false || 
+          (profileWithGoals.goal_assessment_completed == null && 
+           profileWithGoals.created_at && 
+           !isGoalAssessmentOpen)) {
+        console.log('🎯 Opening goal assessment modal - goal_assessment_completed:', profileWithGoals.goal_assessment_completed);
         setIsGoalAssessmentOpen(true);
         setShowRecommendationsDashboard(false);
-      } else if (profileWithGoals.goal_assessment_completed && !showRecommendationsDashboard) {
+      } else if (profileWithGoals.goal_assessment_completed === true && !showRecommendationsDashboard) {
+        console.log('✅ Goal assessment completed, showing recommendations dashboard');
         setShowRecommendationsDashboard(true);
         generateRecommendations();
       }
@@ -70,7 +76,7 @@ export const AIConciergeBanner = () => {
       setIsGoalAssessmentOpen(false);
       setShowRecommendationsDashboard(false);
     }
-  }, [user, profile]);
+  }, [user, profile, isGoalAssessmentOpen]);
   const generateRecommendations = async () => {
     if (!user?.id || !(profile as any)?.goal_assessment_completed) return;
     try {
@@ -392,9 +398,21 @@ export const AIConciergeBanner = () => {
       
       <AskCircleAIModal open={isAIModalOpen} onOpenChange={setIsAIModalOpen} initialPrompt={chatInput} />
       
-      <GoalAssessmentModal open={isGoalAssessmentOpen} onOpenChange={setIsGoalAssessmentOpen} onComplete={() => {
-      setShowRecommendationsDashboard(true);
-      generateRecommendations();
-    }} />
+      <GoalAssessmentModal 
+        open={isGoalAssessmentOpen} 
+        onOpenChange={(open) => {
+          console.log('🎯 Goal assessment modal onOpenChange:', open);
+          setIsGoalAssessmentOpen(open);
+        }} 
+        onComplete={() => {
+          console.log('✅ Goal assessment completed, closing modal');
+          setIsGoalAssessmentOpen(false);
+          // Force a small delay to allow profile update to propagate
+          setTimeout(() => {
+            setShowRecommendationsDashboard(true);
+            generateRecommendations();
+          }, 1000);
+        }}
+      />
     </div>;
 };

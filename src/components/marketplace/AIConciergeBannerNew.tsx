@@ -35,16 +35,21 @@ export const AIConciergeBanner = () => {
     if (user && profile) {
       const profileWithGoals = profile as any;
       
-      // Check if user needs goal assessment
-      if (!profileWithGoals.goal_assessment_completed) {
+      // Check if user needs goal assessment - with proper null checks to prevent reopening
+      if (profileWithGoals.goal_assessment_completed === false || 
+          (profileWithGoals.goal_assessment_completed == null && 
+           profileWithGoals.created_at && 
+           !isGoalAssessmentOpen)) {
+        console.log('🎯 AIConciergeBannerNew - Opening goal assessment modal');
         setIsGoalAssessmentOpen(true);
         setShowRecommendationsDashboard(false);
-      } else if (profileWithGoals.goal_assessment_completed && !showRecommendationsDashboard) {
+      } else if (profileWithGoals.goal_assessment_completed === true && !showRecommendationsDashboard) {
+        console.log('✅ AIConciergeBannerNew - Goal completed, showing dashboard');
         setShowRecommendationsDashboard(true);
         generateRecommendations();
       }
     }
-  }, [user, profile]);
+  }, [user, profile, isGoalAssessmentOpen]);
 
   // Animated placeholder text effect
   useEffect(() => {
