@@ -124,17 +124,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     try {
-      // Shorter timeout for better responsiveness
+      // Longer timeout for better reliability - simplified approach
       const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Profile fetch timeout')), 5000); // Reduced to 5 seconds
+        setTimeout(() => reject(new Error('Profile fetch timeout')), 15000); // Increased to 15 seconds
       });
 
+      // Simplified query without ordering for better performance
       const profilePromise = supabase
         .from('profiles')
         .select('*')
         .eq('user_id', userId)
-        .order('created_at', { ascending: false })
-        .limit(1)
         .maybeSingle();
 
       const { data: profileData, error: profileError } = await Promise.race([
@@ -143,7 +142,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       ]) as any;
 
       if (!profileError && profileData) {
-        logger.log('Profile fetched via direct query:', { 
+        logger.log('Profile fetched successfully:', { 
           userId, 
           isAdmin: profileData.is_admin,
           displayName: profileData.display_name 
@@ -154,11 +153,28 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return;
       }
 
+      if (profileError) {
+        logger.warn('Profile query error:', profileError);
+        
+        // If it's a permission error, don't retry
+        if (profileError.code === 'PGRST116' || profileError.message?.includes('permission')) {
+          logger.warn('Permission denied for profile access');
+          setProfile(null);
+          setRetryCount(0);
+          return;
+        }
+      }
+
       // Fallback to RPC if direct query fails
       logger.warn('Direct profile query failed, trying RPC fallback:', profileError);
-      const { data: rpcData, error: rpcError } = await supabase
+      const rpcPromise = supabase
         .rpc('get_user_profile_safe', { p_user_id: userId })
         .maybeSingle();
+
+      const { data: rpcData, error: rpcError } = await Promise.race([
+        rpcPromise,
+        timeoutPromise
+      ]) as any;
 
       if (!rpcError && rpcData) {
         logger.log('Profile fetched via RPC fallback');
@@ -175,9 +191,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     } catch (error) {
       logger.error('fetchProfile exception:', error);
       
-      // Conservative retry logic with circuit breaker
-      if (retryCount < 1) { // Reduced to 1 retry only
-        const backoffDelay = 3000; // Fixed 3s delay
+      // More conservative retry logic with circuit breaker
+      if (retryCount < 2) { // Increased to 2 retries
+        const backoffDelay = Math.min(5000 * Math.pow(2, retryCount), 10000); // Exponential backoff, max 10s
         setTimeout(() => {
           setRetryCount(prev => prev + 1);
           fetchProfile(userId);
@@ -187,12 +203,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setProfile(null);
         setRetryCount(0);
         
-        // Open circuit breaker for 30 seconds
+        // Open circuit breaker for 60 seconds instead of 30
         setIsCircuitBreakerOpen(true);
         setTimeout(() => {
           setIsCircuitBreakerOpen(false);
           logger.log('Circuit breaker reset, profile fetch available again');
-        }, 30000);
+        }, 60000);
       }
     }
   };
