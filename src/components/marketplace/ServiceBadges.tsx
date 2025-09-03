@@ -93,16 +93,8 @@ export const ServiceBadges = ({
 
 
 
-  // New service (created in last 30 days) - mock for now
-  const isNew = Math.random() < 0.1; // 10% chance for demo
-  if (isNew) {
-    badges.push({
-      label: 'New',
-      icon: <Zap className="w-3 h-3" />,
-      className: 'bg-gradient-to-r from-teal-500 to-cyan-500 text-white border-0',
-      priority: 10
-    });
-  }
+  // Note: New service logic removed to prevent flashing badges
+  // TODO: Add proper created_at field to Service type when implementing this feature
 
   // Sort by priority and limit
   const sortedBadges = badges
