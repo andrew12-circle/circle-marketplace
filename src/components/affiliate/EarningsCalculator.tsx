@@ -6,9 +6,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Calculator, DollarSign, TrendingUp, Users } from "lucide-react";
 
 export const EarningsCalculator = () => {
-  const [agents, setAgents] = useState(25);
+  const [agents, setAgents] = useState(50);
   const [convertPercent, setConvertPercent] = useState(60);
-  const [monthlySpend, setMonthlySpend] = useState(200);
+  const [monthlySpend, setMonthlySpend] = useState(250);
   const [months, setMonths] = useState(12);
   const [proOnly, setProOnly] = useState(false);
 
