@@ -118,12 +118,16 @@ export const VendorSettingsModal = ({ isOpen, onClose, vendorId }: VendorSetting
           .eq('user_id', vendorId)
           .single();
 
+        // Get user's auth email as default contact email
+        const { data: { user } } = await supabase.auth.getUser();
+        const userEmail = user?.email || '';
+
         const { data: newVendor, error: createError } = await supabase
           .from('vendors')
           .insert({
             id: vendorId,
             name: profileData?.display_name || 'New Vendor',
-            contact_email: '', // Will be filled by user
+            contact_email: userEmail, // Use auth email as default
             approval_status: 'pending',
             is_active: true
           })
