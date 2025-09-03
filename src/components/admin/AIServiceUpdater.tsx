@@ -250,7 +250,7 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
           research: 8 * 60 * 1000, // 8 minutes for research
           details: 5 * 60 * 1000,  // 5 minutes for details
           disclaimer: 5 * 60 * 1000, // 5 minutes for disclaimer
-          funnel: 5 * 60 * 1000,    // 5 minutes for funnel
+          funnel: 3 * 60 * 1000,    // 3 minutes for funnel (reduced - often gets stuck)
           faqs: 5 * 60 * 1000,      // 5 minutes for FAQs
           verification: 2 * 60 * 1000 // 2 minutes for verification
         };
@@ -481,11 +481,16 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
   };
 
   const generateFunnel = async (service: Service, progress: UpdateProgress): Promise<any> => {
-    console.log(`Generating funnel for ${service.title}...`);
+    console.log(`🎨 Generating funnel for ${service.title}...`);
     updateSectionProgress(service.id, 'funnel', 'generating');
     
     try {
-      const { data, error } = await supabase.functions.invoke('ai-service-generator', {
+      // Add timeout protection for funnel generation (2 minutes)
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Funnel generation timeout after 2 minutes')), 120000)
+      );
+      
+      const funnelPromise = supabase.functions.invoke('ai-service-generator', {
         body: {
           type: 'funnel',
           service: {
@@ -496,14 +501,33 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
         }
       });
 
-      if (error) throw error;
+      const { data, error } = await Promise.race([funnelPromise, timeoutPromise]) as any;
+
+      if (error) {
+        console.error(`❌ Funnel generation API error for ${service.title}:`, error);
+        throw error;
+      }
       
+      // Validate funnel data structure
+      if (!data || typeof data !== 'object') {
+        console.error(`❌ Invalid funnel data returned for ${service.title}:`, data);
+        throw new Error('Invalid funnel data structure returned from AI');
+      }
+      
+      console.log(`✅ Funnel generation completed for ${service.title}`);
       updateSectionProgress(service.id, 'funnel', 'completed');
       await recordSectionUpdate(service.id, 'funnel', 'AI generated sales funnel and pricing tiers');
       return data;
     } catch (error) {
-      console.error('Error generating funnel:', error);
+      console.error(`❌ Funnel generation error for ${service.title}:`, error);
       updateSectionProgress(service.id, 'funnel', 'error');
+      
+      // Don't throw error - let process continue with other sections
+      if (error.message?.includes('timeout')) {
+        console.log(`⚠️ Funnel generation timed out for ${service.title}, continuing with other sections...`);
+        return null;
+      }
+      
       throw error;
     }
   };
@@ -852,8 +876,13 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
       // Generate disclaimer  
       disclaimerData = await generateDisclaimer(service, progress);
       
-      // Generate funnel
-      funnelData = await generateFunnel(service, progress);
+      // Generate funnel (with error tolerance)
+      try {
+        funnelData = await generateFunnel(service, progress);
+      } catch (funnelError) {
+        console.warn(`⚠️ Funnel generation failed for ${service.title}, continuing with other sections:`, funnelError);
+        updateSectionProgress(service.id, 'funnel', 'error');
+      }
       
       // Generate FAQs
       faqsData = await generateServiceFAQs(service, progress);
