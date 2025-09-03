@@ -526,6 +526,15 @@ export default function AdminDashboard() {
           <Tabs defaultValue="users" className="w-full space-y-8">
           <div className="bg-card rounded-xl border border-border shadow-sm p-4 space-y-4">
             <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 xl:grid-cols-16 gap-1 bg-muted/50 p-1 rounded-lg h-auto min-h-[60px]">
+              {/* Spiritual Group - Moved to first position */}
+              <TabsTrigger 
+                value="spiritual" 
+                className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
+              >
+                <Heart className="h-5 w-5" />
+                <span className="hidden sm:inline">Spiritual</span>
+              </TabsTrigger>
+              
               {/* User Management Group */}
               <TabsTrigger 
                 value="users" 
@@ -637,13 +646,6 @@ export default function AdminDashboard() {
               >
                 <ShieldIcon className="h-5 w-5" />
                 <span className="hidden sm:inline">RESPA</span>
-              </TabsTrigger>
-              <TabsTrigger 
-                value="spiritual" 
-                className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
-              >
-                <Heart className="h-5 w-5" />
-                <span className="hidden sm:inline">Spiritual</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="commissions" 
