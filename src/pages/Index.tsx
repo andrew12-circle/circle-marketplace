@@ -35,21 +35,23 @@ const Index = () => {
   // Refresh profile data when component mounts or when returning to this page
   useEffect(() => {
     if (user && profile) {
+      console.log('🔄 Index page requesting profile refresh on mount');
       refreshProfile();
     }
-  }, [user, refreshProfile]);
+  }, [user, profile]); // Removed refreshProfile from dependencies
 
   // Also refresh when the page becomes visible (user returns from another tab/app)
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (!document.hidden && user && profile) {
+        console.log('🔄 Index page requesting profile refresh on visibility change');
         refreshProfile();
       }
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, [user, profile, refreshProfile]);
+  }, [user, profile]); // Removed refreshProfile from dependencies
 
   return (
     <div className="min-h-screen bg-background">
