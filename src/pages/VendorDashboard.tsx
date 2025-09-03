@@ -16,6 +16,7 @@ import { ServiceCard } from '@/components/marketplace/ServiceCard';
 import { ServiceDetailsModal } from '@/components/marketplace/ServiceDetailsModal';
 import { ServiceFunnelEditorModal } from '@/components/marketplace/ServiceFunnelEditorModal';
 import { SponsoredPositionsModal } from '@/components/vendor/SponsoredPositionsModal';
+import { ReviewsManagementModal } from '@/components/vendor/ReviewsManagementModal';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useVendorActivityTracking } from '@/hooks/useVendorActivityTracking';
@@ -200,6 +201,7 @@ export const VendorDashboard = () => {
   const [selectedService, setSelectedService] = useState<VendorService | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [isSponsoredModalOpen, setIsSponsoredModalOpen] = useState(false);
+  const [isReviewsModalOpen, setIsReviewsModalOpen] = useState(false);
 
   useEffect(() => {
     fetchVendorData();
@@ -685,7 +687,11 @@ export const VendorDashboard = () => {
                 <Zap className="w-4 h-4 mr-2" />
                 Boost Visibility
               </Button>
-              <Button variant="outline" className="w-full justify-start">
+              <Button 
+                variant="outline" 
+                className="w-full justify-start"
+                onClick={() => setIsReviewsModalOpen(true)}
+              >
                 <Award className="w-4 h-4 mr-2" />
                 Manage Reviews
               </Button>
@@ -1031,11 +1037,18 @@ export const VendorDashboard = () => {
       )}
 
       {vendorId && (
-        <SponsoredPositionsModal
-          isOpen={isSponsoredModalOpen}
-          onClose={() => setIsSponsoredModalOpen(false)}
-          vendorId={vendorId}
-        />
+        <>
+          <SponsoredPositionsModal
+            isOpen={isSponsoredModalOpen}
+            onClose={() => setIsSponsoredModalOpen(false)}
+            vendorId={vendorId}
+          />
+          <ReviewsManagementModal
+            isOpen={isReviewsModalOpen}
+            onClose={() => setIsReviewsModalOpen(false)}
+            vendorId={vendorId}
+          />
+        </>
       )}
     </div>
   );
