@@ -62,6 +62,7 @@ import { AutoRecoverySystem } from '@/components/marketplace/AutoRecoverySystem'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Upload, Building, Youtube, DollarSign, BarChart3, Coins, Shield as ShieldIcon, Users2, Send, BookOpen, Heart, MessageSquare } from 'lucide-react';
 import { SpiritualDashboard } from '@/components/admin/SpiritualDashboard';
+import { AdminAffiliates } from '@/components/admin/AdminAffiliates';
 
 interface UserProfile {
   id: string;
@@ -654,6 +655,13 @@ export default function AdminDashboard() {
                 <DollarSign className="h-5 w-5" />
                 <span className="hidden sm:inline">Commissions</span>
               </TabsTrigger>
+              <TabsTrigger 
+                value="affiliates" 
+                className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
+              >
+                <TrendingUp className="h-5 w-5" />
+                <span className="hidden sm:inline">Affiliates</span>
+              </TabsTrigger>
             </TabsList>
           </div>
 
@@ -1059,6 +1067,10 @@ export default function AdminDashboard() {
                   </div>
                 </CardContent>
               </Card>
+            </TabsContent>
+
+            <TabsContent value="affiliates" className="space-y-6">
+              <AdminAffiliates />
             </TabsContent>
 
             <TabsContent value="retention" className="space-y-6">

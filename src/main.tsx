@@ -75,6 +75,11 @@ const AgentPaymentCanceled = lazy(() => import("./pages/AgentPaymentCanceled").t
 const CommandCenterTest = lazy(() => import("./pages/CommandCenterTest").then(m => ({ default: m.CommandCenterTest })));
 const QARunner = lazy(() => import("./pages/QARunner").then(m => ({ default: m.QARunner })));
 
+// Affiliate pages
+const AffiliateLanding = lazy(() => import("./pages/AffiliateLanding").then(m => ({ default: m.AffiliateLanding })));
+const AffiliateApplication = lazy(() => import("./pages/AffiliateApplication").then(m => ({ default: m.AffiliateApplication })));
+const AffiliateDashboard = lazy(() => import("./pages/AffiliateDashboard").then(m => ({ default: m.AffiliateDashboard })));
+
 // Loading component for lazy routes
 const RouteLoader = () => (
   <div className="min-h-screen flex items-center justify-center">
@@ -187,6 +192,11 @@ createRoot(document.getElementById("root")!).render(
                 <Route path="/agent-payment-canceled" element={<AgentPaymentCanceled />} />
                 <Route path="/command-center-test" element={<CommandCenterTest />} />
                 <Route path="/qa" element={<QARunner />} />
+                
+                {/* Affiliate routes */}
+                <Route path="/affiliate" element={<AffiliateLanding />} />
+                <Route path="/affiliate/apply" element={<AffiliateApplication />} />
+                <Route path="/affiliate/dashboard" element={<AffiliateDashboard />} />
                 
                 {/* Profile settings alternate path */}
                 <Route path="/profile" element={<ProfileSettings />} />

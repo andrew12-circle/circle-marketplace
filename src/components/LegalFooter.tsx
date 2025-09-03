@@ -103,6 +103,9 @@ export const LegalFooter = () => {
               <Link to="/ministry" className="block text-sm text-muted-foreground hover:text-primary">
                 Circle Ministry
               </Link>
+              <Link to="/affiliate" className="block text-sm text-muted-foreground hover:text-primary">
+                Affiliate Program
+              </Link>
               <Link to="/dispute-resolution" className="block text-sm text-muted-foreground hover:text-primary">
                 Dispute Resolution
               </Link>
