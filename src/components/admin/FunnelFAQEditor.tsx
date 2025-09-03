@@ -15,17 +15,9 @@ interface FAQSection {
   color?: string;
 }
 
-interface CallToAction {
-  title: string;
-  description: string;
-  buttonText: string;
-  buttonVariant?: string;
-}
-
 interface FunnelFAQEditorProps {
   faqSections: FAQSection[];
-  callToAction: CallToAction;
-  onChange: (type: 'faqSections' | 'callToAction', data: FAQSection[] | CallToAction) => void;
+  onChange: (data: FAQSection[]) => void;
 }
 
 const FAQ_COLORS = [
@@ -72,14 +64,8 @@ const DEFAULT_FAQ_SECTIONS = [
   }
 ];
 
-export const FunnelFAQEditor = ({ faqSections, callToAction, onChange }: FunnelFAQEditorProps) => {
+export const FunnelFAQEditor = ({ faqSections, onChange }: FunnelFAQEditorProps) => {
   const [faqData, setFaqData] = useState<FAQSection[]>(faqSections?.length ? faqSections : DEFAULT_FAQ_SECTIONS);
-  const [ctaData, setCtaData] = useState<CallToAction>(callToAction || {
-    title: "Ready to Transform Your Business?",
-    description: "Join thousands of agents who've already made the switch",
-    buttonText: "Book Your Free Demo",
-    buttonVariant: "default"
-  });
 
   const addFAQSection = () => {
     const newSection: FAQSection = {
@@ -90,20 +76,20 @@ export const FunnelFAQEditor = ({ faqSections, callToAction, onChange }: FunnelF
     };
     const updated = [...faqData, newSection];
     setFaqData(updated);
-    onChange('faqSections', updated);
+    onChange(updated);
   };
 
   const updateFAQSection = (index: number, field: keyof FAQSection, value: string) => {
     const updated = [...faqData];
     updated[index] = { ...updated[index], [field]: value };
     setFaqData(updated);
-    onChange('faqSections', updated);
+    onChange(updated);
   };
 
   const removeFAQSection = (index: number) => {
     const updated = faqData.filter((_, i) => i !== index);
     setFaqData(updated);
-    onChange('faqSections', updated);
+    onChange(updated);
   };
 
   const moveFAQSection = (index: number, direction: 'up' | 'down') => {
@@ -113,14 +99,9 @@ export const FunnelFAQEditor = ({ faqSections, callToAction, onChange }: FunnelF
     const updated = [...faqData];
     [updated[index], updated[newIndex]] = [updated[newIndex], updated[index]];
     setFaqData(updated);
-    onChange('faqSections', updated);
+    onChange(updated);
   };
 
-  const updateCTA = (field: keyof CallToAction, value: string) => {
-    const updated = { ...ctaData, [field]: value };
-    setCtaData(updated);
-    onChange('callToAction', updated);
-  };
 
 
   return (
@@ -236,70 +217,6 @@ export const FunnelFAQEditor = ({ faqSections, callToAction, onChange }: FunnelF
         </CardContent>
       </Card>
 
-      {/* Call to Action */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Call to Action</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label>CTA Title</Label>
-            <Input
-              value={ctaData.title || ""}
-              onChange={(e) => updateCTA('title', e.target.value)}
-              placeholder="Ready to Transform Your Business?"
-            />
-          </div>
-
-          <div>
-            <Label>CTA Description</Label>
-            <Textarea
-              value={ctaData.description || ""}
-              onChange={(e) => updateCTA('description', e.target.value)}
-              placeholder="Join thousands of agents who've already made the switch"
-              rows={2}
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label>Button Text</Label>
-              <Input
-                value={ctaData.buttonText || ""}
-                onChange={(e) => updateCTA('buttonText', e.target.value)}
-                placeholder="Book Your Free Demo"
-              />
-            </div>
-            <div>
-              <Label>Button Style</Label>
-              <Select
-                value={ctaData.buttonVariant || 'default'}
-                onValueChange={(value) => updateCTA('buttonVariant', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="default">Default</SelectItem>
-                  <SelectItem value="secondary">Secondary</SelectItem>
-                  <SelectItem value="outline">Outline</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          {/* CTA Preview */}
-          <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
-            <div className="text-center">
-              <h4 className="text-xl font-bold text-gray-900 mb-2">{ctaData.title}</h4>
-              <p className="text-gray-600 mb-4">{ctaData.description}</p>
-              <Button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
-                {ctaData.buttonText}
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 };

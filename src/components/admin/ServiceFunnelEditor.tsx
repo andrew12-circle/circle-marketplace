@@ -451,8 +451,7 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
         <TabsContent value="faq" className="space-y-4">
           <FunnelFAQEditor
             faqSections={funnelData.faqSections || []}
-            callToAction={funnelData.callToAction || {}}
-            onChange={(type, data) => handleDataChange(type, data)}
+            onChange={(data) => handleDataChange('faqSections', data)}
           />
         </TabsContent>
       </Tabs>
