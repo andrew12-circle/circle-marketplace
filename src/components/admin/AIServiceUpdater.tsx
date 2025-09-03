@@ -802,12 +802,12 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
           .eq('service_id', service.id);
 
         // Insert new FAQs
-        const faqInserts = faqsData.faqs.map((faq: any) => ({
+        const faqInserts = faqsData.faqs.map((faq: any, index: number) => ({
           service_id: service.id,
           question: faq.question,
           answer: faq.answer,
           category: faq.category || 'general',
-          display_order: faq.order || 1
+          display_order: faq.order || (index + 1)
         }));
 
         const { error: faqError } = await supabase
