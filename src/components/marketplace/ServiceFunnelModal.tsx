@@ -552,7 +552,7 @@ export const ServiceFunnelModal = ({
         </DialogHeader>
         
         {/* Action Buttons - Fixed Position */}
-        <div className="absolute top-4 right-14 z-50 flex gap-2">
+        <div className="absolute top-4 right-20 z-50 flex gap-2">
           <Popover open={isSharePopoverOpen} onOpenChange={setIsSharePopoverOpen}>
             <PopoverTrigger asChild>
               <Button
