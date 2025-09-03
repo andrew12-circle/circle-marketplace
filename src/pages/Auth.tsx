@@ -15,6 +15,8 @@ import { SecureForm } from "@/components/common/SecureForm";
 import { commonRules, checkAccountLockout, clearFailedAttempts } from "@/hooks/useSecureInput";
 import { PasswordStrengthIndicator } from "@/components/auth/PasswordStrengthIndicator";
 import { AccountLockoutAlert } from "@/components/auth/AccountLockoutAlert";
+import { TurnstileGate } from "@/components/security/TurnstileGate";
+import { logEvent } from "@/lib/events";
 
 const circleLogoUrl = "/circle-logo-updated.png";
 
@@ -39,6 +41,8 @@ export const Auth = () => {
     timeRemainingSeconds: 0
   });
   const [passwordStrong, setPasswordStrong] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [showTurnstile, setShowTurnstile] = useState(false);
   
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -67,22 +71,26 @@ export const Auth = () => {
     return data;
   };
 
-  const handleSignUp = async (email: string, password: string, displayName: string) => {
-    const redirectUrl = `${window.location.origin}/`;
-    
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: redirectUrl,
-        data: {
-          display_name: displayName
-        }
-      }
+  const handleSignUp = async (email: string, password: string, displayName: string, turnstileToken?: string) => {
+    // For signup, use our protected endpoint
+    const response = await fetch('/functions/v1/auth-signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email,
+        password,
+        displayName,
+        turnstileToken
+      })
     });
 
-    if (error) throw error;
-    return data;
+    const result = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(result.error || 'Signup failed');
+    }
+
+    return result;
   };
 
   const handleForgotPassword = async (email: string) => {
@@ -99,13 +107,13 @@ export const Auth = () => {
     setLoading(true);
     console.log('Starting Google sign-in...');
     
-    // Check if we're in Lovable preview environment
-    const isLovablePreview = window.location.hostname.includes('lovable.app');
+    // Check if Google OAuth is enabled
+    const googleEnabled = process.env.NEXT_PUBLIC_GOOGLE_OAUTH_ON === 'true';
     
-    if (isLovablePreview) {
+    if (!googleEnabled) {
       toast({
         title: "Google Sign-In Unavailable",
-        description: "Google OAuth is not available in preview. Use email/password to test authentication.",
+        description: "Google sign-in is not enabled. Use email/password to create an account.",
         variant: "destructive",
       });
       setLoading(false);
@@ -186,24 +194,39 @@ export const Auth = () => {
         await handleLogin(data.email, data.password);
         // Clear failed attempts on successful login
         await clearFailedAttempts(data.email);
+        // Log successful login
+        await logEvent('login_success', { email: data.email });
         toast({
           title: "Welcome back!",
           description: "You've been successfully logged in.",
         });
         navigate('/');
       } else {
-        const { user } = await handleSignUp(
+        // Validate Turnstile token for signup
+        if (!turnstileToken) {
+          setShowTurnstile(true);
+          toast({
+            title: "Security Verification Required",
+            description: "Please complete the security verification to continue.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        await handleSignUp(
           data.email, 
           data.password, 
-          data.displayName || ''
+          data.displayName || '',
+          turnstileToken
         );
         
-        if (user) {
-          toast({
-            title: "Account created!",
-            description: "Welcome! Check your email to verify your account.",
-          });
-        }
+        // Log successful signup
+        await logEvent('signup_success', { email: data.email });
+        toast({
+          title: "Account created!",
+          description: "Please check your email to verify your account before signing in.",
+        });
+        setIsLogin(true); // Switch to login mode after successful signup
       }
     } catch (error: any) {
       let errorMessage = "An error occurred. Please try again.";
@@ -462,6 +485,20 @@ export const Auth = () => {
               </div>
             )}
 
+            {/* Turnstile Security Verification (Signup only) */}
+            {!isLogin && !showForgotPassword && (showTurnstile || process.env.NODE_ENV === 'production') && (
+              <TurnstileGate
+                siteKey={process.env.REACT_APP_TURNSTILE_SITE_KEY || '1x00000000000000000000AA'}
+                onSuccess={(token) => {
+                  setTurnstileToken(token);
+                  setShowTurnstile(false);
+                }}
+                onError={(error) => {
+                  console.error('Turnstile error:', error);
+                  setTurnstileToken(null);
+                }}
+              />
+            )}
 
             {/* Submit Button */}
             <Button 

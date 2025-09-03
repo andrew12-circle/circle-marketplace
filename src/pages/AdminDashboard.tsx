@@ -58,6 +58,8 @@ import { SponsoredPlacementsManager } from '@/components/admin/SponsoredPlacemen
 import { ServiceVisibilityManager } from '@/components/admin/ServiceVisibilityManager';
 import { useAutoRecovery } from '@/hooks/useAutoRecovery';
 import { AutoRecoverySystem } from '@/components/marketplace/AutoRecoverySystem';
+import { logEvent } from '@/lib/events';
+import { getProStatus } from '@/lib/profile';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Upload, Building, Youtube, DollarSign, BarChart3, Coins, Shield as ShieldIcon, Users2, Send, BookOpen, Heart, MessageSquare } from 'lucide-react';
@@ -397,29 +399,38 @@ export default function AdminDashboard() {
 
   const handleToggleProStatus = async (userId: string, currentStatus: boolean) => {
     try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ is_pro_member: !currentStatus })
-        .eq('user_id', userId);
+      // Use the secure RPC function to toggle Pro status
+      const { error } = await supabase.rpc('admin_set_pro_status', {
+        target_user: userId,
+        pro: !currentStatus
+      });
 
       if (error) throw error;
 
       // Update local state
-      setUsers(users.map(user => 
+      const updateUser = (user: UserProfile) => 
         user.user_id === userId 
-          ? { ...user, is_pro_member: !currentStatus }
-          : user
-      ));
+          ? { ...user, is_pro: !currentStatus, is_pro_member: !currentStatus }
+          : user;
+
+      setUsers(users.map(updateUser));
+      setFilteredUsers(filteredUsers.map(updateUser));
+
+      // Log the admin action
+      await logEvent('admin_pro_toggle', { 
+        target_user: userId, 
+        new_status: !currentStatus 
+      });
 
       toast({
         title: 'Pro Status Updated',
-        description: `User ${!currentStatus ? 'granted' : 'removed'} pro membership`,
+        description: `User ${!currentStatus ? 'granted' : 'removed from'} Pro membership`,
       });
     } catch (error) {
-      console.error('Error updating pro status:', error);
+      console.error('Error updating Pro status:', error);
       toast({
         title: 'Error',
-        description: 'Failed to update pro status',
+        description: error instanceof Error ? error.message : 'Failed to update Pro status',
         variant: 'destructive',
       });
     }
@@ -863,10 +874,10 @@ export default function AdminDashboard() {
                               
                               <div className="flex flex-col items-center gap-2">
                                 <label className="text-xs font-medium text-slate-600">Pro</label>
-                                 <Switch
-                                   checked={user.is_pro_member || false}
+                                <Switch
+                                   checked={getProStatus(user) || false}
                                    disabled={operationLoading}
-                                   onCheckedChange={() => handleToggleProStatus(user.user_id, user.is_pro_member || false)}
+                                   onCheckedChange={() => handleToggleProStatus(user.user_id, getProStatus(user) || false)}
                                   className="data-[state=checked]:bg-amber-600"
                                 />
                               </div>

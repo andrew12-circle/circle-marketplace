@@ -7,6 +7,7 @@ import { removeLegacyAuthCookies, initCookieMonitoring } from '@/lib/cookies';
 import { logger } from '@/utils/logger';
 import { useQueryClient } from '@tanstack/react-query';
 import { useSessionPersistence } from '@/hooks/useSessionPersistence';
+import { getProStatus } from '@/lib/profile';
 
 interface Profile {
   id: string;
@@ -38,6 +39,7 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   profile: Profile | null;
+  pro: boolean;
   loading: boolean;
   signOut: () => Promise<{ error: Error | null }>;
   updateProfile: (updates: Partial<Profile>) => Promise<{ error: Error | null }>;
@@ -48,6 +50,7 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   session: null,
   profile: null,
+  pro: false,
   loading: true,
   signOut: async () => ({ error: null }),
   updateProfile: async () => ({ error: null }),
@@ -302,6 +305,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     user,
     session,
     profile,
+    pro: getProStatus(profile),
     loading,
     signOut,
     updateProfile,
