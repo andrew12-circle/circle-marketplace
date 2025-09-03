@@ -326,7 +326,7 @@ export const CategoryBlocks = ({ onCategoryClick, services, allServices, activeF
   );
 
   return (
-    <div className="mb-8">
+    <div className="mb-8" data-tour="category-blocks">
       <h2 className="text-2xl font-semibold mb-6 text-foreground">Shop by Category</h2>
       
       {renderCategoryGrid(

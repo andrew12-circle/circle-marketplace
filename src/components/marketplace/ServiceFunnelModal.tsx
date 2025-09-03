@@ -1006,7 +1006,7 @@ export const ServiceFunnelModal = ({
                               Buy Now
                             </Button>
                           ) : (
-                            <Button onClick={() => setIsConsultationFlowOpen(true)} className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all">
+                            <Button onClick={() => setIsConsultationFlowOpen(true)} className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all" data-tour="book-consultation">
                               <Calendar className="w-5 h-5 mr-2" />
                               Book Consultation
                             </Button>

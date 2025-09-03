@@ -522,6 +522,7 @@ export const ServiceCard = ({
               size="icon"
               className="h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background"
               onClick={handleSave}
+              data-tour="save-button"
             >
               <Heart 
                 className={`h-4 w-4 transition-colors ${
@@ -656,7 +657,7 @@ export const ServiceCard = ({
 
                   {/* Co-Pay Section - Mobile Optimized */}
                   {service.copay_allowed && service.respa_split_limit && ((service.is_verified && service.pro_price) || (!service.is_verified && service.retail_price)) && (
-                    <div className="bg-green-50 border-2 border-green-200 rounded-lg p-3">
+                    <div className="bg-green-50 border-2 border-green-200 rounded-lg p-3" data-tour="copay-option">
                       <div className="text-center">
                         <div className="flex items-center justify-center gap-2 text-sm font-medium text-green-700 mb-1">
                           <span>Co-Pay Available</span>
@@ -794,10 +795,10 @@ export const ServiceCard = ({
                      <div className="space-y-1">
                        <Tooltip delayDuration={0}>
                          <TooltipTrigger asChild>
-                           <div className="flex items-center justify-between p-2 bg-green-50 rounded-lg border border-green-200 opacity-75 cursor-pointer hover:opacity-100 transition-opacity">
-                             <div className="flex items-center gap-1">
-                               <Lock className="w-3 h-3 text-green-600" />
-                               <span className="text-sm font-medium text-green-600">Potential Co-Pay:</span>
+                            <div className="flex items-center justify-between p-2 bg-green-50 rounded-lg border border-green-200 opacity-75 cursor-pointer hover:opacity-100 transition-opacity" data-tour="copay-badge">
+                              <div className="flex items-center gap-1">
+                                <Lock className="w-3 h-3 text-green-600" />
+                                <span className="text-sm font-medium text-green-600">Potential Co-Pay:</span>
                                <button 
                                  className="w-3 h-3 rounded-full bg-green-600 flex items-center justify-center cursor-help hover:bg-green-700 transition-colors"
                                  onMouseEnter={() => {
@@ -892,6 +893,7 @@ export const ServiceCard = ({
                 size="sm"
                 className="h-9 px-3"
                 onClick={handleViewDetailsButton}
+                data-tour="view-details-button"
               >
                 Learn more
               </Button>

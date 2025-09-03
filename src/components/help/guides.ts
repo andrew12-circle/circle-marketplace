@@ -23,41 +23,69 @@ export interface Guide {
 
 export const guides: Guide[] = [
   {
-    id: 'marketplace-first-service',
-    title: 'Find Your First Service',
-    description: 'Learn how to search, filter, and book your first service in the marketplace.',
+    id: 'marketplace-complete-guide',
+    title: 'Master the Circle Marketplace',
+    description: 'Complete guide to shopping, categories, funnels, and getting vendor help in the marketplace.',
     difficulty: 'beginner',
-    estimatedTime: '3 min',
+    estimatedTime: '6 min',
     routes: ['/marketplace', '/'],
     steps: [
       {
         id: 'step-1',
-        title: 'Open the Marketplace',
-        content: 'First, navigate to the Marketplace to see all available services.',
-        selector: '[data-tour="marketplace-tab"]',
+        title: 'Explore Service Categories',
+        content: 'Start by browsing the category blocks. Each category shows different types of services like CRMs, Marketing Tools, and Lead Generation. Click any category to filter services.',
+        selector: '.category-blocks, [data-tour="category-blocks"]',
         position: 'bottom'
       },
       {
         id: 'step-2',
-        title: 'Use Search & Filters',
-        content: 'Use the search bar and filters to find services that match your needs.',
+        title: 'Use Smart Search',
+        content: 'Use the search bar to find specific services. You can search by service name, category, or keywords. The search will suggest relevant services as you type.',
         selector: '[data-tour="search-container"]',
         position: 'bottom'
       },
       {
         id: 'step-3',
+        title: 'Apply Filters & Sort',
+        content: 'Use the filter options to narrow down services by price range, features (like Co-Pay Available), or verification status. Sort by featured, rating, or price to find what works best for you.',
+        selector: '.marketplace-filters, [data-tour="filters"]',
+        position: 'right'
+      },
+      {
+        id: 'step-4',
         title: 'Browse Service Cards',
-        content: 'Each service card shows key information like price, rating, and provider details.',
+        content: 'Each service card shows key details: price, Circle Pro discount, ratings, and special badges. Look for "Co-Pay Available" and "Circle Pro" badges for extra savings.',
         selector: '[data-tour="service-card"]:first-child',
         position: 'top'
       },
       {
-        id: 'step-4',
-        title: 'View Service Details',
-        content: 'Click on a service to see full details, reviews, and booking options.',
-        selector: '[data-tour="service-card"]:first-child',
+        id: 'step-5',
+        title: 'View Service Funnels',
+        content: 'Click "View Details" on any service to open the service funnel. This shows detailed information, pricing options, ROI data, and booking/contact options.',
+        selector: '[data-tour="service-card"]:first-child .view-details-button, [data-tour="service-card"]:first-child button',
         position: 'top',
         action: { type: 'click' }
+      },
+      {
+        id: 'step-6',
+        title: 'Request Vendor Help',
+        content: 'In any service funnel, look for "Contact Vendor" or "Book Consultation" buttons. These let you get personalized help, request quotes, or book calls with verified vendors.',
+        selector: '.contact-vendor-button, .book-consultation-button, [data-tour="contact-vendor"]',
+        position: 'bottom'
+      },
+      {
+        id: 'step-7',
+        title: 'Explore Co-Pay Options',
+        content: 'Many services offer "Co-Pay" where Circle-vetted vendors can help cover costs in exchange for partnership opportunities. Look for the Co-Pay badge and "Get Vendor Help" options.',
+        selector: '.copay-badge, .vendor-help-button, [data-tour="copay-option"]',
+        position: 'top'
+      },
+      {
+        id: 'step-8',
+        title: 'Save & Compare Services',
+        content: 'Use the heart icon to save services you like. Your saved services help us recommend similar options and make it easy to compare later.',
+        selector: '.save-service-button, [data-tour="save-button"]',
+        position: 'left'
       }
     ]
   },

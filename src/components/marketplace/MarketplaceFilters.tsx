@@ -70,7 +70,7 @@ export const MarketplaceFilters = ({
     safeFilters.priceRange[0] > 0 || safeFilters.priceRange[1] < 2000;
 
   return (
-    <div className="bg-gradient-to-r from-background via-background/95 to-background/90 backdrop-blur-md border border-border/20 rounded-2xl shadow-sm overflow-hidden">
+    <div className="bg-gradient-to-r from-background via-background/95 to-background/90 backdrop-blur-md border border-border/20 rounded-2xl shadow-sm overflow-hidden" data-tour="filters">
       <div className="p-4">
         {hasActiveFilters && (
           <div className="flex justify-end mb-3">
