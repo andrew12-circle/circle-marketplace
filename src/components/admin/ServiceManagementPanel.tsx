@@ -1543,17 +1543,6 @@ export const ServiceManagementPanel = () => {
 
               <TabsContent value="funnel" className="space-y-4">
                 <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <h3 className="text-lg font-semibold">Service Funnel Pages</h3>
-                    <div className="flex items-center gap-3">
-                      {lastFunnelSavedAt && (
-                        <span className="text-xs text-muted-foreground">
-                          Saved {formatRelativeTime(lastFunnelSavedAt)}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  
                   <ServiceFunnelEditor
                     service={selectedService}
                     onUpdate={(updatedService) => {
