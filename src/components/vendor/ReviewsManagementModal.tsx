@@ -57,67 +57,59 @@ export const ReviewsManagementModal = ({ isOpen, onClose, vendorId }: ReviewsMan
     try {
       setLoading(true);
       
-      // Mock data for now - would be replaced with actual Supabase query
-      const mockReviews: Review[] = [
-        {
-          id: "1",
-          service_id: "service-1",
-          service_title: "Lead Generation System",
-          rating: 5,
-          review_text: "Outstanding service! Increased our leads by 300% in just 2 months. The team was professional and delivered exactly what they promised.",
-          reviewer_name: "Sarah Johnson",
-          reviewer_email: "sarah@example.com",
-          created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-          is_flagged: false,
-          is_verified: true
-        },
-        {
-          id: "2",
-          service_id: "service-1",
-          service_title: "Lead Generation System",
-          rating: 4,
-          review_text: "Great results overall. Setup took longer than expected but worth the wait. Customer support was responsive.",
-          reviewer_name: "Mike Chen",
-          created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-          response: "Thank you for your feedback, Mike! We're working on streamlining our setup process. We're thrilled you're seeing great results!",
-          response_date: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
-          is_flagged: false,
-          is_verified: true
-        },
-        {
-          id: "3",
-          service_id: "service-2",
-          service_title: "Marketing Automation",
-          rating: 3,
-          review_text: "Good service but had some technical issues initially. Support helped resolve them.",
-          reviewer_name: "Jennifer Davis",
-          created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-          is_flagged: false,
-          is_verified: true
-        },
-        {
-          id: "4",
-          service_id: "service-1",
-          service_title: "Lead Generation System",
-          rating: 2,
-          review_text: "Service didn't meet expectations. Multiple delays and poor communication.",
-          reviewer_name: "Robert Kim",
-          created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-          is_flagged: true,
-          is_verified: false
-        }
-      ];
+      // Fetch reviews for all services owned by this vendor
+      const { data: reviewsData, error: reviewsError } = await supabase
+        .from('service_reviews')
+        .select(`
+          id,
+          service_id,
+          rating,
+          review,
+          created_at,
+          verified,
+          flagged,
+          vendor_response,
+          vendor_response_date,
+          services (
+            title,
+            vendor_id
+          ),
+          profiles (
+            display_name
+          )
+        `)
+        .eq('services.vendor_id', vendorId)
+        .order('created_at', { ascending: false });
 
-      setReviews(mockReviews);
+      if (reviewsError) {
+        throw reviewsError;
+      }
+
+      // Transform the data to match our interface
+      const transformedReviews: Review[] = (reviewsData || []).map((review: any) => ({
+        id: review.id,
+        service_id: review.service_id,
+        service_title: review.services?.title || 'Unknown Service',
+        rating: review.rating,
+        review_text: review.review,
+        reviewer_name: review.profiles?.display_name || 'Anonymous User',
+        created_at: review.created_at,
+        response: review.vendor_response,
+        response_date: review.vendor_response_date,
+        is_flagged: review.flagged || false,
+        is_verified: review.verified || false
+      }));
+
+      setReviews(transformedReviews);
       
       // Calculate stats
-      const total = mockReviews.length;
-      const average = mockReviews.reduce((sum, r) => sum + r.rating, 0) / total;
-      const distribution = mockReviews.reduce((acc, r) => {
+      const total = transformedReviews.length;
+      const average = total > 0 ? transformedReviews.reduce((sum, r) => sum + r.rating, 0) / total : 0;
+      const distribution = transformedReviews.reduce((acc, r) => {
         acc[r.rating as keyof typeof acc]++;
         return acc;
       }, { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 });
-      const pending_responses = mockReviews.filter(r => !r.response).length;
+      const pending_responses = transformedReviews.filter(r => !r.response).length;
 
       setStats({ total, average, distribution, pending_responses });
     } catch (error) {
@@ -137,9 +129,20 @@ export const ReviewsManagementModal = ({ isOpen, onClose, vendorId }: ReviewsMan
 
     setSubmittingResponse(true);
     try {
-      // Mock response submission - would be replaced with actual Supabase update
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Update the review with vendor response
+      const { error } = await supabase
+        .from('service_reviews')
+        .update({
+          vendor_response: responseText,
+          vendor_response_date: new Date().toISOString()
+        })
+        .eq('id', reviewId);
+
+      if (error) {
+        throw error;
+      }
       
+      // Update local state
       setReviews(prev => prev.map(review => 
         review.id === reviewId 
           ? { 
@@ -150,6 +153,12 @@ export const ReviewsManagementModal = ({ isOpen, onClose, vendorId }: ReviewsMan
           : review
       ));
       
+      // Update stats
+      setStats(prev => ({
+        ...prev,
+        pending_responses: prev.pending_responses - 1
+      }));
+      
       setResponseText("");
       setSelectedReview(null);
       
@@ -158,6 +167,7 @@ export const ReviewsManagementModal = ({ isOpen, onClose, vendorId }: ReviewsMan
         description: "Your response has been posted",
       });
     } catch (error) {
+      console.error('Error posting response:', error);
       toast({
         title: "Error",
         description: "Failed to post response",
@@ -170,6 +180,22 @@ export const ReviewsManagementModal = ({ isOpen, onClose, vendorId }: ReviewsMan
 
   const handleFlag = async (reviewId: string) => {
     try {
+      const currentReview = reviews.find(r => r.id === reviewId);
+      if (!currentReview) return;
+
+      // Update the database
+      const { error } = await supabase
+        .from('service_reviews')
+        .update({
+          flagged: !currentReview.is_flagged
+        })
+        .eq('id', reviewId);
+
+      if (error) {
+        throw error;
+      }
+
+      // Update local state
       setReviews(prev => prev.map(review => 
         review.id === reviewId 
           ? { ...review, is_flagged: !review.is_flagged }
@@ -178,12 +204,13 @@ export const ReviewsManagementModal = ({ isOpen, onClose, vendorId }: ReviewsMan
       
       toast({
         title: "Success",
-        description: "Review flagged for moderation",
+        description: currentReview.is_flagged ? "Review unflagged" : "Review flagged for moderation",
       });
     } catch (error) {
+      console.error('Error flagging review:', error);
       toast({
-        title: "Error",
-        description: "Failed to flag review",
+        title: "Error", 
+        description: "Failed to update review flag",
         variant: "destructive",
       });
     }
@@ -388,16 +415,43 @@ export const ReviewsManagementModal = ({ isOpen, onClose, vendorId }: ReviewsMan
                       <span>This Month</span>
                       <div className="flex items-center gap-2">
                         <TrendingUp className="w-4 h-4 text-green-500" />
-                        <span className="font-medium">+23%</span>
+                        <span className="font-medium">
+                          {(() => {
+                            const thisMonth = new Date();
+                            const lastMonth = new Date(thisMonth.getFullYear(), thisMonth.getMonth() - 1);
+                            const thisMonthReviews = reviews.filter(r => new Date(r.created_at) >= lastMonth).length;
+                            const prevMonthStart = new Date(thisMonth.getFullYear(), thisMonth.getMonth() - 2);
+                            const prevMonthReviews = reviews.filter(r => {
+                              const date = new Date(r.created_at);
+                              return date >= prevMonthStart && date < lastMonth;
+                            }).length;
+                            const change = prevMonthReviews > 0 ? ((thisMonthReviews - prevMonthReviews) / prevMonthReviews * 100) : 0;
+                            return change > 0 ? `+${change.toFixed(0)}%` : `${change.toFixed(0)}%`;
+                          })()}
+                        </span>
                       </div>
                     </div>
                     <div className="flex justify-between items-center">
                       <span>Response Time</span>
-                      <span className="font-medium">1.2 days avg</span>
+                      <span className="font-medium">
+                        {(() => {
+                          const respondedReviews = reviews.filter(r => r.response && r.response_date);
+                          if (respondedReviews.length === 0) return "N/A";
+                          const avgDays = respondedReviews.reduce((sum, review) => {
+                            const reviewDate = new Date(review.created_at);
+                            const responseDate = new Date(review.response_date!);
+                            const days = (responseDate.getTime() - reviewDate.getTime()) / (1000 * 60 * 60 * 24);
+                            return sum + days;
+                          }, 0) / respondedReviews.length;
+                          return `${avgDays.toFixed(1)} days avg`;
+                        })()}
+                      </span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span>Customer Satisfaction</span>
-                      <span className="font-medium">94%</span>
+                      <span className="font-medium">
+                        {stats.total > 0 ? `${Math.round((reviews.filter(r => r.rating >= 4).length / stats.total) * 100)}%` : "N/A"}
+                      </span>
                     </div>
                   </div>
                 </CardContent>
@@ -409,20 +463,42 @@ export const ReviewsManagementModal = ({ isOpen, onClose, vendorId }: ReviewsMan
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    <div className="flex justify-between items-center">
-                      <span>Lead Generation System</span>
-                      <div className="flex items-center gap-2">
-                        <div className="flex">{renderStars(4.5, "w-3 h-3")}</div>
-                        <span className="text-sm">12 reviews</span>
-                      </div>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span>Marketing Automation</span>
-                      <div className="flex items-center gap-2">
-                        <div className="flex">{renderStars(4.2, "w-3 h-3")}</div>
-                        <span className="text-sm">8 reviews</span>
-                      </div>
-                    </div>
+                    {(() => {
+                      // Group reviews by service and calculate stats
+                      const serviceStats = reviews.reduce((acc: any, review) => {
+                        if (!acc[review.service_id]) {
+                          acc[review.service_id] = {
+                            title: review.service_title,
+                            reviews: [],
+                            total: 0,
+                            avgRating: 0
+                          };
+                        }
+                        acc[review.service_id].reviews.push(review);
+                        acc[review.service_id].total = acc[review.service_id].reviews.length;
+                        acc[review.service_id].avgRating = acc[review.service_id].reviews.reduce((sum: number, r: any) => sum + r.rating, 0) / acc[review.service_id].total;
+                        return acc;
+                      }, {});
+
+                      // Sort by number of reviews
+                      const topServices = Object.values(serviceStats)
+                        .sort((a: any, b: any) => b.total - a.total)
+                        .slice(0, 5);
+
+                      if (topServices.length === 0) {
+                        return <p className="text-sm text-muted-foreground">No reviews yet</p>;
+                      }
+
+                      return topServices.map((service: any, index) => (
+                        <div key={index} className="flex justify-between items-center">
+                          <span className="truncate">{service.title}</span>
+                          <div className="flex items-center gap-2">
+                            <div className="flex">{renderStars(Math.round(service.avgRating), "w-3 h-3")}</div>
+                            <span className="text-sm">{service.total} reviews</span>
+                          </div>
+                        </div>
+                      ));
+                    })()}
                   </div>
                 </CardContent>
               </Card>
