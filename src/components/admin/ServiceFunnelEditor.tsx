@@ -385,7 +385,7 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
 
       {/* Main Editor Tabs */}
       <Tabs defaultValue="content" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="content" className="flex items-center gap-2">
             <FileText className="w-4 h-4" />
             Content
@@ -401,10 +401,6 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
           <TabsTrigger value="testimonials" className="flex items-center gap-2">
             <MessageSquare className="w-4 h-4" />
             Social Proof
-          </TabsTrigger>
-          <TabsTrigger value="proof" className="flex items-center gap-2">
-            <Settings className="w-4 h-4" />
-            Proof
           </TabsTrigger>
           <TabsTrigger value="faq" className="flex items-center gap-2">
             <HelpCircle className="w-4 h-4" />
@@ -438,6 +434,16 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
 
         <TabsContent value="testimonials" className="space-y-4">
           <div className="space-y-4">
+            {/* Proof Settings - Toggles for what displays in funnel */}
+            <FunnelProofEditor
+              proofData={funnelData.proofItWorks || {
+                testimonials: { enabled: false, items: [] },
+                caseStudy: { enabled: false, data: { beforeValue: 0, afterValue: 0, beforeLabel: "", afterLabel: "", percentageIncrease: 0, timeframe: "", description: "" } },
+                vendorVerification: { enabled: false, data: { badges: [], description: "" } }
+              }}
+              onChange={(data) => handleDataChange('proofItWorks', data)}
+            />
+            
             {/* Support Stats Display Toggle */}
             <Card>
               <CardHeader>
@@ -457,23 +463,13 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
               </CardContent>
             </Card>
             
+            {/* Testimonial Content Editor */}
             <FunnelTestimonialsEditor
               testimonials={funnelData.testimonials || []}
               stats={funnelData.stats || []}
               onChange={(type, data) => handleDataChange(type, data)}
             />
           </div>
-        </TabsContent>
-
-        <TabsContent value="proof" className="space-y-4">
-          <FunnelProofEditor
-            proofData={funnelData.proofItWorks || {
-              testimonials: { enabled: false, items: [] },
-              caseStudy: { enabled: false, data: { beforeValue: 0, afterValue: 0, beforeLabel: "", afterLabel: "", percentageIncrease: 0, timeframe: "", description: "" } },
-              vendorVerification: { enabled: false, data: { badges: [], description: "" } }
-            }}
-            onChange={(data) => handleDataChange('proofItWorks', data)}
-          />
         </TabsContent>
 
         <TabsContent value="faq" className="space-y-4">
