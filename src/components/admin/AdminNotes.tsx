@@ -55,18 +55,33 @@ export const AdminNotes = ({ serviceId, serviceName }: AdminNotesProps) => {
 
   const loadNotes = async () => {
     try {
+      console.log('AdminNotes: Starting to load notes for service:', serviceId);
+      
       const { data, error } = await supabase
         .from('admin_notes')
         .select('*')
         .eq('service_id', serviceId)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      console.log('AdminNotes: Query result:', { data, error });
+
+      if (error) {
+        console.error('AdminNotes: Database error:', error);
+        if (error.code === 'PGRST116' || error.message?.includes('permission')) {
+          toast.error('Permission denied. Admin access required to view notes.');
+        } else {
+          toast.error('Failed to load admin notes');
+        }
+        return;
+      }
+
+      console.log('AdminNotes: Setting notes data:', data);
       setNotes((data as any[]) || []);
     } catch (error) {
-      console.error('Error loading admin notes:', error);
+      console.error('AdminNotes: Exception loading notes:', error);
       toast.error('Failed to load admin notes');
     } finally {
+      console.log('AdminNotes: Setting loading to false');
       setLoading(false);
     }
   };
