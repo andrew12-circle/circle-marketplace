@@ -267,7 +267,19 @@ Duration: ${service.duration || 'Not specified'}
 ${service.existing_research ? `Research: ${JSON.stringify(service.existing_research)}` : ''}
 ${customPrompt ? `Instructions: ${customPrompt}` : ''}
 
-Create comprehensive funnel content with compelling headlines, benefits, testimonials, and pricing tiers.
+Create comprehensive funnel content with compelling headlines, benefits, testimonials, and 2-4 pricing tiers. 
+
+CRITICAL PRICING REQUIREMENTS:
+- Generate 2-4 pricing tiers with distinct value propositions
+- Use duration "mo", "yr", or "one-time" only  
+- Position tiers from 0 (lowest) to N-1 (highest)
+- Make the middle tier "Most Popular" with isPopular: true
+- Ensure realistic pricing progression and clear feature differentiation
+
+CRITICAL FAQ REQUIREMENTS:
+- Generate exactly 5 faqSections with the exact titles shown below
+- Each section should have relevant, detailed content for this specific service
+- Use the exact id format: "question-1" through "question-5"
 
 Return JSON with:
 {
@@ -317,24 +329,82 @@ Return JSON with:
         "email": "",
         "website": ""
       }
-    }
+    },
+    "faqSections": [
+      {
+        "id": "question-1",
+        "title": "Why Should I Care?",
+        "content": "Explain why this service matters for agents"
+      },
+      {
+        "id": "question-2",
+        "title": "What's My ROI Potential?",
+        "content": "Detail the expected return on investment"
+      },
+      {
+        "id": "question-3",
+        "title": "How Soon Will I See Results?",
+        "content": "Timeline for seeing results"
+      },
+      {
+        "id": "question-4",
+        "title": "What's Included?",
+        "content": "List what's included in the service"
+      },
+      {
+        "id": "question-5",
+        "title": "Proof It Works",
+        "content": "Provide testimonials, stats, or case studies"
+      }
+    ]
   },
   "pricing_tiers": [
     {
-      "id": "1",
+      "id": "starter",
+      "name": "Starter",
+      "description": "Perfect for new agents",
+      "price": "99",
+      "duration": "mo",
+      "features": [
+        {"id": "1", "text": "Basic feature 1", "included": true},
+        {"id": "2", "text": "Basic feature 2", "included": true}
+      ],
+      "isPopular": false,
+      "buttonText": "Get Started",
+      "position": 0
+    },
+    {
+      "id": "professional",
       "name": "Professional",
       "description": "Perfect for growing agents",
       "price": "199",
       "originalPrice": "249",
       "duration": "mo",
       "features": [
-        {"id": "1", "text": "Feature 1", "included": true},
-        {"id": "2", "text": "Feature 2", "included": true}
+        {"id": "1", "text": "Everything in Starter", "included": true},
+        {"id": "2", "text": "Advanced feature", "included": true},
+        {"id": "3", "text": "Premium support", "included": true}
       ],
       "isPopular": true,
       "buttonText": "Get Started",
       "badge": "Most Popular",
-      "position": 0
+      "position": 1
+    },
+    {
+      "id": "enterprise",
+      "name": "Enterprise",
+      "description": "For established agents and teams",
+      "price": "399",
+      "duration": "mo",
+      "features": [
+        {"id": "1", "text": "Everything in Professional", "included": true},
+        {"id": "2", "text": "Team features", "included": true},
+        {"id": "3", "text": "Custom integrations", "included": true},
+        {"id": "4", "text": "Dedicated support", "included": true}
+      ],
+      "isPopular": false,
+      "buttonText": "Contact Sales",
+      "position": 2
     }
   ]
 }`;

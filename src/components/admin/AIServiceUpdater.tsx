@@ -785,12 +785,48 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
         updateData.disclaimer_content = disclaimerData.disclaimer_content;
       }
       
+      // Handle funnel content and pricing tiers with validation
       if (funnelData?.funnel_content) {
-        updateData.funnel_content = funnelData.funnel_content;
+        let funnelContent = { ...funnelData.funnel_content };
+        
+        // Merge FAQ sections from FAQs if funnel doesn't have them
+        if (!funnelContent.faqSections && faqsData?.faqs) {
+          console.log('📝 Merging FAQ data into funnel content...');
+          const defaultTitles = [
+            "Why Should I Care?",
+            "What's My ROI Potential?", 
+            "How Soon Will I See Results?",
+            "What's Included?",
+            "Proof It Works"
+          ];
+          
+          funnelContent.faqSections = faqsData.faqs.slice(0, 5).map((faq: any, index: number) => ({
+            id: `question-${index + 1}`,
+            title: defaultTitles[index] || faq.question,
+            content: faq.answer
+          }));
+        }
+        
+        updateData.funnel_content = funnelContent;
       }
       
+      // Handle pricing tiers with validation
       if (funnelData?.pricing_tiers) {
-        updateData.pricing_tiers = funnelData.pricing_tiers;
+        let pricingTiers = [...funnelData.pricing_tiers];
+        
+        // Normalize and validate pricing tiers
+        pricingTiers = pricingTiers
+          .slice(0, 4) // Cap at 4 tiers
+          .map((tier: any, index: number) => ({
+            ...tier,
+            id: tier.id || `tier-${index}`,
+            position: index, // Ensure contiguous positions
+            duration: ['mo', 'yr', 'one-time'].includes(tier.duration) ? tier.duration : 'mo',
+            features: Array.isArray(tier.features) ? tier.features : []
+          }));
+        
+        console.log(`✅ Normalized ${pricingTiers.length} pricing tiers for ${service.title}`);
+        updateData.pricing_tiers = pricingTiers;
       }
 
       // Store FAQs in service_faqs table
@@ -810,26 +846,32 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
           display_order: faq.order || (index + 1)
         }));
 
-        const { error: faqError } = await supabase
-          .from('service_faqs')
-          .insert(faqInserts);
+      // Update the FAQs completion tracking
+      const { error: faqError } = await supabase
+        .from('service_faqs')
+        .insert(faqInserts);
 
-        if (faqError) {
-          console.error('Error inserting FAQs:', faqError);
-        } else {
-          console.log(`✅ Inserted ${faqInserts.length} FAQs for ${service.title}`);
-        }
+      if (faqError) {
+        console.error('Error inserting FAQs:', faqError);
+      } else {
+        console.log(`✅ Inserted ${faqInserts.length} FAQs for ${service.title}`);
       }
+    }
 
-      if (Object.keys(updateData).length > 0) {
-        const { error } = await supabase
-          .from('services')
-          .update(updateData)
-          .eq('id', service.id);
+    if (Object.keys(updateData).length > 0) {
+      const { error } = await supabase
+        .from('services')
+        .update(updateData)
+        .eq('id', service.id);
 
-        if (error) throw error;
-        console.log(`✅ Updated database for ${service.title}`);
+      if (error) throw error;
+      console.log(`✅ Updated database for ${service.title}`);
+      
+      // Post-update validation for completeness warnings
+      if (updateData.pricing_tiers && updateData.pricing_tiers.length < 2) {
+        console.warn(`⚠️ Service ${service.title} only has ${updateData.pricing_tiers.length} pricing tier(s). Consider adding more tiers for better conversion.`);
       }
+    }
     } catch (error) {
       console.error('Error updating service in database:', error);
       throw error;
