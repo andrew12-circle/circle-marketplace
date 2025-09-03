@@ -265,7 +265,7 @@ export const ServiceManagementPanel = () => {
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [isEditingDetails, setIsEditingDetails] = useState(false);
   // Removed showFunnelEditor state - editor shows directly on funnel tab
-  const [showFunnelPreview, setShowFunnelPreview] = useState(false);
+  // Removed showFunnelPreview state - preview handled inside editor
   const [editForm, setEditForm] = useState<Partial<Service>>({});
   const [error, setError] = useState<string | null>(null);
   const [lastFunnelSavedAt, setLastFunnelSavedAt] = useState<string | null>(null);
@@ -1551,10 +1551,6 @@ export const ServiceManagementPanel = () => {
                           Saved {formatRelativeTime(lastFunnelSavedAt)}
                         </span>
                       )}
-                      <Button variant="outline" onClick={() => setShowFunnelPreview(true)}>
-                        <Eye className="h-4 w-4 mr-2" />
-                        Preview Funnel
-                      </Button>
                     </div>
                   </div>
                   
@@ -1571,24 +1567,6 @@ export const ServiceManagementPanel = () => {
             </Tabs>
           </CardContent>
         </Card>
-      )}
-
-      {showFunnelPreview && selectedService && (
-        <ServiceFunnelModal
-          isOpen={showFunnelPreview}
-          onClose={() => setShowFunnelPreview(false)}
-          service={{
-            ...(selectedService as any),
-            funnel_content: funnelContent,
-            pricing_tiers: pricingTiers,
-            vendor: selectedService.vendors ? {
-              name: selectedService.vendors.name,
-              rating: selectedService.rating || 5,
-              review_count: 25,
-              is_verified: true
-            } : null
-          } as any}
-        />
       )}
 
       {/* AI Service Updater */}
