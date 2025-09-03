@@ -39,6 +39,8 @@ export const NotificationsModal = ({ isOpen, onClose, vendorId }: NotificationsM
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'unread' | 'reviews' | 'bookings'>('all');
+  const [emailNotificationsEnabled, setEmailNotificationsEnabled] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
