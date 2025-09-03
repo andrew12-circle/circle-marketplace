@@ -17,6 +17,7 @@ import { ServiceDetailsModal } from '@/components/marketplace/ServiceDetailsModa
 import { ServiceFunnelEditorModal } from '@/components/marketplace/ServiceFunnelEditorModal';
 import { SponsoredPositionsModal } from '@/components/vendor/SponsoredPositionsModal';
 import { ReviewsManagementModal } from '@/components/vendor/ReviewsManagementModal';
+import { CustomerInsightsModal } from '@/components/vendor/CustomerInsightsModal';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useVendorActivityTracking } from '@/hooks/useVendorActivityTracking';
@@ -202,6 +203,7 @@ export const VendorDashboard = () => {
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [isSponsoredModalOpen, setIsSponsoredModalOpen] = useState(false);
   const [isReviewsModalOpen, setIsReviewsModalOpen] = useState(false);
+  const [isCustomerInsightsModalOpen, setIsCustomerInsightsModalOpen] = useState(false);
 
   useEffect(() => {
     fetchVendorData();
@@ -695,7 +697,11 @@ export const VendorDashboard = () => {
                 <Award className="w-4 h-4 mr-2" />
                 Manage Reviews
               </Button>
-              <Button variant="outline" className="w-full justify-start">
+              <Button 
+                variant="outline" 
+                className="w-full justify-start"
+                onClick={() => setIsCustomerInsightsModalOpen(true)}
+              >
                 <Users className="w-4 h-4 mr-2" />
                 Customer Insights
               </Button>
@@ -1046,6 +1052,11 @@ export const VendorDashboard = () => {
           <ReviewsManagementModal
             isOpen={isReviewsModalOpen}
             onClose={() => setIsReviewsModalOpen(false)}
+            vendorId={vendorId}
+          />
+          <CustomerInsightsModal
+            isOpen={isCustomerInsightsModalOpen}
+            onClose={() => setIsCustomerInsightsModalOpen(false)}
             vendorId={vendorId}
           />
         </>
