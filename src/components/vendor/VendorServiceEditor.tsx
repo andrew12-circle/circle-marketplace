@@ -4,15 +4,25 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ServiceImageUpload } from '@/components/marketplace/ServiceImageUpload';
-import { AlertTriangle, Save, Clock, CheckCircle, X, Plus, Trash2, ShoppingCart, Upload } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { Switch } from '@/components/ui/switch';
+import { X, Upload, Plus, Image as ImageIcon, AlertTriangle, Save, Clock, CheckCircle } from 'lucide-react';
+import { MediaUploadGrid } from './MediaUploadGrid';
+import { ServicePricingEditor } from './ServicePricingEditor';
+
+const SERVICE_CATEGORIES = [
+  'CRMs', 'Ads & Lead Gen', 'Website / IDX', 'SEO', 'Coaching',
+  'Marketing Automation & Content', 'Video & Media Tools', 'Listing & Showing Tools',
+  'Data & Analytics', 'Finance & Business Tools', 'Productivity & Collaboration',
+  'Virtual Assistants & Dialers', 'Team & Recruiting Tools', 'CE & Licensing',
+  'Client Event Kits', 'Print & Mail', 'Signage & Branding', 'Presentations',
+  'Branding', 'Client Retention', 'Transaction Coordinator'
+];
 
 interface VendorServiceEditorProps {
   open: boolean;
@@ -32,123 +42,82 @@ export const VendorServiceEditor: React.FC<VendorServiceEditorProps> = ({
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [pendingDraft, setPendingDraft] = useState<any>(null);
-  
-  // Form state - comprehensive service data
+  const [changeSummary, setChangeSummary] = useState('');
+  const [newTag, setNewTag] = useState('');
+
   const [formData, setFormData] = useState({
     title: '',
     description: '',
+    category: '',
     retail_price: '',
     pro_price: '',
-    category: '',
-    image_url: '',
-    duration: '',
-    estimated_roi: 0,
     tags: [] as string[],
-    is_featured: false,
-    is_top_pick: false,
-    requires_quote: false,
-    direct_purchase_enabled: false,
-    website_url: '',
-    respa_split_limit: 0,
-    max_split_percentage_non_ssp: 0
-  });
-  
-  const [funnelContent, setFunnelContent] = useState({
-    // Circle's 6 Questions
-    whyShouldICare: '',
-    whatIsMyROI: '',
-    howSoonResults: '',
-    howMuchCost: '',
-    whatDoIGet: '',
-    callOrBuyNow: '',
-    
-    // Proof It Works
-    testimonials: '',
-    successStats: '',
-    trustSignals: '',
-    
-    // Hero Section
-    headline: '',
-    subheadline: '',
-    heroDescription: '',
-    estimatedRoi: 0,
-    duration: '',
-    
-    // Media
-    heroMedia: '',
-    additionalMedia: [],
-    
-    // Legacy structure
-    whyChooseUs: {
-      title: '',
-      benefits: []
-    },
-    media: [],
-    packages: [],
-    socialProof: {
-      testimonials: [],
-      stats: []
-    },
-    trustIndicators: {
-      guarantee: '',
-      cancellation: '',
-      certification: ''
-    },
-    callToAction: {
-      primaryHeadline: '',
-      primaryDescription: '',
-      primaryButtonText: '',
-      secondaryHeadline: '',
-      secondaryDescription: '',
-      contactInfo: {
-        phone: '',
-        email: '',
-        website: ''
-      }
-    }
+    image_url: '',
+    pricing_tiers: [] as any[]
   });
 
-  const [newTag, setNewTag] = useState('');
-  const [changeSummary, setChangeSummary] = useState('');
+  const [funnelContent, setFunnelContent] = useState({
+    whyShouldICare: '',
+    whatIsMyROI: '',
+    howSoonWillISeeResults: '',
+    howMuchDoesItCost: '',
+    whatDoIGetWithIt: '',
+    doesItRequireCallOrCanIBuyNow: '',
+    proofItWorks: '',
+    heroTitle: '',
+    heroSubtitle: '',
+    heroImage: '',
+    ctaText: '',
+    ctaLink: '',
+    mediaGallery: [] as any[]
+  });
 
   useEffect(() => {
     if (service && open) {
-      // Load current service data
-      setFormData({
-        title: service.title || '',
-        description: service.description || '',
-        retail_price: service.retail_price || '',
-        pro_price: service.pro_price || '',
-        category: service.category || '',
-        image_url: service.image_url || '',
-        duration: service.duration || '',
-        estimated_roi: service.estimated_roi || 0,
-        tags: service.tags || [],
-        is_featured: service.is_featured || false,
-        is_top_pick: service.is_top_pick || false,
-        requires_quote: service.requires_quote || false,
-        direct_purchase_enabled: service.direct_purchase_enabled || false,
-        website_url: service.website_url || '',
-        respa_split_limit: service.respa_split_limit || 0,
-        max_split_percentage_non_ssp: service.max_split_percentage_non_ssp || 0
-      });
-
-      // Load funnel content
-      if (service.funnel_content) {
-        setFunnelContent(service.funnel_content);
-      }
-
-      // Check for pending draft
+      loadServiceData();
       checkPendingDraft();
     }
   }, [service, open]);
+
+  const loadServiceData = () => {
+    if (!service) return;
+
+    setFormData({
+      title: service.title || '',
+      description: service.description || '',
+      category: service.category || '',
+      retail_price: service.retail_price || '',
+      pro_price: service.pro_price || '',
+      tags: service.tags || [],
+      image_url: service.image_url || '',
+      pricing_tiers: service.pricing_tiers || []
+    });
+
+    if (service.funnel_content) {
+      setFunnelContent({
+        whyShouldICare: service.funnel_content.whyShouldICare || '',
+        whatIsMyROI: service.funnel_content.whatIsMyROI || '',
+        howSoonWillISeeResults: service.funnel_content.howSoonWillISeeResults || '',
+        howMuchDoesItCost: service.funnel_content.howMuchDoesItCost || '',
+        whatDoIGetWithIt: service.funnel_content.whatDoIGetWithIt || '',
+        doesItRequireCallOrCanIBuyNow: service.funnel_content.doesItRequireCallOrCanIBuyNow || '',
+        proofItWorks: service.funnel_content.proofItWorks || '',
+        heroTitle: service.funnel_content.heroTitle || '',
+        heroSubtitle: service.funnel_content.heroSubtitle || '',
+        heroImage: service.funnel_content.heroImage || '',
+        ctaText: service.funnel_content.ctaText || '',
+        ctaLink: service.funnel_content.ctaLink || '',
+        mediaGallery: service.funnel_content.mediaGallery || []
+      });
+    }
+  };
 
   const checkPendingDraft = async () => {
     try {
       const { data, error } = await supabase
         .from('service_drafts')
         .select('*')
-        .eq('service_id', service.id)
+        .eq('service_id', service?.id)
         .eq('status', 'pending')
         .maybeSingle();
 
@@ -159,7 +128,7 @@ export const VendorServiceEditor: React.FC<VendorServiceEditorProps> = ({
     }
   };
 
-  const handleInputChange = (field: string, value: string | number | boolean | string[]) => {
+  const handleInputChange = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -184,54 +153,69 @@ export const VendorServiceEditor: React.FC<VendorServiceEditorProps> = ({
     }));
   };
 
-  const handleSaveDraft = async () => {
+  const handleImageUpload = async (file: File, isMainImage = false) => {
     try {
-      setLoading(true);
+      const user = await supabase.auth.getUser();
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.data.user?.id}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('service-assets')
+        .upload(fileName, file);
 
-      if (!changeSummary.trim()) {
-        toast({
-          title: "Change Summary Required",
-          description: "Please provide a brief summary of your changes for admin review.",
-          variant: "destructive"
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage
+        .from('service-assets')
+        .getPublicUrl(fileName);
+
+      if (isMainImage) {
+        setFormData(prev => ({ ...prev, image_url: data.publicUrl }));
+      }
+
+      return data.publicUrl;
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast({
+        title: "Upload failed",
+        description: "There was an error uploading your image.",
+        variant: "destructive"
+      });
+      return null;
+    }
+  };
+
+  const handleSaveDraft = async () => {
+    if (!changeSummary.trim()) {
+      toast({
+        title: "Change summary required",
+        description: "Please provide a summary of your changes.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { error } = await supabase
+        .from('service_drafts')
+        .insert({
+          service_id: service?.id,
+          vendor_id: vendorId,
+          draft_data: formData,
+          funnel_data: funnelContent,
+          change_summary: changeSummary,
+          status: 'pending'
         });
-        return;
-      }
 
-      // Prepare draft data
-      const draftData = {
-        service_id: service.id,
-        vendor_id: vendorId,
-        draft_data: formData,
-        funnel_data: funnelContent,
-        change_summary: changeSummary,
-        change_type: 'update'
-      };
-
-      // Save or update draft
-      if (pendingDraft) {
-        const { error } = await supabase
-          .from('service_drafts')
-          .update(draftData)
-          .eq('id', pendingDraft.id);
-
-        if (error) throw error;
-      } else {
-        const { error } = await supabase
-          .from('service_drafts')
-          .insert([draftData]);
-
-        if (error) throw error;
-      }
+      if (error) throw error;
 
       toast({
-        title: "Changes Saved",
-        description: "Your changes have been submitted for admin review.",
+        title: "Changes submitted for review",
+        description: "Your service updates have been submitted and are pending admin approval."
       });
 
-      // Check for new pending draft
-      await checkPendingDraft();
       onSave?.();
-      
     } catch (error) {
       console.error('Error saving draft:', error);
       toast({
@@ -259,7 +243,7 @@ export const VendorServiceEditor: React.FC<VendorServiceEditorProps> = ({
     const Icon = config.icon;
     
     return (
-      <Badge variant="outline" className={`mb-4 bg-${config.color}-50 border-${config.color}-200 text-${config.color}-700`}>
+      <Badge variant="outline" className="mb-4">
         <Icon className="w-3 h-3 mr-1" />
         {config.text}
       </Badge>
@@ -268,7 +252,7 @@ export const VendorServiceEditor: React.FC<VendorServiceEditorProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             Edit Service: {service?.title}
@@ -277,525 +261,371 @@ export const VendorServiceEditor: React.FC<VendorServiceEditorProps> = ({
         </DialogHeader>
 
         {pendingDraft?.status === 'rejected' && (
-          <Card className="border-red-200 bg-red-50">
+          <Card className="border-destructive bg-destructive/5">
             <CardHeader>
-              <CardTitle className="text-red-700 flex items-center gap-2">
+              <CardTitle className="text-destructive flex items-center gap-2">
                 <AlertTriangle className="w-4 h-4" />
                 Changes Rejected
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-red-600 text-sm">{pendingDraft.rejection_reason}</p>
+              <p className="text-destructive text-sm">{pendingDraft.rejection_reason}</p>
             </CardContent>
           </Card>
         )}
 
-        <Tabs defaultValue="details" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="details">Service Details</TabsTrigger>
-            <TabsTrigger value="funnel">Sales Funnel</TabsTrigger>
-            <TabsTrigger value="settings">Settings</TabsTrigger>
-          </TabsList>
+        <div className="space-y-6">
+          <Tabs defaultValue="details" className="w-full">
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="details">Service Details</TabsTrigger>
+              <TabsTrigger value="funnel">Sales Funnel</TabsTrigger>
+              <TabsTrigger value="pricing">Pricing</TabsTrigger>
+              <TabsTrigger value="settings">Settings</TabsTrigger>
+            </TabsList>
 
-          <TabsContent value="details" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Basic Information</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="title">Service Title *</Label>
-                    <Input
-                      id="title"
-                      value={formData.title}
-                      onChange={(e) => handleInputChange('title', e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="category">Category</Label>
-                    <Select value={formData.category} onValueChange={(value) => handleInputChange('category', value)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="lead_generation">Lead Generation</SelectItem>
-                        <SelectItem value="marketing_automation">Marketing Automation</SelectItem>
-                        <SelectItem value="crm_management">CRM Management</SelectItem>
-                        <SelectItem value="transaction_coordination">Transaction Coordination</SelectItem>
-                        <SelectItem value="professional_services">Professional Services</SelectItem>
-                        <SelectItem value="coaching_training">Coaching & Training</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
+            <TabsContent value="details" className="space-y-6">
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea
-                    id="description"
-                    value={formData.description}
-                    onChange={(e) => handleInputChange('description', e.target.value)}
-                    rows={4}
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <Label htmlFor="retail_price">Retail Price</Label>
-                    <Input
-                      id="retail_price"
-                      type="number"
-                      value={formData.retail_price}
-                      onChange={(e) => handleInputChange('retail_price', e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="pro_price">Pro Price</Label>
-                    <Input
-                      id="pro_price"
-                      type="number"
-                      value={formData.pro_price}
-                      onChange={(e) => handleInputChange('pro_price', e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="estimated_roi">Estimated ROI (%)</Label>
-                    <Input
-                      id="estimated_roi"
-                      type="number"
-                      value={formData.estimated_roi}
-                      onChange={(e) => handleInputChange('estimated_roi', Number(e.target.value))}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <Label htmlFor="duration">Duration</Label>
+                  <Label htmlFor="title">Service Title</Label>
                   <Input
-                    id="duration"
-                    value={formData.duration}
-                    onChange={(e) => handleInputChange('duration', e.target.value)}
-                    placeholder="e.g., 30 days, 3 months, ongoing"
+                    id="title"
+                    value={formData.title}
+                    onChange={(e) => handleInputChange('title', e.target.value)}
+                    placeholder="Enter service title"
                   />
                 </div>
-
                 <div>
-                  <Label>Service Tags</Label>
-                  <div className="flex flex-wrap gap-2 mb-3">
-                    {formData.tags.map((tag) => (
-                      <Badge key={tag} variant="outline" className="flex items-center gap-1">
-                        {tag}
-                        <X 
-                          className="w-3 h-3 cursor-pointer" 
-                          onClick={() => removeTag(tag)}
+                  <Label htmlFor="category">Category</Label>
+                  <Select value={formData.category} onValueChange={(value) => handleInputChange('category', value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {SERVICE_CATEGORIES.map((category) => (
+                        <SelectItem key={category} value={category}>
+                          {category}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="description">Service Card Description</Label>
+                <Textarea
+                  id="description"
+                  value={formData.description}
+                  onChange={(e) => handleInputChange('description', e.target.value)}
+                  placeholder="Brief description that appears on your service card in the marketplace"
+                  rows={3}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="retail_price">Retail Price</Label>
+                  <Input
+                    id="retail_price"
+                    value={formData.retail_price}
+                    onChange={(e) => handleInputChange('retail_price', e.target.value)}
+                    placeholder="e.g., $99/month"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="pro_price">Circle Pro Price</Label>
+                  <Input
+                    id="pro_price"
+                    value={formData.pro_price}
+                    onChange={(e) => handleInputChange('pro_price', e.target.value)}
+                    placeholder="e.g., $79/month"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label>Main Service Image</Label>
+                <Card className="mt-2">
+                  <CardContent className="p-4">
+                    {formData.image_url ? (
+                      <div className="relative">
+                        <img
+                          src={formData.image_url}
+                          alt="Service preview"
+                          className="w-full h-48 object-cover rounded-lg"
                         />
-                      </Badge>
-                    ))}
-                  </div>
-                  <div className="flex gap-2">
-                    <Input
-                      value={newTag}
-                      onChange={(e) => setNewTag(e.target.value)}
-                      placeholder="Add a tag"
-                      className="flex-1"
-                      onKeyPress={(e) => e.key === 'Enter' && addTag()}
-                    />
-                    <Button onClick={addTag} disabled={!newTag.trim()}>
-                      <Plus className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-
-                <div>
-                  <Label>Service Image</Label>
-                  <ServiceImageUpload
-                    value={formData.image_url}
-                    onChange={(url) => handleInputChange('image_url', url)}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="funnel" className="space-y-4">
-            {/* Circle's 6 Questions */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Circle's 6 Questions (Agent-Facing)</CardTitle>
-                <p className="text-sm text-muted-foreground">Answer these questions to help agents understand your service value</p>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Label htmlFor="whyShouldICare">1. Why should I care?</Label>
-                  <Textarea
-                    id="whyShouldICare"
-                    value={funnelContent.whyShouldICare || ''}
-                    onChange={(e) => handleFunnelChange('whyShouldICare', e.target.value)}
-                    placeholder="Explain why this service matters for a realtor's business"
-                    rows={3}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="whatIsMyROI">2. What's my ROI?</Label>
-                  <Textarea
-                    id="whatIsMyROI"
-                    value={funnelContent.whatIsMyROI || ''}
-                    onChange={(e) => handleFunnelChange('whatIsMyROI', e.target.value)}
-                    placeholder="Show typical returns or agent testimonials (percentage or qualitative)"
-                    rows={3}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="howSoonResults">3. How soon will I see results?</Label>
-                  <Textarea
-                    id="howSoonResults"
-                    value={funnelContent.howSoonResults || ''}
-                    onChange={(e) => handleFunnelChange('howSoonResults', e.target.value)}
-                    placeholder="Immediate, weeks, or months - set realistic expectations"
-                    rows={2}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="howMuchCost">4. How much does it cost?</Label>
-                  <Textarea
-                    id="howMuchCost"
-                    value={funnelContent.howMuchCost || ''}
-                    onChange={(e) => handleFunnelChange('howMuchCost', e.target.value)}
-                    placeholder="List monthly + annual price clearly"
-                    rows={2}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="whatDoIGet">5. What do I get with it?</Label>
-                  <Textarea
-                    id="whatDoIGet"
-                    value={funnelContent.whatDoIGet || ''}
-                    onChange={(e) => handleFunnelChange('whatDoIGet', e.target.value)}
-                    placeholder="Bullet out features and deliverables"
-                    rows={4}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="callOrBuyNow">6. Does it require a call/quote or can I buy now?</Label>
-                  <Input
-                    id="callOrBuyNow"
-                    value={funnelContent.callOrBuyNow || ''}
-                    onChange={(e) => handleFunnelChange('callOrBuyNow', e.target.value)}
-                    placeholder="Yes/No with a link if required"
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Proof It Works Section */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Proof It Works</CardTitle>
-                <p className="text-sm text-muted-foreground">Testimonials, stats, and trust signals</p>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Label htmlFor="testimonials">Real Testimonials</Label>
-                  <Textarea
-                    id="testimonials"
-                    value={funnelContent.testimonials || ''}
-                    onChange={(e) => handleFunnelChange('testimonials', e.target.value)}
-                    placeholder="Real quotes from clients (e.g., 'Agent won a $700k listing')"
-                    rows={4}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="successStats">Success Stats</Label>
-                  <Textarea
-                    id="successStats"
-                    value={funnelContent.successStats || ''}
-                    onChange={(e) => handleFunnelChange('successStats', e.target.value)}
-                    placeholder="Community size, adoption numbers, third-party mentions"
-                    rows={3}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="trustSignals">Trust Signals</Label>
-                  <Input
-                    id="trustSignals"
-                    value={funnelContent.trustSignals || ''}
-                    onChange={(e) => handleFunnelChange('trustSignals', e.target.value)}
-                    placeholder="Awards, certifications, press mentions, etc."
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Media Upload Section */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Funnel Media</CardTitle>
-                <p className="text-sm text-muted-foreground">Upload images, videos, and other media for your sales funnel</p>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Label>Hero Image/Video</Label>
-                  <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
-                    <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground mb-2">Upload hero image or video</p>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => {
-                        const input = document.createElement('input');
-                        input.type = 'file';
-                        input.accept = 'image/*,video/*';
-                        input.onchange = (e) => {
-                          const file = (e.target as HTMLInputElement).files?.[0];
-                          if (file) {
-                            // Handle file upload
-                            toast({
-                              title: "Media Upload",
-                              description: "Media upload functionality will be implemented here.",
-                            });
-                          }
-                        };
-                        input.click();
-                      }}
-                    >
-                      Choose File
-                    </Button>
-                  </div>
-                </div>
-                
-                <div>
-                  <Label>Additional Media</Label>
-                  <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
-                    <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground mb-2">Upload screenshots, demos, case studies</p>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => {
-                        const input = document.createElement('input');
-                        input.type = 'file';
-                        input.accept = 'image/*,video/*,application/pdf';
-                        input.multiple = true;
-                        input.onchange = (e) => {
-                          const files = (e.target as HTMLInputElement).files;
-                          if (files) {
-                            toast({
-                              title: "Media Upload",
-                              description: `Selected ${files.length} file(s). Upload functionality will be implemented here.`,
-                            });
-                          }
-                        };
-                        input.click();
-                      }}
-                    >
-                      Choose Files
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Hero Section */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Hero Section</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Label htmlFor="headline">Headline</Label>
-                  <Input
-                    id="headline"
-                    value={funnelContent.headline}
-                    onChange={(e) => handleFunnelChange('headline', e.target.value)}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="subheadline">Sub-headline</Label>
-                  <Input
-                    id="subheadline"
-                    value={funnelContent.subheadline}
-                    onChange={(e) => handleFunnelChange('subheadline', e.target.value)}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="heroDescription">Description</Label>
-                  <Textarea
-                    id="heroDescription"
-                    value={funnelContent.heroDescription}
-                    onChange={(e) => handleFunnelChange('heroDescription', e.target.value)}
-                    rows={4}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Call to Action */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Call to Action</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Label htmlFor="primaryHeadline">Primary CTA Headline</Label>
-                  <Input
-                    id="primaryHeadline"
-                    value={funnelContent.callToAction.primaryHeadline}
-                    onChange={(e) => handleFunnelChange('callToAction', {
-                      ...funnelContent.callToAction,
-                      primaryHeadline: e.target.value
-                    })}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="primaryButtonText">Primary Button Text</Label>
-                  <Input
-                    id="primaryButtonText"
-                    value={funnelContent.callToAction.primaryButtonText}
-                    onChange={(e) => handleFunnelChange('callToAction', {
-                      ...funnelContent.callToAction,
-                      primaryButtonText: e.target.value
-                    })}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="settings" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Service Status</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label>Featured Service</Label>
-                    <p className="text-sm text-muted-foreground">Display prominently on marketplace</p>
-                  </div>
-                  <Switch
-                    checked={formData.is_featured}
-                    onCheckedChange={(checked) => handleInputChange('is_featured', checked)}
-                  />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label>Top Pick</Label>
-                    <p className="text-sm text-muted-foreground">Mark as a top recommendation</p>
-                  </div>
-                  <Switch
-                    checked={formData.is_top_pick}
-                    onCheckedChange={(checked) => handleInputChange('is_top_pick', checked)}
-                  />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label>Requires Quote</Label>
-                    <p className="text-sm text-muted-foreground">Custom pricing required</p>
-                  </div>
-                  <Switch
-                    checked={formData.requires_quote}
-                    onCheckedChange={(checked) => handleInputChange('requires_quote', checked)}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Purchase Options</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label>Direct Purchase</Label>
-                    <p className="text-sm text-muted-foreground">Enable direct buy-now functionality</p>
-                  </div>
-                  <Switch
-                    checked={formData.direct_purchase_enabled}
-                    onCheckedChange={(checked) => handleInputChange('direct_purchase_enabled', checked)}
-                  />
-                </div>
-
-                {formData.direct_purchase_enabled && (
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-4">
-                    <div className="flex items-start gap-3">
-                      <ShoppingCart className="w-5 h-5 text-blue-600 mt-0.5" />
-                      <div>
-                        <h4 className="font-medium text-blue-900 mb-1">Direct Purchase Enabled</h4>
-                        <p className="text-sm text-blue-700 mb-2">
-                          This service will show a "Buy Now" button that redirects to your purchase URL.
-                        </p>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          className="absolute top-2 right-2"
+                          onClick={() => setFormData(prev => ({ ...prev, image_url: '' }))}
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
                       </div>
-                    </div>
+                    ) : (
+                      <div className="border-2 border-dashed border-border rounded-lg p-8 text-center relative">
+                        <ImageIcon className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                        <p className="text-sm text-muted-foreground mb-4">
+                          Upload your main service image
+                        </p>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleImageUpload(file, true);
+                          }}
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        />
+                        <Button type="button">
+                          <Upload className="w-4 h-4 mr-2" />
+                          Choose Image
+                        </Button>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
 
-                    <div>
-                      <Label htmlFor="website_url">Website / Purchase URL</Label>
-                      <Input
-                        id="website_url"
-                        value={formData.website_url}
-                        onChange={(e) => handleInputChange('website_url', e.target.value)}
-                        placeholder="https://example.com/checkout"
+              <div>
+                <Label>Tags</Label>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {formData.tags.map((tag, index) => (
+                    <Badge key={index} variant="secondary" className="flex items-center gap-1">
+                      {tag}
+                      <X
+                        className="w-3 h-3 cursor-pointer"
+                        onClick={() => removeTag(tag)}
                       />
-                    </div>
-                  </div>
-                )}
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="respa_split">RESPA Split % (0–1000)</Label>
-                    <Input
-                      id="respa_split"
-                      type="number"
-                      min="0"
-                      max="1000"
-                      value={formData.respa_split_limit}
-                      onChange={(e) => handleInputChange('respa_split_limit', Number(e.target.value))}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="non_ssp_split">Non-SSP Split % (0–1000)</Label>
-                    <Input
-                      id="non_ssp_split"
-                      type="number"
-                      min="0"
-                      max="1000"
-                      value={formData.max_split_percentage_non_ssp}
-                      onChange={(e) => handleInputChange('max_split_percentage_non_ssp', Number(e.target.value))}
-                    />
-                  </div>
+                    </Badge>
+                  ))}
                 </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+                <div className="flex gap-2 mt-2">
+                  <Input
+                    value={newTag}
+                    onChange={(e) => setNewTag(e.target.value)}
+                    placeholder="Add a tag"
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        addTag();
+                      }
+                    }}
+                  />
+                  <Button type="button" onClick={addTag}>
+                    <Plus className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            </TabsContent>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Change Summary</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Label htmlFor="changeSummary">What changes are you making?</Label>
-            <Textarea
-              id="changeSummary"
-              placeholder="Briefly describe the changes you're making to this service..."
-              value={changeSummary}
-              onChange={(e) => setChangeSummary(e.target.value)}
-              rows={3}
-            />
-          </CardContent>
-        </Card>
+            <TabsContent value="funnel" className="space-y-6">
+              {/* Circle's 5 Questions */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Circle's 5 Questions</CardTitle>
+                  <p className="text-sm text-muted-foreground">Answer these key questions to help agents understand your service value</p>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label htmlFor="whyShouldICare">1. Why should I care?</Label>
+                    <Textarea
+                      id="whyShouldICare"
+                      value={funnelContent.whyShouldICare}
+                      onChange={(e) => handleFunnelChange('whyShouldICare', e.target.value)}
+                      placeholder="Explain why this service matters for a realtor's business"
+                      rows={3}
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="whatIsMyROI">2. What's my ROI?</Label>
+                    <Textarea
+                      id="whatIsMyROI"
+                      value={funnelContent.whatIsMyROI}
+                      onChange={(e) => handleFunnelChange('whatIsMyROI', e.target.value)}
+                      placeholder="Show typical returns or agent testimonials"
+                      rows={3}
+                    />
+                  </div>
 
-        <div className="flex justify-end gap-2">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-          <Button onClick={handleSaveDraft} disabled={loading}>
-            <Save className="w-4 h-4 mr-2" />
-            {loading ? 'Saving...' : 'Submit for Review'}
-          </Button>
+                  <div>
+                    <Label htmlFor="howSoonWillISeeResults">3. How soon will I see results?</Label>
+                    <Textarea
+                      id="howSoonWillISeeResults"
+                      value={funnelContent.howSoonWillISeeResults}
+                      onChange={(e) => handleFunnelChange('howSoonWillISeeResults', e.target.value)}
+                      placeholder="Immediate, weeks, or months - set realistic expectations"
+                      rows={2}
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="howMuchDoesItCost">4. How much does it cost?</Label>
+                    <Textarea
+                      id="howMuchDoesItCost"
+                      value={funnelContent.howMuchDoesItCost}
+                      onChange={(e) => handleFunnelChange('howMuchDoesItCost', e.target.value)}
+                      placeholder="List monthly + annual price clearly"
+                      rows={2}
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="whatDoIGetWithIt">5. What do I get with it?</Label>
+                    <Textarea
+                      id="whatDoIGetWithIt"
+                      value={funnelContent.whatDoIGetWithIt}
+                      onChange={(e) => handleFunnelChange('whatDoIGetWithIt', e.target.value)}
+                      placeholder="Bullet out features and deliverables"
+                      rows={4}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Proof It Works */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Proof It Works</CardTitle>
+                  <p className="text-sm text-muted-foreground">Share testimonials, case studies, and proof points</p>
+                </CardHeader>
+                <CardContent>
+                  <div>
+                    <Label htmlFor="proof_it_works">Proof It Works</Label>
+                    <Textarea
+                      id="proof_it_works"
+                      value={funnelContent.proofItWorks}
+                      onChange={(e) => handleFunnelChange('proofItWorks', e.target.value)}
+                      placeholder="Share testimonials, case studies, or proof points"
+                      rows={4}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Media Gallery */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Media Gallery</CardTitle>
+                  <p className="text-sm text-muted-foreground">Upload images and videos to showcase your service</p>
+                </CardHeader>
+                <CardContent>
+                  <MediaUploadGrid
+                    mediaItems={funnelContent.mediaGallery}
+                    onMediaChange={(items) => handleFunnelChange('mediaGallery', items)}
+                    maxItems={4}
+                    bucketName="service-assets"
+                    folderPath={`funnel`}
+                  />
+                </CardContent>
+              </Card>
+
+              {/* Hero Section */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Hero Section</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label htmlFor="heroTitle">Hero Title</Label>
+                    <Input
+                      id="heroTitle"
+                      value={funnelContent.heroTitle}
+                      onChange={(e) => handleFunnelChange('heroTitle', e.target.value)}
+                      placeholder="Compelling headline for your service"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="heroSubtitle">Hero Subtitle</Label>
+                    <Input
+                      id="heroSubtitle"
+                      value={funnelContent.heroSubtitle}
+                      onChange={(e) => handleFunnelChange('heroSubtitle', e.target.value)}
+                      placeholder="Supporting subtitle"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Call to Action */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Call to Action</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label htmlFor="ctaText">CTA Button Text</Label>
+                    <Input
+                      id="ctaText"
+                      value={funnelContent.ctaText}
+                      onChange={(e) => handleFunnelChange('ctaText', e.target.value)}
+                      placeholder="e.g., Get Started, Try Free, Contact Us"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="ctaLink">CTA Link</Label>
+                    <Input
+                      id="ctaLink"
+                      value={funnelContent.ctaLink}
+                      onChange={(e) => handleFunnelChange('ctaLink', e.target.value)}
+                      placeholder="https://your-website.com/signup"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="pricing" className="space-y-6">
+              <ServicePricingEditor
+                pricingTiers={formData.pricing_tiers}
+                onPricingTiersChange={(tiers) => handleInputChange('pricing_tiers', tiers)}
+              />
+            </TabsContent>
+
+            <TabsContent value="settings" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Service Settings</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground">Additional service settings will be available here.</p>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+
+          {/* Change Summary and Save */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Submit Changes for Review</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="changeSummary">Change Summary *</Label>
+                <Textarea
+                  id="changeSummary"
+                  value={changeSummary}
+                  onChange={(e) => setChangeSummary(e.target.value)}
+                  placeholder="Briefly describe what you've changed or updated"
+                  rows={3}
+                />
+              </div>
+
+              <div className="flex gap-2 justify-end">
+                <Button variant="outline" onClick={() => onOpenChange(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleSaveDraft} disabled={loading || !changeSummary.trim()}>
+                  <Save className="w-4 h-4 mr-2" />
+                  {loading ? 'Submitting...' : 'Submit for Review'}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </DialogContent>
     </Dialog>
