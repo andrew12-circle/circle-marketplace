@@ -99,3 +99,12 @@ verify_jwt = false
 
 [functions.create-donation]
 verify_jwt = false
+
+[functions.track-affiliate-click]
+verify_jwt = false
+
+[functions.track-affiliate-conversion]
+verify_jwt = false
+
+[functions.generate-affiliate-payouts]
+verify_jwt = true
