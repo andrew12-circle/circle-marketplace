@@ -14,10 +14,15 @@ import {
   Zap
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Header } from "@/components/layout/Header";
+import { LegalFooter } from "@/components/LegalFooter";
 
 export const AffiliateLanding = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
+    <div className="min-h-screen bg-background">
+      <Header />
+      
+      <div className="bg-gradient-to-br from-background via-background to-muted/20">
       {/* Hero Section */}
       <section className="pt-24 pb-20 px-4">
         <div className="max-w-4xl mx-auto text-center">
@@ -323,6 +328,9 @@ export const AffiliateLanding = () => {
           </p>
         </div>
       </section>
+      </div>
+      
+      <LegalFooter />
     </div>
   );
 };

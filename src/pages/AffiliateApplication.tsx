@@ -11,6 +11,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { ArrowLeft, CheckCircle } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { Header } from "@/components/layout/Header";
+import { LegalFooter } from "@/components/LegalFooter";
 
 export const AffiliateApplication = () => {
   const { user } = useAuth();
@@ -70,7 +72,10 @@ export const AffiliateApplication = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background py-12 px-4">
+    <div className="min-h-screen bg-background">
+      <Header />
+      
+      <div className="py-12 px-4">
       <div className="max-w-2xl mx-auto">
         <div className="mb-8">
           <Button variant="ghost" asChild className="mb-4">
@@ -247,6 +252,9 @@ export const AffiliateApplication = () => {
           </p>
         </div>
       </div>
+      </div>
+      
+      <LegalFooter />
     </div>
   );
 };

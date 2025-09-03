@@ -26,6 +26,8 @@ import { AffiliateAssets } from "@/components/affiliate/AffiliateAssets";
 import { AffiliateReports } from "@/components/affiliate/AffiliateReports";
 import { AffiliatePayments } from "@/components/affiliate/AffiliatePayments";
 import { AffiliateSettings } from "@/components/affiliate/AffiliateSettings";
+import { Header } from "@/components/layout/Header";
+import { LegalFooter } from "@/components/LegalFooter";
 
 interface AffiliateStats {
   balance: number;
@@ -113,7 +115,9 @@ export const AffiliateDashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background py-12 px-4">
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="py-12 px-4">
         <div className="max-w-6xl mx-auto">
           <div className="animate-pulse space-y-6">
             <div className="h-8 bg-muted rounded w-1/3"></div>
@@ -124,13 +128,17 @@ export const AffiliateDashboard = () => {
             </div>
           </div>
         </div>
+        </div>
+        <LegalFooter />
       </div>
     );
   }
 
   if (!affiliate) {
     return (
-      <div className="min-h-screen bg-background py-12 px-4">
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="py-12 px-4">
         <div className="max-w-2xl mx-auto text-center">
           <AlertCircle className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
           <h2 className="text-2xl font-bold mb-4">No Affiliate Profile Found</h2>
@@ -141,6 +149,8 @@ export const AffiliateDashboard = () => {
             <a href="/affiliate/apply">Apply Now</a>
           </Button>
         </div>
+        </div>
+        <LegalFooter />
       </div>
     );
   }
@@ -148,7 +158,10 @@ export const AffiliateDashboard = () => {
   const { progress, label } = getProgressStatus();
 
   return (
-    <div className="min-h-screen bg-background py-8 px-4">
+    <div className="min-h-screen bg-background">
+      <Header />
+      
+      <div className="py-8 px-4">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8">
@@ -346,6 +359,9 @@ export const AffiliateDashboard = () => {
           </TabsContent>
         </Tabs>
       </div>
+      </div>
+      
+      <LegalFooter />
     </div>
   );
 };
