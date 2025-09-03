@@ -15,7 +15,7 @@ import { useInvalidateMarketplace } from "@/hooks/useMarketplaceData";
 import { FunnelSectionEditor } from "./FunnelSectionEditor";
 import { FunnelMediaEditor } from "./FunnelMediaEditor";
 import { FunnelPricingEditor } from "./FunnelPricingEditor";
-import { FunnelTestimonialsEditor } from "./FunnelTestimonialsEditor";
+
 import { FunnelFAQEditor } from "./FunnelFAQEditor";
 import { FunnelProofEditor } from "./FunnelProofEditor";
 import { 
@@ -444,31 +444,6 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
               onChange={(data) => handleDataChange('proofItWorks', data)}
             />
             
-            {/* Support Stats Display Toggle */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm">Display Settings</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label className="text-sm font-medium">Show Support Stats</Label>
-                    <p className="text-xs text-muted-foreground">Display support hours in the funnel stats section</p>
-                  </div>
-                  <Switch
-                    checked={funnelData.showSupportStats ?? false}
-                    onCheckedChange={(checked) => handleDataChange('showSupportStats', checked)}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-            
-            {/* Testimonial Content Editor */}
-            <FunnelTestimonialsEditor
-              testimonials={funnelData.testimonials || []}
-              stats={funnelData.stats || []}
-              onChange={(type, data) => handleDataChange(type, data)}
-            />
           </div>
         </TabsContent>
 
