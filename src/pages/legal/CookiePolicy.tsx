@@ -1,9 +1,48 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { ArrowLeft, Settings } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useState } from "react";
+import { 
+  getConsentPreferences, 
+  setConsentPreferences, 
+  clearConsentPreferences,
+  getDefaultConsent,
+  type CookieConsent 
+} from "@/lib/consent";
 
 export const CookiePolicy = () => {
+  const [showPreferences, setShowPreferences] = useState(false);
+  const [preferences, setPreferences] = useState<CookieConsent>(() => 
+    getConsentPreferences() || getDefaultConsent()
+  );
+
+  const handlePreferenceChange = (type: keyof CookieConsent, value: boolean) => {
+    if (type === 'necessary') return; // Always required
+    
+    setPreferences(prev => ({
+      ...prev,
+      [type]: value
+    }));
+  };
+
+  const handleSavePreferences = () => {
+    setConsentPreferences({
+      ...preferences,
+      timestamp: new Date().toISOString(),
+    });
+    setShowPreferences(false);
+  };
+
+  const handleClearPreferences = () => {
+    clearConsentPreferences();
+    setPreferences(getDefaultConsent());
+    setShowPreferences(false);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
@@ -76,9 +115,106 @@ export const CookiePolicy = () => {
             <p>You can control cookies in several ways:</p>
             <ul>
               <li><strong>Browser Settings:</strong> Most browsers allow you to block or delete cookies</li>
-              <li><strong>Cookie Consent Tool:</strong> Use our cookie preference center</li>
+              <li><strong>Cookie Consent Tool:</strong> Use our cookie preference center below</li>
               <li><strong>Opt-out Links:</strong> Visit third-party websites to opt out directly</li>
             </ul>
+
+            <div className="my-6">
+              <Dialog open={showPreferences} onOpenChange={setShowPreferences}>
+                <DialogTrigger asChild>
+                  <Button variant="default">
+                    <Settings className="h-4 w-4 mr-2" />
+                    Manage Cookie Preferences
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl">
+                  <DialogHeader>
+                    <DialogTitle>Cookie Preferences</DialogTitle>
+                    <DialogDescription>
+                      Choose which cookies you want to accept. Some cookies are necessary for the site to function properly.
+                    </DialogDescription>
+                  </DialogHeader>
+                  
+                  <div className="space-y-6 py-4">
+                    <div className="space-y-4">
+                      {/* Necessary Cookies */}
+                      <div className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="space-y-1 flex-1">
+                          <Label className="text-sm font-medium">Necessary Cookies</Label>
+                          <p className="text-xs text-muted-foreground">
+                            Required for authentication, security, and basic site functionality. Cannot be disabled.
+                          </p>
+                        </div>
+                        <Switch 
+                          checked={preferences.necessary} 
+                          disabled={true}
+                        />
+                      </div>
+
+                      {/* Analytics Cookies */}
+                      <div className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="space-y-1 flex-1">
+                          <Label className="text-sm font-medium">Analytics Cookies</Label>
+                          <p className="text-xs text-muted-foreground">
+                            Help us understand how visitors use our website to improve performance and user experience.
+                          </p>
+                        </div>
+                        <Switch 
+                          checked={preferences.analytics}
+                          onCheckedChange={(checked) => handlePreferenceChange('analytics', checked)}
+                        />
+                      </div>
+
+                      {/* Functional Cookies */}
+                      <div className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="space-y-1 flex-1">
+                          <Label className="text-sm font-medium">Functional Cookies</Label>
+                          <p className="text-xs text-muted-foreground">
+                            Enable personalized features and remember your preferences for a better experience.
+                          </p>
+                        </div>
+                        <Switch 
+                          checked={preferences.functional}
+                          onCheckedChange={(checked) => handlePreferenceChange('functional', checked)}
+                        />
+                      </div>
+
+                      {/* Marketing Cookies */}
+                      <div className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="space-y-1 flex-1">
+                          <Label className="text-sm font-medium">Marketing Cookies</Label>
+                          <p className="text-xs text-muted-foreground">
+                            Used to deliver relevant advertisements and track affiliate referrals.
+                          </p>
+                        </div>
+                        <Switch 
+                          checked={preferences.marketing}
+                          onCheckedChange={(checked) => handlePreferenceChange('marketing', checked)}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col-reverse sm:flex-row justify-end gap-2">
+                    <Button 
+                      variant="outline" 
+                      onClick={handleClearPreferences}
+                    >
+                      Clear All Preferences
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setShowPreferences(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button onClick={handleSavePreferences}>
+                      Save Preferences
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
 
             <h2>Cookie Retention</h2>
             <p>Different cookies have different lifespans:</p>

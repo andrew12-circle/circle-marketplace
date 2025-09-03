@@ -4,9 +4,40 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Info, Building, Store } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Info, Building, Store, Settings } from "lucide-react";
+import { useState } from "react";
+import { 
+  getConsentPreferences, 
+  setConsentPreferences, 
+  getDefaultConsent,
+  type CookieConsent 
+} from "@/lib/consent";
 
 export const LegalFooter = () => {
+  const [showCookiePreferences, setShowCookiePreferences] = useState(false);
+  const [preferences, setPreferences] = useState<CookieConsent>(() => 
+    getConsentPreferences() || getDefaultConsent()
+  );
+
+  const handlePreferenceChange = (type: keyof CookieConsent, value: boolean) => {
+    if (type === 'necessary') return; // Always required
+    
+    setPreferences(prev => ({
+      ...prev,
+      [type]: value
+    }));
+  };
+
+  const handleSavePreferences = () => {
+    setConsentPreferences({
+      ...preferences,
+      timestamp: new Date().toISOString(),
+    });
+    setShowCookiePreferences(false);
+  };
+
   return (
     <footer className="bg-muted/30 border-t mt-16">
       {/* Business Partners Section */}
@@ -61,6 +92,93 @@ export const LegalFooter = () => {
               <Link to="/legal/cookies" className="block text-sm text-muted-foreground hover:text-primary">
                 Cookie Policy
               </Link>
+              <Dialog open={showCookiePreferences} onOpenChange={setShowCookiePreferences}>
+                <DialogTrigger asChild>
+                  <button className="text-sm text-muted-foreground hover:text-primary text-left">
+                    Cookie Preferences
+                  </button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl">
+                  <DialogHeader>
+                    <DialogTitle>Cookie Preferences</DialogTitle>
+                    <DialogDescription>
+                      Choose which cookies you want to accept. Some cookies are necessary for the site to function properly.
+                    </DialogDescription>
+                  </DialogHeader>
+                  
+                  <div className="space-y-6 py-4">
+                    <div className="space-y-4">
+                      {/* Necessary Cookies */}
+                      <div className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="space-y-1 flex-1">
+                          <Label className="text-sm font-medium">Necessary Cookies</Label>
+                          <p className="text-xs text-muted-foreground">
+                            Required for authentication, security, and basic site functionality. Cannot be disabled.
+                          </p>
+                        </div>
+                        <Switch 
+                          checked={preferences.necessary} 
+                          disabled={true}
+                        />
+                      </div>
+
+                      {/* Analytics Cookies */}
+                      <div className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="space-y-1 flex-1">
+                          <Label className="text-sm font-medium">Analytics Cookies</Label>
+                          <p className="text-xs text-muted-foreground">
+                            Help us understand how visitors use our website to improve performance and user experience.
+                          </p>
+                        </div>
+                        <Switch 
+                          checked={preferences.analytics}
+                          onCheckedChange={(checked) => handlePreferenceChange('analytics', checked)}
+                        />
+                      </div>
+
+                      {/* Functional Cookies */}
+                      <div className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="space-y-1 flex-1">
+                          <Label className="text-sm font-medium">Functional Cookies</Label>
+                          <p className="text-xs text-muted-foreground">
+                            Enable personalized features and remember your preferences for a better experience.
+                          </p>
+                        </div>
+                        <Switch 
+                          checked={preferences.functional}
+                          onCheckedChange={(checked) => handlePreferenceChange('functional', checked)}
+                        />
+                      </div>
+
+                      {/* Marketing Cookies */}
+                      <div className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="space-y-1 flex-1">
+                          <Label className="text-sm font-medium">Marketing Cookies</Label>
+                          <p className="text-xs text-muted-foreground">
+                            Used to deliver relevant advertisements and track affiliate referrals.
+                          </p>
+                        </div>
+                        <Switch 
+                          checked={preferences.marketing}
+                          onCheckedChange={(checked) => handlePreferenceChange('marketing', checked)}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col-reverse sm:flex-row justify-end gap-2">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setShowCookiePreferences(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button onClick={handleSavePreferences}>
+                      Save Preferences
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
               <Dialog>
                 <DialogTrigger asChild>
                   <button className="text-sm text-muted-foreground hover:text-primary text-left">

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { hasAnalyticsConsent, respectsDoNotTrack } from "@/lib/consent";
 
 interface MobileTrackingOptions {
   trackPageViews?: boolean;
@@ -137,7 +138,11 @@ export const useMobileTracking = (options: MobileTrackingOptions = {}) => {
   };
 
   const trackEvent = async (eventType: string, eventData: Record<string, any> = {}) => {
-    if (!sessionId || !deviceInfo) return;
+    // Respect user's tracking preferences and Do Not Track
+    if (!sessionId || !deviceInfo || respectsDoNotTrack() || !hasAnalyticsConsent()) {
+      console.log('Tracking disabled by user preferences or Do Not Track');
+      return;
+    }
 
     try {
       await supabase.functions.invoke('affiliate-fraud-detection/mobile-tracking', {
