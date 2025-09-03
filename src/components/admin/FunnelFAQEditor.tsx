@@ -245,7 +245,7 @@ export const FunnelFAQEditor = ({ faqSections, callToAction, onChange }: FunnelF
           <div>
             <Label>CTA Title</Label>
             <Input
-              value={ctaData.title}
+              value={ctaData.title || ""}
               onChange={(e) => updateCTA('title', e.target.value)}
               placeholder="Ready to Transform Your Business?"
             />
@@ -254,7 +254,7 @@ export const FunnelFAQEditor = ({ faqSections, callToAction, onChange }: FunnelF
           <div>
             <Label>CTA Description</Label>
             <Textarea
-              value={ctaData.description}
+              value={ctaData.description || ""}
               onChange={(e) => updateCTA('description', e.target.value)}
               placeholder="Join thousands of agents who've already made the switch"
               rows={2}
@@ -265,7 +265,7 @@ export const FunnelFAQEditor = ({ faqSections, callToAction, onChange }: FunnelF
             <div>
               <Label>Button Text</Label>
               <Input
-                value={ctaData.buttonText}
+                value={ctaData.buttonText || ""}
                 onChange={(e) => updateCTA('buttonText', e.target.value)}
                 placeholder="Book Your Free Demo"
               />
