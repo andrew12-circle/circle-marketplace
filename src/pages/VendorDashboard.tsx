@@ -19,6 +19,7 @@ import { SponsoredPositionsModal } from '@/components/vendor/SponsoredPositionsM
 import { ReviewsManagementModal } from '@/components/vendor/ReviewsManagementModal';
 import { CustomerInsightsModal } from '@/components/vendor/CustomerInsightsModal';
 import { NotificationsModal } from '@/components/vendor/NotificationsModal';
+import { VendorSettingsModal } from '@/components/vendor/VendorSettingsModal';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useVendorActivityTracking } from '@/hooks/useVendorActivityTracking';
@@ -206,6 +207,7 @@ export const VendorDashboard = () => {
   const [isReviewsModalOpen, setIsReviewsModalOpen] = useState(false);
   const [isCustomerInsightsModalOpen, setIsCustomerInsightsModalOpen] = useState(false);
   const [isNotificationsModalOpen, setIsNotificationsModalOpen] = useState(false);
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
 
   useEffect(() => {
     fetchVendorData();
@@ -500,7 +502,11 @@ export const VendorDashboard = () => {
                 <Bell className="w-4 h-4 mr-2" />
                 Notifications
               </Button>
-              <Button variant="outline" size="sm">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setIsSettingsModalOpen(true)}
+              >
                 <Settings className="w-4 h-4 mr-2" />
                 Settings
               </Button>
@@ -1068,6 +1074,11 @@ export const VendorDashboard = () => {
           <NotificationsModal
             isOpen={isNotificationsModalOpen}
             onClose={() => setIsNotificationsModalOpen(false)}
+            vendorId={vendorId}
+          />
+          <VendorSettingsModal
+            isOpen={isSettingsModalOpen}
+            onClose={() => setIsSettingsModalOpen(false)}
             vendorId={vendorId}
           />
         </>
