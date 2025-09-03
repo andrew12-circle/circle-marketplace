@@ -1152,16 +1152,111 @@ export const ServiceManagementPanel = () => {
               <TabsContent value="details" className="space-y-4">
                 {isEditingDetails ? (
                   <div className="space-y-4">
-                    {/* Service Image Upload Section */}
-                    <ServiceImageUploader 
-                      serviceId={selectedService.id}
-                      serviceName={selectedService.title}
-                      currentImageUrl={selectedService.profile_image_url}
-                      onImageUpdated={(newImageUrl) => {
-                        setEditForm({ ...editForm, profile_image_url: newImageUrl });
-                        setSelectedService({ ...selectedService, profile_image_url: newImageUrl });
-                      }}
-                    />
+                    {/* Service Images Section */}
+                    <div className="space-y-4 p-4 border rounded-lg bg-blue-50/50">
+                      <h4 className="font-medium text-blue-900">Service Images</h4>
+                      
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-blue-900">Profile Image</label>
+                        <p className="text-xs text-muted-foreground">Small circular image shown on service cards (like a user profile photo)</p>
+                        <ServiceImageUploader 
+                          serviceId={selectedService.id}
+                          serviceName={selectedService.title}
+                          currentImageUrl={selectedService.profile_image_url}
+                          onImageUpdated={(newImageUrl) => {
+                            setEditForm({ ...editForm, profile_image_url: newImageUrl });
+                            setSelectedService({ ...selectedService, profile_image_url: newImageUrl });
+                          }}
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-blue-900">Main Service Image</label>
+                        <p className="text-xs text-muted-foreground">Large banner image used in funnel pages and detailed views</p>
+                        <ServiceImageUploader 
+                          serviceId={selectedService.id}
+                          serviceName={`${selectedService.title}-banner`}
+                          currentImageUrl={selectedService.image_url}
+                          onImageUpdated={(newImageUrl) => {
+                            setEditForm({ ...editForm, image_url: newImageUrl });
+                            setSelectedService({ ...selectedService, image_url: newImageUrl });
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Current Performance Metrics (Read-only) */}
+                    <div className="space-y-4 p-4 border rounded-lg bg-gray-50/50">
+                      <h4 className="font-medium text-gray-900">Current Performance</h4>
+                      
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div className="text-center">
+                          <div className="flex items-center justify-center gap-1">
+                            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                            <span className="font-medium">{selectedService.rating || 'No rating'}</span>
+                          </div>
+                          <p className="text-xs text-muted-foreground">Rating</p>
+                        </div>
+                        <div className="text-center">
+                          <div className="font-medium">{selectedService.review_count || 0}</div>
+                          <p className="text-xs text-muted-foreground">Reviews</p>
+                        </div>
+                        <div className="text-center">
+                          <div className="font-medium">{selectedService.sort_order || '-'}</div>
+                          <p className="text-xs text-muted-foreground">Sort Order</p>
+                        </div>
+                        <div className="text-center">
+                          <div className="font-medium">{selectedService.is_verified ? 'Yes' : 'No'}</div>
+                          <p className="text-xs text-muted-foreground">Verified</p>
+                        </div>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Ratings and reviews are managed automatically. Sort order and verification status can be changed in other tabs.
+                      </p>
+                    </div>
+                    
+                    {/* Live Preview Section */}
+                    <div className="space-y-4 p-4 border rounded-lg bg-purple-50/50">
+                      <h4 className="font-medium text-purple-900">Card Preview</h4>
+                      <p className="text-xs text-muted-foreground">Preview how your changes will appear on service cards</p>
+                      
+                      <div className="bg-white p-4 rounded-lg border shadow-sm max-w-sm">
+                        <div className="flex items-start gap-3 mb-3">
+                          {editForm.profile_image_url ? (
+                            <img 
+                              src={editForm.profile_image_url} 
+                              alt="Profile"
+                              className="w-8 h-8 rounded-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                              <span className="text-blue-600 font-semibold text-sm">
+                                {(editForm.title || selectedService.title || 'S').charAt(0).toUpperCase()}
+                              </span>
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-semibold text-sm line-clamp-2">
+                              {editForm.title || selectedService.title || 'Service Title'}
+                            </h3>
+                            <p className="text-xs text-muted-foreground">
+                              {editForm.category || selectedService.category || 'Category'}
+                            </p>
+                          </div>
+                        </div>
+                        <p className="text-xs text-muted-foreground mb-3 line-clamp-3">
+                          {editForm.description || selectedService.description || 'Service description will appear here...'}
+                        </p>
+                        <div className="flex justify-between items-center text-xs">
+                          <span className="text-muted-foreground">
+                            {editForm.duration || selectedService.duration || 'Duration not set'}
+                          </span>
+                          <span className="font-medium">
+                            {editForm.retail_price || selectedService.retail_price || 'Price TBD'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
                     
                     {isDetailsDirty && (
                       <Badge variant="outline" className="text-xs">Unsaved changes</Badge>
@@ -1186,10 +1281,42 @@ export const ServiceManagementPanel = () => {
                            {(editForm.description || '').length}/140 characters
                          </div>
                        </div>
-                     </div>
+                      </div>
 
+                      {/* Category and Classification */}
+                      <div className="space-y-4 p-4 border rounded-lg bg-green-50/50">
+                        <h4 className="font-medium text-green-900">Category & Classification</h4>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium text-green-900">Primary Category</label>
+                            <p className="text-xs text-muted-foreground">Main category for filtering (shown prominently on cards)</p>
+                            <Input
+                              value={editForm.category || ''}
+                              onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
+                              placeholder="e.g., Marketing, CRM, Lead Generation"
+                              className="bg-white"
+                            />
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium text-green-900">Search Keywords</label>
+                            <p className="text-xs text-muted-foreground">Additional searchable terms (comma-separated)</p>
+                            <Input
+                              value={(editForm.tags || []).filter(tag => !tag.startsWith('cat:')).join(', ')}
+                              onChange={(e) => {
+                                const categoryTags = (editForm.tags || []).filter(tag => tag.startsWith('cat:'));
+                                const additionalTags = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
+                                setEditForm({ ...editForm, tags: [...categoryTags, ...additionalTags] });
+                              }}
+                              placeholder="automation, lead-gen, crm, marketing"
+                              className="bg-white"
+                            />
+                          </div>
+                        </div>
+                      </div>
 
-                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="space-y-2">
                         <label className="text-sm font-medium">Duration</label>
                         <Input
@@ -1266,7 +1393,10 @@ export const ServiceManagementPanel = () => {
                       </div>
                     </div>
                       <div className="space-y-2">
-                        <label className="text-sm font-medium">Category Tags</label>
+                        <label className="text-sm font-medium">Quick Category Tags</label>
+                        <p className="text-xs text-muted-foreground">
+                          Select relevant categories to help users find your service. These sync with the marketplace filtering system.
+                        </p>
                         <div className="space-y-2">
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                             {[
@@ -1310,18 +1440,19 @@ export const ServiceManagementPanel = () => {
                             </div>
                           ))}
                         </div>
-                        <div className="mt-2">
-                          <label className="text-sm font-medium">Additional Tags (comma-separated)</label>
-                          <Input
-                            value={(editForm.tags || []).filter(tag => !tag.startsWith('cat:')).join(', ')}
-                            onChange={(e) => {
-                              const categoryTags = (editForm.tags || []).filter(tag => tag.startsWith('cat:'));
-                              const additionalTags = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
-                              setEditForm({ ...editForm, tags: [...categoryTags, ...additionalTags] });
-                            }}
-                            placeholder="Website, Branding, Luxury"
-                          />
-                        </div>
+                         <div className="mt-2">
+                           <label className="text-sm font-medium">Additional Search Keywords</label>
+                           <p className="text-xs text-muted-foreground">Extra searchable terms beyond the standard categories (comma-separated)</p>
+                           <Input
+                             value={(editForm.tags || []).filter(tag => !tag.startsWith('cat:')).join(', ')}
+                             onChange={(e) => {
+                               const categoryTags = (editForm.tags || []).filter(tag => tag.startsWith('cat:'));
+                               const additionalTags = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
+                               setEditForm({ ...editForm, tags: [...categoryTags, ...additionalTags] });
+                             }}
+                             placeholder="automation, luxury, enterprise, local"
+                           />
+                         </div>
                       </div>
                     </div>
 
@@ -1426,19 +1557,19 @@ export const ServiceManagementPanel = () => {
                           </div>
                         </div>
 
-                        {/* Purchase URL Field - Only shown when direct purchase is enabled */}
-                        <div className="space-y-2">
-                          <label className="text-sm font-medium text-blue-900">Purchase URL (Buy Now Link)</label>
-                          <Input
-                            value={editForm.website_url || ''}
-                            onChange={(e) => setEditForm({ ...editForm, website_url: e.target.value })}
-                            placeholder="https://example.com/checkout or https://calendly.com/yourlink"
-                            className="bg-white"
-                          />
-                          <p className="text-xs text-blue-600">
-                            This is where users will be redirected when they click "Buy Now". Use your affiliate link for direct purchases.
-                          </p>
-                        </div>
+                         {/* Website/Purchase URL Field - Only shown when direct purchase is enabled */}
+                         <div className="space-y-2">
+                           <label className="text-sm font-medium text-blue-900">Website / Purchase URL</label>
+                           <Input
+                             value={editForm.website_url || ''}
+                             onChange={(e) => setEditForm({ ...editForm, website_url: e.target.value })}
+                             placeholder="https://example.com/checkout or https://calendly.com/yourlink"
+                             className="bg-white"
+                           />
+                           <p className="text-xs text-blue-600">
+                             Official website or direct purchase/booking link. Used for "View Website" and "Buy Now" buttons.
+                           </p>
+                         </div>
                       </div>
                     )}
 
