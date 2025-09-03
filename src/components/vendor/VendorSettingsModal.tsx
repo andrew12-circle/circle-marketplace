@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -71,13 +71,41 @@ export const VendorSettingsModal = ({ isOpen, onClose, vendorId }: VendorSetting
   const fetchVendorSettings = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
+      
+      // First check if user has a vendor record, if not create one
+      let { data, error } = await supabase
         .from('vendors')
         .select('*')
         .eq('id', vendorId)
-        .single();
+        .maybeSingle(); // Use maybeSingle to avoid errors when no record exists
 
-      if (error) throw error;
+      if (error && error.code !== 'PGRST116') {
+        throw error;
+      }
+
+      // If no vendor record exists, create a basic one
+      if (!data) {
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('display_name')
+          .eq('user_id', vendorId)
+          .single();
+
+        const { data: newVendor, error: createError } = await supabase
+          .from('vendors')
+          .insert({
+            id: vendorId,
+            name: profileData?.display_name || 'New Vendor',
+            contact_email: '', // Will be filled by user
+            approval_status: 'pending',
+            is_active: true
+          })
+          .select()
+          .single();
+
+        if (createError) throw createError;
+        data = newVendor;
+      }
 
       if (data) {
         setSettings({
@@ -169,6 +197,9 @@ export const VendorSettingsModal = ({ isOpen, onClose, vendorId }: VendorSetting
             <Settings className="w-6 h-6" />
             Vendor Settings
           </DialogTitle>
+          <DialogDescription>
+            Manage your vendor profile, business information, notifications, and privacy settings.
+          </DialogDescription>
         </DialogHeader>
 
         <Tabs defaultValue="profile" className="w-full">
