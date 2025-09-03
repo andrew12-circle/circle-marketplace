@@ -872,69 +872,26 @@ export const ServiceFunnelModal = ({
                         </div>
                       </AccordionTrigger>
                       <AccordionContent className="border-l-4 border-l-red-500 pl-4 bg-white rounded-b-lg shadow-sm pt-0">
-                         <div className="p-6 pt-[5px] whitespace-pre-wrap">
-                           {(() => {
-                          const sections = Array.isArray((fc as any)?.faqSections) ? (fc as any).faqSections : [];
-                          const byId = sections.find((s: any) => s?.id === 'question-4');
-                          const byTitle = sections.find((s: any) => typeof s?.title === 'string' && s.title.toLowerCase().includes('included'));
-                          const included = byId?.content || byTitle?.content;
-                          if (included) {
-                            return <SafeHTML html={included} className="whitespace-pre-wrap" />;
-                          }
-                          return <div className="space-y-6">
-                                {/* Core Features */}
-                                <div>
-                                  <h4 className="font-semibold text-gray-900 mb-3">Core Features</h4>
-                                  <div className="space-y-2">
-                                    <div className="flex items-center gap-3">
-                                      <CheckCircle className="w-5 h-5 text-red-500" />
-                                      <span className="text-gray-700">IDX website</span>
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                      <CheckCircle className="w-5 h-5 text-red-500" />
-                                      <span className="text-gray-700">CRM with auto-drip</span>
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                      <CheckCircle className="w-5 h-5 text-red-500" />
-                                      <span className="text-gray-700">Facebook & Google ad integration</span>
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                      <CheckCircle className="w-5 h-5 text-red-500" />
-                                      <span className="text-gray-700">Text & email automation</span>
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                      <CheckCircle className="w-5 h-5 text-red-500" />
-                                      <span className="text-gray-700">Lead routing</span>
-                                    </div>
-                                  </div>
-                                </div>
-
-                                {/* Optional Add-ons */}
-                                <div>
-                                  <h4 className="font-semibold text-gray-900 mb-3">Optional Add-ons or Upgrades</h4>
-                                  <div className="space-y-2">
-                                    <div className="flex items-center gap-3">
-                                      <Plus className="w-5 h-5 text-gray-400" />
-                                      <span className="text-gray-600">Advanced analytics dashboard</span>
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                      <Plus className="w-5 h-5 text-gray-400" />
-                                      <span className="text-gray-600">Custom branding package</span>
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                      <Plus className="w-5 h-5 text-gray-400" />
-                                      <span className="text-gray-600">Dedicated account manager</span>
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                      <Plus className="w-5 h-5 text-gray-400" />
-                                      <span className="text-gray-600">Enhanced lead scoring</span>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>;
-                        })()}
-                        </div>
-                      </AccordionContent>
+                          <div className="p-6 pt-[5px] whitespace-pre-wrap">
+                            {(() => {
+                           const sections = Array.isArray((fc as any)?.faqSections) ? (fc as any).faqSections : [];
+                           const byId = sections.find((s: any) => s?.id === 'question-4');
+                           const byTitle = sections.find((s: any) => typeof s?.title === 'string' && s.title.toLowerCase().includes('included'));
+                           const included = byId?.content || byTitle?.content;
+                           if (included) {
+                             return <SafeHTML html={included} className="whitespace-pre-wrap" />;
+                           }
+                           return <div className="text-center py-8 text-gray-500">
+                                   <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                                     <p className="text-lg font-medium text-gray-600 mb-2">Information Coming Soon</p>
+                                     <p className="text-sm text-gray-500">
+                                       Detailed information about what's included with this service will be available shortly.
+                                     </p>
+                                   </div>
+                                 </div>;
+                         })()}
+                         </div>
+                       </AccordionContent>
                     </AccordionItem>
 
                     {/* Question 5 - Proof It Works */}
