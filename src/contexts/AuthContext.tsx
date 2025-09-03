@@ -155,9 +155,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     try {
-      // Shorter timeout for better UX - we have fallbacks
+      console.log('🔍 Starting profile fetch for userId:', userId);
+      
+      // Longer timeout to prevent unnecessary timeout errors
       const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Profile fetch timeout')), 5000); // Reduced to 5 seconds
+        setTimeout(() => reject(new Error('Profile fetch timeout')), 15000); // Increased to 15 seconds
       });
 
       // Simplified query without ordering for better performance
@@ -171,6 +173,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         profilePromise,
         timeoutPromise
       ]) as any;
+      
+      console.log('📊 Profile query result:', { profileData: !!profileData, profileError });
 
       if (!profileError && profileData) {
         logger.log('Profile fetched successfully:', { 
@@ -250,11 +254,31 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setProfile(null);
       setRetryCount(0); // Reset retry count when giving up
     } catch (error) {
+      console.log('❌ fetchProfile exception:', error);
       logger.error('fetchProfile exception:', error);
       
-      // More conservative retry logic with circuit breaker
-      if (retryCount < 1) { // Reduced to 1 retry since we have more fallbacks
-        const backoffDelay = 3000; // Fixed 3 second delay
+      // Check if this is a timeout error - don't retry these
+      const isTimeoutError = error instanceof Error && error.message.includes('Profile fetch timeout');
+      
+      if (isTimeoutError) {
+        console.log('⏰ Timeout error detected, not retrying to prevent infinite loop');
+        logger.warn('Profile fetch timeout - not retrying to prevent infinite loop');
+        setProfile(null);
+        setRetryCount(0);
+        
+        // Open circuit breaker temporarily for timeout errors
+        setIsCircuitBreakerOpen(true);
+        setTimeout(() => {
+          setIsCircuitBreakerOpen(false);
+          logger.log('Circuit breaker reset after timeout');
+        }, 10000); // 10 seconds for timeout errors
+        return;
+      }
+      
+      // Only retry for non-timeout errors (database connection issues, etc.)
+      if (retryCount < 1) {
+        console.log('🔄 Retrying profile fetch, attempt:', retryCount + 1);
+        const backoffDelay = 3000;
         setTimeout(() => {
           setRetryCount(prev => prev + 1);
           fetchProfile(userId);
@@ -264,12 +288,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setProfile(null);
         setRetryCount(0);
         
-        // Open circuit breaker for shorter time since we have admin fallback
+        // Open circuit breaker for other errors
         setIsCircuitBreakerOpen(true);
         setTimeout(() => {
           setIsCircuitBreakerOpen(false);
           logger.log('Circuit breaker reset, profile fetch available again');
-        }, 30000); // Reduced to 30 seconds
+        }, 30000);
       }
     }
   };
