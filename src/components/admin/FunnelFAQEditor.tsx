@@ -69,12 +69,6 @@ const DEFAULT_FAQ_SECTIONS = [
     title: "Proof It Works",
     content: "Over 1000+ successful implementations with verified case studies and testimonials",
     color: "emerald"
-  },
-  {
-    id: "question-7",
-    title: "Choose Your Package",
-    content: "Select from our flexible pricing options designed to fit your business needs and budget",
-    color: "violet"
   }
 ];
 
