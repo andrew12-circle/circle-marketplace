@@ -66,12 +66,13 @@ export const AffiliateLinks = ({ affiliateId }: AffiliateLinksProps) => {
       // Generate unique code
       const code = newLink.custom_code || `link${Math.random().toString(36).substr(2, 6)}`;
       
-      // Set destination URL based on type
+      // Set destination URL based on type  
+      const baseUrl = window.location.origin;
       const destinationUrls = {
-        marketplace: "https://circle.example.com/marketplace",
-        academy: "https://circle.example.com/academy", 
-        pro_membership: "https://circle.example.com/pro",
-        funnel: "https://circle.example.com/signup"
+        marketplace: `${baseUrl}/marketplace`,
+        academy: `${baseUrl}/academy`, 
+        pro_membership: `${baseUrl}/pricing`,
+        funnel: `${baseUrl}/signup`
       };
 
       const { error } = await supabase

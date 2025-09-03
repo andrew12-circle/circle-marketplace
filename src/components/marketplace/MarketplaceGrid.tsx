@@ -24,6 +24,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLocation } from "@/hooks/useLocation";
+import { useAffiliateTracking } from "@/hooks/useAffiliateTracking";
 import { determineServiceRisk } from "./RESPAComplianceSystem";
 import { Link } from "react-router-dom";
 import { CategoryMegaMenu } from "./CategoryMegaMenu";
@@ -79,6 +80,9 @@ export const MarketplaceGrid = () => {
   const { t } = useTranslation();
   const bundlesEnabled = useFeatureFlag("serviceBundles", false);
   const marketplaceEnabled = useMarketplaceEnabled(); // Use server-backed config
+  
+  // Initialize affiliate tracking
+  const { trackConversion, hasActiveAttribution } = useAffiliateTracking();
   
   const { toast } = useToast();
 
