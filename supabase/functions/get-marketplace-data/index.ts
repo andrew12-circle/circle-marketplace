@@ -73,9 +73,6 @@ serve(async (req) => {
           vendors!inner (
             id, name, rating, review_count, is_verified, website_url, logo_url, 
             support_hours, vendor_type, service_states, mls_areas
-          ),
-          service_interest_counters (
-            total_likes, updated_at
           )
         `)
         .eq('is_active', true)
@@ -147,8 +144,8 @@ serve(async (req) => {
           conversion_rate: metrics.conversion_rate || 0,
           revenue_attributed: metrics.revenue_attributed || 0
         } : null,
-        // Interest metrics
-        total_likes: service.service_interest_counters?.[0]?.total_likes || 0
+        // Interest metrics (placeholder until table is created)
+        total_likes: 0
       };
     });
 

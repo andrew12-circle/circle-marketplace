@@ -23,7 +23,7 @@ const PanelFallback = ({ title }: { title: string }) => (
 export const LazyServiceManagementPanel = lazy(() => import('./ServiceManagementPanel').then(m => ({ default: m.ServiceManagementPanel })));
 export const LazyVendorManagementPanel = lazy(() => import('./VendorManagementPanel').then(m => ({ default: m.VendorManagementPanel })));
 export const LazyRESPAComplianceManager = lazy(() => import('./RESPAComplianceManager').then(m => ({ default: m.RESPAComplianceManager })));
-export const LazyVendorActivityAnalytics = lazy(() => import('./VendorActivityAnalytics').then(m => ({ default: m.VendorActivityAnalytics })));
+export const LazyVendorActivityAnalytics = lazy(() => import('./OptimizedVendorAnalytics').then(m => ({ default: m.OptimizedVendorAnalytics })));
 export const LazyCreatorPayoutDashboard = lazy(() => import('./CreatorPayoutDashboard').then(m => ({ default: m.CreatorPayoutDashboard })));
 export const LazyRetentionAnalyticsDashboard = lazy(() => import('./RetentionAnalyticsDashboard').then(m => ({ default: m.RetentionAnalyticsDashboard })));
 

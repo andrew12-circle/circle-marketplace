@@ -9,7 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { TrendingUp, Users, ShoppingCart, DollarSign, Activity, AlertTriangle, RefreshCw } from 'lucide-react';
 import { useServiceAnalytics } from '@/hooks/useServiceAnalytics';
 import { VendorAnalytics } from '@/components/marketplace/VendorAnalytics';
-import { VendorActivityAnalytics } from '@/components/admin/VendorActivityAnalytics';
+import { OptimizedVendorAnalytics } from '@/components/admin/OptimizedVendorAnalytics';
 import SecurityMonitoringPanel from '@/components/admin/SecurityMonitoringPanel';
 import { TrafficAnalytics } from '@/components/analytics/TrafficAnalytics';
 
@@ -295,7 +295,7 @@ export const ComprehensiveAnalyticsDashboard = () => {
         </TabsContent>
 
         <TabsContent value="activity">
-          <VendorActivityAnalytics />
+          <OptimizedVendorAnalytics />
         </TabsContent>
 
         <TabsContent value="security">
