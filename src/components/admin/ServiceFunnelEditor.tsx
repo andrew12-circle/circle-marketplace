@@ -16,7 +16,6 @@ import { FunnelSectionEditor } from "./FunnelSectionEditor";
 import { FunnelMediaEditor } from "./FunnelMediaEditor";
 import { FunnelPricingEditor } from "./FunnelPricingEditor";
 
-import { FunnelFAQEditor } from "./FunnelFAQEditor";
 import { FunnelProofEditor } from "./FunnelProofEditor";
 import { 
   Eye, 
@@ -25,8 +24,7 @@ import {
   FileText, 
   Image, 
   DollarSign, 
-  MessageSquare, 
-  HelpCircle,
+  MessageSquare,
   Settings
 } from "lucide-react";
 import { ServiceFunnelModal } from "@/components/marketplace/ServiceFunnelModal";
@@ -386,7 +384,7 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
 
       {/* Main Editor Tabs */}
       <Tabs defaultValue="content" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="content" className="flex items-center gap-2">
             <FileText className="w-4 h-4" />
             Content
@@ -402,10 +400,6 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
           <TabsTrigger value="testimonials" className="flex items-center gap-2">
             <MessageSquare className="w-4 h-4" />
             Social Proof
-          </TabsTrigger>
-          <TabsTrigger value="faq" className="flex items-center gap-2">
-            <HelpCircle className="w-4 h-4" />
-            FAQ
           </TabsTrigger>
         </TabsList>
 
@@ -448,13 +442,6 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
           </div>
         </TabsContent>
 
-        <TabsContent value="faq" className="space-y-4">
-          <FunnelFAQEditor
-            faqSections={funnelData.faqSections || []}
-            callToAction={funnelData.callToAction || {}}
-            onChange={(type, data) => handleDataChange(type, data)}
-          />
-        </TabsContent>
       </Tabs>
 
       {/* Preview Modal */}
