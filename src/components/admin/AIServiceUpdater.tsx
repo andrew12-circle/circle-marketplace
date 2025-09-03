@@ -678,7 +678,7 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
         tags: updatedService.tags ? `present (${updatedService.tags.length} items)` : 'missing',
         retail_price: updatedService.retail_price ? 'present' : 'missing',
         price_duration: updatedService.price_duration ? 'present' : 'missing',
-        disclaimer_id: updatedService.disclaimer_id ? 'present' : 'missing',
+        disclaimer_id: (updatedService.disclaimer_id || updatedService.disclaimer_content) ? 'present' : 'missing',
         funnel_content: updatedService.funnel_content ? 'present' : 'missing',
         pricing_tiers: updatedService.pricing_tiers ? 'present' : 'missing'
       });
@@ -691,7 +691,7 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
         updatedService.tags.length > 0 &&
         updatedService.retail_price &&
         updatedService.price_duration &&
-        updatedService.disclaimer_id &&
+        (updatedService.disclaimer_id || updatedService.disclaimer_content) &&
         updatedService.funnel_content &&
         updatedService.pricing_tiers
       );
