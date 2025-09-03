@@ -264,7 +264,7 @@ export const ServiceManagementPanel = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [isEditingDetails, setIsEditingDetails] = useState(false);
-  const [showFunnelEditor, setShowFunnelEditor] = useState(false);
+  // Removed showFunnelEditor state - editor shows directly on funnel tab
   const [showFunnelPreview, setShowFunnelPreview] = useState(false);
   const [editForm, setEditForm] = useState<Partial<Service>>({});
   const [error, setError] = useState<string | null>(null);
@@ -452,7 +452,7 @@ export const ServiceManagementPanel = () => {
     setSelectedService(service);
     setEditForm(service);
     setIsEditingDetails(false);
-    setShowFunnelEditor(false);
+    // Removed setShowFunnelEditor(false) - editor shows directly on funnel tab
     
     // Load saved funnel content if present and normalize keys; otherwise seed from service
     const rawFunnel: any = (service as any).funnel_content;
@@ -1542,44 +1542,31 @@ export const ServiceManagementPanel = () => {
               </TabsContent>
 
               <TabsContent value="funnel" className="space-y-4">
-                {showFunnelEditor ? (
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-lg font-semibold">Service Funnel Pages</h3>
+                    <div className="flex items-center gap-3">
+                      {lastFunnelSavedAt && (
+                        <span className="text-xs text-muted-foreground">
+                          Saved {formatRelativeTime(lastFunnelSavedAt)}
+                        </span>
+                      )}
+                      <Button variant="outline" onClick={() => setShowFunnelPreview(true)}>
+                        <Eye className="h-4 w-4 mr-2" />
+                        Preview Funnel
+                      </Button>
+                    </div>
+                  </div>
+                  
                   <ServiceFunnelEditor
                     service={selectedService}
                     onUpdate={(updatedService) => {
                       setSelectedService(updatedService as Service);
                       setServices(services.map(s => s.id === updatedService.id ? updatedService as Service : s));
-                      setShowFunnelEditor(false);
+                      // Removed setShowFunnelEditor(false) - stay in editor after saving
                     }}
                   />
-                ) : (
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <h3 className="text-lg font-semibold">Service Funnel Pages</h3>
-                      <div className="flex items-center gap-3">
-                        {lastFunnelSavedAt && (
-                          <span className="text-xs text-muted-foreground">
-                            Saved {formatRelativeTime(lastFunnelSavedAt)}
-                          </span>
-                        )}
-                        <Button variant="outline" onClick={() => setShowFunnelPreview(true)}>
-                          <Eye className="h-4 w-4 mr-2" />
-                          Preview Funnel
-                        </Button>
-                        <Button onClick={() => setShowFunnelEditor(true)}>
-                          <Edit className="h-4 w-4 mr-2" />
-                          Edit Funnel
-                        </Button>
-                      </div>
-                    </div>
-                    
-                    <div className="text-center py-8 border rounded-lg">
-                      <p className="text-muted-foreground">Click "Edit Funnel" to customize this service's funnel pages</p>
-                      <p className="text-sm text-muted-foreground mt-2">
-                        Create compelling sales funnels with hero sections, testimonials, and call-to-actions
-                      </p>
-                    </div>
-                  </div>
-                )}
+                </div>
               </TabsContent>
             </Tabs>
           </CardContent>
