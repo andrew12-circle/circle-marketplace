@@ -1442,15 +1442,7 @@ export type Database = {
           payload?: Json | null
           user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "app_events_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       attack_logs: {
         Row: {

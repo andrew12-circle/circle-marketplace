@@ -12,6 +12,34 @@ export async function logEvent(name: string, payload?: Record<string, any>) {
 
     console.log('📊 Logging event:', name, 'for user:', session.user.id.slice(0, 8))
     
+    // Ensure user profile exists before logging event
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('user_id')
+      .eq('user_id', session.user.id)
+      .maybeSingle()
+    
+    if (!profile) {
+      console.log('📊 User profile not found, creating profile first for user:', session.user.id.slice(0, 8))
+      
+      // Try to create a basic profile if it doesn't exist
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert({
+          user_id: session.user.id,
+          display_name: session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'User',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+      
+      if (profileError) {
+        console.warn('📊 Could not create profile, logging event without user_id:', profileError.message)
+        // Log event without user_id as fallback
+        await supabase.from('app_events').insert({ name, payload: payload || null })
+        return
+      }
+    }
+    
     const { error } = await supabase.from('app_events').insert({ 
       user_id: session.user.id, 
       name, 
@@ -21,11 +49,9 @@ export async function logEvent(name: string, payload?: Record<string, any>) {
     if (error) {
       console.warn('📊 Event log failed:', error.message, 'for event:', name)
       
-      // If RLS policy fails, try without user_id (let RLS handle it)
-      if (error.code === 'PGRST301' || error.message.includes('policy')) {
-        console.log('📊 Retrying event without explicit user_id:', name)
-        await supabase.from('app_events').insert({ name, payload: payload || null })
-      }
+      // If still failing, try without user_id
+      console.log('📊 Retrying event without user_id:', name)
+      await supabase.from('app_events').insert({ name, payload: payload || null })
     } else {
       console.log('📊 Event logged successfully:', name)
     }
