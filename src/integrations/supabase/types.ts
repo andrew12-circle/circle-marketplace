@@ -6746,6 +6746,93 @@ export type Database = {
         }
         Relationships: []
       }
+      sponsored_positions: {
+        Row: {
+          amount_paid: number
+          created_at: string
+          expires_at: string
+          id: string
+          service_id: string | null
+          starts_at: string
+          status: Database["public"]["Enums"]["sponsored_status"]
+          stripe_payment_intent_id: string | null
+          tier: Database["public"]["Enums"]["sponsored_tier"]
+          updated_at: string
+          vendor_id: string
+        }
+        Insert: {
+          amount_paid: number
+          created_at?: string
+          expires_at: string
+          id?: string
+          service_id?: string | null
+          starts_at: string
+          status?: Database["public"]["Enums"]["sponsored_status"]
+          stripe_payment_intent_id?: string | null
+          tier: Database["public"]["Enums"]["sponsored_tier"]
+          updated_at?: string
+          vendor_id: string
+        }
+        Update: {
+          amount_paid?: number
+          created_at?: string
+          expires_at?: string
+          id?: string
+          service_id?: string | null
+          starts_at?: string
+          status?: Database["public"]["Enums"]["sponsored_status"]
+          stripe_payment_intent_id?: string | null
+          tier?: Database["public"]["Enums"]["sponsored_tier"]
+          updated_at?: string
+          vendor_id?: string
+        }
+        Relationships: []
+      }
+      sponsored_pricing: {
+        Row: {
+          created_at: string
+          description: string | null
+          features: Json
+          id: string
+          is_active: boolean
+          max_positions: number
+          name: string
+          price_monthly: number
+          price_quarterly: number
+          price_yearly: number
+          tier: Database["public"]["Enums"]["sponsored_tier"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          features?: Json
+          id?: string
+          is_active?: boolean
+          max_positions?: number
+          name: string
+          price_monthly: number
+          price_quarterly: number
+          price_yearly: number
+          tier: Database["public"]["Enums"]["sponsored_tier"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          features?: Json
+          id?: string
+          is_active?: boolean
+          max_positions?: number
+          name?: string
+          price_monthly?: number
+          price_quarterly?: number
+          price_yearly?: number
+          tier?: Database["public"]["Enums"]["sponsored_tier"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       stripe_radar_events: {
         Row: {
           charge_id: string | null
@@ -8973,6 +9060,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      expire_sponsored_positions: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       get_admin_analytics_summary: {
         Args: Record<PropertyKey, never>
         Returns: Json
@@ -9480,6 +9571,8 @@ export type Database = {
         | "course"
         | "playbook"
         | "channel"
+      sponsored_status: "active" | "pending" | "expired" | "cancelled"
+      sponsored_tier: "featured" | "premium" | "top_ranked"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -9646,6 +9739,8 @@ export const Constants = {
         "playbook",
         "channel",
       ],
+      sponsored_status: ["active", "pending", "expired", "cancelled"],
+      sponsored_tier: ["featured", "premium", "top_ranked"],
     },
   },
 } as const
