@@ -78,7 +78,6 @@ const QARunner = lazy(() => import("./pages/QARunner").then(m => ({ default: m.Q
 // Affiliate pages
 const AffiliateLanding = lazy(() => import("./pages/AffiliateLanding").then(m => ({ default: m.AffiliateLanding })));
 const AffiliateApplication = lazy(() => import("./pages/AffiliateApplication").then(m => ({ default: m.AffiliateApplication })));
-const AffiliateDashboard = lazy(() => import("./pages/AffiliateDashboard").then(m => ({ default: m.AffiliateDashboard })));
 const AffiliatePage = lazy(() => import("./pages/AffiliatePage"));
 
 // Loading component for lazy routes
