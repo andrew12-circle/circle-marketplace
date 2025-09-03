@@ -390,19 +390,15 @@ export const ServiceDetailsModal = ({ service, isOpen, onClose }: ServiceDetails
             </div>
           </div>
 
-          {reviews.length > 0 && (
-            <>
-              <Separator className="my-8" />
+          <Separator className="my-8" />
 
-              {/* Service Reviews */}
-              <div className="mb-8">
-                <h3 className="text-2xl font-bold mb-6">Customer Reviews</h3>
-                <ReviewRatingSystem serviceId={service.id} />
-              </div>
+          {/* Service Reviews */}
+          <div className="mb-8">
+            <h3 className="text-2xl font-bold mb-6">Customer Reviews</h3>
+            <ReviewRatingSystem serviceId={service.id} />
+          </div>
 
-              <Separator className="my-8" />
-            </>
-          )}
+          <Separator className="my-8" />
 
           {/* Customers Also Viewed */}
           <div className="mb-8">
