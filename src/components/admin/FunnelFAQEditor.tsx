@@ -128,10 +128,6 @@ export const FunnelFAQEditor = ({ faqSections, callToAction, onChange }: FunnelF
     onChange('callToAction', updated);
   };
 
-  const loadDefaultFAQ = () => {
-    setFaqData(DEFAULT_FAQ_SECTIONS);
-    onChange('faqSections', DEFAULT_FAQ_SECTIONS);
-  };
 
   return (
     <div className="space-y-6">
@@ -140,15 +136,10 @@ export const FunnelFAQEditor = ({ faqSections, callToAction, onChange }: FunnelF
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>FAQ Sections</CardTitle>
-            <div className="flex gap-2">
-              <Button onClick={loadDefaultFAQ} variant="outline" size="sm">
-                Load Default FAQ
-              </Button>
-              <Button onClick={addFAQSection} size="sm">
-                <Plus className="w-4 h-4 mr-2" />
-                Add Section
-              </Button>
-            </div>
+            <Button onClick={addFAQSection} size="sm">
+              <Plus className="w-4 h-4 mr-2" />
+              Add Section
+            </Button>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -245,7 +236,7 @@ export const FunnelFAQEditor = ({ faqSections, callToAction, onChange }: FunnelF
           {faqData.length === 0 && (
             <div className="text-center py-8 text-gray-500">
               <HelpCircle className="w-12 h-12 text-gray-300 mx-auto mb-2" />
-              <p>No FAQ sections yet. Click "Add Section" or "Load Default FAQ" to get started.</p>
+              <p>No FAQ sections yet. Click "Add Section" to get started.</p>
             </div>
           )}
         </CardContent>
