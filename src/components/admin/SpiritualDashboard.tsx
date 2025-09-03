@@ -271,7 +271,13 @@ export function SpiritualDashboard() {
                     {prayer.kind}
                   </Badge>
                   <span className="text-xs text-muted-foreground">
-                    {new Date(prayer.created_at).toLocaleDateString()}
+                    {new Date(prayer.created_at).toLocaleString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      hour: 'numeric',
+                      minute: '2-digit',
+                      hour12: true
+                    })}
                   </span>
                 </div>
                 <p className="text-xs text-muted-foreground line-clamp-2">
