@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, TrendingUp, DollarSign, Users, Star, Eye, Package, Calendar, Bell, Settings, BarChart3, Zap, Target, Award, Crown, Sparkles } from 'lucide-react';
+import { ArrowLeft, Plus, TrendingUp, DollarSign, Users, Star, Eye, Package, Calendar, Bell, Settings, BarChart3, Zap, Target, Award, Crown, Sparkles, Edit } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,6 +20,8 @@ import { ReviewsManagementModal } from '@/components/vendor/ReviewsManagementMod
 import { CustomerInsightsModal } from '@/components/vendor/CustomerInsightsModal';
 import { NotificationsModal } from '@/components/vendor/NotificationsModal';
 import { VendorSettingsModal } from '@/components/vendor/VendorSettingsModal';
+import { VendorServiceEditor } from '@/components/vendor/VendorServiceEditor';
+import { VendorProfileEditor } from '@/components/vendor/VendorProfileEditor';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useVendorActivityTracking } from '@/hooks/useVendorActivityTracking';
@@ -208,6 +210,9 @@ export const VendorDashboard = () => {
   const [isCustomerInsightsModalOpen, setIsCustomerInsightsModalOpen] = useState(false);
   const [isNotificationsModalOpen, setIsNotificationsModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  const [isServiceEditorOpen, setIsServiceEditorOpen] = useState(false);
+  const [isProfileEditorOpen, setIsProfileEditorOpen] = useState(false);
+  const [selectedServiceForEdit, setSelectedServiceForEdit] = useState<VendorService | null>(null);
 
   useEffect(() => {
     fetchVendorData();
@@ -505,6 +510,14 @@ export const VendorDashboard = () => {
               <Button 
                 variant="outline" 
                 size="sm"
+                onClick={() => setIsProfileEditorOpen(true)}
+              >
+                <Edit className="w-4 h-4 mr-2" />
+                Edit Profile
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
                 onClick={() => setIsSettingsModalOpen(true)}
               >
                 <Settings className="w-4 h-4 mr-2" />
@@ -773,26 +786,42 @@ export const VendorDashboard = () => {
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {services.map((service) => (
-                      <ServiceCard
-                        key={service.id}
-                        service={{
-                          id: service.id,
-                          title: service.title,
-                          description: service.description,
-                          category: service.category,
-                          retail_price: service.retail_price || '0',
-                          image_url: service.image_url,
-                          is_featured: service.is_featured || false,
-                          is_top_pick: false,
-                          vendor: {
-                            name: 'Your Business',
-                            rating: service.rating || 4.5,
-                            review_count: service.reviews_count || 0,
-                            is_verified: true
-                          }
-                        }}
-                        onViewDetails={() => handleServiceClick(service)}
-                      />
+                      <div key={service.id} className="relative">
+                        <ServiceCard
+                          service={{
+                            id: service.id,
+                            title: service.title,
+                            description: service.description,
+                            category: service.category,
+                            retail_price: service.retail_price || '0',
+                            image_url: service.image_url,
+                            is_featured: service.is_featured || false,
+                            is_top_pick: false,
+                            vendor: {
+                              name: 'Your Business',
+                              rating: service.rating || 4.5,
+                              review_count: service.reviews_count || 0,
+                              is_verified: true
+                            }
+                          }}
+                          onViewDetails={() => handleServiceClick(service)}
+                        />
+                        <div className="absolute top-2 right-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="bg-white/90 hover:bg-white"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedServiceForEdit(service);
+                              setIsServiceEditorOpen(true);
+                            }}
+                          >
+                            <Edit className="w-4 h-4 mr-1" />
+                            Edit
+                          </Button>
+                        </div>
+                      </div>
                     ))}
                   </div>
                 )}
@@ -1080,6 +1109,32 @@ export const VendorDashboard = () => {
             isOpen={isSettingsModalOpen}
             onClose={() => setIsSettingsModalOpen(false)}
             vendorId={vendorId}
+          />
+          
+          {/* Vendor Service Editor */}
+          {selectedServiceForEdit && (
+            <VendorServiceEditor
+              open={isServiceEditorOpen}
+              onOpenChange={setIsServiceEditorOpen}
+              service={selectedServiceForEdit}
+              vendorId={vendorId}
+              onSave={() => {
+                fetchVendorData();
+                setIsServiceEditorOpen(false);
+                setSelectedServiceForEdit(null);
+              }}
+            />
+          )}
+          
+          {/* Vendor Profile Editor */}
+          <VendorProfileEditor
+            open={isProfileEditorOpen}
+            onOpenChange={setIsProfileEditorOpen}
+            vendorId={vendorId}
+            onSave={() => {
+              fetchVendorData();
+              setIsProfileEditorOpen(false);
+            }}
           />
         </>
       )}

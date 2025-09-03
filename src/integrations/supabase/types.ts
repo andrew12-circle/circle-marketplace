@@ -82,6 +82,54 @@ export type Database = {
           },
         ]
       }
+      admin_notifications: {
+        Row: {
+          created_at: string
+          entity_id: string
+          entity_type: string
+          id: string
+          message: string
+          priority: string
+          read: boolean
+          read_at: string | null
+          read_by: string | null
+          title: string
+          type: string
+          vendor_id: string
+          vendor_name: string | null
+        }
+        Insert: {
+          created_at?: string
+          entity_id: string
+          entity_type: string
+          id?: string
+          message: string
+          priority?: string
+          read?: boolean
+          read_at?: string | null
+          read_by?: string | null
+          title: string
+          type: string
+          vendor_id: string
+          vendor_name?: string | null
+        }
+        Update: {
+          created_at?: string
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          message?: string
+          priority?: string
+          read?: boolean
+          read_at?: string | null
+          read_by?: string | null
+          title?: string
+          type?: string
+          vendor_id?: string
+          vendor_name?: string | null
+        }
+        Relationships: []
+      }
       admin_sessions: {
         Row: {
           created_at: string
@@ -5881,6 +5929,62 @@ export type Database = {
         }
         Relationships: []
       }
+      service_drafts: {
+        Row: {
+          change_summary: string | null
+          change_type: string
+          created_at: string
+          draft_data: Json
+          funnel_data: Json
+          id: string
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          service_id: string
+          status: string
+          updated_at: string
+          vendor_id: string
+        }
+        Insert: {
+          change_summary?: string | null
+          change_type?: string
+          created_at?: string
+          draft_data?: Json
+          funnel_data?: Json
+          id?: string
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          service_id: string
+          status?: string
+          updated_at?: string
+          vendor_id: string
+        }
+        Update: {
+          change_summary?: string | null
+          change_type?: string
+          created_at?: string
+          draft_data?: Json
+          funnel_data?: Json
+          id?: string
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          service_id?: string
+          status?: string
+          updated_at?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_drafts_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       service_faqs: {
         Row: {
           answer: string
@@ -7850,6 +7954,70 @@ export type Database = {
         }
         Relationships: []
       }
+      vendor_drafts: {
+        Row: {
+          change_summary: string | null
+          change_type: string
+          created_at: string
+          draft_data: Json
+          id: string
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+          vendor_id: string
+        }
+        Insert: {
+          change_summary?: string | null
+          change_type?: string
+          created_at?: string
+          draft_data?: Json
+          id?: string
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          vendor_id: string
+        }
+        Update: {
+          change_summary?: string | null
+          change_type?: string
+          created_at?: string
+          draft_data?: Json
+          id?: string
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_drafts_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendor_directory"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_drafts_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendor_directory_authenticated"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_drafts_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vendor_invitations: {
         Row: {
           created_at: string
@@ -8900,6 +9068,15 @@ export type Database = {
       }
     }
     Functions: {
+      admin_review_draft: {
+        Args: {
+          action: string
+          draft_id: string
+          draft_table: string
+          rejection_reason?: string
+        }
+        Returns: Json
+      }
       admin_self_check: {
         Args: Record<PropertyKey, never>
         Returns: Json

@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { AdminVendorChangesPanel } from "./AdminVendorChangesPanel";
 import { 
   BarChart3, 
   RefreshCw, 
@@ -190,6 +191,7 @@ export const AdminDashboard = ({ onCacheRefresh }: AdminDashboardProps) => {
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="cache">Data Cache</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          <TabsTrigger value="vendor-changes">Vendor Changes</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
@@ -382,6 +384,10 @@ export const AdminDashboard = ({ onCacheRefresh }: AdminDashboardProps) => {
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="vendor-changes" className="space-y-4">
+          <AdminVendorChangesPanel />
         </TabsContent>
       </Tabs>
     </div>
