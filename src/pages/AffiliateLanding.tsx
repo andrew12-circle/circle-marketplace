@@ -148,7 +148,7 @@ export const AffiliateLanding = () => {
                     <span className="font-semibold">All purchases</span>
                   </div>
                   <div className="border-t pt-3 flex justify-between text-lg font-bold text-accent">
-                    <span>Growing with your network</span>
+                    <span className="text-blue-600">Growing with your network</span>
                     <span>📈</span>
                   </div>
                 </div>
