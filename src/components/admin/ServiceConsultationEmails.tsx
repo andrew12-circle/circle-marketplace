@@ -49,9 +49,19 @@ export const ServiceConsultationEmails = ({ serviceId, serviceName }: ServiceCon
         .from('services')
         .select('consultation_emails')
         .eq('id', serviceId)
-        .single();
+        .maybeSingle();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error loading consultation emails:', error);
+        toast.error('Failed to load consultation emails');
+        return;
+      }
+
+      if (!data) {
+        console.warn('No service found with ID:', serviceId);
+        toast.error('Service not found or access denied');
+        return;
+      }
 
       const consultationEmails = (data as any)?.consultation_emails || [];
       // Always show at least one empty field
