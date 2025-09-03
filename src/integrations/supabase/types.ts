@@ -115,6 +115,397 @@ export type Database = {
         }
         Relationships: []
       }
+      affiliate_attributions: {
+        Row: {
+          affiliate_id: string
+          attribution_model: string
+          cookie_expires_at: string
+          created_at: string
+          id: string
+          link_id: string
+          prospect_user_id: string | null
+          session_id: string | null
+        }
+        Insert: {
+          affiliate_id: string
+          attribution_model?: string
+          cookie_expires_at?: string
+          created_at?: string
+          id?: string
+          link_id: string
+          prospect_user_id?: string | null
+          session_id?: string | null
+        }
+        Update: {
+          affiliate_id?: string
+          attribution_model?: string
+          cookie_expires_at?: string
+          created_at?: string
+          id?: string
+          link_id?: string
+          prospect_user_id?: string | null
+          session_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "affiliate_attributions_affiliate_id_fkey"
+            columns: ["affiliate_id"]
+            isOneToOne: false
+            referencedRelation: "affiliates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "affiliate_attributions_link_id_fkey"
+            columns: ["link_id"]
+            isOneToOne: false
+            referencedRelation: "affiliate_links"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      affiliate_clicks: {
+        Row: {
+          affiliate_id: string
+          clicked_at: string
+          id: string
+          ip: unknown | null
+          link_id: string
+          referrer: string | null
+          user_agent: string | null
+          utm_campaign: string | null
+          utm_content: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          utm_term: string | null
+        }
+        Insert: {
+          affiliate_id: string
+          clicked_at?: string
+          id?: string
+          ip?: unknown | null
+          link_id: string
+          referrer?: string | null
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+        }
+        Update: {
+          affiliate_id?: string
+          clicked_at?: string
+          id?: string
+          ip?: unknown | null
+          link_id?: string
+          referrer?: string | null
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "affiliate_clicks_affiliate_id_fkey"
+            columns: ["affiliate_id"]
+            isOneToOne: false
+            referencedRelation: "affiliates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "affiliate_clicks_link_id_fkey"
+            columns: ["link_id"]
+            isOneToOne: false
+            referencedRelation: "affiliate_links"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      affiliate_conversions: {
+        Row: {
+          affiliate_id: string
+          amount_gross: number
+          approval_timestamp: string | null
+          commission_amount: number
+          commission_flat: number | null
+          commission_rate: number
+          conversion_type: Database["public"]["Enums"]["affiliate_conversion_type"]
+          created_at: string
+          eligible_amount: number
+          event_timestamp: string
+          id: string
+          link_id: string | null
+          notes: string | null
+          order_id: string | null
+          status: Database["public"]["Enums"]["affiliate_conversion_status"]
+          subscription_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          affiliate_id: string
+          amount_gross: number
+          approval_timestamp?: string | null
+          commission_amount: number
+          commission_flat?: number | null
+          commission_rate: number
+          conversion_type: Database["public"]["Enums"]["affiliate_conversion_type"]
+          created_at?: string
+          eligible_amount: number
+          event_timestamp: string
+          id?: string
+          link_id?: string | null
+          notes?: string | null
+          order_id?: string | null
+          status?: Database["public"]["Enums"]["affiliate_conversion_status"]
+          subscription_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          affiliate_id?: string
+          amount_gross?: number
+          approval_timestamp?: string | null
+          commission_amount?: number
+          commission_flat?: number | null
+          commission_rate?: number
+          conversion_type?: Database["public"]["Enums"]["affiliate_conversion_type"]
+          created_at?: string
+          eligible_amount?: number
+          event_timestamp?: string
+          id?: string
+          link_id?: string | null
+          notes?: string | null
+          order_id?: string | null
+          status?: Database["public"]["Enums"]["affiliate_conversion_status"]
+          subscription_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "affiliate_conversions_affiliate_id_fkey"
+            columns: ["affiliate_id"]
+            isOneToOne: false
+            referencedRelation: "affiliates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "affiliate_conversions_link_id_fkey"
+            columns: ["link_id"]
+            isOneToOne: false
+            referencedRelation: "affiliate_links"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      affiliate_documents: {
+        Row: {
+          affiliate_id: string
+          created_at: string
+          doc_type: Database["public"]["Enums"]["affiliate_doc_type"]
+          file_url: string
+          id: string
+          verified: boolean
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          affiliate_id: string
+          created_at?: string
+          doc_type: Database["public"]["Enums"]["affiliate_doc_type"]
+          file_url: string
+          id?: string
+          verified?: boolean
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          affiliate_id?: string
+          created_at?: string
+          doc_type?: Database["public"]["Enums"]["affiliate_doc_type"]
+          file_url?: string
+          id?: string
+          verified?: boolean
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "affiliate_documents_affiliate_id_fkey"
+            columns: ["affiliate_id"]
+            isOneToOne: false
+            referencedRelation: "affiliates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      affiliate_links: {
+        Row: {
+          affiliate_id: string
+          code: string
+          created_at: string
+          destination_type: Database["public"]["Enums"]["affiliate_destination_type"]
+          destination_url: string
+          id: string
+          status: Database["public"]["Enums"]["affiliate_status"]
+        }
+        Insert: {
+          affiliate_id: string
+          code: string
+          created_at?: string
+          destination_type: Database["public"]["Enums"]["affiliate_destination_type"]
+          destination_url: string
+          id?: string
+          status?: Database["public"]["Enums"]["affiliate_status"]
+        }
+        Update: {
+          affiliate_id?: string
+          code?: string
+          created_at?: string
+          destination_type?: Database["public"]["Enums"]["affiliate_destination_type"]
+          destination_url?: string
+          id?: string
+          status?: Database["public"]["Enums"]["affiliate_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "affiliate_links_affiliate_id_fkey"
+            columns: ["affiliate_id"]
+            isOneToOne: false
+            referencedRelation: "affiliates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      affiliate_payouts: {
+        Row: {
+          adjustments: number
+          affiliate_id: string
+          created_at: string
+          id: string
+          payout_amount: number
+          payout_fee: number
+          payout_method: Database["public"]["Enums"]["affiliate_payout_method"]
+          payout_reference: string | null
+          payout_status: Database["public"]["Enums"]["affiliate_payout_status"]
+          period_end: string
+          period_start: string
+          total_commission: number
+          updated_at: string
+        }
+        Insert: {
+          adjustments?: number
+          affiliate_id: string
+          created_at?: string
+          id?: string
+          payout_amount: number
+          payout_fee?: number
+          payout_method: Database["public"]["Enums"]["affiliate_payout_method"]
+          payout_reference?: string | null
+          payout_status?: Database["public"]["Enums"]["affiliate_payout_status"]
+          period_end: string
+          period_start: string
+          total_commission: number
+          updated_at?: string
+        }
+        Update: {
+          adjustments?: number
+          affiliate_id?: string
+          created_at?: string
+          id?: string
+          payout_amount?: number
+          payout_fee?: number
+          payout_method?: Database["public"]["Enums"]["affiliate_payout_method"]
+          payout_reference?: string | null
+          payout_status?: Database["public"]["Enums"]["affiliate_payout_status"]
+          period_end?: string
+          period_start?: string
+          total_commission?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "affiliate_payouts_affiliate_id_fkey"
+            columns: ["affiliate_id"]
+            isOneToOne: false
+            referencedRelation: "affiliates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      affiliates: {
+        Row: {
+          agreement_signed_at: string | null
+          agreement_version: string | null
+          business_name: string | null
+          country: string
+          created_at: string
+          email: string
+          id: string
+          legal_name: string
+          marketing_channels: string | null
+          notes: string | null
+          onboarding_status: Database["public"]["Enums"]["affiliate_onboarding_status"]
+          payout_method:
+            | Database["public"]["Enums"]["affiliate_payout_method"]
+            | null
+          status: Database["public"]["Enums"]["affiliate_status"]
+          tax_id: string | null
+          tax_status: Database["public"]["Enums"]["affiliate_tax_status"] | null
+          updated_at: string
+          user_id: string | null
+          website: string | null
+        }
+        Insert: {
+          agreement_signed_at?: string | null
+          agreement_version?: string | null
+          business_name?: string | null
+          country: string
+          created_at?: string
+          email: string
+          id?: string
+          legal_name: string
+          marketing_channels?: string | null
+          notes?: string | null
+          onboarding_status?: Database["public"]["Enums"]["affiliate_onboarding_status"]
+          payout_method?:
+            | Database["public"]["Enums"]["affiliate_payout_method"]
+            | null
+          status?: Database["public"]["Enums"]["affiliate_status"]
+          tax_id?: string | null
+          tax_status?:
+            | Database["public"]["Enums"]["affiliate_tax_status"]
+            | null
+          updated_at?: string
+          user_id?: string | null
+          website?: string | null
+        }
+        Update: {
+          agreement_signed_at?: string | null
+          agreement_version?: string | null
+          business_name?: string | null
+          country?: string
+          created_at?: string
+          email?: string
+          id?: string
+          legal_name?: string
+          marketing_channels?: string | null
+          notes?: string | null
+          onboarding_status?: Database["public"]["Enums"]["affiliate_onboarding_status"]
+          payout_method?:
+            | Database["public"]["Enums"]["affiliate_payout_method"]
+            | null
+          status?: Database["public"]["Enums"]["affiliate_status"]
+          tax_id?: string | null
+          tax_status?:
+            | Database["public"]["Enums"]["affiliate_tax_status"]
+            | null
+          updated_at?: string
+          user_id?: string | null
+          website?: string | null
+        }
+        Relationships: []
+      }
       agent_archetypes: {
         Row: {
           archetype_name: string
@@ -6056,6 +6447,51 @@ export type Database = {
           },
         ]
       }
+      settings_affiliate: {
+        Row: {
+          auto_approve_affiliates: boolean
+          blocked_products: string[] | null
+          cookie_window_days: number
+          created_at: string
+          default_commission_rate: number
+          id: string
+          minimum_payout_threshold: number
+          payout_schedule_day: number
+          program_enabled: boolean
+          refund_clawback_window_days: number
+          subscription_recurring_commission_months: number
+          updated_at: string
+        }
+        Insert: {
+          auto_approve_affiliates?: boolean
+          blocked_products?: string[] | null
+          cookie_window_days?: number
+          created_at?: string
+          default_commission_rate?: number
+          id?: string
+          minimum_payout_threshold?: number
+          payout_schedule_day?: number
+          program_enabled?: boolean
+          refund_clawback_window_days?: number
+          subscription_recurring_commission_months?: number
+          updated_at?: string
+        }
+        Update: {
+          auto_approve_affiliates?: boolean
+          blocked_products?: string[] | null
+          cookie_window_days?: number
+          created_at?: string
+          default_commission_rate?: number
+          id?: string
+          minimum_payout_threshold?: number
+          payout_schedule_day?: number
+          program_enabled?: boolean
+          refund_clawback_window_days?: number
+          subscription_recurring_commission_months?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       stripe_radar_events: {
         Row: {
           charge_id: string | null
@@ -8744,6 +9180,33 @@ export type Database = {
       }
     }
     Enums: {
+      affiliate_conversion_status:
+        | "pending"
+        | "approved"
+        | "rejected"
+        | "clawed_back"
+      affiliate_conversion_type: "marketplace_purchase" | "circle_pro_signup"
+      affiliate_destination_type:
+        | "marketplace"
+        | "academy"
+        | "pro_membership"
+        | "funnel"
+      affiliate_doc_type:
+        | "w9"
+        | "w8ben"
+        | "id_verification"
+        | "ach_authorization"
+        | "business_certificate"
+        | "other"
+      affiliate_onboarding_status:
+        | "not_started"
+        | "pending_kyc"
+        | "approved"
+        | "rejected"
+      affiliate_payout_method: "stripe_connect" | "ach_manual"
+      affiliate_payout_status: "pending" | "processing" | "paid" | "failed"
+      affiliate_status: "active" | "paused" | "banned"
+      affiliate_tax_status: "individual" | "business"
       content_type:
         | "video"
         | "podcast"
@@ -8878,6 +9341,37 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      affiliate_conversion_status: [
+        "pending",
+        "approved",
+        "rejected",
+        "clawed_back",
+      ],
+      affiliate_conversion_type: ["marketplace_purchase", "circle_pro_signup"],
+      affiliate_destination_type: [
+        "marketplace",
+        "academy",
+        "pro_membership",
+        "funnel",
+      ],
+      affiliate_doc_type: [
+        "w9",
+        "w8ben",
+        "id_verification",
+        "ach_authorization",
+        "business_certificate",
+        "other",
+      ],
+      affiliate_onboarding_status: [
+        "not_started",
+        "pending_kyc",
+        "approved",
+        "rejected",
+      ],
+      affiliate_payout_method: ["stripe_connect", "ach_manual"],
+      affiliate_payout_status: ["pending", "processing", "paid", "failed"],
+      affiliate_status: ["active", "paused", "banned"],
+      affiliate_tax_status: ["individual", "business"],
       content_type: [
         "video",
         "podcast",
