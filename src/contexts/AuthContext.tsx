@@ -157,7 +157,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       // Shorter timeout for better UX - we have fallbacks
       const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Profile fetch timeout')), 8000); // Reduced to 8 seconds
+        setTimeout(() => reject(new Error('Profile fetch timeout')), 5000); // Reduced to 5 seconds
       });
 
       // Simplified query without ordering for better performance

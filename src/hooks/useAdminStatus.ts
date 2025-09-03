@@ -5,7 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { logger } from "@/utils/logger";
 
 // Hard allowlist for immediate admin access (bypasses all RPCs)
-const ADMIN_ALLOWLIST = ['robert@circlenetwork.io'];
+const ADMIN_ALLOWLIST = ['robert@circlenetwork.io', 'andrew@heisleyteam.com'];
 
 export const useAdminStatus = () => {
   const { user, profile } = useAuth();
@@ -33,23 +33,25 @@ export const useAdminStatus = () => {
         return false;
       }
       
-      // Only try RPC if profile data is unavailable or null
-      if (profile?.is_admin === null || profile?.is_admin === undefined) {
-        try {
-          const timeoutPromise = new Promise((_, reject) => {
-            setTimeout(() => reject(new Error('RPC timeout')), 3000);
-          });
-          
-          const { data, error } = await Promise.race([
-            supabase.rpc('get_user_admin_status'),
-            timeoutPromise
-          ]) as any;
-          
-          if (!error && data !== null) {
-            logger.log('Admin status: Retrieved via RPC', { userId: user.id, isAdmin: !!data });
-            return !!data;
-          }
-        } catch (error) {
+      // Skip RPC altogether - rely on server-side function which has allowlist built-in
+      // The server function get_user_admin_status() now handles allowlist internally
+      try {
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('RPC timeout')), 2000); // Shorter timeout 
+        });
+        
+        const { data, error } = await Promise.race([
+          supabase.rpc('get_user_admin_status'),
+          timeoutPromise
+        ]) as any;
+        
+        if (!error && data !== null) {
+          logger.log('Admin status: Retrieved via RPC with server allowlist', { userId: user.id, isAdmin: !!data });
+          return !!data;
+        }
+      } catch (error) {
+        // Don't log warnings for expected timeout scenarios
+        if (!error?.message?.includes('timeout')) {
           logger.warn('Admin status RPC failed, using profile fallback:', error);
         }
       }
@@ -60,11 +62,13 @@ export const useAdminStatus = () => {
       return result;
     },
     enabled: !!user,
-    staleTime: 30 * 1000, // 30 seconds - shorter for quicker updates
-    gcTime: 2 * 60 * 1000,
-    retry: false,
+    staleTime: 60 * 1000, // 1 minute - admin status doesn't change frequently
+    gcTime: 5 * 60 * 1000, // 5 minutes
+    retry: 1, // Single retry on failure
+    retryDelay: 500,
     refetchOnWindowFocus: false,
-    // Make it reactive to profile changes
-    refetchOnMount: 'always',
+    refetchOnMount: false, // Don't refetch on every mount
+    refetchInterval: false, // Don't auto-refetch
+    networkMode: 'online', // Only run when online
   });
 };

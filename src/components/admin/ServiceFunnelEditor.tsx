@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +12,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useInvalidateMarketplace } from "@/hooks/useMarketplaceData";
+import { useResilientSave } from "@/hooks/useResilientSave";
+import { useAutosave } from "@/hooks/useAutosave";
 import { FunnelSectionEditor } from "./FunnelSectionEditor";
 import { FunnelMediaEditor } from "./FunnelMediaEditor";
 import { FunnelPricingEditor } from "./FunnelPricingEditor";
@@ -61,9 +63,13 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
   const [pricingTiers, setPricingTiers] = useState(service.pricing_tiers || []);
   const [hasChanges, setHasChanges] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
   const { invalidateAll } = useInvalidateMarketplace();
+  const { save: resilientSave, isSaving } = useResilientSave({
+    maxRetries: 3,
+    retryDelay: 1500,
+    timeout: 25000
+  });
 
   // Initialize default funnel content if none exists
   useEffect(() => {
@@ -201,100 +207,62 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
     return cleaned;
   };
 
-  const handleSave = async () => {
-    console.log("[Admin ServiceFunnelEditor] Save started", {
+  const performSave = useCallback(async (data: { funnelData: any; pricingTiers: any[] }) => {
+    console.log("[Admin ServiceFunnelEditor] Resilient save started", {
       serviceId: service.id,
-      hasChanges,
     });
-    setIsSaving(true);
     
-    let timeoutId: NodeJS.Timeout;
+    const sanitizedFunnel = sanitizeFunnel(data.funnelData);
+    const sanitizedPricing = JSON.parse(JSON.stringify(data.pricingTiers || []));
     
-    try {
-      console.log("[Admin ServiceFunnelEditor] Sanitizing data...");
-      const sanitizedFunnel = sanitizeFunnel(funnelData);
-      const sanitizedPricing = JSON.parse(JSON.stringify(pricingTiers || []));
-      const approxSizeKb = Math.round((JSON.stringify(sanitizedFunnel).length + JSON.stringify(sanitizedPricing).length) / 1024);
-      console.log("[Admin ServiceFunnelEditor] Payload size ~", approxSizeKb, "KB");
+    console.log("[Admin ServiceFunnelEditor] Starting database update...");
+    
+    const { data: response, error } = await supabase
+      .from('services')
+      .update({
+        funnel_content: sanitizedFunnel,
+        pricing_tiers: sanitizedPricing,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', service.id)
+      .select();
 
-      console.log("[Admin ServiceFunnelEditor] Starting database update...");
-      
-      // Create a timeout promise that rejects after 30 seconds
-      const timeoutPromise = new Promise((_, reject) => {
-        timeoutId = setTimeout(() => {
-          reject(new Error("Database operation timed out after 30 seconds. Please try again."));
-        }, 30000);
-      });
-      
-      // Create the database update promise with explicit error handling
-      const updatePromise = supabase
-        .from('services')
-        .update({
-          funnel_content: sanitizedFunnel,
-          pricing_tiers: sanitizedPricing,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', service.id)
-        .select();
+    if (error) {
+      console.error("[Admin ServiceFunnelEditor] Database error:", error);
+      throw error;
+    }
 
-      console.log("[Admin ServiceFunnelEditor] Waiting for response with timeout...");
-      
-      // Race the update against the timeout
-      const response = await Promise.race([updatePromise, timeoutPromise]);
+    console.log("[Admin ServiceFunnelEditor] Database updated successfully");
+    
+    const updatedService = {
+      ...service,
+      funnel_content: data.funnelData,
+      pricing_tiers: data.pricingTiers
+    };
 
-      // Clear the timeout since we got a response
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-
-      console.log("[Admin ServiceFunnelEditor] Database response received:", response);
-      
-      // Check if response is a Supabase response object and has an error
-      if (response && typeof response === 'object' && 'error' in response && response.error) {
-        console.error("[Admin ServiceFunnelEditor] Database error:", response.error);
-        throw response.error;
-      }
-
-      const updatedService = {
-        ...service,
-        funnel_content: funnelData,
-        pricing_tiers: pricingTiers
-      };
-
-      onUpdate(updatedService);
-      setHasChanges(false);
-
-      console.log("[Admin ServiceFunnelEditor] Save success");
-      toast({
-        title: "Funnel Updated Successfully",
-        description: "All changes have been saved to the service funnel.",
-      });
-      
-      // Warm server-side cache and invalidate client caches so the marketplace reflects changes
+    onUpdate(updatedService);
+    
+    // Background cache operations (non-blocking)
+    setTimeout(async () => {
       try {
         await supabase.functions.invoke('warm-marketplace-cache');
         console.log("[Admin ServiceFunnelEditor] Cache warmed successfully");
       } catch (e) {
         console.warn('[Admin ServiceFunnelEditor] Cache warm failed', e);
       }
-      
       invalidateAll();
+    }, 100);
+    
+    return response;
+  }, [service, onUpdate, invalidateAll]);
+
+  const handleSave = async () => {
+    try {
+      await resilientSave({ funnelData, pricingTiers }, performSave);
+      setHasChanges(false);
     } catch (error: any) {
-      console.error('[Admin ServiceFunnelEditor] Error saving funnel:', error);
-      
-      // Clear timeout on error
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-      
-      toast({
-        title: "Save Failed",
-        description: error?.message || "There was an error saving the funnel. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSaving(false);
-      console.log("[Admin ServiceFunnelEditor] Save finished (spinner cleared)");
+      // Error handling is managed by useResilientSave
+      console.error('[Admin ServiceFunnelEditor] Save operation failed:', error);
     }
   };
 

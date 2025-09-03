@@ -1,4 +1,5 @@
 import AdminDashboard from "@/pages/AdminDashboard";
+import { AdminRouteWrapper } from "@/components/admin/AdminRouteWrapper";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -123,5 +124,9 @@ export const Admin = () => {
     );
   }
 
-  return <AdminDashboard />;
+  return (
+    <AdminRouteWrapper>
+      <AdminDashboard />
+    </AdminRouteWrapper>
+  );
 };
