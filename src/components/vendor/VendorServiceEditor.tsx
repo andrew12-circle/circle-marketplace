@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ServiceImageUpload } from '@/components/marketplace/ServiceImageUpload';
-import { AlertTriangle, Save, Clock, CheckCircle, X, Plus, Trash2, ShoppingCart } from 'lucide-react';
+import { AlertTriangle, Save, Clock, CheckCircle, X, Plus, Trash2, ShoppingCart, Upload } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -54,11 +54,31 @@ export const VendorServiceEditor: React.FC<VendorServiceEditorProps> = ({
   });
   
   const [funnelContent, setFunnelContent] = useState({
+    // Circle's 6 Questions
+    whyShouldICare: '',
+    whatIsMyROI: '',
+    howSoonResults: '',
+    howMuchCost: '',
+    whatDoIGet: '',
+    callOrBuyNow: '',
+    
+    // Proof It Works
+    testimonials: '',
+    successStats: '',
+    trustSignals: '',
+    
+    // Hero Section
     headline: '',
     subheadline: '',
     heroDescription: '',
     estimatedRoi: 0,
     duration: '',
+    
+    // Media
+    heroMedia: '',
+    additionalMedia: [],
+    
+    // Legacy structure
     whyChooseUs: {
       title: '',
       benefits: []
@@ -399,6 +419,184 @@ export const VendorServiceEditor: React.FC<VendorServiceEditorProps> = ({
           </TabsContent>
 
           <TabsContent value="funnel" className="space-y-4">
+            {/* Circle's 6 Questions */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Circle's 6 Questions (Agent-Facing)</CardTitle>
+                <p className="text-sm text-muted-foreground">Answer these questions to help agents understand your service value</p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="whyShouldICare">1. Why should I care?</Label>
+                  <Textarea
+                    id="whyShouldICare"
+                    value={funnelContent.whyShouldICare || ''}
+                    onChange={(e) => handleFunnelChange('whyShouldICare', e.target.value)}
+                    placeholder="Explain why this service matters for a realtor's business"
+                    rows={3}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="whatIsMyROI">2. What's my ROI?</Label>
+                  <Textarea
+                    id="whatIsMyROI"
+                    value={funnelContent.whatIsMyROI || ''}
+                    onChange={(e) => handleFunnelChange('whatIsMyROI', e.target.value)}
+                    placeholder="Show typical returns or agent testimonials (percentage or qualitative)"
+                    rows={3}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="howSoonResults">3. How soon will I see results?</Label>
+                  <Textarea
+                    id="howSoonResults"
+                    value={funnelContent.howSoonResults || ''}
+                    onChange={(e) => handleFunnelChange('howSoonResults', e.target.value)}
+                    placeholder="Immediate, weeks, or months - set realistic expectations"
+                    rows={2}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="howMuchCost">4. How much does it cost?</Label>
+                  <Textarea
+                    id="howMuchCost"
+                    value={funnelContent.howMuchCost || ''}
+                    onChange={(e) => handleFunnelChange('howMuchCost', e.target.value)}
+                    placeholder="List monthly + annual price clearly"
+                    rows={2}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="whatDoIGet">5. What do I get with it?</Label>
+                  <Textarea
+                    id="whatDoIGet"
+                    value={funnelContent.whatDoIGet || ''}
+                    onChange={(e) => handleFunnelChange('whatDoIGet', e.target.value)}
+                    placeholder="Bullet out features and deliverables"
+                    rows={4}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="callOrBuyNow">6. Does it require a call/quote or can I buy now?</Label>
+                  <Input
+                    id="callOrBuyNow"
+                    value={funnelContent.callOrBuyNow || ''}
+                    onChange={(e) => handleFunnelChange('callOrBuyNow', e.target.value)}
+                    placeholder="Yes/No with a link if required"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Proof It Works Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Proof It Works</CardTitle>
+                <p className="text-sm text-muted-foreground">Testimonials, stats, and trust signals</p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="testimonials">Real Testimonials</Label>
+                  <Textarea
+                    id="testimonials"
+                    value={funnelContent.testimonials || ''}
+                    onChange={(e) => handleFunnelChange('testimonials', e.target.value)}
+                    placeholder="Real quotes from clients (e.g., 'Agent won a $700k listing')"
+                    rows={4}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="successStats">Success Stats</Label>
+                  <Textarea
+                    id="successStats"
+                    value={funnelContent.successStats || ''}
+                    onChange={(e) => handleFunnelChange('successStats', e.target.value)}
+                    placeholder="Community size, adoption numbers, third-party mentions"
+                    rows={3}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="trustSignals">Trust Signals</Label>
+                  <Input
+                    id="trustSignals"
+                    value={funnelContent.trustSignals || ''}
+                    onChange={(e) => handleFunnelChange('trustSignals', e.target.value)}
+                    placeholder="Awards, certifications, press mentions, etc."
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Media Upload Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Funnel Media</CardTitle>
+                <p className="text-sm text-muted-foreground">Upload images, videos, and other media for your sales funnel</p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label>Hero Image/Video</Label>
+                  <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
+                    <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground mb-2">Upload hero image or video</p>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        const input = document.createElement('input');
+                        input.type = 'file';
+                        input.accept = 'image/*,video/*';
+                        input.onchange = (e) => {
+                          const file = (e.target as HTMLInputElement).files?.[0];
+                          if (file) {
+                            // Handle file upload
+                            toast({
+                              title: "Media Upload",
+                              description: "Media upload functionality will be implemented here.",
+                            });
+                          }
+                        };
+                        input.click();
+                      }}
+                    >
+                      Choose File
+                    </Button>
+                  </div>
+                </div>
+                
+                <div>
+                  <Label>Additional Media</Label>
+                  <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
+                    <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground mb-2">Upload screenshots, demos, case studies</p>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        const input = document.createElement('input');
+                        input.type = 'file';
+                        input.accept = 'image/*,video/*,application/pdf';
+                        input.multiple = true;
+                        input.onchange = (e) => {
+                          const files = (e.target as HTMLInputElement).files;
+                          if (files) {
+                            toast({
+                              title: "Media Upload",
+                              description: `Selected ${files.length} file(s). Upload functionality will be implemented here.`,
+                            });
+                          }
+                        };
+                        input.click();
+                      }}
+                    >
+                      Choose Files
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Hero Section */}
             <Card>
               <CardHeader>
                 <CardTitle>Hero Section</CardTitle>
@@ -432,6 +630,7 @@ export const VendorServiceEditor: React.FC<VendorServiceEditorProps> = ({
               </CardContent>
             </Card>
 
+            {/* Call to Action */}
             <Card>
               <CardHeader>
                 <CardTitle>Call to Action</CardTitle>
