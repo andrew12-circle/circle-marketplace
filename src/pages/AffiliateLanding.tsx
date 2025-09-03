@@ -47,7 +47,14 @@ export const AffiliateLanding = () => {
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Link>
             </Button>
-            <Button variant="outline" size="lg">
+            <Button 
+              variant="outline" 
+              size="lg"
+              onClick={() => {
+                const detailsSection = document.getElementById('program-details');
+                detailsSection?.scrollIntoView({ behavior: 'smooth' });
+              }}
+            >
               Program Details
             </Button>
           </div>
@@ -207,7 +214,7 @@ export const AffiliateLanding = () => {
       </section>
 
       {/* Program Details */}
-      <section className="py-20 px-4">
+      <section id="program-details" className="py-20 px-4">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-16">Program Details</h2>
           
