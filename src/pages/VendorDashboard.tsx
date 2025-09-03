@@ -523,7 +523,7 @@ export const VendorDashboard = () => {
                   </Button>
                   <Button 
                     variant="outline" 
-                    className="border-white/30 text-white hover:bg-white/10"
+                    className="border-white/30 text-white hover:bg-white hover:text-primary"
                     size="lg"
                   >
                     <BarChart3 className="w-5 h-5 mr-2" />
