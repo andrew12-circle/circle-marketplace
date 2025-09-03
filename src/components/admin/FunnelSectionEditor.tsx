@@ -96,14 +96,12 @@ export const FunnelSectionEditor = ({ data, onChange }: FunnelSectionEditorProps
 
       {/* Benefits Section */}
       <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>Benefits & Features</CardTitle>
-            <Button onClick={addBenefit} size="sm">
-              <Plus className="w-4 h-4 mr-2" />
-              Add Benefit
-            </Button>
-          </div>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+          <CardTitle>Benefits & Features</CardTitle>
+          <Button onClick={addBenefit} size="sm">
+            <Plus className="w-4 h-4 mr-2" />
+            Add Benefit
+          </Button>
         </CardHeader>
         <CardContent className="space-y-4">
           {benefits.map((benefit, index) => (
