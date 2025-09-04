@@ -107,19 +107,6 @@ export const Auth = () => {
     setLoading(true);
     console.log('Starting Google sign-in...');
     
-    // Check if Google OAuth is enabled
-    const googleEnabled = process.env.NEXT_PUBLIC_GOOGLE_OAUTH_ON === 'true';
-    
-    if (!googleEnabled) {
-      toast({
-        title: "Google Sign-In Unavailable",
-        description: "Google sign-in is not enabled. Use email/password to create an account.",
-        variant: "destructive",
-      });
-      setLoading(false);
-      return;
-    }
-    
     try {
       console.log('Redirect URL:', `${window.location.origin}/`);
       const { error } = await supabase.auth.signInWithOAuth({
