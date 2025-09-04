@@ -126,7 +126,8 @@ const fetchServices = async (): Promise<Service[]> => {
     const { count, error } = await withTimeout(
       supabase
         .from('services')
-        .select('*', { count: 'exact', head: true }),
+        .select('*', { count: 'exact', head: true })
+        .eq('is_active', true), // Apply same filter as main query
       10000,
       'services-count'
     );
@@ -145,7 +146,7 @@ const fetchServices = async (): Promise<Service[]> => {
       .eq('is_active', true)
       .order('sort_order', { ascending: true })
       .order('created_at', { ascending: false })
-      .limit(200), // Increased from 100 to 200 to accommodate all services
+      .limit(300), // Increased limit to ensure we get all services
       30000, // Increased timeout for stability  
       'fetchServices'
     );
