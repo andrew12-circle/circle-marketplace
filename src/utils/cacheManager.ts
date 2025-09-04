@@ -8,7 +8,8 @@ const CURRENT_VERSION = '1.0.2';
 const SUPABASE_SESSION_KEYS = [
   'sb-ihzyuyfawapweamqzzlj-auth-token',
   'supabase.auth.token',
-  'sb-auth-token'
+  'sb-auth-token',
+  'circle-auth-v1' // Custom session key from Supabase client
 ];
 
 class CacheManager {

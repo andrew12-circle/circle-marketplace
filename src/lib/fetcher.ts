@@ -124,7 +124,7 @@ async function performCookieRecovery(reason: string): Promise<void> {
     await cacheManager.clearAllCachePreserveSession();
     
     // Clear any problematic localStorage items (but preserve auth session)
-    const preserveKeys = ['sb-ihzyuyfawapweamqzzlj-auth-token'];
+    const preserveKeys = ['sb-ihzyuyfawapweamqzzlj-auth-token', 'circle-auth-v1']; // Preserve custom session key
     const itemsToRemove: string[] = [];
     
     for (let i = 0; i < localStorage.length; i++) {
