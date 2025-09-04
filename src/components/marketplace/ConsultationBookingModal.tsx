@@ -225,8 +225,8 @@ export const ConsultationBookingModal = ({
       }
 
       const successMessage = integrationErrors.length > 0 
-        ? `Consultation booked successfully! Note: Some integrations failed (${integrationErrors.join(', ')}). Our team will still contact you to confirm your appointment.`
-        : "We've received your booking request. Our team will contact you soon to confirm your appointment and discuss connecting you with the right vendor.";
+        ? `Consultation booked successfully! Note: Some integrations failed (${integrationErrors.join(', ')}). We'll still notify ${service.vendor?.name || 'the vendor'} and confirm your appointment.`
+        : `Perfect! Your consultation with ${service.vendor?.name || 'the vendor'} has been requested. They'll be notified immediately and will contact you soon to confirm the details.`;
 
       toast({
         title: "Consultation Booked Successfully!",
