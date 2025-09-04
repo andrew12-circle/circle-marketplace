@@ -33,12 +33,13 @@ const Index = () => {
   const isMobile = useIsMobile();
 
   // Refresh profile data when component mounts or when returning to this page
+  // Only refresh if profile is null to prevent unnecessary calls
   useEffect(() => {
-    if (user && profile) {
+    if (user && !profile) {
       console.log('🔄 Index page requesting profile refresh on mount');
       refreshProfile();
     }
-  }, [user, profile]); // Removed refreshProfile from dependencies
+  }, [user, profile]);
 
   // Also refresh when the page becomes visible (user returns from another tab/app)
   useEffect(() => {
