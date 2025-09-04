@@ -8,6 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { BusinessHealthOverview } from "@/components/ai-dashboard/BusinessHealthOverview";
 import { MarketplaceOpportunities } from "@/components/ai-dashboard/MarketplaceOpportunities";
 import { AIRecommendationsDashboard } from "@/components/marketplace/AIRecommendationsDashboard";
+import TopAgentInsights from "@/components/ai-dashboard/TopAgentInsights";
 import { useEnhancedAI } from "@/hooks/useEnhancedAI";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
@@ -140,18 +141,24 @@ const AIDashboard = () => {
             <BusinessHealthOverview />
           </div>
 
-          {/* AI Recommendations Dashboard */}
-          <div className="bg-card/30 backdrop-blur-sm border border-border/50 rounded-xl p-6">
-            <div className="mb-6">
-              <h3 className="text-2xl font-bold text-foreground mb-2 flex items-center gap-2">
-                <Sparkles className="h-6 w-6 text-primary" />
-                AI-Powered Recommendations
-              </h3>
-              <p className="text-muted-foreground">
-                Personalized suggestions based on your goals, market data, and business patterns.
-              </p>
+          {/* AI Recommendations and Top Agent Insights */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="bg-card/30 backdrop-blur-sm border border-border/50 rounded-xl p-6">
+              <div className="mb-6">
+                <h3 className="text-2xl font-bold text-foreground mb-2 flex items-center gap-2">
+                  <Sparkles className="h-6 w-6 text-primary" />
+                  AI-Powered Recommendations
+                </h3>
+                <p className="text-muted-foreground">
+                  Personalized suggestions based on your goals, market data, and business patterns.
+                </p>
+              </div>
+              <AIRecommendationsDashboard />
             </div>
-            <AIRecommendationsDashboard />
+            
+            <div className="bg-card/30 backdrop-blur-sm border border-border/50 rounded-xl p-6">
+              <TopAgentInsights />
+            </div>
           </div>
 
           {/* Marketplace Opportunities */}
