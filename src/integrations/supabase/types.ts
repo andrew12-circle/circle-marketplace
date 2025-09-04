@@ -1920,6 +1920,44 @@ export type Database = {
           },
         ]
       }
+      booking_action_tokens: {
+        Row: {
+          action_type: string
+          booking_id: string
+          created_at: string
+          expires_at: string
+          id: string
+          token_hash: string
+          used_at: string | null
+        }
+        Insert: {
+          action_type: string
+          booking_id: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          token_hash: string
+          used_at?: string | null
+        }
+        Update: {
+          action_type?: string
+          booking_id?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          token_hash?: string
+          used_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_action_tokens_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "consultation_bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       channel_subscriptions: {
         Row: {
           channel_id: string
@@ -2502,8 +2540,44 @@ export type Database = {
         }
         Relationships: []
       }
+      consultation_booking_notes: {
+        Row: {
+          booking_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          note_text: string
+          note_type: string
+        }
+        Insert: {
+          booking_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          note_text: string
+          note_type: string
+        }
+        Update: {
+          booking_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          note_text?: string
+          note_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consultation_booking_notes_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "consultation_bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       consultation_bookings: {
         Row: {
+          assigned_to: string | null
           budget_range: string | null
           client_email: string
           client_name: string
@@ -2515,6 +2589,7 @@ export type Database = {
           external_provider: string | null
           external_status: string | null
           id: string
+          internal_notes: string | null
           is_external: boolean | null
           project_details: string | null
           scheduled_at: string | null
@@ -2523,10 +2598,14 @@ export type Database = {
           service_id: string
           source: string | null
           status: string
+          status_updated_at: string | null
           updated_at: string
           user_id: string | null
+          vendor_notified_at: string | null
+          vendor_response: string | null
         }
         Insert: {
+          assigned_to?: string | null
           budget_range?: string | null
           client_email: string
           client_name: string
@@ -2538,6 +2617,7 @@ export type Database = {
           external_provider?: string | null
           external_status?: string | null
           id?: string
+          internal_notes?: string | null
           is_external?: boolean | null
           project_details?: string | null
           scheduled_at?: string | null
@@ -2546,10 +2626,14 @@ export type Database = {
           service_id: string
           source?: string | null
           status?: string
+          status_updated_at?: string | null
           updated_at?: string
           user_id?: string | null
+          vendor_notified_at?: string | null
+          vendor_response?: string | null
         }
         Update: {
+          assigned_to?: string | null
           budget_range?: string | null
           client_email?: string
           client_name?: string
@@ -2561,6 +2645,7 @@ export type Database = {
           external_provider?: string | null
           external_status?: string | null
           id?: string
+          internal_notes?: string | null
           is_external?: boolean | null
           project_details?: string | null
           scheduled_at?: string | null
@@ -2569,8 +2654,11 @@ export type Database = {
           service_id?: string
           source?: string | null
           status?: string
+          status_updated_at?: string | null
           updated_at?: string
           user_id?: string | null
+          vendor_notified_at?: string | null
+          vendor_response?: string | null
         }
         Relationships: [
           {

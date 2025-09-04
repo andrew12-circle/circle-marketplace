@@ -176,6 +176,66 @@ interface ConsultationRequest {
   budgetRange?: string;
 }
 
+// Helper function to generate ICS content
+function generateICSFile(booking: {
+  client_name: string;
+  client_email: string;
+  client_phone?: string;
+  scheduled_date: string;
+  scheduled_time: string;
+  project_details?: string;
+  services?: {
+    title: string;
+    vendor?: {
+      name: string;
+    };
+  };
+}) {
+  const startDate = new Date(`${booking.scheduled_date}T${convertTimeToISOTime(booking.scheduled_time)}`);
+  const endDate = new Date(startDate.getTime() + 60 * 60 * 1000); // 1 hour duration
+  
+  const formatDate = (date: Date) => {
+    return date.toISOString().replace(/[:-]/g, '').replace(/\.\d{3}/, '');
+  };
+
+  const icsContent = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//Circle Marketplace//Consultation Booking//EN',
+    'BEGIN:VEVENT',
+    `UID:${Date.now()}@circlemarketplace.io`,
+    `DTSTART:${formatDate(startDate)}`,
+    `DTEND:${formatDate(endDate)}`,
+    `SUMMARY:Consultation: ${booking.services?.title || 'Service Consultation'}`,
+    `DESCRIPTION:Consultation with ${booking.client_name}\\n` +
+    `Email: ${booking.client_email}\\n` +
+    `Phone: ${booking.client_phone || 'Not provided'}\\n` +
+    `Vendor: ${booking.services?.vendor?.name || 'TBD'}\\n\\n` +
+    `Project Details:\\n${booking.project_details || 'No details provided'}`,
+    `ATTENDEE;CN=${booking.client_name}:mailto:${booking.client_email}`,
+    'STATUS:CONFIRMED',
+    'END:VEVENT',
+    'END:VCALENDAR'
+  ].join('\r\n');
+
+  return icsContent;
+}
+
+function convertTimeToISOTime(timeString: string): string {
+  // Convert "11:00 AM CST" to "11:00:00"
+  const time = timeString.replace(/\s*(AM|PM|CST|EST|PST|MST)\s*/gi, '');
+  const [hours, minutes] = time.split(':');
+  let hour24 = parseInt(hours);
+  
+  if (timeString.toLowerCase().includes('pm') && hour24 !== 12) {
+    hour24 += 12;
+  } else if (timeString.toLowerCase().includes('am') && hour24 === 12) {
+    hour24 = 0;
+  }
+  
+  return `${hour24.toString().padStart(2, '0')}:${minutes || '00'}:00`;
+}
+
 const handler = async (req: Request): Promise<Response> => {
   console.log('Consultation notification function called');
 
@@ -302,6 +362,40 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log(`Using notification strategy: ${notificationStrategy}, Emails: ${notificationEmails.length > 0 ? notificationEmails.join(', ') : 'internal team'}`);
 
+    // Generate action tokens for vendor accept/decline (if vendor email exists)
+    let acceptToken = '';
+    let declineToken = '';
+    let acceptTokenRaw = '';
+    let declineTokenRaw = '';
+    
+    if (notificationEmails.length > 0 && !notificationEmails[0].includes('circlemarketplace.io')) {
+      // Generate secure tokens
+      acceptTokenRaw = crypto.randomUUID();
+      declineTokenRaw = crypto.randomUUID();
+      
+      // Hash tokens for storage
+      const encoder = new TextEncoder();
+      const acceptHash = await crypto.subtle.digest('SHA-256', encoder.encode(acceptTokenRaw));
+      const declineHash = await crypto.subtle.digest('SHA-256', encoder.encode(declineTokenRaw));
+      
+      acceptToken = Array.from(new Uint8Array(acceptHash)).map(b => b.toString(16).padStart(2, '0')).join('');
+      declineToken = Array.from(new Uint8Array(declineHash)).map(b => b.toString(16).padStart(2, '0')).join('');
+      
+      // Store tokens in database
+      await supabase.from('booking_action_tokens').insert([
+        {
+          booking_id: bookingId,
+          token_hash: acceptToken,
+          action_type: 'accept'
+        },
+        {
+          booking_id: bookingId,
+          token_hash: declineToken,
+          action_type: 'decline'
+        }
+      ]);
+    }
+
     // Create notification record
     const { error: notificationError } = await supabase
       .from('consultation_notifications')
@@ -325,6 +419,15 @@ const handler = async (req: Request): Promise<Response> => {
         }
       });
 
+    // Update booking with vendor notification timestamp
+    await supabase
+      .from('consultation_bookings')
+      .update({ 
+        vendor_notified_at: new Date().toISOString(),
+        status: notificationEmails.length > 0 && !notificationEmails[0].includes('circlemarketplace.io') ? 'awaiting_vendor' : 'pending'
+      })
+      .eq('id', bookingId);
+
     if (notificationError) {
       console.error('Error creating notification record:', notificationError);
       throw notificationError;
@@ -334,8 +437,25 @@ const handler = async (req: Request): Promise<Response> => {
     let emailsSent = 0;
     const emailResults = [];
 
+    // Generate ICS file content for calendar
+    const booking = {
+      client_name: clientName,
+      client_email: clientEmail,
+      client_phone: clientPhone,
+      scheduled_date: scheduledDate,
+      scheduled_time: scheduledTime,
+      project_details: projectDetails,
+      services: {
+        title: serviceTitle,
+        vendor: vendorName ? { name: vendorName } : undefined
+      }
+    };
+    
+    const icsContent = generateICSFile(booking);
+
     if (notificationEmails.length > 0) {
       // Send emails to service/vendor recipients
+      const isVendor = !notificationEmails[0].includes('circlemarketplace.io');
       const subject = `🔥 URGENT: New Consultation Booking - ${serviceTitle}`;
       const html = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f9f9f9;">
@@ -391,6 +511,23 @@ const handler = async (req: Request): Promise<Response> => {
             </div>
             ` : ''}
 
+            ${isVendor && acceptTokenRaw && declineTokenRaw ? `
+            <div style="text-align: center; margin: 30px 0;">
+              <h3 style="color: #2c3e50; margin: 0 0 15px 0;">🎯 Quick Actions</h3>
+              <p style="margin-bottom: 20px;">Click one of the buttons below to respond:</p>
+              <div style="margin: 20px 0;">
+                <a href="https://ihzyuyfawapweamqzzlj.supabase.co/functions/v1/booking-action?token=${acceptTokenRaw}&action=accept" 
+                   style="background-color: #22c55e; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 0 10px; display: inline-block; font-weight: bold;">
+                  ✅ Accept Meeting
+                </a>
+                <a href="https://ihzyuyfawapweamqzzlj.supabase.co/functions/v1/booking-action?token=${declineTokenRaw}&action=decline" 
+                   style="background-color: #ef4444; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 0 10px; display: inline-block; font-weight: bold;">
+                  ❌ Decline Meeting
+                </a>
+              </div>
+            </div>
+            ` : ''}
+
             <div style="text-align: center; margin: 30px 0;">
               <div style="background: #e74c3c; color: white; padding: 15px; border-radius: 6px; margin: 10px 0;">
                 <h3 style="margin: 0 0 10px 0;">⏰ IMMEDIATE ACTION REQUIRED</h3>
@@ -411,6 +548,14 @@ const handler = async (req: Request): Promise<Response> => {
           to: notificationEmails,
           subject: subject,
           html: html,
+          attachments: [
+            {
+              filename: `consultation-${scheduledDate}.ics`,
+              content: Buffer.from(icsContent).toString('base64'),
+              type: 'text/calendar',
+              disposition: 'attachment'
+            }
+          ]
         });
 
         emailsSent = notificationEmails.length;

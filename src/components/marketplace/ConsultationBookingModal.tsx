@@ -190,27 +190,27 @@ export const ConsultationBookingModal = ({
 
       // Send internal notification
       console.log('[Consultation Booking] Sending notification...');
-      try {
-        await supabase.functions.invoke('send-consultation-notification', {
-          body: {
-            bookingId: bookingData.id,
-            serviceId: service.id,
-            serviceTitle: service.title,
-            vendorName: service.vendor?.name || 'Direct Service',
-            clientName: data.client_name,
-            clientEmail: data.client_email,
-            clientPhone: data.client_phone,
-            scheduledDate: selectedDate.toISOString().split('T')[0],
-            scheduledTime: selectedTime,
-            projectDetails: data.project_details,
-            isInternalBooking: true
-          }
-        });
-        console.log('[Consultation Booking] Notification sent successfully');
-      } catch (notificationError) {
-        console.error('[Consultation Booking] Notification failed:', notificationError);
-        setIntegrationErrors(prev => [...prev, 'email notification']);
-      }
+        try {
+          await supabase.functions.invoke('send-consultation-notification', {
+            body: {
+              bookingId: bookingData.id,
+              serviceId: service.id,
+              serviceTitle: service.title,
+              vendorName: service.vendor?.name || 'Direct Service',
+              clientName: data.client_name,
+              clientEmail: data.client_email,
+              clientPhone: data.client_phone,
+              scheduledDate: selectedDate.toISOString().split('T')[0],
+              scheduledTime: selectedTime,
+              projectDetails: data.project_details,
+              isInternalBooking: true
+            }
+          });
+          console.log('[Consultation Booking] Notification sent successfully');
+        } catch (notificationError) {
+          console.error('[Consultation Booking] Notification failed:', notificationError);
+          setIntegrationErrors(prev => [...prev, 'email notification']);
+        }
 
       // Track successful booking
       try {
