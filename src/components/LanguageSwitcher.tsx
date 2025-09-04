@@ -18,12 +18,16 @@ export const LanguageSwitcher = () => {
 
   const currentLanguage = languages.find(lang => lang.code === i18n.language) || languages[0];
 
-  const handleLanguageChange = (languageCode: string) => {
-    i18n.changeLanguage(languageCode);
+  const handleLanguageChange = async (languageCode: string) => {
+    await i18n.changeLanguage(languageCode);
     setOpen(false);
     
     // Store the user's preference
     localStorage.setItem('preferredLanguage', languageCode);
+    
+    // Force a page reload to ensure all components update with new language
+    // This ensures all components re-render with the new language
+    window.location.reload();
   };
 
   // Auto-detect currency based on location and language

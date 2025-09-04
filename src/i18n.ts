@@ -36,12 +36,18 @@ const resources = {
       addToCart: "Add to Cart",
       estROI: "Est. ROI",
       
-      // Common
+      // Common UI
       loading: "Loading",
       noResultsFound: "No {{type}} found",
       tryAdjustingFilters: "Try adjusting your search terms or filters",
       signIn: "Sign In",
       signUp: "Sign Up",
+      save: "Save",
+      cancel: "Cancel",
+      edit: "Edit",
+      delete: "Delete",
+      view: "View",
+      close: "Close",
       
       // Currency
       currency: "USD",
@@ -96,15 +102,36 @@ const resources = {
       addToCart: "Agregar al Carrito",
       estROI: "ROI Est.",
       
-      // Common
+      // Common UI
       loading: "Cargando",
       noResultsFound: "No se encontraron {{type}}",
       tryAdjustingFilters: "Intenta ajustar tus términos de búsqueda o filtros",
       signIn: "Iniciar Sesión",
       signUp: "Registrarse",
+      save: "Guardar",
+      cancel: "Cancelar",
+      edit: "Editar",
+      delete: "Eliminar",
+      view: "Ver",
+      close: "Cerrar",
       
       // Currency
-      currency: "USD"
+      currency: "USD",
+      
+      // First Visit Intro  
+      intro: {
+        newBadge: "Nuevo",
+        headline: "Bienvenido a Circle Network - Donde los Mejores Agentes Prosperan",
+        subheadline: "Únete a miles de agentes ahorrando dinero y haciendo crecer su negocio con nuestro mercado curado.",
+        benefit1Title: "Ahorros Masivos",
+        benefit1Desc: "Ahorra 40-80% en herramientas que ya usas",
+        benefit2Title: "Crecimiento Impulsado por IA",
+        benefit2Desc: "Obtén recomendaciones personalizadas para aumentar tu ROI",
+        benefit3Title: "Verificado por Agentes",
+        benefit3Desc: "Cada servicio es probado por agentes exitosos como tú",
+        learnMore: "Explorar Primero",
+        getStarted: "Comenzar Gratis"
+      }
     }
   },
   fr: {
@@ -141,15 +168,36 @@ const resources = {
       addToCart: "Ajouter au Panier",
       estROI: "ROI Est.",
       
-      // Common
+      // Common UI
       loading: "Chargement",
       noResultsFound: "Aucun {{type}} trouvé",
       tryAdjustingFilters: "Essayez d'ajuster vos termes de recherche ou filtres",
       signIn: "Se Connecter",
       signUp: "S'inscrire",
+      save: "Sauvegarder",
+      cancel: "Annuler",
+      edit: "Modifier",
+      delete: "Supprimer",
+      view: "Voir",
+      close: "Fermer",
       
       // Currency
-      currency: "CAD"
+      currency: "CAD",
+      
+      // First Visit Intro
+      intro: {
+        newBadge: "Nouveau",
+        headline: "Bienvenue sur Circle Network - Où les Meilleurs Agents Prospèrent",
+        subheadline: "Rejoignez des milliers d'agents qui économisent de l'argent et développent leur entreprise avec notre marché curé.",
+        benefit1Title: "Économies Massives",
+        benefit1Desc: "Économisez 40-80% sur les outils que vous utilisez déjà",
+        benefit2Title: "Croissance Alimentée par l'IA",
+        benefit2Desc: "Obtenez des recommandations personnalisées pour augmenter votre ROI",
+        benefit3Title: "Vérifié par les Agents",
+        benefit3Desc: "Chaque service est testé par des agents performants comme vous",
+        learnMore: "Explorer d'Abord",
+        getStarted: "Commencer Gratuitement"
+      }
     }
   }
 };
@@ -158,7 +206,7 @@ i18n
   .use(initReactI18next)
   .init({
     resources,
-    lng: 'en', // default language
+    lng: localStorage.getItem('preferredLanguage') || 'en', // Load saved language or default to English
     fallbackLng: 'en',
     
     detection: {
@@ -170,5 +218,12 @@ i18n
       escapeValue: false
     }
   });
+
+// Save language changes to localStorage
+i18n.on('languageChanged', (lng) => {
+  localStorage.setItem('preferredLanguage', lng);
+  // Update HTML lang attribute for better accessibility
+  document.documentElement.lang = lng;
+});
 
 export default i18n;
