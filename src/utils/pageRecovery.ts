@@ -100,7 +100,7 @@ class PageRecovery {
     let timeoutCount = 0;
     let lastTimeoutTime = 0;
 
-    // Monitor for timeout errors
+    // Monitor for timeout errors - but be much more conservative
     const originalConsoleError = console.error;
     console.error = (...args) => {
       const message = args.join(' ');
@@ -108,8 +108,8 @@ class PageRecovery {
       if (message.includes('timeout') || message.includes('Request timed out')) {
         const now = Date.now();
         
-        // Count recent timeouts
-        if (now - lastTimeoutTime < 10000) {
+        // Count recent timeouts - increased time window to 30 seconds
+        if (now - lastTimeoutTime < 30000) {
           timeoutCount++;
         } else {
           timeoutCount = 1;
@@ -117,12 +117,13 @@ class PageRecovery {
         
         lastTimeoutTime = now;
         
-        // Auto-recover after multiple timeouts
-        if (timeoutCount >= 3) {
-          logger.log('Multiple timeouts detected, initiating auto-recovery');
+        // Only auto-recover after many more timeouts and avoid reloads
+        if (timeoutCount >= 8) {
+          logger.log('Many timeouts detected, soft recovery only');
           this.recover({
             revalidateQueries: true,
             reloadAuth: true
+            // Removed clearCache to prevent reloads
           });
           timeoutCount = 0;
         }
@@ -131,7 +132,7 @@ class PageRecovery {
       originalConsoleError.apply(console, args);
     };
 
-    logger.log('Auto-recovery enabled');
+    logger.log('Auto-recovery enabled (conservative mode)');
   }
 
   // Expose recovery functions globally for debugging

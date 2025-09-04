@@ -2,6 +2,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { reportClientError } from '@/utils/errorReporting';
 import { cacheManager } from '@/utils/cacheManager';
+import { logger } from '@/utils/logger';
 
 interface AppConfig {
   auto_heal_enabled: boolean;
@@ -20,9 +21,9 @@ class GlobalErrorMonitor {
   private errorCount = 0;
   private errorTimeWindow: number[] = [];
   private config: GlobalMonitoringConfig = {
-    errorThreshold: 15, // Increased threshold
-    timeWindow: 10, // Increased time window
-    autoHealingEnabled: false, // Disabled by default - read from server
+    errorThreshold: 15, // Much higher threshold - 15 errors before warnings
+    timeWindow: 10,     // Within 10 minutes (longer window)
+    autoHealingEnabled: false, // PERMANENTLY disabled to prevent reload loops
     bootCanaryEnabled: false // Disabled until we're more stable
   };
   private serverConfig: AppConfig | null = null;
@@ -297,16 +298,16 @@ class GlobalErrorMonitor {
     if (this.errorTimeWindow.length >= this.config.errorThreshold) {
       console.warn(`🚨 Error threshold reached: ${this.errorTimeWindow.length} errors in ${this.config.timeWindow} minutes`);
       
-      // Only show soft warning, don't immediately trigger reload
+      // Only show soft warning, never trigger automatic reloads
       this.showSoftErrorNotification();
       
-      // Only escalate to self-healing for extremely high error counts AND if enabled on server
-      const criticalThreshold = this.config.errorThreshold * 2; // Much higher bar
-      if (this.config.autoHealingEnabled && 
-          this.serverConfig?.auto_heal_enabled && 
-          this.errorTimeWindow.length >= criticalThreshold) {
-        console.warn(`🚨 CRITICAL: ${this.errorTimeWindow.length} errors, triggering self-heal`);
-        await this.triggerSelfHealing('critical_error_threshold');
+      // DISABLE auto-healing to prevent reload loops - only log the issue
+      console.warn(`🔍 Would trigger self-heal but disabled to prevent reload loops. Errors: ${this.errorTimeWindow.length}`);
+      
+      // Reset error counter to prevent spam
+      if (this.errorTimeWindow.length >= this.config.errorThreshold * 3) {
+        logger.log('🔄 Resetting error counter to prevent notification spam');
+        this.errorTimeWindow = [];
       }
     }
   }
