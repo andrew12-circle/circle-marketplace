@@ -100,17 +100,40 @@ export const QUERY_KEYS = {
   savedServices: (userId: string) => ['marketplace', 'savedServices', userId],
 } as const;
 
-// Helper: timeout wrapper - increased timeout for stability
-const withTimeout = async <T,>(promise: PromiseLike<T>, ms = 30000, label?: string): Promise<T> => {
+// Helper: timeout wrapper with retry for auth issues
+const withTimeout = async <T,>(promise: PromiseLike<T>, ms = 15000, label?: string): Promise<T> => {
   let timer: number | undefined;
-  return Promise.race<T>([
-    promise as Promise<T>,
-    new Promise<T>((_, reject) => {
-      timer = window.setTimeout(() => reject(new Error(`Request timed out${label ? `: ${label}` : ''}`)), ms);
-    }),
-  ]).finally(() => {
-    if (timer) window.clearTimeout(timer);
+  
+  const timeoutPromise = new Promise<T>((_, reject) => {
+    timer = window.setTimeout(() => reject(new Error(`Request timed out${label ? `: ${label}` : ''}`)), ms);
   });
+  
+  try {
+    const result = await Promise.race<T>([
+      promise as Promise<T>,
+      timeoutPromise,
+    ]);
+    return result;
+  } catch (error: any) {
+    // Handle auth errors by refreshing session
+    if (error?.message?.includes('JWT') || error?.message?.includes('auth') || error?.message?.includes('401')) {
+      try {
+        await supabase.auth.refreshSession();
+        // Retry the original promise once after auth refresh
+        return await Promise.race<T>([
+          promise as Promise<T>,
+          new Promise<T>((_, reject) => {
+            setTimeout(() => reject(new Error(`Retry timed out${label ? `: ${label}` : ''}`)), ms);
+          }),
+        ]);
+      } catch (retryError) {
+        throw error; // Throw original error if retry fails
+      }
+    }
+    throw error;
+  } finally {
+    if (timer) window.clearTimeout(timer);
+  }
 };
 
 /**
@@ -138,7 +161,7 @@ const fetchServices = async (): Promise<Service[]> => {
     // Non-blocking: count fetch timed out or failed
   }
   
-  // Fetch services with increased limit to handle all available services
+  // Fetch services with optimized query
   const { data, error } = await withTimeout(
     supabase
       .from('services')
@@ -146,8 +169,8 @@ const fetchServices = async (): Promise<Service[]> => {
       .eq('is_active', true)
       .order('sort_order', { ascending: true })
       .order('created_at', { ascending: false })
-      .limit(300), // Increased limit to ensure we get all services
-      30000, // Increased timeout for stability  
+      .limit(200), // Reasonable limit for performance
+      15000, // Reduced timeout for faster failures
       'fetchServices'
     );
 
@@ -217,8 +240,8 @@ const fetchVendors = async (): Promise<Vendor[]> => {
       .in('approval_status', ['approved', 'auto_approved', 'pending'])
       .order('sort_order', { ascending: true })
       .order('rating', { ascending: false })
-      .limit(50),
-      30000, // Increased timeout for stability
+      .limit(20), // Reduced limit for faster queries
+      15000, // Reduced timeout to fail faster
       'fetchVendors'
     );
 
@@ -291,7 +314,7 @@ const fetchCombinedMarketplaceData = async (): Promise<MarketplaceData> => {
       logger.log('🔍 Trying edge function for marketplace data...');
       const edgeFunctionResult = await withTimeout(
         supabase.functions.invoke('get-marketplace-data'),
-        6000,
+        10000, // Increased edge function timeout
         'edge_function'
       );
 
