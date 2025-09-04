@@ -133,20 +133,7 @@ const fetchServices = async (): Promise<Service[]> => {
   const { data, error } = await withTimeout(
     supabase
       .from('services')
-      .select(`
-        *,
-        vendor:vendors!vendor_id (
-          id,
-          name,
-          rating,
-          review_count,
-          is_verified,
-          website_url,
-          logo_url,
-          support_hours,
-          contact_email
-        )
-      `)
+      .select('*')
       .eq('is_active', true)
       .order('sort_order', { ascending: true })
       .order('created_at', { ascending: false })
@@ -179,17 +166,16 @@ const fetchServices = async (): Promise<Service[]> => {
       discount_percentage: service.discount_percentage ? String(service.discount_percentage) : undefined,
       is_verified: service.is_verified || false,
       pricing_tiers: Array.isArray(pricing_tiers) ? pricing_tiers : null,
-      vendor: service.vendor ? {
-        id: service.vendor.id,
-        name: service.vendor.name,
-        rating: service.vendor.rating || 4.5,
-        review_count: service.vendor.review_count || 0,
-        is_verified: service.vendor.is_verified || false,
-        website_url: service.vendor.website_url,
-        logo_url: service.vendor.logo_url,
-        support_hours: service.vendor.support_hours || 'Business Hours',
-        contact_email: service.vendor.contact_email,
-      } : null,
+      vendor: {
+        name: 'Circle Platform',
+        rating: 5,
+        review_count: 0,
+        is_verified: true,
+        website_url: undefined,
+        logo_url: undefined,
+        support_hours: 'Business Hours',
+        contact_email: undefined,
+      },
     };
   });
 

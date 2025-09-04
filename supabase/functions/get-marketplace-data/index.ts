@@ -68,13 +68,7 @@ serve(async (req) => {
     const [servicesResponse, vendorsResponse, trackingMetricsResponse] = await Promise.all([
       supabaseClient
         .from('services')
-        .select(`
-          *,
-          vendors!inner (
-            id, name, rating, review_count, is_verified, website_url, logo_url, 
-            support_hours, vendor_type, service_states, mls_areas
-          )
-        `)
+        .select('*')
         .eq('is_active', true)
         .order('sort_order', { ascending: true })
         .order('created_at', { ascending: false })
@@ -82,12 +76,7 @@ serve(async (req) => {
       
       supabaseClient
         .from('vendors')
-        .select(`
-          *,
-          services!inner (
-            id, title, is_active, category
-          )
-        `)
+        .select('*')
         .eq('is_active', true)
         .in('approval_status', ['approved', 'auto_approved', 'pending'])
         .order('sort_order', { ascending: true })
@@ -124,15 +113,9 @@ serve(async (req) => {
       return {
         ...service,
         discount_percentage: service.discount_percentage ? String(service.discount_percentage) : undefined,
-        vendor: service.vendors ? {
-          ...service.vendors,
-          name: service.vendors.name || 'Service Provider',
-          rating: service.vendors.rating || 4.5,
-          review_count: service.vendors.review_count || 0,
-          is_verified: service.vendors.is_verified || true
-        } : {
-          name: 'Service Provider',
-          rating: 4.5,
+        vendor: {
+          name: 'Circle Platform',
+          rating: 5,
           review_count: 0,
           is_verified: true
         },
@@ -172,8 +155,8 @@ serve(async (req) => {
       vendor_type: vendor.vendor_type || 'company',
       local_representatives: vendor.local_representatives || [],
       // Enhanced service data
-      active_services_count: vendor.services?.filter((s: any) => s.is_active).length || 0,
-      service_categories: [...new Set(vendor.services?.map((s: any) => s.category) || [])]
+      active_services_count: 0,
+      service_categories: []
     }));
 
     const result = {
