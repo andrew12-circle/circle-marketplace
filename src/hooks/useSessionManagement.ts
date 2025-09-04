@@ -29,6 +29,39 @@ export function useSessionManagement() {
     return `sess_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 
+  // Helper functions for tracking dismissed warnings in current session
+  const getDismissedWarningsKey = () => `dismissed_warnings_${user?.id || 'anonymous'}`;
+  
+  const isWarningDismissed = (warningType: string): boolean => {
+    try {
+      const dismissed = sessionStorage.getItem(getDismissedWarningsKey());
+      if (!dismissed) return false;
+      const dismissedTypes = JSON.parse(dismissed) as string[];
+      return dismissedTypes.includes(warningType);
+    } catch {
+      return false;
+    }
+  };
+
+  const markWarningAsDismissed = (warningType: string) => {
+    try {
+      const key = getDismissedWarningsKey();
+      const dismissed = sessionStorage.getItem(key);
+      let dismissedTypes: string[] = [];
+      
+      if (dismissed) {
+        dismissedTypes = JSON.parse(dismissed) as string[];
+      }
+      
+      if (!dismissedTypes.includes(warningType)) {
+        dismissedTypes.push(warningType);
+        sessionStorage.setItem(key, JSON.stringify(dismissedTypes));
+      }
+    } catch (error) {
+      console.warn('Failed to save dismissed warning state:', error);
+    }
+  };
+
   function generateDeviceFingerprint(): string {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
@@ -86,7 +119,7 @@ export function useSessionManagement() {
         }
       });
 
-      if (result && result.warning) {
+      if (result && result.warning && !isWarningDismissed('concurrent_sessions')) {
         setSessionWarning({
           type: 'concurrent_sessions',
           message: result.warning,
@@ -108,7 +141,7 @@ export function useSessionManagement() {
       }
 
     } catch (error: any) {
-      if (error.message?.includes('Maximum concurrent sessions exceeded')) {
+      if (error.message?.includes('Maximum concurrent sessions exceeded') && !isWarningDismissed('concurrent_sessions')) {
         setSessionWarning({
           type: 'concurrent_sessions',
           message: 'Too many active sessions. Please log out from other devices.',
@@ -152,7 +185,11 @@ export function useSessionManagement() {
   }
 
   function dismissWarning() {
-    setSessionWarning(null);
+    if (sessionWarning) {
+      // Mark this warning type as dismissed for the current session
+      markWarningAsDismissed(sessionWarning.type);
+      setSessionWarning(null);
+    }
   }
 
   // Initialize session when user logs in
@@ -164,6 +201,12 @@ export function useSessionManagement() {
       endSession();
       setActiveSessions([]);
       setSessionWarning(null);
+      // Clear dismissed warnings when logging out
+      try {
+        sessionStorage.removeItem(getDismissedWarningsKey());
+      } catch (error) {
+        console.warn('Failed to clear dismissed warnings on logout:', error);
+      }
     }
 
     return () => {
