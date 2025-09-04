@@ -33,30 +33,7 @@ export const useAdminStatus = () => {
         return false;
       }
       
-      // Skip RPC altogether - rely on server-side function which has allowlist built-in
-      // The server function get_user_admin_status() now handles allowlist internally
-      try {
-        const timeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error('RPC timeout')), 2000); // Shorter timeout 
-        });
-        
-        const { data, error } = await Promise.race([
-          supabase.rpc('get_user_admin_status'),
-          timeoutPromise
-        ]) as any;
-        
-        if (!error && data !== null) {
-          logger.log('Admin status: Retrieved via RPC with server allowlist', { userId: user.id, isAdmin: !!data });
-          return !!data;
-        }
-      } catch (error) {
-        // Don't log warnings for expected timeout scenarios
-        if (!error?.message?.includes('timeout')) {
-          logger.warn('Admin status RPC failed, using profile fallback:', error);
-        }
-      }
-      
-      // Final fallback to profile data
+      // Final fallback to profile data (skip RPC to avoid timeouts)
       const result = !!profile?.is_admin;
       logger.log('Admin status: Final result', { userId: user.id, isAdmin: result, source: 'profile_fallback' });
       return result;
