@@ -12,7 +12,7 @@ import { logger } from '@/utils/logger';
 const STRICT_ADMIN_SECURITY = false;
 
 // Hard allowlist for immediate admin access (bypasses all RPCs)
-const ADMIN_ALLOWLIST = ['robert@circlenetwork.io', 'andrew@heisleyteam.com'];
+const ADMIN_ALLOWLIST = ['robert@circlenetwork.io', 'andrew@heisleyteam.com', 'andrew@circlenetwork.io'];
 
 interface SecureAdminGuardProps {
   children: ReactNode;

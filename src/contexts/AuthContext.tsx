@@ -78,6 +78,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isCircuitBreakerOpen, setIsCircuitBreakerOpen] = useState(false);
   const [showSessionsDialog, setShowSessionsDialog] = useState(false);
   const [profileCache, setProfileCache] = useState<Map<string, { profile: Profile; timestamp: number }>>(new Map());
+  const [inFlightFetches, setInFlightFetches] = useState<Set<string>>(new Set());
   const queryClient = useQueryClient();
   const { handleSessionError, triggerRecoveryBanner } = useSessionPersistence();
   const sessionManagement = useSessionManagement();
@@ -115,9 +116,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       return;
     }
 
-    // ADMIN BYPASS: Check if user is in admin allowlist FIRST (before any caching or circuit breaker)
-    const currentUser = user;
-    const isAdminUser = currentUser?.email && ['robert@circlenetwork.io', 'andrew@heisleyteam.com'].includes(currentUser.email.toLowerCase());
+    // IN-FLIGHT GUARD: Prevent multiple simultaneous fetches for same user
+    if (inFlightFetches.has(userId)) {
+      logger.log('Profile fetch already in progress for user:', userId);
+      return;
+    }
+    
+    // Add to in-flight set
+    setInFlightFetches(prev => new Set(prev.add(userId)));
+
+  // ADMIN BYPASS: Check if user is in admin allowlist FIRST (before any caching or circuit breaker)
+  const currentUser = user;
+  const isAdminUser = currentUser?.email && ['robert@circlenetwork.io', 'andrew@heisleyteam.com', 'andrew@circlenetwork.io'].includes(currentUser.email.toLowerCase());
     
     if (isAdminUser) {
       logger.log('Admin user detected, bypassing all restrictions for:', currentUser.email);
@@ -139,6 +149,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setProfileCache(prev => new Map(prev.set(userId, { profile: adminProfile, timestamp: now })));
       setRetryCount(0);
       setIsCircuitBreakerOpen(false); // Reset circuit breaker for admin
+      // Remove from in-flight
+      setInFlightFetches(prev => {
+        const next = new Set(prev);
+        next.delete(userId);
+        return next;
+      });
       return;
     }
 
@@ -221,12 +237,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     try {
+      const startTime = performance.now();
       console.log('🔍 Starting profile fetch for userId:', userId);
       
-      // Create a timeout with proper cleanup - very aggressive timeout for faster fallback
+      // Determine timeout based on route - longer for admin routes to prevent circuit breaker activation
+      const isAdminRoute = window.location.pathname.includes('/admin');
+      const timeoutMs = isAdminRoute ? 10000 : 5000; // 10s for admin routes, 5s elsewhere
+      console.log(`⏱️ Using ${timeoutMs}ms timeout for ${isAdminRoute ? 'admin' : 'regular'} route`);
+      
+      // Create a timeout with proper cleanup
       let timeoutId: NodeJS.Timeout;
       const timeoutPromise = new Promise((_, reject) => {
-        timeoutId = setTimeout(() => reject(new Error('Profile fetch timeout')), 3000); // Reduced from 8 to 3 seconds
+        timeoutId = setTimeout(() => reject(new Error('Profile fetch timeout')), timeoutMs);
       });
 
       // Simplified query without ordering for better performance  
@@ -245,19 +267,27 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         timeoutPromise
       ]) as any;
       
-      console.log('📊 Profile query result:', { profileData: !!profileData, profileError });
+      const fetchDuration = performance.now() - startTime;
+      console.log('📊 Profile query result:', { profileData: !!profileData, profileError, fetchDurationMs: Math.round(fetchDuration) });
 
       if (!profileError && profileData) {
         logger.log('Profile fetched successfully:', { 
           userId, 
           isAdmin: profileData.is_admin,
-          displayName: profileData.display_name 
+          displayName: profileData.display_name,
+          fetchDurationMs: Math.round(fetchDuration)
         });
         setProfile(profileData);
         // Cache the profile
         setProfileCache(prev => new Map(prev.set(userId, { profile: profileData, timestamp: now })));
         setRetryCount(0); // Reset retry count on success
         setIsCircuitBreakerOpen(false); // Reset circuit breaker on success
+        // Remove from in-flight
+        setInFlightFetches(prev => {
+          const next = new Set(prev);
+          next.delete(userId);
+          return next;
+        });
         return;
       }
 
@@ -336,6 +366,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       logger.warn('All profile fetch methods failed, user may need profile creation');
       setProfile(null);
       setRetryCount(0); // Reset retry count when giving up
+      
+      // Always remove from in-flight at end of function
+      setInFlightFetches(prev => {
+        const next = new Set(prev);
+        next.delete(userId);
+        return next;
+      });
     } catch (error) {
       console.log('❌ fetchProfile exception:', error);
       
@@ -345,10 +382,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (isTimeoutError) {
         console.log('⏰ Timeout error detected, not retrying to prevent infinite loop');
         logger.warn('Profile fetch timeout - activating circuit breaker and fallbacks');
+        
+        // FOR ADMIN USERS: Don't open circuit breaker on timeout, just set null profile
+        if (isAdminUser) {
+          console.log('🔑 Admin user timeout - not opening circuit breaker to prevent lockout');
+          setProfile(null);
+          setRetryCount(0);
+          return;
+        }
+        
         setProfile(null);
         setRetryCount(0);
         
-        // Open circuit breaker temporarily for timeout errors
+        // Open circuit breaker temporarily for timeout errors (non-admin users only)
         setIsCircuitBreakerOpen(true);
         setTimeout(() => {
           setIsCircuitBreakerOpen(false);
@@ -378,6 +424,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           logger.log('Circuit breaker reset after timeout');
         }, 5000); // 5 seconds
       }
+      
+      // Always remove from in-flight at end of catch block
+      setInFlightFetches(prev => {
+        const next = new Set(prev);
+        next.delete(userId);
+        return next;
+      });
     }
   };
 

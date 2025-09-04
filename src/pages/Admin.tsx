@@ -41,12 +41,12 @@ export const Admin = () => {
         return;
       }
 
-      // PRIORITY 3: Only try RPC for non-allowlisted users with minimal timeout
+      // PRIORITY 3: Only try RPC for non-allowlisted users with longer timeout to prevent circuit breaker
       try {
         console.log('Checking admin status for user:', user.id);
         
         const timeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error('Admin check timeout')), 500); // Very short timeout
+          setTimeout(() => reject(new Error('Admin check timeout')), 3000); // Increased timeout to prevent circuit breaker
         });
         
         // Try direct admin check first
@@ -103,7 +103,7 @@ export const Admin = () => {
         setIsAdmin(!!profile?.is_admin);
       }
       setIsLoading(false);
-    }, 1000); // Ultra-fast timeout since email allowlist is checked first
+    }, 5000); // Increased timeout to prevent premature admin check failures
 
     checkAdminStatus();
 
