@@ -212,7 +212,7 @@ const handler = async (req: Request): Promise<Response> => {
       clientEmail: { required: true, type: 'string', pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, maxLength: 100 },
       clientPhone: { required: false, type: 'string', maxLength: 20 },
       scheduledDate: { required: true, type: 'string', pattern: /^\d{4}-\d{2}-\d{2}$/ },
-      scheduledTime: { required: true, type: 'string', maxLength: 10 },
+      scheduledTime: { required: true, type: 'string', maxLength: 20 },
       projectDetails: { required: false, type: 'string', maxLength: 1000 },
       budgetRange: { required: false, type: 'string', maxLength: 50 }
     });

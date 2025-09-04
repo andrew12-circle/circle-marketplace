@@ -1,0 +1,290 @@
+import React, { useState, useEffect } from 'react';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Calendar, Clock, User, Mail, Phone, MessageSquare } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { format } from "date-fns";
+
+interface ConsultationBooking {
+  id: string;
+  service_id: string;
+  user_id: string;
+  client_name: string;
+  client_email: string;
+  client_phone?: string;
+  scheduled_date: string;
+  scheduled_time: string;
+  project_details?: string;
+  status: string;
+  created_at: string;
+  services?: {
+    title: string;
+    vendor?: {
+      name: string;
+      contact_email: string;
+    };
+  };
+}
+
+export default function AdminBookings() {
+  const [bookings, setBookings] = useState<ConsultationBooking[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const { toast } = useToast();
+
+  useEffect(() => {
+    fetchBookings();
+  }, []);
+
+  const fetchBookings = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('consultation_bookings')
+        .select(`
+          *,
+          services (
+            title,
+            vendors (
+              name,
+              contact_email
+            )
+          )
+        `)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setBookings(data || []);
+    } catch (error) {
+      console.error('Error fetching bookings:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch bookings",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateBookingStatus = async (bookingId: string, newStatus: string) => {
+    try {
+      const { error } = await supabase
+        .from('consultation_bookings')
+        .update({ status: newStatus })
+        .eq('id', bookingId);
+
+      if (error) throw error;
+      
+      setBookings(prev => 
+        prev.map(booking => 
+          booking.id === bookingId 
+            ? { ...booking, status: newStatus }
+            : booking
+        )
+      );
+
+      toast({
+        title: "Status Updated",
+        description: `Booking marked as ${newStatus}`,
+      });
+    } catch (error) {
+      console.error('Error updating status:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update booking status",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const filteredBookings = bookings.filter(booking => {
+    const matchesSearch = 
+      booking.client_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      booking.client_email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      booking.services?.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      booking.services?.vendor?.name.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesStatus = statusFilter === 'all' || booking.status === statusFilter;
+    
+    return matchesSearch && matchesStatus;
+  });
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'confirmed': return 'bg-green-500';
+      case 'pending': return 'bg-yellow-500';
+      case 'cancelled': return 'bg-red-500';
+      case 'completed': return 'bg-blue-500';
+      default: return 'bg-gray-500';
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="container mx-auto py-8">
+        <div className="flex justify-center items-center min-h-[400px]">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container mx-auto py-8 space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold">Consultation Bookings</h1>
+        <div className="text-sm text-muted-foreground">
+          {filteredBookings.length} of {bookings.length} bookings
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div className="flex gap-4">
+        <Input
+          placeholder="Search by client name, email, service, or vendor..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="max-w-md"
+        />
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="px-3 py-2 border rounded-md bg-background"
+        >
+          <option value="all">All Status</option>
+          <option value="pending">Pending</option>
+          <option value="confirmed">Confirmed</option>
+          <option value="completed">Completed</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </div>
+
+      {/* Bookings List */}
+      <div className="grid gap-4">
+        {filteredBookings.map((booking) => (
+          <Card key={booking.id} className="p-6">
+            <div className="flex justify-between items-start mb-4">
+              <div className="flex items-center gap-3">
+                <Badge className={getStatusColor(booking.status)}>
+                  {booking.status}
+                </Badge>
+                <span className="text-sm text-muted-foreground">
+                  Booked {format(new Date(booking.created_at), 'MMM d, yyyy')}
+                </span>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => updateBookingStatus(booking.id, 'confirmed')}
+                  disabled={booking.status === 'confirmed'}
+                >
+                  Confirm
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => updateBookingStatus(booking.id, 'completed')}
+                  disabled={booking.status === 'completed'}
+                >
+                  Complete
+                </Button>
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-6">
+              {/* Client Info */}
+              <div className="space-y-3">
+                <h3 className="font-semibold text-lg flex items-center gap-2">
+                  <User className="w-4 h-4" />
+                  Client Information
+                </h3>
+                <div className="space-y-2 text-sm">
+                  <div><strong>Name:</strong> {booking.client_name}</div>
+                  <div className="flex items-center gap-2">
+                    <Mail className="w-3 h-3" />
+                    <a href={`mailto:${booking.client_email}`} className="text-primary hover:underline">
+                      {booking.client_email}
+                    </a>
+                  </div>
+                  {booking.client_phone && (
+                    <div className="flex items-center gap-2">
+                      <Phone className="w-3 h-3" />
+                      <a href={`tel:${booking.client_phone}`} className="text-primary hover:underline">
+                        {booking.client_phone}
+                      </a>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Service & Schedule Info */}
+              <div className="space-y-3">
+                <h3 className="font-semibold text-lg flex items-center gap-2">
+                  <Calendar className="w-4 h-4" />
+                  Service & Schedule
+                </h3>
+                <div className="space-y-2 text-sm">
+                  <div><strong>Service:</strong> {booking.services?.title}</div>
+                  <div><strong>Vendor:</strong> {booking.services?.vendor?.name}</div>
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-3 h-3" />
+                    {format(new Date(booking.scheduled_date), 'EEEE, MMMM d, yyyy')}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-3 h-3" />
+                    {booking.scheduled_time}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Project Details */}
+            {booking.project_details && (
+              <div className="mt-4 pt-4 border-t">
+                <h4 className="font-semibold flex items-center gap-2 mb-2">
+                  <MessageSquare className="w-4 h-4" />
+                  Project Details
+                </h4>
+                <p className="text-sm text-muted-foreground">{booking.project_details}</p>
+              </div>
+            )}
+
+            {/* Vendor Contact */}
+            {booking.services?.vendor?.contact_email && (
+              <div className="mt-4 pt-4 border-t">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium">Vendor Contact:</span>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => window.open(`mailto:${booking.services?.vendor?.contact_email}?subject=Consultation Booking - ${booking.services?.title}&body=Hi,\n\nWe have a consultation booking for ${booking.client_name} on ${format(new Date(booking.scheduled_date), 'MMMM d, yyyy')} at ${booking.scheduled_time}.\n\nClient Contact:\n- Email: ${booking.client_email}\n- Phone: ${booking.client_phone || 'Not provided'}\n\nProject Details:\n${booking.project_details || 'No details provided'}\n\nPlease confirm your availability or suggest alternative times.\n\nThanks!`)}
+                  >
+                    Email Vendor
+                  </Button>
+                </div>
+              </div>
+            )}
+          </Card>
+        ))}
+      </div>
+
+      {filteredBookings.length === 0 && (
+        <div className="text-center py-12">
+          <Calendar className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+          <h3 className="text-lg font-semibold mb-2">No bookings found</h3>
+          <p className="text-muted-foreground">
+            {searchTerm || statusFilter !== 'all' 
+              ? 'Try adjusting your search or filter criteria.'
+              : 'No consultation bookings have been made yet.'
+            }
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}

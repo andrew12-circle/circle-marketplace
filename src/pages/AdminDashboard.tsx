@@ -62,9 +62,10 @@ import { logEvent } from '@/lib/events';
 import { getProStatus } from '@/lib/profile';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Upload, Building, Youtube, DollarSign, BarChart3, Coins, Shield as ShieldIcon, Users2, Send, BookOpen, Heart, MessageSquare } from 'lucide-react';
+import { Upload, Building, Youtube, DollarSign, BarChart3, Coins, Shield as ShieldIcon, Users2, Send, BookOpen, Heart, MessageSquare, Calendar } from 'lucide-react';
 import { SpiritualDashboard } from '@/components/admin/SpiritualDashboard';
 import { AdminAffiliates } from '@/components/admin/AdminAffiliates';
+import AdminBookings from '@/pages/AdminBookings';
 
 interface UserProfile {
   id: string;
@@ -538,7 +539,7 @@ export default function AdminDashboard() {
           {/* Modern Tab Navigation */}
           <Tabs defaultValue="spiritual" className="w-full space-y-8">
           <div className="bg-card rounded-xl border border-border shadow-sm p-4 space-y-4">
-            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 xl:grid-cols-16 gap-1 bg-muted/50 p-1 rounded-lg h-auto min-h-[60px]">
+            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 xl:grid-cols-17 gap-1 bg-muted/50 p-1 rounded-lg h-auto min-h-[60px]">
               {/* Spiritual Group - Moved to first position */}
               <TabsTrigger 
                 value="spiritual" 
@@ -546,6 +547,15 @@ export default function AdminDashboard() {
               >
                 <Heart className="h-5 w-5" />
                 <span className="hidden sm:inline">Spiritual</span>
+              </TabsTrigger>
+              
+              {/* Bookings Tab */}
+              <TabsTrigger 
+                value="bookings" 
+                className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
+              >
+                <Calendar className="h-5 w-5" />
+                <span className="hidden sm:inline">Bookings</span>
               </TabsTrigger>
               
               {/* User Management Group */}
@@ -1091,6 +1101,10 @@ export default function AdminDashboard() {
 
         <TabsContent value="calculator" className="space-y-6">
           <AdvancedSplitCalculator />
+        </TabsContent>
+
+        <TabsContent value="bookings" className="space-y-6">
+          <AdminBookings />
         </TabsContent>
       </Tabs>
         </div>

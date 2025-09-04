@@ -226,7 +226,7 @@ export const ConsultationBookingModal = ({
 
       const successMessage = integrationErrors.length > 0 
         ? `Consultation booked successfully! Note: Some integrations failed (${integrationErrors.join(', ')}). Our team will still contact you to confirm your appointment.`
-        : "We've received your booking and added you to our Go High Level system. Our team will contact you soon to confirm your appointment and discuss connecting you with the right vendor.";
+        : "We've received your booking request. Our team will contact you soon to confirm your appointment and discuss connecting you with the right vendor.";
 
       toast({
         title: "Consultation Booked Successfully!",
