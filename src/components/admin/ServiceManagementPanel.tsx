@@ -401,7 +401,29 @@ export const ServiceManagementPanel = () => {
   ]);
 
   useEffect(() => {
-    fetchServices();
+    const initializeServices = async () => {
+      // Check admin access first
+      try {
+        const { data: adminCheck, error: adminError } = await supabase.rpc('get_user_admin_status');
+        console.log('ServiceManagementPanel: Admin check result:', { adminCheck, adminError });
+        
+        if (!adminCheck) {
+          console.log('ServiceManagementPanel: No admin access, setting loading to false');
+          setError('Admin access required to manage services');
+          setLoading(false);
+          return;
+        }
+        
+        console.log('ServiceManagementPanel: Admin access confirmed, loading services');
+        await fetchServices();
+      } catch (error) {
+        console.error('ServiceManagementPanel: Error checking admin status:', error);
+        setError('Failed to verify admin access');
+        setLoading(false);
+      }
+    };
+
+    initializeServices();
   }, []);
 
 
@@ -417,6 +439,8 @@ export const ServiceManagementPanel = () => {
   const fetchServices = async () => {
     try {
       setError(null);
+      console.log('ServiceManagementPanel: Fetching services...');
+      
       const { data, error } = await supabase
         .from('services')
         .select(`
@@ -426,18 +450,24 @@ export const ServiceManagementPanel = () => {
         .order('sort_order', { ascending: true })
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('ServiceManagementPanel: Supabase error:', error);
+        throw error;
+      }
+      
+      console.log('ServiceManagementPanel: Successfully loaded', data?.length || 0, 'services');
       setServices((data as any) || []);
     } catch (error) {
-      console.error('Error fetching services:', error);
+      console.error('ServiceManagementPanel: Error fetching services:', error);
       const errorMessage = error instanceof Error ? error.message : 'Failed to fetch services';
       setError(errorMessage);
       toast({
-        title: 'Error',
+        title: 'Error Loading Services',
         description: errorMessage,
         variant: 'destructive',
       });
     } finally {
+      console.log('ServiceManagementPanel: Setting loading to false');
       setLoading(false);
     }
   };
