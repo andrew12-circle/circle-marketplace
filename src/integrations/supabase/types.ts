@@ -6763,7 +6763,6 @@ export type Database = {
           tags: string[] | null
           title: string
           updated_at: string | null
-          vendor_id: string | null
           website_url: string | null
         }
         Insert: {
@@ -6828,7 +6827,6 @@ export type Database = {
           tags?: string[] | null
           title: string
           updated_at?: string | null
-          vendor_id?: string | null
           website_url?: string | null
         }
         Update: {
@@ -6893,7 +6891,6 @@ export type Database = {
           tags?: string[] | null
           title?: string
           updated_at?: string | null
-          vendor_id?: string | null
           website_url?: string | null
         }
         Relationships: [
@@ -6909,27 +6906,6 @@ export type Database = {
             columns: ["service_provider_id"]
             isOneToOne: false
             referencedRelation: "service_providers"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "services_vendor_id_fkey"
-            columns: ["vendor_id"]
-            isOneToOne: false
-            referencedRelation: "vendor_directory"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "services_vendor_id_fkey"
-            columns: ["vendor_id"]
-            isOneToOne: false
-            referencedRelation: "vendor_directory_authenticated"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "services_vendor_id_fkey"
-            columns: ["vendor_id"]
-            isOneToOne: false
-            referencedRelation: "vendors"
             referencedColumns: ["id"]
           },
         ]

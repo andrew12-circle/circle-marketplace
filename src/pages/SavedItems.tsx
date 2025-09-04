@@ -72,14 +72,7 @@ export const SavedItems = () => {
             pro_price,
             co_pay_price,
             image_url,
-            tags,
-            vendor_id,
-            vendors (
-              name,
-              rating,
-              review_count,
-              is_verified
-            )
+            tags
           )
         `)
         .eq('user_id', profile.user_id)
@@ -87,16 +80,16 @@ export const SavedItems = () => {
 
       if (error) throw error;
 
-      // Transform the data to match our interface
+      // Transform the data to match our interface (no vendor data needed)
       const transformedData = data?.map(item => ({
         ...item,
         services: {
           ...item.services,
-          vendor: item.services?.vendors || {
-            name: 'Unknown Vendor',
-            rating: 0,
+          vendor: {
+            name: 'Circle Platform',
+            rating: 5,
             review_count: 0,
-            is_verified: false
+            is_verified: true
           }
         }
       })) || [];
