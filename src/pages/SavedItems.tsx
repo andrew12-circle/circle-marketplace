@@ -559,8 +559,8 @@ export const SavedItems = () => {
                       <CardTitle className="text-lg leading-tight">
                         {item.services.title}
                       </CardTitle>
-                      <p className="text-sm text-muted-foreground">
-                        {item.services.vendor.name}
+                      <p className="text-sm text-muted-foreground line-clamp-2">
+                        {item.services.description}
                       </p>
                     </div>
                   </div>
