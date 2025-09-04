@@ -1370,6 +1370,51 @@ export type Database = {
           },
         ]
       }
+      ai_batch_status: {
+        Row: {
+          batch_id: string
+          completed_at: string | null
+          completed_count: number
+          created_at: string
+          current_service: string | null
+          error_count: number
+          errors: Json | null
+          id: string
+          last_updated: string
+          started_at: string | null
+          status: string
+          total_count: number
+        }
+        Insert: {
+          batch_id: string
+          completed_at?: string | null
+          completed_count?: number
+          created_at?: string
+          current_service?: string | null
+          error_count?: number
+          errors?: Json | null
+          id?: string
+          last_updated?: string
+          started_at?: string | null
+          status?: string
+          total_count?: number
+        }
+        Update: {
+          batch_id?: string
+          completed_at?: string | null
+          completed_count?: number
+          created_at?: string
+          current_service?: string | null
+          error_count?: number
+          errors?: Json | null
+          id?: string
+          last_updated?: string
+          started_at?: string | null
+          status?: string
+          total_count?: number
+        }
+        Relationships: []
+      }
       ai_interaction_logs: {
         Row: {
           created_at: string | null

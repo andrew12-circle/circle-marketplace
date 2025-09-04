@@ -121,3 +121,9 @@ verify_jwt = true
 [functions.send-vendor-weekly-stats]
 verify_jwt = false
 schedule = "0 9 * * 1"
+
+[functions.bulk-ai-service-updater]
+verify_jwt = false
+
+[functions.get-batch-status]
+verify_jwt = false

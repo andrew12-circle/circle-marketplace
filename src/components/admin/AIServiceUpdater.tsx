@@ -1039,17 +1039,7 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
     await new Promise(resolve => setTimeout(resolve, 0));
     console.log('✅ Progress state synchronized');
 
-    if (runInBackground) {
-      console.log('⚡ Running in background mode');
-      toast({
-        title: "Running in background",
-        description: "AI updater is processing services in the background. You can navigate away and check back later.",
-        duration: 5000,
-      });
-    } else {
-      console.log('🎯 Running in foreground mode');
-    }
-
+    // Define processInBackground function first for foreground fallback
     const processInBackground = async () => {
       console.log('🔄 processInBackground started with', servicesToUpdate.length, 'services');
       console.log('📋 Services to process:', servicesToUpdate.map(s => `${s.title} (${s.id})`));
@@ -1126,16 +1116,111 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
       }
     };
 
-    console.log('🚀 About to start processing in', runInBackground ? 'background' : 'foreground', 'mode');
-    
     if (runInBackground) {
-      // Start processing without awaiting it
-      processInBackground().catch(error => {
+      console.log('⚡ Running in background mode - using bulk processor');
+      
+      const batchId = `bulk_ai_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+      
+      try {
+        // Call the bulk background processor
+        const { data, error } = await supabase.functions.invoke('bulk-ai-service-updater', {
+          body: {
+            services: servicesToUpdate,
+            customPrompts: customPrompts,
+            overwriteAIUpdated: overwriteAIUpdated,
+            batchId: batchId
+          }
+        });
+
+        if (error) {
+          throw error;
+        }
+
+        console.log(`✅ Background batch started: ${batchId}`);
+        
+        toast({
+          title: "Background processing started",
+          description: `Processing ${servicesToUpdate.length} services in background. Batch ID: ${batchId}. You can navigate away and check status later.`,
+          duration: 8000,
+        });
+
+        // Set up polling for batch status
+        const pollBatchStatus = async () => {
+          try {
+            const { data: statusData, error: statusError } = await supabase.functions.invoke('get-batch-status', {
+              body: { batchId }
+            });
+
+            if (!statusError && statusData?.batchStatus) {
+              const status = statusData.batchStatus;
+              
+              // Update progress display
+              setServiceProgress(prev => {
+                const updated = { ...prev };
+                servicesToUpdate.forEach(service => {
+                  updated[service.id] = {
+                    ...updated[service.id],
+                    serviceName: service.title,
+                    status: status.status === 'completed' || status.status === 'completed_with_errors' ? 'completed' : 'updating',
+                    sections: {
+                      details: 'completed',
+                      disclaimer: 'completed', 
+                      funnel: 'completed',
+                      research: 'completed',
+                      faqs: 'completed',
+                      verification: 'completed'
+                    }
+                  };
+                });
+                return updated;
+              });
+
+              if (status.status === 'completed') {
+                toast({
+                  title: "Background processing completed",
+                  description: `Successfully processed ${status.completed_count} out of ${status.total_count} services.`,
+                  duration: 5000,
+                });
+                setIsRunning(false);
+                return; // Stop polling
+              } else if (status.status === 'completed_with_errors') {
+                toast({
+                  title: "Background processing completed with errors",
+                  description: `Processed ${status.completed_count} out of ${status.total_count} services. ${status.error_count} errors occurred.`,
+                  variant: "destructive",
+                  duration: 8000,
+                });
+                setIsRunning(false);
+                return; // Stop polling
+              }
+              
+              // Continue polling if still processing
+              setTimeout(pollBatchStatus, 15000); // Check every 15 seconds
+            } else {
+              console.warn('Failed to get batch status:', statusError);
+              setTimeout(pollBatchStatus, 30000); // Retry in 30 seconds on error
+            }
+          } catch (pollError) {
+            console.error('Polling error:', pollError);
+            setTimeout(pollBatchStatus, 30000); // Retry in 30 seconds on error
+          }
+        };
+
+        // Start polling after a delay
+        setTimeout(pollBatchStatus, 10000); // Start checking after 10 seconds
+
+      } catch (error) {
         console.error('Background processing failed:', error);
+        toast({
+          title: "Background processing failed",
+          description: `Failed to start background processing: ${error.message}`,
+          variant: "destructive",
+          duration: 8000,
+        });
         setIsRunning(false);
-        setErrorCount(prev => prev + 1);
-      });
+      }
     } else {
+      console.log('🎯 Running in foreground mode');
       try {
         await processInBackground();
       } catch (error) {
