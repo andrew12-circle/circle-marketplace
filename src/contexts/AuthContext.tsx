@@ -162,17 +162,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       console.log('🔍 Starting profile fetch for userId:', userId);
       
-      // Longer timeout to prevent unnecessary timeout errors
+      // Create a timeout with proper cleanup
+      let timeoutId: NodeJS.Timeout;
       const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Profile fetch timeout')), 30000); // Increased to 30 seconds
+        timeoutId = setTimeout(() => reject(new Error('Profile fetch timeout')), 15000); // Reduced to 15 seconds
       });
 
-      // Simplified query without ordering for better performance
+      // Simplified query without ordering for better performance  
       const profilePromise = supabase
         .from('profiles')
         .select('*')
         .eq('user_id', userId)
-        .maybeSingle();
+        .maybeSingle()
+        .then(result => {
+          clearTimeout(timeoutId); // Clear timeout on success
+          return result;
+        });
 
       const { data: profileData, error: profileError } = await Promise.race([
         profilePromise,

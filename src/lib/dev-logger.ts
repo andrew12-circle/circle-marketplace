@@ -9,7 +9,12 @@ const NOISY_PATTERNS = [
   'Extension context invalidated',
   'moz-extension://',
   'safari-extension://',
-  'ms-browser-extension://'
+  'ms-browser-extension://',
+  'Cannot find menu item with id LastPass',
+  'Cannot find menu item with id Add Item',
+  'Unchecked runtime.lastError',
+  'stripe.com',
+  'm-outer-'
 ];
 
 export function devLog(...args: any[]) {
