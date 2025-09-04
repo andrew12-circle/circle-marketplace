@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { useState, useEffect, useRef } from "react";
-import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -548,7 +548,10 @@ export const ServiceFunnelModal = ({
   return <Dialog open={isOpen} onOpenChange={open => !open && onClose()} modal={true}>
       <DialogContent className="max-w-[90vw] lg:max-w-6xl max-h-[90vh] overflow-hidden p-0 animate-scale-in">
         <DialogHeader className="sr-only">
-          <span>Service Details</span>
+          <DialogTitle>{service.title} - Service Details</DialogTitle>
+          <DialogDescription>
+            View details, pricing, and features for {service.title}. Compare packages and make your selection.
+          </DialogDescription>
         </DialogHeader>
         
         {/* Action Buttons - Fixed Position */}
