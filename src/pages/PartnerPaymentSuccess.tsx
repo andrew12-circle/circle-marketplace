@@ -37,8 +37,7 @@ export const PartnerPaymentSuccess = () => {
             .from('copay_orders')
             .select(`
               *,
-              services(title),
-              vendors(name)
+              services(title)
             `)
             .eq('id', contribution.copay_order_id)
             .single();
@@ -57,7 +56,7 @@ export const PartnerPaymentSuccess = () => {
             setPaymentDetails({
               amount: contribution.contribution_amount,
               serviceName: (order.services as any)?.title || 'Unknown Service',
-              vendorName: (order.vendors as any)?.name || 'Unknown Vendor',
+              vendorName: 'Circle Platform',
               partnerType: contribution.partner_type
             });
           }

@@ -115,9 +115,7 @@ export const RESPAComplianceManager = () => {
           respa_risk_level,
           respa_compliance_notes,
           respa_split_limit,
-          compliance_checklist,
-          vendor_id,
-          vendor:vendors(id, name)
+          compliance_checklist
         `)
         .order('title');
 

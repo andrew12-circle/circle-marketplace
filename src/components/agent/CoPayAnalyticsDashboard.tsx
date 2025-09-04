@@ -61,7 +61,6 @@ export const CoPayAnalyticsDashboard = () => {
         .select(`
           *,
           services(title, category, retail_price),
-          vendors(name),
           agent_profile:profiles!co_pay_requests_agent_id_fkey(display_name)
         `)
         .eq('agent_id' as any, user.id as any)
@@ -122,7 +121,7 @@ export const CoPayAnalyticsDashboard = () => {
       id: r.id,
       type: r.status,
       serviceName: r.services?.title || 'Unknown Service',
-      vendorName: r.vendors?.name || 'Unknown Vendor',
+      vendorName: 'Circle Platform',
       amount: parseFloat(r.services?.retail_price?.replace(/[^0-9.]/g, '') || '0') * r.requested_split_percentage / 100,
       date: r.updated_at,
       status: r.status
@@ -187,7 +186,7 @@ export const CoPayAnalyticsDashboard = () => {
     const vendorMap = new Map();
     
     requests.filter(r => r.status === 'approved').forEach(request => {
-      const vendorName = request.vendors?.name || 'Unknown Vendor';
+      const vendorName = 'Circle Platform';
       if (!vendorMap.has(vendorName)) {
         vendorMap.set(vendorName, { name: vendorName, savings: 0, requests: 0 });
       }
