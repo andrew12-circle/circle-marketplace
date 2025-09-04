@@ -13,7 +13,7 @@ if (typeof window !== 'undefined') {
   console.error = (...args: any[]) => {
     const message = String(args[0] ?? '');
     
-    // Filter out extension noise
+    // Filter out extension noise AND Firebase errors from extensions
     const isExtensionError = [
       'chrome-extension://',
       'moz-extension://', 
@@ -29,7 +29,22 @@ if (typeof window !== 'undefined') {
       'Failed to execute \'observe\' on \'MutationObserver\'',
       'parameter 1 is not of type \'Node\'',
       'content-script',
-      'HTMLIFrameElement.<anonymous>'
+      'HTMLIFrameElement.<anonymous>',
+      // Firebase/Firestore errors from browser extensions
+      'firestore.googleapis.com',
+      'firebase',
+      'firestore',
+      'gpt-engineer',
+      'projects%2Fgpt-engineer',
+      '@firebase/firestore',
+      'WebChannelConnection RPC',
+      // Analytics/tracking errors
+      'lovable.dev/ingest',
+      'ERR_NAME_NOT_RESOLVED',
+      'ERR_ABORTED',
+      // Sentry errors
+      'sentry.io',
+      'ingest.sentry.io'
     ].some(pattern => message.includes(pattern));
 
     if (!isExtensionError) {
@@ -40,7 +55,7 @@ if (typeof window !== 'undefined') {
   console.warn = (...args: any[]) => {
     const message = String(args[0] ?? '');
     
-    // Filter out extension noise
+    // Filter out extension noise AND Firebase errors from extensions
     const isExtensionError = [
       'chrome-extension://',
       'moz-extension://',
@@ -56,7 +71,22 @@ if (typeof window !== 'undefined') {
       'Failed to execute \'observe\' on \'MutationObserver\'',
       'parameter 1 is not of type \'Node\'',
       'content-script',
-      'HTMLIFrameElement.<anonymous>'
+      'HTMLIFrameElement.<anonymous>',
+      // Firebase/Firestore errors from browser extensions
+      'firestore.googleapis.com',
+      'firebase',
+      'firestore',
+      'gpt-engineer',
+      'projects%2Fgpt-engineer',
+      '@firebase/firestore',
+      'WebChannelConnection RPC',
+      // Analytics/tracking errors
+      'lovable.dev/ingest',
+      'ERR_NAME_NOT_RESOLVED',
+      'ERR_ABORTED',
+      // Sentry errors
+      'sentry.io',
+      'ingest.sentry.io'
     ].some(pattern => message.includes(pattern));
 
     if (!isExtensionError) {
@@ -74,7 +104,7 @@ if (typeof window !== 'undefined') {
     const reason = event.reason;
     const message = reason?.message || String(reason);
     
-    // Filter extension-related promise rejections
+    // Filter extension-related promise rejections AND Firebase errors
     const isExtensionError = [
       'chrome-extension://',
       'moz-extension://', 
@@ -90,7 +120,22 @@ if (typeof window !== 'undefined') {
       'Failed to execute \'observe\' on \'MutationObserver\'',
       'parameter 1 is not of type \'Node\'',
       'content-script',
-      'HTMLIFrameElement.<anonymous>'
+      'HTMLIFrameElement.<anonymous>',
+      // Firebase/Firestore errors from browser extensions
+      'firestore.googleapis.com',
+      'firebase',
+      'firestore',
+      'gpt-engineer',
+      'projects%2Fgpt-engineer',
+      '@firebase/firestore',
+      'WebChannelConnection RPC',
+      // Analytics/tracking errors
+      'lovable.dev/ingest',
+      'ERR_NAME_NOT_RESOLVED',
+      'ERR_ABORTED',
+      // Sentry errors
+      'sentry.io',
+      'ingest.sentry.io'
     ].some(pattern => message.includes(pattern));
 
     if (!isExtensionError) {
@@ -108,7 +153,7 @@ if (typeof window !== 'undefined') {
     const message = event.message || '';
     const filename = event.filename || '';
     
-    // Filter extension-related errors
+    // Filter extension-related errors AND Firebase errors
     const isExtensionError = [
       'chrome-extension://',
       'moz-extension://',
@@ -124,7 +169,22 @@ if (typeof window !== 'undefined') {
       'Failed to execute \'observe\' on \'MutationObserver\'',
       'parameter 1 is not of type \'Node\'',
       'content-script',
-      'HTMLIFrameElement.<anonymous>'
+      'HTMLIFrameElement.<anonymous>',
+      // Firebase/Firestore errors from browser extensions
+      'firestore.googleapis.com',
+      'firebase',
+      'firestore',
+      'gpt-engineer',
+      'projects%2Fgpt-engineer',
+      '@firebase/firestore',
+      'WebChannelConnection RPC',
+      // Analytics/tracking errors
+      'lovable.dev/ingest',
+      'ERR_NAME_NOT_RESOLVED',
+      'ERR_ABORTED',
+      // Sentry errors
+      'sentry.io',
+      'ingest.sentry.io'
     ].some(pattern => 
       message.includes(pattern) || filename.includes(pattern)
     );
