@@ -132,27 +132,29 @@ const RESPAServiceManager = () => {
   const updateService = async (serviceId: string, updates: Partial<Service>) => {
     setSaving(true);
     try {
+      const { updateService: secureUpdate } = await import('@/lib/secure-service-updates');
+      
       // Convert updates to match database schema
       const dbUpdates: any = { ...updates };
       if (updates.supporting_documents) {
         dbUpdates.supporting_documents = updates.supporting_documents;
       }
       
-      const { error } = await supabase
-        .from('services')
-        .update(dbUpdates)
-        .eq('id', serviceId);
-
-      if (error) throw error;
-
-      setServices(prev => prev.map(service =>
-        service.id === serviceId ? { ...service, ...updates } : service
-      ));
-
-      toast({
-        title: "Success",
-        description: "Service updated successfully",
+      const success = await secureUpdate(serviceId, dbUpdates, {
+        validateAdmin: true,
+        showProgress: false
       });
+
+      if (success) {
+        setServices(prev => prev.map(service =>
+          service.id === serviceId ? { ...service, ...updates } : service
+        ));
+
+        toast({
+          title: "Success",
+          description: "Service updated successfully",
+        });
+      }
     } catch (error) {
       console.error('Error updating service:', error);
       toast({
@@ -177,28 +179,33 @@ const RESPAServiceManager = () => {
 
     setSaving(true);
     try {
+      const { bulkUpdateServices } = await import('@/lib/secure-service-updates');
+      
       // Convert updates to match database schema
       const dbUpdates: any = { ...updates };
       if (updates.supporting_documents) {
         dbUpdates.supporting_documents = updates.supporting_documents;
       }
       
-      const { error } = await supabase
-        .from('services')
-        .update(dbUpdates)
-        .in('id', selectedServices);
-
-      if (error) throw error;
-
-      setServices(prev => prev.map(service =>
-        selectedServices.includes(service.id) ? { ...service, ...updates } : service
-      ));
-
-      setSelectedServices([]);
-      toast({
-        title: "Bulk Update Complete",
-        description: `Updated ${selectedServices.length} services`,
+      const result = await bulkUpdateServices(selectedServices, dbUpdates, {
+        batchSize: 8, // Smaller batches for RESPA updates
+        showProgress: true,
+        validateAdmin: true
       });
+
+      if (result.success || result.totalUpdated > 0) {
+        setServices(prev => prev.map(service =>
+          selectedServices.includes(service.id) && !result.errors.some(e => e.id === service.id)
+            ? { ...service, ...updates } 
+            : service
+        ));
+
+        setSelectedServices([]);
+      }
+
+      if (result.errors.length > 0) {
+        console.error('Some services failed to update:', result.errors);
+      }
     } catch (error) {
       console.error('Error in bulk update:', error);
       toast({

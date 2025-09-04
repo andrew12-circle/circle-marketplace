@@ -78,28 +78,29 @@ export const ServiceVisibilityManager = () => {
     setUpdating(prev => new Set(prev).add(serviceId));
 
     try {
-      const { error } = await (supabase
-        .from('services')
-        .update as any)({ is_active: !currentState })
-        .eq('id' as any, serviceId);
-
-      if (error) throw error;
-
-      // Update local state
-      setServices(prev => 
-        prev.map(service => 
-          service.id === serviceId 
-            ? { ...service, is_active: !currentState }
-            : service
-        )
-      );
-
-      toast({
-        title: 'Success',
-        description: `Service ${!currentState ? 'activated' : 'deactivated'} successfully`,
+      const { toggleServiceVisibility } = await import('@/lib/secure-service-updates');
+      const success = await toggleServiceVisibility(serviceId, currentState, {
+        showProgress: false,
+        validateAdmin: true
       });
+
+      if (success) {
+        // Update local state
+        setServices(prev => 
+          prev.map(service => 
+            service.id === serviceId 
+              ? { ...service, is_active: !currentState }
+              : service
+          )
+        );
+
+        toast({
+          title: 'Success',
+          description: `Service ${!currentState ? 'activated' : 'deactivated'} successfully`,
+        });
+      }
     } catch (error) {
-      console.error('Error updating service:', error);
+      console.error('Error updating service visibility:', error);
       toast({
         title: 'Error',
         description: 'Failed to update service visibility',
@@ -132,28 +133,33 @@ export const ServiceVisibilityManager = () => {
     if (!confirmed) return;
 
     try {
+      const { bulkUpdateServices } = await import('@/lib/secure-service-updates');
       const serviceIds = servicesToUpdate.map(s => s.id);
       
-      const { error } = await (supabase
-        .from('services')
-        .update as any)({ is_active: activate })
-        .in('id' as any, serviceIds as any);
-
-      if (error) throw error;
-
-      // Update local state
-      setServices(prev => 
-        prev.map(service => 
-          serviceIds.includes(service.id)
-            ? { ...service, is_active: activate }
-            : service
-        )
+      const result = await bulkUpdateServices(
+        serviceIds,
+        { is_active: activate },
+        {
+          batchSize: 10, // Process 10 services at a time for safety
+          showProgress: true,
+          validateAdmin: true
+        }
       );
 
-      toast({
-        title: 'Success',
-        description: `${servicesToUpdate.length} services ${activate ? 'activated' : 'deactivated'} successfully`,
-      });
+      if (result.success || result.totalUpdated > 0) {
+        // Update local state for successful updates
+        setServices(prev => 
+          prev.map(service => 
+            serviceIds.includes(service.id) && !result.errors.some(e => e.id === service.id)
+              ? { ...service, is_active: activate }
+              : service
+          )
+        );
+      }
+
+      if (result.errors.length > 0) {
+        console.error('Some services failed to update:', result.errors);
+      }
     } catch (error) {
       console.error('Error in bulk update:', error);
       toast({

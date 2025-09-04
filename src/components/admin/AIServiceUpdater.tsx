@@ -763,6 +763,8 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
     console.log(`Updating database for ${service.title}...`);
     
     try {
+      const { updateService: secureUpdate } = await import('@/lib/secure-service-updates');
+      
       const updateData: any = {};
       
       if (detailsData) {
@@ -786,7 +788,7 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
         updateData.disclaimer_content = disclaimerData.disclaimer_content;
       }
       
-        // Handle funnel content and pricing tiers with validation
+      // Handle funnel content and pricing tiers with validation
       if (funnelData?.funnel_content) {
         let funnelContent = { ...funnelData.funnel_content };
         
@@ -841,51 +843,53 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
         }
       }
 
-      // Store FAQs in service_faqs table
+      // Use secure updater for main service data
+      const success = await secureUpdate(service.id, updateData, {
+        validateAdmin: false, // Already validated in the main process
+        showProgress: false,
+        retryAttempts: 2 // Reduce retries for AI operations to avoid long delays
+      });
+
+      if (!success) {
+        throw new Error('Failed to update service in database');
+      }
+
+      // Store FAQs in service_faqs table (separate operation)
       if (faqsData?.faqs) {
-        // First, delete existing FAQs for this service
-        await supabase
-          .from('service_faqs')
-          .delete()
-          .eq('service_id', service.id);
+        try {
+          // First, delete existing FAQs for this service
+          await supabase
+            .from('service_faqs')
+            .delete()
+            .eq('service_id', service.id);
 
-        // Insert new FAQs
-        const faqInserts = faqsData.faqs.map((faq: any, index: number) => ({
-          service_id: service.id,
-          question: faq.question,
-          answer: faq.answer,
-          category: faq.category || 'general',
-          display_order: faq.order || (index + 1)
-        }));
+          // Insert new FAQs
+          const faqInserts = faqsData.faqs.slice(0, 10).map((faq: any, index: number) => ({
+            service_id: service.id,
+            question: faq.question,
+            answer: faq.answer,
+            sort_order: index
+          }));
 
-      // Update the FAQs completion tracking
-      const { error: faqError } = await supabase
-        .from('service_faqs')
-        .insert(faqInserts);
+          const { error: faqError } = await supabase
+            .from('service_faqs')
+            .insert(faqInserts);
 
-      if (faqError) {
-        console.error('Error inserting FAQs:', faqError);
-      } else {
-        console.log(`✅ Inserted ${faqInserts.length} FAQs for ${service.title}`);
+          if (faqError) {
+            console.error('⚠️ FAQ insert error (non-critical):', faqError);
+            // Don't throw - FAQs are supplementary
+          } else {
+            console.log(`✅ Inserted ${faqInserts.length} FAQs for ${service.title}`);
+          }
+        } catch (faqError) {
+          console.error('⚠️ FAQ processing error (non-critical):', faqError);
+          // Don't throw - FAQs are supplementary
+        }
       }
-    }
 
-    if (Object.keys(updateData).length > 0) {
-      const { error } = await supabase
-        .from('services')
-        .update(updateData)
-        .eq('id', service.id);
-
-      if (error) throw error;
-      console.log(`✅ Updated database for ${service.title}`);
-      
-      // Post-update validation for completeness warnings
-      if (updateData.pricing_tiers && updateData.pricing_tiers.length < 2) {
-        console.warn(`⚠️ Service ${service.title} only has ${updateData.pricing_tiers.length} pricing tier(s). Consider adding more tiers for better conversion.`);
-      }
-    }
+      console.log(`✅ Successfully updated database for ${service.title}`);
     } catch (error) {
-      console.error('Error updating service in database:', error);
+      console.error(`❌ Database update failed for ${service.title}:`, error);
       throw error;
     }
   };

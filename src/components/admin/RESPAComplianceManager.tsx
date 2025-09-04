@@ -263,32 +263,20 @@ export const RESPAComplianceManager = () => {
   const updateServiceCompliance = async (serviceId: string, updates: any) => {
     setSaving(true);
     try {
-      // Ensure we're sending all the fields that need to be updated
-      const updateData = {
-        is_respa_regulated: updates.is_respa_regulated,
-        respa_risk_level: updates.respa_risk_level,
-        respa_split_limit: updates.respa_split_limit,
-        respa_compliance_notes: updates.respa_compliance_notes
-      };
-
-      console.log('Updating service with data:', updateData);
-
-      // Use simplified approach to avoid TypeScript complexity
-      const { error } = await (supabase as any)
-        .from('services')
-        .update(updateData)
-        .eq('id', serviceId);
-
-      if (error) {
-        console.error('Update error:', error);
-        throw error;
-      }
-
-      await loadServices();
-      toast({
-        title: "Updated",
-        description: "Service compliance information updated successfully",
+      const { updateServiceCompliance: secureUpdate } = await import('@/lib/secure-service-updates');
+      
+      const success = await secureUpdate(serviceId, updates, {
+        validateAdmin: true,
+        showProgress: false
       });
+
+      if (success) {
+        await loadServices();
+        toast({
+          title: "Updated",
+          description: "Service compliance information updated successfully",
+        });
+      }
     } catch (error) {
       console.error('Failed to update service:', error);
       toast({
