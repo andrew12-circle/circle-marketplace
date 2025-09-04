@@ -5752,6 +5752,42 @@ export type Database = {
           },
         ]
       }
+      qbo_connections: {
+        Row: {
+          access_token: string
+          created_at: string | null
+          expires_at: string
+          id: string
+          org_id: string
+          realm_id: string
+          refresh_token: string
+          scope: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          access_token: string
+          created_at?: string | null
+          expires_at: string
+          id?: string
+          org_id: string
+          realm_id: string
+          refresh_token: string
+          scope?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          access_token?: string
+          created_at?: string | null
+          expires_at?: string
+          id?: string
+          org_id?: string
+          realm_id?: string
+          refresh_token?: string
+          scope?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       rate_limit_tracking: {
         Row: {
           endpoint: string
@@ -10384,6 +10420,16 @@ export type Database = {
       }
       update_playbook_creator_analytics: {
         Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      update_qbo_tokens: {
+        Args: {
+          p_access_token: string
+          p_expires_at: string
+          p_org_id: string
+          p_realm_id: string
+          p_refresh_token: string
+        }
         Returns: undefined
       }
       user_has_specialty: {
