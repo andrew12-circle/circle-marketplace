@@ -1665,8 +1665,8 @@ export const ServiceManagementPanel = () => {
       <AIServiceUpdater 
         services={services}
         onServiceUpdate={(serviceId) => {
-          // Refresh the specific service or refetch all services
-          fetchServices();
+          // Invalidate queries to trigger refresh without full refetch
+          queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SERVICES] });
           toast({
             title: 'Service Updated',
             description: 'Service has been updated by AI. Please review and verify the changes.',

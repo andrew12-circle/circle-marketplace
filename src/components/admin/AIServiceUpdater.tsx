@@ -316,7 +316,7 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
         clearInterval(interval);
       }
     };
-  }, [isRunning, serviceProgress]);
+  }, [isRunning]); // Removed serviceProgress dependency to prevent infinite loops
 
   const initializeProgress = (serviceIds: string[]): Record<string, UpdateProgress> => {
     const progressMap: Record<string, UpdateProgress> = {};
