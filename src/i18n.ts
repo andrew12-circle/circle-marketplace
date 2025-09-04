@@ -10,6 +10,17 @@ const resources = {
       pricing: "Pricing",
       agentWallet: "Agent Wallet",
       
+      // Hero Section
+      heroTitle: "The Marketplace",
+      heroSubtitle: "Agents Actually Asked For",
+      heroDescription: "Finally, a vetted, agent-approved marketplace with negotiated pricing and proven vendors. Every tool you need—faster, cheaper, without the awkward sales calls.",
+      saveUpTo: "Save up to 80% on top tools",
+      preVettedVendors: "Pre-vetted vendors",
+      vendorsCoPayUpTo: "Vendors co-pay up to 50%",
+      exploreMarketplace: "Explore Marketplace →",
+      seeVendorCoPay: "See Vendor Co-Pay →",
+      trustedByAgents: "Trusted by 500+ agents and counting",
+      
       // Marketplace
       marketplaceTitle: "Marketplace.",
       marketplaceDescription: "Finally, we silenced the noise. Welcome to the Marketplace. Explore premium services you already use — now at a fraction of the cost. Everything is curated, easy to compare, and backed by verified agents like you. Stop guessing. Start growing. Buy outcomes, not tools.",
@@ -76,6 +87,17 @@ const resources = {
       pricing: "Precios", 
       agentWallet: "Cartera del Agente",
       
+      // Hero Section
+      heroTitle: "El Mercado",
+      heroSubtitle: "Que los Agentes Realmente Pidieron",
+      heroDescription: "Finalmente, un mercado verificado y aprobado por agentes con precios negociados y vendedores probados. Todas las herramientas que necesitas—más rápido, más barato, sin llamadas de ventas incómodas.",
+      saveUpTo: "Ahorra hasta 80% en herramientas principales",
+      preVettedVendors: "Vendedores pre-verificados",
+      vendorsCoPayUpTo: "Vendedores co-pagan hasta 50%",
+      exploreMarketplace: "Explorar Mercado →",
+      seeVendorCoPay: "Ver Co-Pago de Vendedor →",
+      trustedByAgents: "Confiado por 500+ agentes y contando",
+      
       // Marketplace
       marketplaceTitle: "Mercado.",
       marketplaceDescription: "Finalmente, silenciamos el ruido. Bienvenido al Mercado. Descubre servicios de marketing premium y conecta con vendedores de alto rendimiento que realmente harán avanzar tu negocio.",
@@ -141,6 +163,17 @@ const resources = {
       academy: "Académie",
       pricing: "Tarification",
       agentWallet: "Portefeuille Agent",
+      
+      // Hero Section
+      heroTitle: "Le Marché",
+      heroSubtitle: "Que les Agents Ont Vraiment Demandé",
+      heroDescription: "Enfin, un marché vérifié et approuvé par les agents avec des prix négociés et des fournisseurs éprouvés. Tous les outils dont vous avez besoin—plus rapide, moins cher, sans appels de vente gênants.",
+      saveUpTo: "Économisez jusqu'à 80% sur les meilleurs outils",
+      preVettedVendors: "Fournisseurs pré-vérifiés",
+      vendorsCoPayUpTo: "Les fournisseurs co-paient jusqu'à 50%",
+      exploreMarketplace: "Explorer le Marché →",
+      seeVendorCoPay: "Voir Co-Paiement Fournisseur →",
+      trustedByAgents: "Approuvé par 500+ agents et plus",
       
       // Marketplace
       marketplaceTitle: "Marché.",
