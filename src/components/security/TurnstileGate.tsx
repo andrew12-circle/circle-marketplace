@@ -27,7 +27,7 @@ declare global {
 }
 
 export function TurnstileGate({
-  siteKey = '1x00000000000000000000AA', // Default test key
+  siteKey = '0x4AAAAAAAkqiE0MhYzCsJLs', // Real Turnstile site key - replace with your actual site key
   onSuccess,
   onError,
   theme = 'auto',

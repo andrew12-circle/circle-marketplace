@@ -127,3 +127,6 @@ verify_jwt = false
 
 [functions.get-batch-status]
 verify_jwt = false
+
+[functions.auth-signup]
+verify_jwt = false
