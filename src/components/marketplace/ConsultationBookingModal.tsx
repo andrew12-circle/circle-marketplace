@@ -322,6 +322,7 @@ export const ConsultationBookingModal = ({
           validationRules={validationRules}
           onSubmit={handleSecureSubmit}
           className="space-y-6"
+          requireCSRF={false}
         >
           {/* Service Info */}
           <div className="bg-muted/50 p-4 rounded-lg">
