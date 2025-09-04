@@ -110,8 +110,8 @@ export const VendorSelectionModal = ({
 
   // Memoized filtered vendors to avoid re-computation
   const filteredVendors = useMemo(() => {
-    // Don't filter until data is ready
-    if (!vendorsLoaded || vendors.length === 0) {
+    // Don't filter until data is ready - use internal loading state instead of external prop
+    if (isLoading || vendors.length === 0) {
       return [];
     }
 
@@ -179,7 +179,7 @@ export const VendorSelectionModal = ({
     }
 
     return filtered;
-  }, [vendorsLoaded, vendors, debouncedSearchQuery, location?.state, getStateAbbreviation, service.id, showAllVendors]);
+  }, [isLoading, vendors, debouncedSearchQuery, location?.state, getStateAbbreviation, service.id, showAllVendors]);
 
   useEffect(() => {
     if (isOpen) {
