@@ -1341,16 +1341,16 @@ export const ServiceManagementPanel = () => {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="space-y-2">
                         <label className="text-sm font-medium">List Price</label>
-                        <Input
-                          value={editForm.retail_price ?? ''}
-                          onChange={(e) => setEditForm({ ...editForm, retail_price: e.target.value })}
-                          placeholder="e.g., $0.00"
-                        />
+                          <Input
+                            value={editForm.retail_price || ''}
+                            onChange={(e) => setEditForm({ ...editForm, retail_price: e.target.value })}
+                            placeholder="e.g., $0.00"
+                          />
                       </div>
                       <div className="space-y-2">
                         <label className="text-sm font-medium">Pro Price</label>
                         <Input
-                          value={editForm.pro_price ?? ''}
+                          value={editForm.pro_price || ''}
                           onChange={(e) => setEditForm({ ...editForm, pro_price: e.target.value })}
                           placeholder="e.g., $0.00"
                         />
@@ -1358,7 +1358,7 @@ export const ServiceManagementPanel = () => {
                       <div className="space-y-2">
                         <label className="text-sm font-medium">Price Duration</label>
                         <Input
-                          value={editForm.price_duration ?? ''}
+                          value={editForm.price_duration || ''}
                           onChange={(e) => setEditForm({ ...editForm, price_duration: e.target.value })}
                           placeholder="e.g., mo"
                         />
@@ -1486,9 +1486,9 @@ export const ServiceManagementPanel = () => {
                              max="1000"
                              step="1"
                              className="pr-10"
-                             value={editForm.respa_split_limit ?? ''}
-                             onChange={(e) => setEditForm({ ...editForm, respa_split_limit: Number(e.target.value) })}
-                             placeholder="Enter percentage"
+                            value={editForm.respa_split_limit || ''}
+                            onChange={(e) => setEditForm({ ...editForm, respa_split_limit: Number(e.target.value) })}
+                            placeholder="Enter percentage"
                            />
                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">%</span>
                          </div>
@@ -1502,7 +1502,7 @@ export const ServiceManagementPanel = () => {
                             max="1000"
                             step="1"
                             className="pr-10"
-                            value={editForm.max_split_percentage_non_ssp ?? ''}
+                            value={editForm.max_split_percentage_non_ssp || ''}
                             onChange={(e) => setEditForm({ ...editForm, max_split_percentage_non_ssp: Number(e.target.value) })}
                             placeholder="Enter percentage"
                           />

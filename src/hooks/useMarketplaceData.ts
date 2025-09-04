@@ -98,6 +98,7 @@ export const QUERY_KEYS = {
   services: ['marketplace', 'services'],
   vendors: ['marketplace', 'vendors'],
   savedServices: (userId: string) => ['marketplace', 'savedServices', userId],
+  serviceById: (serviceId: string) => ['marketplace', 'service', serviceId],
 } as const;
 
 // Helper: timeout wrapper with retry for auth issues

@@ -11,9 +11,12 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { useInvalidateMarketplace } from "@/hooks/useMarketplaceData";
+import { useInvalidateMarketplace, QUERY_KEYS } from "@/hooks/useMarketplaceData";
+import { useQueryClient } from "@tanstack/react-query";
 import { useResilientSave } from "@/hooks/useResilientSave";
 import { useAutosave } from "@/hooks/useAutosave";
+import { useDraft } from "@/hooks/useDraft";
+import { useNavigationGuard } from "@/hooks/useNavigationGuard";
 import { FunnelSectionEditor } from "./FunnelSectionEditor";
 import { FunnelMediaEditor } from "./FunnelMediaEditor";
 import { FunnelPricingEditor } from "./FunnelPricingEditor";
@@ -67,13 +70,42 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
   const [funnelData, setFunnelData] = useState(service.funnel_content || {});
   const [pricingTiers, setPricingTiers] = useState(service.pricing_tiers || []);
   const [hasChanges, setHasChanges] = useState(false);
+  const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const { toast } = useToast();
   const { invalidateServices } = useInvalidateMarketplace();
+  const queryClient = useQueryClient();
+  
   const { save: resilientSave, isSaving } = useResilientSave({
     maxRetries: 3,
     retryDelay: 1500,
     timeout: 25000
+  });
+
+  // Draft management
+  const { saveDraft, clearDraft, hasDraft } = useDraft({
+    key: `service-funnel-${service.id}`,
+    initialData: { funnelData, pricingTiers },
+    enabled: true
+  });
+  
+  // Navigation guard
+  useNavigationGuard({
+    hasUnsavedChanges: hasChanges || isSaving
+  });
+  
+  // Autosave integration with "Saved" feedback
+  const { triggerAutosave } = useAutosave({
+    onSave: async (data) => {
+      await resilientSave(data, performSave);
+      saveDraft(data);
+    },
+    onSaved: () => {
+      setLastSavedAt(new Date().toISOString());
+      setHasChanges(false);
+    },
+    delay: 6000,
+    enabled: hasChanges
   });
 
   // Initialize default funnel content if none exists
@@ -252,17 +284,8 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
 
     onUpdate(updatedService);
     
-      // Background cache operations (non-blocking) - narrow invalidation only
-      setTimeout(async () => {
-        try {
-          await supabase.functions.invoke('warm-marketplace-cache');
-          console.log("[Admin ServiceFunnelEditor] Cache warmed successfully");
-        } catch (e) {
-          console.warn('[Admin ServiceFunnelEditor] Cache warm failed', e);
-        }
-        // Only invalidate services, not everything
-        invalidateServices();
-      }, 100);
+    // Only do scoped invalidation during autosave - no heavy operations
+    queryClient.invalidateQueries({ queryKey: QUERY_KEYS.serviceById(service.id) });
     
     return response;
   }, [service, onUpdate, invalidateServices]);
@@ -271,6 +294,19 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
     try {
       await resilientSave({ funnelData, pricingTiers }, performSave);
       setHasChanges(false);
+      clearDraft(); // Clear localStorage draft on successful explicit save
+      
+      // Only run heavy operations on explicit save
+      setTimeout(async () => {
+        try {
+          await supabase.functions.invoke('warm-marketplace-cache');
+          console.log("[Admin ServiceFunnelEditor] Cache warmed after explicit save");
+        } catch (e) {
+          console.warn('[Admin ServiceFunnelEditor] Cache warm failed', e);
+        }
+        // Full invalidation after explicit save
+        invalidateServices();
+      }, 100);
     } catch (error: any) {
       // Error handling is managed by useResilientSave
       console.error('[Admin ServiceFunnelEditor] Save operation failed:', error);
@@ -294,6 +330,8 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
     setFunnelData(service.funnel_content || {});
     setPricingTiers(service.pricing_tiers || []);
     setHasChanges(false);
+    clearDraft();
+    setLastSavedAt(null);
   };
 
   // Create preview service object with required fields

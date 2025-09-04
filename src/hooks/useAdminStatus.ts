@@ -12,6 +12,12 @@ export const useAdminStatus = () => {
     queryFn: async () => {
       if (!user) return false;
       
+      // Client-side admin allowlist for known admins
+      if (user.email === 'andrew@circlenetwork.io') {
+        logger.log('Admin status: Allowed via client allowlist', { email: user.email });
+        return true;
+      }
+      
       // Prioritize profile data - if we have it and it's true, use it immediately
       if (profile?.is_admin === true) {
         logger.log('Admin status: Confirmed via profile', { userId: user.id, isAdmin: true });

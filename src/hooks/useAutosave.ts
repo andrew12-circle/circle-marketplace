@@ -4,11 +4,12 @@ import { logger } from '@/utils/logger';
 
 interface AutosaveOptions {
   onSave: (data: any) => Promise<void>;
+  onSaved?: (data: any) => void; // Callback when save completes successfully
   delay?: number;
   enabled?: boolean;
 }
 
-export const useAutosave = ({ onSave, delay = 3000, enabled = true }: AutosaveOptions) => {
+export const useAutosave = ({ onSave, onSaved, delay = 6000, enabled = true }: AutosaveOptions) => {
   const { toast } = useToast();
   const timeoutRef = useRef<NodeJS.Timeout>();
   const lastDataRef = useRef<string>('');
@@ -34,11 +35,8 @@ export const useAutosave = ({ onSave, delay = 3000, enabled = true }: AutosaveOp
         await onSave(data);
         lastDataRef.current = dataString;
         
-        toast({
-          title: "Changes Saved",
-          description: "Your work has been automatically saved.",
-          duration: 2000,
-        });
+        // Trigger onSaved callback instead of showing toast
+        onSaved?.(data);
       } catch (error) {
         logger.error('❌ Autosave failed:', error);
         toast({
@@ -50,8 +48,8 @@ export const useAutosave = ({ onSave, delay = 3000, enabled = true }: AutosaveOp
       } finally {
         savingRef.current = false;
       }
-    }, delay);
-  }, [onSave, delay, enabled, toast]);
+  }, delay);
+}, [onSave, onSaved, delay, enabled, toast]);
 
   // Cleanup on unmount
   useEffect(() => {

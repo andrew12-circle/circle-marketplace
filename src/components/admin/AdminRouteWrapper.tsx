@@ -9,19 +9,43 @@ interface AdminRouteWrapperProps {
   children: ReactNode;
 }
 
+// Check if user has unsaved changes in any editor
+const hasUnsavedChanges = (): boolean => {
+  try {
+    const hasChangesElements = document.querySelectorAll('[data-has-changes="true"]');
+    const isSavingElements = document.querySelectorAll('[data-is-saving="true"]');
+    return hasChangesElements.length > 0 || isSavingElements.length > 0;
+  } catch {
+    return false;
+  }
+};
+
 export const AdminRouteWrapper = ({ children }: AdminRouteWrapperProps) => {
   const { user } = useAuth();
   const { data: isAdmin, isLoading: adminLoading } = useAdminStatus();
 
-  // Light session monitoring for admin routes - no aggressive polling
+  // Stable session monitoring - auth state changes only, no polling
   useEffect(() => {
     if (!user || !isAdmin || adminLoading) return;
     
-    logger.log('🔒 Admin route session monitoring activated (light mode)');
+    logger.log('🔒 Admin route session monitoring activated (stable mode)');
     
-    // Listen to auth state changes instead of polling
+    // Listen to auth state changes only
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_OUT') {
+        // Never auto-redirect if user has unsaved work
+        if (hasUnsavedChanges()) {
+          logger.warn('⚠️ Admin session expired but has unsaved changes - not redirecting');
+          toast.error('Session expired. Please save your work and sign in again.', {
+            duration: 10000,
+            action: {
+              label: 'Sign In',
+              onClick: () => window.open('/auth', '_blank')
+            }
+          });
+          return;
+        }
+        
         logger.warn('⚠️ Admin user signed out, redirecting to auth');
         toast.error('Session expired. Please sign in again.', {
           duration: 5000,
@@ -41,11 +65,10 @@ export const AdminRouteWrapper = ({ children }: AdminRouteWrapperProps) => {
     };
   }, [user, isAdmin, adminLoading]);
 
-  // Light visibility check - no aggressive session verification
+  // Light visibility check - just logging
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible' && user && isAdmin) {
-        // Light check only - just log that admin returned to tab
         logger.log('🔍 Admin returned to tab');
       }
     };
