@@ -57,6 +57,10 @@ export const AdminNotes = ({ serviceId, serviceName }: AdminNotesProps) => {
     try {
       console.log('AdminNotes: Starting to load notes for service:', serviceId);
       
+      // Debug: Check admin status first
+      const { data: adminCheck, error: adminError } = await supabase.rpc('get_user_admin_status');
+      console.log('AdminNotes: Admin status check result:', { adminCheck, adminError });
+      
       const { data, error } = await supabase
         .from('admin_notes')
         .select('*')
