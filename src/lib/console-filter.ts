@@ -44,7 +44,14 @@ if (typeof window !== 'undefined') {
       'ERR_ABORTED',
       // Sentry errors
       'sentry.io',
-      'ingest.sentry.io'
+      'ingest.sentry.io',
+      // Cross-origin and permissions policy warnings
+      'Potential permissions policy violation',
+      'cross-origin-isolated is not allowed',
+      // Cloudflare Turnstile preload warnings
+      'challenges.cloudflare.com',
+      'was preloaded using link preload but not used',
+      'challenge-platform'
     ].some(pattern => message.includes(pattern));
 
     if (!isExtensionError) {
@@ -86,7 +93,14 @@ if (typeof window !== 'undefined') {
       'ERR_ABORTED',
       // Sentry errors
       'sentry.io',
-      'ingest.sentry.io'
+      'ingest.sentry.io',
+      // Cross-origin and permissions policy warnings
+      'Potential permissions policy violation',
+      'cross-origin-isolated is not allowed',
+      // Cloudflare Turnstile preload warnings
+      'challenges.cloudflare.com',
+      'was preloaded using link preload but not used',
+      'challenge-platform'
     ].some(pattern => message.includes(pattern));
 
     if (!isExtensionError) {
@@ -147,7 +161,14 @@ if (typeof window !== 'undefined') {
       'ERR_ABORTED',
       // Sentry errors
       'sentry.io',
-      'ingest.sentry.io'
+      'ingest.sentry.io',
+      // Cross-origin and permissions policy warnings
+      'Potential permissions policy violation',
+      'cross-origin-isolated is not allowed',
+      // Cloudflare Turnstile preload warnings
+      'challenges.cloudflare.com',
+      'was preloaded using link preload but not used',
+      'challenge-platform'
     ].some(pattern => message.includes(pattern));
 
     if (!isExtensionError) {
@@ -196,7 +217,14 @@ if (typeof window !== 'undefined') {
       'ERR_ABORTED',
       // Sentry errors
       'sentry.io',
-      'ingest.sentry.io'
+      'ingest.sentry.io',
+      // Cross-origin and permissions policy warnings
+      'Potential permissions policy violation',
+      'cross-origin-isolated is not allowed',
+      // Cloudflare Turnstile preload warnings
+      'challenges.cloudflare.com',
+      'was preloaded using link preload but not used',
+      'challenge-platform'
     ].some(pattern => 
       message.includes(pattern) || filename.includes(pattern)
     );
