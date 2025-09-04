@@ -9,6 +9,10 @@ import { BusinessHealthOverview } from "@/components/ai-dashboard/BusinessHealth
 import { MarketplaceOpportunities } from "@/components/ai-dashboard/MarketplaceOpportunities";
 import { AIRecommendationsDashboard } from "@/components/marketplace/AIRecommendationsDashboard";
 import TopAgentInsights from "@/components/ai-dashboard/TopAgentInsights";
+import TodayBriefing from "@/components/ai-dashboard/TodayBriefing";
+import NextBestActions from "@/components/ai-dashboard/NextBestActions";
+import TrendingInMarket from "@/components/ai-dashboard/TrendingInMarket";
+import BenchmarksVsPeers from "@/components/ai-dashboard/BenchmarksVsPeers";
 import { useEnhancedAI } from "@/hooks/useEnhancedAI";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
@@ -135,6 +139,18 @@ const AIDashboard = () => {
 
         {/* Dashboard Content */}
         <div className="space-y-8">
+          
+          {/* Today's Briefing */}
+          <TodayBriefing />
+
+          {/* Trending in Market */}
+          <TrendingInMarket />
+
+          {/* Next Best Actions and Benchmarks */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <NextBestActions />
+            <BenchmarksVsPeers />
+          </div>
 
           {/* Business Health Overview */}
           <div className="bg-card/30 backdrop-blur-sm border border-border/50 rounded-xl p-6">

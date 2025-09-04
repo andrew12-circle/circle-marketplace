@@ -51,12 +51,31 @@ const TopAgentInsights = () => {
     }
   };
 
-  const addToCart = (serviceId: string, serviceTitle: string) => {
-    // This would integrate with your cart system
-    toast({
-      title: "Added to Cart",
-      description: `${serviceTitle} has been added to your cart`,
-    });
+  const addToCart = async (serviceId: string, serviceTitle: string) => {
+    try {
+      // Log the interaction
+      await supabase.from('ai_interaction_logs').insert({
+        user_id: (await supabase.auth.getUser()).data.user?.id,
+        intent_type: 'service_add_to_cart',
+        query_text: `Add top agent service: ${serviceTitle}`,
+        result_type: 'service_added',
+        interaction_timestamp: new Date().toISOString(),
+        recommendation_text: `Service added from top agent insights: ${serviceTitle}`
+      });
+
+      // This would integrate with your cart system
+      toast({
+        title: "Added to Cart",
+        description: `${serviceTitle} has been added to your cart`,
+      });
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add item to cart",
+        variant: "destructive"
+      });
+    }
   };
 
   if (!isPro) {
