@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminVendorChangesPanel } from "./AdminVendorChangesPanel";
+import { QuickBooksConnectCard } from "./QuickBooksConnectCard";
 import { 
   BarChart3, 
   RefreshCw, 
@@ -17,7 +18,8 @@ import {
   Clock,
   Users,
   DollarSign,
-  Activity
+  Activity,
+  Settings
 } from "lucide-react";
 
 interface AdminDashboardProps {
@@ -191,6 +193,7 @@ export const AdminDashboard = ({ onCacheRefresh }: AdminDashboardProps) => {
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="cache">Data Cache</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          <TabsTrigger value="integrations">Integrations</TabsTrigger>
           <TabsTrigger value="vendor-changes">Vendor Changes</TabsTrigger>
         </TabsList>
 
@@ -384,6 +387,12 @@ export const AdminDashboard = ({ onCacheRefresh }: AdminDashboardProps) => {
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="integrations" className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <QuickBooksConnectCard />
+          </div>
         </TabsContent>
 
         <TabsContent value="vendor-changes" className="space-y-4">

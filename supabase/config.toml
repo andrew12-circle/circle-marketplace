@@ -133,3 +133,18 @@ verify_jwt = false
 
 [functions.session-control]
 verify_jwt = false
+
+[functions.qbo-connect]
+verify_jwt = false
+
+[functions.qbo-callback]
+verify_jwt = false
+
+[functions.qbo-webhook]
+verify_jwt = false
+
+[functions.qbo-refresh-token]
+verify_jwt = false
+
+[functions.qbo-test-invoice]
+verify_jwt = false
