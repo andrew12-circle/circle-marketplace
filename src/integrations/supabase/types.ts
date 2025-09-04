@@ -940,6 +940,96 @@ export type Database = {
         }
         Relationships: []
       }
+      agent_profile_stats: {
+        Row: {
+          agent_id: string
+          avg_sale_price: number | null
+          buyers_12m: number | null
+          capacity_hours_per_week: number | null
+          channels: string[] | null
+          cities: string[] | null
+          closings_12m: number | null
+          constraints: string[] | null
+          created_at: string
+          crm: string | null
+          gci_12m: number | null
+          goal_closings_12m: number | null
+          goal_closings_90d: number | null
+          id: string
+          listings_12m: number | null
+          monthly_marketing_budget: number | null
+          niche: string[] | null
+          pipeline_hot_buyers: number | null
+          pipeline_listings: number | null
+          pipeline_pendings: number | null
+          price_band: Json | null
+          priority_outcome: string | null
+          source_map: Json | null
+          updated_at: string
+          vendors_current: string[] | null
+          website_platform: string | null
+          zips: string[] | null
+        }
+        Insert: {
+          agent_id: string
+          avg_sale_price?: number | null
+          buyers_12m?: number | null
+          capacity_hours_per_week?: number | null
+          channels?: string[] | null
+          cities?: string[] | null
+          closings_12m?: number | null
+          constraints?: string[] | null
+          created_at?: string
+          crm?: string | null
+          gci_12m?: number | null
+          goal_closings_12m?: number | null
+          goal_closings_90d?: number | null
+          id?: string
+          listings_12m?: number | null
+          monthly_marketing_budget?: number | null
+          niche?: string[] | null
+          pipeline_hot_buyers?: number | null
+          pipeline_listings?: number | null
+          pipeline_pendings?: number | null
+          price_band?: Json | null
+          priority_outcome?: string | null
+          source_map?: Json | null
+          updated_at?: string
+          vendors_current?: string[] | null
+          website_platform?: string | null
+          zips?: string[] | null
+        }
+        Update: {
+          agent_id?: string
+          avg_sale_price?: number | null
+          buyers_12m?: number | null
+          capacity_hours_per_week?: number | null
+          channels?: string[] | null
+          cities?: string[] | null
+          closings_12m?: number | null
+          constraints?: string[] | null
+          created_at?: string
+          crm?: string | null
+          gci_12m?: number | null
+          goal_closings_12m?: number | null
+          goal_closings_90d?: number | null
+          id?: string
+          listings_12m?: number | null
+          monthly_marketing_budget?: number | null
+          niche?: string[] | null
+          pipeline_hot_buyers?: number | null
+          pipeline_listings?: number | null
+          pipeline_pendings?: number | null
+          price_band?: Json | null
+          priority_outcome?: string | null
+          source_map?: Json | null
+          updated_at?: string
+          vendors_current?: string[] | null
+          website_platform?: string | null
+          zips?: string[] | null
+        }
+        Relationships: []
+      }
       agent_quiz_responses: {
         Row: {
           agent_id: string
@@ -2206,6 +2296,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      concierge_runs: {
+        Row: {
+          agent_id: string
+          ai_response: string | null
+          created_at: string
+          estimated_roi: Json | null
+          generated_assets: Json | null
+          id: string
+          prompt: string
+          recommended_vendors: Json | null
+          status: string | null
+          workflow_type: string | null
+        }
+        Insert: {
+          agent_id: string
+          ai_response?: string | null
+          created_at?: string
+          estimated_roi?: Json | null
+          generated_assets?: Json | null
+          id?: string
+          prompt: string
+          recommended_vendors?: Json | null
+          status?: string | null
+          workflow_type?: string | null
+        }
+        Update: {
+          agent_id?: string
+          ai_response?: string | null
+          created_at?: string
+          estimated_roi?: Json | null
+          generated_assets?: Json | null
+          id?: string
+          prompt?: string
+          recommended_vendors?: Json | null
+          status?: string | null
+          workflow_type?: string | null
+        }
+        Relationships: []
       }
       consultation_bookings: {
         Row: {
@@ -7954,6 +8083,39 @@ export type Database = {
         }
         Relationships: []
       }
+      vendor_demand_signals: {
+        Row: {
+          avg_agent_budget: number | null
+          created_at: string
+          demand_count: number | null
+          id: string
+          market_segments: string[] | null
+          service_id: string | null
+          updated_at: string
+          vendor_id: string
+        }
+        Insert: {
+          avg_agent_budget?: number | null
+          created_at?: string
+          demand_count?: number | null
+          id?: string
+          market_segments?: string[] | null
+          service_id?: string | null
+          updated_at?: string
+          vendor_id: string
+        }
+        Update: {
+          avg_agent_budget?: number | null
+          created_at?: string
+          demand_count?: number | null
+          id?: string
+          market_segments?: string[] | null
+          service_id?: string | null
+          updated_at?: string
+          vendor_id?: string
+        }
+        Relationships: []
+      }
       vendor_drafts: {
         Row: {
           change_summary: string | null
@@ -9135,6 +9297,14 @@ export type Database = {
         Args: { target_month: string }
         Returns: undefined
       }
+      calculate_nba_score: {
+        Args: {
+          p_agent_id: string
+          p_service_id: string
+          p_workflow_type: string
+        }
+        Returns: Json
+      }
       calculate_respa_compliant_usage: {
         Args: {
           p_agent_id: string
@@ -9301,6 +9471,10 @@ export type Database = {
         Args: { target_agent_user_id: string }
         Returns: Json
       }
+      get_concierge_context: {
+        Args: { p_agent_id: string }
+        Returns: Json
+      }
       get_creator_earnings_summary: {
         Args: { creator_user_id: string }
         Returns: Json
@@ -9408,6 +9582,16 @@ export type Database = {
       get_service_tracking_metrics: {
         Args: { p_service_id: string; p_time_period?: string }
         Returns: Json
+      }
+      get_top_agent_purchases: {
+        Args: { p_market?: string; p_price_band?: Json }
+        Returns: {
+          avg_roi: number
+          category: string
+          purchase_frequency: number
+          service_id: string
+          service_title: string
+        }[]
       }
       get_trending_services: {
         Args: {
