@@ -123,8 +123,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setLastFetchAttempt(now);
 
     // Admin fallback: if circuit breaker is open but we're on admin route, try admin check
-    if (isCircuitBreakerOpen && window.location.pathname.includes('/admin')) {
-      logger.log('Circuit breaker open but admin route detected, trying admin fallback');
+    if (isCircuitBreakerOpen) {
+      // For admin users, always try admin fallback regardless of route
+      logger.log('Circuit breaker open, trying admin fallback for user');
       try {
         const { data: adminData, error: adminError } = await supabase
           .rpc('admin_self_check_enhanced')
@@ -151,10 +152,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       } catch (adminError) {
         logger.warn('Admin fallback failed:', adminError);
       }
-    }
-
-    // Circuit breaker: if too many failures, stop trying for a while (unless admin fallback worked)
-    if (isCircuitBreakerOpen) {
+      
+      // If admin fallback fails, skip normal fetch
       logger.warn('Circuit breaker open, skipping profile fetch');
       return;
     }
@@ -298,12 +297,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setProfile(null);
         setRetryCount(0);
         
-        // Open circuit breaker for other errors
+        // Open circuit breaker for other errors  
         setIsCircuitBreakerOpen(true);
+        // Shorter timeout for faster recovery
         setTimeout(() => {
           setIsCircuitBreakerOpen(false);
-          logger.log('Circuit breaker reset, profile fetch available again');
-        }, 30000);
+          logger.log('Circuit breaker reset after timeout');
+        }, 10000); // Reduced from 30 seconds to 10 seconds
       }
     }
   };

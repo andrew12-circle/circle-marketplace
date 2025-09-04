@@ -35,9 +35,9 @@ export const Admin = () => {
       try {
         console.log('Checking admin status for user:', user.id);
         
-        // Use a shorter timeout for the RPC call
+        // Use a longer timeout for the RPC call to prevent timeouts
         const timeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error('RPC timeout')), 3000);
+          setTimeout(() => reject(new Error('RPC timeout')), 8000); // Increased from 3 to 8 seconds
         });
         
         const rpcPromise = supabase.rpc('get_user_admin_status');
