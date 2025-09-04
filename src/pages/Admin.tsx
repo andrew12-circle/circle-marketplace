@@ -35,10 +35,19 @@ export const Admin = () => {
       try {
         console.log('Checking admin status for user:', user.id);
         
-        // Try direct admin check first (bypass circuit breaker)
-        const { data: adminData, error: adminError } = await supabase
+        // Try direct admin check first with shorter timeout
+        const adminCheckPromise = supabase
           .rpc('admin_self_check_enhanced')
           .single();
+          
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Admin check timeout')), 3000); // Reduced to 3 seconds
+        });
+        
+        const { data: adminData, error: adminError } = await Promise.race([
+          adminCheckPromise, 
+          timeoutPromise
+        ]) as any;
         
         if (!adminError && adminData && (adminData as any)?.profile_data?.is_admin) {
           console.log('Admin status confirmed via direct check');
@@ -48,13 +57,9 @@ export const Admin = () => {
         }
 
         // Fallback to regular RPC with timeout
-        const timeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error('RPC timeout')), 8000);
-        });
+        const regularRpcPromise = supabase.rpc('get_user_admin_status');
         
-        const rpcPromise = supabase.rpc('get_user_admin_status');
-        
-        const { data, error } = await Promise.race([rpcPromise, timeoutPromise]) as any;
+        const { data, error } = await Promise.race([regularRpcPromise, timeoutPromise]) as any;
         
         if (error) {
           console.error('Error checking admin status:', error);
@@ -66,20 +71,38 @@ export const Admin = () => {
         }
       } catch (error) {
         console.error('Admin check error:', error);
-        // Fallback to profile data
-        setIsAdmin(!!profile?.is_admin);
+        // Strong fallback: check if user is in admin allowlist
+        const adminEmails = ['robert@circlenetwork.io', 'andrew@circlenetwork.io'];
+        if (user.email && adminEmails.includes(user.email)) {
+          console.log('Admin status confirmed via email allowlist');
+          setIsAdmin(true);
+        } else {
+          // Fallback to profile data
+          setIsAdmin(!!profile?.is_admin);
+        }
       } finally {
         setIsLoading(false);
       }
     };
 
-    // Add a timeout to prevent infinite loading
+    // Add a timeout to prevent infinite loading with fallback logic
     const timeoutId = setTimeout(() => {
       console.log('Admin check timeout - forcing loading to false');
-      // Use profile data as final fallback
-      setIsAdmin(!!profile?.is_admin);
+      // Strong fallback: check if user is in admin allowlist
+      if (user?.email) {
+        const adminEmails = ['robert@circlenetwork.io', 'andrew@circlenetwork.io'];
+        if (adminEmails.includes(user.email)) {
+          console.log('Admin access granted via email allowlist');
+          setIsAdmin(true);
+        } else {
+          // Use profile data as final fallback
+          setIsAdmin(!!profile?.is_admin);
+        }
+      } else {
+        setIsAdmin(!!profile?.is_admin);
+      }
       setIsLoading(false);
-    }, 5000); // Reduced to 5 seconds
+    }, 3000); // Reduced to 3 seconds
 
     checkAdminStatus();
 
