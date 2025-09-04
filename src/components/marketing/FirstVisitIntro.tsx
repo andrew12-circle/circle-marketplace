@@ -73,7 +73,13 @@ export function FirstVisitIntro() {
   if (!open || user) return null;
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(isOpen) => {
+      if (!isOpen) {
+        handleClose();
+      } else {
+        setOpen(isOpen);
+      }
+    }}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader className="space-y-3">
           <div className="flex items-center gap-2">
