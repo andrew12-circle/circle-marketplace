@@ -6716,6 +6716,8 @@ export type Database = {
           copay_allowed: boolean | null
           created_at: string | null
           description: string | null
+          description_es: string | null
+          description_fr: string | null
           direct_purchase_enabled: boolean | null
           disclaimer_content: Json | null
           disclaimer_id: string | null
@@ -6762,6 +6764,8 @@ export type Database = {
           sync_to_ghl: boolean | null
           tags: string[] | null
           title: string
+          title_es: string | null
+          title_fr: string | null
           updated_at: string | null
           website_url: string | null
         }
@@ -6780,6 +6784,8 @@ export type Database = {
           copay_allowed?: boolean | null
           created_at?: string | null
           description?: string | null
+          description_es?: string | null
+          description_fr?: string | null
           direct_purchase_enabled?: boolean | null
           disclaimer_content?: Json | null
           disclaimer_id?: string | null
@@ -6826,6 +6832,8 @@ export type Database = {
           sync_to_ghl?: boolean | null
           tags?: string[] | null
           title: string
+          title_es?: string | null
+          title_fr?: string | null
           updated_at?: string | null
           website_url?: string | null
         }
@@ -6844,6 +6852,8 @@ export type Database = {
           copay_allowed?: boolean | null
           created_at?: string | null
           description?: string | null
+          description_es?: string | null
+          description_fr?: string | null
           direct_purchase_enabled?: boolean | null
           disclaimer_content?: Json | null
           disclaimer_id?: string | null
@@ -6890,6 +6900,8 @@ export type Database = {
           sync_to_ghl?: boolean | null
           tags?: string[] | null
           title?: string
+          title_es?: string | null
+          title_fr?: string | null
           updated_at?: string | null
           website_url?: string | null
         }
@@ -8476,6 +8488,8 @@ export type Database = {
           created_at: string
           custom_cta_text: string | null
           description: string | null
+          description_es: string | null
+          description_fr: string | null
           email_notifications_enabled: boolean | null
           facilitator_fee_percentage: number | null
           funnel_enabled: boolean | null
@@ -8501,6 +8515,8 @@ export type Database = {
           minimum_commission_amount: number | null
           mls_areas: string[] | null
           name: string
+          name_es: string | null
+          name_fr: string | null
           nmls_id: string | null
           parent_vendor_id: string | null
           payment_terms: string | null
@@ -8558,6 +8574,8 @@ export type Database = {
           created_at?: string
           custom_cta_text?: string | null
           description?: string | null
+          description_es?: string | null
+          description_fr?: string | null
           email_notifications_enabled?: boolean | null
           facilitator_fee_percentage?: number | null
           funnel_enabled?: boolean | null
@@ -8583,6 +8601,8 @@ export type Database = {
           minimum_commission_amount?: number | null
           mls_areas?: string[] | null
           name: string
+          name_es?: string | null
+          name_fr?: string | null
           nmls_id?: string | null
           parent_vendor_id?: string | null
           payment_terms?: string | null
@@ -8640,6 +8660,8 @@ export type Database = {
           created_at?: string
           custom_cta_text?: string | null
           description?: string | null
+          description_es?: string | null
+          description_fr?: string | null
           email_notifications_enabled?: boolean | null
           facilitator_fee_percentage?: number | null
           funnel_enabled?: boolean | null
@@ -8665,6 +8687,8 @@ export type Database = {
           minimum_commission_amount?: number | null
           mls_areas?: string[] | null
           name?: string
+          name_es?: string | null
+          name_fr?: string | null
           nmls_id?: string | null
           parent_vendor_id?: string | null
           payment_terms?: string | null

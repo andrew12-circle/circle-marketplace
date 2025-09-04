@@ -11,6 +11,8 @@ interface VendorCardProps {
   vendor: {
     id: string;
     company: string;
+    company_es?: string;
+    company_fr?: string;
     category: string;
     retailPrice: number;
     proPrice: number;
@@ -20,6 +22,8 @@ interface VendorCardProps {
     rating?: number;
     tags?: string[];
     description?: string;
+    description_es?: string;
+    description_fr?: string;
     coMarketingEligible: boolean;
   };
   onAddToWallet: (vendorId: string) => void;
@@ -30,8 +34,31 @@ interface VendorCardProps {
 export const VendorCard = ({ vendor, onAddToWallet, onRequestCoMarketing, onNavigateToVendors }: VendorCardProps) => {
   const { profile } = useAuth();
   const { formatPrice } = useCurrency();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const isProMember = profile?.is_pro_member || false;
+  
+  // Helper functions to get localized content
+  const getLocalizedCompanyName = () => {
+    const currentLang = i18n.language;
+    if (currentLang === 'es' && vendor.company_es) {
+      return vendor.company_es;
+    }
+    if (currentLang === 'fr' && vendor.company_fr) {
+      return vendor.company_fr;
+    }
+    return vendor.company; // fallback to English
+  };
+
+  const getLocalizedDescription = () => {
+    const currentLang = i18n.language;
+    if (currentLang === 'es' && vendor.description_es) {
+      return vendor.description_es;
+    }
+    if (currentLang === 'fr' && vendor.description_fr) {
+      return vendor.description_fr;
+    }
+    return vendor.description; // fallback to English
+  };
   
   const percentSaved = Math.round(((vendor.retailPrice - vendor.proPrice) / vendor.retailPrice) * 100);
   const coPaySavings = Math.round(((vendor.retailPrice - vendor.coPayPrice) / vendor.retailPrice) * 100);
@@ -75,7 +102,7 @@ export const VendorCard = ({ vendor, onAddToWallet, onRequestCoMarketing, onNavi
               />
             )}
             <div>
-              <h3 className="font-semibold text-sm mobile-title">{vendor.company}</h3>
+              <h3 className="font-semibold text-sm mobile-title">{getLocalizedCompanyName()}</h3>
               <p className="text-xs text-muted-foreground mobile-body">{vendor.category}</p>
             </div>
           </div>
@@ -102,8 +129,8 @@ export const VendorCard = ({ vendor, onAddToWallet, onRequestCoMarketing, onNavi
           </div>
         )}
 
-        {vendor.description && (
-          <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{vendor.description}</p>
+        {getLocalizedDescription() && (
+          <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{getLocalizedDescription()}</p>
         )}
 
         <div className="space-y-2">

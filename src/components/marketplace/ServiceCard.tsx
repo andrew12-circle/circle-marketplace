@@ -60,7 +60,7 @@ export const ServiceCard = ({
   onView,
   showBundlePrice = true
 }: ServiceCardProps) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [isHovered, setIsHovered] = useState(false);
   const [isClosingModal, setIsClosingModal] = useState(false);
   const [isConsultationFlowOpen, setIsConsultationFlowOpen] = useState(false);
@@ -226,7 +226,7 @@ export const ServiceCard = ({
       const viewData = {
         serviceId: service.id,
         viewedAt: Date.now(),
-        title: service.title
+        title: getLocalizedTitle()
       };
       
       // Remove duplicates and add to beginning
@@ -251,7 +251,7 @@ export const ServiceCard = ({
     
     addToCart({
       id: service.id,
-      title: service.title,
+      title: getLocalizedTitle(),
       price: finalPrice,
       vendor: service.vendor?.name || 'Unknown Vendor',
       image_url: service.image_url,
@@ -323,7 +323,7 @@ export const ServiceCard = ({
     const dealInfo = getDealDisplayPrice(service);
     const shareUrl = buildShareUrl();
     
-    return `Check out this deal: ${service.title} - ${formatPrice(dealInfo.price)} ${dealInfo.label}${service.description ? `\n\n${service.description.substring(0, 100)}${service.description.length > 100 ? '...' : ''}` : ''}\n\n${shareUrl}`;
+    return `Check out this deal: ${getLocalizedTitle()} - ${formatPrice(dealInfo.price)} ${dealInfo.label}${getLocalizedDescription() ? `\n\n${getLocalizedDescription().substring(0, 100)}${getLocalizedDescription().length > 100 ? '...' : ''}` : ''}\n\n${shareUrl}`;
   };
 
   const getSmsHref = (message: string) => {
@@ -353,7 +353,7 @@ export const ServiceCard = ({
     if (navigator.share) {
       try {
         await navigator.share({
-          title: `Circle Marketplace - ${service.title}`,
+          title: `Circle Marketplace - ${getLocalizedTitle()}`,
           text: shareMessage,
           url: shareUrl,
         });
@@ -395,7 +395,7 @@ export const ServiceCard = ({
         window.open(getSmsHref(shareMessage), '_self');
         break;
       case 'email':
-        const emailSubject = encodeURIComponent(`Circle Marketplace Deal: ${service.title}`);
+        const emailSubject = encodeURIComponent(`Circle Marketplace Deal: ${getLocalizedTitle()}`);
         const emailBody = encodeURIComponent(shareMessage);
         window.open(`mailto:?subject=${emailSubject}&body=${emailBody}`, '_self');
         break;
@@ -428,6 +428,29 @@ export const ServiceCard = ({
 
   const discountPercentage = calculateDiscountPercentage();
 
+  // Helper functions to get localized content
+  const getLocalizedTitle = () => {
+    const currentLang = i18n.language;
+    if (currentLang === 'es' && service.title_es) {
+      return service.title_es;
+    }
+    if (currentLang === 'fr' && service.title_fr) {
+      return service.title_fr;
+    }
+    return service.title; // fallback to English
+  };
+
+  const getLocalizedDescription = () => {
+    const currentLang = i18n.language;
+    if (currentLang === 'es' && service.description_es) {
+      return service.description_es;
+    }
+    if (currentLang === 'fr' && service.description_fr) {
+      return service.description_fr;
+    }
+    return service.description; // fallback to English
+  };
+
   return (
     <TooltipProvider>
       <div className="relative">
@@ -454,13 +477,13 @@ export const ServiceCard = ({
             ) : (
               <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
                 <span className="text-blue-600 font-semibold text-sm">
-                  {service.title.charAt(0).toUpperCase()}
+                  {getLocalizedTitle().charAt(0).toUpperCase()}
                 </span>
               </div>
             )}
             <div className="flex-1 min-w-0">
               <h3 className="font-semibold text-foreground leading-tight text-base line-clamp-2 mb-1">
-                {service.title.split(' - ').pop() || service.title.split(': ').pop() || service.title}
+                {getLocalizedTitle().split(' - ').pop() || getLocalizedTitle().split(': ').pop() || getLocalizedTitle()}
               </h3>
               {/* Sponsored label right underneath the name, like Facebook */}
               {isSponsored && (
@@ -535,9 +558,9 @@ export const ServiceCard = ({
           {/* Description with dynamic height for expansion */}
           <div className={`px-4 pt-1 pb-2 flex flex-col transition-all duration-300 ${isDescriptionExpanded ? 'h-auto' : 'h-20'}`}>
             <p className={`text-sm text-muted-foreground leading-tight transition-all duration-300 ${isDescriptionExpanded ? 'overflow-visible' : 'line-clamp-2 overflow-hidden'}`}>
-              {service.description}
+              {getLocalizedDescription()}
             </p>
-            {service.description && service.description.length > 100 && (
+            {getLocalizedDescription() && getLocalizedDescription().length > 100 && (
               <button
                 className="text-sm text-primary hover:text-primary/80 font-medium mt-1 transition-colors self-start"
                 onClick={(e) => {
@@ -555,7 +578,7 @@ export const ServiceCard = ({
           <div className="relative aspect-[2/1] overflow-hidden bg-white flex-shrink-0 p-4">
             <img
               src={service.image_url || "/lovable-uploads/placeholder.svg"}
-              alt={service.title}
+              alt={getLocalizedTitle()}
               className="w-full h-full object-contain object-center transition-transform duration-300 group-hover:scale-105"
             />
           </div>

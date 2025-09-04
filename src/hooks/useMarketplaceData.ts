@@ -17,7 +17,11 @@ import { marketplaceCircuitBreaker, CircuitBreakerState } from '@/utils/circuitB
 export interface Service {
   id: string;
   title: string;
+  title_es?: string;
+  title_fr?: string;
   description: string;
+  description_es?: string;
+  description_fr?: string;
   category: string;
   discount_percentage?: string;
   retail_price?: string;
@@ -59,7 +63,11 @@ export interface Service {
 export interface Vendor {
   id: string;
   name: string;
+  name_es?: string;
+  name_fr?: string;
   description: string;
+  description_es?: string;
+  description_fr?: string;
   logo_url?: string;
   website_url?: string;
   location?: string;
@@ -133,7 +141,7 @@ const fetchServices = async (): Promise<Service[]> => {
   const { data, error } = await withTimeout(
     supabase
       .from('services')
-      .select('*')
+      .select('*, title_es, title_fr, description_es, description_fr')
       .eq('is_active', true)
       .order('sort_order', { ascending: true })
       .order('created_at', { ascending: false })
@@ -203,7 +211,7 @@ const fetchVendors = async (): Promise<Vendor[]> => {
   const { data, error } = await withTimeout(
     supabase
       .from('vendors')
-      .select('*')
+      .select('*, name_es, name_fr, description_es, description_fr')
       .eq('is_active', true)
       .in('approval_status', ['approved', 'auto_approved', 'pending'])
       .order('sort_order', { ascending: true })
