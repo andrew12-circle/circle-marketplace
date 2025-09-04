@@ -46,6 +46,8 @@ export const SavedItems = () => {
   const [loading, setLoading] = useState(true);
   const [aiAnalysis, setAiAnalysis] = useState("");
   const [analyzingWithAI, setAnalyzingWithAI] = useState(false);
+  const [peerInsights, setPeerInsights] = useState(null);
+  const [loadingPeerInsights, setLoadingPeerInsights] = useState(false);
   const [notesTimers, setNotesTimers] = useState<Record<string, NodeJS.Timeout>>({});
   const isProMember = profile?.is_pro_member || false;
 
@@ -216,34 +218,57 @@ export const SavedItems = () => {
     }
 
     setAnalyzingWithAI(true);
+    setLoadingPeerInsights(true);
+    
     try {
       const selectedServices = savedServices.filter(item => 
         selectedForComparison.includes(item.id)
       );
 
-      const servicesData = selectedServices.map(item => ({
-        title: item.services.title,
-        description: item.services.description,
-        category: item.services.category,
-        retail_price: item.services.retail_price,
-        pro_price: item.services.pro_price,
-        co_pay_price: item.services.co_pay_price,
-        vendor: item.services.vendor.name,
-        rating: item.services.vendor.rating,
-        tags: item.services.tags,
-        notes: item.notes
-      }));
+      // Get both AI analysis and peer insights
+      const [aiResponse, peerResponse] = await Promise.all([
+        // Original AI analysis
+        supabase.functions.invoke('ask-circle-ai', {
+          body: {
+            type: 'quick',
+            prompt: `Please analyze and compare these services for a real estate agent. Provide insights on pricing differences, value propositions, and which might be best for different scenarios: ${JSON.stringify(selectedServices.map(item => ({
+              title: item.services.title,
+              description: item.services.description,
+              category: item.services.category,
+              retail_price: item.services.retail_price,
+              pro_price: item.services.pro_price,
+              co_pay_price: item.services.co_pay_price,
+              vendor: item.services.vendor.name,
+              rating: item.services.vendor.rating,
+              tags: item.services.tags,
+              notes: item.notes
+            })), null, 2)}`
+          }
+        }),
+        // Peer insights analysis
+        supabase.functions.invoke('compare-services-with-peers', {
+          body: {
+            serviceIds: selectedServices.map(item => item.services.id),
+            userId: profile?.user_id
+          }
+        })
+      ]);
 
-      const { data, error } = await supabase.functions.invoke('ask-circle-ai', {
-        body: {
-          type: 'quick',
-          prompt: `Please analyze and compare these services for a real estate agent. Provide insights on pricing differences, value propositions, and which might be best for different scenarios: ${JSON.stringify(servicesData, null, 2)}`
-        }
+      if (aiResponse.error) throw aiResponse.error;
+      if (peerResponse.error) throw peerResponse.error;
+
+      setAiAnalysis(aiResponse.data.response);
+      setPeerInsights(peerResponse.data);
+      
+      // Log interaction
+      await supabase.from('ai_interaction_logs').insert({
+        user_id: profile?.user_id,
+        intent_type: 'service_comparison_with_peers',
+        query_text: `Compared ${selectedServices.length} services with peer insights`,
+        result_type: 'comparison_analysis',
+        interaction_timestamp: new Date().toISOString()
       });
 
-      if (error) throw error;
-
-      setAiAnalysis(data.response);
     } catch (error) {
       console.error('Error analyzing with AI:', error);
       toast({
@@ -253,6 +278,7 @@ export const SavedItems = () => {
       });
     } finally {
       setAnalyzingWithAI(false);
+      setLoadingPeerInsights(false);
     }
   };
 
@@ -375,6 +401,86 @@ export const SavedItems = () => {
                     ))}
                   </div>
                   
+                  {/* Peer Insights Section */}
+                  {peerInsights && isProMember && (
+                    <div className="border-t pt-6 space-y-4">
+                      <div className="flex items-center gap-2">
+                        <Crown className="w-5 h-5 text-circle-primary" />
+                        <h3 className="text-lg font-semibold">Peer Insights</h3>
+                        <Badge variant="secondary" className="text-circle-primary">Pro</Badge>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {peerInsights.services.map((service) => (
+                          <Card key={service.serviceId} className="p-4">
+                            <h4 className="font-semibold mb-3">{service.serviceName}</h4>
+                            
+                            <div className="space-y-3">
+                              <div className="flex justify-between">
+                                <span className="text-sm text-muted-foreground">Peer Adoption:</span>
+                                <span className="text-sm font-medium">{service.peerInsights.adoptionRate}% of agents</span>
+                              </div>
+                              
+                              <div className="flex justify-between">
+                                <span className="text-sm text-muted-foreground">Top 10% Use:</span>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-sm font-medium">{service.peerInsights.topPerformerAdoptionRate}%</span>
+                                  {service.peerInsights.topPerformerSignal === 'high' && (
+                                    <Badge variant="default" className="text-xs bg-green-100 text-green-800">High Signal</Badge>
+                                  )}
+                                </div>
+                              </div>
+                              
+                              <div className="pt-2 border-t">
+                                <p className="text-xs text-muted-foreground mb-2">Typical Performance Lift:</p>
+                                <div className="grid grid-cols-3 gap-2 text-xs">
+                                  <div className="text-center">
+                                    <div className="font-semibold text-green-600">+{service.peerInsights.performanceLift.transactions}%</div>
+                                    <div className="text-muted-foreground">Transactions</div>
+                                  </div>
+                                  <div className="text-center">
+                                    <div className="font-semibold text-green-600">+{service.peerInsights.performanceLift.volume}%</div>
+                                    <div className="text-muted-foreground">Volume</div>
+                                  </div>
+                                  <div className="text-center">
+                                    <div className="font-semibold text-green-600">+{service.peerInsights.performanceLift.conversion}%</div>
+                                    <div className="text-muted-foreground">Conversion</div>
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              {service.peerInsights.bundles.length > 0 && (
+                                <div className="pt-2 border-t">
+                                  <p className="text-xs text-muted-foreground mb-2">Often bundled with:</p>
+                                  <div className="space-y-1">
+                                    {service.peerInsights.bundles.slice(0, 2).map((bundle, idx) => (
+                                      <div key={idx} className="flex justify-between items-center">
+                                        <span className="text-xs">{bundle.title}</span>
+                                        <Badge variant="outline" className="text-xs">{bundle.category}</Badge>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </Card>
+                        ))}
+                      </div>
+                      
+                      {peerInsights.aiInsight && (
+                        <div className="bg-circle-primary/5 border border-circle-primary/20 rounded-lg p-4">
+                          <div className="flex items-start gap-2">
+                            <MessageCircle className="w-4 h-4 text-circle-primary mt-0.5" />
+                            <div>
+                              <p className="text-sm font-medium text-circle-primary mb-1">Peer Intelligence Summary</p>
+                              <p className="text-sm text-muted-foreground">{peerInsights.aiInsight}</p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  
                   {/* AI Analysis Section */}
                   <div className="border-t pt-6">
                     <div className="flex items-center justify-between mb-4">
@@ -389,9 +495,21 @@ export const SavedItems = () => {
                         ) : (
                           <MessageCircle className="w-4 h-4" />
                         )}
-                        {analyzingWithAI ? "Analyzing..." : "Analyze with AI"}
+                        {analyzingWithAI ? "Analyzing..." : "Get Insights + Peer Data"}
                       </Button>
                     </div>
+                    
+                    {!isProMember && (
+                      <div className="bg-muted/50 rounded-lg p-4 mb-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Crown className="w-4 h-4 text-circle-primary" />
+                          <span className="text-sm font-medium">Unlock Peer Insights</span>
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          Upgrade to Circle Pro to see how other top agents use these services and their performance outcomes.
+                        </p>
+                      </div>
+                    )}
                     
                     {aiAnalysis && (
                       <div className="bg-muted/50 rounded-lg p-4">
