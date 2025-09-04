@@ -31,19 +31,7 @@ async function fetchServicesPage(filters: PaginatedFilters): Promise<PaginatedPa
   const offset = (page - 1) * pageSize;
   let query = supabase
     .from('services')
-    .select(`
-      *,
-      vendors (
-        id,
-        name,
-        rating,
-        review_count,
-        is_verified,
-        website_url,
-        logo_url,
-        support_hours
-      )
-    `, { count: 'exact' });
+    .select('*', { count: 'exact' });
 
   // Apply ordering strategy
   const orderStrategy = filters.orderStrategy || 'ranked';
@@ -116,16 +104,16 @@ async function fetchServicesPage(filters: PaginatedFilters): Promise<PaginatedPa
     ...service,
     discount_percentage: service.discount_percentage ? String(service.discount_percentage) : undefined,
     is_verified: service.is_verified || false,
-    vendor: service.vendors ? {
-      id: service.vendors.id,
-      name: service.vendors.name,
-      rating: service.vendors.rating || 4.5,
-      review_count: service.vendors.review_count || 0,
-      is_verified: service.vendors.is_verified || false,
-      website_url: service.vendors.website_url,
-      logo_url: service.vendors.logo_url,
-      support_hours: service.vendors.support_hours || 'Business Hours',
-    } : null,
+    vendor: {
+      id: 'circle-platform',
+      name: 'Circle Platform',
+      rating: 4.8,
+      review_count: 100,
+      is_verified: true,
+      website_url: null,
+      logo_url: null,
+      support_hours: 'Business Hours',
+    },
   }));
 
   const totalCount = typeof count === 'number' ? count : formattedServices.length;
