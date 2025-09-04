@@ -44,18 +44,35 @@ export const ConsultationBookingModal = ({
   const [projectDetails, setProjectDetails] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [integrationErrors, setIntegrationErrors] = useState<string[]>([]);
+  const [serviceDetails, setServiceDetails] = useState<any>(null);
   const { toast } = useToast();
   const { user } = useAuth();
   const { trackBooking } = useProviderTracking(service.id, isOpen);
   const navigate = useNavigate();
 
-  // Pre-populate form with user data when signed in
+  // Fetch user data and service settings
   useEffect(() => {
-    if (user) {
-      setName(user.user_metadata?.full_name || user.email?.split('@')[0] || '');
-      setEmail(user.email || '');
-    }
-  }, [user]);
+    const fetchData = async () => {
+      // Pre-populate form with user data when signed in
+      if (user) {
+        setName(user.user_metadata?.full_name || user.email?.split('@')[0] || '');
+        setEmail(user.email || '');
+      }
+
+      // Fetch service details including sync_to_ghl setting
+      if (service?.id) {
+        const { data: serviceData } = await supabase
+          .from('services')
+          .select('sync_to_ghl, consultation_emails')
+          .eq('id', service.id)
+          .single();
+
+        setServiceDetails(serviceData);
+      }
+    };
+
+    fetchData();
+  }, [user, service?.id]);
 
   // Business hours: Monday-Friday 10am-4pm CST (converted to local display)
   const businessTimeSlots = [
@@ -158,34 +175,39 @@ export const ConsultationBookingModal = ({
 
       console.log('[Consultation Booking] Successfully created booking:', bookingData.id);
 
-      // Create Go High Level contact and send to GHL
-      console.log('[Consultation Booking] Calling GHL integration...');
-      try {
-        const ghlResponse = await supabase.functions.invoke('create-ghl-contact', {
-          body: {
-            bookingId: bookingData.id,
-            firstName: data.client_name.split(' ')[0] || data.client_name,
-            lastName: data.client_name.split(' ').slice(1).join(' ') || '',
-            email: data.client_email,
-            phone: data.client_phone || '',
-            serviceTitle: service.title,
-            vendorName: service.vendor?.name || 'Direct Service',
-            scheduledDate: selectedDate.toISOString().split('T')[0],
-            scheduledTime: selectedTime,
-            projectDetails: data.project_details || '',
-            source: 'Circle Marketplace Consultation'
-          }
-        });
+      // Create Go High Level contact based on service setting
+      const shouldSyncToGHL = serviceDetails?.sync_to_ghl ?? true;
+      if (shouldSyncToGHL) {
+        console.log('[Consultation Booking] Calling GHL integration...');
+        try {
+          const ghlResponse = await supabase.functions.invoke('create-ghl-contact', {
+            body: {
+              bookingId: bookingData.id,
+              firstName: data.client_name.split(' ')[0] || data.client_name,
+              lastName: data.client_name.split(' ').slice(1).join(' ') || '',
+              email: data.client_email,
+              phone: data.client_phone || '',
+              serviceTitle: service.title,
+              vendorName: service.vendor?.name || 'Direct Service',
+              scheduledDate: selectedDate.toISOString().split('T')[0],
+              scheduledTime: selectedTime,
+              projectDetails: data.project_details || '',
+              source: 'Circle Marketplace Consultation'
+            }
+          });
 
-        if (ghlResponse.error) {
-          console.error('[Consultation Booking] GHL integration failed:', ghlResponse.error);
+          if (ghlResponse.error) {
+            console.error('[Consultation Booking] GHL integration failed:', ghlResponse.error);
+            setIntegrationErrors(prev => [...prev, 'CRM integration']);
+          } else {
+            console.log('[Consultation Booking] GHL integration successful:', ghlResponse.data);
+          }
+        } catch (ghlError) {
+          console.error('[Consultation Booking] GHL integration error:', ghlError);
           setIntegrationErrors(prev => [...prev, 'CRM integration']);
-        } else {
-          console.log('[Consultation Booking] GHL integration successful:', ghlResponse.data);
         }
-      } catch (ghlError) {
-        console.error('[Consultation Booking] GHL integration error:', ghlError);
-        setIntegrationErrors(prev => [...prev, 'CRM integration']);
+      } else {
+        console.log('[Consultation Booking] GHL sync disabled for this service');
       }
 
       // Send booking confirmation to client

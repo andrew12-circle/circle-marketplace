@@ -7,6 +7,7 @@ import { Calendar, Clock, User, Mail, Phone, MessageSquare } from "lucide-react"
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
+import { BookingSummaryStats } from '@/components/admin/BookingSummaryStats';
 
 interface ConsultationBooking {
   id: string;
@@ -37,6 +38,17 @@ export default function AdminBookings() {
   const [selectedBooking, setSelectedBooking] = useState<ConsultationBooking | null>(null);
   const [newNote, setNewNote] = useState('');
   const [addingNote, setAddingNote] = useState(false);
+  const [stats, setStats] = useState({
+    total: 0,
+    pending: 0,
+    confirmed: 0,
+    vendor_confirmed: 0,
+    vendor_declined: 0,
+    cancelled: 0,
+    completed: 0,
+    today: 0,
+    this_week: 0
+  });
   const { toast } = useToast();
 
   useEffect(() => {
@@ -61,6 +73,25 @@ export default function AdminBookings() {
 
       if (error) throw error;
       setBookings(data || []);
+      
+      // Calculate stats
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+      
+      const newStats = {
+        total: data?.length || 0,
+        pending: data?.filter(b => b.status === 'pending').length || 0,
+        confirmed: data?.filter(b => b.status === 'confirmed').length || 0,
+        vendor_confirmed: data?.filter(b => b.status === 'vendor_confirmed').length || 0,
+        vendor_declined: data?.filter(b => b.status === 'vendor_declined').length || 0,
+        cancelled: data?.filter(b => b.status === 'cancelled').length || 0,
+        completed: data?.filter(b => b.status === 'completed').length || 0,
+        today: data?.filter(b => new Date(b.created_at) >= today).length || 0,
+        this_week: data?.filter(b => new Date(b.created_at) >= weekAgo).length || 0
+      };
+      
+      setStats(newStats);
     } catch (error) {
       console.error('Error fetching bookings:', error);
       toast({
@@ -119,6 +150,8 @@ export default function AdminBookings() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'confirmed': return 'bg-green-500';
+      case 'vendor_confirmed': return 'bg-emerald-500';
+      case 'vendor_declined': return 'bg-orange-500';
       case 'pending': return 'bg-yellow-500';
       case 'cancelled': return 'bg-red-500';
       case 'completed': return 'bg-blue-500';
@@ -139,11 +172,13 @@ export default function AdminBookings() {
   return (
     <div className="container mx-auto py-8 space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Consultation Bookings</h1>
+        <h1 className="text-3xl font-bold">Consultation Bookings Management</h1>
         <div className="text-sm text-muted-foreground">
           {filteredBookings.length} of {bookings.length} bookings
         </div>
       </div>
+
+      <BookingSummaryStats stats={stats} />
 
       {/* Filters */}
       <div className="flex gap-4">
@@ -160,10 +195,19 @@ export default function AdminBookings() {
         >
           <option value="all">All Status</option>
           <option value="pending">Pending</option>
-          <option value="confirmed">Confirmed</option>
+          <option value="confirmed">Admin Confirmed</option>
+          <option value="vendor_confirmed">Vendor Confirmed</option>
+          <option value="vendor_declined">Vendor Declined</option>
           <option value="completed">Completed</option>
           <option value="cancelled">Cancelled</option>
         </select>
+        <Button 
+          onClick={() => window.location.reload()} 
+          variant="outline"
+          size="sm"
+        >
+          Refresh
+        </Button>
       </div>
 
       {/* Bookings List */}
@@ -179,14 +223,14 @@ export default function AdminBookings() {
                   Booked {format(new Date(booking.created_at), 'MMM d, yyyy')}
                 </span>
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 <Button
                   size="sm"
-                  variant="outline"
                   onClick={() => updateBookingStatus(booking.id, 'confirmed')}
-                  disabled={booking.status === 'confirmed'}
+                  disabled={['confirmed', 'vendor_confirmed', 'completed'].includes(booking.status)}
+                  className="bg-green-600 hover:bg-green-700"
                 >
-                  Confirm
+                  Admin Confirm
                 </Button>
                 <Button
                   size="sm"
@@ -194,7 +238,22 @@ export default function AdminBookings() {
                   onClick={() => updateBookingStatus(booking.id, 'completed')}
                   disabled={booking.status === 'completed'}
                 >
-                  Complete
+                  Mark Complete
+                </Button>
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  onClick={() => updateBookingStatus(booking.id, 'cancelled')}
+                  disabled={['cancelled', 'completed'].includes(booking.status)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => window.open(`mailto:${booking.client_email}?subject=Re: Your consultation booking&body=Hi ${booking.client_name},%0A%0ARegarding your consultation for ${booking.services?.title}...`)}
+                >
+                  Email Client
                 </Button>
               </div>
             </div>
