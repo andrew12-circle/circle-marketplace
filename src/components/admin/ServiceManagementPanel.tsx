@@ -401,76 +401,7 @@ export const ServiceManagementPanel = () => {
   ]);
 
   useEffect(() => {
-    const initializeServices = async () => {
-      try {
-        console.log('ServiceManagementPanel: Initializing services...');
-        
-        // Get current user for admin allowlist check
-        const { data: { user } } = await supabase.auth.getUser();
-        const userEmail = user?.email?.toLowerCase();
-        
-        // Admin allowlist - these users bypass timeout restrictions
-        const adminAllowlist = [
-          'robert@circlenetwork.io',
-          'andrew@circlenetwork.io'
-        ];
-        
-        const isAdminAllowed = userEmail && adminAllowlist.includes(userEmail);
-        
-        if (isAdminAllowed) {
-          console.log('ServiceManagementPanel: Admin user detected, bypassing restrictions');
-          await fetchServices();
-          return;
-        }
-        
-        // Check admin status using server function (single source of truth)
-        console.log('ServiceManagementPanel: Checking admin status...');
-        
-        // Longer timeout for admin routes (10s vs 3s)
-        const timeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error('Admin check timeout')), 10000);
-        });
-        
-        const adminCheckPromise = supabase.rpc('get_user_admin_status');
-        
-        try {
-          const { data: adminCheck, error: adminError } = await Promise.race([
-            adminCheckPromise, 
-            timeoutPromise
-          ]) as any;
-          
-          if (adminError) {
-            console.warn('ServiceManagementPanel: Admin RPC error:', adminError);
-            setError('Admin verification failed. Please contact support if you should have admin access.');
-            setLoading(false);
-            return;
-          }
-          
-          if (!adminCheck) {
-            console.log('ServiceManagementPanel: No admin access confirmed');
-            setError('Admin access required to manage services');
-            setLoading(false);
-            return;
-          }
-          
-          console.log('ServiceManagementPanel: Admin access confirmed');
-          await fetchServices();
-          
-        } catch (timeoutError) {
-          console.warn('ServiceManagementPanel: Admin check timeout, denying access for safety');
-          setError('Admin verification timed out. Please refresh the page or contact support.');
-          setLoading(false);
-          return;
-        }
-        
-      } catch (error) {
-        console.error('ServiceManagementPanel: Critical error during initialization:', error);
-        setError('Failed to initialize services. Please refresh the page.');
-        setLoading(false);
-      }
-    };
-
-    initializeServices();
+    fetchServices();
   }, []);
 
 
@@ -488,12 +419,7 @@ export const ServiceManagementPanel = () => {
       setError(null);
       console.log('ServiceManagementPanel: Fetching services...');
       
-      // Add timeout to service fetch as well
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Service fetch timeout')), 10000); // 10 second timeout for service fetch
-      });
-      
-      const servicePromise = supabase
+      const { data, error } = await supabase
         .from('services')
         .select(`
           *,
@@ -502,28 +428,21 @@ export const ServiceManagementPanel = () => {
         .order('sort_order', { ascending: true })
         .order('created_at', { ascending: false });
 
-      const { data, error } = await Promise.race([servicePromise, timeoutPromise]) as any;
-
-      if (error) {
-        console.error('ServiceManagementPanel: Supabase error:', error);
-        throw error;
-      }
+      if (error) throw error;
       
       console.log('ServiceManagementPanel: Successfully loaded', data?.length || 0, 'services');
-      setServices((data as any) || []);
+      setServices(data || []);
     } catch (error) {
       console.error('ServiceManagementPanel: Error fetching services:', error);
       const errorMessage = error instanceof Error ? error.message : 'Failed to fetch services';
       setError(errorMessage);
       
-      // Show toast for better user feedback
       toast({
         title: 'Error Loading Services',
         description: errorMessage,
         variant: 'destructive',
       });
     } finally {
-      console.log('ServiceManagementPanel: Setting loading to false');
       setLoading(false);
     }
   };
@@ -575,34 +494,10 @@ export const ServiceManagementPanel = () => {
   const handleServiceUpdate = async () => {
     if (!selectedService || saving || saveInProgress) return;
 
-    // Prevent multiple simultaneous saves
     setSaveInProgress(true);
     setSaving(true);
 
     try {
-      // Check authentication first
-      const { data: session } = await supabase.auth.getSession();
-      if (!session?.session?.user) {
-        toast({
-          title: 'Authentication Required',
-          description: 'Please log in to update services.',
-          variant: 'destructive',
-        });
-        return;
-      }
-
-      // Check admin status
-      const { data: adminStatus, error: adminError } = await supabase.rpc('get_user_admin_status');
-      console.debug('Admin status check:', { adminStatus, adminError });
-      
-      if (!adminStatus) {
-        toast({
-          title: 'Permission Error',
-          description: 'You need admin privileges to update services.',
-          variant: 'destructive',
-        });
-        return;
-      }
 
       // Basic required field validation
       if (!editForm.title || !editForm.category) {
