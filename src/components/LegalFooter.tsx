@@ -8,6 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Info, Building, Store, Settings } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { 
   getConsentPreferences, 
   setConsentPreferences, 
@@ -16,6 +17,7 @@ import {
 } from "@/lib/consent";
 
 export const LegalFooter = () => {
+  const { t } = useTranslation();
   const [showCookiePreferences, setShowCookiePreferences] = useState(false);
   const [preferences, setPreferences] = useState<CookieConsent>(() => 
     getConsentPreferences() || getDefaultConsent()
@@ -44,10 +46,9 @@ export const LegalFooter = () => {
       <div className="bg-gradient-to-r from-primary/5 to-accent/5 border-b">
         <div className="container mx-auto px-4 py-8">
           <div className="text-center space-y-4">
-            <h3 className="text-lg font-semibold">Are You a Business Partner?</h3>
+            <h3 className="text-lg font-semibold">{t('footer.businessPartnersTitle')}</h3>
             <p className="text-sm text-muted-foreground max-w-2xl mx-auto">
-              Join our marketplace as a service provider or co-marketing partner. 
-              List your services and connect with real estate professionals.
+              {t('footer.businessPartnersDescription')}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Button asChild variant="default" className="min-w-[200px]">
@@ -58,7 +59,7 @@ export const LegalFooter = () => {
                   }}
                 >
                   <Store className="w-4 h-4 mr-2" />
-                  List Your Services
+                  {t('footer.listYourServices')}
                 </Link>
               </Button>
               <Button asChild variant="outline" className="min-w-[200px]">
@@ -69,7 +70,7 @@ export const LegalFooter = () => {
                   }}
                 >
                   <Building className="w-4 h-4 mr-2" />
-                  Join as Co-Marketing Partner
+                  {t('footer.joinCoMarketing')}
                 </Link>
               </Button>
             </div>
@@ -81,21 +82,21 @@ export const LegalFooter = () => {
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6">
           <div>
-            <h4 className="font-semibold mb-3 text-sm">Legal</h4>
+            <h4 className="font-semibold mb-3 text-sm">{t('footer.legal')}</h4>
             <div className="space-y-2">
               <Link to="/legal/terms" className="block text-sm text-muted-foreground hover:text-primary">
-                Terms of Service
+                {t('footer.termsOfService')}
               </Link>
               <Link to="/legal/privacy" className="block text-sm text-muted-foreground hover:text-primary">
-                Privacy Policy
+                {t('footer.privacyPolicy')}
               </Link>
               <Link to="/legal/cookies" className="block text-sm text-muted-foreground hover:text-primary">
-                Cookie Policy
+                {t('footer.cookiePolicy')}
               </Link>
               <Dialog open={showCookiePreferences} onOpenChange={setShowCookiePreferences}>
                 <DialogTrigger asChild>
                   <button className="text-sm text-muted-foreground hover:text-primary text-left">
-                    Cookie Preferences
+                    {t('footer.cookiePreferences')}
                   </button>
                 </DialogTrigger>
                 <DialogContent className="max-w-2xl">
@@ -182,7 +183,7 @@ export const LegalFooter = () => {
               <Dialog>
                 <DialogTrigger asChild>
                   <button className="text-sm text-muted-foreground hover:text-primary text-left">
-                    Compliance Info
+                    {t('footer.complianceInfo')}
                   </button>
                 </DialogTrigger>
                 <DialogContent className="max-w-2xl">
@@ -201,52 +202,52 @@ export const LegalFooter = () => {
           </div>
           
           <div>
-            <h4 className="font-semibold mb-3 text-sm">Marketplace</h4>
+            <h4 className="font-semibold mb-3 text-sm">{t('footer.marketplace')}</h4>
             <div className="space-y-2">
               <Link to="/legal/seller-agreement" className="block text-sm text-muted-foreground hover:text-primary">
-                Seller Agreement
+                {t('footer.sellerAgreement')}
               </Link>
               <Link to="/legal/buyer-protection" className="block text-sm text-muted-foreground hover:text-primary">
-                Buyer Protection
+                {t('footer.buyerProtection')}
               </Link>
               <Link to="/legal/prohibited-items" className="block text-sm text-muted-foreground hover:text-primary">
-                Prohibited Items
+                {t('footer.prohibitedItems')}
               </Link>
             </div>
           </div>
           
           <div>
-            <h4 className="font-semibold mb-3 text-sm">Support</h4>
+            <h4 className="font-semibold mb-3 text-sm">{t('footer.support')}</h4>
             <div className="space-y-2">
               <Link to="/ministry" className="block text-sm text-muted-foreground hover:text-primary">
-                Circle Ministry
+                {t('footer.circleMinistry')}
               </Link>
               <Link to="/affiliate" className="block text-sm text-muted-foreground hover:text-primary">
-                Affiliate Program
+                {t('footer.affiliateProgram')}
               </Link>
               <Link to="/dispute-resolution" className="block text-sm text-muted-foreground hover:text-primary">
-                Dispute Resolution
+                {t('footer.disputeResolution')}
               </Link>
               <Link to="/refund-policy" className="block text-sm text-muted-foreground hover:text-primary">
-                Refund Policy
+                {t('footer.refundPolicy')}
               </Link>
               <Link to="/contact" className="block text-sm text-muted-foreground hover:text-primary">
-                Contact Support
+                {t('footer.contactSupport')}
               </Link>
             </div>
           </div>
           
           <div>
-            <h4 className="font-semibold mb-3 text-sm">Security</h4>
+            <h4 className="font-semibold mb-3 text-sm">{t('footer.security')}</h4>
             <div className="space-y-2">
               <Badge variant="outline" className="text-xs">
-                SSL Secured
+                {t('footer.sslSecured')}
               </Badge>
               <Badge variant="outline" className="text-xs">
-                PCI Compliant
+                {t('footer.pciCompliant')}
               </Badge>
               <p className="text-xs text-muted-foreground">
-                256-bit encryption
+                {t('footer.encryption')}
               </p>
             </div>
           </div>
@@ -257,36 +258,33 @@ export const LegalFooter = () => {
         {/* Marketplace Disclaimer */}
         <div className="mb-6">
           <p className="text-xs text-muted-foreground leading-relaxed">
-            <strong>Marketplace Disclaimer:</strong> CircleMarketplace.io is a venue for buyers and sellers. We are not responsible for the content, quality, legality, or accuracy of any vendor listing, nor the ability of sellers to fulfill services or buyers to pay for them. All vendor logos and public information displayed are used for informational and comparative purposes only, based on publicly available data. Pricing shown reflects standard published rates and estimated copay examples for illustrative purposes only and does not constitute offers, guarantees, or vendor commitments unless marked as Verified. Circle Network does not claim partnership or affiliation with any unverified vendors.
+            <strong>{t('footer.marketplaceDisclaimer')}</strong> {t('footer.disclaimerText')}
           </p>
         </div>
         
         {/* Compliance Statements */}
         <div className="mb-6 space-y-2">
           <p className="text-xs text-muted-foreground">
-            <strong>Age Restriction:</strong> You must be 18 years or older to use this marketplace.
+            <strong>{t('footer.ageRestriction')}</strong> {t('footer.ageRestrictionText')}
           </p>
           <p className="text-xs text-muted-foreground">
-            <strong>Geographic Restrictions:</strong> Available only where permitted by law.
+            <strong>{t('footer.geoRestrictions')}</strong> {t('footer.geoRestrictionsText')}
           </p>
           <p className="text-xs text-muted-foreground">
-            <strong>Tax Disclaimer:</strong> Buyers and sellers are responsible for determining and paying applicable taxes.
+            <strong>{t('footer.taxDisclaimer')}</strong> {t('footer.taxDisclaimerText')}
           </p>
         </div>
         
         {/* Additional Protection Clauses */}
         <div className="mb-6 space-y-2">
           <p className="text-xs text-muted-foreground">
-            <strong>Indemnification Notice:</strong> Users agree to indemnify and hold CircleMarketplace.io 
-            harmless from any claims arising from their use of the platform.
+            <strong>{t('footer.indemnificationNotice')}</strong> {t('footer.indemnificationText')}
           </p>
           <p className="text-xs text-muted-foreground">
-            <strong>As-Is Disclaimer:</strong> This platform is provided "as is" without warranties of any kind, 
-            either express or implied.
+            <strong>{t('footer.asIsDisclaimer')}</strong> {t('footer.asIsText')}
           </p>
           <p className="text-xs text-muted-foreground">
-            <strong>User-Generated Content:</strong> Users are solely responsible for content they post. 
-            We may remove content that violates our policies.
+            <strong>{t('footer.userGeneratedContent')}</strong> {t('footer.userGeneratedContentText')}
           </p>
         </div>
         
@@ -296,19 +294,19 @@ export const LegalFooter = () => {
         {/* Copyright and Final Info */}
         <div className="flex flex-col md:flex-row justify-between items-center">
           <p className="text-sm text-muted-foreground mb-4 md:mb-0">
-            © 2025 CircleMarketplace.io. All rights reserved.
+            {t('footer.copyright')}
           </p>
           
           <div className="flex items-center space-x-4">
             <span className="text-xs text-muted-foreground">
-              Payments secured by industry-leading providers
+              {t('footer.paymentsSecured')}
             </span>
             <div className="flex space-x-2">
               <Badge variant="secondary" className="text-xs">
-                Secure
+                {t('footer.secure')}
               </Badge>
               <Badge variant="secondary" className="text-xs">
-                Verified
+                {t('footer.verified')}
               </Badge>
             </div>
           </div>

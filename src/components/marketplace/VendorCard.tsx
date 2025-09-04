@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCurrency } from "@/hooks/useCurrency";
+import { useTranslation } from "react-i18next";
 import { Star, TrendingUp, MapPin, Award, Info } from "lucide-react";
 
 interface VendorCardProps {
@@ -29,6 +30,7 @@ interface VendorCardProps {
 export const VendorCard = ({ vendor, onAddToWallet, onRequestCoMarketing, onNavigateToVendors }: VendorCardProps) => {
   const { profile } = useAuth();
   const { formatPrice } = useCurrency();
+  const { t } = useTranslation();
   const isProMember = profile?.is_pro_member || false;
   
   const percentSaved = Math.round(((vendor.retailPrice - vendor.proPrice) / vendor.retailPrice) * 100);
@@ -108,7 +110,7 @@ export const VendorCard = ({ vendor, onAddToWallet, onRequestCoMarketing, onNavi
           {/* Show retail price only if user is NOT pro */}
           {!isProMember && (
             <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">Retail Price:</span>
+              <span className="text-sm text-muted-foreground">{t('vendorCard.retailPrice')}</span>
               <span className="text-sm line-through">{formatPrice(vendor.retailPrice, 'mo')}</span>
             </div>
           )}
@@ -116,7 +118,7 @@ export const VendorCard = ({ vendor, onAddToWallet, onRequestCoMarketing, onNavi
           {/* Show Circle Pro price if user IS pro */}
           {isProMember && (
             <div className="flex justify-between items-center">
-              <span className="text-sm font-medium">Circle Pro:</span>
+              <span className="text-sm font-medium">{t('vendorCard.circlePro')}</span>
               <span className="text-lg font-bold text-circle-primary">{formatPrice(vendor.proPrice, 'mo')}</span>
             </div>
           )}
@@ -124,7 +126,7 @@ export const VendorCard = ({ vendor, onAddToWallet, onRequestCoMarketing, onNavi
           {/* Always show Co-Pay price with hover explanation */}
           <div className="flex justify-between items-center bg-circle-success/10 p-2 rounded border">
             <div className="flex items-center gap-1">
-              <span className="text-sm font-medium text-circle-success">Co-Pay Price:</span>
+              <span className="text-sm font-medium text-circle-success">{t('vendorCard.coPayPrice')}</span>
               <Popover>
                 <PopoverTrigger asChild>
                   <button className="hover:text-circle-primary transition-colors">
@@ -133,19 +135,19 @@ export const VendorCard = ({ vendor, onAddToWallet, onRequestCoMarketing, onNavi
                 </PopoverTrigger>
                 <PopoverContent className="w-80">
                   <div className="space-y-2">
-                    <h4 className="font-medium">What is Co-Pay?</h4>
+                    <h4 className="font-medium">{t('vendorCard.coPayTitle')}</h4>
                     <p className="text-sm text-muted-foreground">
-                      Co-Pay is our vendor partnership program where approved vendors help cover up to 50% of your costs.
+                      {t('vendorCard.coPayDescription')}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      *50% coverage is an average. Actual coverage varies by vendor and agreement.
+                      {t('vendorCard.coPayDisclaimer')}
                     </p>
                     <Button 
                       size="sm" 
                       onClick={onNavigateToVendors}
                       className="w-full mt-2"
                     >
-                      Find Vendors
+                      {t('vendorCard.findVendors')}
                     </Button>
                   </div>
                 </PopoverContent>
@@ -155,13 +157,13 @@ export const VendorCard = ({ vendor, onAddToWallet, onRequestCoMarketing, onNavi
           </div>
           
           <div className="flex justify-between items-center">
-            <span className="text-sm text-muted-foreground">Avg Agent Cost:</span>
+            <span className="text-sm text-muted-foreground">{t('vendorCard.avgAgentCost')}</span>
             <span className="text-sm font-medium">{formatPrice(vendor.avgAgentCost, 'mo')}</span>
           </div>
           
           <div className="flex justify-between items-center">
             <span className="text-sm font-medium text-circle-success">
-              {isProMember ? `Co-Pay Saves: ${coPaySavings - percentSaved}% more` : `You Save: ${coPaySavings}%`}
+              {isProMember ? `${t('vendorCard.coPaySaves')} ${coPaySavings - percentSaved}% ${t('vendorCard.more')}` : `${t('vendorCard.youSave')} ${coPaySavings}%`}
             </span>
             <span className="text-sm font-bold text-circle-success">
               {isProMember ? `${coPaySavings - percentSaved}%` : `${coPaySavings}%`}
@@ -175,7 +177,7 @@ export const VendorCard = ({ vendor, onAddToWallet, onRequestCoMarketing, onNavi
           onClick={() => onAddToWallet(vendor.id)}
           className="w-full bg-circle-primary hover:bg-circle-primary-light mobile-btn touch-target"
         >
-          Add to Wallet
+          {t('vendorCard.addToWallet')}
         </Button>
         {vendor.coMarketingEligible && (
           <Button 
@@ -183,7 +185,7 @@ export const VendorCard = ({ vendor, onAddToWallet, onRequestCoMarketing, onNavi
             onClick={() => onRequestCoMarketing(vendor.id)}
             className="w-full mobile-btn touch-target"
           >
-            Request Co-Marketing
+            {t('vendorCard.requestCoMarketing')}
           </Button>
         )}
       </CardFooter>

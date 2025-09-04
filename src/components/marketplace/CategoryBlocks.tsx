@@ -27,6 +27,7 @@ import {
 import { logger } from "@/utils/logger";
 import { useMemo } from "react";
 import { type Service } from "@/hooks/useMarketplaceData";
+import { useTranslation } from "react-i18next";
 
 interface CategoryBlocksProps {
   onCategoryClick: (searchTerm: string, categoryName: string) => void;
@@ -244,6 +245,7 @@ const OLD_SCHOOL_CATEGORIES = [
 ];
 
 export const CategoryBlocks = ({ onCategoryClick, services, allServices, activeFilters = [] }: CategoryBlocksProps) => {
+  const { t } = useTranslation();
   const categoryCounts = useMemo(() => {
     const counts = new Map<string, number>();
     const allCategories = [...DIGITAL_CATEGORIES, ...OLD_SCHOOL_CATEGORIES];
@@ -327,18 +329,18 @@ export const CategoryBlocks = ({ onCategoryClick, services, allServices, activeF
 
   return (
     <div className="mb-8" data-tour="category-blocks">
-      <h2 className="text-2xl font-semibold mb-6 text-foreground">Shop by Category</h2>
+      <h2 className="text-2xl font-semibold mb-6 text-foreground">{t('shopByCategory')}</h2>
       
       {renderCategoryGrid(
         OLD_SCHOOL_CATEGORIES, 
-        "Old-school (Relationship Builders)", 
-        "Traditional marketing and relationship-building essentials"
+        t('oldSchoolCategory'), 
+        t('oldSchoolSubtitle')
       )}
       
       {renderCategoryGrid(
         DIGITAL_CATEGORIES, 
-        "Digital-first (Fast Growth)", 
-        "Technology and automation tools for scaling your business"
+        t('digitalFirstCategory'), 
+        t('digitalFirstSubtitle')
       )}
     </div>
   );
