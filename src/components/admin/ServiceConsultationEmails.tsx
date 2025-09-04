@@ -101,12 +101,15 @@ export const ServiceConsultationEmails = ({ serviceId, serviceName }: ServiceCon
 
   const handleSave = async () => {
     console.log('=== SAVE BUTTON CLICKED ===');
-    console.log('Current user session check...');
     
-    // Check current session
-    const { data: { session } } = await supabase.auth.getSession();
-    console.log('Current session exists:', !!session);
-    console.log('User ID:', session?.user?.id);
+    // Check admin access first
+    const { data: adminCheck, error: adminError } = await supabase.rpc('get_user_admin_status');
+    console.log('Admin check result:', { adminCheck, adminError });
+    
+    if (!adminCheck) {
+      toast.error('Admin access required to update consultation emails');
+      return;
+    }
     
     setSaving(true);
     try {
@@ -136,18 +139,21 @@ export const ServiceConsultationEmails = ({ serviceId, serviceName }: ServiceCon
         return;
       }
 
-      console.log('About to update with emails:', uniqueEmails);
+      // Ensure we have a valid array (empty array is fine for NOT NULL ARRAY column)
+      const emailsToSave = uniqueEmails.length > 0 ? uniqueEmails : [];
+      
+      console.log('About to update with emails:', emailsToSave);
       console.log('Update query details:', {
         table: 'services',
         serviceId,
-        updateData: { consultation_emails: uniqueEmails }
+        updateData: { consultation_emails: emailsToSave }
       });
 
       const { data, error } = await supabase
         .from('services')
-        .update({ consultation_emails: uniqueEmails })
+        .update({ consultation_emails: emailsToSave })
         .eq('id', serviceId)
-        .select();
+        .select('id, title, consultation_emails');
 
       console.log('Update response data:', data);
       console.log('Update error details:', error);
@@ -159,19 +165,24 @@ export const ServiceConsultationEmails = ({ serviceId, serviceName }: ServiceCon
           hint: error.hint,
           code: error.code
         });
-      }
-
-      if (error) {
-        console.error('Supabase error details:', error);
+        
         if (error.code === 'PGRST116' || error.message?.includes('permission')) {
-          toast.error('Permission denied. You need admin access or vendor ownership to update consultation emails.');
+          toast.error('Permission denied. You need admin access to update consultation emails.');
+        } else if (error.message?.includes('violates')) {
+          toast.error('Database constraint violation. Please check your permissions.');
         } else {
-          throw error;
+          toast.error(`Database error: ${error.message}`);
         }
         return;
       }
 
-      toast.success(`Consultation alert emails updated successfully`);
+      if (!data || data.length === 0) {
+        toast.error('Service not found or no changes made');
+        return;
+      }
+
+      toast.success(`Consultation alert emails updated successfully for "${data[0].title}"`);
+      console.log('Successfully saved emails:', data[0].consultation_emails);
       
       // Reload to show the saved state
       await loadEmails();
