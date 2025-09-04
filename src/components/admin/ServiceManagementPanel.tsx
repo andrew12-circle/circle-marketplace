@@ -90,10 +90,6 @@ interface Service {
   sort_order?: number;
   created_at: string;
   updated_at: string;
-  vendors?: {
-    name: string;
-    logo_url?: string;
-  };
   service_providers?: {
     name: string;
     logo_url?: string;
@@ -413,7 +409,6 @@ export const ServiceManagementPanel = () => {
     const filtered = services.filter(service =>
       service.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       service.category?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      service.vendors?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       service.service_providers?.name?.toLowerCase().includes(searchTerm.toLowerCase())
     );
     setFilteredServices(filtered);
@@ -611,7 +606,6 @@ export const ServiceManagementPanel = () => {
         .from('services')
         .select(`
           *,
-          vendors (name, logo_url),
           service_providers (name, logo_url)
         `)
         .eq('id' as any, selectedService.id as any)

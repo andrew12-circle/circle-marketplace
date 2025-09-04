@@ -22,7 +22,9 @@ const NOISY_PATTERNS = [
   'battery',
   'vr',
   'Max reconnect attempts',
-  'Failed to execute \'observe\' on \'MutationObserver\''
+  'Failed to execute \'observe\' on \'MutationObserver\'',
+  'Could not find a relationship',
+  'PGRST200'
 ];
 
 export function devLog(...args: any[]) {
