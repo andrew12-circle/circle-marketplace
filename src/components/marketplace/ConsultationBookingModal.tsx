@@ -188,29 +188,51 @@ export const ConsultationBookingModal = ({
         setIntegrationErrors(prev => [...prev, 'CRM integration']);
       }
 
+      // Send booking confirmation to client
+      console.log('[Consultation Booking] Sending client confirmation...');
+      try {
+        await supabase.functions.invoke('send-booking-confirmation', {
+          body: {
+            bookingId: bookingData.id,
+            clientName: data.client_name,
+            clientEmail: data.client_email,
+            clientPhone: data.client_phone,
+            serviceTitle: service.title,
+            vendorName: service.vendor?.name || 'Circle Marketplace Team',
+            scheduledDate: selectedDate.toISOString().split('T')[0],
+            scheduledTime: selectedTime,
+            projectDetails: data.project_details
+          }
+        });
+        console.log('[Consultation Booking] Client confirmation sent successfully');
+      } catch (confirmationError) {
+        console.error('[Consultation Booking] Client confirmation failed:', confirmationError);
+        setIntegrationErrors(prev => [...prev, 'booking confirmation email']);
+      }
+
       // Send internal notification
       console.log('[Consultation Booking] Sending notification...');
-        try {
-          await supabase.functions.invoke('send-consultation-notification', {
-            body: {
-              bookingId: bookingData.id,
-              serviceId: service.id,
-              serviceTitle: service.title,
-              vendorName: service.vendor?.name || 'Direct Service',
-              clientName: data.client_name,
-              clientEmail: data.client_email,
-              clientPhone: data.client_phone,
-              scheduledDate: selectedDate.toISOString().split('T')[0],
-              scheduledTime: selectedTime,
-              projectDetails: data.project_details,
-              isInternalBooking: true
-            }
-          });
-          console.log('[Consultation Booking] Notification sent successfully');
-        } catch (notificationError) {
-          console.error('[Consultation Booking] Notification failed:', notificationError);
-          setIntegrationErrors(prev => [...prev, 'email notification']);
-        }
+      try {
+        await supabase.functions.invoke('send-consultation-notification', {
+          body: {
+            bookingId: bookingData.id,
+            serviceId: service.id,
+            serviceTitle: service.title,
+            vendorName: service.vendor?.name || 'Direct Service',
+            clientName: data.client_name,
+            clientEmail: data.client_email,
+            clientPhone: data.client_phone,
+            scheduledDate: selectedDate.toISOString().split('T')[0],
+            scheduledTime: selectedTime,
+            projectDetails: data.project_details,
+            isInternalBooking: true
+          }
+        });
+        console.log('[Consultation Booking] Notification sent successfully');
+      } catch (notificationError) {
+        console.error('[Consultation Booking] Notification failed:', notificationError);
+        setIntegrationErrors(prev => [...prev, 'email notification']);
+      }
 
       // Track successful booking
       try {
@@ -225,8 +247,8 @@ export const ConsultationBookingModal = ({
       }
 
       const successMessage = integrationErrors.length > 0 
-        ? `Consultation booked successfully! Note: Some integrations failed (${integrationErrors.join(', ')}). We'll still notify ${service.vendor?.name || 'the vendor'} and confirm your appointment.`
-        : `Perfect! Your consultation with ${service.vendor?.name || 'the vendor'} has been requested. They'll be notified immediately and will contact you soon to confirm the details.`;
+        ? `Consultation booked successfully! Note: Some integrations failed (${integrationErrors.join(', ')}). Check your email for confirmation details.`
+        : `Perfect! Your consultation with ${service.vendor?.name || 'the vendor'} has been confirmed. Check your email for all the details and calendar invitation.`;
 
       toast({
         title: "Consultation Booked Successfully!",
