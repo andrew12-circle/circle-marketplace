@@ -405,11 +405,30 @@ export const ServiceManagementPanel = () => {
       try {
         console.log('ServiceManagementPanel: Initializing services...');
         
+        // Get current user for admin allowlist check
+        const { data: { user } } = await supabase.auth.getUser();
+        const userEmail = user?.email?.toLowerCase();
+        
+        // Admin allowlist - these users bypass timeout restrictions
+        const adminAllowlist = [
+          'robert@circlenetwork.io',
+          'andrew@circlenetwork.io'
+        ];
+        
+        const isAdminAllowed = userEmail && adminAllowlist.includes(userEmail);
+        
+        if (isAdminAllowed) {
+          console.log('ServiceManagementPanel: Admin user detected, bypassing restrictions');
+          await fetchServices();
+          return;
+        }
+        
         // Check admin status using server function (single source of truth)
         console.log('ServiceManagementPanel: Checking admin status...');
         
+        // Longer timeout for admin routes (10s vs 3s)
         const timeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error('Admin check timeout')), 3000); // 3 second timeout
+          setTimeout(() => reject(new Error('Admin check timeout')), 10000);
         });
         
         const adminCheckPromise = supabase.rpc('get_user_admin_status');
