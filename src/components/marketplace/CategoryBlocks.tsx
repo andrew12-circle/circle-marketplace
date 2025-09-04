@@ -40,6 +40,7 @@ interface CategoryBlocksProps {
 const DIGITAL_CATEGORIES = [
   {
     name: "CRM",
+    translationKey: "crm",
     icon: Users,
     tags: ["cat:crms", "tag:customer-management", "tag:contact-management"],
     description: "Manage client relationships",
@@ -47,7 +48,8 @@ const DIGITAL_CATEGORIES = [
     iconColor: "text-white"
   },
   {
-    name: "Ads & Lead Gen", 
+    name: "Ads & Lead Gen",
+    translationKey: "adsLeadGen",
     icon: TrendingUp,
     tags: ["cat:ads-lead-gen", "tag:facebook-ads", "tag:google-ads", "tag:lead-generation"],
     description: "Generate quality leads",
@@ -56,6 +58,7 @@ const DIGITAL_CATEGORIES = [
   },
   {
     name: "Website",
+    translationKey: "website",
     icon: Globe,
     tags: ["cat:website-idx", "tag:websites", "tag:idx", "tag:property-search"],
     description: "Professional agent websites",
@@ -64,6 +67,7 @@ const DIGITAL_CATEGORIES = [
   },
   {
     name: "Photography",
+    translationKey: "photography",
     icon: Camera,
     tags: ["cat:photography", "tag:photos", "tag:virtual-tours", "tag:3d-tours"],
     description: "Stunning listing visuals",
@@ -72,6 +76,7 @@ const DIGITAL_CATEGORIES = [
   },
   {
     name: "SEO",
+    translationKey: "seo",
     icon: Search,
     tags: ["cat:seo", "tag:search-optimization", "tag:local-seo"],
     description: "Rank higher online",
@@ -80,6 +85,7 @@ const DIGITAL_CATEGORIES = [
   },
   {
     name: "Coaching",
+    translationKey: "coaching",
     icon: GraduationCap,
     tags: ["cat:coaching", "tag:training", "tag:mentoring"],
     description: "Accelerate your growth",
@@ -88,6 +94,7 @@ const DIGITAL_CATEGORIES = [
   },
   {
     name: "Automation",
+    translationKey: "automation",
     icon: Bot,
     tags: ["cat:marketing-automation", "tag:email-marketing", "tag:drip-campaigns"],
     description: "Automate your marketing",
@@ -96,6 +103,7 @@ const DIGITAL_CATEGORIES = [
   },
   {
     name: "Video & Media",
+    translationKey: "videoMedia",
     icon: Play,
     tags: ["cat:video-media", "tag:video-production", "tag:social-media"],
     description: "Create engaging content",
@@ -104,6 +112,7 @@ const DIGITAL_CATEGORIES = [
   },
   {
     name: "Listing & Showing",
+    translationKey: "listingShowing",
     icon: Home,
     tags: ["cat:listing-showing", "tag:listing-management", "tag:showing-tools"],
     description: "Streamline property sales",
@@ -112,6 +121,7 @@ const DIGITAL_CATEGORIES = [
   },
   {
     name: "Data & Analytics",
+    translationKey: "dataAnalytics",
     icon: BarChart3,
     tags: ["cat:data-analytics", "tag:market-data", "tag:reporting"],
     description: "Make data-driven decisions",
@@ -120,6 +130,7 @@ const DIGITAL_CATEGORIES = [
   },
   {
     name: "Finance & Ops",
+    translationKey: "financeOps",
     icon: Calculator,
     tags: ["cat:finance-business", "tag:accounting", "tag:business-tools"],
     description: "Manage your finances",
@@ -128,6 +139,7 @@ const DIGITAL_CATEGORIES = [
   },
   {
     name: "Productivity",
+    translationKey: "productivity",
     icon: Zap,
     tags: ["cat:productivity", "tag:task-management", "tag:collaboration"],
     description: "Work more efficiently",
@@ -136,6 +148,7 @@ const DIGITAL_CATEGORIES = [
   },
   {
     name: "Virtual Assistants & Dialers",
+    translationKey: "virtualAssistants",
     icon: Headphones,
     tags: ["cat:virtual-assistants", "tag:vas", "tag:dialers", "tag:calling"],
     description: "Scale with remote support",
@@ -144,6 +157,7 @@ const DIGITAL_CATEGORIES = [
   },
   {
     name: "Team & Recruiting",
+    translationKey: "teamRecruiting",
     icon: UserPlus,
     tags: ["cat:team-recruiting", "tag:hiring", "tag:team-management"],
     description: "Build your dream team",
@@ -152,6 +166,7 @@ const DIGITAL_CATEGORIES = [
   },
   {
     name: "Insurance & Compliance",
+    translationKey: "insuranceCompliance",
     icon: ShieldCheck,
     tags: ["cat:insurance-compliance", "tag:insurance", "tag:compliance", "tag:e-o"],
     description: "Protect your business",
@@ -160,6 +175,7 @@ const DIGITAL_CATEGORIES = [
   },
   {
     name: "CE & Licensing",
+    translationKey: "ceLicensing",
     icon: Award,
     tags: ["cat:ce-licensing", "tag:continuing-education", "tag:licenses"],
     description: "Stay licensed & current",
@@ -172,6 +188,7 @@ const DIGITAL_CATEGORIES = [
 const OLD_SCHOOL_CATEGORIES = [
   {
     name: "Client Event Kits",
+    translationKey: "clientEventKits",
     icon: Gift,
     tags: ["cat:client-events", "tag:events", "tag:hosting"],
     description: "Host memorable events",
@@ -180,6 +197,7 @@ const OLD_SCHOOL_CATEGORIES = [
   },
   {
     name: "Client Gifting",
+    translationKey: "clientGifting",
     icon: Gift,
     tags: ["cat:client-gifting", "tag:gifts", "tag:appreciation", "tag:closing-gifts"],
     description: "Show client appreciation",
@@ -188,6 +206,7 @@ const OLD_SCHOOL_CATEGORIES = [
   },
   {
     name: "Open House",
+    translationKey: "openHouse",
     icon: Home,
     tags: ["cat:open-house-kits", "tag:open-house", "tag:signage"],
     description: "Professional open houses",
@@ -196,6 +215,7 @@ const OLD_SCHOOL_CATEGORIES = [
   },
   {
     name: "Print & Mail",
+    translationKey: "printMail",
     icon: Mail,
     tags: ["cat:print-mail", "tag:postcards", "tag:mailers", "tag:print"],
     description: "Direct mail campaigns",
@@ -204,6 +224,7 @@ const OLD_SCHOOL_CATEGORIES = [
   },
   {
     name: "Signage & Branding",
+    translationKey: "signageBranding",
     icon: FileText,
     tags: ["cat:signs", "tag:branding", "tag:yard-signs", "tag:car-wraps", "tag:merchandise"],
     description: "Stand-out signs & swag",
@@ -212,6 +233,7 @@ const OLD_SCHOOL_CATEGORIES = [
   },
   {
     name: "Presentations",
+    translationKey: "presentations",
     icon: Presentation,
     tags: ["cat:presentations", "tag:listing-presentations", "tag:buyer-presentations"],
     description: "Win more listings",
@@ -220,6 +242,7 @@ const OLD_SCHOOL_CATEGORIES = [
   },
   {
     name: "Lockboxes",
+    translationKey: "lockboxes",
     icon: Lock,
     tags: ["cat:lockboxes", "tag:lockbox", "tag:access-tools", "tag:showing-tools"],
     description: "Secure property access",
@@ -228,6 +251,7 @@ const OLD_SCHOOL_CATEGORIES = [
   },
   {
     name: "Pop-By Kits",
+    translationKey: "popByKits",
     icon: Gift,
     tags: ["cat:pop-by-kits", "tag:popby", "tag:pop-by", "tag:client-touch"],
     description: "Stay top-of-mind",
@@ -236,6 +260,7 @@ const OLD_SCHOOL_CATEGORIES = [
   },
   {
     name: "Transaction Coordinator",
+    translationKey: "transactionCoordinator",
     icon: FileText,
     tags: ["cat:transaction-coordinator", "tag:tc", "tag:transaction-management"],
     description: "Smooth transactions",
@@ -282,6 +307,14 @@ export const CategoryBlocks = ({ onCategoryClick, services, allServices, activeF
           const IconComponent = category.icon;
           const isActive = activeFilters.some(filter => category.tags.includes(filter));
           
+          // Get translated name and description
+          const translatedName = t(`categories.${category.translationKey}`) !== `categories.${category.translationKey}` 
+            ? t(`categories.${category.translationKey}`) 
+            : category.name;
+          const translatedDescription = t(`categories.${category.translationKey}Description`) !== `categories.${category.translationKey}Description` 
+            ? t(`categories.${category.translationKey}Description`) 
+            : category.description;
+          
           return (
             <Card 
               key={category.name}
@@ -312,10 +345,10 @@ export const CategoryBlocks = ({ onCategoryClick, services, allServices, activeF
                     <h4 className={`font-semibold text-sm group-hover:text-primary transition-colors ${
                       isActive ? 'text-primary' : ''
                     }`}>
-                      {category.name}
+                      {translatedName}
                     </h4>
                     <p className="text-xs text-muted-foreground">
-                      {category.description}
+                      {translatedDescription}
                     </p>
                   </div>
                 </div>
