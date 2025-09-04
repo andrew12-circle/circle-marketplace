@@ -35,9 +35,21 @@ export const Admin = () => {
       try {
         console.log('Checking admin status for user:', user.id);
         
-        // Use a longer timeout for the RPC call to prevent timeouts
+        // Try direct admin check first (bypass circuit breaker)
+        const { data: adminData, error: adminError } = await supabase
+          .rpc('admin_self_check_enhanced')
+          .single();
+        
+        if (!adminError && adminData && (adminData as any)?.profile_data?.is_admin) {
+          console.log('Admin status confirmed via direct check');
+          setIsAdmin(true);
+          setIsLoading(false);
+          return;
+        }
+
+        // Fallback to regular RPC with timeout
         const timeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error('RPC timeout')), 8000); // Increased from 3 to 8 seconds
+          setTimeout(() => reject(new Error('RPC timeout')), 8000);
         });
         
         const rpcPromise = supabase.rpc('get_user_admin_status');

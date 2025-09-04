@@ -20,7 +20,9 @@ const NOISY_PATTERNS = [
   'Unrecognized feature',
   'ambient-light-sensor',
   'battery',
-  'vr'
+  'vr',
+  'Max reconnect attempts',
+  'Failed to execute \'observe\' on \'MutationObserver\''
 ];
 
 export function devLog(...args: any[]) {
