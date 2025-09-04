@@ -431,6 +431,17 @@ export const ServiceCard = ({
   // Helper functions to get localized content
   const getLocalizedTitle = () => {
     const currentLang = i18n.language;
+    console.log('Debug title localization:', {
+      currentLang,
+      serviceId: service.id,
+      hasTitle: !!service.title,
+      hasTitleEs: !!service.title_es,
+      hasTitleFr: !!service.title_fr,
+      title: service.title,
+      title_es: service.title_es,
+      title_fr: service.title_fr
+    });
+    
     if (currentLang === 'es' && service.title_es) {
       return service.title_es;
     }
@@ -442,6 +453,17 @@ export const ServiceCard = ({
 
   const getLocalizedDescription = () => {
     const currentLang = i18n.language;
+    console.log('Debug localization:', {
+      currentLang,
+      serviceId: service.id,
+      hasDescription: !!service.description,
+      hasDescriptionEs: !!service.description_es,
+      hasDescriptionFr: !!service.description_fr,
+      description: service.description,
+      description_es: service.description_es,
+      description_fr: service.description_fr
+    });
+    
     if (currentLang === 'es' && service.description_es) {
       return service.description_es;
     }
