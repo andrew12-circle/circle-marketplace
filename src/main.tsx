@@ -125,7 +125,25 @@ if (typeof window !== 'undefined') {
   (window as any).reportClientError = reportClientError;
 }
 
-createRoot(document.getElementById("root")!).render(
+// Prevent multiple React roots during hot reload
+const rootElement = document.getElementById("root")!;
+let root: any;
+
+if (!rootElement.hasAttribute('data-react-root')) {
+  root = createRoot(rootElement);
+  rootElement.setAttribute('data-react-root', 'true');
+  // Store root globally for hot reload
+  (window as any).__reactRoot = root;
+} else {
+  // Get existing root for hot reload
+  root = (window as any).__reactRoot;
+  if (!root) {
+    root = createRoot(rootElement);
+    (window as any).__reactRoot = root;
+  }
+}
+
+root.render(
   <ErrorBoundaryWithQA section="Application Root">
     <QueryClientProvider client={queryClient}>
       <SpiritualCoverageProvider>

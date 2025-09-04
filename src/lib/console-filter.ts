@@ -95,8 +95,20 @@ if (typeof window !== 'undefined') {
   };
 
   console.log = (...args: any[]) => {
-    // Don't filter regular logs, but could be extended
-    originalConsole.log(...args);
+    const message = String(args[0] ?? '');
+    // Filter out extension and external script noise from console.log too
+    const isFilteredMessage = [
+      'web-client-content-script.js',
+      'MutationObserver',
+      'Failed to execute \'observe\' on \'MutationObserver\'',
+      'parameter 1 is not of type \'Node\'',
+      'HTMLIFrameElement.<anonymous>',
+      'content-script'
+    ].some(pattern => message.includes(pattern));
+    
+    if (!isFilteredMessage) {
+      originalConsole.log(...args);
+    }
   };
 
   // Handle unhandled promise rejections
