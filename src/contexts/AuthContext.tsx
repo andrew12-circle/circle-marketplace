@@ -115,6 +115,33 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       return;
     }
 
+    // ADMIN BYPASS: Check if user is in admin allowlist FIRST (before any caching or circuit breaker)
+    const currentUser = user;
+    const isAdminUser = currentUser?.email && ['robert@circlenetwork.io', 'andrew@heisleyteam.com'].includes(currentUser.email.toLowerCase());
+    
+    if (isAdminUser) {
+      logger.log('Admin user detected, bypassing all restrictions for:', currentUser.email);
+      // Create admin profile immediately to prevent lockouts
+      const adminProfile = {
+        user_id: userId,
+        display_name: currentUser.email.split('@')[0],
+        is_admin: true,
+        specialties: ['admin'],
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        is_verified: true,
+        is_pro: true,
+        is_creator: true
+      };
+      setProfile(adminProfile);
+      // Cache it
+      const now = Date.now();
+      setProfileCache(prev => new Map(prev.set(userId, { profile: adminProfile, timestamp: now })));
+      setRetryCount(0);
+      setIsCircuitBreakerOpen(false); // Reset circuit breaker for admin
+      return;
+    }
+
     // Check cache first - 30 second cache
     const cached = profileCache.get(userId);
     const now = Date.now();
@@ -131,41 +158,65 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
     setLastFetchAttempt(now);
 
-    // Admin fallback: if circuit breaker is open but we're on admin route, try admin check
+    // Circuit breaker check - but with admin recovery
     if (isCircuitBreakerOpen) {
-      // For admin users, always try admin fallback regardless of route
       logger.log('Circuit breaker open, trying admin fallback for user');
       try {
-        const { data: adminData, error: adminError } = await supabase
-          .rpc('admin_self_check_enhanced')
-          .single();
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Admin fallback timeout')), 1000); // Very short timeout
+        });
+        
+        const { data: adminData, error: adminError } = await Promise.race([
+          supabase.rpc('admin_self_check_enhanced').single(),
+          timeoutPromise
+        ]) as any;
         
         if (!adminError && adminData?.profile_data) {
           logger.log('Admin profile fetched via admin_self_check_enhanced fallback');
           const adminProfile = {
             user_id: userId,
-            display_name: adminData.profile_data.display_name,
-            is_admin: adminData.profile_data.is_admin,
-            specialties: adminData.profile_data.specialties || [],
+            display_name: adminData.profile_data.display_name || 'Admin User',
+            is_admin: adminData.profile_data.is_admin || true,
+            specialties: adminData.profile_data.specialties || ['admin'],
             created_at: adminData.profile_data.created_at,
             updated_at: new Date().toISOString(),
-            is_verified: false,
-            is_pro: false,
+            is_verified: true,
+            is_pro: true,
             is_creator: false
           };
           setProfile(adminProfile);
-          // Cache the profile
           setProfileCache(prev => new Map(prev.set(userId, { profile: adminProfile, timestamp: now })));
           setRetryCount(0);
-          setIsCircuitBreakerOpen(false); // Reset circuit breaker on admin success
+          setIsCircuitBreakerOpen(false); // Reset circuit breaker on success
           return;
         }
       } catch (adminError) {
         logger.warn('Admin fallback failed:', adminError);
       }
       
-      // If admin fallback fails, skip normal fetch
-      logger.warn('Circuit breaker open, skipping profile fetch');
+      // Final admin safety net - if we're still in circuit breaker mode, don't block admins
+      if (currentUser?.email) {
+        const potentialAdminEmails = ['robert@circlenetwork.io', 'andrew@heisleyteam.com', 'andrew@circlenetwork.io'];
+        if (potentialAdminEmails.includes(currentUser.email.toLowerCase())) {
+          logger.log('Creating emergency admin profile to prevent lockout');
+          const emergencyProfile = {
+            user_id: userId,
+            display_name: currentUser.email.split('@')[0],
+            is_admin: true,
+            specialties: ['admin'],
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            is_verified: true,
+            is_pro: true,
+            is_creator: true
+          };
+          setProfile(emergencyProfile);
+          setProfileCache(prev => new Map(prev.set(userId, { profile: emergencyProfile, timestamp: now })));
+          return;
+        }
+      }
+      
+      logger.warn('Circuit breaker open, skipping profile fetch for non-admin user');
       return;
     }
 

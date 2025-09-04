@@ -116,8 +116,9 @@ export default function AdminDashboard() {
     toggleVerificationStatus
   } = useSecureAdminOperations();
 
-  // Check if user is admin
-  const isAdmin = profile?.is_admin || false;
+  // Check if user is admin - with admin allowlist bypass for critical users
+  const isKnownAdmin = user?.email && ['robert@circlenetwork.io', 'andrew@heisleyteam.com'].includes(user.email.toLowerCase());
+  const isAdmin = profile?.is_admin || isKnownAdmin || false;
 
   useEffect(() => {
     if (!loading && (!user || !isAdmin)) {
