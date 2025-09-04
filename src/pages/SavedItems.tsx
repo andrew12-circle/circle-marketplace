@@ -612,21 +612,6 @@ export const SavedItems = () => {
                   )}
                 </div>
                 
-                {/* Tags */}
-                {item.services.tags && item.services.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-1">
-                    {item.services.tags.slice(0, 3).map((tag) => (
-                      <Badge key={tag} variant="secondary" className="text-xs">
-                        {tag}
-                      </Badge>
-                    ))}
-                    {item.services.tags.length > 3 && (
-                      <span className="text-xs text-muted-foreground">
-                        +{item.services.tags.length - 3} more
-                      </span>
-                    )}
-                  </div>
-                )}
                 
                 {/* Notes Section */}
                 <div className="space-y-2">
