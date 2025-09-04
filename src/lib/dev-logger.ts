@@ -4,6 +4,7 @@ const NOISY_PATTERNS = [
   'chrome-extension://',
   'LastPass',
   'web-client-content-script.js',
+  'eb-client-content-script.js',
   'Invalid frameId',
   'duplicate id',
   'Extension context invalidated',
@@ -14,7 +15,12 @@ const NOISY_PATTERNS = [
   'Cannot find menu item with id Add Item',
   'Unchecked runtime.lastError',
   'stripe.com',
-  'm-outer-'
+  'm-outer-',
+  'MutationObserver',
+  'Unrecognized feature',
+  'ambient-light-sensor',
+  'battery',
+  'vr'
 ];
 
 export function devLog(...args: any[]) {
