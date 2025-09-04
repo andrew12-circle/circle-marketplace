@@ -553,7 +553,7 @@ export const SavedItems = () => {
                     <img 
                       src={item.services.image_url || "/placeholder.svg"} 
                       alt={item.services.title}
-                      className="w-20 h-20 rounded-lg object-cover"
+                      className="w-20 h-20 rounded-lg object-contain"
                     />
                     <div className="flex-1">
                       <CardTitle className="text-lg leading-tight">
