@@ -148,11 +148,11 @@ export const ServiceCard = ({
 
     if (!user) {
       toast({
-        title: "Sign in to save",
-        description: "Sign in or create a free account to save favorites.",
+        title: t('serviceCard.signInToSave'),
+        description: t('serviceCard.signInToSaveDescription'),
         action: (
           <ToastAction altText="Go to sign in" onClick={() => navigate('/auth')}>
-            Sign in / Create account
+            {t('serviceCard.signInCreateAccount')}
           </ToastAction>
         ),
       });
@@ -161,8 +161,8 @@ export const ServiceCard = ({
 
     onSave?.(service.id);
     toast({
-      title: isSaved ? "Removed from saved" : "Saved to favorites",
-      description: isSaved ? "Service removed from your saved list" : "Service added to your saved list",
+      title: isSaved ? t('serviceCard.removedFromSaved') : t('serviceCard.savedToFavorites'),
+      description: isSaved ? t('serviceCard.removedDescription') : t('serviceCard.savedDescription'),
     });
   };
 
@@ -210,8 +210,8 @@ export const ServiceCard = ({
     // Critical: Validate pricing integrity before adding to cart
     if (finalPrice === 0) {
       toast({
-        title: "Pricing Error",
-        description: "Unable to determine valid price. Please contact support.",
+        title: t('serviceCard.pricingError'),
+        description: t('serviceCard.pricingErrorDescription'),
         variant: "destructive",
       });
       return;
@@ -242,8 +242,8 @@ export const ServiceCard = ({
     const isPriceValid = await validateCartPricing(service.id, finalPrice);
     if (!isPriceValid) {
       toast({
-        title: "Price Validation Failed",
-        description: "Price mismatch detected. Please refresh and try again.",
+        title: t('serviceCard.priceValidationFailed'),
+        description: t('serviceCard.priceValidationDescription'),
         variant: "destructive",
       });
       return;
@@ -403,8 +403,8 @@ export const ServiceCard = ({
         try {
           await navigator.clipboard.writeText(shareUrl);
           toast({
-            title: "Link copied!",
-            description: "Deal link has been copied to your clipboard.",
+            title: t('serviceCard.linkCopied'),
+            description: t('serviceCard.linkCopiedDescription'),
           });
         } catch (error) {
           // Fallback for older browsers
@@ -416,8 +416,8 @@ export const ServiceCard = ({
           document.body.removeChild(textArea);
           
           toast({
-            title: "Link copied!",
-            description: "Deal link has been copied to your clipboard.",
+            title: t('serviceCard.linkCopied'),
+            description: t('serviceCard.linkCopiedDescription'),
           });
         }
         break;
@@ -493,7 +493,7 @@ export const ServiceCard = ({
                     onClick={() => handleShareOption('sms')}
                   >
                     <MessageCircle className="h-4 w-4 mr-2" />
-                    Text Message
+                    {t('serviceCard.textMessage')}
                   </Button>
                   <Button
                     variant="ghost"
@@ -502,7 +502,7 @@ export const ServiceCard = ({
                     onClick={() => handleShareOption('email')}
                   >
                     <MessageCircle className="h-4 w-4 mr-2" />
-                    Email
+                    {t('serviceCard.email')}
                   </Button>
                   <Button
                     variant="ghost"
@@ -511,7 +511,7 @@ export const ServiceCard = ({
                     onClick={() => handleShareOption('copy')}
                   >
                     <ArrowRight className="h-4 w-4 mr-2" />
-                    Copy Link
+                    {t('serviceCard.copyLink')}
                   </Button>
                 </div>
               </PopoverContent>
@@ -546,7 +546,7 @@ export const ServiceCard = ({
                   setIsDescriptionExpanded(!isDescriptionExpanded);
                 }}
               >
-                {isDescriptionExpanded ? 'See less' : 'See more'}
+                {isDescriptionExpanded ? t('serviceCard.seeLess') : t('serviceCard.seeMore')}
               </button>
             )}
           </div>
@@ -581,7 +581,7 @@ export const ServiceCard = ({
                     <div className="text-center space-y-3">
                       {/* Discount Pending Status */}
                       <div className="inline-flex items-center gap-2 bg-amber-100 text-amber-800 text-sm font-medium px-3 py-1 rounded-full">
-                        <span>Discount Pending</span>
+                        <span>{t('serviceCard.discountPending')}</span>
                       </div>
                       
                       {/* Interest CTA */}
@@ -597,7 +597,7 @@ export const ServiceCard = ({
                           disabled={demandSignals.hasLiked}
                         >
                           <ThumbsUp className={`w-4 h-4 mr-2 ${demandSignals.hasLiked ? 'fill-current' : ''}`} />
-                          {demandSignals.hasLiked ? "Thanks! We'll keep you posted" : "I'd use this with a discount"}
+                          {demandSignals.hasLiked ? t('serviceCard.thanksSeeYouPosted') : t('serviceCard.useWithDiscount')}
                         </Button>
                         
                         {/* Social proof counter */}
@@ -706,7 +706,7 @@ export const ServiceCard = ({
                   {/* Non-Pro Member View: Show retail as main price, others as incentives */}
                   {service.retail_price && (
                     <div className="flex items-center justify-between mt-4">
-                      <span className="text-sm text-muted-foreground">List Price:</span>
+                      <span className="text-sm text-muted-foreground">{t('serviceCard.listPrice')}</span>
                       <span className="text-xl font-bold text-foreground">
                         {formatPrice(extractNumericPrice(service.retail_price), service.price_duration || 'mo')}
                       </span>
@@ -718,7 +718,7 @@ export const ServiceCard = ({
                       {/* Show Circle Pro price only if service is verified and has pro price */}
                       {service.is_verified && service.pro_price ? (
                         <div className="flex items-center justify-between text-sm">
-                          <span className="text-muted-foreground">Circle Pro:</span>
+                          <span className="text-muted-foreground">{t('serviceCard.circlePro')}</span>
                           <span className="font-semibold text-primary">
                             {formatPrice(extractNumericPrice(service.pro_price), service.price_duration || 'mo')}
                           </span>
@@ -727,7 +727,7 @@ export const ServiceCard = ({
                         <div className="p-2 bg-amber-50 rounded-lg border border-amber-200">
                           <div className="flex items-center justify-between">
                             <span className="text-xs text-amber-700">
-                              Upvote if you'd buy at a discount
+                              {t('serviceCard.upvoteDiscount')}
                             </span>
                             <div className="flex items-center gap-1">
                               {demandSignals.totalLikes > 0 && (
@@ -774,7 +774,7 @@ export const ServiceCard = ({
                             <div className="flex items-center justify-between p-2 bg-circle-primary/5 rounded-lg border border-circle-primary/20 opacity-75 cursor-pointer">
                               <div className="flex items-center gap-1">
                                 <Lock className="w-3 h-3 text-circle-primary" />
-                                <span className="text-sm font-medium text-circle-primary">Circle Pro Price:</span>
+                                <span className="text-sm font-medium text-circle-primary">{t('serviceCard.circleProPrice')}</span>
                                 <Crown className="w-4 h-4 text-circle-primary" />
                               </div>
                               <span className="text-lg font-bold text-circle-primary">
@@ -798,7 +798,7 @@ export const ServiceCard = ({
                             <div className="flex items-center justify-between p-2 bg-green-50 rounded-lg border border-green-200 opacity-75 cursor-pointer hover:opacity-100 transition-opacity" data-tour="copay-badge">
                               <div className="flex items-center gap-1">
                                 <Lock className="w-3 h-3 text-green-600" />
-                                <span className="text-sm font-medium text-green-600">Potential Co-Pay:</span>
+                                <span className="text-sm font-medium text-green-600">{t('serviceCard.potentialCoPay')}</span>
                                <button 
                                  className="w-3 h-3 rounded-full bg-green-600 flex items-center justify-center cursor-help hover:bg-green-700 transition-colors"
                                  onMouseEnter={() => {
@@ -824,8 +824,8 @@ export const ServiceCard = ({
                        </Tooltip>
                        {discountPercentage && discountPercentage > 0 && (
                          <div className="flex justify-end">
-                           <Badge className="bg-red-500 text-white text-xs font-medium">
-                             {discountPercentage}% OFF
+                            <Badge className="bg-red-500 text-white text-xs font-medium">
+                              {discountPercentage}{t('serviceCard.percentOff')}
                            </Badge>
                          </div>
                        )}
@@ -845,7 +845,7 @@ export const ServiceCard = ({
                   onClick={handleAddToCart}
                 >
                   <ShoppingCart className="w-4 h-4 mr-1" />
-                  Add to Cart
+                  {t('serviceCard.addToCart')}
                 </Button>
               ) : service.direct_purchase_enabled && service.website_url ? (
                 <>
@@ -857,7 +857,7 @@ export const ServiceCard = ({
                     onClick={handleAddToCart}
                   >
                     <ShoppingCart className="w-4 h-4 mr-1" />
-                    Add to Cart
+                    {t('serviceCard.addToCart')}
                   </Button>
                 </>
               ) : (
@@ -872,7 +872,7 @@ export const ServiceCard = ({
                     }}
                   >
                     <Calendar className="w-4 h-4 mr-1" />
-                    Book Consultation
+                    {t('serviceCard.bookConsultation')}
                   </Button>
                   
                   {/* Add to Cart Button */}
@@ -883,7 +883,7 @@ export const ServiceCard = ({
                     onClick={handleAddToCart}
                   >
                     <ShoppingCart className="w-4 h-4 mr-1" />
-                    Add to Cart
+                    {t('serviceCard.addToCart')}
                   </Button>
                 </>
               )}
@@ -895,7 +895,7 @@ export const ServiceCard = ({
                 onClick={handleViewDetailsButton}
                 data-tour="view-details-button"
               >
-                Learn more
+                {t('serviceCard.learnMore')}
               </Button>
             </div>
           </CardContent>
@@ -996,8 +996,8 @@ export const ServiceCard = ({
           onPurchaseComplete={() => {
             // After successful purchase, redirect to onboarding booking
             toast({
-              title: "Purchase successful!",
-              description: "You'll now be redirected to book your onboarding session.",
+              title: t('serviceCard.purchaseSuccessful'),
+              description: t('serviceCard.purchaseSuccessfulDescription'),
             });
             // Optional: Open consultation flow for onboarding booking
             setIsConsultationFlowOpen(true);

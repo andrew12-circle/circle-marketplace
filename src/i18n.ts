@@ -200,6 +200,42 @@ const resources = {
         more: "more",
         addToWallet: "Add to Wallet",
         requestCoMarketing: "Request Co-Marketing"
+      },
+      
+      // Service Card
+      serviceCard: {
+        textMessage: "Text Message",
+        email: "Email", 
+        copyLink: "Copy Link",
+        seeMore: "See more",
+        seeLess: "See less",
+        discountPending: "Discount Pending",
+        thanksSeeYouPosted: "Thanks! We'll keep you posted",
+        useWithDiscount: "I'd use this with a discount",
+        listPrice: "List Price:",
+        circlePro: "Circle Pro:",
+        upvoteDiscount: "Upvote if you'd buy at a discount",
+        circleProPrice: "Circle Pro Price:",
+        potentialCoPay: "Potential Co-Pay:",
+        percentOff: "% OFF",
+        addToCart: "Add to Cart",
+        bookConsultation: "Book Consultation",
+        learnMore: "Learn more",
+        linkCopied: "Link copied!",
+        linkCopiedDescription: "Deal link has been copied to your clipboard.",
+        signInToSave: "Sign in to save",
+        signInToSaveDescription: "Sign in or create a free account to save favorites.",
+        signInCreateAccount: "Sign in / Create account",
+        removedFromSaved: "Removed from saved",
+        removedDescription: "Service removed from your saved list",
+        savedToFavorites: "Saved to favorites",
+        savedDescription: "Service added to your saved list",
+        pricingError: "Pricing Error",
+        pricingErrorDescription: "Unable to determine valid price. Please contact support.",
+        priceValidationFailed: "Price Validation Failed",
+        priceValidationDescription: "Price mismatch detected. Please refresh and try again.",
+        purchaseSuccessful: "Purchase successful!",
+        purchaseSuccessfulDescription: "You'll now be redirected to book your onboarding session."
       }
     }
   },
@@ -401,6 +437,42 @@ const resources = {
         more: "más",
         addToWallet: "Agregar a Cartera",
         requestCoMarketing: "Solicitar Co-Marketing"
+      },
+      
+      // Service Card
+      serviceCard: {
+        textMessage: "Mensaje de Texto",
+        email: "Correo Electrónico",
+        copyLink: "Copiar Enlace",
+        seeMore: "Ver más",
+        seeLess: "Ver menos",
+        discountPending: "Descuento Pendiente",
+        thanksSeeYouPosted: "¡Gracias! Te mantendremos informado",
+        useWithDiscount: "Lo usaría con un descuento",
+        listPrice: "Precio de Lista:",
+        circlePro: "Circle Pro:",
+        upvoteDiscount: "Vota si comprarías con descuento",
+        circleProPrice: "Precio Circle Pro:",
+        potentialCoPay: "Co-Pago Potencial:",
+        percentOff: "% DESC",
+        addToCart: "Agregar al Carrito",
+        bookConsultation: "Reservar Consulta",
+        learnMore: "Saber más",
+        linkCopied: "¡Enlace copiado!",
+        linkCopiedDescription: "El enlace de la oferta se ha copiado a tu portapapeles.",
+        signInToSave: "Inicia sesión para guardar",
+        signInToSaveDescription: "Inicia sesión o crea una cuenta gratuita para guardar favoritos.",
+        signInCreateAccount: "Iniciar sesión / Crear cuenta",
+        removedFromSaved: "Removido de guardados",
+        removedDescription: "Servicio removido de tu lista de guardados",
+        savedToFavorites: "Guardado en favoritos",
+        savedDescription: "Servicio agregado a tu lista de guardados",
+        pricingError: "Error de Precio",
+        pricingErrorDescription: "No se puede determinar un precio válido. Por favor contacta soporte.",
+        priceValidationFailed: "Validación de Precio Falló",
+        priceValidationDescription: "Discrepancia de precio detectada. Por favor actualiza e intenta de nuevo.",
+        purchaseSuccessful: "¡Compra exitosa!",
+        purchaseSuccessfulDescription: "Ahora serás redirigido para reservar tu sesión de incorporación."
       }
     }
   },
@@ -602,6 +674,42 @@ const resources = {
         more: "plus",
         addToWallet: "Ajouter au Portefeuille",
         requestCoMarketing: "Demander Co-Marketing"
+      },
+      
+      // Service Card
+      serviceCard: {
+        textMessage: "Message Texte",
+        email: "E-mail",
+        copyLink: "Copier le Lien",
+        seeMore: "Voir plus",
+        seeLess: "Voir moins",
+        discountPending: "Remise En Attente",
+        thanksSeeYouPosted: "Merci! Nous vous tiendrons au courant",
+        useWithDiscount: "Je l'utiliserais avec une remise",
+        listPrice: "Prix de Liste:",
+        circlePro: "Circle Pro:",
+        upvoteDiscount: "Votez si vous achèteriez avec une remise",
+        circleProPrice: "Prix Circle Pro:",
+        potentialCoPay: "Co-Paiement Potentiel:",
+        percentOff: "% REMISE",
+        addToCart: "Ajouter au Panier",
+        bookConsultation: "Réserver une Consultation",
+        learnMore: "En savoir plus",
+        linkCopied: "Lien copié!",
+        linkCopiedDescription: "Le lien de l'offre a été copié dans votre presse-papiers.",
+        signInToSave: "Connectez-vous pour sauvegarder",
+        signInToSaveDescription: "Connectez-vous ou créez un compte gratuit pour sauvegarder les favoris.",
+        signInCreateAccount: "Se connecter / Créer un compte",
+        removedFromSaved: "Retiré des sauvegardés",
+        removedDescription: "Service retiré de votre liste sauvegardée",
+        savedToFavorites: "Sauvegardé dans les favoris",
+        savedDescription: "Service ajouté à votre liste sauvegardée",
+        pricingError: "Erreur de Prix",
+        pricingErrorDescription: "Impossible de déterminer un prix valide. Veuillez contacter le support.",
+        priceValidationFailed: "Validation de Prix Échouée",
+        priceValidationDescription: "Discordance de prix détectée. Veuillez actualiser et réessayer.",
+        purchaseSuccessful: "Achat réussi!",
+        purchaseSuccessfulDescription: "Vous allez maintenant être redirigé pour réserver votre session d'intégration."
       }
     }
   }
