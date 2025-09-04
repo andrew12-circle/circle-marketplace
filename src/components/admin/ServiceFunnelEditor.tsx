@@ -69,7 +69,7 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
   const [hasChanges, setHasChanges] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const { toast } = useToast();
-  const { invalidateAll } = useInvalidateMarketplace();
+  const { invalidateServices } = useInvalidateMarketplace();
   const { save: resilientSave, isSaving } = useResilientSave({
     maxRetries: 3,
     retryDelay: 1500,
@@ -252,19 +252,20 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
 
     onUpdate(updatedService);
     
-    // Background cache operations (non-blocking)
-    setTimeout(async () => {
-      try {
-        await supabase.functions.invoke('warm-marketplace-cache');
-        console.log("[Admin ServiceFunnelEditor] Cache warmed successfully");
-      } catch (e) {
-        console.warn('[Admin ServiceFunnelEditor] Cache warm failed', e);
-      }
-      invalidateAll();
-    }, 100);
+      // Background cache operations (non-blocking) - narrow invalidation only
+      setTimeout(async () => {
+        try {
+          await supabase.functions.invoke('warm-marketplace-cache');
+          console.log("[Admin ServiceFunnelEditor] Cache warmed successfully");
+        } catch (e) {
+          console.warn('[Admin ServiceFunnelEditor] Cache warm failed', e);
+        }
+        // Only invalidate services, not everything
+        invalidateServices();
+      }, 100);
     
     return response;
-  }, [service, onUpdate, invalidateAll]);
+  }, [service, onUpdate, invalidateServices]);
 
   const handleSave = async () => {
     try {

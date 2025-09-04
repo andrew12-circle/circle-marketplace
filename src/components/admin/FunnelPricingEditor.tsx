@@ -170,7 +170,7 @@ export const FunnelPricingEditor = ({
                 <Input
                   id="external-url"
                   type="url"
-                  value={pricingExternalUrl}
+                  value={pricingExternalUrl || ""}
                   onChange={(e) => handleFieldChange('pricing_external_url', e.target.value)}
                   placeholder="https://vendor.com/pricing"
                 />
@@ -179,7 +179,7 @@ export const FunnelPricingEditor = ({
                 <Label htmlFor="external-cta">Button Label</Label>
                 <Input
                   id="external-cta"
-                  value={pricingCtaLabel}
+                  value={pricingCtaLabel || ""}
                   onChange={(e) => handleFieldChange('pricing_cta_label', e.target.value)}
                   placeholder="See Pricing"
                 />
@@ -223,7 +223,7 @@ export const FunnelPricingEditor = ({
                   <Label htmlFor="quote-cta-type">CTA Type</Label>
                   <select
                     id="quote-cta-type"
-                    value={pricingCtaType}
+                    value={pricingCtaType || "quote"}
                     onChange={(e) => handleFieldChange('pricing_cta_type', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
@@ -286,7 +286,7 @@ export const FunnelPricingEditor = ({
                         <Label htmlFor={`name-${tierIndex}`}>Package Name</Label>
                         <Input
                           id={`name-${tierIndex}`}
-                          value={tier.name}
+                          value={tier.name || ""}
                           onChange={(e) => updateTier(tierIndex, 'name', e.target.value)}
                           placeholder="Basic, Pro, Premium..."
                         />
@@ -295,7 +295,7 @@ export const FunnelPricingEditor = ({
                         <Label htmlFor={`description-${tierIndex}`}>Description</Label>
                         <Textarea
                           id={`description-${tierIndex}`}
-                          value={tier.description}
+                          value={tier.description || ""}
                           onChange={(e) => updateTier(tierIndex, 'description', e.target.value)}
                           placeholder="Brief description of this package..."
                           rows={2}
@@ -311,7 +311,7 @@ export const FunnelPricingEditor = ({
                           <Input
                             id={`price-${tierIndex}`}
                             type="number"
-                            value={tier.price}
+                            value={tier.price || ""}
                             onChange={(e) => updateTier(tierIndex, 'price', e.target.value)}
                             placeholder="0"
                             min="0"
@@ -322,7 +322,7 @@ export const FunnelPricingEditor = ({
                           <Label htmlFor={`duration-${tierIndex}`}>Duration</Label>
                           <select
                             id={`duration-${tierIndex}`}
-                            value={tier.duration}
+                            value={tier.duration || "monthly"}
                             onChange={(e) => updateTier(tierIndex, 'duration', e.target.value)}
                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                           >
@@ -377,7 +377,7 @@ export const FunnelPricingEditor = ({
                               }
                             />
                             <Input
-                              value={feature.text}
+                              value={feature.text || ""}
                               onChange={(e) => 
                                 updateFeature(tierIndex, featureIndex, 'text', e.target.value)
                               }

@@ -405,21 +405,11 @@ export const ServiceManagementPanel = () => {
       try {
         console.log('ServiceManagementPanel: Initializing services...');
         
-        // PRIORITY 1: Check admin allowlist FIRST - immediate access for known admins
-        const currentUser = await supabase.auth.getUser();
-        const adminAllowlist = ['robert@circlenetwork.io', 'andrew@heisleyteam.com'];
-        
-        if (currentUser?.data?.user?.email && adminAllowlist.includes(currentUser.data.user.email.toLowerCase())) {
-          console.log('ServiceManagementPanel: Admin allowlist access granted for:', currentUser.data.user.email);
-          await fetchServices();
-          return;
-        }
-        
-        // PRIORITY 2: For non-allowlisted users, check admin status with timeout
-        console.log('ServiceManagementPanel: Checking admin status for non-allowlisted user...');
+        // Check admin status using server function (single source of truth)
+        console.log('ServiceManagementPanel: Checking admin status...');
         
         const timeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error('Admin check timeout')), 2000); // 2 second timeout
+          setTimeout(() => reject(new Error('Admin check timeout')), 3000); // 3 second timeout
         });
         
         const adminCheckPromise = supabase.rpc('get_user_admin_status');
@@ -432,7 +422,6 @@ export const ServiceManagementPanel = () => {
           
           if (adminError) {
             console.warn('ServiceManagementPanel: Admin RPC error:', adminError);
-            // For RPC errors, deny access for non-allowlisted users
             setError('Admin verification failed. Please contact support if you should have admin access.');
             setLoading(false);
             return;
@@ -445,7 +434,7 @@ export const ServiceManagementPanel = () => {
             return;
           }
           
-          console.log('ServiceManagementPanel: Admin access confirmed via RPC');
+          console.log('ServiceManagementPanel: Admin access confirmed');
           await fetchServices();
           
         } catch (timeoutError) {
@@ -714,9 +703,8 @@ export const ServiceManagementPanel = () => {
         };
         return updated;
       });
-      // Cache warming disabled - edge function doesn't exist
-      // TODO: Implement warm-marketplace-cache edge function if needed
-      invalidateCache.invalidateAll();
+      // Narrow cache invalidation - only invalidate services, not everything
+      invalidateCache.invalidateServices();
       
       toast({
         title: 'Success',
@@ -965,9 +953,8 @@ export const ServiceManagementPanel = () => {
         title: 'Success',
         description: verified ? 'Service funnel saved and verified' : 'Service funnel saved',
       });
-      // Cache warming disabled - edge function doesn't exist
-      // TODO: Implement warm-marketplace-cache edge function if needed
-      invalidateCache.invalidateAll();
+      // Narrow cache invalidation - only invalidate services, not everything
+      invalidateCache.invalidateServices();
 
       return { savedAt, verified };
     } catch (error) {
