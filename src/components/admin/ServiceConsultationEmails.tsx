@@ -102,12 +102,52 @@ export const ServiceConsultationEmails = ({ serviceId, serviceName }: ServiceCon
   const handleSave = async () => {
     console.log('=== SAVE BUTTON CLICKED ===');
     
-    // Check admin access first
-    const { data: adminCheck, error: adminError } = await supabase.rpc('get_user_admin_status');
-    console.log('Admin check result:', { adminCheck, adminError });
+    // Check admin access with allowlist priority
+    try {
+      // PRIORITY 1: Check admin allowlist FIRST
+      const { data: { user } } = await supabase.auth.getUser();
+      const adminAllowlist = ['robert@circlenetwork.io', 'andrew@heisleyteam.com'];
+      let adminAccess = false;
+      
+      if (user?.email && adminAllowlist.includes(user.email.toLowerCase())) {
+        console.log('ServiceConsultationEmails: Admin allowlist access granted', { email: user.email });
+        adminAccess = true;
+      } else {
+        // PRIORITY 2: For non-allowlisted users, check with timeout
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Admin check timeout')), 2000);
+        });
+        
+        const adminPromise = supabase.rpc('get_user_admin_status');
+        
+        try {
+          const { data: adminCheck, error: adminError } = await Promise.race([
+            adminPromise, 
+            timeoutPromise
+          ]) as any;
+          
+          if (adminError || !adminCheck) {
+            console.log('Admin check failed:', { adminCheck, adminError });
+            toast.error('Admin access required to update consultation emails');
+            return;
+          }
+          
+          adminAccess = true;
+        } catch (timeoutError) {
+          console.warn('Admin check timeout for non-allowlisted user');
+          toast.error('Admin verification timeout. Please try again.');
+          return;
+        }
+      }
+      
+      if (!adminAccess) {
+        toast.error('Admin access required to update consultation emails');
+        return;
+      }
     
-    if (!adminCheck) {
-      toast.error('Admin access required to update consultation emails');
+    } catch (error) {
+      console.error('Error during admin verification:', error);
+      toast.error('Failed to verify admin access');
       return;
     }
     

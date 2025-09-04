@@ -1,6 +1,9 @@
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
+// Admin allowlist for immediate access (consistent across all admin components)
+const ADMIN_ALLOWLIST = ['robert@circlenetwork.io', 'andrew@heisleyteam.com'];
+
 export interface ServiceUpdateOptions {
   batchSize?: number;
   retryAttempts?: number;
@@ -24,10 +27,26 @@ export class SecureServiceUpdater {
 
   /**
    * Validates admin access before allowing service updates
+   * Uses admin allowlist for immediate access, falls back to RPC with timeout
    */
   private static async validateAdminAccess(): Promise<boolean> {
     try {
-      const { data: isAdmin, error } = await supabase.rpc('get_user_admin_status');
+      // PRIORITY 1: Check admin allowlist FIRST - immediate access
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (user?.email && ADMIN_ALLOWLIST.includes(user.email.toLowerCase())) {
+        console.log('SecureServiceUpdater: Admin allowlist access granted', { email: user.email });
+        return true;
+      }
+      
+      // PRIORITY 2: For non-allowlisted users, check with timeout
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error('Admin verification timeout')), 3000);
+      });
+      
+      const adminPromise = supabase.rpc('get_user_admin_status');
+      
+      const { data: isAdmin, error } = await Promise.race([adminPromise, timeoutPromise]) as any;
       
       if (error) {
         console.error('Admin validation error:', error);
