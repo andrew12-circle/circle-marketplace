@@ -48,10 +48,13 @@ if (typeof window !== 'undefined') {
       // Cross-origin and permissions policy warnings
       'Potential permissions policy violation',
       'cross-origin-isolated is not allowed',
+      'autoplay is not allowed',
+      'fullscreen is not allowed',
       // Cloudflare Turnstile preload warnings
       'challenges.cloudflare.com',
       'was preloaded using link preload but not used',
-      'challenge-platform'
+      'challenge-platform',
+      'Turnstile success:'
     ].some(pattern => message.includes(pattern));
 
     if (!isExtensionError) {
@@ -97,10 +100,13 @@ if (typeof window !== 'undefined') {
       // Cross-origin and permissions policy warnings
       'Potential permissions policy violation',
       'cross-origin-isolated is not allowed',
+      'autoplay is not allowed',
+      'fullscreen is not allowed',
       // Cloudflare Turnstile preload warnings
       'challenges.cloudflare.com',
       'was preloaded using link preload but not used',
-      'challenge-platform'
+      'challenge-platform',
+      'Turnstile success:'
     ].some(pattern => message.includes(pattern));
 
     if (!isExtensionError) {
@@ -117,7 +123,8 @@ if (typeof window !== 'undefined') {
       'Failed to execute \'observe\' on \'MutationObserver\'',
       'parameter 1 is not of type \'Node\'',
       'HTMLIFrameElement.<anonymous>',
-      'content-script'
+      'content-script',
+      'Turnstile success:'
     ].some(pattern => message.includes(pattern));
     
     if (!isFilteredMessage) {
@@ -165,10 +172,13 @@ if (typeof window !== 'undefined') {
       // Cross-origin and permissions policy warnings
       'Potential permissions policy violation',
       'cross-origin-isolated is not allowed',
+      'autoplay is not allowed',
+      'fullscreen is not allowed',
       // Cloudflare Turnstile preload warnings
       'challenges.cloudflare.com',
       'was preloaded using link preload but not used',
-      'challenge-platform'
+      'challenge-platform',
+      'Turnstile success:'
     ].some(pattern => message.includes(pattern));
 
     if (!isExtensionError) {
@@ -221,10 +231,13 @@ if (typeof window !== 'undefined') {
       // Cross-origin and permissions policy warnings
       'Potential permissions policy violation',
       'cross-origin-isolated is not allowed',
+      'autoplay is not allowed',
+      'fullscreen is not allowed',
       // Cloudflare Turnstile preload warnings
       'challenges.cloudflare.com',
       'was preloaded using link preload but not used',
-      'challenge-platform'
+      'challenge-platform',
+      'Turnstile success:'
     ].some(pattern => 
       message.includes(pattern) || filename.includes(pattern)
     );
