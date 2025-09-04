@@ -426,7 +426,6 @@ export const ServiceManagementPanel = () => {
         .from('services')
         .select(`
           *,
-          vendors (name, logo_url),
           service_providers (name, logo_url)
         `)
         .order('sort_order', { ascending: true })
