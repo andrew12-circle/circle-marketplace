@@ -77,6 +77,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [lastFetchAttempt, setLastFetchAttempt] = useState(0);
   const [isCircuitBreakerOpen, setIsCircuitBreakerOpen] = useState(false);
   const [showSessionsDialog, setShowSessionsDialog] = useState(false);
+  const [profileCache, setProfileCache] = useState<Map<string, { profile: Profile; timestamp: number }>>(new Map());
   const queryClient = useQueryClient();
   const { handleSessionError, triggerRecoveryBanner } = useSessionPersistence();
   const sessionManagement = useSessionManagement();
@@ -114,8 +115,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       return;
     }
 
-    // Circuit breaker: prevent rapid successive calls
+    // Check cache first - 30 second cache
+    const cached = profileCache.get(userId);
     const now = Date.now();
+    if (cached && (now - cached.timestamp < 30000)) {
+      logger.log('Using cached profile for user:', userId);
+      setProfile(cached.profile);
+      return;
+    }
+
+    // Circuit breaker: prevent rapid successive calls
     if (now - lastFetchAttempt < 2000) {
       logger.warn('Profile fetch called too recently, throttling...');
       return;
@@ -145,6 +154,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             is_creator: false
           };
           setProfile(adminProfile);
+          // Cache the profile
+          setProfileCache(prev => new Map(prev.set(userId, { profile: adminProfile, timestamp: now })));
           setRetryCount(0);
           setIsCircuitBreakerOpen(false); // Reset circuit breaker on admin success
           return;
@@ -161,10 +172,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       console.log('🔍 Starting profile fetch for userId:', userId);
       
-      // Create a timeout with proper cleanup
+      // Create a timeout with proper cleanup - very aggressive timeout for faster fallback
       let timeoutId: NodeJS.Timeout;
       const timeoutPromise = new Promise((_, reject) => {
-        timeoutId = setTimeout(() => reject(new Error('Profile fetch timeout')), 8000); // Reduced from 15 to 8 seconds
+        timeoutId = setTimeout(() => reject(new Error('Profile fetch timeout')), 3000); // Reduced from 8 to 3 seconds
       });
 
       // Simplified query without ordering for better performance  
@@ -192,13 +203,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           displayName: profileData.display_name 
         });
         setProfile(profileData);
+        // Cache the profile
+        setProfileCache(prev => new Map(prev.set(userId, { profile: profileData, timestamp: now })));
         setRetryCount(0); // Reset retry count on success
         setIsCircuitBreakerOpen(false); // Reset circuit breaker on success
         return;
       }
 
       if (profileError) {
-        logger.warn('Profile query error:', profileError);
+        // Don't log timeout errors as errors since they trigger fallbacks
+        const isTimeoutError = profileError.message?.includes('Profile fetch timeout');
+        if (isTimeoutError) {
+          logger.warn('Profile query timeout, activating fallbacks');
+        } else {
+          logger.warn('Profile query error:', profileError);
+        }
         
         // If it's a permission error, don't retry
         if (profileError.code === 'PGRST116' || profileError.message?.includes('permission')) {
@@ -223,6 +242,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (!rpcError && rpcData) {
         logger.log('Profile fetched via RPC fallback');
         setProfile(rpcData as any);
+        // Cache the profile
+        setProfileCache(prev => new Map(prev.set(userId, { profile: rpcData as any, timestamp: now })));
         setRetryCount(0); // Reset retry count on success
         setIsCircuitBreakerOpen(false); // Reset circuit breaker on success
         return;
@@ -250,6 +271,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
               is_creator: false
             };
             setProfile(adminProfile);
+            // Cache the profile
+            setProfileCache(prev => new Map(prev.set(userId, { profile: adminProfile, timestamp: now })));
             setRetryCount(0);
             return;
           }
@@ -264,14 +287,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setRetryCount(0); // Reset retry count when giving up
     } catch (error) {
       console.log('❌ fetchProfile exception:', error);
-      logger.error('fetchProfile exception:', error);
       
       // Check if this is a timeout error - don't retry these
       const isTimeoutError = error instanceof Error && error.message.includes('Profile fetch timeout');
       
       if (isTimeoutError) {
         console.log('⏰ Timeout error detected, not retrying to prevent infinite loop');
-        logger.warn('Profile fetch timeout - not retrying to prevent infinite loop');
+        logger.warn('Profile fetch timeout - activating circuit breaker and fallbacks');
         setProfile(null);
         setRetryCount(0);
         
@@ -280,7 +302,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setTimeout(() => {
           setIsCircuitBreakerOpen(false);
           logger.log('Circuit breaker reset after timeout');
-        }, 10000); // 10 seconds for timeout errors
+        }, 5000); // 5 seconds for timeout errors
         return;
       }
       
@@ -303,7 +325,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setTimeout(() => {
           setIsCircuitBreakerOpen(false);
           logger.log('Circuit breaker reset after timeout');
-        }, 10000); // Reduced from 30 seconds to 10 seconds
+        }, 5000); // 5 seconds
       }
     }
   };
