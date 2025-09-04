@@ -42,7 +42,16 @@ const DialogContent = React.forwardRef<
       {...props}
     >
       {children}
-      <DialogPrimitive.Close className="absolute right-6 top-4 rounded-full p-2 bg-white/80 backdrop-blur-sm hover:bg-white shadow-lg border border-white/20 opacity-70 ring-offset-background transition-all hover:opacity-100 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground pointer-events-auto z-50">
+      <DialogPrimitive.Close 
+        className="absolute right-6 top-4 rounded-full p-2 bg-white/80 backdrop-blur-sm hover:bg-white shadow-lg border border-white/20 opacity-70 ring-offset-background transition-all hover:opacity-100 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground pointer-events-auto z-50"
+        onClick={() => {
+          // Force close the dialog by triggering onOpenChange
+          const dialogRoot = document.querySelector('[data-state="open"]');
+          if (dialogRoot) {
+            dialogRoot.dispatchEvent(new Event('close'));
+          }
+        }}
+      >
         <X className="h-5 w-5" />
         <span className="sr-only">Close</span>
       </DialogPrimitive.Close>
