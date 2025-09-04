@@ -48,21 +48,27 @@ export function useSessionManagement() {
 
   async function callSessionAPI(action: string, data: any = {}) {
     if (!session?.access_token) {
-      throw new Error('No valid session');
+      console.warn('No valid session for session API call');
+      return null;
     }
 
-    const response = await supabase.functions.invoke('session-control', {
-      body: { action, ...data },
-      headers: {
-        Authorization: `Bearer ${session.access_token}`
+    try {
+      const response = await supabase.functions.invoke('session-control', {
+        body: { action, ...data },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`
+        }
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message || 'Session API error');
       }
-    });
 
-    if (response.error) {
-      throw new Error(response.error.message || 'Session API error');
+      return response.data;
+    } catch (error) {
+      console.warn('Session API call failed:', error);
+      return null;
     }
-
-    return response.data;
   }
 
   async function startSession() {
@@ -80,7 +86,7 @@ export function useSessionManagement() {
         }
       });
 
-      if (result.warning) {
+      if (result && result.warning) {
         setSessionWarning({
           type: 'concurrent_sessions',
           message: result.warning,
@@ -88,18 +94,18 @@ export function useSessionManagement() {
         });
       }
 
-      // Start heartbeat
-      if (heartbeatInterval.current) {
+      // Start heartbeat only if session start was successful
+      if (result && heartbeatInterval.current) {
         clearInterval(heartbeatInterval.current);
       }
       
-      heartbeatInterval.current = setInterval(async () => {
-        try {
-          await callSessionAPI('heartbeat', { sessionId: currentSessionId });
-        } catch (error) {
-          console.warn('Heartbeat failed:', error);
-        }
-      }, 30000); // Every 30 seconds
+      if (result) {
+        heartbeatInterval.current = setInterval(async () => {
+          if (session?.access_token) {
+            await callSessionAPI('heartbeat', { sessionId: currentSessionId });
+          }
+        }, 30000); // Every 30 seconds
+      }
 
     } catch (error: any) {
       if (error.message?.includes('Maximum concurrent sessions exceeded')) {
@@ -119,31 +125,29 @@ export function useSessionManagement() {
       heartbeatInterval.current = undefined;
     }
 
-    try {
+    // Only try to end session if we have a valid session
+    if (session?.access_token) {
       await callSessionAPI('end', { sessionId: currentSessionId });
-    } catch (error) {
-      console.warn('Failed to end session:', error);
     }
   }
 
   async function loadActiveSessions() {
-    if (!user) return;
+    if (!user || !session) return;
 
-    try {
-      const result = await callSessionAPI('list');
-      setActiveSessions(result.sessions || []);
-    } catch (error) {
-      console.error('Failed to load sessions:', error);
+    const result = await callSessionAPI('list');
+    if (result && result.sessions) {
+      setActiveSessions(result.sessions);
     }
   }
 
   async function revokeSessions(sessionIds: string[]) {
-    try {
-      await callSessionAPI('revoke', { sessionIds });
+    if (!session?.access_token) {
+      throw new Error('No valid session');
+    }
+    
+    const result = await callSessionAPI('revoke', { sessionIds });
+    if (result) {
       await loadActiveSessions(); // Refresh the list
-    } catch (error) {
-      console.error('Failed to revoke sessions:', error);
-      throw error;
     }
   }
 
