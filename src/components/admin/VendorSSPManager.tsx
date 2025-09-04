@@ -37,11 +37,13 @@ const VendorSSPManager = () => {
 
   const loadVendors = async () => {
     try {
+      setLoading(true);
       const { data, error } = await supabase
         .from('profiles')
         .select('user_id, business_name, display_name, is_settlement_service_provider, specialties, vendor_enabled')
         .eq('vendor_enabled', true)
-        .order('business_name');
+        .order('business_name', { nullsFirst: false })
+        .limit(100); // Add limit to prevent slow queries
 
       if (error) throw error;
       setVendors(data as any || []);
