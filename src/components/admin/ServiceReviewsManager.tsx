@@ -89,20 +89,36 @@ export const ServiceReviewsManager = () => {
           review_source,
           verified,
           source_url,
-          admin_notes,
-          services!service_reviews_service_id_fkey(title),
-          profiles!service_reviews_user_id_fkey(display_name, avatar_url)
+          admin_notes
         `)
         .order('created_at', { ascending: false });
 
       if (reviewsError) throw reviewsError;
 
+      // Fetch service titles separately
+      const serviceIds = [...new Set(reviewsData?.map(r => r.service_id) || [])];
+      const { data: servicesData } = await supabase
+        .from('services')
+        .select('id, title')
+        .in('id', serviceIds);
+
+      // Fetch user profiles separately
+      const userIds = [...new Set(reviewsData?.map(r => r.user_id) || [])];
+      const { data: profilesData } = await supabase
+        .from('profiles')
+        .select('user_id, display_name, avatar_url')
+        .in('user_id', userIds);
+
+      // Create lookup maps
+      const servicesMap = new Map(servicesData?.map(s => [s.id, s]) || []);
+      const profilesMap = new Map(profilesData?.map(p => [p.user_id, p]) || []);
+
       const formattedReviews = reviewsData?.map((review: any) => ({
         ...review,
         review_source: review.review_source as 'agent' | 'vendor_provided' | 'google_external' | 'admin_assigned',
-        service_title: review.services?.title,
-        user_display_name: review.profiles?.display_name,
-        user_avatar_url: review.profiles?.avatar_url
+        service_title: servicesMap.get(review.service_id)?.title,
+        user_display_name: profilesMap.get(review.user_id)?.display_name,
+        user_avatar_url: profilesMap.get(review.user_id)?.avatar_url
       })) || [];
 
       setReviews(formattedReviews);
