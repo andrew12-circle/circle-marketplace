@@ -8,6 +8,9 @@ import { logger } from '@/utils/logger';
 import { useQueryClient } from '@tanstack/react-query';
 import { useSessionPersistence } from '@/hooks/useSessionPersistence';
 import { getProStatus } from '@/lib/profile';
+import { useSessionManagement } from '@/hooks/useSessionManagement';
+import { SessionWarningDialog } from '@/components/session/SessionWarningDialog';
+import { ActiveSessionsDialog } from '@/components/session/ActiveSessionsDialog';
 
 interface Profile {
   id: string;
@@ -73,8 +76,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [retryCount, setRetryCount] = useState(0);
   const [lastFetchAttempt, setLastFetchAttempt] = useState(0);
   const [isCircuitBreakerOpen, setIsCircuitBreakerOpen] = useState(false);
+  const [showSessionsDialog, setShowSessionsDialog] = useState(false);
   const queryClient = useQueryClient();
   const { handleSessionError, triggerRecoveryBanner } = useSessionPersistence();
+  const sessionManagement = useSessionManagement();
 
   // Add recovery mechanism for stuck states
   const recoverFromStuckState = useCallback(() => {
@@ -353,6 +358,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signOut = async () => {
     try {
       logger.log('Sign out initiated...');
+      
+      // End session management tracking
+      await sessionManagement.endSession();
+      
       const { error } = await supabase.auth.signOut();
       
       if (error) {
@@ -416,6 +425,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   return (
     <AuthContext.Provider value={value}>
       {children}
+      
+      {/* Session Warning Dialog */}
+      <SessionWarningDialog
+        warning={sessionManagement.sessionWarning}
+        onDismiss={sessionManagement.dismissWarning}
+        onViewSessions={() => {
+          sessionManagement.dismissWarning();
+          setShowSessionsDialog(true);
+        }}
+      />
+      
+      {/* Active Sessions Management Dialog */}
+      <ActiveSessionsDialog
+        isOpen={showSessionsDialog}
+        onClose={() => setShowSessionsDialog(false)}
+        sessions={sessionManagement.activeSessions}
+        currentSessionId={sessionManagement.currentSessionId}
+        onRevokeSessions={sessionManagement.revokeSessions}
+      />
     </AuthContext.Provider>
   );
 };

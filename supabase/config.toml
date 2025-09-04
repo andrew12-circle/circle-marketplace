@@ -130,3 +130,6 @@ verify_jwt = false
 
 [functions.auth-signup]
 verify_jwt = false
+
+[functions.session-control]
+verify_jwt = false

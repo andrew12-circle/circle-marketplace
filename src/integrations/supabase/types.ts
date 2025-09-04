@@ -245,6 +245,13 @@ export type Database = {
             referencedRelation: "affiliate_links"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "affiliate_attributions_prospect_user_id_fkey"
+            columns: ["prospect_user_id"]
+            isOneToOne: false
+            referencedRelation: "session_sharing_alerts"
+            referencedColumns: ["user_id"]
+          },
         ]
       }
       affiliate_clicks: {
@@ -420,6 +427,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "affiliates"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "affiliate_documents_verified_by_fkey"
+            columns: ["verified_by"]
+            isOneToOne: false
+            referencedRelation: "session_sharing_alerts"
+            referencedColumns: ["user_id"]
           },
         ]
       }
@@ -728,7 +742,15 @@ export type Database = {
           user_id?: string | null
           website?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "affiliates_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "session_sharing_alerts"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       agent_archetypes: {
         Row: {
@@ -854,7 +876,15 @@ export type Database = {
           status?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "agent_invitations_invited_by_fkey"
+            columns: ["invited_by"]
+            isOneToOne: false
+            referencedRelation: "session_sharing_alerts"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       agent_performance_tracking: {
         Row: {
@@ -896,7 +926,15 @@ export type Database = {
           updated_at?: string
           volume_closed?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "agent_performance_tracking_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "session_sharing_alerts"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       agent_playbook_templates: {
         Row: {
@@ -1171,6 +1209,13 @@ export type Database = {
             referencedRelation: "agent_archetypes"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "agent_success_path_scores_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "session_sharing_alerts"
+            referencedColumns: ["user_id"]
+          },
         ]
       }
       agent_transactions: {
@@ -1314,7 +1359,15 @@ export type Database = {
           years_active?: number | null
           zip_code?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "agents_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "session_sharing_alerts"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       agreement_signatures: {
         Row: {
@@ -1446,7 +1499,15 @@ export type Database = {
           result_type?: string
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "ai_interaction_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "session_sharing_alerts"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       ai_query_patterns: {
         Row: {
@@ -1568,9 +1629,12 @@ export type Database = {
           maintenance_message: string | null
           maintenance_mode: boolean | null
           marketplace_enabled: boolean | null
+          max_concurrent_sessions: number | null
           min_build_version: string | null
           security_monitoring_global: boolean | null
+          session_enforcement_mode: string | null
           top_deals_enabled: boolean | null
+          track_ip_changes: boolean | null
           updated_at: string
         }
         Insert: {
@@ -1582,9 +1646,12 @@ export type Database = {
           maintenance_message?: string | null
           maintenance_mode?: boolean | null
           marketplace_enabled?: boolean | null
+          max_concurrent_sessions?: number | null
           min_build_version?: string | null
           security_monitoring_global?: boolean | null
+          session_enforcement_mode?: string | null
           top_deals_enabled?: boolean | null
+          track_ip_changes?: boolean | null
           updated_at?: string
         }
         Update: {
@@ -1596,9 +1663,12 @@ export type Database = {
           maintenance_message?: string | null
           maintenance_mode?: boolean | null
           marketplace_enabled?: boolean | null
+          max_concurrent_sessions?: number | null
           min_build_version?: string | null
           security_monitoring_global?: boolean | null
+          session_enforcement_mode?: string | null
           top_deals_enabled?: boolean | null
+          track_ip_changes?: boolean | null
           updated_at?: string
         }
         Relationships: []
@@ -1840,7 +1910,15 @@ export type Database = {
           updated_at?: string
           user_agent?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "blocked_ips_blocked_by_fkey"
+            columns: ["blocked_by"]
+            isOneToOne: false
+            referencedRelation: "session_sharing_alerts"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       channel_subscriptions: {
         Row: {
@@ -2005,6 +2083,13 @@ export type Database = {
             referencedRelation: "co_pay_requests"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "co_pay_audit_log_performed_by_fkey"
+            columns: ["performed_by"]
+            isOneToOne: false
+            referencedRelation: "session_sharing_alerts"
+            referencedColumns: ["user_id"]
+          },
         ]
       }
       co_pay_requests: {
@@ -2108,6 +2193,20 @@ export type Database = {
           vendor_signature_date?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "co_pay_requests_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "session_sharing_alerts"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "co_pay_requests_compliance_reviewed_by_fkey"
+            columns: ["compliance_reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "session_sharing_alerts"
+            referencedColumns: ["user_id"]
+          },
           {
             foreignKeyName: "co_pay_requests_service_id_fkey"
             columns: ["service_id"]
@@ -2260,6 +2359,13 @@ export type Database = {
             referencedRelation: "co_pay_requests"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "compliance_documents_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "session_sharing_alerts"
+            referencedColumns: ["user_id"]
+          },
         ]
       }
       compliance_team_members: {
@@ -2290,7 +2396,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "compliance_team_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "session_sharing_alerts"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       compliance_workflow_log: {
         Row: {
@@ -2339,6 +2453,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "co_pay_requests"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compliance_workflow_log_performed_by_fkey"
+            columns: ["performed_by"]
+            isOneToOne: false
+            referencedRelation: "session_sharing_alerts"
+            referencedColumns: ["user_id"]
           },
         ]
       }
@@ -2458,6 +2579,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "services"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultation_bookings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "session_sharing_alerts"
+            referencedColumns: ["user_id"]
           },
         ]
       }
@@ -3138,6 +3266,13 @@ export type Database = {
             referencedRelation: "consultation_bookings"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "course_progress_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "session_sharing_alerts"
+            referencedColumns: ["user_id"]
+          },
         ]
       }
       creator_analytics: {
@@ -3318,7 +3453,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "creator_onboarding_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "session_sharing_alerts"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       creator_payment_info: {
         Row: {
@@ -3492,7 +3635,22 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "creator_verification_requests_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "session_sharing_alerts"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "creator_verification_requests_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "session_sharing_alerts"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       creator_webhooks: {
         Row: {
@@ -3567,7 +3725,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "deals_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "session_sharing_alerts"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       failed_login_attempts: {
         Row: {
@@ -3627,7 +3793,15 @@ export type Database = {
           updated_at?: string
           updated_by?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "feature_flags_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "session_sharing_alerts"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       financial_data_backups: {
         Row: {
@@ -3954,6 +4128,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "goal_based_recommendations_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "session_sharing_alerts"
+            referencedColumns: ["user_id"]
+          },
+          {
             foreignKeyName: "goal_based_recommendations_bundle_id_fkey"
             columns: ["bundle_id"]
             isOneToOne: false
@@ -4080,7 +4261,15 @@ export type Database = {
           route?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "help_analytics_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "session_sharing_alerts"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       help_issues: {
         Row: {
@@ -4140,7 +4329,15 @@ export type Database = {
           user_id?: string
           user_satisfaction?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "help_issues_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "session_sharing_alerts"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       help_knowledge_base: {
         Row: {
@@ -4215,7 +4412,15 @@ export type Database = {
           trigger_type?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "help_proactive_triggers_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "session_sharing_alerts"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       image_cache: {
         Row: {
@@ -4754,7 +4959,15 @@ export type Database = {
           updated_at?: string
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "orders_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "session_sharing_alerts"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       outbound_clicks: {
         Row: {
@@ -4999,6 +5212,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "content"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "playbook_creation_progress_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "session_sharing_alerts"
+            referencedColumns: ["user_id"]
           },
           {
             foreignKeyName: "playbook_creation_progress_template_id_fkey"
@@ -5523,6 +5743,13 @@ export type Database = {
             referencedRelation: "agent_archetypes"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "session_sharing_alerts"
+            referencedColumns: ["user_id"]
+          },
         ]
       }
       rate_limit_tracking: {
@@ -5625,7 +5852,15 @@ export type Database = {
           user_agent?: string | null
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "request_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "session_sharing_alerts"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       respa_disclaimers: {
         Row: {
@@ -5682,7 +5917,15 @@ export type Database = {
           id?: string
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "retention_events_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "session_sharing_alerts"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       revenue_tracking: {
         Row: {
@@ -5804,6 +6047,13 @@ export type Database = {
             referencedRelation: "services"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "saved_services_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "session_sharing_alerts"
+            referencedColumns: ["user_id"]
+          },
         ]
       }
       scraping_settings: {
@@ -5834,7 +6084,15 @@ export type Database = {
           updated_at?: string
           updated_by?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "scraping_settings_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "session_sharing_alerts"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       scriptures: {
         Row: {
@@ -5888,7 +6146,15 @@ export type Database = {
           id?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "security_config_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "session_sharing_alerts"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       security_events: {
         Row: {
@@ -5918,7 +6184,15 @@ export type Database = {
           user_agent?: string | null
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "security_events_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "session_sharing_alerts"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       security_monitoring: {
         Row: {
@@ -5954,7 +6228,15 @@ export type Database = {
           user_agent?: string | null
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "security_monitoring_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "session_sharing_alerts"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       security_risk_scores: {
         Row: {
@@ -6293,6 +6575,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "service_outcome_tracking_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "session_sharing_alerts"
+            referencedColumns: ["user_id"]
+          },
+          {
             foreignKeyName: "service_outcome_tracking_service_id_fkey"
             columns: ["service_id"]
             isOneToOne: false
@@ -6630,7 +6919,15 @@ export type Database = {
           user_id?: string
           verified?: boolean
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "service_reviews_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "session_sharing_alerts"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       service_tracking_events: {
         Row: {
@@ -7172,7 +7469,15 @@ export type Database = {
           updated_at?: string
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "subscribers_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "session_sharing_alerts"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       support_agents: {
         Row: {
@@ -7223,7 +7528,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "support_agents_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "session_sharing_alerts"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       support_analytics: {
         Row: {
@@ -7319,7 +7632,22 @@ export type Database = {
           updated_at?: string
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "support_conversations_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "session_sharing_alerts"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "support_conversations_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "session_sharing_alerts"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       support_escalations: {
         Row: {
@@ -7376,6 +7704,13 @@ export type Database = {
             referencedRelation: "support_conversations"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "support_escalations_escalated_by_fkey"
+            columns: ["escalated_by"]
+            isOneToOne: false
+            referencedRelation: "session_sharing_alerts"
+            referencedColumns: ["user_id"]
+          },
         ]
       }
       support_knowledge_base: {
@@ -7421,7 +7756,15 @@ export type Database = {
           updated_at?: string
           view_count?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "support_knowledge_base_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "session_sharing_alerts"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       support_messages: {
         Row: {
@@ -7476,6 +7819,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "support_conversations"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "session_sharing_alerts"
+            referencedColumns: ["user_id"]
           },
         ]
       }
@@ -7634,7 +7984,15 @@ export type Database = {
           updated_at?: string | null
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "user_ai_preferences_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "session_sharing_alerts"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       user_onboarding_states: {
         Row: {
@@ -7675,6 +8033,56 @@ export type Database = {
         }
         Relationships: []
       }
+      user_sessions: {
+        Row: {
+          created_at: string
+          device_fingerprint: string | null
+          expires_at: string
+          id: string
+          ip_address: unknown | null
+          is_active: boolean
+          last_activity: string
+          location_data: Json | null
+          session_id: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          device_fingerprint?: string | null
+          expires_at?: string
+          id?: string
+          ip_address?: unknown | null
+          is_active?: boolean
+          last_activity?: string
+          location_data?: Json | null
+          session_id: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          device_fingerprint?: string | null
+          expires_at?: string
+          id?: string
+          ip_address?: unknown | null
+          is_active?: boolean
+          last_activity?: string
+          location_data?: Json | null
+          session_id?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_sessions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "session_sharing_alerts"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       vendor_agent_activities: {
         Row: {
           activity_data: Json | null
@@ -7704,6 +8112,13 @@ export type Database = {
           vendor_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "vendor_agent_activities_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "session_sharing_alerts"
+            referencedColumns: ["user_id"]
+          },
           {
             foreignKeyName: "vendor_agent_activities_vendor_id_fkey"
             columns: ["vendor_id"]
@@ -8247,7 +8662,15 @@ export type Database = {
           vendor_email?: string
           vendor_name?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "vendor_invitations_invited_by_fkey"
+            columns: ["invited_by"]
+            isOneToOne: false
+            referencedRelation: "session_sharing_alerts"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       vendor_payouts: {
         Row: {
@@ -8337,6 +8760,13 @@ export type Database = {
           vendor_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "vendor_qa_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "session_sharing_alerts"
+            referencedColumns: ["user_id"]
+          },
           {
             foreignKeyName: "vendor_qa_vendor_id_fkey"
             columns: ["vendor_id"]
@@ -8482,6 +8912,13 @@ export type Database = {
           vendor_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "vendor_user_associations_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "session_sharing_alerts"
+            referencedColumns: ["user_id"]
+          },
           {
             foreignKeyName: "vendor_user_associations_vendor_id_fkey"
             columns: ["vendor_id"]
@@ -9071,11 +9508,25 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "zoom_integrations_attendee_id_fkey"
+            columns: ["attendee_id"]
+            isOneToOne: false
+            referencedRelation: "session_sharing_alerts"
+            referencedColumns: ["user_id"]
+          },
+          {
             foreignKeyName: "zoom_integrations_conversation_id_fkey"
             columns: ["conversation_id"]
             isOneToOne: false
             referencedRelation: "support_conversations"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "zoom_integrations_host_id_fkey"
+            columns: ["host_id"]
+            isOneToOne: false
+            referencedRelation: "session_sharing_alerts"
+            referencedColumns: ["user_id"]
           },
         ]
       }
@@ -9159,6 +9610,18 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      session_sharing_alerts: {
+        Row: {
+          active_sessions: number | null
+          email: string | null
+          ip_addresses: string[] | null
+          latest_activity: string | null
+          unique_devices: number | null
+          unique_ips: number | null
+          user_id: string | null
+        }
+        Relationships: []
       }
       vendor_directory: {
         Row: {
@@ -9431,6 +9894,10 @@ export type Database = {
         Returns: undefined
       }
       cleanup_expired_security_data: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      cleanup_expired_user_sessions: {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
