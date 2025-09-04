@@ -562,9 +562,6 @@ export const SavedItems = () => {
                       <p className="text-sm text-muted-foreground">
                         {item.services.vendor.name}
                       </p>
-                      <Badge variant="outline" className="mt-1 text-xs">
-                        {item.services.category}
-                      </Badge>
                     </div>
                   </div>
                   <Button
