@@ -316,7 +316,14 @@ export const ServiceReviewsManager = () => {
                     <div className="flex items-start justify-between">
                       <div className="flex items-start space-x-4 flex-1">
                         <Avatar>
-                          <AvatarImage src={review.user_avatar_url} />
+                          <AvatarImage 
+                            src={review.user_avatar_url} 
+                            onError={(e) => {
+                              // Handle broken image URLs by removing the src
+                              const target = e.target as HTMLImageElement;
+                              target.src = '';
+                            }}
+                          />
                           <AvatarFallback>
                             {review.user_display_name?.charAt(0) || 'U'}
                           </AvatarFallback>
