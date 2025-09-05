@@ -11,32 +11,45 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Create client with anon key for user verification
-    const anonClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-    )
+    console.log('Starting questionnaire save function')
+    
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')
+    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+    const anonKey = Deno.env.get('SUPABASE_ANON_KEY')
+    
+    console.log('Environment check:', {
+      hasUrl: !!supabaseUrl,
+      hasServiceRole: !!serviceRoleKey,
+      hasAnonKey: !!anonKey
+    })
+    
+    const supabaseClient = createClient(supabaseUrl ?? '', serviceRoleKey ?? '')
 
     const authHeader = req.headers.get('Authorization')!
     const token = authHeader.replace('Bearer ', '')
+    
+    console.log('Auth header present:', !!authHeader)
+    
+    // Verify user with anon client first
+    const anonClient = createClient(supabaseUrl ?? '', anonKey ?? '')
+    
     const { data: { user } } = await anonClient.auth.getUser(token)
 
     if (!user) {
+      console.log('No user found in token')
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
 
-    // Create service role client for database operations (bypasses RLS)
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
-    )
+    console.log('User verified:', user.id)
 
     const { data: formData, completed = false } = await req.json()
 
-    // Save or update questionnaire data
+    console.log('Saving questionnaire for user:', user.id, 'completed:', completed)
+
+    // Use service role client for database operations (bypasses RLS)
     const { data, error } = await supabaseClient
       .from('agent_questionnaires')
       .upsert({
