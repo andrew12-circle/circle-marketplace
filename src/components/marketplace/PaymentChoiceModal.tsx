@@ -176,7 +176,7 @@ export const PaymentChoiceModal = ({
                     <Users className="w-5 h-5 text-green-600" />
                     <h3 className="font-semibold">Get Vendor Help (Co-Pay)</h3>
                   </div>
-                  <div className="text-2xl font-bold text-green-600 mb-1">{`$${coPayPrice || 0}/mo`}</div>
+                  <div className="text-2xl font-bold text-green-600 mb-1">${coPayPrice || 0}/mo</div>
                   <div className="text-sm text-muted-foreground mb-4">SSP</div>
                   <p className="text-sm text-muted-foreground mb-4">
                     Get connected with a vendor partner. SSP vendors limited to 20% by RESPA compliance.
