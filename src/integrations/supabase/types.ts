@@ -1768,6 +1768,71 @@ export type Database = {
         }
         Relationships: []
       }
+      attribution_events: {
+        Row: {
+          created_at: string
+          event_type: Database["public"]["Enums"]["attribution_event_type"]
+          external_order_id: string | null
+          id: string
+          listing_id: string
+          offer_code: string | null
+          payload: Json | null
+          user_id: string | null
+          vendor_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_type: Database["public"]["Enums"]["attribution_event_type"]
+          external_order_id?: string | null
+          id?: string
+          listing_id: string
+          offer_code?: string | null
+          payload?: Json | null
+          user_id?: string | null
+          vendor_id: string
+        }
+        Update: {
+          created_at?: string
+          event_type?: Database["public"]["Enums"]["attribution_event_type"]
+          external_order_id?: string | null
+          id?: string
+          listing_id?: string
+          offer_code?: string | null
+          payload?: Json | null
+          user_id?: string | null
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attribution_events_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attribution_events_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendor_directory"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attribution_events_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendor_directory_authenticated"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attribution_events_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_log: {
         Row: {
           id: string
@@ -2744,6 +2809,47 @@ export type Database = {
           vendor_id?: string
         }
         Relationships: []
+      }
+      consults: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string | null
+          order_id: string
+          pm_id: string | null
+          scheduled_at: string | null
+          setup_intent_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          order_id: string
+          pm_id?: string | null
+          scheduled_at?: string | null
+          setup_intent_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          order_id?: string
+          pm_id?: string | null
+          scheduled_at?: string | null
+          setup_intent_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consults_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       content: {
         Row: {
@@ -5949,6 +6055,47 @@ export type Database = {
         }
         Relationships: []
       }
+      quotes: {
+        Row: {
+          amount_cents: number
+          attachment_urls: Json | null
+          created_at: string
+          id: string
+          line_items: Json | null
+          order_id: string
+          status: Database["public"]["Enums"]["quote_status"]
+          updated_at: string
+        }
+        Insert: {
+          amount_cents: number
+          attachment_urls?: Json | null
+          created_at?: string
+          id?: string
+          line_items?: Json | null
+          order_id: string
+          status?: Database["public"]["Enums"]["quote_status"]
+          updated_at?: string
+        }
+        Update: {
+          amount_cents?: number
+          attachment_urls?: Json | null
+          created_at?: string
+          id?: string
+          line_items?: Json | null
+          order_id?: string
+          status?: Database["public"]["Enums"]["quote_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quotes_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rate_limit_tracking: {
         Row: {
           endpoint: string
@@ -8149,6 +8296,41 @@ export type Database = {
             columns: ["title_company_id"]
             isOneToOne: false
             referencedRelation: "title_companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transfers: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          destination_connect_id: string
+          id: string
+          order_id: string
+          stripe_transfer_id: string
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string
+          destination_connect_id: string
+          id?: string
+          order_id: string
+          stripe_transfer_id: string
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          destination_connect_id?: string
+          id?: string
+          order_id?: string
+          stripe_transfer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transfers_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
             referencedColumns: ["id"]
           },
         ]
@@ -10674,6 +10856,11 @@ export type Database = {
       affiliate_payout_status: "pending" | "processing" | "paid" | "failed"
       affiliate_status: "active" | "paused" | "banned"
       affiliate_tax_status: "individual" | "business"
+      attribution_event_type:
+        | "click"
+        | "trial_started"
+        | "trial_converted"
+        | "purchase"
       content_type:
         | "video"
         | "podcast"
@@ -10681,6 +10868,7 @@ export type Database = {
         | "course"
         | "playbook"
         | "channel"
+      quote_status: "submitted" | "approved" | "rejected"
       sponsored_status: "active" | "pending" | "expired" | "cancelled"
       sponsored_tier: "featured" | "premium" | "top_ranked"
     }
@@ -10841,6 +11029,12 @@ export const Constants = {
       affiliate_payout_status: ["pending", "processing", "paid", "failed"],
       affiliate_status: ["active", "paused", "banned"],
       affiliate_tax_status: ["individual", "business"],
+      attribution_event_type: [
+        "click",
+        "trial_started",
+        "trial_converted",
+        "purchase",
+      ],
       content_type: [
         "video",
         "podcast",
@@ -10849,6 +11043,7 @@ export const Constants = {
         "playbook",
         "channel",
       ],
+      quote_status: ["submitted", "approved", "rejected"],
       sponsored_status: ["active", "pending", "expired", "cancelled"],
       sponsored_tier: ["featured", "premium", "top_ranked"],
     },
