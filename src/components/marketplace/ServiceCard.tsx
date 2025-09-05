@@ -603,7 +603,7 @@ export const ServiceCard = ({
                   {showDiscountPending ? (
                     <div className="text-center space-y-3">
                       {/* Discount Pending Status */}
-                      <div className="inline-flex items-center gap-2 bg-amber-100 text-amber-800 text-sm font-medium px-3 py-1 rounded-full">
+                      <div className="inline-flex items-center gap-2 bg-amber-100 text-amber-800 text-sm font-medium px-3 py-1 rounded-full hidden">
                         <span>{t('serviceCard.discountPending')}</span>
                       </div>
                       
