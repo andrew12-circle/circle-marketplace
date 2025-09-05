@@ -351,9 +351,9 @@ export const AIConciergeBanner = () => {
                   </div>
                   
                   {/* Content */}
-                  <div className="bg-background/50 rounded-lg p-4 border border-border/50">
-                    <div className="prose prose-sm max-w-none">
-                      <p className="text-sm leading-relaxed text-foreground/90 mb-0">
+                  <div className="bg-background/50 rounded-lg p-6 border border-border/50">
+                    <div className="prose prose-base max-w-none">
+                      <p className="text-base leading-loose text-foreground/95 mb-0 font-normal tracking-wide">
                         {aiResults.recommendation}
                       </p>
                     </div>
