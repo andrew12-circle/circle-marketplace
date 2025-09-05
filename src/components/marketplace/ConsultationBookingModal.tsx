@@ -55,8 +55,29 @@ export const ConsultationBookingModal = ({
     const fetchData = async () => {
       // Pre-populate form with user data when signed in
       if (user) {
-        setName(user.user_metadata?.full_name || user.email?.split('@')[0] || '');
-        setEmail(user.email || '');
+        // Only set if fields are empty to avoid overwriting user edits
+        if (!name) {
+          setName(user.user_metadata?.full_name || user.email?.split('@')[0] || '');
+        }
+        if (!email) {
+          setEmail(user.email || '');
+        }
+        if (!phone) {
+          // Try to get phone from profile first, then user metadata
+          try {
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('phone')
+              .eq('user_id', user.id)
+              .single();
+            
+            const phoneNumber = profile?.phone || user.user_metadata?.phone || '';
+            setPhone(phoneNumber);
+          } catch (error) {
+            // Fallback to metadata if profile doesn't exist
+            setPhone(user.user_metadata?.phone || '');
+          }
+        }
       }
 
       // Fetch service details including sync_to_ghl setting
