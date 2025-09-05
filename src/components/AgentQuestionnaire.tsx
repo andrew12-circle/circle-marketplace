@@ -228,11 +228,11 @@ export default function AgentQuestionnaire({ onComplete }: { onComplete?: (data:
         setLoading(false);
       }
     })();
-  }, [user, draftData]);
+  }, [user]); // Remove draftData dependency to prevent loops
 
   // Auto-save when form data changes
   useEffect(() => {
-    if (!user || loading) return;
+    if (!user || loading || Object.keys(form).length === 0) return;
     
     const currentData = { ...form, disc };
     
@@ -241,7 +241,7 @@ export default function AgentQuestionnaire({ onComplete }: { onComplete?: (data:
     
     // Trigger remote autosave (debounced)
     triggerAutosave(currentData);
-  }, [form, disc, user, loading, saveLocalDraft, triggerAutosave]);
+  }, [form, disc, user, loading]); // Remove function dependencies to prevent loops
 
   // Save before page unload
   useEffect(() => {
