@@ -82,6 +82,15 @@ const Index = () => {
                   <div className="flex items-center gap-2">
                     {location.pathname === "/" && <CartDrawer />}
                     
+                    {user && (
+                      <Button asChild variant="outline" size="sm" className="text-xs">
+                        <Link to="/agent-questionnaire">
+                          <BookOpen className="w-3 h-3 mr-1" />
+                          Goals
+                        </Link>
+                      </Button>
+                    )}
+                    
                     {user && profile && (
                       <Link to="/wallet" className="flex items-center gap-1 text-xs hover:bg-accent hover:text-accent-foreground rounded-md px-1.5 py-1 transition-colors cursor-pointer touch-target">
                         <Crown className="w-3 h-3 text-yellow-500" />
@@ -144,6 +153,16 @@ const Index = () => {
                       <Link to="/pricing">
                         <Crown className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                         <span className="hidden md:inline">Upgrade to</span> Pro
+                      </Link>
+                    </Button>
+                  )}
+
+                  {/* Agent Questionnaire button */}
+                  {user && (
+                    <Button asChild variant="outline" size="sm" className="text-xs sm:text-sm">
+                      <Link to="/agent-questionnaire">
+                        <BookOpen className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                        <span className="hidden md:inline">Set</span> Goals
                       </Link>
                     </Button>
                   )}

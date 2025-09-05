@@ -68,6 +68,7 @@ const AdminCommissions = lazy(() => import("./pages/AdminCommissions"));
 const CreatorOnboardingPage = lazy(() => import("./pages/CreatorOnboarding"));
 const Welcome = lazy(() => import("./pages/Welcome"));
 const CompliancePage = lazy(() => import("./pages/CompliancePage"));
+const AgentQuestionnairePage = lazy(() => import("./pages/AgentQuestionnairePage"));
 const PartnerCheckout = lazy(() => import("./pages/PartnerCheckout").then(m => ({ default: m.PartnerCheckout })));
 const PartnerPaymentSuccess = lazy(() => import("./pages/PartnerPaymentSuccess").then(m => ({ default: m.PartnerPaymentSuccess })));
 const PartnerPaymentCanceled = lazy(() => import("./pages/PartnerPaymentCanceled").then(m => ({ default: m.PartnerPaymentCanceled })));
