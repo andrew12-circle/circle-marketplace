@@ -2,12 +2,16 @@ import { useNavigate } from "react-router-dom";
 import AgentQuestionnaire from "@/components/AgentQuestionnaire";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function AgentQuestionnairePage() {
   const navigate = useNavigate();
+  const { refreshProfile } = useAuth();
 
-  const handleComplete = (data: any) => {
+  const handleComplete = async (data: any) => {
     console.log('Questionnaire completed:', data);
+    // Refresh profile to update the UI state immediately
+    await refreshProfile();
     // Navigate to results or dashboard
     navigate('/', { 
       state: { 
