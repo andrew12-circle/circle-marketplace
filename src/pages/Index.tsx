@@ -82,7 +82,7 @@ const Index = () => {
                   <div className="flex items-center gap-2">
                     {location.pathname === "/" && <CartDrawer />}
                     
-                    {user && (
+                    {user && profile && !profile.goal_assessment_completed && (
                       <Button asChild variant="outline" size="sm" className="text-xs">
                         <Link to="/agent-questionnaire">
                           <BookOpen className="w-3 h-3 mr-1" />
@@ -158,7 +158,7 @@ const Index = () => {
                   )}
 
                   {/* Agent Questionnaire button */}
-                  {user && (
+                  {user && profile && !profile.goal_assessment_completed && (
                     <Button asChild variant="outline" size="sm" className="text-xs sm:text-sm">
                       <Link to="/agent-questionnaire">
                         <BookOpen className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
