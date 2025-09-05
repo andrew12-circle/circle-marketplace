@@ -285,6 +285,36 @@ export const MarketplaceGrid = () => {
     }
   }, [searchTerm, filters.category, filters.featured, filters.verified, filters.coPayEligible]);
 
+  // Read URL parameters and handle search events
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const queryParam = urlParams.get('q');
+    if (queryParam && queryParam !== searchTerm) {
+      setSearchTerm(queryParam);
+      setCurrentPage(1);
+      // Auto-scroll to results
+      setTimeout(scrollToServicesGrid, 100);
+    }
+  }, [window.location.search]);
+
+  // Listen for custom search events
+  useEffect(() => {
+    const handleMarketplaceSearch = (event: CustomEvent) => {
+      const { query } = event.detail;
+      if (query && query !== searchTerm) {
+        setSearchTerm(query);
+        setCurrentPage(1);
+        // Auto-scroll to results
+        setTimeout(scrollToServicesGrid, 100);
+      }
+    };
+
+    window.addEventListener('marketplace:search', handleMarketplaceSearch as EventListener);
+    return () => {
+      window.removeEventListener('marketplace:search', handleMarketplaceSearch as EventListener);
+    };
+  }, [searchTerm]);
+
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);

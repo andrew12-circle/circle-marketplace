@@ -155,6 +155,10 @@ export const AIConciergeBanner = () => {
       } else {
         // Direct marketplace search for simple queries
         navigate(`/?q=${encodeURIComponent(query)}`);
+        // Dispatch custom event for marketplace grid to update
+        window.dispatchEvent(new CustomEvent('marketplace:search', { 
+          detail: { query } 
+        }));
       }
     } finally {
       setIsProcessing(false);
@@ -240,7 +244,7 @@ export const AIConciergeBanner = () => {
       console.error('Error logging AI interaction:', error);
     }
   };
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       handleSendMessage();
     }
@@ -297,7 +301,7 @@ export const AIConciergeBanner = () => {
                   <Input 
                     value={chatInput} 
                     onChange={e => setChatInput(e.target.value)} 
-                    onKeyPress={handleKeyPress} 
+                    onKeyDown={handleKeyDown} 
                     onFocus={() => setIsInputFocused(true)} 
                     onBlur={() => setIsInputFocused(false)} 
                     placeholder={placeholderText} 
