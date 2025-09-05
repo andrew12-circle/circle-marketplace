@@ -167,10 +167,14 @@ export const AIConciergeBanner = () => {
     
     // Business outcome queries require AI processing
     const businessOutcomeKeywords = ['roi', 'increase', 'boost', 'grow', 'revenue', 'transactions', 'leads', 'referrals'];
-    const contextualKeywords = ['best', 'recommend', 'should i', 'help me', 'strategy', 'plan'];
-    const specificConstraints = ['under $', 'in my area', 'my market', 'co-pay', 'marketing budget'];
+    const contextualKeywords = ['best', 'recommend', 'should i', 'help me', 'strategy', 'plan', 'what', 'how', 'why', 'which'];
+    const specificConstraints = ['under $', 'in my area', 'my market', 'co-pay', 'marketing budget', 'closing gift', 'gift', 'need'];
     
-    const requiresAI = businessOutcomeKeywords.some(keyword => lowerQuery.includes(keyword)) ||
+    // Make AI processing more inclusive - most questions should use AI unless it's a simple single-word search
+    const isSimpleSearch = query.trim().split(' ').length === 1 && !query.includes('?');
+    
+    const requiresAI = !isSimpleSearch || 
+                      businessOutcomeKeywords.some(keyword => lowerQuery.includes(keyword)) ||
                       contextualKeywords.some(keyword => lowerQuery.includes(keyword)) ||
                       specificConstraints.some(keyword => lowerQuery.includes(keyword));
     
