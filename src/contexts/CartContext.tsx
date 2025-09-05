@@ -143,9 +143,30 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const checkAuthAndRedirect = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    if (!session?.user) {
+    try {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      
+      if (error || !session?.user) {
+        toast({
+          title: "Sign in required",
+          description: "You need to sign in or create an account to add items to your cart.",
+          action: (
+            <ToastAction
+              altText="Go to sign in"
+              onClick={() => {
+                window.location.href = '/auth';
+              }}
+            >
+              Sign In
+            </ToastAction>
+          ),
+        });
+        return false;
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Auth check failed:', error);
       toast({
         title: "Sign in required",
         description: "You need to sign in or create an account to add items to your cart.",
@@ -162,8 +183,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
       return false;
     }
-    
-    return true;
   };
 
   const addToCart = async (item: Omit<CartItem, 'quantity'>) => {
