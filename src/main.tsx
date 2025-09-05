@@ -204,6 +204,7 @@ root.render(
                 <Route path="/creator-onboarding" element={<CreatorOnboardingPage />} />
                 <Route path="/welcome" element={<Welcome />} />
                 <Route path="/compliance" element={<CompliancePage />} />
+                <Route path="/agent-questionnaire" element={<AgentQuestionnairePage />} />
                 <Route path="/partner-checkout/:token" element={<PartnerCheckout />} />
                 <Route path="/partner-payment-success" element={<PartnerPaymentSuccess />} />
                 <Route path="/partner-payment-canceled" element={<PartnerPaymentCanceled />} />

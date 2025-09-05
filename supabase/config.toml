@@ -1,5 +1,20 @@
 project_id = "ihzyuyfawapweamqzzlj"
 
+[functions.disc-start]
+verify_jwt = true
+
+[functions.disc-status]
+verify_jwt = true
+
+[functions.disc-webhook]
+verify_jwt = false
+
+[functions.questionnaire-save]
+verify_jwt = true
+
+[functions.questionnaire-load]
+verify_jwt = true
+
 [functions.vendor-demand-digest]
 verify_jwt = false
 
