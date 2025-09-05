@@ -13,7 +13,7 @@ Deno.serve(async (req) => {
   try {
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
     )
 
     const authHeader = req.headers.get('Authorization')!
@@ -26,6 +26,12 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
+
+    // Set auth context for RLS
+    await supabaseClient.auth.setSession({
+      access_token: token,
+      refresh_token: ''
+    })
 
     const { data: formData, completed = false } = await req.json()
 
