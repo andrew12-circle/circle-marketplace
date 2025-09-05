@@ -433,11 +433,11 @@ export default function AgentQuestionnaire({ onComplete }: { onComplete?: (data:
                       <div className="flex items-center gap-2">
                         <Button
                           variant="secondary"
-                          onClick={async ()=>{
+                          onClick={() => {
                             if (!user) return;
-                            const url = await createDiscLink(user.id);
-                            setDisc((d)=>({...d, discStatus: "in_progress", discExternalLink: url }));
-                            window.open(url, "_blank");
+                            setDisc((d)=>({...d, discStatus: "in_progress" }));
+                            // Navigate to internal DISC test
+                            window.location.href = "/disc-test";
                           }}
                         >
                           <LinkIcon className="h-4 w-4 mr-2" /> Take DISC
