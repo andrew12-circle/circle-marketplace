@@ -607,8 +607,8 @@ export const ServiceCard = ({
                         <span>{t('serviceCard.discountPending')}</span>
                       </div>
                       
-                      {/* Interest CTA */}
-                      <div className="space-y-2">
+                       {/* Interest CTA */}
+                       <div className="space-y-2 hidden">
                         <Button
                           variant="outline"
                           size="sm"
