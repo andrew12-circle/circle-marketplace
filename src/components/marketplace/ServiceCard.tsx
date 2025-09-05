@@ -858,67 +858,67 @@ export const ServiceCard = ({
               )}
             </div>
 
-            {/* Action Buttons - Fixed at bottom */}
+            {/* Action Buttons - Responsive sizing */}
             <div className="flex gap-2 mt-auto">
               {service.requires_quote ? (
                 <Button
                   variant="outline" 
-                  size="sm"
-                  className="flex-1 h-9"
+                  className="flex-1 h-8 sm:h-9 md:h-10 text-xs sm:text-sm px-2 sm:px-3"
                   onClick={handleAddToCart}
                 >
-                  <ShoppingCart className="w-4 h-4 mr-1" />
-                  {t('serviceCard.addToCart')}
+                  <ShoppingCart className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                  <span className="hidden xs:inline">{t('serviceCard.addToCart')}</span>
+                  <span className="xs:hidden">Add</span>
                 </Button>
               ) : service.direct_purchase_enabled && service.website_url ? (
                 <>
                   {/* Only Add to Cart Button - Buy Now will be handled in cart */}
                   <Button
                     variant="outline"
-                    size="sm"
-                    className="flex-1 h-9"
+                    className="flex-1 h-8 sm:h-9 md:h-10 text-xs sm:text-sm px-2 sm:px-3"
                     onClick={handleAddToCart}
                   >
-                    <ShoppingCart className="w-4 h-4 mr-1" />
-                    {t('serviceCard.addToCart')}
+                    <ShoppingCart className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                    <span className="hidden xs:inline">{t('serviceCard.addToCart')}</span>
+                    <span className="xs:hidden">Add</span>
                   </Button>
                 </>
               ) : (
                 <>
                   {/* Primary action - Consultation (traditional flow) */}
                   <Button
-                    size="sm"
-                    className="flex-1 h-9"
+                    className="flex-1 h-8 sm:h-9 md:h-10 text-xs sm:text-sm px-2 sm:px-3"
                     onClick={(e) => {
                       e.stopPropagation();
                       setIsConsultationFlowOpen(true);
                     }}
                   >
-                    <Calendar className="w-4 h-4 mr-1" />
-                    {t('serviceCard.bookConsultation')}
+                    <Calendar className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                    <span className="hidden sm:inline">{t('serviceCard.bookConsultation')}</span>
+                    <span className="sm:hidden">Book</span>
                   </Button>
                   
                   {/* Add to Cart Button */}
                   <Button
                     variant="outline"
-                    size="sm"
-                    className="flex-1 h-9"
+                    className="flex-1 h-8 sm:h-9 md:h-10 text-xs sm:text-sm px-2 sm:px-3"
                     onClick={handleAddToCart}
                   >
-                    <ShoppingCart className="w-4 h-4 mr-1" />
-                    {t('serviceCard.addToCart')}
+                    <ShoppingCart className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                    <span className="hidden xs:inline">{t('serviceCard.addToCart')}</span>
+                    <span className="xs:hidden">Add</span>
                   </Button>
                 </>
               )}
               
               <Button 
                 variant="outline" 
-                size="sm"
-                className="h-9 px-3"
+                className="h-8 sm:h-9 md:h-10 text-xs sm:text-sm px-2 sm:px-3 md:px-4 shrink-0"
                 onClick={handleViewDetailsButton}
                 data-tour="view-details-button"
               >
-                {t('serviceCard.learnMore')}
+                <span className="hidden sm:inline">{t('serviceCard.learnMore')}</span>
+                <span className="sm:hidden">More</span>
               </Button>
             </div>
           </CardContent>
