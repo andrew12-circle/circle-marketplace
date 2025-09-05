@@ -245,7 +245,8 @@ export const AIConciergeBanner = () => {
     if (hour < 17) return "Good afternoon";
     return "Good evening";
   };
-  return <div className="mb-8 space-y-6">
+  return (
+    <div className="mb-8 space-y-6">
       <Card className="bg-gradient-to-br from-primary/5 via-background to-accent/5 border-primary/20 shadow-lg">
         <CardContent className="p-4 md:p-6">
           <div className="space-y-6">
@@ -398,16 +399,18 @@ export const AIConciergeBanner = () => {
             {showRecommendationsDashboard && (profile as any)?.goal_assessment_completed && <AIRecommendationsDashboard />}
 
             {/* Call to Action for Non-Authenticated Users */}
-            {!user && <div className="text-center">
+            {!user && (
+              <div className="text-center">
                 <div className="flex flex-wrap items-center justify-center gap-3 text-muted-foreground">
                   <Target className="h-4 w-4" />
                   <span>Get personalized recommendations based on your goals & data from 300,000 successful agents</span>
-                   <Button onClick={() => navigate("/pricing")} size="sm" className="bg-primary hover:bg-primary/90">
-                     Create Free Account
-                   </Button>
-                 </div>
-               </div>}
-           </div>
+                  <Button onClick={() => navigate("/pricing")} size="sm" className="bg-primary hover:bg-primary/90">
+                    Create Free Account
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
          </CardContent>
       </Card>
       
