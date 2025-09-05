@@ -82,6 +82,9 @@ const AffiliateLanding = lazy(() => import("./pages/AffiliateLanding").then(m =>
 const AffiliateApplication = lazy(() => import("./pages/AffiliateApplication").then(m => ({ default: m.AffiliateApplication })));
 const AffiliateDashboardPage = lazy(() => import("./pages/AffiliateDashboardPage").then(m => ({ default: m.AffiliateDashboardPage })));
 
+// DISC Test page
+const DiscTest = lazy(() => import("./pages/DiscTest"));
+
 // Loading component for lazy routes
 const RouteLoader = () => (
   <div className="min-h-screen flex items-center justify-center">
@@ -218,6 +221,9 @@ root.render(
                 <Route path="/affiliate" element={<AffiliateLanding />} />
                 <Route path="/affiliate/apply" element={<AffiliateApplication />} />
                 <Route path="/affiliate/dashboard" element={<AffiliateDashboardPage />} />
+                
+                {/* DISC Test route */}
+                <Route path="/disc-test" element={<DiscTest />} />
                 
                 {/* Profile settings alternate path */}
                 <Route path="/profile" element={<ProfileSettings />} />
