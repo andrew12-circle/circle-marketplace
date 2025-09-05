@@ -1068,6 +1068,38 @@ export type Database = {
         }
         Relationships: []
       }
+      agent_questionnaires: {
+        Row: {
+          completed: boolean
+          created_at: string
+          data: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean
+          created_at?: string
+          data?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed?: boolean
+          created_at?: string
+          data?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_questionnaires_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "session_sharing_alerts"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       agent_quiz_responses: {
         Row: {
           agent_id: string
@@ -3818,6 +3850,47 @@ export type Database = {
             foreignKeyName: "deals_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "session_sharing_alerts"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      disc_results: {
+        Row: {
+          created_at: string
+          disc_type: string | null
+          method: string | null
+          scores: Json | null
+          status: string | null
+          token: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          disc_type?: string | null
+          method?: string | null
+          scores?: Json | null
+          status?: string | null
+          token?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          disc_type?: string | null
+          method?: string | null
+          scores?: Json | null
+          status?: string | null
+          token?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "disc_results_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
             referencedRelation: "session_sharing_alerts"
             referencedColumns: ["user_id"]
           },
