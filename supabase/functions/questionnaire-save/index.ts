@@ -11,14 +11,15 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const supabaseClient = createClient(
+    // Create client with anon key for user verification
+    const anonClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
     )
 
     const authHeader = req.headers.get('Authorization')!
     const token = authHeader.replace('Bearer ', '')
-    const { data: { user } } = await supabaseClient.auth.getUser(token)
+    const { data: { user } } = await anonClient.auth.getUser(token)
 
     if (!user) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
@@ -27,11 +28,11 @@ Deno.serve(async (req) => {
       })
     }
 
-    // Set auth context for RLS
-    await supabaseClient.auth.setSession({
-      access_token: token,
-      refresh_token: ''
-    })
+    // Create service role client for database operations (bypasses RLS)
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+    )
 
     const { data: formData, completed = false } = await req.json()
 
