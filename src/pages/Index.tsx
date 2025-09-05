@@ -99,19 +99,17 @@ const Index = () => {
               <div className="flex items-center justify-between">
                 {/* Logo */}
                 <div className="flex items-center gap-2 sm:gap-3">
-                  <img 
-                    src={circleLogoUrl}
-                    alt="Circle Logo" 
-                    className="w-12 h-12 sm:w-16 sm:h-16 object-contain"
-                    width="80"
-                    height="80"
-                    loading="eager"
-                    decoding="async"
-                    
-                    style={{
-                      imageRendering: 'crisp-edges'
-                    }}
-                  />
+                  <svg 
+                    width="80" 
+                    height="80" 
+                    viewBox="0 0 200 200" 
+                    className="w-12 h-12 sm:w-16 sm:h-16"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <circle cx="100" cy="100" r="90" fill="currentColor" className="text-primary"/>
+                    <circle cx="100" cy="100" r="60" fill="none" stroke="white" strokeWidth="4"/>
+                    <circle cx="100" cy="100" r="30" fill="white"/>
+                  </svg>
                 </div>
                 
                 {/* Tour Discovery Button - Desktop */}
