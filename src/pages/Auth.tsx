@@ -305,17 +305,16 @@ export const Auth = () => {
         <CardHeader className="space-y-4">
           {/* Logo */}
           <div className="flex justify-center">
-            <svg 
-              width="112" 
-              height="112" 
-              viewBox="0 0 200 200" 
-              className="w-24 h-24 sm:w-28 sm:h-28"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <circle cx="100" cy="100" r="90" fill="currentColor" className="text-primary"/>
-              <circle cx="100" cy="100" r="60" fill="none" stroke="white" strokeWidth="4"/>
-              <circle cx="100" cy="100" r="30" fill="white"/>
-            </svg>
+            <img 
+              src="/circle-logo-updated.png"
+              alt="Circle Logo" 
+              className="w-24 h-24 sm:w-28 sm:h-28 object-contain"
+              width="112"
+              height="112"
+              style={{
+                imageRendering: 'crisp-edges'
+              }}
+            />
           </div>
           
           <div className="space-y-1">
