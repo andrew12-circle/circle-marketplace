@@ -6,6 +6,9 @@ verify_jwt = true
 [functions.disc-status]
 verify_jwt = true
 
+[functions.disc-complete]
+verify_jwt = true
+
 [functions.disc-webhook]
 verify_jwt = false
 
