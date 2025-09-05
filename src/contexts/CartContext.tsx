@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { ToastAction } from '@/components/ui/toast';
 
 interface CartItem {
   id: string; // Can be serviceId or courseId
@@ -147,13 +148,18 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!session?.user) {
       toast({
         title: "Sign in required",
-        description: "Create a free account or sign in to add items to your cart.",
+        description: "You need to sign in or create an account to add items to your cart.",
+        action: (
+          <ToastAction
+            altText="Go to sign in"
+            onClick={() => {
+              window.location.href = '/auth';
+            }}
+          >
+            Sign In
+          </ToastAction>
+        ),
       });
-      
-      // Redirect to auth page
-      setTimeout(() => {
-        window.location.href = '/auth?mode=signup';
-      }, 1000);
       return false;
     }
     
