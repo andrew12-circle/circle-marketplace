@@ -346,42 +346,59 @@ export const AIConciergeBanner = () => {
 
             {/* AI Results Display */}
             {aiResults && (
-              <div className="bg-gradient-to-r from-primary/5 to-accent/5 border border-primary/20 rounded-lg p-4">
-                <div className="flex items-start gap-3">
-                  <div className="p-2 rounded-lg bg-primary/10">
-                    <Sparkles className="h-4 w-4 text-primary" />
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="font-semibold text-sm mb-2">AI Concierge Results</h4>
-                    <p className="text-sm text-muted-foreground mb-3">{aiResults.recommendation}</p>
-                    <div className="flex gap-2">
-                      {voiceSupported && (
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          onClick={() => speakText(aiResults.recommendation)}
-                          disabled={isSpeaking}
-                        >
-                          <Volume2 className="h-3 w-3 mr-1" />
-                          {isSpeaking ? "Speaking..." : "Listen"}
-                        </Button>
-                      )}
-                      <Button 
-                        size="sm" 
-                        variant="outline"
-                        onClick={() => navigate(`/?q=${encodeURIComponent(aiResults.recommendation)}`)}
-                      >
-                        <Eye className="h-3 w-3 mr-1" />
-                        View Services
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        variant="outline"
-                        onClick={() => setAiResults(null)}
-                      >
-                        Clear
-                      </Button>
+              <div className="bg-gradient-to-r from-primary/5 to-accent/5 border border-primary/20 rounded-xl p-6">
+                <div className="space-y-4">
+                  {/* Header */}
+                  <div className="flex items-center gap-3">
+                    <div className="p-2.5 rounded-xl bg-primary/10 ring-1 ring-primary/20">
+                      <Sparkles className="h-5 w-5 text-primary" />
                     </div>
+                    <div>
+                      <h4 className="font-semibold text-base text-foreground">AI Concierge Recommendation</h4>
+                      <p className="text-xs text-muted-foreground">Personalized for your business goals</p>
+                    </div>
+                  </div>
+                  
+                  {/* Content */}
+                  <div className="bg-background/50 rounded-lg p-4 border border-border/50">
+                    <div className="prose prose-sm max-w-none">
+                      <p className="text-sm leading-relaxed text-foreground/90 mb-0">
+                        {aiResults.recommendation}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  {/* Actions */}
+                  <div className="flex flex-wrap gap-2 pt-2">
+                    {voiceSupported && (
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => speakText(aiResults.recommendation)}
+                        disabled={isSpeaking}
+                        className="h-8"
+                      >
+                        <Volume2 className="h-3 w-3 mr-1.5" />
+                        {isSpeaking ? "Speaking..." : "Listen"}
+                      </Button>
+                    )}
+                    <Button 
+                      size="sm" 
+                      variant="default"
+                      onClick={() => navigate(`/?q=${encodeURIComponent(aiResults.recommendation)}`)}
+                      className="h-8"
+                    >
+                      <Eye className="h-3 w-3 mr-1.5" />
+                      View Services
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="ghost"
+                      onClick={() => setAiResults(null)}
+                      className="h-8 text-muted-foreground hover:text-foreground"
+                    >
+                      Clear
+                    </Button>
                   </div>
                 </div>
               </div>
