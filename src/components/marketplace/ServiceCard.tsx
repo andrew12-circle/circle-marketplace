@@ -599,84 +599,52 @@ export const ServiceCard = ({
             <div className="space-y-3 mb-3 mt-6">
               {isProMember ? (
                 <>
-                  {/* Pro Member View: Show pro price prominently or discount pending */}
-                  {showDiscountPending ? (
-                    <div className="text-center space-y-3">
-                      {/* Discount Pending Status */}
-                      <div className="inline-flex items-center gap-2 bg-amber-100 text-amber-800 text-sm font-medium px-3 py-1 rounded-full">
-                        <span>{t('serviceCard.discountPending')}</span>
-                      </div>
-                      
-                      {/* Interest CTA */}
-                      <div className="space-y-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="w-full"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            demandSignals.likeService();
-                          }}
-                          disabled={demandSignals.hasLiked}
-                        >
-                          <ThumbsUp className={`w-4 h-4 mr-2 ${demandSignals.hasLiked ? 'fill-current' : ''}`} />
-                          {demandSignals.hasLiked ? t('serviceCard.thanksSeeYouPosted') : t('serviceCard.useWithDiscount')}
-                        </Button>
-                        
-                        {/* Social proof counter */}
-                        {demandSignals.totalLikes > 0 && (
-                          <div className="text-xs text-muted-foreground">
-                            {demandSignals.totalLikes} agent{demandSignals.totalLikes === 1 ? '' : 's'} interested
-                          </div>
-                        )}
-                        
-                        {/* Tooltip info */}
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <button className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors">
-                              <Info className="w-3 h-3" />
-                              How this works
-                            </button>
-                          </TooltipTrigger>
-                          <TooltipContent className="w-64 p-3">
-                            <p className="text-sm leading-relaxed">
-                              Vendors unlock Pro discounts when enough agents show interest. Every like notifies the vendor and increases the chance of Circle securing a discount.
-                            </p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </div>
-                      
-                      {/* Show retail price as fallback */}
-                      {service.retail_price && (
-                        <div className="text-xl font-bold text-foreground">
-                          {formatPrice(extractNumericPrice(service.retail_price), service.price_duration || 'mo')}
-                        </div>
-                      )}
-                    </div>
-                  ) : (
+                  {/* Pro Member View: Show pro price prominently */}
+                  {service.is_verified && service.pro_price ? (
                     <div className="text-center">
-                      {service.is_verified && service.pro_price ? (
-                        <>
-                          {service.retail_price && (
-                            <div className="text-xs text-muted-foreground mb-1">
-                              <span className="line-through">
-                                Retail: {formatPrice(extractNumericPrice(service.retail_price), service.price_duration || 'mo')}
-                              </span>
-                            </div>
-                          )}
-                          <div className="flex items-center justify-center gap-2 text-xl font-bold text-blue-600">
-                            <Crown className="w-4 h-4" />
-                            <span>{formatPrice(extractNumericPrice(service.pro_price), service.price_duration || 'mo')}</span>
-                          </div>
-                          <div className="text-xs text-blue-600 font-medium">Circle Pro Price</div>
-                        </>
-                      ) : (
-                        <div className="text-xl font-bold text-foreground">
-                          {formatPrice(extractNumericPrice(service.retail_price || '0'), service.price_duration || 'mo')}
+                      {/* Pro price display */}
+                      <div className="space-y-1">
+                        <div className="text-2xl font-bold text-primary">
+                          {formatPrice(extractNumericPrice(service.pro_price))}
+                          <span className="text-sm text-muted-foreground ml-1">
+                            {service.price_duration || '/mo'}
+                          </span>
+                        </div>
+                        <div className="text-sm text-muted-foreground">Pro Price</div>
+                      </div>
+                    </div>
+                  ) : service.retail_price ? (
+                    <div className="text-center">
+                      <div className="text-xl font-bold text-foreground">
+                        {formatPrice(extractNumericPrice(service.retail_price), service.price_duration || 'mo')}
+                      </div>
+                    </div>
+                  ) : null}
+                </>
+              ) : (
+                <div className="text-center">
+                  {service.is_verified && service.pro_price ? (
+                    <>
+                      {service.retail_price && (
+                        <div className="text-xs text-muted-foreground mb-1">
+                          <span className="line-through">
+                            Retail: {formatPrice(extractNumericPrice(service.retail_price), service.price_duration || 'mo')}
+                          </span>
                         </div>
                       )}
+                      <div className="flex items-center justify-center gap-2 text-xl font-bold text-blue-600">
+                        <Crown className="w-4 h-4" />
+                        <span>{formatPrice(extractNumericPrice(service.pro_price), service.price_duration || 'mo')}</span>
+                      </div>
+                      <div className="text-xs text-blue-600 font-medium">Circle Pro Price</div>
+                    </>
+                  ) : (
+                    <div className="text-xl font-bold text-foreground">
+                      {formatPrice(extractNumericPrice(service.retail_price || '0'), service.price_duration || 'mo')}
                     </div>
                   )}
+                </div>
+              )}
 
                   {/* Co-Pay Section - Mobile Optimized */}
                   {service.copay_allowed && service.respa_split_limit && ((service.is_verified && service.pro_price) || (!service.is_verified && service.retail_price)) && (
