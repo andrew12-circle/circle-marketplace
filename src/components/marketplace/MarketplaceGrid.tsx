@@ -642,7 +642,7 @@ export const MarketplaceGrid = () => {
 
   return (
     <>
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background" data-testid="marketplace-grid">
         <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
           {/* QA Mode Indicator and Controls */}
           {isQAMode && (

@@ -385,7 +385,38 @@ export const AIConciergeBanner = () => {
                     <Button 
                       size="sm" 
                       variant="default"
-                      onClick={() => navigate(`/?q=${encodeURIComponent(aiResults.recommendation)}`)}
+                      onClick={() => {
+                        // Extract relevant keywords from AI recommendation for better search results
+                        const recommendation = aiResults.recommendation.toLowerCase();
+                        let searchQuery = "";
+                        
+                        // Look for specific service types mentioned in the recommendation
+                        if (recommendation.includes('crm') || recommendation.includes('customer relationship')) {
+                          searchQuery = "crm";
+                        } else if (recommendation.includes('marketing') || recommendation.includes('lead generation')) {
+                          searchQuery = "marketing";
+                        } else if (recommendation.includes('website') || recommendation.includes('online presence')) {
+                          searchQuery = "website";
+                        } else if (recommendation.includes('social media')) {
+                          searchQuery = "social media";
+                        } else if (recommendation.includes('coaching') || recommendation.includes('training')) {
+                          searchQuery = "coaching";
+                        } else if (recommendation.includes('automation') || recommendation.includes('technology')) {
+                          searchQuery = "automation";
+                        } else {
+                          // Default to business growth if no specific keywords found
+                          searchQuery = "business growth";
+                        }
+                        
+                        navigate(`/?q=${encodeURIComponent(searchQuery)}`);
+                        // Scroll to marketplace section
+                        setTimeout(() => {
+                          const marketplaceSection = document.querySelector('[data-testid="marketplace-grid"]');
+                          if (marketplaceSection) {
+                            marketplaceSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                          }
+                        }, 100);
+                      }}
                       className="h-8"
                     >
                       <Eye className="h-3 w-3 mr-1.5" />
