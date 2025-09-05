@@ -177,10 +177,21 @@ export default function AgentQuestionnaire({ onComplete }: { onComplete?: (data:
       await saveRemote(
         data, // Pass data as first argument
         async (formData) => {
-          const { error } = await supabase.functions.invoke('questionnaire-save', {
+          const { data: response, error } = await supabase.functions.invoke('questionnaire-save', {
             body: { data: formData, completed: false }
           });
-          if (error) throw error;
+          
+          if (error) {
+            console.error('Autosave edge function invoke error:', error);
+            throw error;
+          }
+          
+          if (!response?.success) {
+            console.error('Autosave edge function business logic error:', response);
+            throw new Error(response?.error || 'Failed to autosave questionnaire');
+          }
+          
+          return response;
         }
       );
     },
@@ -283,10 +294,21 @@ export default function AgentQuestionnaire({ onComplete }: { onComplete?: (data:
       await saveRemote(
         payload,
         async (data) => {
-          const { error } = await supabase.functions.invoke('questionnaire-save', {
+          const { data: response, error } = await supabase.functions.invoke('questionnaire-save', {
             body: { data, completed: true }
           });
-          if (error) throw error;
+          
+          if (error) {
+            console.error('Edge function invoke error:', error);
+            throw error;
+          }
+          
+          if (!response?.success) {
+            console.error('Edge function business logic error:', response);
+            throw new Error(response?.error || 'Failed to save questionnaire');
+          }
+          
+          return response;
         }
       );
       
@@ -299,6 +321,7 @@ export default function AgentQuestionnaire({ onComplete }: { onComplete?: (data:
       });
       onComplete?.(payload);
     } catch (error) {
+      console.error('Submit error:', error);
       toast({
         title: "Submission failed",
         description: "Unable to submit questionnaire. Please try again.",
