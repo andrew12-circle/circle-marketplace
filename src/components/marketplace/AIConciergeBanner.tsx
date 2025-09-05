@@ -353,9 +353,18 @@ export const AIConciergeBanner = () => {
                   {/* Content */}
                   <div className="bg-background/50 rounded-lg p-6 border border-border/50">
                     <div className="prose prose-base max-w-none">
-                      <p className="text-base leading-loose text-foreground/95 mb-0 font-normal tracking-wide">
-                        {aiResults.recommendation}
-                      </p>
+                      <div className="space-y-4 text-base leading-loose text-foreground/95 font-normal tracking-wide">
+                        {aiResults.recommendation.split('\n\n').map((paragraph: string, index: number) => (
+                          <p key={index} className="mb-0">
+                            {paragraph.split('\n').map((line: string, lineIndex: number) => (
+                              <span key={lineIndex}>
+                                {line}
+                                {lineIndex < paragraph.split('\n').length - 1 && <br />}
+                              </span>
+                            ))}
+                          </p>
+                        ))}
+                      </div>
                     </div>
                   </div>
                   
