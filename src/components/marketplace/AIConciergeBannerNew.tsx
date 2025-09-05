@@ -9,13 +9,12 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
-import { GoalAssessmentModal } from "./GoalAssessmentModal";
+
 import { AIRecommendationsDashboard } from "./AIRecommendationsDashboard";
 
 export const AIConciergeBanner = () => {
   const { user, profile } = useAuth();
   const [isAIModalOpen, setIsAIModalOpen] = useState(false);
-  const [isGoalAssessmentOpen, setIsGoalAssessmentOpen] = useState(false);
   const [chatInput, setChatInput] = useState("");
   const [placeholderText, setPlaceholderText] = useState("");
   const [isInputFocused, setIsInputFocused] = useState(false);
@@ -30,26 +29,19 @@ export const AIConciergeBanner = () => {
     "How can I boost your sales this month?"
   ];
 
-  // Check if user needs goal assessment or show recommendations dashboard
+  // Check if user has completed comprehensive questionnaire  
   useEffect(() => {
     if (user && profile) {
       const profileWithGoals = profile as any;
       
-      // Check if user needs goal assessment - with proper null checks to prevent reopening
-      if (profileWithGoals.goal_assessment_completed === false || 
-          (profileWithGoals.goal_assessment_completed == null && 
-           profileWithGoals.created_at && 
-           !isGoalAssessmentOpen)) {
-        console.log('🎯 AIConciergeBannerNew - Opening goal assessment modal');
-        setIsGoalAssessmentOpen(true);
-        setShowRecommendationsDashboard(false);
-      } else if (profileWithGoals.goal_assessment_completed === true && !showRecommendationsDashboard) {
+      // Show recommendations dashboard if questionnaire is completed
+      if (profileWithGoals.goal_assessment_completed === true && !showRecommendationsDashboard) {
         console.log('✅ AIConciergeBannerNew - Goal completed, showing dashboard');
         setShowRecommendationsDashboard(true);
         generateRecommendations();
       }
     }
-  }, [user, profile, isGoalAssessmentOpen]);
+  }, [user, profile]);
 
   // Animated placeholder text effect
   useEffect(() => {
@@ -241,15 +233,6 @@ export const AIConciergeBanner = () => {
         open={isAIModalOpen} 
         onOpenChange={setIsAIModalOpen} 
         initialPrompt={chatInput}
-      />
-      
-      <GoalAssessmentModal
-        open={isGoalAssessmentOpen}
-        onOpenChange={setIsGoalAssessmentOpen}
-        onComplete={() => {
-          setShowRecommendationsDashboard(true);
-          generateRecommendations();
-        }}
       />
     </div>
   );

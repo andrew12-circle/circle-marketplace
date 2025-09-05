@@ -6,21 +6,20 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { LegalFooter } from "@/components/LegalFooter";
 import { RealtorView } from "@/components/command-center/RealtorView";
-import { GoalAssessmentModal } from "@/components/marketplace/GoalAssessmentModal";
+
 import { ArrowLeft, Shield, Target } from "lucide-react";
 import { useState, useEffect } from "react";
 
 const CommandCenter = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [isGoalAssessmentOpen, setIsGoalAssessmentOpen] = useState(false);
 
   // Check for hash navigation to goals section
   useEffect(() => {
     if (window.location.hash === '#goals') {
-      setIsGoalAssessmentOpen(true);
+      navigate('/agent-questionnaire');
     }
-  }, []);
+  }, [navigate]);
 
   // Require authentication
   if (!user) {
@@ -76,7 +75,7 @@ const CommandCenter = () => {
                   </p>
                 </div>
                 <Button
-                  onClick={() => setIsGoalAssessmentOpen(true)}
+                  onClick={() => navigate('/agent-questionnaire')}
                   variant="outline"
                 >
                   <Target className="h-4 w-4 mr-2" />
@@ -98,15 +97,6 @@ const CommandCenter = () => {
       </div>
 
       <LegalFooter />
-      
-      {/* Goal Assessment Modal */}
-      <GoalAssessmentModal
-        open={isGoalAssessmentOpen}
-        onOpenChange={setIsGoalAssessmentOpen}
-        onComplete={() => {
-          setIsGoalAssessmentOpen(false);
-        }}
-      />
     </div>
   );
 };

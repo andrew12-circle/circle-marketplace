@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { sbInvoke } from "@/utils/sb";
 import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
-import { GoalAssessmentModal } from "./GoalAssessmentModal";
+
 import { AIRecommendationsDashboard } from "./AIRecommendationsDashboard";
 import { useEnhancedAI } from "@/hooks/useEnhancedAI";
 import { useVoiceAssistant } from "@/hooks/useVoiceAssistant";
@@ -18,7 +18,6 @@ import { useVoiceAssistant } from "@/hooks/useVoiceAssistant";
 export const AIConciergeBanner = () => {
   const { user, profile } = useAuth();
   const [isAIModalOpen, setIsAIModalOpen] = useState(false);
-  const [isGoalAssessmentOpen, setIsGoalAssessmentOpen] = useState(false);
   const [chatInput, setChatInput] = useState("");
   const [placeholderText, setPlaceholderText] = useState("");
   const [isInputFocused, setIsInputFocused] = useState(false);
@@ -51,32 +50,23 @@ export const AIConciergeBanner = () => {
     "I want to increase my transaction volume by 30% this year"
   ];
 
-  // Check if user needs goal assessment or show recommendations dashboard
+  // Check if user has completed comprehensive questionnaire
   useEffect(() => {
     // Only trigger for authenticated users with valid profiles
     if (user && profile && user.id && (profile as any).user_id) {
       const profileWithGoals = profile as any;
 
-      // Check if user needs goal assessment - but only if profile is properly loaded
-      // Add extra safety checks to prevent modal from reopening due to profile fetch issues
-      if (profileWithGoals.goal_assessment_completed === false || 
-          (profileWithGoals.goal_assessment_completed == null && 
-           profileWithGoals.created_at && 
-           !isGoalAssessmentOpen)) {
-        console.log('🎯 Opening goal assessment modal - goal_assessment_completed:', profileWithGoals.goal_assessment_completed);
-        setIsGoalAssessmentOpen(true);
-        setShowRecommendationsDashboard(false);
-      } else if (profileWithGoals.goal_assessment_completed === true && !showRecommendationsDashboard) {
+      // Show recommendations dashboard if questionnaire is completed
+      if (profileWithGoals.goal_assessment_completed === true && !showRecommendationsDashboard) {
         console.log('✅ Goal assessment completed, showing recommendations dashboard');
         setShowRecommendationsDashboard(true);
         generateRecommendations();
       }
     } else {
-      // For unauthenticated users, ensure modals are closed
-      setIsGoalAssessmentOpen(false);
+      // For unauthenticated users, ensure dashboard is closed
       setShowRecommendationsDashboard(false);
     }
-  }, [user, profile, isGoalAssessmentOpen]);
+  }, [user, profile]);
   const generateRecommendations = async () => {
     if (!user?.id || !(profile as any)?.goal_assessment_completed) return;
     try {
@@ -412,32 +402,16 @@ export const AIConciergeBanner = () => {
                 <div className="flex flex-wrap items-center justify-center gap-3 text-muted-foreground">
                   <Target className="h-4 w-4" />
                   <span>Get personalized recommendations based on your goals & data from 300,000 successful agents</span>
-                  <Button onClick={() => navigate("/pricing")} size="sm" className="bg-primary hover:bg-primary/90">
-                    Create Free Account
-                  </Button>
-                </div>
-              </div>}
-          </div>
-        </CardContent>
+                   <Button onClick={() => navigate("/pricing")} size="sm" className="bg-primary hover:bg-primary/90">
+                     Create Free Account
+                   </Button>
+                 </div>
+               </div>}
+           </div>
+         </CardContent>
       </Card>
       
       <AskCircleAIModal open={isAIModalOpen} onOpenChange={setIsAIModalOpen} initialPrompt={chatInput} />
-      
-      <GoalAssessmentModal 
-        open={isGoalAssessmentOpen} 
-        onOpenChange={(open) => {
-          console.log('🎯 Goal assessment modal onOpenChange:', open);
-          setIsGoalAssessmentOpen(open);
-        }} 
-        onComplete={() => {
-          console.log('✅ Goal assessment completed, closing modal');
-          setIsGoalAssessmentOpen(false);
-          // Force a small delay to allow profile update to propagate
-          setTimeout(() => {
-            setShowRecommendationsDashboard(true);
-            generateRecommendations();
-          }, 1000);
-        }}
-      />
-    </div>;
+    </div>
+  );
 };

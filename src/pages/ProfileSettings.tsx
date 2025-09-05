@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -15,7 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { User, Upload, ArrowLeft, Crown, Building, Store, Briefcase } from "lucide-react";
-import { GoalAssessmentModal } from "@/components/marketplace/GoalAssessmentModal";
+
 
 export const ProfileSettings = () => {
   const { user, profile, updateProfile } = useAuth();
@@ -42,7 +42,6 @@ export const ProfileSettings = () => {
     vendor_description: "",
   });
 
-  const [isGoalAssessmentOpen, setIsGoalAssessmentOpen] = useState(false);
   const [goals, setGoals] = useState<any | null>(null);
   useEffect(() => {
     if (!user) {
@@ -443,7 +442,7 @@ export const ProfileSettings = () => {
                 <p className="text-sm text-muted-foreground">No goals set yet.</p>
               )}
               <div className="pt-2">
-                <Button variant="outline" onClick={() => setIsGoalAssessmentOpen(true)}>
+                <Button variant="outline" onClick={() => navigate('/agent-questionnaire')}>
                   Edit Goals
                 </Button>
               </div>
@@ -620,27 +619,6 @@ export const ProfileSettings = () => {
           </Card>
         </div>
       </main>
-      <GoalAssessmentModal
-        open={isGoalAssessmentOpen}
-        onOpenChange={setIsGoalAssessmentOpen}
-        onComplete={async () => {
-          if (user) {
-            const { data } = await supabase
-              .from('profiles')
-              .select('annual_goal_transactions, annual_goal_volume, average_commission_per_deal, primary_challenge, marketing_time_per_week, budget_preference')
-              .eq('user_id', user.id)
-              .maybeSingle();
-            if (data) {
-              setGoals(data as any);
-            }
-            toast({
-              title: "Goals updated",
-              description: "Your recommendations will adapt to your new goals.",
-            });
-          }
-          setIsGoalAssessmentOpen(false);
-        }}
-      />
     </div>
   );
 };

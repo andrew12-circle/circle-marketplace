@@ -4,7 +4,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAgentData } from "@/hooks/useAgentData";
-import { GoalAssessmentModal } from "./GoalAssessmentModal";
+
 import { ConversationalRefinement } from "./ConversationalRefinement";
 import { RecommendationsHeader } from "./RecommendationsHeader";
 import { ProfileCompletionAlert } from "./ProfileCompletionAlert";
@@ -15,9 +15,9 @@ import { useAutoRecovery } from "@/hooks/useAutoRecovery";
 export function AIRecommendationsDashboard() {
   const { user, profile } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const { agent, stats: agentStats, loading: agentLoading, error: agentError } = useAgentData();
   const [isLoading, setIsLoading] = useState(true);
-  const [isGoalAssessmentOpen, setIsGoalAssessmentOpen] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentPlan, setCurrentPlan] = useState<any>(null);
   const [showRefinement, setShowRefinement] = useState(false);
@@ -99,10 +99,10 @@ export function AIRecommendationsDashboard() {
     if (!requirements.isComplete) {
       toast({
         title: "Missing Information",
-        description: `Please complete: ${requirements.missing.join(', ')}`,
+        description: `Please complete the comprehensive questionnaire: ${requirements.missing.join(', ')}`,
         variant: "destructive"
       });
-      setIsGoalAssessmentOpen(true);
+      navigate('/agent-questionnaire');
       return;
     }
 
@@ -201,13 +201,13 @@ export function AIRecommendationsDashboard() {
         isGenerating={isGenerating}
         hasCompleteProfile={requirements.isComplete}
         onGenerateRecommendations={generateAIRecommendations}
-        onOpenAssessment={() => setIsGoalAssessmentOpen(true)}
+        onOpenAssessment={() => navigate('/agent-questionnaire')}
       />
 
       {!requirements.isComplete && (
         <ProfileCompletionAlert
           missingItems={requirements.missing as string[]}
-          onComplete={() => setIsGoalAssessmentOpen(true)}
+          onComplete={() => navigate('/agent-questionnaire')}
         />
       )}
 
@@ -229,17 +229,6 @@ export function AIRecommendationsDashboard() {
           />
         </div>
       )}
-
-      <GoalAssessmentModal
-        open={isGoalAssessmentOpen}
-        onOpenChange={setIsGoalAssessmentOpen}
-        onComplete={() => {
-          setIsGoalAssessmentOpen(false);
-          setTimeout(() => {
-            generateAIRecommendations();
-          }, 1000);
-        }}
-      />
     </div>
   );
 }
