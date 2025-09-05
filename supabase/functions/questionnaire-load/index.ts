@@ -27,14 +27,15 @@ Deno.serve(async (req) => {
       })
     }
 
-    // Load questionnaire data
+    // Load questionnaire data - use maybeSingle to handle 0 or 1 records
     const { data: questionnaire, error } = await supabaseClient
       .from('agent_questionnaires')
       .select('*')
       .eq('user_id', user.id)
-      .single()
+      .order('updated_at', { ascending: false })
+      .maybeSingle()
 
-    if (error && error.code !== 'PGRST116') { // PGRST116 is "not found"
+    if (error) {
       console.error('Error loading questionnaire:', error)
       return new Response(JSON.stringify({ error: 'Failed to load questionnaire' }), {
         status: 500,

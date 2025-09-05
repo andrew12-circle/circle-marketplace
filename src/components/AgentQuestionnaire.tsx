@@ -1,10 +1,13 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, ChevronLeft, ChevronRight, Loader2, LinkIcon } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Loader2, LinkIcon, Save } from "lucide-react";
 import { z } from "zod";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useDraft } from "@/hooks/useDraft";
+import { useAutosave } from "@/hooks/useAutosave";
+import { useResilientSave } from "@/hooks/useResilientSave";
 
 // shadcn/ui components
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -144,46 +147,128 @@ export default function AgentQuestionnaire({ onComplete }: { onComplete?: (data:
   const { toast } = useToast();
   const [current, setCurrent] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
   const [disc, setDisc] = useState<z.infer<typeof DISCSchema>>({ knowsDisc: "no", discStatus: "not_started" } as any);
   const [form, setForm] = useState<Partial<QuestionnairePayload>>({});
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
 
+  // Draft system for local storage fallback
+  const { 
+    draftData, 
+    hasDraft, 
+    saveDraft: saveLocalDraft, 
+    clearDraft, 
+    getMergedData 
+  } = useDraft<Partial<QuestionnairePayload>>({ 
+    key: `questionnaire-${user?.id}`, 
+    enabled: !!user 
+  });
+
+  // Resilient save for remote persistence
+  const { save: saveRemote, isSaving } = useResilientSave({
+    maxRetries: 3,
+    retryDelay: 1000,
+    timeout: 10000
+  });
+
+  // Auto-save hook with debouncing
+  const { triggerAutosave } = useAutosave({
+    onSave: async (data: Partial<QuestionnairePayload>) => {
+      if (!user) return;
+      await saveRemote(
+        data, // Pass data as first argument
+        async (formData) => {
+          const { error } = await supabase.functions.invoke('questionnaire-save', {
+            body: { data: formData, completed: false }
+          });
+          if (error) throw error;
+        }
+      );
+    },
+    onSaved: () => {
+      setLastSaved(new Date());
+    },
+    delay: 3000, // 3 second debounce
+    enabled: !!user
+  });
+
+  // Load initial data
   useEffect(() => {
     if (!user) return;
     
     (async () => {
-      const draft = await loadDraft(user.id);
-      const discInfo = await getDiscStatus(user.id);
-      setForm(draft ?? {});
-      setDisc({ 
-        knowsDisc: discInfo.knowsDisc ?? "no", 
-        discStatus: discInfo.discStatus ?? "not_started", 
-        discType: (discInfo as any).discType, 
-        discScores: (discInfo as any).discScores, 
-        discExternalLink: (discInfo as any).discExternalLink 
-      });
-      setLoading(false);
+      try {
+        // Load remote data first
+        const { data, error } = await supabase.functions.invoke('questionnaire-load');
+        let remoteData = null;
+        if (!error && data?.data) {
+          remoteData = data.data;
+        }
+
+        // Use remote data if available, otherwise use local draft
+        const finalData = remoteData || draftData || {};
+        
+        setForm(finalData);
+
+        // Load DISC data
+        const discInfo = await getDiscStatus(user.id);
+        setDisc({ 
+          knowsDisc: discInfo.knowsDisc ?? "no", 
+          discStatus: discInfo.discStatus ?? "not_started", 
+          discType: (discInfo as any).discType, 
+          discScores: (discInfo as any).discScores, 
+          discExternalLink: (discInfo as any).discExternalLink 
+        });
+        
+        setLoading(false);
+      } catch (error) {
+        console.error('Error loading questionnaire:', error);
+        // Fallback to local draft
+        const finalData = draftData || {};
+        setForm(finalData);
+        setLoading(false);
+      }
     })();
-  }, [user]);
+  }, [user, draftData]);
+
+  // Auto-save when form data changes
+  useEffect(() => {
+    if (!user || loading) return;
+    
+    const currentData = { ...form, disc };
+    
+    // Save to local storage immediately
+    saveLocalDraft(currentData);
+    
+    // Trigger remote autosave (debounced)
+    triggerAutosave(currentData);
+  }, [form, disc, user, loading, saveLocalDraft, triggerAutosave]);
+
+  // Save before page unload
+  useEffect(() => {
+    if (!user) return;
+    
+    const handleBeforeUnload = async () => {
+      if (form && Object.keys(form).length > 0) {
+        saveLocalDraft({ ...form, disc });
+        // Try one final save
+        try {
+          await supabase.functions.invoke('questionnaire-save', {
+            body: { data: { ...form, disc }, completed: false }
+          });
+        } catch (error) {
+          console.error('Failed to save on page unload:', error);
+        }
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [form, disc, user, saveLocalDraft]);
 
   const progress = useMemo(() => Math.round(((current + 1) / steps.length) * 100), [current]);
 
   async function handleNext() {
-    if (!user) return;
-    
-    setSaving(true);
-    const success = await saveDraft(user.id, { ...form, disc });
-    setSaving(false);
-    
-    if (success) {
-      setCurrent((c) => Math.min(c + 1, steps.length - 1));
-    } else {
-      toast({
-        title: "Save failed",
-        description: "Unable to save progress. Please try again.",
-        variant: "destructive"
-      });
-    }
+    setCurrent((c) => Math.min(c + 1, steps.length - 1));
   }
 
   function handleBack() {
@@ -193,18 +278,27 @@ export default function AgentQuestionnaire({ onComplete }: { onComplete?: (data:
   async function handleSubmit() {
     if (!user) return;
     
-    setSaving(true);
-    const payload = { ...form, disc } as QuestionnairePayload;
-    const success = await finalizeSubmission(user.id, payload);
-    setSaving(false);
-    
-    if (success) {
+    try {
+      const payload = { ...form, disc } as QuestionnairePayload;
+      await saveRemote(
+        payload,
+        async (data) => {
+          const { error } = await supabase.functions.invoke('questionnaire-save', {
+            body: { data, completed: true }
+          });
+          if (error) throw error;
+        }
+      );
+      
+      // Clear local draft after successful submission
+      clearDraft();
+      
       toast({
         title: "Questionnaire submitted!",
         description: "Your profile has been saved and recommendations are being generated."
       });
       onComplete?.(payload);
-    } else {
+    } catch (error) {
       toast({
         title: "Submission failed",
         description: "Unable to submit questionnaire. Please try again.",
@@ -379,7 +473,7 @@ export default function AgentQuestionnaire({ onComplete }: { onComplete?: (data:
                   <div className="space-y-4 text-sm">
                     <div className="text-muted-foreground">You can submit now — anything missing can be completed later.</div>
                     <Button onClick={handleSubmit} className="w-full md:w-auto">
-                      {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
+                      {isSaving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
                       Submit & Generate Plan
                     </Button>
                   </div>
@@ -393,14 +487,15 @@ export default function AgentQuestionnaire({ onComplete }: { onComplete?: (data:
               <ChevronLeft className="h-4 w-4 mr-2" /> Back
             </Button>
             <div className="flex items-center gap-3">
-              {saving && <span className="text-xs text-muted-foreground flex items-center gap-1"><Loader2 className="h-3 w-3 animate-spin" /> Saving…</span>}
+              {isSaving && <span className="text-xs text-muted-foreground flex items-center gap-1"><Loader2 className="h-3 w-3 animate-spin" /> Saving…</span>}
+              {lastSaved && !isSaving && <span className="text-xs text-muted-foreground flex items-center gap-1"><Save className="h-3 w-3" /> Saved {lastSaved.toLocaleTimeString()}</span>}
               {current < steps.length - 1 ? (
                 <Button onClick={handleNext}>
                   Next <ChevronRight className="h-4 w-4 ml-2" />
                 </Button>
               ) : (
                 <Button onClick={handleSubmit}>
-                  {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
+                  {isSaving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
                   Finish
                 </Button>
               )}

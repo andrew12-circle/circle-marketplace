@@ -57,6 +57,8 @@ Deno.serve(async (req) => {
         data: formData,
         completed: completed,
         updated_at: new Date().toISOString()
+      }, {
+        onConflict: 'user_id'
       })
       .select()
 
