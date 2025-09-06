@@ -2,12 +2,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ShoppingCart, Users, CreditCard, DollarSign, Coins, Loader2 } from "lucide-react";
+import { ShoppingCart, Users, CreditCard, DollarSign, Coins, Loader2, UserPlus } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useCart } from "@/contexts/CartContext";
 import { VendorSelectionModal } from "./VendorSelectionModal";
 import { Service } from "@/hooks/useMarketplaceData";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface PaymentChoiceModalProps {
   isOpen: boolean;
@@ -31,6 +32,7 @@ export const PaymentChoiceModal = ({
   const [respaCompliance, setRespaCompliance] = useState<boolean>(false);
   const [loadingPoints, setLoadingPoints] = useState(false);
   const { updateCartItemCoverage } = useCart();
+  const { user } = useAuth();
 
   const handleProChoice = () => {
     // Update cart item with pro coverage
@@ -40,6 +42,10 @@ export const PaymentChoiceModal = ({
   };
 
   const handleCoPayChoice = () => {
+    if (!user) {
+      // Show auth required message instead of opening vendor modal
+      return;
+    }
     setIsVendorModalOpen(true);
   };
 
@@ -187,9 +193,35 @@ export const PaymentChoiceModal = ({
                       Final pricing depends on vendor approval and compliance requirements.
                     </div>
                   </div>
-                  <Button onClick={handleCoPayChoice} variant="outline" className="w-full">
-                    Find Vendor Partner
+                  <Button 
+                    onClick={handleCoPayChoice} 
+                    variant="outline" 
+                    className="w-full"
+                    disabled={!user}
+                  >
+                    {!user ? (
+                      <>
+                        <UserPlus className="w-4 h-4 mr-2" />
+                        Sign In to Find Vendor Partner
+                      </>
+                    ) : (
+                      "Find Vendor Partner"
+                    )}
                   </Button>
+                  {!user && (
+                    <div className="mt-2 text-center">
+                      <p className="text-sm text-muted-foreground">
+                        Please{" "}
+                        <a 
+                          href="/auth" 
+                          className="text-primary hover:underline font-medium"
+                        >
+                          sign in or create an account
+                        </a>{" "}
+                        to connect with vendor partners
+                      </p>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             )}
