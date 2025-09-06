@@ -19,7 +19,7 @@ const resources = {
       vendorsCoPayUpTo: "Vendors co-pay up to 50%",
       exploreMarketplace: "Explore Marketplace →",
       seeVendorCoPay: "See Vendor Co-Pay →",
-      trustedByAgents: "Trusted by 500+ agents and counting",
+      trustedByAgents: "Interviewed 700+ agents and counting",
       
       // Marketplace
       marketplaceTitle: "Marketplace.",
@@ -256,7 +256,7 @@ const resources = {
       vendorsCoPayUpTo: "Vendedores co-pagan hasta 50%",
       exploreMarketplace: "Explorar Mercado →",
       seeVendorCoPay: "Ver Co-Pago de Vendedor →",
-      trustedByAgents: "Confiado por 500+ agentes y contando",
+      trustedByAgents: "Entrevistados 700+ agentes y contando",
       
       // Marketplace
       marketplaceTitle: "Mercado.",
@@ -493,7 +493,7 @@ const resources = {
       vendorsCoPayUpTo: "Les fournisseurs co-paient jusqu'à 50%",
       exploreMarketplace: "Explorer le Marché →",
       seeVendorCoPay: "Voir Co-Paiement Fournisseur →",
-      trustedByAgents: "Approuvé par 500+ agents et plus",
+      trustedByAgents: "Interviewé 700+ agents et plus",
       
       // Marketplace
       marketplaceTitle: "Marché.",
