@@ -1,0 +1,119 @@
+{
+  "sections": {
+    "goals": {
+      "title": "Goals & Production",
+      "questions": [
+        {
+          "id": "goal_current_volume",
+          "prompt": "How many deals did you close last year?",
+          "type": "number",
+          "weight": 3,
+          "maps_to_signal": "current_volume"
+        },
+        {
+          "id": "goal_target_volume", 
+          "prompt": "What's your target this year?",
+          "type": "number",
+          "weight": 3,
+          "maps_to_signal": "target_volume"
+        },
+        {
+          "id": "side_focus",
+          "prompt": "Do you focus more on buyers, sellers, or both?",
+          "type": "select",
+          "options": ["buyers", "sellers", "both"],
+          "weight": 2,
+          "maps_to_signal": "side_focus"
+        }
+      ]
+    },
+    "market": {
+      "title": "Market & Production",
+      "questions": [
+        {
+          "id": "avg_price_point",
+          "prompt": "What's your average price point?",
+          "type": "number",
+          "weight": 2,
+          "maps_to_signal": "avg_price_point"
+        },
+        {
+          "id": "market_density",
+          "prompt": "How would you describe your market?",
+          "type": "select",
+          "options": ["rural", "suburban", "urban"],
+          "weight": 1,
+          "maps_to_signal": "market_density"
+        },
+        {
+          "id": "niche_interest",
+          "prompt": "What's your specialty or niche?",
+          "type": "select",
+          "options": ["move_up_sellers", "first_time_buyers", "investors", "luxury", "new_construction", "general"],
+          "weight": 1,
+          "maps_to_signal": "niche_interest"
+        }
+      ]
+    },
+    "blockers": {
+      "title": "Challenges & Priorities",
+      "questions": [
+        {
+          "id": "biggest_blocker",
+          "prompt": "What's your biggest frustration right now?",
+          "type": "select",
+          "options": ["time", "money", "systems", "consistency"],
+          "weight": 3,
+          "maps_to_signal": "biggest_blocker"
+        },
+        {
+          "id": "lead_sources",
+          "prompt": "How do you usually get business?",
+          "type": "select",
+          "options": ["referrals", "online_leads", "open_houses", "farming", "other"],
+          "weight": 2,
+          "maps_to_signal": "lead_sources"
+        },
+        {
+          "id": "follow_up_system",
+          "prompt": "How would you rate your follow-up system?",
+          "type": "select",
+          "options": ["none", "basic", "strong"],
+          "weight": 2,
+          "maps_to_signal": "follow_up_system"
+        }
+      ]
+    },
+    "preference": {
+      "title": "Working Style & Budget",
+      "questions": [
+        {
+          "id": "diy_vs_dfy",
+          "prompt": "Do you prefer DIY tools you control, or done-for-you services?",
+          "type": "select",
+          "options": ["diy", "dfy", "hybrid"],
+          "weight": 2,
+          "maps_to_signal": "diy_vs_dfy"
+        },
+        {
+          "id": "budget_band",
+          "prompt": "What's your monthly marketing budget?",
+          "type": "select",
+          "options": ["under_250", "250_to_750", "750_to_1500", "1500_plus"],
+          "weight": 3,
+          "maps_to_signal": "budget_band"
+        },
+        {
+          "id": "time_commitment",
+          "prompt": "How many hours per week can you dedicate to new initiatives?",
+          "type": "select",
+          "options": ["2_to_4", "5_to_8", "9_plus"],
+          "weight": 1,
+          "maps_to_signal": "time_commitment"
+        }
+      ]
+    }
+  },
+  "total_questions": 12,
+  "estimated_time_minutes": 5
+}

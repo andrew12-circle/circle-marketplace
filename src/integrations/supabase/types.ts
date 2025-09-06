@@ -163,6 +163,60 @@ export type Database = {
         }
         Relationships: []
       }
+      advisor_responses: {
+        Row: {
+          created_at: string | null
+          id: number
+          question_id: string
+          updated_at: string | null
+          user_id: string
+          value: Json
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+          question_id: string
+          updated_at?: string | null
+          user_id: string
+          value: Json
+        }
+        Update: {
+          created_at?: string | null
+          id?: number
+          question_id?: string
+          updated_at?: string | null
+          user_id?: string
+          value?: Json
+        }
+        Relationships: []
+      }
+      advisor_signals: {
+        Row: {
+          created_at: string | null
+          id: number
+          signal: string
+          user_id: string
+          value: string
+          weight: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+          signal: string
+          user_id: string
+          value: string
+          weight?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: number
+          signal?: string
+          user_id?: string
+          value?: string
+          weight?: number | null
+        }
+        Relationships: []
+      }
       affiliate_approval_workflow: {
         Row: {
           affiliate_id: string
@@ -4452,50 +4506,71 @@ export type Database = {
       }
       goal_based_recommendations: {
         Row: {
+          accepted_at: string | null
           agent_id: string
           bundle_id: string | null
           confidence_score: number | null
           created_at: string
+          dismiss_reason: string | null
+          dismissed_at: string | null
           estimated_roi_percentage: number | null
           id: string
           is_accepted: boolean | null
           is_dismissed: boolean | null
           is_viewed: boolean | null
+          playbook_key: string | null
           priority_rank: number | null
+          reasons: Json | null
+          rec_skus: Json | null
           recommendation_text: string
           recommendation_type: string
+          roi: Json | null
           service_id: string | null
           updated_at: string
         }
         Insert: {
+          accepted_at?: string | null
           agent_id: string
           bundle_id?: string | null
           confidence_score?: number | null
           created_at?: string
+          dismiss_reason?: string | null
+          dismissed_at?: string | null
           estimated_roi_percentage?: number | null
           id?: string
           is_accepted?: boolean | null
           is_dismissed?: boolean | null
           is_viewed?: boolean | null
+          playbook_key?: string | null
           priority_rank?: number | null
+          reasons?: Json | null
+          rec_skus?: Json | null
           recommendation_text: string
           recommendation_type: string
+          roi?: Json | null
           service_id?: string | null
           updated_at?: string
         }
         Update: {
+          accepted_at?: string | null
           agent_id?: string
           bundle_id?: string | null
           confidence_score?: number | null
           created_at?: string
+          dismiss_reason?: string | null
+          dismissed_at?: string | null
           estimated_roi_percentage?: number | null
           id?: string
           is_accepted?: boolean | null
           is_dismissed?: boolean | null
           is_viewed?: boolean | null
+          playbook_key?: string | null
           priority_rank?: number | null
+          reasons?: Json | null
+          rec_skus?: Json | null
           recommendation_text?: string
           recommendation_type?: string
+          roi?: Json | null
           service_id?: string | null
           updated_at?: string
         }
