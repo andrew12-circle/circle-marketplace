@@ -73,6 +73,18 @@ export default function MarketplaceHero({ onExploreClick }: MarketplaceHeroProps
           {t('trustedByAgents')}
         </p>
       </div>
+      
+      {/* Media Logos */}
+      <div className="max-w-6xl mx-auto px-6 py-6">
+        <div className="flex justify-center">
+          <img 
+            src="https://storage.googleapis.com/msgsndr/UjxJODh2Df0UKjTnKpcP/media/6879b4f857dd60a40d8545af.png" 
+            alt="As Seen On Media Bar" 
+            className="max-h-[60px] w-auto"
+            loading="lazy"
+          />
+        </div>
+      </div>
     </section>
   )
 }
