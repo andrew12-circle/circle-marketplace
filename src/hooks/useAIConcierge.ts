@@ -162,9 +162,20 @@ export function useAIConcierge() {
     if (!conversation.plan || !user) return;
 
     try {
+      // Save plan reference to user's profile
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          last_ai_plan: conversation.plan,
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
       toast({
-        title: "Plan saved",
-        description: "Your growth plan has been saved to your profile.",
+        title: "Plan saved to profile",
+        description: "Your growth plan is now saved and you can track progress.",
       });
     } catch (error: any) {
       console.error('Error saving plan:', error);

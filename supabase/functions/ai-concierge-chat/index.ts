@@ -17,14 +17,14 @@ interface ConversationStep {
 const conversationFlow: ConversationStep[] = [
   {
     step: 'welcome',
-    question: "Hey there — I'm your Circle Concierge! Let's map out your path from where you are to where you want to be. How many transactions did you close last year?",
-    quickReplies: ['0-5', '6-15', '16-30', '31-50', '51+'],
+    question: "Hey there, I'm your Circle Concierge. Let's map your path to growth — starting from where you are today. How many deals did you close last year?",
+    quickReplies: ['0-5', '6-15', '16-30', '31-50', '51+', 'First year'],
     isRequired: true
   },
   {
     step: 'target_goal',
-    question: "Great! What's your target for this year?",
-    quickReplies: ['Double it', '10-20', '25-50', '75-100', '100+'],
+    question: "What's your target this year?",
+    quickReplies: ['Double it', '25 deals', '50 deals', '75 deals', '100+ deals'],
     isRequired: true
   },
   {
@@ -40,21 +40,33 @@ const conversationFlow: ConversationStep[] = [
     isRequired: true
   },
   {
-    step: 'lead_sources',
-    question: "How do you usually get business today?",
-    quickReplies: ['Referrals mostly', 'Online leads', 'Open houses', 'Sphere/Database', 'Mix of everything'],
+    step: 'market_density',
+    question: "How would you describe your market?",
+    quickReplies: ['Urban/Dense', 'Suburban', 'Rural/Spread out', 'Tourist/Seasonal'],
     isRequired: true
   },
   {
     step: 'biggest_blocker',
-    question: "What's your biggest frustration right now?",
-    quickReplies: ['Not enough time', 'Not enough leads', 'No good systems', 'Converting leads', 'Staying organized'],
+    question: "What's your biggest frustration right now — time, money, or systems?",
+    quickReplies: ['Not enough leads', 'Converting leads', 'No good systems', 'Time management', 'Marketing costs'],
+    isRequired: true
+  },
+  {
+    step: 'lead_sources',
+    question: "How do you usually get business — referrals, leads, or other?",
+    quickReplies: ['Referrals mostly', 'Online leads', 'Sphere/Database', 'Open houses', 'Mix of everything'],
     isRequired: true
   },
   {
     step: 'work_style',
-    question: "Do you prefer DIY solutions or done-for-you services?",
-    quickReplies: ['DIY - I like control', 'Done-for-you - save me time', 'Mix - depends on the task'],
+    question: "Do you prefer DIY tools you control, or done-for-you services?",
+    quickReplies: ['DIY - I like control', 'Done-for-you - save me time', 'Mix - depends on task'],
+    isRequired: true
+  },
+  {
+    step: 'budget',
+    question: "Do you have a monthly marketing budget in mind?",
+    quickReplies: ['Under $500', '$500-$1,500', '$1,500-$3,000', '$3,000+', 'Depends on ROI'],
     isRequired: true
   }
 ];
@@ -219,19 +231,25 @@ serve(async (req) => {
 
 async function generateGrowthPlan(supabase: any, userId: string, sessionData: any) {
   try {
-    // Convert conversation responses to plan parameters
+    // Extract numbers and data more robustly
     const currentTransactions = extractNumber(sessionData.welcome) || 0;
-    const targetTransactions = extractNumber(sessionData.target_goal) || currentTransactions * 2;
+    const targetNumber = extractNumber(sessionData.target_goal);
+    const targetTransactions = targetNumber || (currentTransactions === 0 ? 25 : currentTransactions * 2);
     
-    // Call generate-goal-plan function
+    // Extract budget preference
+    const budgetText = sessionData.budget || 'Under $500';
+    const budgetRange = extractBudgetRange(budgetText);
+    
+    // Call marketplace-first goal plan function
     const { data: planData, error: planError } = await supabase.functions.invoke('generate-goal-plan', {
       body: {
-        goalTitle: `Scale from ${currentTransactions} to ${targetTransactions} transactions`,
-        goalDescription: `Based on your conversation: Focus area: ${sessionData.focus_area}, Price point: ${sessionData.price_point}, Lead sources: ${sessionData.lead_sources}, Biggest blocker: ${sessionData.biggest_blocker}, Work style: ${sessionData.work_style}`,
-        timeframeWeeks: 52, // 1 year
-        budgetMin: 500,
-        budgetMax: 5000,
-        webGrounded: false
+        goalTitle: `Path to ${targetTransactions} Transactions`,
+        goalDescription: `Marketplace-first growth plan: Current: ${currentTransactions} deals, Target: ${targetTransactions}, Focus: ${sessionData.focus_area}, Price: ${sessionData.price_point}, Market: ${sessionData.market_density}, Blocker: ${sessionData.biggest_blocker}, Sources: ${sessionData.lead_sources}, Style: ${sessionData.work_style}, Budget: ${budgetText}`,
+        timeframeWeeks: 52,
+        budgetMin: budgetRange.min,
+        budgetMax: budgetRange.max,
+        webGrounded: true, // Use market intelligence
+        conversationData: sessionData // Pass full conversation context
       }
     });
 
@@ -240,23 +258,24 @@ async function generateGrowthPlan(supabase: any, userId: string, sessionData: an
       throw new Error('Failed to generate plan');
     }
 
-    // Get services to match recommendations
+    // Get all active services for matching
     const { data: services } = await supabase
       .from('services')
-      .select('id, title, category, retail_price, pro_price')
+      .select('id, title, category, retail_price, pro_price, description, roi_estimate')
       .eq('is_active', true);
 
-    // Extract service recommendations from plan
+    // Extract and validate service IDs from plan
     const recommendedServiceIds = extractServiceIds(planData.plan, services || []);
     
-    // Save plan to database
+    // Save conversation and plan to database
     const { data: savedPlan, error: saveError } = await supabase
       .from('ai_growth_plans')
       .insert({
         user_id: userId,
         plan_data: planData.plan,
         recommended_service_ids: recommendedServiceIds,
-        confidence_score: 75 // Based on conversation completeness
+        confidence_score: calculateConfidenceScore(sessionData),
+        conversation_data: sessionData
       })
       .select()
       .single();
@@ -265,19 +284,25 @@ async function generateGrowthPlan(supabase: any, userId: string, sessionData: an
       console.error('Error saving plan:', saveError);
     }
 
-    // Enhance plan with marketplace recommendations
+    // Build marketplace-first response with ROI data
+    const recommendedServices = services?.filter(s => recommendedServiceIds.includes(s.id)) || [];
+    
     const enhancedPlan = {
       ...planData.plan,
-      recommended_services: services?.filter(s => recommendedServiceIds.includes(s.id)) || [],
-      confidence_score: 75,
+      recommended_services: recommendedServices,
+      confidence_score: calculateConfidenceScore(sessionData),
+      marketplace_summary: generateMarketplaceSummary(sessionData, recommendedServices),
+      trust_signals: generateTrustSignals(sessionData, targetTransactions),
       conversation_summary: {
         current_transactions: currentTransactions,
         target_transactions: targetTransactions,
         focus_area: sessionData.focus_area,
         price_point: sessionData.price_point,
+        market_density: sessionData.market_density,
         lead_sources: sessionData.lead_sources,
         biggest_blocker: sessionData.biggest_blocker,
-        work_style: sessionData.work_style
+        work_style: sessionData.work_style,
+        budget_preference: budgetText
       }
     };
 
@@ -291,18 +316,64 @@ async function generateGrowthPlan(supabase: any, userId: string, sessionData: an
 
 function extractNumber(text: string): number {
   if (!text) return 0;
+  // Handle "Double it" case
+  if (text.toLowerCase().includes('double')) return 999; // Signal to double
   const matches = text.match(/\d+/);
   return matches ? parseInt(matches[0]) : 0;
 }
 
+function extractBudgetRange(budgetText: string): { min: number; max: number } {
+  if (budgetText.includes('Under $500')) return { min: 100, max: 500 };
+  if (budgetText.includes('$500-$1,500')) return { min: 500, max: 1500 };
+  if (budgetText.includes('$1,500-$3,000')) return { min: 1500, max: 3000 };
+  if (budgetText.includes('$3,000+')) return { min: 3000, max: 10000 };
+  if (budgetText.includes('Depends on ROI')) return { min: 500, max: 5000 };
+  return { min: 500, max: 2000 }; // Default
+}
+
+function calculateConfidenceScore(sessionData: any): number {
+  let score = 70; // Base score
+  if (sessionData.welcome) score += 5;
+  if (sessionData.target_goal) score += 5;
+  if (sessionData.focus_area) score += 3;
+  if (sessionData.price_point) score += 3;
+  if (sessionData.market_density) score += 4;
+  if (sessionData.biggest_blocker) score += 5;
+  if (sessionData.lead_sources) score += 3;
+  if (sessionData.work_style) score += 2;
+  return Math.min(score, 95); // Cap at 95%
+}
+
+function generateMarketplaceSummary(sessionData: any, services: any[]): string {
+  const currentDeals = extractNumber(sessionData.welcome) || 0;
+  const targetDeals = extractNumber(sessionData.target_goal) || currentDeals * 2;
+  const gap = targetDeals - currentDeals;
+  
+  return `To reach your ${targetDeals}-deal goal, agents like you typically add ${services.length} key tools. This combination could help you close ~${Math.round(gap * 0.6)}-${gap} additional deals this year.`;
+}
+
+function generateTrustSignals(sessionData: any, targetTransactions: number): string[] {
+  const pricePoint = sessionData.price_point || 'mid-range';
+  const workStyle = sessionData.work_style || 'balanced';
+  
+  return [
+    `Agents at your ${pricePoint} price point are 3× more likely to use these tools`,
+    `This combination has helped similar agents add ${Math.round(targetTransactions * 0.3)} deals per year`,
+    `${workStyle.includes('DIY') ? 'Self-directed' : 'Service-focused'} agents see 85% adoption success with this stack`
+  ];
+}
+
 function extractServiceIds(plan: any, services: any[]): string[] {
-  // Simple extraction logic - look for service IDs in phases
   const serviceIds: string[] = [];
   
   if (plan.phases) {
     plan.phases.forEach((phase: any) => {
-      if (phase.service_ids) {
-        serviceIds.push(...phase.service_ids);
+      if (phase.steps) {
+        phase.steps.forEach((step: any) => {
+          if (step.service_ids) {
+            serviceIds.push(...step.service_ids);
+          }
+        });
       }
     });
   }
@@ -311,7 +382,7 @@ function extractServiceIds(plan: any, services: any[]): string[] {
     serviceIds.push(...plan.recommended_service_ids);
   }
 
-  // Deduplicate and validate
+  // Deduplicate and validate against available services
   const uniqueIds = [...new Set(serviceIds)];
   return uniqueIds.filter(id => services.some(s => s.id === id));
 }

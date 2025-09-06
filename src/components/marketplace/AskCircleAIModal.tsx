@@ -116,12 +116,20 @@ export function AskCircleAIModal({ open, onOpenChange }: AskCircleAIModalProps) 
           </DialogHeader>
 
           <div className="space-y-6 py-4">
-            {/* Confidence Score */}
-            <div className="flex items-center gap-2 text-sm">
-              <Badge variant="secondary">
-                {conversation.plan.confidence_score || 75}% Match
-              </Badge>
-              <span className="text-muted-foreground">Based on agents like you</span>
+            {/* Confidence Score and Trust Signals */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm">
+                <Badge variant="secondary">
+                  {conversation.plan.confidence_score || 75}% Match
+                </Badge>
+                <span className="text-muted-foreground">Based on agents like you</span>
+              </div>
+              
+              {conversation.plan.marketplace_summary && (
+                <p className="text-sm text-muted-foreground italic">
+                  "{conversation.plan.marketplace_summary}"
+                </p>
+              )}
             </div>
 
             {/* Recommended Services */}
@@ -135,16 +143,35 @@ export function AskCircleAIModal({ open, onOpenChange }: AskCircleAIModalProps) 
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {conversation.plan.recommended_services.map((service: any) => (
-                    <div key={service.id} className="flex items-center justify-between p-3 border rounded-lg">
-                      <div>
+                    <div key={service.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors">
+                      <div className="flex-1">
                         <h4 className="font-medium">{service.title}</h4>
                         <p className="text-sm text-muted-foreground">{service.category}</p>
+                        {service.roi_estimate && (
+                          <Badge variant="outline" className="mt-1 text-xs">
+                            ROI: {service.roi_estimate}
+                          </Badge>
+                        )}
                       </div>
                       <div className="text-right">
-                        <p className="font-medium">{service.pro_price || service.retail_price}</p>
+                        <p className="font-medium text-primary">{service.pro_price || service.retail_price}</p>
+                        <p className="text-xs text-muted-foreground">Circle Pro</p>
                       </div>
                     </div>
                   ))}
+                  
+                  {conversation.plan.trust_signals && (
+                    <div className="mt-4 p-3 bg-muted/30 rounded-lg">
+                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
+                        Peer Insights
+                      </p>
+                      {conversation.plan.trust_signals.map((signal: string, index: number) => (
+                        <p key={index} className="text-sm text-muted-foreground mb-1">
+                          • {signal}
+                        </p>
+                      ))}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             )}
@@ -182,9 +209,21 @@ export function AskCircleAIModal({ open, onOpenChange }: AskCircleAIModalProps) 
               <Button onClick={savePlanToProfile} variant="outline" className="flex-1">
                 Save Plan to Profile
               </Button>
-              <Button onClick={() => onOpenChange(false)} className="flex-1">
-                Explore Marketplace
+              <Button 
+                onClick={() => {
+                  onOpenChange(false);
+                  // Future: Navigate to marketplace with filtered results
+                }} 
+                className="flex-1"
+              >
+                View Recommended Services
               </Button>
+            </div>
+            
+            <div className="text-center">
+              <p className="text-xs text-muted-foreground">
+                Here's your plan — want me to save this inside your profile so you can track progress?
+              </p>
             </div>
           </div>
         </DialogContent>
