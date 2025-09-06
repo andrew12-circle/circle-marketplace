@@ -352,7 +352,7 @@ export const AIConciergeBanner = () => {
          </CardContent>
       </Card>
       
-      <AskCircleAIModal open={isAIModalOpen} onOpenChange={setIsAIModalOpen} initialPrompt={chatInput} />
+      <AskCircleAIModal open={isAIModalOpen} onOpenChange={setIsAIModalOpen} />
     </div>
   );
 };
