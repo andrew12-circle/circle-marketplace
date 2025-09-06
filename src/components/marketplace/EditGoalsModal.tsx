@@ -79,11 +79,9 @@ export function EditGoalsModal({ children }: EditGoalsModalProps) {
   ];
 
   const budgetOptions = [
-    "under_500",
-    "500_1000",
-    "1000_2500", 
-    "2500_5000",
-    "over_5000"
+    "conservative",
+    "balanced", 
+    "aggressive"
   ];
 
   return (
@@ -142,11 +140,9 @@ export function EditGoalsModal({ children }: EditGoalsModalProps) {
               <SelectContent>
                 {budgetOptions.map((budget) => (
                   <SelectItem key={budget} value={budget}>
-                    {budget === "under_500" ? "Under $500" :
-                     budget === "500_1000" ? "$500 - $1,000" :
-                     budget === "1000_2500" ? "$1,000 - $2,500" :
-                     budget === "2500_5000" ? "$2,500 - $5,000" :
-                     "Over $5,000"}
+                    {budget === "conservative" ? "Conservative" :
+                     budget === "balanced" ? "Balanced" :
+                     "Aggressive"}
                   </SelectItem>
                 ))}
               </SelectContent>
