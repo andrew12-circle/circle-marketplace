@@ -267,10 +267,7 @@ serve(async (req) => {
     }
 
     // Create personality and performance-aware prompt
-    const currentTransactions = recentTransactions?.length || 0;
-    const currentVolume = recentTransactions?.reduce((sum, t) => sum + (t.sale_price || 0), 0) || 0;
-    const targetTransactions = profile?.annual_goal_transactions || Math.max(currentTransactions * 1.5, 40);
-    const gapToClose = Math.max(0, targetTransactions - currentTransactions);
+    // Use already declared variables from above
 
     const system = `You are an expert real estate business strategist specializing in personalized growth plans for agents with different personality types and work styles.
 
