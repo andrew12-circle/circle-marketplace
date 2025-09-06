@@ -19,8 +19,6 @@ export const AIConciergeBanner = () => {
   const { user, profile } = useAuth();
   const [isAIModalOpen, setIsAIModalOpen] = useState(false);
   const [chatInput, setChatInput] = useState("");
-  const [placeholderText, setPlaceholderText] = useState("");
-  const [isInputFocused, setIsInputFocused] = useState(false);
   const [showRecommendationsDashboard, setShowRecommendationsDashboard] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [aiResults, setAiResults] = useState<any>(null);
@@ -28,12 +26,6 @@ export const AIConciergeBanner = () => {
   const navigate = useNavigate();
   const { getRecommendation, isLoading } = useEnhancedAI();
   
-  const placeholderQuestions = [
-    "I need a closing gift for a $400K first-time buyer couple, under $100",
-    "What marketing services give the best ROI in my area?", 
-    "Show me vendors who offer co-pay in Nashville",
-    "I want to increase my transaction volume by 30% this year"
-  ];
 
   // Check if user has completed comprehensive questionnaire
   useEffect(() => {
@@ -72,42 +64,6 @@ export const AIConciergeBanner = () => {
     }
   };
 
-  // Animated placeholder text effect
-  useEffect(() => {
-    if (isInputFocused || chatInput.trim().length > 0) {
-      setPlaceholderText("");
-      return;
-    }
-    let currentQuestionIndex = 0;
-    let currentCharIndex = 0;
-    let isDeleting = false;
-    const typeEffect = () => {
-      const currentQuestion = placeholderQuestions[currentQuestionIndex];
-      if (isDeleting) {
-        setPlaceholderText(currentQuestion.substring(0, currentCharIndex - 1));
-        currentCharIndex--;
-        if (currentCharIndex === 0) {
-          isDeleting = false;
-          currentQuestionIndex = (currentQuestionIndex + 1) % placeholderQuestions.length;
-          setTimeout(typeEffect, 1000);
-          return;
-        }
-      } else {
-        setPlaceholderText(currentQuestion.substring(0, currentCharIndex + 1));
-        currentCharIndex++;
-        if (currentCharIndex === currentQuestion.length) {
-          setTimeout(() => {
-            isDeleting = true;
-            typeEffect();
-          }, 3000);
-          return;
-        }
-      }
-      setTimeout(typeEffect, isDeleting ? 150 : 200);
-    };
-    const timeout = setTimeout(typeEffect, 1000);
-    return () => clearTimeout(timeout);
-  }, [isInputFocused, chatInput]);
   const handleSendMessage = async () => {
     const query = chatInput.trim();
     if (!query) return;
@@ -259,9 +215,6 @@ export const AIConciergeBanner = () => {
             {/* AI Concierge Input */}
             <div className="bg-card/30 backdrop-blur-sm border border-border/50 rounded-lg p-4">
               <div className="flex items-center justify-between mb-3">
-                <p className="text-sm text-muted-foreground">
-                  Ask me anything about growing your real estate business
-                </p>
                 <EditGoalsModal>
                   <Button
                     variant="outline"
@@ -279,10 +232,8 @@ export const AIConciergeBanner = () => {
                     value={chatInput} 
                     onChange={e => setChatInput(e.target.value)} 
                     onKeyDown={handleKeyDown} 
-                    onFocus={() => setIsInputFocused(true)} 
-                    onBlur={() => setIsInputFocused(false)} 
-                    placeholder={placeholderText} 
-                    className="bg-background/50 border-border/50 focus:bg-background" 
+                    placeholder="Ask me anything about growing your real estate business" 
+                    className="bg-background/50 border-border/50 focus:bg-background"
                     disabled={isProcessing || isLoading}
                   />
                   {(isProcessing || isLoading) && (
