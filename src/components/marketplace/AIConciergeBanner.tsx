@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { sbInvoke } from "@/utils/sb";
 import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
+import { EditGoalsModal } from "./EditGoalsModal";
 
 import { AIRecommendationsDashboard } from "./AIRecommendationsDashboard";
 import { useEnhancedAI } from "@/hooks/useEnhancedAI";
@@ -261,15 +262,16 @@ export const AIConciergeBanner = () => {
                 <p className="text-sm text-muted-foreground">
                   Ask me anything about growing your real estate business
                 </p>
-                <Button
-                  onClick={() => navigate('/command-center#goals')}
-                  variant="outline"
-                  size="sm"
-                  className="text-xs"
-                >
-                  <Target className="h-3 w-3 mr-1" />
-                  Edit Goals
-                </Button>
+                <EditGoalsModal>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-xs"
+                  >
+                    <Target className="h-3 w-3 mr-1" />
+                    Edit Goals
+                  </Button>
+                </EditGoalsModal>
               </div>
               <div className="flex items-center gap-3">
                 <div className="flex-1 relative">
