@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next"
+import { useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { CheckCircle, Percent, DollarSign } from "lucide-react"
@@ -9,6 +10,7 @@ interface MarketplaceHeroProps {
 
 export default function MarketplaceHero({ onExploreClick }: MarketplaceHeroProps) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   
   const handleExploreClick = () => {
     if (onExploreClick) {
@@ -64,8 +66,13 @@ export default function MarketplaceHero({ onExploreClick }: MarketplaceHeroProps
           >
             {t('exploreMarketplace')}
           </Button>
-          <Button size="default" variant="outline" className="rounded-2xl sm:text-base text-sm">
-            {t('seeVendorCoPay')}
+          <Button 
+            size="default" 
+            variant="outline" 
+            className="rounded-2xl sm:text-base text-sm"
+            onClick={() => navigate('/pricing')}
+          >
+            Create Free Account
           </Button>
         </div>
 
