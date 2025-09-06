@@ -1500,6 +1500,47 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_growth_plans: {
+        Row: {
+          confidence_score: number
+          created_at: string
+          id: string
+          plan_data: Json
+          recommended_service_ids: string[]
+          session_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          confidence_score?: number
+          created_at?: string
+          id?: string
+          plan_data: Json
+          recommended_service_ids?: string[]
+          session_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          confidence_score?: number
+          created_at?: string
+          id?: string
+          plan_data?: Json
+          recommended_service_ids?: string[]
+          session_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_growth_plans_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "concierge_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_interaction_logs: {
         Row: {
           created_at: string | null
@@ -2598,6 +2639,41 @@ export type Database = {
           },
         ]
       }
+      concierge_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          role: string
+          session_id: string
+          step_name: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          role: string
+          session_id: string
+          step_name?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          role?: string
+          session_id?: string
+          step_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "concierge_messages_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "concierge_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       concierge_runs: {
         Row: {
           agent_id: string
@@ -2634,6 +2710,36 @@ export type Database = {
           recommended_vendors?: Json | null
           status?: string | null
           workflow_type?: string | null
+        }
+        Relationships: []
+      }
+      concierge_sessions: {
+        Row: {
+          completed: boolean
+          created_at: string
+          current_step: string
+          id: string
+          session_data: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean
+          created_at?: string
+          current_step?: string
+          id?: string
+          session_data?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed?: boolean
+          created_at?: string
+          current_step?: string
+          id?: string
+          session_data?: Json
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
