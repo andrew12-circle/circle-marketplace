@@ -272,7 +272,7 @@ export const CartDrawer = () => {
                       </h4>
                       <p className="text-xs text-muted-foreground">
                         {item.coverageType === 'copay' && item.selectedVendor
-                          ? `Co-Pay with ${item.selectedVendor.name}`
+                          ? `Co-Pay with ${item.selectedVendor?.name || 'Selected Vendor'}`
                           : item.vendor}
                       </p>
                       
