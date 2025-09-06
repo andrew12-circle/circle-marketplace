@@ -21,10 +21,11 @@ export default function AgentQuestionnairePage() {
   };
 
   const handleGoBack = () => {
-    if (window.history.length > 1) {
-      navigate(-1);
-    } else {
+    console.log('Back button clicked, history length:', window.history.length);
+    try {
       navigate('/');
+    } catch (error) {
+      console.error('Navigation error:', error);
     }
   };
 
