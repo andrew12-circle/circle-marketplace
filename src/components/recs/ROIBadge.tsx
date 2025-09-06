@@ -3,11 +3,22 @@ import { TrendingUp } from "lucide-react";
 import { ROIEstimate, formatROI, formatAppointments } from "@/lib/roi";
 
 interface ROIBadgeProps {
-  roi: ROIEstimate;
+  roi?: ROIEstimate;
+  text?: string;
   variant?: "default" | "compact";
 }
 
-export const ROIBadge = ({ roi, variant = "default" }: ROIBadgeProps) => {
+export const ROIBadge = ({ roi, text, variant = "default" }: ROIBadgeProps) => {
+  if (text) {
+    return (
+      <span className="inline-flex items-center rounded-full border px-2 py-0.5 text-xs text-muted-foreground">
+        {text}
+      </span>
+    );
+  }
+
+  if (!roi) return null;
+
   if (variant === "compact") {
     return (
       <Badge variant="secondary" className="gap-1 text-xs">

@@ -14,6 +14,7 @@ import { useNavigate } from "react-router-dom";
 
 import { AIRecommendationsDashboard } from "./AIRecommendationsDashboard";
 import { useEnhancedAI } from "@/hooks/useEnhancedAI";
+import ConciergeHero from "@/components/concierge/ConciergeHero";
 
 export const AIConciergeBanner = () => {
   const { user, profile } = useAuth();
@@ -191,26 +192,25 @@ export const AIConciergeBanner = () => {
       <Card className="bg-gradient-to-br from-primary/5 via-background to-accent/5 border-primary/20 shadow-lg">
         <CardContent className="p-4 md:p-6">
           <div className="space-y-6">
-            {/* Header */}
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-primary/10 border border-primary/20">
-                <Brain className="h-5 w-5 text-primary" />
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <h3 className="text-lg font-semibold">
-                    {getTimeOfDayGreeting()}, {user && profile ? profile.display_name || 'Agent' : 'Future Member'}!
-                  </h3>
-                  <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
-                    <Sparkles className="h-3 w-3 mr-1" />
-                    AI Concierge
-                  </Badge>
-                </div>
-                <p className="text-muted-foreground">
-                  {showRecommendationsDashboard ? "Here are your personalized business recommendations" : "How can I help you grow your business today?"}
-                </p>
-              </div>
-            </div>
+            <ConciergeHero
+              userFirstName={user && profile ? profile.display_name?.split(' ')[0] || 'Agent' : 'Future Member'}
+              signals={{
+                goalTargetVolume: (profile as any)?.goal_target_volume || null,
+                persona: (profile as any)?.personality_type || null
+              }}
+              onStart={() => setIsAIModalOpen(true)}
+              onOpenGuide={() => {
+                // Navigate to AI strategy guide or show modal
+                setIsAIModalOpen(true);
+              }}
+              onBookHuman={() => {
+                // Add booking logic here
+                toast({
+                  title: "Booking Feature",
+                  description: "Human advisor booking coming soon!",
+                });
+              }}
+            />
 
             {/* AI Concierge Input */}
             <div className="bg-card/30 backdrop-blur-sm border border-border/50 rounded-lg p-4">

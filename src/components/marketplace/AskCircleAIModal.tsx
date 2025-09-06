@@ -171,7 +171,11 @@ export function AskCircleAIModal({ open, onOpenChange }: AskCircleAIModalProps) 
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
                           <h4 className="font-medium">{service.title}</h4>
-                          <WhyThisPopover reasons={service.reasons} serviceName={service.title} />
+                          <WhyThisPopover 
+                            peerUsage={service.reasons?.peer_usage}
+                            expectedDelta={service.reasons?.expected_delta}
+                            fitReason={service.reasons?.fit_reason}
+                          />
                         </div>
                         <p className="text-sm text-muted-foreground">{service.category}</p>
                         {planData.roi && (
