@@ -181,7 +181,7 @@ export function AIRecommendationsDashboard() {
 
   const requirements = checkDataRequirements();
   const currentTransactions = (agentStats?.buyerDeals || 0) + (agentStats?.sellerDeals || 0);
-  const targetTransactions = (profile as any)?.annual_goal_transactions || Math.max(currentTransactions * 1.5, 40);
+  const targetTransactions = (profile as any)?.annual_goal_transactions || (currentTransactions * 1.5) || 40;
   const personalityType = (profile as any)?.personality_data?.personality_type || null;
 
   return (
