@@ -184,6 +184,12 @@ export function AIRecommendationsDashboard() {
   const targetTransactions = (profile as any)?.annual_goal_transactions || (currentTransactions * 1.5) || 40;
   const personalityType = (profile as any)?.personality_data?.personality_type || null;
 
+  // Force re-render when profile updates
+  useEffect(() => {
+    // This will cause the component to re-render when profile data changes
+    console.log('Profile updated, targetTransactions:', targetTransactions);
+  }, [(profile as any)?.annual_goal_transactions, targetTransactions]);
+
   return (
     <div className="space-y-6">
       {/* Show recovery system if we have errors */}
