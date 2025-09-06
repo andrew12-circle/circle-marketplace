@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { ConsultationBookingModal } from "@/components/marketplace/ConsultationBookingModal";
 import { HelpCircle } from "lucide-react";
 
 type Signals = {
@@ -40,8 +42,23 @@ export default function ConciergeHero({
   onOpenGuide: () => void;
   onBookHuman?: () => void;
 }) {
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const cta = getCtaLabel(signals.goalTargetVolume);
   const playbookTitle = getPlaybookTitle(signals.persona);
+
+  const handleBookingConfirmed = (consultationId: string) => {
+    console.log('Consultation booked successfully:', consultationId);
+    setIsBookingModalOpen(false);
+  };
+
+  // Service object for the booking modal - representing Circle's advisory service
+  const advisoryService = {
+    id: 'circle-advisory-service', // This represents Circle's internal advisory service
+    title: 'Circle Marketplace Advisory Consultation',
+    vendor: {
+      name: 'Circle Marketplace Team'
+    }
+  };
 
   return (
     <div className="rounded-2xl border border-primary/20 p-6 md:p-8 bg-gradient-to-br from-primary/5 via-background to-accent/5">
@@ -98,14 +115,30 @@ export default function ConciergeHero({
         <p className="text-sm text-muted-foreground">AI-powered recommendations based on your goals and market data.</p>
       </div>
 
-      {/* Optional: human fallback */}
-      {onBookHuman && (
-        <div className="mt-4">
-          <Button variant="link" className="px-0 text-sm" onClick={onBookHuman}>
-            Prefer a 15-min human advisor?
-          </Button>
-        </div>
-      )}
+      {/* Human advisor booking button */}
+      <div className="mt-4">
+        <Button 
+          variant="link" 
+          className="px-0 text-sm" 
+          onClick={() => {
+            if (onBookHuman) {
+              onBookHuman();
+            } else {
+              setIsBookingModalOpen(true);
+            }
+          }}
+        >
+          Prefer a 15-min human advisor?
+        </Button>
+      </div>
+
+      {/* Consultation Booking Modal */}
+      <ConsultationBookingModal
+        isOpen={isBookingModalOpen}
+        onClose={() => setIsBookingModalOpen(false)}
+        service={advisoryService}
+        onBookingConfirmed={handleBookingConfirmed}
+      />
     </div>
   );
 }
