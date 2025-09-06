@@ -6037,7 +6037,6 @@ export type Database = {
           state: string | null
           success_path_score: number | null
           team_size: string | null
-          tier: string
           total_earnings: number | null
           updated_at: string
           user_id: string
@@ -6105,7 +6104,6 @@ export type Database = {
           state?: string | null
           success_path_score?: number | null
           team_size?: string | null
-          tier?: string
           total_earnings?: number | null
           updated_at?: string
           user_id: string
@@ -6173,7 +6171,6 @@ export type Database = {
           state?: string | null
           success_path_score?: number | null
           team_size?: string | null
-          tier?: string
           total_earnings?: number | null
           updated_at?: string
           user_id?: string
@@ -8006,42 +8003,6 @@ export type Database = {
             referencedColumns: ["user_id"]
           },
         ]
-      }
-      subscriptions: {
-        Row: {
-          created_at: string
-          current_period_end: string | null
-          id: string
-          price_id: string | null
-          status: string | null
-          stripe_customer_id: string | null
-          stripe_subscription_id: string | null
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          current_period_end?: string | null
-          id?: string
-          price_id?: string | null
-          status?: string | null
-          stripe_customer_id?: string | null
-          stripe_subscription_id?: string | null
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          current_period_end?: string | null
-          id?: string
-          price_id?: string | null
-          status?: string | null
-          stripe_customer_id?: string | null
-          stripe_subscription_id?: string | null
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
       }
       support_agents: {
         Row: {
