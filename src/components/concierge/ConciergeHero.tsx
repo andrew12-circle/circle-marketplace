@@ -51,9 +51,9 @@ export default function ConciergeHero({
     setIsBookingModalOpen(false);
   };
 
-  // Service object for the booking modal - representing Circle's advisory service
+  // Service object for the booking modal - using the service we created in the database
   const advisoryService = {
-    id: 'ad4ec4d4-fc66-4286-9e92-209b11dab58d', // Circle's internal advisory service from services table
+    id: '00000000-0000-0000-0000-000000000001', // Circle's Advisory Service from services table
     title: 'Circle Marketplace Advisory Consultation',
     vendor: {
       name: 'Circle Marketplace Team'
