@@ -121,10 +121,10 @@ export const PaymentChoiceModal = ({
                   <CreditCard className="w-5 h-5 text-primary" />
                   <h3 className="font-semibold">Pay Circle Pro Price</h3>
                 </div>
-                <div className="text-2xl font-bold text-primary mb-2">{proPrice}/mo</div>
+                <div className="text-2xl font-bold text-primary mb-2">${proPrice}/mo</div>
                 <p className="text-sm text-muted-foreground mb-4">Pay your discounted member price and get started immediately.</p>
                 <Button onClick={handleProChoice} className="w-full">
-                  Add to Cart - {proPrice}/mo
+                  Add to Cart - ${proPrice}/mo
                 </Button>
               </CardContent>
             </Card>
@@ -176,7 +176,7 @@ export const PaymentChoiceModal = ({
                     <Users className="w-5 h-5 text-green-600" />
                     <h3 className="font-semibold">Get Vendor Help (Co-Pay)</h3>
                   </div>
-                  <div className="text-2xl font-bold text-green-600 mb-1">${coPayPrice || 0}/mo</div>
+                  <div className="text-2xl font-bold text-green-600 mb-1">{coPayPrice || "$0"}/mo</div>
                   <div className="text-sm text-muted-foreground mb-4">SSP</div>
                   <p className="text-sm text-muted-foreground mb-4">
                     Get connected with a vendor partner. SSP vendors limited to 20% by RESPA compliance.
