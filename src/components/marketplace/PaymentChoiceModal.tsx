@@ -35,6 +35,10 @@ export const PaymentChoiceModal = ({
   const { user } = useAuth();
 
   const handleProChoice = () => {
+    if (!user) {
+      // Show auth required message instead of adding to cart
+      return;
+    }
     // Update cart item with pro coverage
     updateCartItemCoverage(service.id, 'pro');
     onProChoice(service);
@@ -129,9 +133,34 @@ export const PaymentChoiceModal = ({
                 </div>
                 <div className="text-2xl font-bold text-primary mb-2">${proPrice}/mo</div>
                 <p className="text-sm text-muted-foreground mb-4">Pay your discounted member price and get started immediately.</p>
-                <Button onClick={handleProChoice} className="w-full">
-                  Add to Cart - ${proPrice}/mo
+                <Button 
+                  onClick={handleProChoice} 
+                  className="w-full"
+                  disabled={!user}
+                >
+                  {!user ? (
+                    <>
+                      <UserPlus className="w-4 h-4 mr-2" />
+                      Sign In to Add to Cart
+                    </>
+                  ) : (
+                    `Add to Cart - $${proPrice}/mo`
+                  )}
                 </Button>
+                {!user && (
+                  <div className="mt-2 text-center">
+                    <p className="text-sm text-muted-foreground">
+                      Please{" "}
+                      <a 
+                        href="/auth" 
+                        className="text-primary hover:underline font-medium"
+                      >
+                        sign in or create an account
+                      </a>{" "}
+                      to add items to your cart
+                    </p>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
