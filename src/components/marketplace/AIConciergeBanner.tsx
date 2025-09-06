@@ -220,7 +220,7 @@ export const AIConciergeBanner = () => {
                     value={chatInput} 
                     onChange={e => setChatInput(e.target.value)} 
                     onKeyDown={handleKeyDown} 
-                    placeholder="Ask me anything about growing your real estate business" 
+                    placeholder="Advice for real estate agents, back by data driven results" 
                     className="bg-background/50 border-border/50 focus:bg-background"
                     disabled={isProcessing || isLoading}
                   />
