@@ -560,7 +560,7 @@ serve(async (req) => {
           .eq('id', sessionId);
 
         // Generate growth plan
-        const planResult = await generateGrowthPlan(supabase, user.id, updatedData);
+        const planResult = await generateEnhancedGrowthPlan(supabase, user.id, updatedData);
 
         return new Response(JSON.stringify({
           sessionId,
@@ -763,7 +763,7 @@ async function trackRecommendationOutcome(supabase: any, userId: string, service
 }
 
 // Enhanced plan generation with marketplace intelligence
-async function generateGrowthPlan(supabase: any, userId: string, sessionData: any) {
+async function generateEnhancedGrowthPlan(supabase: any, userId: string, sessionData: any) {
   console.log('Generating growth plan with marketplace intelligence for user:', userId);
   
   try {

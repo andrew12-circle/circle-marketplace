@@ -1,7 +1,7 @@
 
 // @ts-nocheck
 import { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -361,6 +361,9 @@ export const ConsultationBookingModal = ({
             <CalendarIcon className="w-5 h-5" />
             Book Consultation: {service.title}
           </DialogTitle>
+          <DialogDescription>
+            Schedule a consultation to discuss your needs and get personalized recommendations.
+          </DialogDescription>
         </DialogHeader>
 
         {/* Authentication Check */}
