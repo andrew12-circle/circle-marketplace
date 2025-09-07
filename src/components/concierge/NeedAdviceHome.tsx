@@ -494,8 +494,21 @@ export default function NeedAdviceHome() {
         </div>
       </footer>
 
+      {/* Minimized chat icon - shows when chat is minimized */}
+      {isChatOpen && isChatMinimized && (
+        <div className="fixed bottom-4 left-4 z-50">
+          <Button
+            onClick={() => setIsChatMinimized(false)}
+            className="h-12 w-12 rounded-full bg-primary hover:bg-primary/90 shadow-lg"
+            size="icon"
+          >
+            <Brain className="h-5 w-5 text-primary-foreground" />
+          </Button>
+        </div>
+      )}
+
       {/* Chat Sheet - Fixed position when minimized */}
-      <Sheet open={isChatOpen} onOpenChange={(open) => {
+      <Sheet open={isChatOpen && !isChatMinimized} onOpenChange={(open) => {
         if (!open) {
           setIsChatOpen(false);
           setIsChatMinimized(false);
@@ -503,26 +516,10 @@ export default function NeedAdviceHome() {
       }}>
         <SheetContent 
           side="bottom" 
-          className={`p-0 border-0 transition-all duration-300 ${
-            isChatMinimized 
-              ? 'h-0 bg-transparent' 
-              : 'h-[80vh] bg-transparent'
-          }`}
+          className="p-0 border-0 h-[80vh] bg-transparent"
         >
-          {isChatMinimized ? (
-            // Minimized chat icon
-            <div className="fixed bottom-4 left-4 z-50">
-              <Button
-                onClick={() => setIsChatMinimized(false)}
-                className="h-12 w-12 rounded-full bg-primary hover:bg-primary/90 shadow-lg"
-                size="icon"
-              >
-                <Brain className="h-5 w-5 text-primary-foreground" />
-              </Button>
-            </div>
-          ) : (
-            // Full chat interface
-            <div className="w-full h-full flex items-end justify-center pb-6">
+          {/* Full chat interface */}
+          <div className="w-full h-full flex items-end justify-center pb-6">
               <div className="w-full max-w-[640px] h-[74vh] bg-white border rounded-2xl shadow-xl flex flex-col overflow-hidden relative">
                 <div className="absolute right-3 top-3 flex items-center gap-1">
                   <Button
@@ -661,7 +658,6 @@ export default function NeedAdviceHome() {
                 </SheetFooter>
               </div>
             </div>
-          )}
         </SheetContent>
       </Sheet>
 
