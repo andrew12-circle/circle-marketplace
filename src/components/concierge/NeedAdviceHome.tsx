@@ -262,9 +262,9 @@ export default function NeedAdviceHome() {
       
       const randomResponse = responses[Math.floor(Math.random() * responses.length)];
 
-      // Add AI response with typing animation
-      setPending(false);
+      // Add AI response with typing animation (keep pending true until typing is complete)
       await typeOutReply(randomResponse, 22);
+      setPending(false);
     } catch (error: any) {
       console.error('Error sending message:', error);
       toast({
