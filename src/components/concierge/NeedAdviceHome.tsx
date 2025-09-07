@@ -198,17 +198,24 @@ export default function NeedAdviceHome() {
 
       if (error) throw error;
 
-      if (data.isComplete) {
-        // Conversation finished - show plan
+      if (data.isComplete && messages.length > 2) {
+        // Only auto-complete if we've had a real conversation (more than just initial message)
         setIsComplete(true);
         setPlan(data.plan);
         setQuickReplies([]);
         // Show completion message
         await typeOutReply("Great! I've created a personalized plan for you. You can find related services in our marketplace below. Let me scroll you down to see what's available.", 22);
         
-        // Auto-scroll to marketplace after short delay
+        // Auto-scroll to marketplace after short delay, but keep chat expanded
         setTimeout(() => {
-          scrollToMarketplace();
+          const marketplaceSection = document.querySelector('[data-testid="marketplace-grid"]') || 
+                                    document.querySelector('.marketplace-grid') ||
+                                    document.querySelector('#marketplace');
+          if (marketplaceSection) {
+            marketplaceSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          } else {
+            window.scrollTo({ top: window.innerHeight, behavior: 'smooth' });
+          }
         }, 2000);
       } else {
         // Continue conversation
