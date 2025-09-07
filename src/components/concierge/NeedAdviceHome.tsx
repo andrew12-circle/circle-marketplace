@@ -300,8 +300,8 @@ export default function NeedAdviceHome() {
     setIsChatOpen(true);
     setIsChatMinimized(false);
     
-    // Default to CRM flow for search-bar questions
-    startConversation("CRM").then(() => {
+    // Start conversation without a predetermined category to let AI handle the user's question
+    startConversation(undefined).then(() => {
       // Give React a tick to apply the conversation state, then send the user's message
       console.log('🔄 About to send message from search, chat should be open and expanded');
       setTimeout(() => sendMessage(q), 300);
