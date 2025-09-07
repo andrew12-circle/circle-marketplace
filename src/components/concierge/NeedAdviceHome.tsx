@@ -604,7 +604,7 @@ export default function NeedAdviceHome() {
             className="h-16 w-16 rounded-full bg-primary hover:bg-primary/90 shadow-lg"
             size="icon"
           >
-            <Brain className="h-9 w-9 text-primary-foreground" />
+            <Brain className="h-11 w-11 text-primary-foreground" />
           </Button>
         </div>
       )}
