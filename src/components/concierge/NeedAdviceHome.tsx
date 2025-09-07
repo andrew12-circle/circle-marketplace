@@ -99,6 +99,7 @@ export default function NeedAdviceHome() {
   const { toast } = useToast();
   const [query, setQuery] = useState("");
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isChatMinimized, setIsChatMinimized] = useState(false);
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [topic, setTopic] = useState<string | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -124,6 +125,7 @@ export default function NeedAdviceHome() {
 
     setTopic(initialTopic);
     setIsChatOpen(true);
+    setIsChatMinimized(false);
     setPending(true);
 
     try {
@@ -164,7 +166,9 @@ export default function NeedAdviceHome() {
           const arr = [...prev];
           // Replace the last message with progressively more text
           const last = arr.length - 1;
-          arr[last] = { role: "assistant", content: fullText.slice(0, i) };
+          if (arr[last]) {
+            arr[last] = { role: "assistant", content: fullText.slice(0, i) };
+          }
           return arr;
         });
         if (i >= fullText.length) {
@@ -199,10 +203,18 @@ export default function NeedAdviceHome() {
         setIsComplete(true);
         setPlan(data.plan);
         setQuickReplies([]);
+        // Show completion message
+        await typeOutReply("Great! I've created a personalized plan for you. You can find related services in our marketplace below. Let me scroll you down to see what's available.", 22);
+        
+        // Auto-scroll to marketplace after short delay
+        setTimeout(() => {
+          scrollToMarketplace();
+        }, 2000);
       } else {
         // Continue conversation
         setCurrentStep(data.step);
         setQuickReplies(data.quickReplies || []);
+        setPending(false);
         await typeOutReply(data.message, 22);
       }
     } catch (error: any) {
@@ -228,6 +240,24 @@ export default function NeedAdviceHome() {
       // Give React a tick to apply the conversation state, then send the user's message
       setTimeout(() => sendMessage(q), 100);
     });
+  }
+
+  function scrollToMarketplace() {
+    // Minimize chat first
+    setIsChatMinimized(true);
+    
+    // Scroll to marketplace section
+    setTimeout(() => {
+      const marketplaceSection = document.querySelector('[data-testid="marketplace-grid"]') || 
+                                document.querySelector('.marketplace-grid') ||
+                                document.querySelector('#marketplace');
+      if (marketplaceSection) {
+        marketplaceSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        // If no specific marketplace section found, scroll down to show services
+        window.scrollTo({ top: window.innerHeight, behavior: 'smooth' });
+      }
+    }, 300);
   }
 
   function hasSpeech() {
@@ -396,91 +426,181 @@ export default function NeedAdviceHome() {
         </div>
       </footer>
 
-      {/* Chat Sheet */}
-      <Sheet open={isChatOpen} onOpenChange={setIsChatOpen}>
-        <SheetContent side="bottom" className="h-[80vh] p-0 bg-transparent border-0">
-          {/* Centered, smaller white container with wider chat area */}
-          <div className="w-full h-full flex items-end justify-center pb-6">
-            <div className="w-full max-w-[640px] h-[74vh] bg-white border rounded-2xl shadow-xl flex flex-col overflow-hidden relative">
-              <div className="absolute right-3 top-3">
+      {/* Chat Sheet - Fixed position when minimized */}
+      <Sheet open={isChatOpen} onOpenChange={(open) => {
+        if (!open) {
+          setIsChatOpen(false);
+          setIsChatMinimized(false);
+        }
+      }}>
+        <SheetContent 
+          side="bottom" 
+          className={`p-0 border-0 transition-all duration-300 ${
+            isChatMinimized 
+              ? 'h-16 bg-white/95 backdrop-blur-sm' 
+              : 'h-[80vh] bg-transparent'
+          }`}
+        >
+          {isChatMinimized ? (
+            // Minimized chat bar
+            <div className="h-16 flex items-center justify-between px-4 bg-white border-t shadow-lg">
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span className="text-sm font-medium">Agent Concierge — {topic}</span>
+                {pending && <div className="text-xs text-muted-foreground">Thinking...</div>}
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsChatMinimized(false)}
+                  className="text-xs"
+                >
+                  Expand
+                </Button>
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 rounded-full"
+                  className="h-8 w-8"
                   onClick={() => setIsChatOpen(false)}
-                  aria-label="Close chat"
                 >
                   <X className="h-4 w-4" />
                 </Button>
               </div>
-              <SheetHeader className="pt-4 px-4">
-                <SheetTitle className="text-base text-center">Agent Concierge — {topic || "Conversation"}</SheetTitle>
-              </SheetHeader>
-
-              <div className="px-4 mt-2 space-y-3 overflow-y-auto flex-1">
-                {messages.map((m, i) => (
-                  <div key={i} className={m.role === "user" ? "text-right" : "text-left"}>
-                    <div
-                      className={
-                        "inline-block rounded-2xl px-4 py-2 text-sm max-w-[86%] " +
-                        (m.role === "user"
-                          ? "bg-sky-600 text-white"
-                          : m.role === "assistant"
-                          ? "bg-white shadow border"
-                          : "text-muted-foreground")
-                      }
-                    >
-                      {m.content}
-                    </div>
-                  </div>
-                ))}
-                {pending && (
-                  <div className="text-left">
-                    <div className="inline-block rounded-2xl px-4 py-2 text-sm bg-white shadow border opacity-80 max-w-[86%]">
-                      Thinking…
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <SheetFooter className="px-4 pb-4 pt-2">
-                <div className="w-full flex items-end gap-2">
-                  <Textarea
-                    ref={inputRef}
-                    placeholder="Type your message…"
-                    className="min-h-[44px] max-h-40"
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && !e.shiftKey) {
-                        e.preventDefault();
-                        sendMessage((e.target as HTMLTextAreaElement).value);
-                        (e.target as HTMLTextAreaElement).value = "";
-                      }
-                    }}
-                  />
+            </div>
+          ) : (
+            // Full chat interface
+            <div className="w-full h-full flex items-end justify-center pb-6">
+              <div className="w-full max-w-[640px] h-[74vh] bg-white border rounded-2xl shadow-xl flex flex-col overflow-hidden relative">
+                <div className="absolute right-3 top-3 flex items-center gap-1">
                   <Button
-                    variant="outline"
-                    className="h-11 w-11"
-                    onClick={toggleDictation}
-                    title="Voice input"
-                    aria-label={isRecording ? "Stop voice input" : "Start voice input"}
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 rounded-full"
+                    onClick={() => setIsChatMinimized(true)}
+                    aria-label="Minimize chat"
                   >
-                    {isRecording ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+                    ─
                   </Button>
                   <Button
-                    onClick={() => {
-                      const val = inputRef.current?.value || "";
-                      sendMessage(val);
-                      if (inputRef.current) inputRef.current.value = "";
-                    }}
-                    className="h-11"
-                    aria-label="Send message"
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 rounded-full"
+                    onClick={() => setIsChatOpen(false)}
+                    aria-label="Close chat"
                   >
-                    <Send className="h-4 w-4" />
+                    <X className="h-4 w-4" />
                   </Button>
                 </div>
-              </SheetFooter>
+                <SheetHeader className="pt-4 px-4">
+                  <SheetTitle className="text-base text-center pr-20">Agent Concierge — {topic || "Conversation"}</SheetTitle>
+                </SheetHeader>
+
+                <div className="px-4 mt-2 space-y-3 overflow-y-auto flex-1">
+                  {messages.filter(m => m.role !== 'system').map((m, i) => (
+                    <div key={i} className={m.role === "user" ? "text-right" : "text-left"}>
+                      <div
+                        className={
+                          "inline-block rounded-2xl px-4 py-2 text-sm max-w-[86%] " +
+                          (m.role === "user"
+                            ? "bg-sky-600 text-white"
+                            : "bg-white shadow border")
+                        }
+                      >
+                        {m.content}
+                      </div>
+                    </div>
+                  ))}
+                  {pending && (
+                    <div className="text-left">
+                      <div className="inline-block rounded-2xl px-4 py-2 text-sm bg-white shadow border opacity-80 max-w-[86%]">
+                        Thinking…
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Quick replies */}
+                  {quickReplies.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-3">
+                      {quickReplies.map((reply, i) => (
+                        <Button
+                          key={i}
+                          variant="outline"
+                          size="sm"
+                          className="text-xs"
+                          onClick={() => sendMessage(reply)}
+                        >
+                          {reply}
+                        </Button>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Plan completion actions */}
+                  {isComplete && plan && (
+                    <div className="bg-gradient-to-r from-primary/5 to-accent/5 border border-primary/20 rounded-xl p-4 mt-4">
+                      <div className="space-y-3">
+                        <h4 className="font-semibold text-sm">Your Growth Plan is Ready!</h4>
+                        <div className="flex flex-wrap gap-2">
+                          <Button 
+                            size="sm" 
+                            onClick={scrollToMarketplace}
+                            className="bg-primary hover:bg-primary/90"
+                          >
+                            View Recommended Services
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => setIsChatMinimized(true)}
+                          >
+                            Minimize & Browse
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <SheetFooter className="px-4 pb-4 pt-2">
+                  <div className="w-full flex items-end gap-2">
+                    <Textarea
+                      ref={inputRef}
+                      placeholder="Type your message…"
+                      className="min-h-[44px] max-h-40"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && !e.shiftKey) {
+                          e.preventDefault();
+                          sendMessage((e.target as HTMLTextAreaElement).value);
+                          (e.target as HTMLTextAreaElement).value = "";
+                        }
+                      }}
+                    />
+                    <Button
+                      variant="outline"
+                      className="h-11 w-11"
+                      onClick={toggleDictation}
+                      title="Voice input"
+                      aria-label={isRecording ? "Stop voice input" : "Start voice input"}
+                    >
+                      {isRecording ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        const val = inputRef.current?.value || "";
+                        sendMessage(val);
+                        if (inputRef.current) inputRef.current.value = "";
+                      }}
+                      className="h-11"
+                      aria-label="Send message"
+                    >
+                      <Send className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </SheetFooter>
+              </div>
             </div>
-          </div>
+          )}
         </SheetContent>
       </Sheet>
 
