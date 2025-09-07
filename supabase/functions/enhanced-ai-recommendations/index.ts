@@ -76,18 +76,23 @@ serve(async (req) => {
           messages: [
             {
               role: 'system',
-              content: `You are a business advisor for real estate professionals. 
-              Provide general business growth advice based on the sanitized data provided.
-              Do not reference specific services, vendors, or marketplace details.
-              Keep advice generic and focused on business strategy, not specific purchases.`
+              content: `You are a friendly real estate concierge who provides brief, helpful advice.
+              
+              RESPONSE RULES:
+              - Keep responses to 2-3 sentences maximum
+              - Be conversational and helpful
+              - Focus on practical, actionable advice
+              - Don't reference specific vendor names or prices
+              - End with a relevant follow-up question if appropriate
+              
+              Provide concise business growth advice based on the context provided.`
             },
             {
               role: 'user',
               content: sanitizedPrompt
             }
           ],
-          temperature: 0.7,
-          max_tokens: 500,
+          max_completion_tokens: 150, // Enforce brevity
         }),
       });
 
@@ -311,16 +316,20 @@ function createContextualPrompt(userMessage: string, userContext: any, marketAna
 
   // Market Data Context
   prompt += `CURRENT MARKET INSIGHTS:\n`;
-  prompt += `- Trending Categories: ${Object.keys(categoryTrends).slice(0, 5).join(', ')}\n`;
-  prompt += `- Price Range Analysis: ${JSON.stringify(priceRanges)}\n`;
-  prompt += `- Top Vendor Types: ${vendorInsights.topTypes?.join(', ') || 'Mixed'}\n`;
-  prompt += `- Market Activity: ${marketAnalysis.marketActivity} recent interactions\n\n`;
+  const trendingCategories = Object.keys(categoryTrends || {}).slice(0, 5);
+  prompt += `- Trending Categories: ${trendingCategories.length > 0 ? trendingCategories.join(', ') : 'Marketing, Lead Generation, CRM'}\n`;
+  prompt += `- Price Range Analysis: ${JSON.stringify(priceRanges || {})}\n`;
+  prompt += `- Top Vendor Types: ${vendorInsights?.topTypes?.join(', ') || 'Marketing, Settlement Services, Photography'}\n`;
+  prompt += `- Market Activity: ${marketAnalysis?.marketActivity || 0} recent interactions\n\n`;
 
-  // What Similar Agents Are Buying
+    // What Similar Agents Are Buying
   if (similarUserPurchases?.length > 0) {
     prompt += `WHAT SIMILAR AGENTS IN YOUR MARKET ARE BUYING:\n`;
     similarUserPurchases.slice(0, 5).forEach((purchase: any, index: number) => {
-      prompt += `${index + 1}. [ID: ${purchase.services?.id}] ${purchase.services?.title} - $${purchase.services?.retail_price} (${purchase.services?.service_providers?.name})\n`;
+      const serviceTitle = purchase.services?.title || 'Unknown Service';
+      const retailPrice = purchase.services?.retail_price || 'Price not available';
+      const providerName = purchase.services?.service_providers?.name || 'Provider not specified';
+      prompt += `${index + 1}. [ID: ${purchase.services?.id || 'N/A'}] ${serviceTitle} - $${retailPrice} (${providerName})\n`;
     });
     prompt += `\n`;
   }
@@ -334,7 +343,10 @@ function createContextualPrompt(userMessage: string, userContext: any, marketAna
       .slice(0, 5);
     
     uniqueTrending.forEach((trending: any, index: number) => {
-      prompt += `${index + 1}. [ID: ${trending.services?.id}] ${trending.services?.title} - $${trending.services?.retail_price} (Rating: ${trending.services?.rating})\n`;
+      const serviceTitle = trending.services?.title || 'Service Name Unavailable';
+      const retailPrice = trending.services?.retail_price || 'Price not available';
+      const rating = trending.services?.rating || 'Not rated';
+      prompt += `${index + 1}. [ID: ${trending.services?.id || 'N/A'}] ${serviceTitle} - $${retailPrice} (Rating: ${rating})\n`;
     });
     prompt += `\n`;
   }
