@@ -41,6 +41,21 @@ async function getUserProfileData(supabase: any, userId: string) {
       .eq('agent_id', userId)
       .maybeSingle();
 
+    // Also check agent_questionnaires table
+    const { data: questionnaire } = await supabase
+      .from('agent_questionnaires')
+      .select('*')
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    console.log('📊 Assessment data check:', {
+      hasStats: !!stats,
+      hasQuestionnaire: !!questionnaire,
+      statsClosings: stats?.closings_12m,
+      questionnaireCompleted: questionnaire?.completed,
+      questionnaireData: questionnaire?.data
+    });
+
     if (stats) {
       profileData.hasProfileStats = true;
       profileData.closings12m = stats.closings_12m || 0;
@@ -53,6 +68,14 @@ async function getUserProfileData(supabase: any, userId: string) {
       if (stats.price_band) {
         profileData.priceRange = stats.price_band;
       }
+    } else if (questionnaire && questionnaire.completed) {
+      // Use questionnaire data if no profile stats
+      profileData.hasProfileStats = true;
+      const data = questionnaire.data || {};
+      profileData.closings12m = data.closings_last_year || 0;
+      profileData.goalClosings12m = data.goal_closings || 0;
+      profileData.focusArea = data.focus_area || null;
+      profileData.crm = data.crm || null;
     }
 
     // Get agent basic info
