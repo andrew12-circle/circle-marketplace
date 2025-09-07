@@ -502,7 +502,7 @@ export default function NeedAdviceHome() {
           side="bottom" 
           className={`p-0 border-0 transition-all duration-300 ${
             isChatMinimized 
-              ? 'h-16 bg-white/95 backdrop-blur-sm' 
+              ? 'h-0 bg-transparent' 
               : 'h-[80vh] bg-transparent'
           }`}
         >
