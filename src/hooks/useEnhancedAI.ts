@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { sbInvoke } from '@/utils/sb';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 
@@ -41,7 +41,7 @@ export const useEnhancedAI = ({ onSuccess, onError }: UseEnhancedAIProps = {}) =
     try {
       setIsLoading(true);
       
-      const { data, error } = await supabase.functions.invoke('enhanced-ai-recommendations', {
+      const { data, error } = await sbInvoke('enhanced-ai-recommendations', {
         body: {
           message,
           userId: user.id,
@@ -149,7 +149,7 @@ export const useEnhancedAI = ({ onSuccess, onError }: UseEnhancedAIProps = {}) =
     
     try {
       setIsLoading(true);
-      const { data, error } = await supabase.functions.invoke('ai-market-intelligence', {
+      const { data, error } = await sbInvoke('ai-market-intelligence', {
         body: {
           userId: user.id,
           location: `${(user as any)?.city}, ${(user as any)?.state}`,
