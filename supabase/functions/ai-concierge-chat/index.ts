@@ -571,6 +571,45 @@ function getGeneralAdvice(profileData: any): string {
   return "you're in a great position to add the right tools to accelerate your growth.";
 }
 
+const conversationFlow: ConversationStep[] = [
+  {
+    step: 'welcome',
+    question: formatAgentVoiceResponse(
+      "Perfect! Let's map your path to growth.",
+      "You're right to focus on this.",
+      "Here's what I'm seeing... understanding where you are today helps me give you the exact tools that'll move the needle.",
+      "The simplest path is starting with your current production level.",
+      "How many deals did you close last year?"
+    ),
+    quickReplies: ['0-5', '6-15', '16-30', '31-50', '51+', 'First year'],
+    isRequired: true
+  },
+  {
+    step: 'target_goal',
+    question: formatAgentVoiceResponse(
+      "Great context!",
+      "I get why you want to grow from there.",
+      "Here's what I'm seeing... agents who set clear targets are 3x more likely to hit them.",
+      "What I can do right now is help you pick a realistic but aggressive goal.",
+      "What's your target this year?"
+    ),
+    quickReplies: ['Double it', '25 deals', '50 deals', '75 deals', '100+ deals'],
+    isRequired: true
+  },
+  {
+    step: 'focus_area',
+    question: formatAgentVoiceResponse(
+      "Smart goal!",
+      "You're right to be ambitious.",
+      "Here's what I'm seeing... focus beats trying to do everything. The best agents pick a lane and dominate it.",
+      "The simplest path is aligning your tools with your focus area.",
+      "Do you focus more on buyers, sellers, or both?"
+    ),
+    quickReplies: ['Buyers mostly', 'Sellers mostly', 'Both equally', 'Want to shift focus'],
+    isRequired: true
+  }
+];
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { 
