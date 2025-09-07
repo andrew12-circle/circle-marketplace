@@ -142,14 +142,28 @@ export default function NeedAdviceHome() {
       setSessionId(data.sessionId);
       setCurrentStep(data.step);
       setQuickReplies(data.quickReplies || []);
-      setMessages([
-        { role: "system", content: getSystemForTopic(initialTopic) },
-        { role: "assistant", content: data.message }
-      ]);
+      
+      // Handle the new multiple messages format
+      if (data.messages && Array.isArray(data.messages)) {
+        const formattedMessages = [
+          { role: "system", content: getSystemForTopic(initialTopic) },
+          ...data.messages.map((msg: any) => ({
+            role: msg.role,
+            content: msg.content
+          }))
+        ];
+        setMessages(formattedMessages);
+      } else if (data.message) {
+        // Fallback for old format
+        setMessages([
+          { role: "system", content: getSystemForTopic(initialTopic) },
+          { role: "assistant", content: data.message }
+        ]);
+      }
     } catch (error: any) {
       console.error('Error starting conversation:', error);
       toast({
-        title: "Error",
+        title: "Error", 
         description: error.message || "Failed to start conversation",
         variant: "destructive"
       });
