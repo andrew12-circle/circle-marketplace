@@ -1,4 +1,5 @@
 import React, { useRef, useState } from "react";
+import EnhancedChat from "./EnhancedChat";
 import { motion } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,7 @@ import {
   PhoneCall,
   Send,
   X,
+  Paperclip,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -112,8 +114,13 @@ export default function NeedAdviceHome() {
   const [isComplete, setIsComplete] = useState(false);
   const [plan, setPlan] = useState<any>(null);
   const [services, setServices] = useState<any[]>([]);
+  const [isSmartChatOpen, setIsSmartChatOpen] = useState(false);
   const recognitionRef = useRef<any>(null);
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  // File upload state
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
 
   async function startConversation(initialTopic: string) {
     console.log('🚀 Starting simple conversation with topic:', initialTopic);
@@ -312,7 +319,17 @@ export default function NeedAdviceHome() {
       setIsFromSearchQuery(false); // Reset flag after message processing
       if (inputRef.current) inputRef.current.focus();
     }
-  }
+  };
+
+  // File handling functions
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    setUploadedFiles(prev => [...prev, ...files]);
+  };
+
+  const removeFile = (index: number) => {
+    setUploadedFiles(prev => prev.filter((_, i) => i !== index));
+  };
 
   function openChatFromSearch() {
     if (!query.trim()) return;
@@ -513,6 +530,20 @@ export default function NeedAdviceHome() {
                   }}
                 >
                   {isRecording ? <MicOff className="h-5 w-5 text-red-500" /> : <Mic className="h-5 w-5" />}
+                </Button>
+                <Button
+                  variant="default"
+                  className="absolute right-12 top-1/2 -translate-y-1/2 rounded-full h-10 w-10 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700"
+                  aria-label="Open Smart Chat"
+                  onClick={() => {
+                    if (query.trim()) {
+                      setIsSmartChatOpen(true);
+                    } else {
+                      setIsSmartChatOpen(true);
+                    }
+                  }}
+                >
+                  <Brain className="h-5 w-5 text-white" />
                 </Button>
               </div>
             </motion.div>
@@ -771,23 +802,57 @@ export default function NeedAdviceHome() {
                 </div>
 
                 <SheetFooter className="px-4 pb-4 pt-2">
-                  <div className="w-full flex items-end gap-2">
-                    <Textarea
-                      ref={inputRef}
-                      placeholder="Type your message…"
-                      className="min-h-[44px] max-h-40"
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" && !e.shiftKey) {
-                          e.preventDefault();
-                          const message = (e.target as HTMLTextAreaElement).value.trim();
-                          console.log('🔥 Enter pressed, message:', message);
-                          if (message) {
-                            sendMessage(message);
-                            (e.target as HTMLTextAreaElement).value = "";
+                  <div className="w-full space-y-2">
+                    {/* File upload area */}
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleFileUpload}
+                        accept="image/*,.pdf,.doc,.docx,.txt"
+                        className="hidden"
+                        multiple
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="h-8"
+                      >
+                        <Paperclip className="h-4 w-4" />
+                      </Button>
+                      {uploadedFiles.length > 0 && (
+                        <div className="flex gap-1 flex-wrap">
+                          {uploadedFiles.map((file, index) => (
+                            <div key={index} className="flex items-center gap-1 bg-sky-100 text-sky-800 px-2 py-1 rounded text-xs">
+                              {file.type.startsWith('image/') ? '🖼️' : '📄'}
+                              <span className="max-w-[80px] truncate">{file.name}</span>
+                              <button onClick={() => removeFile(index)} className="text-sky-600 hover:text-sky-800">×</button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Message input */}
+                    <div className="flex items-end gap-2">
+                      <Textarea
+                        ref={inputRef}
+                        placeholder="Ask me anything about real estate, upload images to analyze, or get marketplace insights..."
+                        className="min-h-[44px] max-h-40 resize-none"
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && !e.shiftKey) {
+                            e.preventDefault();
+                            const message = (e.target as HTMLTextAreaElement).value.trim();
+                            console.log('🔥 Enter pressed, message:', message);
+                            if (message || uploadedFiles.length > 0) {
+                              sendMessage(message);
+                              (e.target as HTMLTextAreaElement).value = "";
+                            }
                           }
-                        }
-                      }}
-                    />
+                        }}
+                      />
                     <Button
                       variant="outline"
                       className="h-11 w-11"
@@ -809,6 +874,7 @@ export default function NeedAdviceHome() {
                       <Send className="h-4 w-4" />
                     </Button>
                   </div>
+                </div>
                 </SheetFooter>
               </div>
             </div>
@@ -827,6 +893,13 @@ export default function NeedAdviceHome() {
             description: "You'll receive a confirmation email shortly.",
           });
         }}
+      />
+
+      {/* Enhanced ChatGPT-like AI Assistant */}
+      <EnhancedChat 
+        isOpen={isSmartChatOpen}
+        onClose={() => setIsSmartChatOpen(false)}
+        initialMessage={query}
       />
     </div>
   );
