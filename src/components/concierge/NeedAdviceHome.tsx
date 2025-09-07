@@ -131,7 +131,10 @@ export default function NeedAdviceHome() {
 
     try {
       const { data, error } = await supabase.functions.invoke('ai-concierge-chat', {
-        body: { action: 'start' }
+        body: { 
+          action: 'start',
+          category: initialTopic 
+        }
       });
 
       if (error) throw error;
