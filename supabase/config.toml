@@ -169,3 +169,15 @@ verify_jwt = false
 
 [functions.simple-openai-chat]
 verify_jwt = false
+
+[functions.concierge-respond]
+verify_jwt = true
+
+[functions.concierge-ingest]
+verify_jwt = true
+
+[functions.concierge-feedback]
+verify_jwt = true
+
+[functions.nightly-learning-job]
+verify_jwt = false

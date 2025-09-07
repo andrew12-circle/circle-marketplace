@@ -259,14 +259,12 @@ export default function NeedAdviceHome() {
     try {
       console.log('💬 Sending message to OpenAI:', text);
       
-      // Call simple OpenAI chat function
-      const { data, error } = await supabase.functions.invoke('simple-openai-chat', {
+      // Call Circle Concierge system
+      const { data, error } = await supabase.functions.invoke('concierge-respond', {
         body: {
-          message: text,
-          context: {
-            messageCount: messages.length,
-            timestamp: new Date().toISOString()
-          }
+          user_id: user?.id,
+          thread_id: sessionId,
+          text
         }
       });
 
@@ -274,6 +272,11 @@ export default function NeedAdviceHome() {
       
       const aiResponse = data?.message || "I'd be happy to help with that! Can you tell me more?";
       await typeOutReply(aiResponse, 22);
+      
+      // Handle quick replies if available
+      if (data?.quick_replies) {
+        setQuickReplies(data.quick_replies);
+      }
       
     } catch (error: any) {
       console.error('Error sending message:', error);
