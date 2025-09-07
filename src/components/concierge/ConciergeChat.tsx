@@ -44,7 +44,7 @@ interface ConciergeChatProps {
   initialMessage?: string;
 }
 
-export const ConciergeChat: React.FC<ConciergeChatProps> = ({ threadId: initialThreadId, onThreadChange }) => {
+export const ConciergeChat: React.FC<ConciergeChatProps> = ({ threadId: initialThreadId, onThreadChange, initialMessage }) => {
   const [messages, setMessages] = useState<ConciergeMessage[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -57,6 +57,13 @@ export const ConciergeChat: React.FC<ConciergeChatProps> = ({ threadId: initialT
       loadMessages(threadId);
     }
   }, [threadId]);
+
+  // Handle initial message
+  useEffect(() => {
+    if (initialMessage && messages.length === 0 && !loading) {
+      sendMessage(initialMessage);
+    }
+  }, [initialMessage]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
