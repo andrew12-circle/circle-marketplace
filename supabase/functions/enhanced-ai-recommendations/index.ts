@@ -59,54 +59,50 @@ serve(async (req) => {
     
     let finalRecommendation;
     
-    // If we have strong local data, use it primarily
-    if (localRecommendation.confidence > 0.7) {
-      finalRecommendation = localRecommendation.recommendation;
-      console.log('Using local recommendation due to high confidence');
-    } else {
-      // Only send generic, non-proprietary data to OpenAI for general advice
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${openAIApiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          messages: [
-            {
-              role: 'system',
-              content: `You are a helpful AI assistant, similar to ChatGPT, with access to a specialized marketplace of real estate tools and services. You can discuss any topic naturally and conversationally.
+    // Always use OpenAI for natural conversation, but enhance with marketplace data when relevant
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openAIApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'system',
+            content: `You are a helpful AI assistant, similar to ChatGPT, with access to a specialized marketplace of real estate tools and services. You can discuss any topic naturally and conversationally.
 
-              RESPONSE STYLE:
-              - Answer any question naturally, like ChatGPT would
-              - Be conversational and helpful
-              - When real estate or business tools are mentioned, you can reference your marketplace knowledge
-              - Match your response length to what's appropriate for the question
-              - Don't force real estate context if the question isn't about that
-              
-              You have access to curated real estate marketplace data when relevant, but you can discuss any topic the user asks about.`
-            },
-            {
-              role: 'user',
-              content: sanitizedPrompt
-            }
-          ],
-          max_completion_tokens: 500, // Allow for natural conversation length
-        }),
-      });
+            RESPONSE STYLE:
+            - Answer any question naturally, like ChatGPT would
+            - Be conversational and helpful
+            - When real estate or business tools are mentioned, you can reference your marketplace knowledge
+            - Match your response length to what's appropriate for the question
+            - Don't force real estate context if the question isn't about that
+            
+            You have access to curated real estate marketplace data when relevant, but you can discuss any topic the user asks about.`
+          },
+          {
+            role: 'user',
+            content: sanitizedPrompt
+          }
+        ],
+        max_completion_tokens: 500, // Allow for natural conversation length
+      }),
+    });
 
-      const aiResponse = await response.json();
-      console.log('OpenAI response received (sanitized)');
+    const aiResponse = await response.json();
+    console.log('OpenAI response received');
 
-      if (!response.ok) {
-        throw new Error(`OpenAI API error: ${aiResponse.error?.message || 'Unknown error'}`);
-      }
+    if (!response.ok) {
+      throw new Error(`OpenAI API error: ${aiResponse.error?.message || 'Unknown error'}`);
+    }
 
-      const genericAdvice = aiResponse.choices[0].message.content;
-      
-      // Combine generic advice with local marketplace recommendations
-      finalRecommendation = combineRecommendations(genericAdvice, localRecommendation.recommendation);
+    let finalRecommendation = aiResponse.choices[0].message.content;
+    
+    // Enhance with marketplace data if relevant and local confidence is high
+    if (localRecommendation.confidence > 0.8 && localRecommendation.recommendation) {
+      finalRecommendation += `\n\n📋 **From Circle Marketplace:** ${localRecommendation.recommendation}`;
     }
 
     // Log the recommendation for analytics (keeping your data local)
