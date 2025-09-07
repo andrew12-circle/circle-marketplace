@@ -152,13 +152,11 @@ export default function EnhancedChat({ isOpen, onClose, initialMessage }: Enhanc
         if (error) throw error;
         aiResponse = data?.analysis || "I can see the image you shared. Could you tell me more about what specific advice you're looking for?";
       } else {
-        // Use regular AI concierge for text-only queries
-        const { data, error } = await supabase.functions.invoke('ai-concierge-chat', {
+        // Use simple OpenAI chat
+        const { data, error } = await supabase.functions.invoke('simple-openai-chat', {
           body: {
-            action: 'chat',
-            userQuery: text,
+            message: text,
             context: {
-              hasImages: false,
               messageCount: messages.length,
               timestamp: new Date().toISOString()
             }
@@ -166,7 +164,7 @@ export default function EnhancedChat({ isOpen, onClose, initialMessage }: Enhanc
         });
 
         if (error) throw error;
-        aiResponse = data?.messages?.find(m => m.role === 'assistant')?.content || "I'd be happy to help you with that! Could you provide more details about what you're looking for?";
+        aiResponse = data?.message || "I'd be happy to help you with that! Could you provide more details about what you're looking for?";
       }
       
       await typeOutReply(aiResponse, 15);
