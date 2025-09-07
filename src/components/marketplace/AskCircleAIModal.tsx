@@ -1,4 +1,5 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { ConciergeChat } from "@/components/concierge/ConciergeChat";
 import { useState } from "react";
 
@@ -14,7 +15,10 @@ export function AskCircleAIModal({ open, onOpenChange, initialMessage }: AskCirc
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-6xl h-[85vh] p-0">
-        <ConciergeChat 
+        <VisuallyHidden>
+          <DialogTitle>Circle Agent Concierge</DialogTitle>
+        </VisuallyHidden>
+        <ConciergeChat
           threadId={threadId} 
           onThreadChange={setThreadId}
           initialMessage={initialMessage}

@@ -35,7 +35,7 @@ interface ConciergeMessage {
 }
 
 const generateThreadId = () => {
-  return `thread_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  return crypto.randomUUID();
 };
 
 interface ConciergeChatProps {
