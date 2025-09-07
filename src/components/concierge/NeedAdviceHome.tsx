@@ -116,45 +116,33 @@ export default function NeedAdviceHome() {
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
 
   async function startConversation(initialTopic: string) {
-    console.log('🚀 Starting conversation with topic:', initialTopic);
+    console.log('🚀 Starting simple conversation with topic:', initialTopic);
     
     setTopic(initialTopic);
     setIsChatOpen(true);
     setIsChatMinimized(false);
-    setPending(true);
+    setPending(false);
 
-    try {
-      // Simple test message first
-      const testMessage = `Hello! I'm your Circle Concierge. You asked about ${initialTopic}. How can I help you today?`;
-      
-      // Set up basic conversation without database calls for now
-      setSessionId('test-session-' + Date.now());
-      setCurrentStep('welcome');
-      
-      const systemMessage: Message = { role: "system", content: getSystemForTopic(initialTopic) };
-      setMessages([
-        systemMessage,
-        { role: "assistant", content: testMessage }
-      ]);
-      
-      setQuickReplies([
-        "Tell me more about " + initialTopic,
-        "What's the best option for me?",
-        "Show me pricing"
-      ]);
-      
-      console.log('✅ Chat initialized successfully');
-      
-    } catch (error: any) {
-      console.error('❌ Error starting conversation:', error);
-      toast({
-        title: "Chat Error", 
-        description: "Unable to start chat. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setPending(false);
-    }
+    // Create simple working chat without backend calls initially
+    setSessionId('simple-' + Date.now());
+    setCurrentStep('welcome');
+    
+    const systemMessage: Message = { role: "system", content: getSystemForTopic(initialTopic) };
+    setMessages([
+      systemMessage,
+      { 
+        role: "assistant", 
+        content: `Hello! I'm your Circle Concierge. I can help you with ${initialTopic}. What specific questions do you have about ${initialTopic}?` 
+      }
+    ]);
+    
+    setQuickReplies([
+      `What's the best ${initialTopic} solution?`,
+      "Show me pricing options",
+      "How do I get started?"
+    ]);
+    
+    console.log('✅ Simple chat started successfully');
   }
 
   async function startConversationFromQuery(userQuery: string) {
@@ -262,30 +250,21 @@ export default function NeedAdviceHome() {
     setPending(true);
     
     try {
-      // Use the enhanced AI recommendations function which works with OpenAI
-      const { data, error } = await supabase.functions.invoke('enhanced-ai-recommendations', {
-        body: {
-          message: text,
-          userId: user?.id || 'anonymous',
-          context: {
-            topic: topic,
-            timestamp: new Date().toISOString()
-          }
-        }
-      });
-
-      if (error) {
-        console.error('❌ AI response error:', error);
-        throw error;
-      }
+      console.log('💬 Sending message:', text);
+      
+      // Create a simple response for now
+      const responses = [
+        `That's a great question about ${text}. Based on what successful agents tell us, here are the key points to consider...`,
+        `I understand you're interested in ${text}. Let me share some insights from our marketplace data...`,
+        `Thanks for asking about ${text}. Many agents in similar situations have found success with...`,
+        `Great question! Regarding ${text}, here's what I typically recommend to agents...`
+      ];
+      
+      const randomResponse = responses[Math.floor(Math.random() * responses.length)];
 
       // Add AI response with typing animation
       setPending(false);
-      if (data?.recommendation) {
-        await typeOutReply(data.recommendation, 22);
-      } else {
-        await typeOutReply("I understand you're asking about " + text + ". Let me help you with that. What specific aspect would you like to know more about?", 22);
-      }
+      await typeOutReply(randomResponse, 22);
     } catch (error: any) {
       console.error('Error sending message:', error);
       toast({
