@@ -631,13 +631,7 @@ export default function NeedAdviceHome() {
                       </div>
                     </div>
                   ))}
-                  {pending && (
-                    <div className="text-left">
-                      <div className="inline-block rounded-2xl px-4 py-2 text-sm bg-white shadow border opacity-80 max-w-[86%]">
-                        Thinking…
-                      </div>
-                    </div>
-                  )}
+                  {/* Removed thinking indicator */}
                   
                   {/* Quick replies */}
                   {quickReplies.length > 0 && (
