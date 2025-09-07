@@ -271,6 +271,8 @@ export default function NeedAdviceHome() {
       const greetings = ['hello', 'hi', 'hey', 'good morning', 'good afternoon', 'good evening'];
       const isGreeting = greetings.some(greeting => text.toLowerCase().trim().includes(greeting));
       
+      console.log('🔍 Checking greeting:', { text, isGreeting, matchedGreeting: greetings.find(g => text.toLowerCase().trim().includes(g)) });
+      
       if (isGreeting) {
         // Simple personalized greeting without backend call
         const firstName = user?.user_metadata?.first_name || user?.user_metadata?.name?.split(' ')[0] || 'there';
