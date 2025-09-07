@@ -90,7 +90,7 @@ function getSystemForTopic(t: string) {
 }
 
 interface Message {
-  role: "system" | "user" | "assistant";
+  role: "system" | "user" | "assistant" | "typing";
   content: string;
 }
 
@@ -143,16 +143,13 @@ export default function NeedAdviceHome() {
       setCurrentStep(data.step);
       setQuickReplies(data.quickReplies || []);
       
-      // Handle the new multiple messages format
+      // Handle the new multiple messages format with realistic timing
       if (data.messages && Array.isArray(data.messages)) {
-        const formattedMessages = [
-          { role: "system", content: getSystemForTopic(initialTopic) },
-          ...data.messages.map((msg: any) => ({
-            role: msg.role,
-            content: msg.content
-          }))
-        ];
-        setMessages(formattedMessages);
+        const systemMessage: Message = { role: "system", content: getSystemForTopic(initialTopic) };
+        setMessages([systemMessage]);
+        
+        // Add messages with realistic delays
+        await addMessagesWithDelay(data.messages);
       } else if (data.message) {
         // Fallback for old format
         setMessages([
@@ -169,6 +166,39 @@ export default function NeedAdviceHome() {
       });
     } finally {
       setPending(false);
+    }
+  }
+
+  // Add messages with realistic human-like delays
+  async function addMessagesWithDelay(messages: any[]) {
+    for (let i = 0; i < messages.length; i++) {
+      const message = messages[i];
+      
+      if (i > 0) {
+        // Add delay before each message (except the first user message)
+        const delay = message.role === 'assistant' 
+          ? Math.max(1500, message.content.length * 30) // 30ms per character, minimum 1.5s
+          : 500; // Short delay for user messages
+        
+        // Show typing indicator for assistant messages
+        if (message.role === 'assistant') {
+          setMessages(prev => [...prev, { role: "typing", content: "..." }]);
+          await new Promise(resolve => setTimeout(resolve, delay));
+          // Remove typing indicator
+          setMessages(prev => prev.slice(0, -1));
+        } else {
+          await new Promise(resolve => setTimeout(resolve, delay));
+        }
+      }
+      
+      // Add the actual message
+      setMessages(prev => [...prev, {
+        role: message.role as "user" | "assistant",
+        content: message.content
+      }]);
+      
+      // Small pause after adding message
+      await new Promise(resolve => setTimeout(resolve, 200));
     }
   }
 
@@ -584,10 +614,20 @@ export default function NeedAdviceHome() {
                           "inline-block rounded-2xl px-4 py-2 text-sm max-w-[86%] " +
                           (m.role === "user"
                             ? "bg-sky-600 text-white"
+                            : m.role === "typing" 
+                            ? "bg-gray-100 shadow border animate-pulse" 
                             : "bg-white shadow border")
                         }
                       >
-                        {m.content}
+                        {m.role === "typing" ? (
+                          <div className="flex space-x-1">
+                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                          </div>
+                        ) : (
+                          m.content
+                        )}
                       </div>
                     </div>
                   ))}
