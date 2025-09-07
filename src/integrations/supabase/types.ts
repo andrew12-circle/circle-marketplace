@@ -2693,6 +2693,99 @@ export type Database = {
           },
         ]
       }
+      concierge_chat_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          role: string
+          thread_id: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          role: string
+          thread_id: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          role?: string
+          thread_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      concierge_feedback: {
+        Row: {
+          answer_id: string
+          created_at: string
+          helpful: boolean
+          id: string
+          reason: string | null
+          user_id: string
+        }
+        Insert: {
+          answer_id: string
+          created_at?: string
+          helpful: boolean
+          id?: string
+          reason?: string | null
+          user_id: string
+        }
+        Update: {
+          answer_id?: string
+          created_at?: string
+          helpful?: boolean
+          id?: string
+          reason?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      concierge_market_pulse: {
+        Row: {
+          cohort_key: string | null
+          generated_at: string
+          id: string
+          insights: Json
+        }
+        Insert: {
+          cohort_key?: string | null
+          generated_at?: string
+          id?: string
+          insights?: Json
+        }
+        Update: {
+          cohort_key?: string | null
+          generated_at?: string
+          id?: string
+          insights?: Json
+        }
+        Relationships: []
+      }
+      concierge_memory: {
+        Row: {
+          data: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          data?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          data?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       concierge_messages: {
         Row: {
           content: string
@@ -5049,6 +5142,71 @@ export type Database = {
         }
         Relationships: []
       }
+      kb_chunks: {
+        Row: {
+          content: string
+          created_at: string
+          document_id: string
+          embedding: string
+          id: string
+          metadata: Json
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          document_id: string
+          embedding: string
+          id?: string
+          metadata?: Json
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          document_id?: string
+          embedding?: string
+          id?: string
+          metadata?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kb_chunks_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "kb_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kb_documents: {
+        Row: {
+          created_at: string
+          id: string
+          source: string
+          tags: string[]
+          title: string
+          updated_at: string
+          url: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          source: string
+          tags?: string[]
+          title: string
+          updated_at?: string
+          url?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          source?: string
+          tags?: string[]
+          title?: string
+          updated_at?: string
+          url?: string | null
+        }
+        Relationships: []
+      }
       lenders: {
         Row: {
           company: string | null
@@ -6202,6 +6360,36 @@ export type Database = {
             referencedColumns: ["user_id"]
           },
         ]
+      }
+      purchase_events: {
+        Row: {
+          created_at: string
+          id: string
+          price: number
+          sku: string
+          source: string
+          user_id: string
+          vendor_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          price?: number
+          sku: string
+          source: string
+          user_id: string
+          vendor_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          price?: number
+          sku?: string
+          source?: string
+          user_id?: string
+          vendor_id?: string
+        }
+        Relationships: []
       }
       qbo_connections: {
         Row: {
@@ -10375,6 +10563,10 @@ export type Database = {
         Args: { backup_type_param: string }
         Returns: string
       }
+      binary_quantize: {
+        Args: { "": string } | { "": unknown }
+        Returns: unknown
+      }
       calculate_agent_playbook_earnings: {
         Args: { p_content_id: string; p_total_revenue: number }
         Returns: number
@@ -10816,6 +11008,38 @@ export type Database = {
           website_url: string
         }[]
       }
+      halfvec_avg: {
+        Args: { "": number[] }
+        Returns: unknown
+      }
+      halfvec_out: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      halfvec_send: {
+        Args: { "": unknown }
+        Returns: string
+      }
+      halfvec_typmod_in: {
+        Args: { "": unknown[] }
+        Returns: number
+      }
+      hnsw_bit_support: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      hnsw_halfvec_support: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      hnsw_sparsevec_support: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      hnswhandler: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
       identify_security_definer_views: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -10842,6 +11066,26 @@ export type Database = {
       is_ip_blocked_safe: {
         Args: { p_ip_address: unknown; p_user_id?: string }
         Returns: boolean
+      }
+      ivfflat_bit_support: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      ivfflat_halfvec_support: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      ivfflathandler: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      l2_norm: {
+        Args: { "": unknown } | { "": unknown }
+        Returns: number
+      }
+      l2_normalize: {
+        Args: { "": string } | { "": unknown } | { "": unknown }
+        Returns: string
       }
       link_funnel_events: {
         Args: { p_anon_id: string }
@@ -10953,6 +11197,18 @@ export type Database = {
         Args: { p_user_id?: string }
         Returns: boolean
       }
+      sparsevec_out: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      sparsevec_send: {
+        Args: { "": unknown }
+        Returns: string
+      }
+      sparsevec_typmod_in: {
+        Args: { "": unknown[] }
+        Returns: number
+      }
       start_admin_session: {
         Args: Record<PropertyKey, never>
         Returns: boolean
@@ -11026,6 +11282,30 @@ export type Database = {
       validate_uuid_field: {
         Args: { input_text: string }
         Returns: boolean
+      }
+      vector_avg: {
+        Args: { "": number[] }
+        Returns: string
+      }
+      vector_dims: {
+        Args: { "": string } | { "": unknown }
+        Returns: number
+      }
+      vector_norm: {
+        Args: { "": string }
+        Returns: number
+      }
+      vector_out: {
+        Args: { "": string }
+        Returns: unknown
+      }
+      vector_send: {
+        Args: { "": string }
+        Returns: string
+      }
+      vector_typmod_in: {
+        Args: { "": unknown[] }
+        Returns: number
       }
       verify_admin_operation_request: {
         Args: {
