@@ -2775,7 +2775,7 @@ export type Database = {
           id: string
           session_data: Json
           updated_at: string
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           completed?: boolean
@@ -2784,7 +2784,7 @@ export type Database = {
           id?: string
           session_data?: Json
           updated_at?: string
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           completed?: boolean
@@ -2793,7 +2793,7 @@ export type Database = {
           id?: string
           session_data?: Json
           updated_at?: string
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: []
       }
