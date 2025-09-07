@@ -299,8 +299,8 @@ export default function NeedAdviceHome() {
     setIsChatOpen(true);
     setIsChatMinimized(false);
     
-    // Set empty state and show user's message first
-    setSessionId(null);
+    // Set up new session for search query
+    setSessionId('search-' + Date.now());
     setMessages([]);
     setTopic(null);
     setQuickReplies([]);
