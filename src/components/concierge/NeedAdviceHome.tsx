@@ -116,68 +116,40 @@ export default function NeedAdviceHome() {
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
 
   async function startConversation(initialTopic: string) {
-    // Allow both authenticated and anonymous users to start conversations
-
+    console.log('🚀 Starting conversation with topic:', initialTopic);
+    
     setTopic(initialTopic);
     setIsChatOpen(true);
-    setIsChatMinimized(false); // Start expanded by default
+    setIsChatMinimized(false);
     setPending(true);
 
     try {
-      console.log('🚀 Starting conversation with topic:', initialTopic);
-      const { data, error } = await supabase.functions.invoke('ai-concierge-chat', {
-        body: { 
-          action: 'start',
-          category: initialTopic 
-        }
-      });
-
-      console.log('📡 AI Concierge response:', { data, error });
-
-      if (error) {
-        console.error('❌ AI Concierge error:', error);
-        throw error;
-      }
-
-      setSessionId(data.sessionId);
-      setCurrentStep(data.step);
-      // Don't set quickReplies immediately - wait for all messages to complete
+      // Simple test message first
+      const testMessage = `Hello! I'm your Circle Concierge. You asked about ${initialTopic}. How can I help you today?`;
       
-      // Handle the new multiple messages format with realistic timing
-      if (data.messages && Array.isArray(data.messages)) {
-        const systemMessage: Message = { role: "system", content: getSystemForTopic(initialTopic) };
-        setMessages([systemMessage]);
-        
-        // Add messages with realistic delays, then show quick replies
-        await addMessagesWithDelay(data.messages);
-        setQuickReplies(data.quickReplies || []);
-        
-        // Store services if provided
-        if (data.services && data.services.length > 0) {
-          setServices(data.services);
-        }
-      } else if (data.message) {
-        // Fallback for old format
-        setMessages([
-          { role: "system", content: getSystemForTopic(initialTopic) },
-          { role: "assistant", content: data.message }
-        ]);
-        setQuickReplies(data.quickReplies || []);
-        
-        // Store services if provided
-        if (data.services && data.services.length > 0) {
-          setServices(data.services);
-        }
-      }
+      // Set up basic conversation without database calls for now
+      setSessionId('test-session-' + Date.now());
+      setCurrentStep('welcome');
+      
+      const systemMessage: Message = { role: "system", content: getSystemForTopic(initialTopic) };
+      setMessages([
+        systemMessage,
+        { role: "assistant", content: testMessage }
+      ]);
+      
+      setQuickReplies([
+        "Tell me more about " + initialTopic,
+        "What's the best option for me?",
+        "Show me pricing"
+      ]);
+      
+      console.log('✅ Chat initialized successfully');
+      
     } catch (error: any) {
       console.error('❌ Error starting conversation:', error);
-      console.error('Error details:', JSON.stringify(error, null, 2));
-      
-      // Show a more helpful error message
-      const errorMessage = error?.message || 'Failed to start conversation';
       toast({
         title: "Chat Error", 
-        description: `Unable to start chat: ${errorMessage}. The AI service may need configuration.`,
+        description: "Unable to start chat. Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -290,42 +262,29 @@ export default function NeedAdviceHome() {
     setPending(true);
     
     try {
-      const { data, error } = await supabase.functions.invoke('ai-concierge-chat', {
+      // Use the enhanced AI recommendations function which works with OpenAI
+      const { data, error } = await supabase.functions.invoke('enhanced-ai-recommendations', {
         body: {
-          action: 'respond',
-          sessionId,
           message: text,
-          stepName: currentStep
+          userId: user?.id || 'anonymous',
+          context: {
+            topic: topic,
+            timestamp: new Date().toISOString()
+          }
         }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ AI response error:', error);
+        throw error;
+      }
 
-      if (data.isComplete && messages.length > 2) {
-        // Only auto-complete if we've had a real conversation (more than just initial message)
-        setIsComplete(true);
-        setPlan(data.plan);
-        setQuickReplies([]);
-        // Show completion message
-        await typeOutReply("Great! I've created a personalized plan for you. You can find related services in our marketplace below. Let me scroll you down to see what's available.", 22);
-        
-        // Auto-scroll to marketplace after short delay, but keep chat expanded
-        setTimeout(() => {
-          const marketplaceSection = document.querySelector('[data-testid="marketplace-grid"]') || 
-                                    document.querySelector('.marketplace-grid') ||
-                                    document.querySelector('#marketplace');
-          if (marketplaceSection) {
-            marketplaceSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          } else {
-            window.scrollTo({ top: window.innerHeight, behavior: 'smooth' });
-          }
-        }, 2000);
+      // Add AI response with typing animation
+      setPending(false);
+      if (data?.recommendation) {
+        await typeOutReply(data.recommendation, 22);
       } else {
-        // Continue conversation
-        setCurrentStep(data.step);
-        setQuickReplies(data.quickReplies || []);
-        setPending(false);
-        await typeOutReply(data.message, 22);
+        await typeOutReply("I understand you're asking about " + text + ". Let me help you with that. What specific aspect would you like to know more about?", 22);
       }
     } catch (error: any) {
       console.error('Error sending message:', error);
