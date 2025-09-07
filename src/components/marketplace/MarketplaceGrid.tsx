@@ -9,7 +9,7 @@ import { CampaignServicesHeader } from "./CampaignServicesHeader";
 import { CircleProBanner } from "./CircleProBanner";
 import { ServiceDetailsModal } from "./ServiceDetailsModal";
 import { ServiceFunnelModal } from "./ServiceFunnelModal";
-import { AIConciergeBanner } from "./AIConciergeBanner";
+import NeedAdviceHome from "../concierge/NeedAdviceHome";
 import { AddProductModal } from "./AddProductModal";
 import { VendorSelectionModal } from "./VendorSelectionModal";
 import { TopDealsCarousel } from "./TopDealsCarousel";
@@ -688,8 +688,8 @@ export const MarketplaceGrid = () => {
           )}
 
 
-          {/* AI Concierge Banner - Show for all users */}
-          <AIConciergeBanner />
+          {/* Need Advice Home - Show for all users */}
+          <NeedAdviceHome />
 
           {/* Campaign Services Header */}
           <CampaignServicesHeader />
