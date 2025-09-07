@@ -141,21 +141,23 @@ export default function NeedAdviceHome() {
 
       setSessionId(data.sessionId);
       setCurrentStep(data.step);
-      setQuickReplies(data.quickReplies || []);
+      // Don't set quickReplies immediately - wait for all messages to complete
       
       // Handle the new multiple messages format with realistic timing
       if (data.messages && Array.isArray(data.messages)) {
         const systemMessage: Message = { role: "system", content: getSystemForTopic(initialTopic) };
         setMessages([systemMessage]);
         
-        // Add messages with realistic delays
+        // Add messages with realistic delays, then show quick replies
         await addMessagesWithDelay(data.messages);
+        setQuickReplies(data.quickReplies || []);
       } else if (data.message) {
         // Fallback for old format
         setMessages([
           { role: "system", content: getSystemForTopic(initialTopic) },
           { role: "assistant", content: data.message }
         ]);
+        setQuickReplies(data.quickReplies || []);
       }
     } catch (error: any) {
       console.error('Error starting conversation:', error);
