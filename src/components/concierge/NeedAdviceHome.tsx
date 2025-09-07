@@ -243,7 +243,15 @@ export default function NeedAdviceHome() {
   }
 
   async function sendMessage(text: string) {
-    if (!text.trim() || !sessionId) return;
+    console.log('🚀 sendMessage called with:', text, 'sessionId:', sessionId);
+    if (!text.trim()) {
+      console.log('❌ Empty message, returning');
+      return;
+    }
+    if (!sessionId) {
+      console.log('❌ No sessionId, returning');
+      return;
+    }
     
     // Show the user's message immediately
     setMessages((prev) => [...prev, { role: "user", content: text }]);
@@ -745,8 +753,12 @@ export default function NeedAdviceHome() {
                       onKeyDown={(e) => {
                         if (e.key === "Enter" && !e.shiftKey) {
                           e.preventDefault();
-                          sendMessage((e.target as HTMLTextAreaElement).value);
-                          (e.target as HTMLTextAreaElement).value = "";
+                          const message = (e.target as HTMLTextAreaElement).value.trim();
+                          console.log('🔥 Enter pressed, message:', message);
+                          if (message) {
+                            sendMessage(message);
+                            (e.target as HTMLTextAreaElement).value = "";
+                          }
                         }
                       }}
                     />
