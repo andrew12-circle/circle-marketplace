@@ -272,7 +272,7 @@ export default function NeedAdviceHome() {
       const isGreeting = greetings.some(greeting => text.toLowerCase().trim().includes(greeting));
       
       if (isGreeting) {
-        // Simple personalized greeting
+        // Simple personalized greeting without backend call
         const firstName = user?.user_metadata?.first_name || user?.user_metadata?.name?.split(' ')[0] || 'there';
         const greetingResponse = `Hello ${firstName}! I'm your Circle Concierge. How can I help you grow your real estate business today?`;
         await typeOutReply(greetingResponse, 22);
@@ -285,24 +285,30 @@ export default function NeedAdviceHome() {
           "I want to increase my income"
         ]);
       } else {
-        // For actual business questions, use AI with concierge context
-        const { data, error } = await supabase.functions.invoke('enhanced-ai-recommendations', {
-          body: {
-            message: `As a friendly real estate concierge, provide a helpful but brief response (2-3 sentences max): ${text}`,
-            userId: user?.id || 'anonymous',
-            context: {
-              role: 'concierge',
-              responseStyle: 'conversational_brief',
-              topic: topic || 'real estate advice',
-              timestamp: new Date().toISOString()
+        try {
+          // For actual business questions, use AI with concierge context
+          const { data, error } = await supabase.functions.invoke('enhanced-ai-recommendations', {
+            body: {
+              message: `As a friendly real estate concierge, provide a helpful but brief response (2-3 sentences max): ${text}`,
+              userId: user?.id || 'anonymous',
+              context: {
+                role: 'concierge',
+                responseStyle: 'conversational_brief',
+                topic: topic || 'real estate advice',
+                timestamp: new Date().toISOString()
+              }
             }
-          }
-        });
+          });
 
-        if (error) throw error;
-        
-        const aiResponse = data?.recommendation || data?.response || "I'd be happy to help with that! Can you tell me more about what you're looking for?";
-        await typeOutReply(aiResponse, 22);
+          if (error) throw error;
+          
+          const aiResponse = data?.recommendation || data?.response || "I'd be happy to help with that! Can you tell me more about what you're looking for?";
+          await typeOutReply(aiResponse, 22);
+        } catch (error: any) {
+          console.error('AI Error:', error);
+          // Fallback to simple response if AI fails
+          await typeOutReply("I'd be happy to help with that! Can you tell me more about what you're looking for?", 22);
+        }
       }
       
       setPending(false);
