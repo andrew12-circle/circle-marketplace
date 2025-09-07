@@ -125,7 +125,7 @@ export default function NeedAdviceHome() {
 
     setTopic(initialTopic);
     setIsChatOpen(true);
-    setIsChatMinimized(false);
+    setIsChatMinimized(false); // Start expanded by default
     setPending(true);
 
     try {
@@ -265,9 +265,56 @@ export default function NeedAdviceHome() {
     return (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
   }
 
+  function toggleSearchMicrophone() {
+    if (!hasSpeech()) {
+      toast({
+        title: "Voice not supported",
+        description: "Voice input isn't supported in this browser. Try Chrome desktop or Android.",
+        variant: "destructive"
+      });
+      return;
+    }
+    if (isRecording) {
+      try { recognitionRef.current?.stop(); } catch {}
+      setIsRecording(false);
+      return;
+    }
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const rec = new SpeechRecognition();
+    recognitionRef.current = rec;
+    rec.continuous = false;
+    rec.interimResults = false;
+    rec.lang = "en-US";
+    rec.onresult = (e: any) => {
+      let transcript = "";
+      for (let i = 0; i < e.results.length; i++) {
+        transcript += e.results[i][0]?.transcript || "";
+        if (i < e.results.length - 1) transcript += " ";
+      }
+      transcript = transcript.trim();
+      setQuery(transcript);
+      // Auto-start conversation with the voice input
+      if (transcript) {
+        setTimeout(() => openChatFromSearch(), 500);
+      }
+    };
+    rec.onerror = () => {
+      setIsRecording(false);
+    };
+    rec.onend = () => {
+      setIsRecording(false);
+    };
+    setIsRecording(true);
+    rec.start();
+  }
+
   function toggleDictation() {
     if (!hasSpeech()) {
-      alert("Voice input isn't supported in this browser. Try Chrome desktop or Android.");
+      toast({
+        title: "Voice not supported",
+        description: "Voice input isn't supported in this browser. Try Chrome desktop or Android.",
+        variant: "destructive"
+      });
       return;
     }
     if (isRecording) {
@@ -358,9 +405,15 @@ export default function NeedAdviceHome() {
                   variant="ghost"
                   className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full h-10 w-10"
                   aria-label="Voice input"
-                  onClick={openChatFromSearch}
+                  onClick={() => {
+                    if (query.trim()) {
+                      openChatFromSearch();
+                    } else {
+                      toggleSearchMicrophone();
+                    }
+                  }}
                 >
-                  <Mic className="h-5 w-5" />
+                  {isRecording ? <MicOff className="h-5 w-5 text-red-500" /> : <Mic className="h-5 w-5" />}
                 </Button>
               </div>
             </motion.div>
@@ -445,7 +498,7 @@ export default function NeedAdviceHome() {
             // Minimized chat bar
             <div className="h-16 flex items-center justify-between px-4 bg-white border-t shadow-lg">
               <div className="flex items-center gap-3">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <Brain className="h-4 w-4 text-sky-600" />
                 <span className="text-sm font-medium">Agent Concierge — {topic}</span>
                 {pending && <div className="text-xs text-muted-foreground">Thinking...</div>}
               </div>
@@ -493,7 +546,10 @@ export default function NeedAdviceHome() {
                   </Button>
                 </div>
                 <SheetHeader className="pt-4 px-4">
-                  <SheetTitle className="text-base text-center pr-20">Agent Concierge — {topic || "Conversation"}</SheetTitle>
+                  <SheetTitle className="text-base text-center pr-20 flex items-center justify-center gap-2">
+                    <Brain className="h-4 w-4 text-sky-600" />
+                    Agent Concierge — {topic || "Conversation"}
+                  </SheetTitle>
                 </SheetHeader>
 
                 <div className="px-4 mt-2 space-y-3 overflow-y-auto flex-1">
