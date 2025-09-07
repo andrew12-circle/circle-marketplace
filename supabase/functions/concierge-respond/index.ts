@@ -44,10 +44,27 @@ serve(async (req) => {
   }
 
   try {
+    console.log('🚀 Concierge-respond function called');
+    
     const { user_id, thread_id, text } = await req.json();
+    console.log('📝 Request data:', { user_id: user_id || 'null', thread_id, text: text?.substring(0, 50) });
+
+    // Check if OpenAI API key is available
+    if (!openAIApiKey) {
+      console.error('❌ OpenAI API key is not configured');
+      return new Response(JSON.stringify({ 
+        type: 'answer',
+        message: "I'm having trouble connecting to my AI service. Please contact support.",
+        handoff: { suggest: true, reason: "Service configuration issue" }
+      }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
     // Validate required fields
     if (!thread_id || !text) {
+      console.error('❌ Missing required fields:', { thread_id, text });
       return new Response(JSON.stringify({ 
         type: 'answer',
         message: "Missing required fields",
@@ -59,6 +76,7 @@ serve(async (req) => {
     }
 
     // Fetch user profile (handle cases where user_id might be undefined)
+    console.log('👤 Fetching user profile...');
     const profile = await fetchProfile(user_id || null);
     
     // Get recent messages for context
@@ -185,11 +203,13 @@ serve(async (req) => {
     }
 
     // Parse response and add trust metrics
+    console.log('✨ Parsing OpenAI response...');
     const response: ConciergeResponse = JSON.parse(responseContent);
     response.trust = calculateTrust(response, ragSnippets, profile);
     
     // Determine handoff
     if (response.trust.confidence < 45) {
+      console.log('⚠️ Low confidence, suggesting handoff');
       response.handoff = {
         suggest: true,
         reason: "This request needs clarification or specialized expertise. Let's connect you with a human agent concierge."
@@ -203,14 +223,22 @@ serve(async (req) => {
     }
 
     // Save messages to database
+    console.log('💾 Saving messages to database...');
     await saveMessages(user_id, thread_id, text, responseContent);
 
+    console.log('✅ Concierge response completed successfully');
     return new Response(JSON.stringify(response), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
   } catch (error) {
-    console.error('Error in concierge-respond:', error);
+    console.error('❌ Error in concierge-respond:', error);
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    });
+    
     return new Response(
       JSON.stringify({ 
         type: 'answer',
