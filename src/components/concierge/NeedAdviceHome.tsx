@@ -507,31 +507,15 @@ export default function NeedAdviceHome() {
           }`}
         >
           {isChatMinimized ? (
-            // Minimized chat bar
-            <div className="h-16 flex items-center justify-between px-4 mx-0 sm:mx-6 md:mx-12 lg:mx-24 xl:mx-32 bg-white border-t shadow-lg rounded-t-lg sm:rounded-t-xl">
-              <div className="flex items-center gap-3">
-                <Brain className="h-4 w-4 text-sky-600" />
-                <span className="text-sm font-medium">Agent Concierge — {topic}</span>
-                {pending && <div className="text-xs text-muted-foreground">Thinking...</div>}
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setIsChatMinimized(false)}
-                  className="text-xs"
-                >
-                  Expand
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8"
-                  onClick={() => setIsChatOpen(false)}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
+            // Minimized chat icon
+            <div className="fixed bottom-4 left-4 z-50">
+              <Button
+                onClick={() => setIsChatMinimized(false)}
+                className="h-12 w-12 rounded-full bg-primary hover:bg-primary/90 shadow-lg"
+                size="icon"
+              >
+                <Brain className="h-5 w-5 text-primary-foreground" />
+              </Button>
             </div>
           ) : (
             // Full chat interface
