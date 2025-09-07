@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -205,6 +205,9 @@ export default function EnhancedChat({ isOpen, onClose, initialMessage }: Enhanc
               <Brain className="h-5 w-5 text-blue-600" />
               Enhanced AI Assistant
             </SheetTitle>
+            <SheetDescription>
+              Chat with AI assistant for real estate advice and image analysis
+            </SheetDescription>
           </SheetHeader>
 
           <ScrollArea className="flex-1 p-4" ref={scrollRef}>
