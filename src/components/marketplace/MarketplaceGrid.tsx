@@ -599,6 +599,11 @@ export const MarketplaceGrid = () => {
     }, 100);
   };
 
+  const handleAIChat = (initialMessage: string) => {
+    setConciergeInitialMessage(initialMessage);
+    setIsConciergeModalOpen(true);
+  };
+
   const handleSaveService = useCallback(async (serviceId: string) => {
     if (!profile?.user_id) {
       toast({
@@ -719,6 +724,7 @@ export const MarketplaceGrid = () => {
               />
               <CategoryBlocks 
                 onCategoryClick={handleCategoryClick}
+                onAIChat={handleAIChat}
                 services={flattenServices}
                 allServices={services}
                 activeFilters={searchTerm ? [searchTerm] : []}

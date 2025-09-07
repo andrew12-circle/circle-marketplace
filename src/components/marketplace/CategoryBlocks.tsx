@@ -31,6 +31,7 @@ import { useTranslation } from "react-i18next";
 
 interface CategoryBlocksProps {
   onCategoryClick: (searchTerm: string, categoryName: string) => void;
+  onAIChat?: (initialMessage: string) => void; // New prop for AI chat
   services: Service[]; // Filtered services for display
   allServices: Service[]; // All services for counting
   activeFilters?: string[]; // Currently active category filters
@@ -269,7 +270,7 @@ const OLD_SCHOOL_CATEGORIES = [
   }
 ];
 
-export const CategoryBlocks = ({ onCategoryClick, services, allServices, activeFilters = [] }: CategoryBlocksProps) => {
+export const CategoryBlocks = ({ onCategoryClick, onAIChat, services, allServices, activeFilters = [] }: CategoryBlocksProps) => {
   const { t } = useTranslation();
   const categoryCounts = useMemo(() => {
     const counts = new Map<string, number>();
@@ -293,7 +294,15 @@ export const CategoryBlocks = ({ onCategoryClick, services, allServices, activeF
 
   const handleCategoryClick = (tags: string[], categoryName: string) => {
     logger.log('category_block_clicked', { tags, categoryName });
-    onCategoryClick(tags[0], categoryName); // Use first tag for search
+    
+    // If AI chat is available, use it with a formulated question
+    if (onAIChat) {
+      const question = `What's the best ${categoryName.toLowerCase()} service for a real estate agent?`;
+      onAIChat(question);
+    } else {
+      // Fallback to old behavior
+      onCategoryClick(tags[0], categoryName); // Use first tag for search
+    }
   };
 
   const renderCategoryGrid = (categories: typeof DIGITAL_CATEGORIES, title: string, subtitle: string) => (
