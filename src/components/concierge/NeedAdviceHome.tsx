@@ -105,6 +105,7 @@ export default function NeedAdviceHome() {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState<string>("welcome");
   const [messages, setMessages] = useState<Message[]>([]);
+  const [isFromSearchQuery, setIsFromSearchQuery] = useState(false);
   const [pending, setPending] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [quickReplies, setQuickReplies] = useState<string[]>([]);
@@ -234,6 +235,7 @@ export default function NeedAdviceHome() {
       await typeOutReply("Sorry — I couldn't reach the concierge service. Try again in a moment.", 22);
     } finally {
       setPending(false);
+      setIsFromSearchQuery(false); // Reset flag after message processing
       if (inputRef.current) inputRef.current.focus();
     }
   }
@@ -245,6 +247,7 @@ export default function NeedAdviceHome() {
     
     // Ensure chat opens expanded
     console.log('🔄 Opening chat expanded from search');
+    setIsFromSearchQuery(true);
     setIsChatOpen(true);
     setIsChatMinimized(false);
     
@@ -527,6 +530,11 @@ export default function NeedAdviceHome() {
                     size="icon"
                     className="h-8 w-8 rounded-full"
                     onClick={() => {
+                      // Prevent auto-minimization if chat was opened from search query
+                      if (isFromSearchQuery) {
+                        console.log('🚫 Preventing auto-minimize during search query');
+                        return;
+                      }
                       console.log('🔽 Minimizing chat from minimize button');
                       setIsChatMinimized(true);
                     }}
