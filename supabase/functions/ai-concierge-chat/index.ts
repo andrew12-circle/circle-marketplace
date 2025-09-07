@@ -14,6 +14,148 @@ interface ConversationStep {
   isRequired: boolean;
 }
 
+// Helper function to get user's profile data
+async function getUserProfileData(supabase: any, userId: string) {
+  const profileData = {
+    hasProfileStats: false,
+    closings12m: 0,
+    gci12m: 0,
+    goalClosings12m: 0,
+    avgSalePrice: 0,
+    priceRange: null,
+    focusArea: null,
+    crm: null,
+    city: null,
+    state: null
+  };
+
+  try {
+    // Get agent profile stats
+    const { data: stats } = await supabase
+      .from('agent_profile_stats')
+      .select('*')
+      .eq('agent_id', userId)
+      .maybeSingle();
+
+    if (stats) {
+      profileData.hasProfileStats = true;
+      profileData.closings12m = stats.closings_12m || 0;
+      profileData.gci12m = stats.gci_12m || 0;
+      profileData.goalClosings12m = stats.goal_closings_12m || 0;
+      profileData.avgSalePrice = stats.avg_sale_price || 0;
+      profileData.crm = stats.crm;
+      
+      if (stats.price_band) {
+        profileData.priceRange = stats.price_band;
+      }
+    }
+
+    // Get agent basic info
+    const { data: agent } = await supabase
+      .from('agents')
+      .select('*')
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    if (agent) {
+      profileData.city = agent.city;
+      profileData.state = agent.state;
+    }
+
+    // Get recent transactions to understand focus
+    const { data: transactions } = await supabase
+      .from('agent_transactions')
+      .select('role')
+      .eq('agent_id', userId)
+      .order('close_date', { ascending: false })
+      .limit(10);
+
+    if (transactions && transactions.length > 0) {
+      const buyerTransactions = transactions.filter(t => t.role === 'buyer_agent').length;
+      const sellerTransactions = transactions.filter(t => t.role === 'listing_agent').length;
+      
+      if (buyerTransactions > sellerTransactions * 1.5) {
+        profileData.focusArea = 'buyers';
+      } else if (sellerTransactions > buyerTransactions * 1.5) {
+        profileData.focusArea = 'sellers';
+      } else {
+        profileData.focusArea = 'both';
+      }
+    }
+
+  } catch (error) {
+    console.error('Error fetching profile data:', error);
+  }
+
+  return profileData;
+}
+
+// Create personalized welcome message
+function createPersonalizedWelcome(profileData: any): string {
+  const hasData = profileData.hasProfileStats && profileData.closings12m > 0;
+  
+  if (hasData) {
+    const location = profileData.city && profileData.state ? ` in ${profileData.city}, ${profileData.state}` : '';
+    const closings = profileData.closings12m;
+    const goal = profileData.goalClosings12m > closings ? profileData.goalClosings12m : null;
+    
+    let message = `Hey there! I see you closed ${closings} deal${closings === 1 ? '' : 's'} last year${location}`;
+    
+    if (goal) {
+      message += ` and you're targeting ${goal} this year`;
+    }
+    
+    message += ". I'm your Circle Concierge, and I'm here to help you hit your goals with the right tools and strategies. ";
+    
+    if (goal && goal > closings * 1.5) {
+      message += "That's ambitious growth - let me help you map the path to get there!";
+    } else if (goal) {
+      message += "Let's identify what will accelerate your path to that target.";
+    } else {
+      message += "What's your main focus for growing your business this year?";
+    }
+    
+    return message;
+  }
+  
+  return "Hey there, I'm your Circle Concierge! I help agents like you find the right tools and strategies to grow your business. Let's start by understanding where you are today - how many deals did you close last year?";
+}
+
+// Determine starting step based on profile data
+function determineStartingStep(profileData: any): string {
+  if (!profileData.hasProfileStats || profileData.closings12m === 0) {
+    return 'welcome'; // Need basic info
+  }
+  
+  if (!profileData.goalClosings12m || profileData.goalClosings12m <= profileData.closings12m) {
+    return 'target_goal'; // Need to set goals
+  }
+  
+  if (!profileData.focusArea) {
+    return 'focus_area'; // Need to understand focus
+  }
+  
+  return 'biggest_blocker'; // Skip to pain points
+}
+
+// Get appropriate quick replies based on step and profile data
+function getQuickRepliesForStep(step: string, profileData: any): string[] {
+  switch (step) {
+    case 'welcome':
+      return ['0-5', '6-15', '16-30', '31-50', '51+', 'First year'];
+    case 'target_goal':
+      const current = profileData.closings12m || 0;
+      if (current === 0) return ['10 deals', '25 deals', '50 deals', '75 deals'];
+      return ['Double it', `${current + 10} deals`, `${current * 2} deals`, `${Math.max(50, current * 1.5)} deals`];
+    case 'focus_area':
+      return ['Buyers mostly', 'Sellers mostly', 'Both equally', 'Want to shift focus'];
+    case 'biggest_blocker':
+      return ['Lead generation', 'Time management', 'Systems & tools', 'Market knowledge', 'Transaction management'];
+    default:
+      return [];
+  }
+}
+
 const conversationFlow: ConversationStep[] = [
   {
     step: 'welcome',
@@ -96,41 +238,52 @@ serve(async (req) => {
 
     const { action, sessionId, message, stepName } = await req.json();
 
-    if (action === 'start') {
-      // Create new session
-      const { data: session, error: sessionError } = await supabase
-        .from('concierge_sessions')
-        .insert({
-          user_id: user.id,
-          session_data: {},
-          current_step: 'welcome'
-        })
-        .select()
-        .single();
+  if (action === 'start') {
+    console.log('Starting new concierge session for user:', user.id);
+    
+    // Get user's existing profile data to personalize the conversation
+    const profileData = await getUserProfileData(supabase, user.id);
+    console.log('Retrieved profile data:', profileData);
+    
+    // Create personalized welcome message based on profile data
+    const welcomeMessage = createPersonalizedWelcome(profileData);
+    const nextStep = determineStartingStep(profileData);
+    const quickReplies = getQuickRepliesForStep(nextStep, profileData);
 
-      if (sessionError) {
-        console.error('Error creating session:', sessionError);
-        throw new Error('Failed to create session');
-      }
+    // Create new session
+    const { data: session, error: sessionError } = await supabase
+      .from('concierge_sessions')
+      .insert({
+        user_id: user.id,
+        session_data: { profileData },
+        current_step: nextStep
+      })
+      .select()
+      .single();
 
-      // Insert welcome message
-      await supabase.from('concierge_messages').insert({
-        session_id: session.id,
-        role: 'assistant',
-        content: conversationFlow[0].question,
-        step_name: 'welcome'
-      });
-
-      return new Response(JSON.stringify({
-        sessionId: session.id,
-        step: 'welcome',
-        message: conversationFlow[0].question,
-        quickReplies: conversationFlow[0].quickReplies,
-        isComplete: false
-      }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+    if (sessionError) {
+      console.error('Error creating session:', sessionError);
+      throw new Error('Failed to create session');
     }
+
+    // Insert welcome message
+    await supabase.from('concierge_messages').insert({
+      session_id: session.id,
+      role: 'assistant',
+      content: welcomeMessage,
+      step_name: nextStep
+    });
+
+    return new Response(JSON.stringify({
+      sessionId: session.id,
+      step: nextStep,
+      message: welcomeMessage,
+      quickReplies: quickReplies,
+      isComplete: false
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
 
     if (action === 'respond' && sessionId && message) {
       // Get session
