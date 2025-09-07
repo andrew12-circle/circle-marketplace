@@ -34,15 +34,6 @@ export function useAIConcierge() {
   const { toast } = useToast();
 
   const startConversation = async (category?: string) => {
-    if (!user) {
-      toast({
-        title: "Authentication required",
-        description: "Please sign in to start your growth planning session.",
-        variant: "destructive"
-      });
-      return;
-    }
-
     setIsLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('ai-concierge-chat', {
@@ -88,7 +79,7 @@ export function useAIConcierge() {
   };
 
   const sendMessage = async (message: string) => {
-    if (!conversation.sessionId || !user) return;
+    if (!conversation.sessionId) return;
 
     setIsLoading(true);
     

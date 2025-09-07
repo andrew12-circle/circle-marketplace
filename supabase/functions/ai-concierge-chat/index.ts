@@ -309,6 +309,7 @@ function getProductionRange(closings: number) {
 function createPersonalizedWelcome(profileData: any, category?: string): string {
   const name = profileData?.display_name || 'there';
   const hasData = profileData.hasProfileStats && profileData.closings12m > 0;
+  const isAuthenticated = profileData?.isAuthenticated !== false;
   
   // Create human-like category-specific greetings with Agent Voice
   const categoryGreetings = {
@@ -358,6 +359,17 @@ function createPersonalizedWelcome(profileData: any, category?: string): string 
   // Use category-specific greeting if available
   if (category && categoryGreetings[category]) {
     return categoryGreetings[category];
+  }
+  
+  // For anonymous users, create friendly welcome but mention account benefits
+  if (!isAuthenticated) {
+    return formatAgentVoiceResponse(
+      "Hey there! I'm your Circle Concierge. How's your day going?",
+      "I help real estate agents find exactly the right tools to grow their business.",
+      "Here's what I'm seeing... you're smart to explore what tools could help you scale.",
+      "I can absolutely help you right now, and if you set up a free account, I can give you even more personalized recommendations based on your specific business.",
+      category ? `What specific ${category.toLowerCase()} challenge are you facing?` : "What's your biggest business challenge right now?"
+    );
   }
   
   // Fallback with Agent Voice formatting
@@ -415,6 +427,31 @@ function createPersonalizedWelcome(profileData: any, category?: string): string 
 // Format response using Agent Voice structure
 function formatAgentVoiceResponse(greeting: string, empathy: string, recap: string, options: string, cta: string): string {
   return `${greeting}\n\n${empathy}\n\n${recap}\n\n${options}\n\n${cta}`;
+}
+
+// Create authentication suggestion after some conversation
+function createAuthSuggestion(messageCount: number): string | null {
+  if (messageCount === 3) {
+    return formatAgentVoiceResponse(
+      "You know what, I'm really enjoying our conversation!",
+      "I can tell you're serious about growing your business, which I respect.",
+      "Here's what I'm thinking... if you set up a quick free account, I can give you way more personalized recommendations based on your specific business metrics and goals.",
+      "It takes literally 30 seconds and then I can show you exactly what successful agents at your level are using to scale.",
+      "Would you like me to help you get that set up, or should we keep chatting for now?"
+    );
+  }
+  
+  if (messageCount === 5) {
+    return formatAgentVoiceResponse(
+      "I've been thinking about your situation...",
+      "You're asking really smart questions, and I want to make sure I'm giving you the most accurate advice possible.",
+      "Here's what I'm seeing... I could give you much better recommendations if I knew a bit more about your current business - like how many deals you closed last year and what your goals are.",
+      "If you create a free Circle account, I can analyze your specific situation and show you exactly what tools have worked for agents in similar positions.",
+      "It literally takes 30 seconds. Want to do that real quick?"
+    );
+  }
+  
+  return null;
 }
 
 // Determine starting step based on profile data
@@ -624,39 +661,45 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
+    // Get user from JWT (optional for unauthenticated users)
+    let user = null;
     const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
-      throw new Error('No authorization header');
-    }
-
-    const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
-
-    if (userError || !user) {
-      throw new Error('Invalid token');
+    if (authHeader) {
+      const token = authHeader.replace('Bearer ', '');
+      const { data: userData, error: userError } = await supabase.auth.getUser(token);
+      if (!userError && userData) {
+        user = userData.user;
+      }
     }
 
     const { action, sessionId, message, stepName, category } = await req.json();
 
   if (action === 'start') {
-    console.log('Starting new concierge session for user:', user.id, 'with category:', category);
+    console.log('Starting new concierge session for user:', user?.id || 'anonymous', 'with category:', category);
     
-    // Get user's existing profile data to personalize the conversation
-    const profileData = await getUserProfileData(supabase, user.id);
+    // Get user's existing profile data to personalize the conversation (only if authenticated)
+    const profileData = user ? await getUserProfileData(supabase, user.id) : { hasProfileStats: false, isAuthenticated: false };
     console.log('Retrieved profile data:', profileData);
     
     // Create the simulated user question based on category
     const userQuestion = createSimulatedUserQuestion(category, profileData);
     const nextStep = determineStartingStep(profileData);
 
-    // Create new session
+    // Create new session (handle both authenticated and anonymous users)
+    const sessionData = {
+      user_id: user?.id || null,
+      session_data: { 
+        profileData, 
+        category, 
+        isAuthenticated: !!user,
+        messageCount: 0 
+      },
+      current_step: nextStep
+    };
+
     const { data: session, error: sessionError } = await supabase
       .from('concierge_sessions')
-      .insert({
-        user_id: user.id,
-        session_data: { profileData, category },
-        current_step: nextStep
-      })
+      .insert(sessionData)
       .select()
       .single();
 
@@ -712,17 +755,26 @@ serve(async (req) => {
   }
 
     if (action === 'respond' && sessionId && message) {
-      // Get session
-      const { data: session, error: sessionError } = await supabase
+      // Get session (allow for both authenticated and anonymous users)
+      const sessionQuery = supabase
         .from('concierge_sessions')
         .select()
-        .eq('id', sessionId)
-        .eq('user_id', user.id)
-        .single();
+        .eq('id', sessionId);
+      
+      if (user) {
+        sessionQuery.eq('user_id', user.id);
+      } else {
+        sessionQuery.is('user_id', null);
+      }
+      
+      const { data: session, error: sessionError } = await sessionQuery.single();
 
       if (sessionError || !session) {
         throw new Error('Session not found');
       }
+
+      // Increment message count for anonymous users
+      const currentMessageCount = (session.session_data?.messageCount || 0) + 1;
 
       // Save user response
       await supabase.from('concierge_messages').insert({
@@ -732,11 +784,16 @@ serve(async (req) => {
         step_name: stepName
       });
 
-      // Update session data
+      // Update session data with message count
       const updatedData = {
         ...session.session_data,
-        [stepName]: message
+        [stepName]: message,
+        messageCount: currentMessageCount
       };
+
+      // Check if we should suggest authentication for anonymous users
+      const shouldSuggestAuth = !user && !session.session_data?.authSuggested;
+      const authSuggestion = shouldSuggestAuth ? createAuthSuggestion(currentMessageCount) : null;
 
       // Find current step and next step
       const currentStepIndex = conversationFlow.findIndex(step => step.step === stepName);
@@ -753,6 +810,35 @@ serve(async (req) => {
             current_step: nextStep.step
           })
           .eq('id', sessionId);
+
+        // If we have an auth suggestion, send that instead of the next question
+        if (authSuggestion) {
+          // Mark that we've suggested auth to avoid repeating
+          updatedData.authSuggested = true;
+          await supabase
+            .from('concierge_sessions')
+            .update({
+              session_data: updatedData
+            })
+            .eq('id', sessionId);
+
+          await supabase.from('concierge_messages').insert({
+            session_id: sessionId,
+            role: 'assistant',
+            content: authSuggestion,
+            step_name: stepName
+          });
+
+          return new Response(JSON.stringify({
+            sessionId,
+            step: stepName,
+            message: authSuggestion,
+            quickReplies: ['Set up free account', 'Keep chatting'],
+            isComplete: false
+          }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
 
         // Insert next question
         await supabase.from('concierge_messages').insert({
