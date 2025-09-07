@@ -130,16 +130,14 @@ export default function NeedAdviceHome() {
     setIsChatMinimized(false);
     setPending(false);
 
-    // Create simple working chat without backend calls initially
-    setSessionId('simple-' + Date.now());
+    // Create simple working chat
+    setSessionId('simple-chat');
     setCurrentStep('welcome');
     
-    const systemMessage: Message = { role: "system", content: getSystemForTopic(initialTopic) };
     setMessages([
-      systemMessage,
       { 
         role: "assistant", 
-        content: `Hello! I'm your AI assistant with access to Circle's marketplace of real estate tools and services. I can help you with ${initialTopic} or discuss anything else you'd like. What can I help you with?` 
+        content: `Hello! I'm your AI assistant. I can help you with ${initialTopic} or discuss anything else you'd like. What can I help you with?` 
       }
     ]);
     
@@ -154,30 +152,28 @@ export default function NeedAdviceHome() {
 
   async function startConversationFromQuery(userQuery: string) {
     setPending(true);
+    setSessionId('simple-chat'); // Simple session ID
 
     try {
-      const { data, error } = await supabase.functions.invoke('ai-concierge-chat', {
+      // Add user message to chat
+      setMessages(prev => [...prev, { role: "user", content: userQuery }]);
+      
+      // Call simple OpenAI chat
+      const { data, error } = await supabase.functions.invoke('simple-openai-chat', {
         body: { 
-          action: 'start',
-          userQuery: userQuery // Send the user's query instead of a category
+          message: userQuery,
+          context: {
+            messageCount: messages.length,
+            timestamp: new Date().toISOString()
+          }
         }
       });
 
       if (error) throw error;
 
-      setSessionId(data.sessionId);
-      setCurrentStep(data.step);
+      const aiResponse = data?.message || "I'd be happy to help with that! Can you tell me more?";
+      await typeOutReply(aiResponse, 22);
       
-      // For search queries, directly show the assistant's response
-      if (data.message) {
-        await typeOutReply(data.message, 22);
-        setQuickReplies(data.quickReplies || []);
-        
-        // Store services if provided
-        if (data.services && data.services.length > 0) {
-          setServices(data.services);
-        }
-      }
     } catch (error: any) {
       console.error('Error starting conversation from query:', error);
       toast({
@@ -185,7 +181,7 @@ export default function NeedAdviceHome() {
         description: error.message || "Failed to start conversation",
         variant: "destructive"
       });
-      await typeOutReply("Sorry — I couldn't reach the concierge service. Try again in a moment.", 22);
+      await typeOutReply("Sorry — I couldn't connect right now. Try again in a moment.", 22);
     } finally {
       setPending(false);
     }
@@ -250,13 +246,9 @@ export default function NeedAdviceHome() {
   }
 
   async function sendMessage(text: string) {
-    console.log('🚀 sendMessage called with:', text, 'sessionId:', sessionId);
+    console.log('🚀 sendMessage called with:', text);
     if (!text.trim()) {
       console.log('❌ Empty message, returning');
-      return;
-    }
-    if (!sessionId) {
-      console.log('❌ No sessionId, returning');
       return;
     }
     
@@ -265,55 +257,24 @@ export default function NeedAdviceHome() {
     setPending(true);
     
     try {
-      console.log('💬 Sending message:', text);
+      console.log('💬 Sending message to OpenAI:', text);
       
-      // Handle simple greetings with personalized responses
-      const greetings = ['hello', 'hi', 'hey', 'good morning', 'good afternoon', 'good evening'];
-      const isGreeting = greetings.some(greeting => text.toLowerCase().trim().includes(greeting));
-      
-      console.log('🔍 Checking greeting:', { text, isGreeting, matchedGreeting: greetings.find(g => text.toLowerCase().trim().includes(g)) });
-      
-      if (isGreeting) {
-        // Simple personalized greeting without backend call
-        const firstName = user?.user_metadata?.first_name || user?.user_metadata?.name?.split(' ')[0] || 'there';
-        const greetingResponse = `Hello ${firstName}! I'm your AI assistant with access to Circle's marketplace. I can help with real estate business questions, discuss any topic, or recommend tools and services. What's on your mind?`;
-        await typeOutReply(greetingResponse, 22);
-        
-        // Add some helpful quick replies
-        setQuickReplies([
-          "What real estate tools do you recommend?",
-          "Help me with marketing strategies", 
-          "What's trending in the marketplace?",
-          "Tell me about AI in real estate"
-        ]);
-      } else {
-        try {
-          // For any questions, use AI assistant with marketplace context when relevant
-          const { data, error } = await supabase.functions.invoke('enhanced-ai-recommendations', {
-            body: {
-              message: text,
-              userId: user?.id || 'anonymous',
-              context: {
-                role: 'assistant',
-                responseStyle: 'conversational',
-                topic: 'general',
-                timestamp: new Date().toISOString()
-              }
-            }
-          });
-
-          if (error) throw error;
-          
-          const aiResponse = data?.recommendation || data?.response || "I'd be happy to help with that! Can you tell me more about what you're looking for?";
-          await typeOutReply(aiResponse, 22);
-        } catch (error: any) {
-          console.error('AI Error:', error);
-          // Fallback to simple response if AI fails
-          await typeOutReply("I'd be happy to help with that! Can you tell me more about what you're looking for?", 22);
+      // Call simple OpenAI chat function
+      const { data, error } = await supabase.functions.invoke('simple-openai-chat', {
+        body: {
+          message: text,
+          context: {
+            messageCount: messages.length,
+            timestamp: new Date().toISOString()
+          }
         }
-      }
+      });
+
+      if (error) throw error;
       
-      setPending(false);
+      const aiResponse = data?.message || "I'd be happy to help with that! Can you tell me more?";
+      await typeOutReply(aiResponse, 22);
+      
     } catch (error: any) {
       console.error('Error sending message:', error);
       toast({
@@ -321,7 +282,7 @@ export default function NeedAdviceHome() {
         description: error.message || "Failed to send message",
         variant: "destructive"
       });
-      await typeOutReply("Sorry — I couldn't reach the concierge service. Try again in a moment.", 22);
+      await typeOutReply("Sorry — I couldn't connect right now. Try again in a moment.", 22);
     } finally {
       setPending(false);
       setIsFromSearchQuery(false); // Reset flag after message processing
