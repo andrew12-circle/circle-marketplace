@@ -124,6 +124,7 @@ export default function NeedAdviceHome() {
     setPending(true);
 
     try {
+      console.log('🚀 Starting conversation with topic:', initialTopic);
       const { data, error } = await supabase.functions.invoke('ai-concierge-chat', {
         body: { 
           action: 'start',
@@ -131,7 +132,12 @@ export default function NeedAdviceHome() {
         }
       });
 
-      if (error) throw error;
+      console.log('📡 AI Concierge response:', { data, error });
+
+      if (error) {
+        console.error('❌ AI Concierge error:', error);
+        throw error;
+      }
 
       setSessionId(data.sessionId);
       setCurrentStep(data.step);
@@ -164,10 +170,14 @@ export default function NeedAdviceHome() {
         }
       }
     } catch (error: any) {
-      console.error('Error starting conversation:', error);
+      console.error('❌ Error starting conversation:', error);
+      console.error('Error details:', JSON.stringify(error, null, 2));
+      
+      // Show a more helpful error message
+      const errorMessage = error?.message || 'Failed to start conversation';
       toast({
-        title: "Error", 
-        description: error.message || "Failed to start conversation",
+        title: "Chat Error", 
+        description: `Unable to start chat: ${errorMessage}. The AI service may need configuration.`,
         variant: "destructive"
       });
     } finally {
