@@ -633,8 +633,17 @@ function generateLocalRecommendation(userContext: any, marketAnalysis: any, cura
   // Add trending insights
   if (trendingInCategories?.length > 0) {
     const topTrending = trendingInCategories[0];
-    recommendation += `I see ${topTrending.services?.category} services are trending in your market. `;
-    confidence += 0.3;
+    const categoryName = topTrending.services?.category;
+    if (categoryName && categoryName !== 'undefined') {
+      recommendation += `I see ${categoryName} services are trending in your market. `;
+      confidence += 0.3;
+    } else {
+      recommendation += `I see marketing and lead generation services are popular in your market. `;
+      confidence += 0.1;
+    }
+  } else {
+    recommendation += `I see marketing and lead generation services are popular in your market. `;
+    confidence += 0.1;
   }
   
   // Add similar user purchase data
