@@ -413,18 +413,18 @@ function calculateTrust(response: ConciergeResponse, ragSnippets: any[], profile
   };
 }
 
-async function saveMessages(userId: string, threadId: string, userMessage: string, assistantResponse: string) {
+async function saveMessages(userId: string | null, threadId: string, userMessage: string, assistantResponse: string) {
   await supabase
     .from('concierge_chat_messages')
     .insert([
       {
-        user_id: userId,
+        user_id: userId, // Allow null for anonymous users
         thread_id: threadId,
         role: 'user',
         content: userMessage
       },
       {
-        user_id: userId,
+        user_id: userId, // Allow null for anonymous users
         thread_id: threadId,
         role: 'assistant',
         content: assistantResponse

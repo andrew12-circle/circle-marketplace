@@ -65,12 +65,21 @@ export const ConciergeChat: React.FC<ConciergeChatProps> = ({ threadId: initialT
 
   const loadMessages = async (currentThreadId: string) => {
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('concierge_chat_messages')
         .select('*')
         .eq('thread_id', currentThreadId)
-        .eq('user_id', user?.id)
         .order('created_at', { ascending: true });
+
+      // Only filter by user_id if user is authenticated
+      if (user?.id) {
+        query = query.eq('user_id', user.id);
+      } else {
+        // For anonymous users, don't filter by user_id or filter for null
+        query = query.is('user_id', null);
+      }
+
+      const { data, error } = await query;
 
       if (error) throw error;
 
