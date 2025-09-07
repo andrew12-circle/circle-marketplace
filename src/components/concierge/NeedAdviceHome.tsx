@@ -260,29 +260,44 @@ export default function NeedAdviceHome() {
     try {
       console.log('💬 Sending message:', text);
       
-      // Use the enhanced AI recommendations function with concierge context
-      const { data, error } = await supabase.functions.invoke('enhanced-ai-recommendations', {
-        body: {
-          message: `You are a friendly Circle Marketplace concierge. Respond conversationally and briefly (1-2 sentences max). If someone says hello, greet them warmly and ask how you can help with their real estate business today. User said: "${text}"`,
-          userId: user?.id || 'anonymous',
-          context: {
-            role: 'concierge',
-            responseStyle: 'conversational_brief',
-            topic: topic || 'general help',
-            maxLength: 'short',
-            timestamp: new Date().toISOString()
+      // Handle simple greetings with personalized responses
+      const greetings = ['hello', 'hi', 'hey', 'good morning', 'good afternoon', 'good evening'];
+      const isGreeting = greetings.some(greeting => text.toLowerCase().trim().includes(greeting));
+      
+      if (isGreeting) {
+        // Simple personalized greeting
+        const firstName = user?.user_metadata?.first_name || user?.user_metadata?.name?.split(' ')[0] || 'there';
+        const greetingResponse = `Hello ${firstName}! I'm your Circle Concierge. How can I help you grow your real estate business today?`;
+        await typeOutReply(greetingResponse, 22);
+        
+        // Add some helpful quick replies
+        setQuickReplies([
+          "I need more leads",
+          "Help me with marketing", 
+          "Show me what's trending",
+          "I want to increase my income"
+        ]);
+      } else {
+        // For actual business questions, use AI with concierge context
+        const { data, error } = await supabase.functions.invoke('enhanced-ai-recommendations', {
+          body: {
+            message: `As a friendly real estate concierge, provide a helpful but brief response (2-3 sentences max): ${text}`,
+            userId: user?.id || 'anonymous',
+            context: {
+              role: 'concierge',
+              responseStyle: 'conversational_brief',
+              topic: topic || 'real estate advice',
+              timestamp: new Date().toISOString()
+            }
           }
-        }
-      });
+        });
 
-      if (error) {
-        console.error('❌ AI response error:', error);
-        throw error;
+        if (error) throw error;
+        
+        const aiResponse = data?.recommendation || data?.response || "I'd be happy to help with that! Can you tell me more about what you're looking for?";
+        await typeOutReply(aiResponse, 22);
       }
-
-      // Add AI response with typing animation
-      const aiResponse = data?.recommendation || data?.response || "Hello! I'm here to help you with your real estate business. What can I assist you with today?";
-      await typeOutReply(aiResponse, 22);
+      
       setPending(false);
     } catch (error: any) {
       console.error('Error sending message:', error);
