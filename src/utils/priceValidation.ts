@@ -61,10 +61,10 @@ export const validatePrice = (
     return result;
   }
 
-  // Step 3: Range validation
-  if (numericPrice < PRICE_RULES.MIN_PRICE) {
+  // Step 3: Range validation (allow 0 for FREE services)
+  if (numericPrice < 0) {
     result.isValid = false;
-    result.errors.push(`Price must be at least $${PRICE_RULES.MIN_PRICE}`);
+    result.errors.push('Price cannot be negative');
   }
 
   if (numericPrice > PRICE_RULES.MAX_PRICE) {
@@ -104,6 +104,19 @@ export const validatePrice = (
  * Extract and validate price from various input formats
  */
 export const extractAndValidatePrice = (priceString: string, priceType: 'retail' | 'pro' | 'co_pay'): PriceValidationResult => {
+  // Handle special cases first
+  const normalizedPrice = priceString.trim().toLowerCase();
+  
+  // Handle "FREE" services
+  if (normalizedPrice === 'free' || normalizedPrice === '$0' || normalizedPrice === '0' || normalizedPrice === '0.00') {
+    return {
+      isValid: true,
+      errors: [],
+      warnings: [],
+      sanitizedPrice: 0
+    };
+  }
+  
   // More robust regex that handles various price formats
   const priceRegex = /(?:\$|USD|CAD)?\s*(\d+(?:,\d{3})*(?:\.\d{1,2})?)/;
   const match = priceString.match(priceRegex);
