@@ -115,14 +115,7 @@ export default function NeedAdviceHome() {
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
 
   async function startConversation(initialTopic: string) {
-    if (!user) {
-      toast({
-        title: "Authentication required",
-        description: "Please sign in to start your growth planning session.",
-        variant: "destructive"
-      });
-      return;
-    }
+    // Allow both authenticated and anonymous users to start conversations
 
     setTopic(initialTopic);
     setIsChatOpen(true);
