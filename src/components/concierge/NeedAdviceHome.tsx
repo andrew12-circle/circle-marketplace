@@ -503,7 +503,7 @@ export default function NeedAdviceHome() {
         >
           {isChatMinimized ? (
             // Minimized chat bar
-            <div className="h-16 flex items-center justify-between px-4 bg-white border-t shadow-lg">
+            <div className="h-16 flex items-center justify-between px-4 mx-0 sm:mx-6 md:mx-12 lg:mx-24 xl:mx-32 bg-white border-t shadow-lg rounded-t-lg sm:rounded-t-xl">
               <div className="flex items-center gap-3">
                 <Brain className="h-4 w-4 text-sky-600" />
                 <span className="text-sm font-medium">Agent Concierge — {topic}</span>
