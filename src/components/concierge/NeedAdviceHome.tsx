@@ -260,18 +260,27 @@ export default function NeedAdviceHome() {
     try {
       console.log('💬 Sending message:', text);
       
-      // Create a simple response for now
-      const responses = [
-        `That's a great question about ${text}. Based on what successful agents tell us, here are the key points to consider...`,
-        `I understand you're interested in ${text}. Let me share some insights from our marketplace data...`,
-        `Thanks for asking about ${text}. Many agents in similar situations have found success with...`,
-        `Great question! Regarding ${text}, here's what I typically recommend to agents...`
-      ];
-      
-      const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+      // Use the enhanced AI recommendations function for real AI responses
+      const { data, error } = await supabase.functions.invoke('enhanced-ai-recommendations', {
+        body: {
+          message: text,
+          userId: user?.id || 'anonymous',
+          context: {
+            topic: topic || 'general business advice',
+            step: currentStep,
+            timestamp: new Date().toISOString()
+          }
+        }
+      });
 
-      // Add AI response with typing animation (keep pending true until typing is complete)
-      await typeOutReply(randomResponse, 22);
+      if (error) {
+        console.error('❌ AI response error:', error);
+        throw error;
+      }
+
+      // Add AI response with typing animation
+      const aiResponse = data?.recommendation || data?.response || "I understand your question. Let me help you with that - what specific aspect would you like to know more about?";
+      await typeOutReply(aiResponse, 22);
       setPending(false);
     } catch (error: any) {
       console.error('Error sending message:', error);
