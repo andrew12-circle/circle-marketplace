@@ -551,7 +551,7 @@ export default function NeedAdviceHome() {
         <div className="fixed bottom-4 left-4 z-50">
           <Button
             onClick={() => setIsChatMinimized(false)}
-            className="h-12 w-12 rounded-full bg-primary hover:bg-primary/90 shadow-lg"
+            className="h-8 w-8 rounded-full bg-primary hover:bg-primary/90 shadow-lg"
             size="icon"
           >
             <Brain className="h-5 w-5 text-primary-foreground" />
