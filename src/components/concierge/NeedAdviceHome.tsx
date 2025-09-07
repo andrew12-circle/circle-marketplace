@@ -111,6 +111,7 @@ export default function NeedAdviceHome() {
   const [quickReplies, setQuickReplies] = useState<string[]>([]);
   const [isComplete, setIsComplete] = useState(false);
   const [plan, setPlan] = useState<any>(null);
+  const [services, setServices] = useState<any[]>([]);
   const recognitionRef = useRef<any>(null);
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
 
@@ -144,6 +145,11 @@ export default function NeedAdviceHome() {
         // Add messages with realistic delays, then show quick replies
         await addMessagesWithDelay(data.messages);
         setQuickReplies(data.quickReplies || []);
+        
+        // Store services if provided
+        if (data.services && data.services.length > 0) {
+          setServices(data.services);
+        }
       } else if (data.message) {
         // Fallback for old format
         setMessages([
@@ -151,6 +157,11 @@ export default function NeedAdviceHome() {
           { role: "assistant", content: data.message }
         ]);
         setQuickReplies(data.quickReplies || []);
+        
+        // Store services if provided
+        if (data.services && data.services.length > 0) {
+          setServices(data.services);
+        }
       }
     } catch (error: any) {
       console.error('Error starting conversation:', error);
@@ -628,6 +639,63 @@ export default function NeedAdviceHome() {
                   ))}
                   {/* Removed thinking indicator */}
                   
+                  {/* Service Recommendations */}
+                  {services.length > 0 && (
+                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4 mt-4">
+                      <h4 className="font-semibold text-sm mb-3 text-blue-900">Recommended Services</h4>
+                      <div className="space-y-3">
+                        {services.slice(0, 3).map((service, i) => (
+                          <div key={service.id || i} className="bg-white border border-blue-100 rounded-lg p-3 hover:bg-blue-50/50 transition-colors">
+                            <div className="flex justify-between items-start">
+                              <div className="flex-1">
+                                <h5 className="font-medium text-sm text-gray-900">{service.title}</h5>
+                                <p className="text-xs text-gray-600 mt-1">{service.vendors?.name || 'Circle Partner'}</p>
+                                {service.description && (
+                                  <p className="text-xs text-gray-500 mt-1 line-clamp-2">
+                                    {service.description.substring(0, 80)}...
+                                  </p>
+                                )}
+                              </div>
+                              <div className="text-right ml-3">
+                                <p className="text-sm font-semibold text-blue-600">
+                                  {service.pro_price || service.retail_price || 'Contact'}
+                                </p>
+                                <p className="text-xs text-gray-500">Circle Pro</p>
+                              </div>
+                            </div>
+                            <div className="flex gap-2 mt-3">
+                              <Button 
+                                size="sm" 
+                                variant="outline" 
+                                className="text-xs h-7 px-3"
+                                onClick={() => window.open(`https://circle.com/marketplace/service/${service.id}`, '_blank')}
+                              >
+                                View Details
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                className="text-xs h-7 px-3"
+                                onClick={() => sendMessage(`Tell me more about ${service.title}`)}
+                              >
+                                Ask About This
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                        {services.length > 3 && (
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="w-full text-xs mt-2"
+                            onClick={() => sendMessage('Show me all options')}
+                          >
+                            See {services.length - 3} more options
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
                   {/* Quick replies */}
                   {quickReplies.length > 0 && (
                     <div className="flex flex-wrap gap-2 mt-3">

@@ -18,6 +18,7 @@ interface ConversationState {
   isComplete: boolean;
   quickReplies: string[];
   plan?: any;
+  services?: any[];
 }
 
 export function useAIConcierge() {
@@ -28,7 +29,8 @@ export function useAIConcierge() {
     currentStep: 'welcome',
     isComplete: false,
     quickReplies: [],
-    plan: null
+    plan: null,
+    services: null
   });
   const { user } = useAuth();
   const { toast } = useToast();
@@ -63,7 +65,8 @@ export function useAIConcierge() {
         currentStep: data.step,
         isComplete: false,
         quickReplies: data.quickReplies || [],
-        plan: null
+        plan: null,
+        services: data.services || null
       });
 
     } catch (error: any) {
@@ -154,7 +157,8 @@ export function useAIConcierge() {
       currentStep: 'welcome',
       isComplete: false,
       quickReplies: [],
-      plan: null
+      plan: null,
+      services: null
     });
   };
 

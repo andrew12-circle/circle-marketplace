@@ -489,6 +489,157 @@ function getQuickRepliesForStep(step: string, profileData: any): string[] {
   }
 }
 
+// Detect if user message is asking for specific services/products
+function detectServiceSearchIntent(message: string): string | null {
+  const lowerMessage = message.toLowerCase();
+  
+  // Service-specific keywords mapping
+  const serviceKeywords = {
+    'yard signs': 'signage',
+    'signs': 'signage', 
+    'bandit signs': 'signage',
+    'real estate signs': 'signage',
+    'listing signs': 'signage',
+    'open house signs': 'signage',
+    'crm': 'crm',
+    'customer relationship': 'crm',
+    'contact management': 'crm',
+    'lead management': 'crm',
+    'marketing': 'marketing',
+    'social media': 'marketing',
+    'email marketing': 'marketing',
+    'lead generation': 'lead generation',
+    'leads': 'lead generation',
+    'lead gen': 'lead generation',
+    'coaching': 'coaching',
+    'mentor': 'coaching',
+    'training': 'coaching',
+    'education': 'education',
+    'school': 'education',
+    'course': 'education',
+    'licensing': 'licensing',
+    'license': 'licensing',
+    'photography': 'photography',
+    'photos': 'photography',
+    'virtual tour': 'photography',
+    'website': 'website',
+    'landing page': 'website',
+    'listing platform': 'website'
+  };
+
+  for (const [keyword, category] of Object.entries(serviceKeywords)) {
+    if (lowerMessage.includes(keyword)) {
+      return category;
+    }
+  }
+  
+  return null;
+}
+
+// Search marketplace for services matching the intent
+async function searchMarketplaceServices(supabase: any, searchIntent: string, limit: number = 5) {
+  try {
+    let categoryFilter = '';
+    let tagFilters: string[] = [];
+    
+    // Map search intent to service categories and tags
+    switch (searchIntent) {
+      case 'signage':
+        categoryFilter = 'Print & Mail';
+        tagFilters = ['signage', 'yard signs', 'marketing materials'];
+        break;
+      case 'crm':
+        categoryFilter = 'CRMs';
+        break;
+      case 'marketing':
+        categoryFilter = 'Marketing Automation & Content';
+        break;
+      case 'lead generation':
+        categoryFilter = 'Ads & Lead Gen';
+        break;
+      case 'coaching':
+        categoryFilter = 'Coaching';
+        break;
+      case 'education':
+        categoryFilter = 'CE & Licensing';
+        break;
+      case 'licensing':
+        categoryFilter = 'CE & Licensing';
+        tagFilters = ['licensing', 'certification'];
+        break;
+      case 'photography':
+        categoryFilter = 'Video & Media Tools';
+        tagFilters = ['photography', 'virtual tours'];
+        break;
+      case 'website':
+        categoryFilter = 'Website / IDX';
+        break;
+    }
+
+    // Build query
+    let query = supabase
+      .from('services')
+      .select(`
+        id,
+        title,
+        description,
+        category,
+        retail_price,
+        pro_price,
+        vendor_id,
+        vendors(name, auto_score),
+        tags,
+        image_url
+      `)
+      .eq('is_active', true);
+
+    // Apply category filter if found
+    if (categoryFilter) {
+      query = query.eq('category', categoryFilter);
+    }
+
+    // Execute query
+    const { data: services, error } = await query
+      .order('vendors(auto_score)', { ascending: false })
+      .limit(limit * 2); // Get more to filter
+
+    if (error) {
+      console.error('Error searching services:', error);
+      return [];
+    }
+
+    if (!services) return [];
+
+    // Filter by tags if specified
+    let filteredServices = services;
+    if (tagFilters.length > 0) {
+      filteredServices = services.filter(service => 
+        tagFilters.some(tag => 
+          service.tags?.some(serviceTag => 
+            serviceTag.toLowerCase().includes(tag.toLowerCase())
+          ) ||
+          service.title.toLowerCase().includes(tag) ||
+          service.description?.toLowerCase().includes(tag)
+        )
+      );
+    }
+
+    // If tag filtering returned too few results, fall back to category results
+    if (filteredServices.length < 2 && services.length > 0) {
+      filteredServices = services;
+    }
+
+    // Sort by vendor score and return top results
+    return filteredServices
+      .sort((a, b) => (b.vendors?.auto_score || 0) - (a.vendors?.auto_score || 0))
+      .slice(0, limit);
+
+  } catch (error) {
+    console.error('Error in searchMarketplaceServices:', error);
+    return [];
+  }
+}
+
 // Create simulated user question based on category
 function createSimulatedUserQuestion(category?: string, profileData?: any): string {
   const categoryQuestions = {
@@ -504,19 +655,62 @@ function createSimulatedUserQuestion(category?: string, profileData?: any): stri
   return categoryQuestions[category] || 'What tools and services would help me grow my real estate business?';
 }
 
-// Create initial human-like response
-function createInitialHumanResponse(profileData: any): string {
+// Create initial human-like response for service search
+function createInitialHumanResponse(profileData: any, isServiceSearch: boolean = false): string {
   const name = profileData?.display_name || 'there';
   const firstName = name.split(' ')[0];
+  
+  if (isServiceSearch) {
+    return `Perfect! Let me see who we have that can help you with that. Give me just a second to pull up our best options.`;
+  }
   
   return `Hey ${firstName}! Good question, let me do a little deep dive into what would work best for your specific situation. I'll be right back.`;
 }
 
+// Create service recommendation response
+function createServiceRecommendationResponse(services: any[], searchIntent: string): string {
+  if (!services || services.length === 0) {
+    return formatAgentVoiceResponse(
+      "Alright, I'm back!",
+      "I searched through our marketplace partners for what you're looking for.",
+      "Here's what I'm seeing... I don't have any specific partners for that exact service right now, but I can definitely help you find alternatives.",
+      "What I can do right now is show you similar tools or put you in touch with some general contractors in our network.",
+      "Would you like me to broaden the search or help you with something else?"
+    );
+  }
+
+  const serviceType = searchIntent === 'signage' ? 'yard signs and signage' : searchIntent;
+  const topServices = services.slice(0, 3);
+  
+  let serviceList = "";
+  topServices.forEach((service, index) => {
+    const price = service.pro_price || service.retail_price || 'Contact for pricing';
+    serviceList += `\n\n${index + 1}. **${service.title}** by ${service.vendors?.name || 'Partner'}`;
+    serviceList += `\n   - Price: ${price}`;
+    if (service.description) {
+      serviceList += `\n   - ${service.description.substring(0, 100)}${service.description.length > 100 ? '...' : ''}`;
+    }
+  });
+
+  return formatAgentVoiceResponse(
+    "Perfect! I found some great options for you.",
+    "I've reviewed our marketplace partners and their ratings.",
+    `Here's what I'm seeing... we have ${services.length} solid options for ${serviceType}. Based on our data, reviews, and pricing, I recommend these top 3:${serviceList}`,
+    `What I can do right now is connect you directly with any of these partners to discuss your specific needs.`,
+    "Which one interests you most, or would you like me to tell you more about any of them?"
+  );
+}
+
 // Create follow-up response with recommendations or assessment prompt
-function createFollowUpResponse(profileData: any, category?: string): string {
+function createFollowUpResponse(profileData: any, category?: string, services?: any[], searchIntent?: string): string {
   const name = profileData?.display_name || 'there';
   const firstName = name.split(' ')[0];
   const hasData = profileData.hasProfileStats && profileData.closings12m > 0;
+  
+  // If this is a service search, return service recommendations
+  if (searchIntent && services !== undefined) {
+    return createServiceRecommendationResponse(services, searchIntent);
+  }
   
   if (!hasData) {
     return formatAgentVoiceResponse(
@@ -552,8 +746,29 @@ function createFollowUpResponse(profileData: any, category?: string): string {
   );
 }
 
+// Get quick replies for service recommendations
+function getQuickRepliesForServices(services: any[], searchIntent: string): string[] {
+  if (!services || services.length === 0) {
+    return ['Broaden search', 'Try something else', 'Contact support'];
+  }
+
+  const topServices = services.slice(0, 3);
+  const replies = topServices.map(service => `Tell me about ${service.vendors?.name || service.title}`);
+  
+  // Add generic options
+  replies.push('See all options');
+  replies.push('Something else');
+  
+  return replies.slice(0, 5); // Limit to 5 options
+}
+
 // Get quick replies based on profile and category
-function getQuickRepliesForCategory(profileData: any, category?: string): string[] {
+function getQuickRepliesForCategory(profileData: any, category?: string, services?: any[], searchIntent?: string): string[] {
+  // If this is a service search, return service-specific quick replies
+  if (searchIntent && services !== undefined) {
+    return getQuickRepliesForServices(services, searchIntent);
+  }
+  
   const hasData = profileData.hasProfileStats && profileData.closings12m > 0;
   
   if (!hasData) {
@@ -683,6 +898,17 @@ serve(async (req) => {
     
     // Create the simulated user question based on category
     const userQuestion = createSimulatedUserQuestion(category, profileData);
+    
+    // Check if this is a service search intent
+    const searchIntent = detectServiceSearchIntent(userQuestion);
+    let services = null;
+    
+    if (searchIntent) {
+      console.log('Detected service search intent:', searchIntent);
+      services = await searchMarketplaceServices(supabase, searchIntent);
+      console.log('Found services:', services?.length || 0);
+    }
+    
     const nextStep = determineStartingStep(profileData);
 
     // Create new session (handle both authenticated and anonymous users)
@@ -692,7 +918,9 @@ serve(async (req) => {
         profileData, 
         category, 
         isAuthenticated: !!user,
-        messageCount: 0 
+        messageCount: 0,
+        searchIntent,
+        recommendedServices: services
       },
       current_step: nextStep
     };
@@ -717,7 +945,7 @@ serve(async (req) => {
     });
 
     // Create the initial human-like response
-    const initialResponse = createInitialHumanResponse(profileData);
+    const initialResponse = createInitialHumanResponse(profileData, !!searchIntent);
     
     // Insert initial response
     await supabase.from('concierge_messages').insert({
@@ -728,8 +956,8 @@ serve(async (req) => {
     });
 
     // Create follow-up response with recommendations or questions
-    const followUpResponse = createFollowUpResponse(profileData, category);
-    const quickReplies = getQuickRepliesForCategory(profileData, category);
+    const followUpResponse = createFollowUpResponse(profileData, category, services, searchIntent);
+    const quickReplies = getQuickRepliesForCategory(profileData, category, services, searchIntent);
     
     // Insert follow-up response
     await supabase.from('concierge_messages').insert({
@@ -748,7 +976,8 @@ serve(async (req) => {
         { role: 'assistant', content: followUpResponse }
       ],
       quickReplies: quickReplies,
-      isComplete: false
+      isComplete: false,
+      services: services // Include services in response for frontend
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
