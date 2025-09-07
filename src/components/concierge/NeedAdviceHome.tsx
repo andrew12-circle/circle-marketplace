@@ -244,18 +244,21 @@ export default function NeedAdviceHome() {
     setQuery("");
     
     // Ensure chat opens expanded
+    console.log('🔄 Opening chat expanded from search');
     setIsChatOpen(true);
     setIsChatMinimized(false);
     
     // Default to CRM flow for search-bar questions
     startConversation("CRM").then(() => {
       // Give React a tick to apply the conversation state, then send the user's message
+      console.log('🔄 About to send message from search, chat should be open and expanded');
       setTimeout(() => sendMessage(q), 300);
     });
   }
 
   function scrollToMarketplace() {
     // Minimize chat first
+    console.log('🔽 Minimizing chat from scrollToMarketplace');
     setIsChatMinimized(true);
     
     // Scroll to marketplace section
@@ -526,7 +529,10 @@ export default function NeedAdviceHome() {
                     variant="ghost"
                     size="icon"
                     className="h-8 w-8 rounded-full"
-                    onClick={() => setIsChatMinimized(true)}
+                    onClick={() => {
+                      console.log('🔽 Minimizing chat from minimize button');
+                      setIsChatMinimized(true);
+                    }}
                     aria-label="Minimize chat"
                   >
                     ─
@@ -604,7 +610,10 @@ export default function NeedAdviceHome() {
                           <Button 
                             size="sm" 
                             variant="outline"
-                            onClick={() => setIsChatMinimized(true)}
+                            onClick={() => {
+                              console.log('🔽 Minimizing chat from minimize & browse button');
+                              setIsChatMinimized(true);
+                            }}
                           >
                             Minimize & Browse
                           </Button>
