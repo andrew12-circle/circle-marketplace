@@ -5,15 +5,20 @@ import { useState } from "react";
 interface AskCircleAIModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  initialMessage?: string;
 }
 
-export function AskCircleAIModal({ open, onOpenChange }: AskCircleAIModalProps) {
+export function AskCircleAIModal({ open, onOpenChange, initialMessage }: AskCircleAIModalProps) {
   const [threadId, setThreadId] = useState<string>();
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-6xl h-[85vh] p-0">
-        <ConciergeChat threadId={threadId} onThreadChange={setThreadId} />
+        <ConciergeChat 
+          threadId={threadId} 
+          onThreadChange={setThreadId}
+          initialMessage={initialMessage}
+        />
       </DialogContent>
     </Dialog>
   );

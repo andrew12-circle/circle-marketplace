@@ -41,6 +41,7 @@ const generateThreadId = () => {
 interface ConciergeChatProps {
   threadId?: string;
   onThreadChange?: (threadId: string) => void;
+  initialMessage?: string;
 }
 
 export const ConciergeChat: React.FC<ConciergeChatProps> = ({ threadId: initialThreadId, onThreadChange }) => {

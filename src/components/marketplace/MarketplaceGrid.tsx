@@ -10,6 +10,7 @@ import { CircleProBanner } from "./CircleProBanner";
 import { ServiceDetailsModal } from "./ServiceDetailsModal";
 import { ServiceFunnelModal } from "./ServiceFunnelModal";
 import NeedAdviceHome from "../concierge/NeedAdviceHome";
+import { AskCircleAIModal } from "./AskCircleAIModal";
 import { AddProductModal } from "./AddProductModal";
 import { VendorSelectionModal } from "./VendorSelectionModal";
 import { TopDealsCarousel } from "./TopDealsCarousel";
@@ -486,6 +487,8 @@ export const MarketplaceGrid = () => {
   const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
   const [isAddProductModalOpen, setIsAddProductModalOpen] = useState(false);
   const [showQAOverlay, setShowQAOverlay] = useState(false);
+  const [isConciergeModalOpen, setIsConciergeModalOpen] = useState(false);
+  const [conciergeInitialMessage, setConciergeInitialMessage] = useState<string>();
 
   // Handle deep linking to services from shared URLs
   const [isFunnelModalOpen, setIsFunnelModalOpen] = useState(false);
@@ -508,6 +511,19 @@ export const MarketplaceGrid = () => {
       }
     }
   }, [services]);
+
+  // Listen for concierge modal events
+  useEffect(() => {
+    const handleOpenConciergeModal = (event: CustomEvent) => {
+      setConciergeInitialMessage(event.detail.initialMessage);
+      setIsConciergeModalOpen(true);
+    };
+
+    window.addEventListener('openConciergeModal' as any, handleOpenConciergeModal);
+    return () => {
+      window.removeEventListener('openConciergeModal' as any, handleOpenConciergeModal);
+    };
+  }, []);
 
   const handleCloseServiceModal = () => {
     setIsServiceModalOpen(false);
@@ -1041,6 +1057,13 @@ export const MarketplaceGrid = () => {
         open={isAddProductModalOpen} 
         onOpenChange={setIsAddProductModalOpen} 
         onProductAdded={() => {}} 
+      />
+
+      {/* Concierge AI Modal */}
+      <AskCircleAIModal 
+        open={isConciergeModalOpen} 
+        onOpenChange={setIsConciergeModalOpen}
+        initialMessage={conciergeInitialMessage}
       />
 
       {/* QA Overlay */}
