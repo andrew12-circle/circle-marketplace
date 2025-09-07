@@ -56,7 +56,13 @@ export function useAIConcierge() {
 
       setConversation({
         sessionId: data.sessionId,
-        messages: [{
+        messages: data.messages?.map((msg: any, index: number) => ({
+          id: (index + 1).toString(),
+          role: msg.role,
+          content: msg.content,
+          step_name: data.step,
+          timestamp: new Date()
+        })) || [{
           id: '1',
           role: 'assistant',
           content: data.message,

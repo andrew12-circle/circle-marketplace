@@ -429,116 +429,124 @@ function getQuickRepliesForStep(step: string, profileData: any): string[] {
   }
 }
 
-const conversationFlow: ConversationStep[] = [
-  {
-    step: 'welcome',
-    question: formatAgentVoiceResponse(
-      "Perfect! Let's map your path to growth.",
-      "You're right to focus on this.",
-      "Here's what I'm seeing... understanding where you are today helps me give you the exact tools that'll move the needle.",
-      "The simplest path is starting with your current production level.",
-      "How many deals did you close last year?"
-    ),
-    quickReplies: ['0-5', '6-15', '16-30', '31-50', '51+', 'First year'],
-    isRequired: true
-  },
-  {
-    step: 'target_goal',
-    question: formatAgentVoiceResponse(
-      "Great context!",
-      "I get why you want to grow from there.",
-      "Here's what I'm seeing... agents who set clear targets are 3x more likely to hit them.",
-      "What I can do right now is help you pick a realistic but aggressive goal.",
-      "What's your target this year?"
-    ),
-    quickReplies: ['Double it', '25 deals', '50 deals', '75 deals', '100+ deals'],
-    isRequired: true
-  },
-  {
-    step: 'focus_area',
-    question: formatAgentVoiceResponse(
-      "Smart goal!",
-      "You're right to be ambitious.",
-      "Here's what I'm seeing... focus beats trying to do everything. The best agents pick a lane and dominate it.",
-      "The simplest path is aligning your tools with your focus area.",
-      "Do you focus more on buyers, sellers, or both?"
-    ),
-    quickReplies: ['Buyers mostly', 'Sellers mostly', 'Both equally', 'Want to shift focus'],
-    isRequired: true
-  },
-  {
-    step: 'price_point',
-    question: formatAgentVoiceResponse(
-      "Perfect focus area!",
-      "I get why that works for your market.",
-      "Here's what I'm seeing... your price point determines which tools give you the best ROI.",
-      "What I can do right now is match you with tools that work at your price level.",
-      "What's your average price point?"
-    ),
-    quickReplies: ['Under $300k', '$300k-$500k', '$500k-$750k', '$750k-$1M', '$1M+'],
-    isRequired: true
-  },
-  {
-    step: 'market_density',
-    question: formatAgentVoiceResponse(
-      "Got it on the price point!",
-      "You're right to factor that into your strategy.",
-      "Here's what I'm seeing... market density changes everything about lead gen and marketing.",
-      "The simplest path is tools that work specifically for your market type.",
-      "How would you describe your market?"
-    ),
-    quickReplies: ['Urban/Dense', 'Suburban', 'Rural/Spread out', 'Tourist/Seasonal'],
-    isRequired: true
-  },
-  {
-    step: 'biggest_blocker',
-    question: formatAgentVoiceResponse(
-      "Perfect market context!",
-      "I get why that affects your approach.",
-      "Here's what I'm seeing... every agent has one main thing holding them back from their next level.",
-      "What I can do right now is help you identify and solve your biggest bottleneck.",
-      "What's your biggest frustration right now?"
-    ),
-    quickReplies: ['Not enough leads', 'Converting leads', 'No good systems', 'Time management', 'Marketing costs'],
-    isRequired: true
-  },
-  {
-    step: 'lead_sources',
-    question: formatAgentVoiceResponse(
-      "I hear you on that challenge!",
-      "You're right to flag that as your blocker.",
-      "Here's what I'm seeing... your current lead sources tell me exactly which tools will multiply your results.",
-      "The simplest path is amplifying what's already working while adding new channels.",
-      "How do you usually get business?"
-    ),
-    quickReplies: ['Referrals mostly', 'Online leads', 'Sphere/Database', 'Open houses', 'Mix of everything'],
-    isRequired: true
-  },
-  {
-    step: 'work_style',
-    question: formatAgentVoiceResponse(
-      "Great lead source info!",
-      "I get why you want to build on that foundation.",
-      "Here's what I'm seeing... your work style determines whether you need DIY tools or done-for-you services.",
-      "What I can do right now is match you with tools that fit how you actually like to work.",
-      "Do you prefer DIY tools you control, or done-for-you services?"
-    ),
-    quickReplies: ['DIY - I like control', 'Done-for-you - save me time', 'Mix - depends on task'],
-    isRequired: true
-  },
-  {
-    step: 'budget',
-    question: formatAgentVoiceResponse(
-      "Perfect work style context!",
-      "You're smart to know how you like to operate.",
-      "Here's what I'm seeing... budget determines timing and which tools to prioritize first.",
-      "The simplest path is starting with your highest-ROI tools first, then adding others.",
-      "Do you have a monthly marketing budget in mind?"
-    ),
-    quickReplies: ['Under $500', '$500-$1,500', '$1,500-$3,000', '$3,000+', 'Depends on ROI'],
-    isRequired: true
+// Create simulated user question based on category
+function createSimulatedUserQuestion(category?: string, profileData?: any): string {
+  const categoryQuestions = {
+    'Marketing Tools': 'What are the best marketing tools based on my business?',
+    'CRM': 'What CRM system would work best for my real estate business?', 
+    'Lead Generation': 'What are the most effective lead generation tools for agents like me?',
+    'Real Estate Schools': 'What educational programs would help me grow my real estate business?',
+    'Licensing': 'What licensing options should I consider for my real estate career?',
+    'Coaching': 'What coaching programs would be most beneficial for my business level?',
+    'Marketplace': 'What tools and services would help me grow my real estate business?'
+  };
+
+  return categoryQuestions[category] || 'What tools and services would help me grow my real estate business?';
+}
+
+// Create initial human-like response
+function createInitialHumanResponse(profileData: any): string {
+  const name = profileData?.display_name || 'there';
+  const firstName = name.split(' ')[0];
+  
+  return `Hey ${firstName}! Good question, let me do a little deep dive into what would work best for your specific situation. I'll be right back.`;
+}
+
+// Create follow-up response with recommendations or assessment prompt
+function createFollowUpResponse(profileData: any, category?: string): string {
+  const name = profileData?.display_name || 'there';
+  const firstName = name.split(' ')[0];
+  const hasData = profileData.hasProfileStats && profileData.closings12m > 0;
+  
+  if (!hasData) {
+    return formatAgentVoiceResponse(
+      `Alright ${firstName}, I'm back!`,
+      "I want to give you the most accurate recommendations possible.",
+      "Here's what I'm seeing... I don't have enough information about your business yet to give you the best advice.",
+      "The simplest path is completing your business assessment first - it takes 2 minutes and helps me match you with exactly the right tools.",
+      "Would you like to complete your assessment now so I can give you personalized recommendations?"
+    );
   }
-];
+
+  // They have data - give personalized recommendations
+  const location = profileData.city && profileData.state ? ` in ${profileData.city}, ${profileData.state}` : '';
+  const closings = profileData.closings12m;
+  
+  let categoryAdvice = "";
+  if (category === 'Marketing Tools') {
+    categoryAdvice = getMarketingToolsAdvice(profileData);
+  } else if (category === 'CRM') {
+    categoryAdvice = getCRMAdvice(profileData);
+  } else if (category === 'Lead Generation') {
+    categoryAdvice = getLeadGenAdvice(profileData);
+  } else {
+    categoryAdvice = getGeneralAdvice(profileData);
+  }
+
+  return formatAgentVoiceResponse(
+    `Perfect ${firstName}, I'm back with some insights!`,
+    "I've analyzed your business profile - you closed " + closings + " deals last year" + location + ".",
+    "Here's what I'm seeing... " + categoryAdvice,
+    "What I can do right now is show you the specific tools that agents at your level use to scale up.",
+    "Does that sound helpful, or would you prefer to see something specific first?"
+  );
+}
+
+// Get quick replies based on profile and category
+function getQuickRepliesForCategory(profileData: any, category?: string): string[] {
+  const hasData = profileData.hasProfileStats && profileData.closings12m > 0;
+  
+  if (!hasData) {
+    return ['Complete Assessment', 'Skip for now', 'Tell me more'];
+  }
+
+  if (category === 'Marketing Tools') {
+    return ['Show me marketing tools', 'Social media focused', 'Email marketing', 'Listing promotion'];
+  } else if (category === 'CRM') {
+    return ['Show me CRMs', 'Simple & affordable', 'Full-featured', 'Real estate specific'];
+  } else if (category === 'Lead Generation') {
+    return ['Show lead gen tools', 'Online leads', 'Referral systems', 'Prospecting tools'];
+  }
+  
+  return ['Show me recommendations', 'Tell me more', 'See specific tools'];
+}
+
+// Category-specific advice functions
+function getMarketingToolsAdvice(profileData: any): string {
+  const closings = profileData.closings12m;
+  if (closings < 10) {
+    return "agents at your level typically need cost-effective marketing that focuses on building your brand and generating consistent leads.";
+  } else if (closings < 25) {
+    return "agents closing " + closings + " deals usually benefit from automated marketing systems that scale their reach without eating up time.";
+  } else {
+    return "high-performing agents like you typically invest in premium marketing automation and lead nurturing systems.";
+  }
+}
+
+function getCRMAdvice(profileData: any): string {
+  if (!profileData.crm) {
+    return "you don't have a CRM yet - that's actually the #1 thing holding back most agents from scaling past 20 deals.";
+  }
+  return "you're already using " + profileData.crm + " - I can help you either optimize it or find something better suited to your growth.";
+}
+
+function getLeadGenAdvice(profileData: any): string {
+  const closings = profileData.closings12m;
+  if (closings < 15) {
+    return "agents at your level need consistent, affordable lead sources that convert well with proper follow-up.";
+  }
+  return "established agents like you typically add premium lead sources and referral systems to their existing pipeline.";
+}
+
+function getGeneralAdvice(profileData: any): string {
+  const closings = profileData.closings12m;
+  const goal = profileData.goalClosings12m;
+  
+  if (goal > closings * 1.5) {
+    return "you're planning aggressive growth - that typically requires 2-3 key systems working together.";
+  }
+  return "you're in a great position to add the right tools to accelerate your growth.";
+}
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -569,23 +577,22 @@ serve(async (req) => {
     const { action, sessionId, message, stepName, category } = await req.json();
 
   if (action === 'start') {
-    console.log('Starting new concierge session for user:', user.id);
+    console.log('Starting new concierge session for user:', user.id, 'with category:', category);
     
     // Get user's existing profile data to personalize the conversation
     const profileData = await getUserProfileData(supabase, user.id);
     console.log('Retrieved profile data:', profileData);
     
-    // Create personalized welcome message based on profile data and category
-    const welcomeMessage = createPersonalizedWelcome(profileData, category);
+    // Create the simulated user question based on category
+    const userQuestion = createSimulatedUserQuestion(category, profileData);
     const nextStep = determineStartingStep(profileData);
-    const quickReplies = getQuickRepliesForStep(nextStep, profileData);
 
     // Create new session
     const { data: session, error: sessionError } = await supabase
       .from('concierge_sessions')
       .insert({
         user_id: user.id,
-        session_data: { profileData },
+        session_data: { profileData, category },
         current_step: nextStep
       })
       .select()
@@ -596,18 +603,45 @@ serve(async (req) => {
       throw new Error('Failed to create session');
     }
 
-    // Insert welcome message
+    // Insert the simulated user question first
+    await supabase.from('concierge_messages').insert({
+      session_id: session.id,
+      role: 'user',
+      content: userQuestion,
+      step_name: nextStep
+    });
+
+    // Create the initial human-like response
+    const initialResponse = createInitialHumanResponse(profileData);
+    
+    // Insert initial response
     await supabase.from('concierge_messages').insert({
       session_id: session.id,
       role: 'assistant',
-      content: welcomeMessage,
+      content: initialResponse,
+      step_name: nextStep
+    });
+
+    // Create follow-up response with recommendations or questions
+    const followUpResponse = createFollowUpResponse(profileData, category);
+    const quickReplies = getQuickRepliesForCategory(profileData, category);
+    
+    // Insert follow-up response
+    await supabase.from('concierge_messages').insert({
+      session_id: session.id,
+      role: 'assistant', 
+      content: followUpResponse,
       step_name: nextStep
     });
 
     return new Response(JSON.stringify({
       sessionId: session.id,
       step: nextStep,
-      message: welcomeMessage,
+      messages: [
+        { role: 'user', content: userQuestion },
+        { role: 'assistant', content: initialResponse },
+        { role: 'assistant', content: followUpResponse }
+      ],
       quickReplies: quickReplies,
       isComplete: false
     }), {
