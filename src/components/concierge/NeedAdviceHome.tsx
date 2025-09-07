@@ -175,6 +175,45 @@ export default function NeedAdviceHome() {
     }
   }
 
+  async function startConversationFromQuery(userQuery: string) {
+    setPending(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('ai-concierge-chat', {
+        body: { 
+          action: 'start',
+          userQuery: userQuery // Send the user's query instead of a category
+        }
+      });
+
+      if (error) throw error;
+
+      setSessionId(data.sessionId);
+      setCurrentStep(data.step);
+      
+      // For search queries, directly show the assistant's response
+      if (data.message) {
+        await typeOutReply(data.message, 22);
+        setQuickReplies(data.quickReplies || []);
+        
+        // Store services if provided
+        if (data.services && data.services.length > 0) {
+          setServices(data.services);
+        }
+      }
+    } catch (error: any) {
+      console.error('Error starting conversation from query:', error);
+      toast({
+        title: "Error", 
+        description: error.message || "Failed to start conversation",
+        variant: "destructive"
+      });
+      await typeOutReply("Sorry — I couldn't reach the concierge service. Try again in a moment.", 22);
+    } finally {
+      setPending(false);
+    }
+  }
+
   // Add messages with realistic human-like delays
   async function addMessagesWithDelay(messages: any[]) {
     for (let i = 0; i < messages.length; i++) {
@@ -304,12 +343,19 @@ export default function NeedAdviceHome() {
     setIsChatOpen(true);
     setIsChatMinimized(false);
     
-    // Start conversation without a predetermined category to let AI handle the user's question
-    startConversation(undefined).then(() => {
-      // Give React a tick to apply the conversation state, then send the user's message
-      console.log('🔄 About to send message from search, chat should be open and expanded');
-      setTimeout(() => sendMessage(q), 300);
-    });
+    // Set empty state and show user's message first
+    setSessionId(null);
+    setMessages([]);
+    setTopic(null);
+    setQuickReplies([]);
+    setServices([]);
+    setCurrentStep("welcome");
+    
+    // Show user's message immediately and then start conversation
+    setMessages([{ role: "user", content: q }]);
+    
+    // Start conversation and let AI respond to the user's question
+    startConversationFromQuery(q);
   }
 
   function scrollToMarketplace() {

@@ -887,17 +887,17 @@ serve(async (req) => {
       }
     }
 
-    const { action, sessionId, message, stepName, category } = await req.json();
+    const { action, sessionId, message, stepName, category, userQuery } = await req.json();
 
   if (action === 'start') {
-    console.log('Starting new concierge session for user:', user?.id || 'anonymous', 'with category:', category);
+    console.log('Starting new concierge session for user:', user?.id || 'anonymous', 'with category:', category, 'userQuery:', userQuery);
     
     // Get user's existing profile data to personalize the conversation (only if authenticated)
     const profileData = user ? await getUserProfileData(supabase, user.id) : { hasProfileStats: false, isAuthenticated: false };
     console.log('Retrieved profile data:', profileData);
     
-    // Create the simulated user question based on category
-    const userQuestion = createSimulatedUserQuestion(category, profileData);
+    // Use userQuery if provided, otherwise create simulated question based on category
+    const userQuestion = userQuery || createSimulatedUserQuestion(category, profileData);
     
     // Check if this is a service search intent
     const searchIntent = detectServiceSearchIntent(userQuestion);
