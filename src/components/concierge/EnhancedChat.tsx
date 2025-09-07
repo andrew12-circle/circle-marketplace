@@ -124,11 +124,11 @@ ${images.length > 0 ? `**Images attached**: ${images.length} image(s) for analys
 
 Provide a comprehensive, helpful response. If images are provided, analyze them thoroughly. Always suggest relevant marketplace solutions when appropriate.`;
 
-      const { data, error } = await supabase.functions.invoke('enhanced-ai-recommendations', {
+      const { data, error } = await supabase.functions.invoke('ai-concierge-chat', {
         body: {
-          message: enhancedPrompt,
+          action: 'chat',
+          userQuery: text,
           images: images.length > 0 ? images : undefined,
-          userId: user?.id || 'anonymous',
           context: {
             hasImages: images.length > 0,
             fileCount: uploadedFiles.length,
@@ -141,7 +141,7 @@ Provide a comprehensive, helpful response. If images are provided, analyze them 
 
       if (error) throw error;
 
-      const aiResponse = data?.recommendation || data?.response || "I'd be happy to help you with that! Could you provide more details about what you're looking for?";
+      const aiResponse = data?.messages?.find(m => m.role === 'assistant')?.content || "I'd be happy to help you with that! Could you provide more details about what you're looking for?";
       await typeOutReply(aiResponse, 15);
 
     } catch (error: any) {
