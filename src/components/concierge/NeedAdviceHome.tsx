@@ -322,10 +322,8 @@ export default function NeedAdviceHome() {
     setServices([]);
     setCurrentStep("welcome");
     
-    // Show user's message immediately and then start conversation
-    setMessages([{ role: "user", content: q }]);
-    
     // Start conversation and let AI respond to the user's question
+    // The startConversationFromQuery function will handle adding the message
     startConversationFromQuery(q);
   }
 
