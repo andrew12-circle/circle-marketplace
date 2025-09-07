@@ -426,7 +426,7 @@ export default function NeedAdviceHome() {
   };
 
   return (
-    <div className="min-h-[100dvh] bg-gradient-to-b from-white to-slate-50">
+    <div className="min-h-[100dvh] bg-background">
       {/* Header / Logo */}
       <header className="pt-20 pb-8 flex flex-col items-center select-none">
         <motion.h1
