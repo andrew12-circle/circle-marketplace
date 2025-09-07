@@ -106,24 +106,22 @@ export const AIConciergeBanner = () => {
   };
 
   const handleSendMessage = () => {
-    const query = chatInput.trim();
-    if (!query) return;
-
     if (!user || !profile) {
       toast({
         title: "Create a free account",
-        description: "Sign in to get personalized, location-aware recommendations.",
+        description: "Sign in to talk to Circle AI.",
       });
       navigate("/auth");
       return;
     }
-
-    // Deep-link into marketplace search with the typed query
-    navigate(`/marketplace?q=${encodeURIComponent(query)}`);
+    
+    // Open modal with input as initial message
+    setIsAIModalOpen(true);
+    setChatInput("");
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' && chatInput.trim()) {
       handleSendMessage();
     }
   };
@@ -189,16 +187,15 @@ export const AIConciergeBanner = () => {
                         navigate("/auth");
                         return;
                       }
-                      setIsAIModalOpen(true);
+                      // Open modal with any existing input as initial message
+                      if (chatInput.trim()) {
+                        // Pass the input as initial message and clear the input
+                        setIsAIModalOpen(true);
+                        setChatInput("");
+                      } else {
+                        setIsAIModalOpen(true);
+                      }
                     }}
-                    size="sm" 
-                    variant="outline"
-                    className="bg-background/50 hover:bg-background"
-                  >
-                    <Mic className="h-4 w-4" />
-                  </Button>
-                  <Button 
-                    onClick={handleSendMessage}
                     size="sm" 
                     disabled={!chatInput.trim()}
                   >
@@ -232,6 +229,7 @@ export const AIConciergeBanner = () => {
         <AskCircleAIModal 
           open={isAIModalOpen} 
           onOpenChange={setIsAIModalOpen}
+          initialMessage={chatInput}
         />
     </div>
   );
