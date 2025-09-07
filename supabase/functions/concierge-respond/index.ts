@@ -66,12 +66,38 @@ serve(async (req) => {
         messages: [
           { 
             role: 'system', 
-            content: `You are Circle AI, a helpful concierge for real estate agents. You help agents find the right tools, services, and strategies to grow their business. Be conversational, helpful, and knowledgeable about real estate technology and business growth. Keep responses friendly and under 200 words.` 
+            content: `You are Andrew, Circle's AI concierge for real estate agents. You're knowledgeable, direct, and genuinely care about helping agents grow their business. 
+
+PERSONALITY:
+- Sound like a trusted business partner, not a robotic assistant
+- Be conversational and use "you" language 
+- Show genuine interest in their success
+- Ask follow-up questions to understand their specific situation
+- Use real estate terminology naturally but don't overdo it
+
+KNOWLEDGE AREAS:
+- CRMs and lead management systems
+- Marketing automation and lead generation
+- Real estate photography and virtual tours
+- Social media marketing for agents
+- Website and IDX solutions
+- Transaction management tools
+- Market analysis and data tools
+- Agent coaching and training programs
+
+CONVERSATION STYLE:
+- Keep responses under 150 words for better flow
+- End with a relevant follow-up question when appropriate
+- Reference specific tools/services when relevant
+- Share actionable insights, not just generic advice
+- If they mention a specific challenge, dig deeper to understand their situation
+
+Remember: You're here to help them find the RIGHT solution for THEIR specific business needs, not just recommend popular tools.` 
           },
           { role: 'user', content: text }
         ],
-        max_tokens: 500,
-        temperature: 0.7
+        max_tokens: 400,
+        temperature: 0.8
       })
     });
 
@@ -84,23 +110,22 @@ serve(async (req) => {
 
     console.log('✅ OpenAI response received');
 
+    // Generate contextual quick replies based on the conversation
+    const quickReplies = generateQuickReplies(text.toLowerCase(), responseContent);
+
     // Create response structure  
     const response: ConciergeResponse = {
       type: 'answer',
       message: responseContent,
       trust: {
-        confidence: 85,
-        peer_patterns: ["AI conversation response"],
+        confidence: 88,
+        peer_patterns: ["Natural conversation flow"],
         inventory_evidence: [],
-        clarity_assessment: "Direct response"
+        clarity_assessment: "Conversational response"
       },
       handoff: null,
       actions: [],
-      quick_replies: [
-        "Tell me about your business goals",
-        "What services do you need help with?", 
-        "Show me top tools for agents"
-      ]
+      quick_replies: quickReplies
     };
 
     // Save messages to database (allow null user_id for anonymous users)
@@ -115,16 +140,17 @@ serve(async (req) => {
     console.error('❌ Error in concierge-respond:', error);
     console.error('Error details:', error);
     
-    // Return a helpful fallback response
+    // Return a helpful fallback response that feels human
     const fallbackResponse = {
       type: 'answer',
-      message: "I'm here to help! I can assist you with finding the right tools and services for your real estate business. What would you like to know about?",
+      message: "Hey there! I'm Andrew, your Circle AI concierge. I help real estate agents like you find the right tools and strategies to grow their business. What's the biggest challenge you're facing right now?",
       handoff: null,
       actions: [],
       quick_replies: [
-        "What CRM should I use?",
-        "Help me generate more leads",
-        "Show me marketing tools"
+        "I need more leads",
+        "Help me organize my contacts", 
+        "I want to automate my marketing",
+        "Show me what other agents are using"
       ]
     };
     
@@ -156,4 +182,91 @@ async function saveMessages(userId: string | null, threadId: string, userMessage
   } catch (error) {
     console.error('Failed to save messages:', error);
   }
+}
+
+function generateQuickReplies(userInput: string, assistantResponse: string): string[] {
+  // Default replies for general conversation
+  const defaultReplies = [
+    "Tell me about your current business challenges",
+    "What's your biggest growth goal right now?",
+    "Show me tools that could help"
+  ];
+
+  // Topic-specific quick replies
+  if (userInput.includes('crm') || userInput.includes('customer') || userInput.includes('contact')) {
+    return [
+      "What's your budget for a CRM?",
+      "How many leads do you get monthly?",
+      "Do you need integration with other tools?"
+    ];
+  }
+
+  if (userInput.includes('lead') || userInput.includes('marketing') || userInput.includes('ads')) {
+    return [
+      "What's your current lead source?",
+      "What's your monthly marketing budget?",
+      "Tell me about your target market"
+    ];
+  }
+
+  if (userInput.includes('website') || userInput.includes('online') || userInput.includes('seo')) {
+    return [
+      "Do you have a website currently?",
+      "What's your target area for SEO?",
+      "Do you need IDX property search?"
+    ];
+  }
+
+  if (userInput.includes('photography') || userInput.includes('photos') || userInput.includes('virtual')) {
+    return [
+      "How many listings do you have monthly?",
+      "Do you need drone photography?",
+      "What's your photography budget per listing?"
+    ];
+  }
+
+  if (userInput.includes('coaching') || userInput.includes('training') || userInput.includes('learn')) {
+    return [
+      "What area do you want to improve most?",
+      "How long have you been in real estate?",
+      "What's your current transaction volume?"
+    ];
+  }
+
+  if (userInput.includes('best') || userInput.includes('recommend') || userInput.includes('suggest')) {
+    return [
+      "Tell me more about your specific needs",
+      "What's your budget range?",
+      "What have you tried before?"
+    ];
+  }
+
+  // If asking about goals or business
+  if (userInput.includes('goal') || userInput.includes('grow') || userInput.includes('business')) {
+    return [
+      "What's your current transaction volume?",
+      "What's holding you back right now?",
+      "Where do you want to be in 12 months?"
+    ];
+  }
+
+  // Check if assistant response mentions specific categories to generate relevant follow-ups
+  const lowerResponse = assistantResponse.toLowerCase();
+  if (lowerResponse.includes('crm') || lowerResponse.includes('contact management')) {
+    return [
+      "Compare CRM options for me",
+      "What integrations should I look for?",
+      "How much should I budget for a CRM?"
+    ];
+  }
+
+  if (lowerResponse.includes('lead generation') || lowerResponse.includes('marketing')) {
+    return [
+      "Show me lead generation strategies",
+      "What's the ROI on different marketing channels?",
+      "Help me create a marketing plan"
+    ];
+  }
+
+  return defaultReplies;
 }
