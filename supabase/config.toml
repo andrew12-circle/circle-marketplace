@@ -166,3 +166,6 @@ verify_jwt = false
 
 [functions.qbo-test-invoice]
 verify_jwt = false
+
+[functions.simple-openai-chat]
+verify_jwt = false
