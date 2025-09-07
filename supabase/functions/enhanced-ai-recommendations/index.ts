@@ -76,23 +76,23 @@ serve(async (req) => {
           messages: [
             {
               role: 'system',
-              content: `You are a friendly real estate concierge who provides brief, helpful advice.
-              
-              RESPONSE RULES:
-              - Keep responses to 2-3 sentences maximum
+              content: `You are a helpful AI assistant, similar to ChatGPT, with access to a specialized marketplace of real estate tools and services. You can discuss any topic naturally and conversationally.
+
+              RESPONSE STYLE:
+              - Answer any question naturally, like ChatGPT would
               - Be conversational and helpful
-              - Focus on practical, actionable advice
-              - Don't reference specific vendor names or prices
-              - End with a relevant follow-up question if appropriate
+              - When real estate or business tools are mentioned, you can reference your marketplace knowledge
+              - Match your response length to what's appropriate for the question
+              - Don't force real estate context if the question isn't about that
               
-              Provide concise business growth advice based on the context provided.`
+              You have access to curated real estate marketplace data when relevant, but you can discuss any topic the user asks about.`
             },
             {
               role: 'user',
               content: sanitizedPrompt
             }
           ],
-          max_completion_tokens: 150, // Enforce brevity
+          max_completion_tokens: 500, // Allow for natural conversation length
         }),
       });
 
@@ -572,25 +572,36 @@ async function logRecommendation(supabase: any, userId: string, question: string
 }
 
 function createSanitizedPrompt(userMessage: string, userContext: any, marketAnalysis: any, additionalContext: any) {
-  // Only send generic, non-identifying data to OpenAI
-  let prompt = `User Question: "${userMessage}"\n\n`;
+  // Create a natural prompt like ChatGPT, with context only when relevant
+  let prompt = `User: ${userMessage}\n\n`;
   
-  prompt += `GENERIC USER PROFILE:\n`;
-  prompt += `- Experience Level: ${userContext.profile?.years_experience ? 
-    (userContext.profile.years_experience > 5 ? 'Experienced' : 'New') : 'Not specified'}\n`;
-  prompt += `- Business Focus: ${userContext.profile?.vendor_enabled ? 'Service Provider' : 'Service Buyer'}\n`;
-  prompt += `- General Location: ${userContext.profile?.state ? 'United States' : 'Not specified'}\n\n`;
+  // Only add context if the question seems business/real estate related
+  const businessKeywords = ['business', 'real estate', 'marketing', 'leads', 'clients', 'deals', 'crm', 'tools', 'services', 'growth', 'income', 'sales'];
+  const isBusinessRelated = businessKeywords.some(keyword => 
+    userMessage.toLowerCase().includes(keyword)
+  );
   
-  prompt += `BEHAVIOR PATTERNS:\n`;
-  prompt += `- Services Saved: ${userContext.totalSavedServices}\n`;
-  prompt += `- General Categories of Interest: ${userContext.uniqueCategories.length} different types\n`;
-  prompt += `- Activity Level: ${userContext.recentViews?.length || 0 > 10 ? 'High' : 'Moderate'}\n\n`;
+  if (isBusinessRelated && userContext.profile) {
+    prompt += `Context (if relevant): The user appears to be a `;
+    if (userContext.profile.years_experience > 5) {
+      prompt += `experienced `;
+    } else if (userContext.profile.years_experience > 0) {
+      prompt += `newer `;
+    }
+    prompt += `real estate professional`;
+    
+    if (userContext.profile.state) {
+      prompt += ` in the United States`;
+    }
+    
+    if (userContext.profile.vendor_enabled) {
+      prompt += ` who also provides services`;
+    }
+    
+    prompt += `.\n\n`;
+  }
   
-  prompt += `MARKET CONTEXT:\n`;
-  prompt += `- Total Market Categories: ${Object.keys(marketAnalysis.categoryTrends || {}).length}\n`;
-  prompt += `- Market Activity Level: ${marketAnalysis.marketActivity > 100 ? 'High' : 'Moderate'}\n\n`;
-  
-  prompt += `Please provide general business growth advice for this profile type. Do not reference specific services or vendors.`;
+  prompt += `Please respond naturally and helpfully to their question.`;
   
   return prompt;
 }

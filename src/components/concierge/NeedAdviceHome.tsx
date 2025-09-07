@@ -139,7 +139,7 @@ export default function NeedAdviceHome() {
       systemMessage,
       { 
         role: "assistant", 
-        content: `Hello! I'm your Circle Concierge. I can help you with ${initialTopic}. What specific questions do you have about ${initialTopic}?` 
+        content: `Hello! I'm your AI assistant with access to Circle's marketplace of real estate tools and services. I can help you with ${initialTopic} or discuss anything else you'd like. What can I help you with?` 
       }
     ]);
     
@@ -276,27 +276,27 @@ export default function NeedAdviceHome() {
       if (isGreeting) {
         // Simple personalized greeting without backend call
         const firstName = user?.user_metadata?.first_name || user?.user_metadata?.name?.split(' ')[0] || 'there';
-        const greetingResponse = `Hello ${firstName}! I'm your Circle Concierge. How can I help you grow your real estate business today?`;
+        const greetingResponse = `Hello ${firstName}! I'm your AI assistant with access to Circle's marketplace. I can help with real estate business questions, discuss any topic, or recommend tools and services. What's on your mind?`;
         await typeOutReply(greetingResponse, 22);
         
         // Add some helpful quick replies
         setQuickReplies([
-          "I need more leads",
-          "Help me with marketing", 
-          "Show me what's trending",
-          "I want to increase my income"
+          "What real estate tools do you recommend?",
+          "Help me with marketing strategies", 
+          "What's trending in the marketplace?",
+          "Tell me about AI in real estate"
         ]);
       } else {
         try {
-          // For actual business questions, use AI with concierge context
+          // For any questions, use AI assistant with marketplace context when relevant
           const { data, error } = await supabase.functions.invoke('enhanced-ai-recommendations', {
             body: {
-              message: `As a friendly real estate concierge, provide a helpful but brief response (2-3 sentences max): ${text}`,
+              message: text,
               userId: user?.id || 'anonymous',
               context: {
-                role: 'concierge',
-                responseStyle: 'conversational_brief',
-                topic: topic || 'real estate advice',
+                role: 'assistant',
+                responseStyle: 'conversational',
+                topic: 'general',
                 timestamp: new Date().toISOString()
               }
             }
