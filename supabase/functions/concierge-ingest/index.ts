@@ -20,145 +20,143 @@ serve(async (req) => {
   }
 
   try {
-    const { type, content, url, title, tags = [] } = await req.json();
+    const { type, content, url, title, tags } = await req.json();
 
-    let textContent = content;
-    let documentTitle = title || 'Untitled Document';
-
-    // Handle different input types
-    if (type === 'url' && url) {
-      const urlContent = await fetchUrlContent(url);
-      textContent = urlContent.text;
-      documentTitle = urlContent.title || new URL(url).hostname;
-    } else if (type === 'pdf') {
-      throw new Error('PDF processing not implemented yet');
+    if (!type || (!content && !url)) {
+      return new Response(
+        JSON.stringify({ error: 'Missing required fields: type and (content or url)' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    if (!textContent) {
+    let processedText = content;
+    let documentTitle = title || 'Untitled Document';
+
+    // Fetch content from URL if provided
+    if (type === 'url' && url) {
+      const { text, title: extractedTitle } = await fetchUrlContent(url);
+      processedText = text;
+      documentTitle = extractedTitle || title || 'Web Document';
+    } else if (type === 'pdf') {
+      throw new Error('PDF processing not yet implemented');
+    }
+
+    if (!processedText) {
       throw new Error('No content to process');
     }
 
-    // Create document record
+    // Insert document metadata
     const { data: document, error: docError } = await supabase
       .from('kb_documents')
-      .insert({
+      .insert([{
         title: documentTitle,
-        source: type === 'qa' ? 'trainer' : (type === 'url' ? 'url' : 'kb'),
+        source: type === 'url' ? 'url' : 'manual',
         url: url || null,
-        tags
-      })
+        tags: tags || []
+      }])
       .select()
       .single();
 
-    if (docError) {
-      throw docError;
-    }
+    if (docError) throw docError;
 
-    // Chunk the content
-    const chunks = chunkText(textContent, 500, 50);
-    let totalChunks = 0;
-    let successfulChunks = 0;
+    // Chunk the text
+    const chunks = chunkText(processedText, 1000, 100);
+    
+    let processedChunks = 0;
+    let errors = [];
 
+    // Process chunks and generate embeddings
     for (const chunk of chunks) {
-      totalChunks++;
-      
       try {
-        // Generate embedding
         const embedding = await generateEmbedding(chunk);
         
-        // Store chunk with embedding
         const { error: chunkError } = await supabase
           .from('kb_chunks')
-          .insert({
+          .insert([{
             document_id: document.id,
             content: chunk,
             embedding: embedding,
-            metadata: {
-              chunk_index: totalChunks - 1,
-              source_type: type,
-              document_title: documentTitle
+            metadata: { 
+              chunk_index: processedChunks,
+              total_chunks: chunks.length 
             }
-          });
+          }]);
 
-        if (!chunkError) {
-          successfulChunks++;
-        } else {
-          console.error('Error storing chunk:', chunkError);
-        }
+        if (chunkError) throw chunkError;
+        processedChunks++;
       } catch (error) {
-        console.error('Error processing chunk:', error);
+        console.error(`Error processing chunk ${processedChunks}:`, error);
+        errors.push(`Chunk ${processedChunks}: ${error.message}`);
       }
     }
 
     return new Response(JSON.stringify({
       success: true,
       document_id: document.id,
-      stats: {
-        total_chunks: totalChunks,
-        successful_chunks: successfulChunks,
-        failed_chunks: totalChunks - successfulChunks
-      }
+      chunks_processed: processedChunks,
+      total_chunks: chunks.length,
+      errors: errors.length > 0 ? errors : undefined
     }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
 
   } catch (error) {
     console.error('Error in concierge-ingest:', error);
-    return new Response(JSON.stringify({ 
-      success: false,
-      error: error.message 
-    }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    return new Response(
+      JSON.stringify({ 
+        success: false,
+        error: error.message 
+      }),
+      { 
+        status: 500, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      }
+    );
   }
 });
 
-async function fetchUrlContent(url: string) {
-  try {
-    const response = await fetch(url);
-    const html = await response.text();
-    
-    // Basic HTML text extraction (in production, use a proper parser)
-    const textContent = html
-      .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
-      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
-      .replace(/<[^>]*>/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim();
-
-    // Extract title
-    const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
-    const title = titleMatch ? titleMatch[1].trim() : null;
-
-    return { text: textContent, title };
-  } catch (error) {
-    throw new Error(`Failed to fetch URL content: ${error.message}`);
-  }
+async function fetchUrlContent(url: string): Promise<{ text: string; title: string }> {
+  const response = await fetch(url);
+  const html = await response.text();
+  
+  // Extract title
+  const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
+  const title = titleMatch ? titleMatch[1].trim() : 'Web Document';
+  
+  // Extract text content (remove script and style tags)
+  const textContent = html
+    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  
+  return { text: textContent, title };
 }
 
-function chunkText(text: string, maxChunkSize: number = 500, overlap: number = 50): string[] {
-  const chunks: string[] = [];
+function chunkText(text: string, maxChunkSize: number = 1000, overlap: number = 100): string[] {
   const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
-  
+  const chunks: string[] = [];
   let currentChunk = '';
   
   for (const sentence of sentences) {
     const trimmedSentence = sentence.trim();
     if (!trimmedSentence) continue;
     
-    if (currentChunk.length + trimmedSentence.length + 1 <= maxChunkSize) {
-      currentChunk += (currentChunk ? '. ' : '') + trimmedSentence;
+    const potentialChunk = currentChunk + (currentChunk ? '. ' : '') + trimmedSentence;
+    
+    if (potentialChunk.length <= maxChunkSize) {
+      currentChunk = potentialChunk;
     } else {
       if (currentChunk) {
         chunks.push(currentChunk + '.');
         
-        // Create overlap
+        // Handle overlap
         const words = currentChunk.split(' ');
-        const overlapWords = words.slice(-overlap).join(' ');
-        currentChunk = overlapWords + '. ' + trimmedSentence;
+        const overlapWords = words.slice(-Math.floor(overlap / 10)); // Rough word-based overlap
+        currentChunk = overlapWords.join(' ') + (overlapWords.length > 0 ? '. ' : '') + trimmedSentence;
       } else {
-        // Single sentence is too long, split by words
+        // Single sentence is too long, split it
         const words = trimmedSentence.split(' ');
         for (let i = 0; i < words.length; i += maxChunkSize / 10) {
           const wordChunk = words.slice(i, i + maxChunkSize / 10).join(' ');
@@ -189,10 +187,6 @@ async function generateEmbedding(text: string): Promise<number[]> {
       dimensions: 1536
     }),
   });
-
-  if (!response.ok) {
-    throw new Error(`OpenAI API error: ${response.statusText}`);
-  }
 
   const data = await response.json();
   return data.data[0].embedding;
