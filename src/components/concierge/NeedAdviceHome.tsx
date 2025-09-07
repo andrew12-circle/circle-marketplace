@@ -260,14 +260,16 @@ export default function NeedAdviceHome() {
     try {
       console.log('💬 Sending message:', text);
       
-      // Use the enhanced AI recommendations function for real AI responses
+      // Use the enhanced AI recommendations function with concierge context
       const { data, error } = await supabase.functions.invoke('enhanced-ai-recommendations', {
         body: {
-          message: text,
+          message: `You are a friendly Circle Marketplace concierge. Respond conversationally and briefly (1-2 sentences max). If someone says hello, greet them warmly and ask how you can help with their real estate business today. User said: "${text}"`,
           userId: user?.id || 'anonymous',
           context: {
-            topic: topic || 'general business advice',
-            step: currentStep,
+            role: 'concierge',
+            responseStyle: 'conversational_brief',
+            topic: topic || 'general help',
+            maxLength: 'short',
             timestamp: new Date().toISOString()
           }
         }
@@ -279,7 +281,7 @@ export default function NeedAdviceHome() {
       }
 
       // Add AI response with typing animation
-      const aiResponse = data?.recommendation || data?.response || "I understand your question. Let me help you with that - what specific aspect would you like to know more about?";
+      const aiResponse = data?.recommendation || data?.response || "Hello! I'm here to help you with your real estate business. What can I assist you with today?";
       await typeOutReply(aiResponse, 22);
       setPending(false);
     } catch (error: any) {
