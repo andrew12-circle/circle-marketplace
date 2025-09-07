@@ -46,8 +46,8 @@ serve(async (req) => {
   try {
     console.log('🚀 Concierge-respond function called');
     
-    const { user_id, thread_id, text } = await req.json();
-    console.log('📝 Request data:', { user_id: user_id || 'null', thread_id, text: text?.substring(0, 50) });
+    const { user_id, anon_id, thread_id, text } = await req.json();
+    console.log('📝 Request data:', { user_id: user_id || 'null', anon_id, thread_id, text: text?.substring(0, 50) });
 
     // Check if OpenAI API key is available
     if (!openAIApiKey) {
@@ -397,10 +397,10 @@ function calculateTrust(response: ConciergeResponse, ragSnippets: any[], profile
   const clarityWeight = 20;
   const kbWeight = 15;
 
-  const peerScore = Math.min(40, ragSnippets.length * 10);
+  const peerScore = Math.min(40, (ragSnippets || []).length * 10);
   const inventoryScore = response.actions?.length ? 25 : 10;
-  const clarityScore = response.message.length > 50 ? 20 : 10;
-  const kbScore = ragSnippets.length > 3 ? 15 : 5;
+  const clarityScore = (response.message || '').length > 50 ? 20 : 10;
+  const kbScore = (ragSnippets || []).length > 3 ? 15 : 5;
 
   const confidence = Math.round(peerScore + inventoryScore + clarityScore + kbScore);
 

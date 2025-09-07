@@ -127,9 +127,13 @@ export const ConciergeChat: React.FC<ConciergeChatProps> = ({ threadId: initialT
     setLoading(true);
 
     try {
+      // Generate anon_id if user is not authenticated
+      const anonId = user?.id || crypto.randomUUID();
+      
       const { data, error } = await supabase.functions.invoke('concierge-respond', {
         body: {
-          user_id: user?.id,
+          user_id: user?.id || null,
+          anon_id: anonId,
           thread_id: threadId,
           text: text
         }
