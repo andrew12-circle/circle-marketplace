@@ -282,27 +282,51 @@ function getProductionRange(closings: number) {
 }
 
 // Create personalized welcome message with marketplace intelligence
-function createPersonalizedWelcome(profileData: any): string {
+function createPersonalizedWelcome(profileData: any, category?: string): string {
+  const name = profileData?.display_name || 'there';
   const hasData = profileData.hasProfileStats && profileData.closings12m > 0;
   
+  // Create human-like category-specific greetings
+  const categoryGreetings = {
+    'CRM': `Hey ${name}! I see you're looking for CRM solutions. How's your day going? I'd love to help you find the perfect system to keep your leads organized and your business growing. What's been your biggest challenge with managing your client relationships lately?`,
+    
+    'Marketing Tools': `Hey there ${name}! I noticed you're interested in marketing tools. How are you doing today? Marketing can make such a huge difference in growing your business - I'm excited to help you find the right tools to get more eyes on your listings and attract quality leads. What's your current marketing situation like?`,
+    
+    'Lead Generation': `Hi ${name}! I see you're exploring lead generation options. How's your week treating you? Finding good leads is absolutely crucial for success in real estate, and I'm here to help you discover the best tools to keep your pipeline full. Tell me, what's been working for you so far with lead gen?`,
+    
+    'Real Estate Schools': `Hey ${name}! Looking into real estate education, I see. How's everything going? Whether you're getting started or looking to level up your skills, education is such a smart investment. What area of real estate are you most interested in learning about?`,
+    
+    'Licensing': `Hi there ${name}! I see you're checking out licensing options. How are you doing today? Getting properly licensed is such an important step, and I'm here to help you navigate the process smoothly. Are you working on getting your initial license or looking at additional certifications?`,
+    
+    'Coaching': `Hey ${name}! I noticed you're interested in coaching. How's your day going? Having the right mentor can absolutely transform your real estate career - I'm excited to help you find someone who can take your business to the next level. What specific areas would you like to improve in?`,
+    
+    'Marketplace': `Hi ${name}! Welcome to exploring our marketplace. How are you doing today? We have so many amazing tools and services that can help grow your business. What's the biggest challenge you're facing right now that we might be able to help solve?`
+  };
+
+  // Use category-specific greeting if available
+  if (category && categoryGreetings[category]) {
+    return categoryGreetings[category];
+  }
+  
+  // Fallback to existing logic for general conversations
   if (hasData) {
     const location = profileData.city && profileData.state ? ` in ${profileData.city}, ${profileData.state}` : '';
     const closings = profileData.closings12m;
     const goal = profileData.goalClosings12m > closings ? profileData.goalClosings12m : null;
     
-    let message = `Hey there! I see you closed ${closings} deal${closings === 1 ? '' : 's'} last year${location}`;
+    let message = `Hey ${name}! I see you closed ${closings} deal${closings === 1 ? '' : 's'} last year${location}`;
     
     if (goal) {
       message += ` and you're targeting ${goal} this year`;
     }
     
-    message += ". I'm your Circle Concierge, and I'm here to help you hit your goals with proven strategies and tools. ";
+    message += ". How's your day going? I'm here to help you hit those goals with the right tools and strategies. ";
     
     // Add marketplace intelligence
-    if (profileData.successPatterns.length > 0) {
+    if (profileData.successPatterns?.length > 0) {
       const pattern = profileData.successPatterns[0];
       if (pattern.type === 'tools' && pattern.insight) {
-        message += `I've analyzed agents at your level who've successfully scaled, and ${pattern.insight.toLowerCase()}. `;
+        message += `I've been looking at agents at your level who've successfully scaled, and ${pattern.insight.toLowerCase()}. `;
       }
     }
     
@@ -312,9 +336,9 @@ function createPersonalizedWelcome(profileData: any): string {
     }
     
     if (goal && goal > closings * 1.5) {
-      message += "That's ambitious growth - let me show you the exact path other agents took to achieve similar jumps.";
+      message += "That's some ambitious growth you're planning - I love it! What's been your biggest challenge so far in scaling up?";
     } else if (goal) {
-      message += "Let's identify the 2-3 tools that will have the biggest impact on reaching that target.";
+      message += "What's the main thing you feel like you need to focus on to hit that target?";
     } else {
       message += "What's your main focus for growing your business this year?";
     }
@@ -440,7 +464,7 @@ serve(async (req) => {
       throw new Error('Invalid token');
     }
 
-    const { action, sessionId, message, stepName } = await req.json();
+    const { action, sessionId, message, stepName, category } = await req.json();
 
   if (action === 'start') {
     console.log('Starting new concierge session for user:', user.id);
@@ -449,8 +473,8 @@ serve(async (req) => {
     const profileData = await getUserProfileData(supabase, user.id);
     console.log('Retrieved profile data:', profileData);
     
-    // Create personalized welcome message based on profile data
-    const welcomeMessage = createPersonalizedWelcome(profileData);
+    // Create personalized welcome message based on profile data and category
+    const welcomeMessage = createPersonalizedWelcome(profileData, category);
     const nextStep = determineStartingStep(profileData);
     const quickReplies = getQuickRepliesForStep(nextStep, profileData);
 
