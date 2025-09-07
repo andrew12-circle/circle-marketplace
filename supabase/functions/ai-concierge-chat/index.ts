@@ -5,6 +5,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4';
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS'
 };
 
 interface ConversationStep {
@@ -281,26 +282,54 @@ function getProductionRange(closings: number) {
   return { min: 40, max: 999 };
 }
 
-// Create personalized welcome message with marketplace intelligence
+// Create personalized welcome message with Agent Voice persona
 function createPersonalizedWelcome(profileData: any, category?: string): string {
   const name = profileData?.display_name || 'there';
   const hasData = profileData.hasProfileStats && profileData.closings12m > 0;
   
-  // Create human-like category-specific greetings
+  // Create human-like category-specific greetings with Agent Voice
   const categoryGreetings = {
-    'CRM': `Hey ${name}! I see you're looking for CRM solutions. How's your day going? I'd love to help you find the perfect system to keep your leads organized and your business growing. What's been your biggest challenge with managing your client relationships lately?`,
+    'CRM': formatAgentVoiceResponse(`Hey ${name}! I see you're looking for CRM solutions. How's your day going?`, 
+      "Here's what I'm seeing...", 
+      "Most agents struggle with lead organization until they find the right CRM system.", 
+      "What I can do right now is help you find a system that actually fits how you work.", 
+      "What's been your biggest challenge with managing your client relationships?"),
     
-    'Marketing Tools': `Hey there ${name}! I noticed you're interested in marketing tools. How are you doing today? Marketing can make such a huge difference in growing your business - I'm excited to help you find the right tools to get more eyes on your listings and attract quality leads. What's your current marketing situation like?`,
+    'Marketing Tools': formatAgentVoiceResponse(`Hey there ${name}! I noticed you're interested in marketing tools. How are you doing today?`, 
+      "Here's what I'm seeing...", 
+      "Marketing is the #1 way successful agents separate themselves from the competition.", 
+      "The simplest path is finding 2-3 tools that work together seamlessly.", 
+      "What's your current marketing situation like?"),
     
-    'Lead Generation': `Hi ${name}! I see you're exploring lead generation options. How's your week treating you? Finding good leads is absolutely crucial for success in real estate, and I'm here to help you discover the best tools to keep your pipeline full. Tell me, what's been working for you so far with lead gen?`,
+    'Lead Generation': formatAgentVoiceResponse(`Hi ${name}! I see you're exploring lead generation options. How's your week treating you?`, 
+      "Here's what I'm seeing...", 
+      "Lead generation is absolutely crucial - it's what keeps your pipeline full.", 
+      "What I can do right now is show you the exact tools top agents use to generate consistent leads.", 
+      "Tell me, what's been working for you so far with lead gen?"),
     
-    'Real Estate Schools': `Hey ${name}! Looking into real estate education, I see. How's everything going? Whether you're getting started or looking to level up your skills, education is such a smart investment. What area of real estate are you most interested in learning about?`,
+    'Real Estate Schools': formatAgentVoiceResponse(`Hey ${name}! Looking into real estate education, I see. How's everything going?`, 
+      "Here's what I'm seeing...", 
+      "Education is such a smart investment - it's what separates pros from everyone else.", 
+      "The simplest path is finding courses that give you immediate, practical skills.", 
+      "What area of real estate are you most interested in learning about?"),
     
-    'Licensing': `Hi there ${name}! I see you're checking out licensing options. How are you doing today? Getting properly licensed is such an important step, and I'm here to help you navigate the process smoothly. Are you working on getting your initial license or looking at additional certifications?`,
+    'Licensing': formatAgentVoiceResponse(`Hi there ${name}! I see you're checking out licensing options. How are you doing today?`, 
+      "Here's what I'm seeing...", 
+      "Getting properly licensed is your foundation - everything builds from there.", 
+      "What I can do right now is help you navigate the process smoothly and efficiently.", 
+      "Are you working on getting your initial license or looking at additional certifications?"),
     
-    'Coaching': `Hey ${name}! I noticed you're interested in coaching. How's your day going? Having the right mentor can absolutely transform your real estate career - I'm excited to help you find someone who can take your business to the next level. What specific areas would you like to improve in?`,
+    'Coaching': formatAgentVoiceResponse(`Hey ${name}! I noticed you're interested in coaching. How's your day going?`, 
+      "Here's what I'm seeing...", 
+      "Having the right mentor can absolutely transform your real estate career.", 
+      "The simplest path is finding someone who's actually done what you want to do.", 
+      "What specific areas would you like to improve in?"),
     
-    'Marketplace': `Hi ${name}! Welcome to exploring our marketplace. How are you doing today? We have so many amazing tools and services that can help grow your business. What's the biggest challenge you're facing right now that we might be able to help solve?`
+    'Marketplace': formatAgentVoiceResponse(`Hi ${name}! Welcome to exploring our marketplace. How are you doing today?`, 
+      "Here's what I'm seeing...", 
+      "We have amazing tools and services that can help grow your business.", 
+      "What I can do right now is help you find exactly what you need to solve your biggest challenge.", 
+      "What's the biggest challenge you're facing right now?")
   };
 
   // Use category-specific greeting if available
@@ -308,45 +337,61 @@ function createPersonalizedWelcome(profileData: any, category?: string): string 
     return categoryGreetings[category];
   }
   
-  // Fallback to existing logic for general conversations
+  // Fallback with Agent Voice formatting
   if (hasData) {
     const location = profileData.city && profileData.state ? ` in ${profileData.city}, ${profileData.state}` : '';
     const closings = profileData.closings12m;
     const goal = profileData.goalClosings12m > closings ? profileData.goalClosings12m : null;
     
-    let message = `Hey ${name}! I see you closed ${closings} deal${closings === 1 ? '' : 's'} last year${location}`;
-    
+    let greeting = `Hey ${name}! I see you closed ${closings} deal${closings === 1 ? '' : 's'} last year${location}`;
     if (goal) {
-      message += ` and you're targeting ${goal} this year`;
+      greeting += ` and you're targeting ${goal} this year`;
     }
+    greeting += ". How's your day going?";
     
-    message += ". How's your day going? I'm here to help you hit those goals with the right tools and strategies. ";
+    let empathy = "I respect agents who are serious about growth.";
     
-    // Add marketplace intelligence
+    let recap = "Here's what I'm seeing... ";
     if (profileData.successPatterns?.length > 0) {
       const pattern = profileData.successPatterns[0];
       if (pattern.type === 'tools' && pattern.insight) {
-        message += `I've been looking at agents at your level who've successfully scaled, and ${pattern.insight.toLowerCase()}. `;
+        recap += `Agents at your level who've successfully scaled typically use the same core tools. ${pattern.insight}.`;
       }
-    }
-    
-    // Highlight missing critical tools
-    if (!profileData.crm) {
-      message += "I notice you might not have a CRM system set up yet - that's usually the first game-changer for agents scaling past 20 deals. ";
-    }
-    
-    if (goal && goal > closings * 1.5) {
-      message += "That's some ambitious growth you're planning - I love it! What's been your biggest challenge so far in scaling up?";
-    } else if (goal) {
-      message += "What's the main thing you feel like you need to focus on to hit that target?";
     } else {
-      message += "What's your main focus for growing your business this year?";
+      recap += `You're at a great position to scale with the right tools and strategy.`;
     }
     
-    return message;
+    let options = "";
+    if (!profileData.crm) {
+      options = "The simplest path is getting your CRM foundation right first - that's usually the first game-changer for agents scaling past 20 deals.";
+    } else {
+      options = "What I can do right now is help you identify the next tool that'll have the biggest impact on your growth.";
+    }
+    
+    let cta = "";
+    if (goal && goal > closings * 1.5) {
+      cta = "What's been your biggest challenge so far in scaling up?";
+    } else if (goal) {
+      cta = "What's the main thing you need to focus on to hit that target?";
+    } else {
+      cta = "What's your main focus for growing your business this year?";
+    }
+    
+    return formatAgentVoiceResponse(greeting, empathy, recap, options, cta);
   }
   
-  return "Hey there, I'm your Circle Concierge! I help agents like you find the exact tools and strategies that successful agents use to scale their business. Let's start by understanding where you are today - how many deals did you close last year?";
+  return formatAgentVoiceResponse(
+    "Hey there, I'm your Circle Concierge! How's your day going?",
+    "I help agents like you find the exact tools that successful agents use to scale.",
+    "Here's what I'm seeing... you're smart to be looking at what tools can help grow your business.",
+    "The simplest path is understanding where you are today first.",
+    "How many deals did you close last year?"
+  );
+}
+
+// Format response using Agent Voice structure
+function formatAgentVoiceResponse(greeting: string, empathy: string, recap: string, options: string, cta: string): string {
+  return `${greeting}\n\n${empathy}\n\n${recap}\n\n${options}\n\n${cta}`;
 }
 
 // Determine starting step based on profile data
@@ -387,55 +432,109 @@ function getQuickRepliesForStep(step: string, profileData: any): string[] {
 const conversationFlow: ConversationStep[] = [
   {
     step: 'welcome',
-    question: "Hey there, I'm your Circle Concierge. Let's map your path to growth — starting from where you are today. How many deals did you close last year?",
+    question: formatAgentVoiceResponse(
+      "Perfect! Let's map your path to growth.",
+      "You're right to focus on this.",
+      "Here's what I'm seeing... understanding where you are today helps me give you the exact tools that'll move the needle.",
+      "The simplest path is starting with your current production level.",
+      "How many deals did you close last year?"
+    ),
     quickReplies: ['0-5', '6-15', '16-30', '31-50', '51+', 'First year'],
     isRequired: true
   },
   {
     step: 'target_goal',
-    question: "What's your target this year?",
+    question: formatAgentVoiceResponse(
+      "Great context!",
+      "I get why you want to grow from there.",
+      "Here's what I'm seeing... agents who set clear targets are 3x more likely to hit them.",
+      "What I can do right now is help you pick a realistic but aggressive goal.",
+      "What's your target this year?"
+    ),
     quickReplies: ['Double it', '25 deals', '50 deals', '75 deals', '100+ deals'],
     isRequired: true
   },
   {
     step: 'focus_area',
-    question: "Do you focus more on buyers, sellers, or both?",
+    question: formatAgentVoiceResponse(
+      "Smart goal!",
+      "You're right to be ambitious.",
+      "Here's what I'm seeing... focus beats trying to do everything. The best agents pick a lane and dominate it.",
+      "The simplest path is aligning your tools with your focus area.",
+      "Do you focus more on buyers, sellers, or both?"
+    ),
     quickReplies: ['Buyers mostly', 'Sellers mostly', 'Both equally', 'Want to shift focus'],
     isRequired: true
   },
   {
     step: 'price_point',
-    question: "What's your average price point?",
+    question: formatAgentVoiceResponse(
+      "Perfect focus area!",
+      "I get why that works for your market.",
+      "Here's what I'm seeing... your price point determines which tools give you the best ROI.",
+      "What I can do right now is match you with tools that work at your price level.",
+      "What's your average price point?"
+    ),
     quickReplies: ['Under $300k', '$300k-$500k', '$500k-$750k', '$750k-$1M', '$1M+'],
     isRequired: true
   },
   {
     step: 'market_density',
-    question: "How would you describe your market?",
+    question: formatAgentVoiceResponse(
+      "Got it on the price point!",
+      "You're right to factor that into your strategy.",
+      "Here's what I'm seeing... market density changes everything about lead gen and marketing.",
+      "The simplest path is tools that work specifically for your market type.",
+      "How would you describe your market?"
+    ),
     quickReplies: ['Urban/Dense', 'Suburban', 'Rural/Spread out', 'Tourist/Seasonal'],
     isRequired: true
   },
   {
     step: 'biggest_blocker',
-    question: "What's your biggest frustration right now — time, money, or systems?",
+    question: formatAgentVoiceResponse(
+      "Perfect market context!",
+      "I get why that affects your approach.",
+      "Here's what I'm seeing... every agent has one main thing holding them back from their next level.",
+      "What I can do right now is help you identify and solve your biggest bottleneck.",
+      "What's your biggest frustration right now?"
+    ),
     quickReplies: ['Not enough leads', 'Converting leads', 'No good systems', 'Time management', 'Marketing costs'],
     isRequired: true
   },
   {
     step: 'lead_sources',
-    question: "How do you usually get business — referrals, leads, or other?",
+    question: formatAgentVoiceResponse(
+      "I hear you on that challenge!",
+      "You're right to flag that as your blocker.",
+      "Here's what I'm seeing... your current lead sources tell me exactly which tools will multiply your results.",
+      "The simplest path is amplifying what's already working while adding new channels.",
+      "How do you usually get business?"
+    ),
     quickReplies: ['Referrals mostly', 'Online leads', 'Sphere/Database', 'Open houses', 'Mix of everything'],
     isRequired: true
   },
   {
     step: 'work_style',
-    question: "Do you prefer DIY tools you control, or done-for-you services?",
+    question: formatAgentVoiceResponse(
+      "Great lead source info!",
+      "I get why you want to build on that foundation.",
+      "Here's what I'm seeing... your work style determines whether you need DIY tools or done-for-you services.",
+      "What I can do right now is match you with tools that fit how you actually like to work.",
+      "Do you prefer DIY tools you control, or done-for-you services?"
+    ),
     quickReplies: ['DIY - I like control', 'Done-for-you - save me time', 'Mix - depends on task'],
     isRequired: true
   },
   {
     step: 'budget',
-    question: "Do you have a monthly marketing budget in mind?",
+    question: formatAgentVoiceResponse(
+      "Perfect work style context!",
+      "You're smart to know how you like to operate.",
+      "Here's what I'm seeing... budget determines timing and which tools to prioritize first.",
+      "The simplest path is starting with your highest-ROI tools first, then adding others.",
+      "Do you have a monthly marketing budget in mind?"
+    ),
     quickReplies: ['Under $500', '$500-$1,500', '$1,500-$3,000', '$3,000+', 'Depends on ROI'],
     isRequired: true
   }
@@ -443,7 +542,10 @@ const conversationFlow: ConversationStep[] = [
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { 
+      status: 200,
+      headers: corsHeaders 
+    });
   }
 
   try {

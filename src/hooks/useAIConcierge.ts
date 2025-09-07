@@ -33,7 +33,7 @@ export function useAIConcierge() {
   const { user } = useAuth();
   const { toast } = useToast();
 
-  const startConversation = async () => {
+  const startConversation = async (category?: string) => {
     if (!user) {
       toast({
         title: "Authentication required",
@@ -46,7 +46,10 @@ export function useAIConcierge() {
     setIsLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('ai-concierge-chat', {
-        body: { action: 'start' }
+        body: { 
+          action: 'start',
+          category: category 
+        }
       });
 
       if (error) throw error;
