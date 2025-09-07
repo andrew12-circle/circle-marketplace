@@ -46,8 +46,20 @@ serve(async (req) => {
   try {
     const { user_id, thread_id, text } = await req.json();
 
-    // Fetch user profile
-    const profile = await fetchProfile(user_id);
+    // Validate required fields
+    if (!thread_id || !text) {
+      return new Response(JSON.stringify({ 
+        type: 'answer',
+        message: "Missing required fields",
+        handoff: { suggest: true, reason: "Invalid request" }
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Fetch user profile (handle cases where user_id might be undefined)
+    const profile = await fetchProfile(user_id || null);
     
     // Get recent messages for context
     const { data: messages } = await supabase
@@ -218,7 +230,15 @@ serve(async (req) => {
   }
 });
 
-async function fetchProfile(userId: string) {
+async function fetchProfile(userId: string | null) {
+  if (!userId) {
+    return {
+      territory: "Unknown",
+      niche: "General",
+      experience_level: "new_agent"
+    };
+  }
+  
   const { data } = await supabase
     .from('profiles')
     .select(`
@@ -229,7 +249,11 @@ async function fetchProfile(userId: string) {
     .eq('user_id', userId)
     .single();
   
-  return data || {};
+  return data || {
+    territory: "Unknown", 
+    niche: "General",
+    experience_level: "new_agent"
+  };
 }
 
 async function kbSearch(query: string, k: number = 6) {

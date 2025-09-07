@@ -262,8 +262,8 @@ export default function NeedAdviceHome() {
       // Call Circle Concierge system
       const { data, error } = await supabase.functions.invoke('concierge-respond', {
         body: {
-          user_id: user?.id,
-          thread_id: sessionId,
+          user_id: user?.id || null,
+          thread_id: sessionId || 'simple-chat',
           text
         }
       });
