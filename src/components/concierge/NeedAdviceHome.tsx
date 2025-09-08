@@ -230,7 +230,7 @@ export default function NeedAdviceHome() {
   return (
     <div className="min-h-[100dvh] bg-background">
       {/* Header / Logo */}
-      <header className="pt-20 pb-8 flex flex-col items-center select-none">
+      <header className="pt-12 pb-8 flex flex-col items-center select-none">
         <motion.h1
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
