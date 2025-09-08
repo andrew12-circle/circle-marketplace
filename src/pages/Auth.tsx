@@ -198,8 +198,10 @@ export const Auth = () => {
         });
         navigate('/');
       } else {
-        // Validate Turnstile token for signup
-        if (!turnstileToken) {
+        // Validate Turnstile token for signup (only in production)
+        const isProduction = import.meta.env.MODE === 'production';
+        
+        if (isProduction && !turnstileToken) {
           setShowTurnstile(true);
           toast({
             title: "Security Verification Required",
@@ -213,7 +215,7 @@ export const Auth = () => {
           data.email, 
           data.password, 
           data.displayName || '',
-          turnstileToken
+          turnstileToken || undefined
         );
         
         // Log successful signup
