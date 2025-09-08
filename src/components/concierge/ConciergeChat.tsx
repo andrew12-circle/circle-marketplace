@@ -57,7 +57,7 @@ export const ConciergeChat: React.FC<ConciergeChatProps> = ({ threadId: initialT
 
   // Mock service for Circle team consultation
   const circleConsultationService = {
-    id: 'circle-consultation',
+    id: '00000000-0000-0000-0000-000000000001',
     title: 'Circle Team Consultation',
     vendor: {
       name: 'Circle Marketplace Team'
