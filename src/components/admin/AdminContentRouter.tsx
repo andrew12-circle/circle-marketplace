@@ -198,27 +198,27 @@ export function AdminContentRouter() {
   return (
     <div className="p-6">
       <Routes>
-        <Route path="/admin" element={<Navigate to="/admin/overview" replace />} />
+        <Route path="/" element={<Navigate to="/admin/overview" replace />} />
         
-        <Route path="/admin/overview" element={
+        <Route path="/overview" element={
           <Suspense fallback={<LoadingFallback title="Overview Dashboard" />}>
             <OptimizedOverview />
           </Suspense>
         } />
         
-        <Route path="/admin/users" element={
+        <Route path="/users" element={
           <Suspense fallback={<LoadingFallback title="User Management" />}>
             <OptimizedUserManagement />
           </Suspense>
         } />
         
-        <Route path="/admin/content" element={
+        <Route path="/content" element={
           <Suspense fallback={<LoadingFallback title="Content Management" />}>
             <ContentPromotionPanel />
           </Suspense>
         } />
         
-        <Route path="/admin/services" element={
+        <Route path="/services" element={
           <Suspense fallback={<LoadingFallback title="Service Management" />}>
             <div className="space-y-6">
               <ServiceManagementPanelWrapper />
@@ -227,13 +227,13 @@ export function AdminContentRouter() {
           </Suspense>
         } />
         
-        <Route path="/admin/reviews" element={
+        <Route path="/reviews" element={
           <Suspense fallback={<LoadingFallback title="Reviews Management" />}>
             <ServiceReviewsManager />
           </Suspense>
         } />
         
-        <Route path="/admin/vendors" element={
+        <Route path="/vendors" element={
           <Suspense fallback={<LoadingFallback title="Vendor Management" />}>
             <div className="space-y-6">
               <VendorManagementPanelWrapper />
@@ -251,43 +251,43 @@ export function AdminContentRouter() {
           </Suspense>
         } />
         
-        <Route path="/admin/points" element={
+        <Route path="/points" element={
           <Suspense fallback={<LoadingFallback title="Points Management" />}>
             <VendorPointAllocationPanel />
           </Suspense>
         } />
         
-        <Route path="/admin/analytics" element={
+        <Route path="/analytics" element={
           <Suspense fallback={<LoadingFallback title="Analytics Dashboard" />}>
             <VendorActivityAnalyticsWrapper />
           </Suspense>
         } />
         
-        <Route path="/admin/sponsored" element={
+        <Route path="/sponsored" element={
           <Suspense fallback={<LoadingFallback title="Sponsored Placements" />}>
             <SponsoredPlacementsManager />
           </Suspense>
         } />
         
-        <Route path="/admin/ranking" element={
+        <Route path="/ranking" element={
           <Suspense fallback={<LoadingFallback title="Ranking Monitor" />}>
             <RankImpactMonitor />
           </Suspense>
         } />
         
-        <Route path="/admin/security" element={
+        <Route path="/security" element={
           <Suspense fallback={<LoadingFallback title="Security System" />}>
             <AntiScrapingSystem />
           </Suspense>
         } />
         
-        <Route path="/admin/health" element={
+        <Route path="/health" element={
           <Suspense fallback={<LoadingFallback title="System Health" />}>
             <AdminHealthDashboard />
           </Suspense>
         } />
         
-        <Route path="/admin/youtube" element={
+        <Route path="/youtube" element={
           <Suspense fallback={<LoadingFallback title="YouTube Import" />}>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <YouTubeImportPanel />
@@ -296,13 +296,13 @@ export function AdminContentRouter() {
           </Suspense>
         } />
         
-        <Route path="/admin/agent-invites" element={
+        <Route path="/agent-invites" element={
           <Suspense fallback={<LoadingFallback title="Agent Invitations" />}>
             <AgentInvitationPanel />
           </Suspense>
         } />
         
-        <Route path="/admin/respa" element={
+        <Route path="/respa" element={
           <Suspense fallback={<LoadingFallback title="RESPA Compliance" />}>
             <div className="space-y-6">
               <RESPADisclaimerManager />
@@ -313,21 +313,21 @@ export function AdminContentRouter() {
           </Suspense>
         } />
         
-        <Route path="/admin/spiritual" element={
+        <Route path="/spiritual" element={
           <Suspense fallback={<LoadingFallback title="Spiritual Dashboard" />}>
             <SpiritualDashboard />
           </Suspense>
         } />
         
-        <Route path="/admin/commissions" element={<CommissionsContent />} />
+        <Route path="/commissions" element={<CommissionsContent />} />
         
-        <Route path="/admin/affiliates" element={
+        <Route path="/affiliates" element={
           <Suspense fallback={<LoadingFallback title="Affiliate Management" />}>
             <AdminAffiliates />
           </Suspense>
         } />
         
-        <Route path="/admin/retention" element={
+        <Route path="/retention" element={
           <Suspense fallback={<LoadingFallback title="Retention Analytics" />}>
             <div className="space-y-6">
               <RetentionAnalyticsDashboardWrapper />
@@ -336,22 +336,22 @@ export function AdminContentRouter() {
           </Suspense>
         } />
         
-        <Route path="/admin/calculator" element={
+        <Route path="/calculator" element={
           <Suspense fallback={<LoadingFallback title="Advanced Calculator" />}>
             <AdvancedSplitCalculator />
           </Suspense>
         } />
         
-        <Route path="/admin/bookings" element={
+        <Route path="/bookings" element={
           <Suspense fallback={<LoadingFallback title="Booking Management" />}>
             <AdminBookings />
           </Suspense>
         } />
         
-        <Route path="/admin/settings" element={<SettingsContent />} />
+        <Route path="/settings" element={<SettingsContent />} />
         
         {/* Fallback route */}
-        <Route path="/admin/*" element={<Navigate to="/admin/overview" replace />} />
+        <Route path="/*" element={<Navigate to="/admin/overview" replace />} />
       </Routes>
     </div>
   );

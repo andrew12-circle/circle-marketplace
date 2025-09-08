@@ -163,7 +163,7 @@ root.render(
                 <Route path="/academy" element={<Academy />} />
                 <Route path="/creator-dashboard" element={<CreatorDashboard />} />
                 <Route path="/creator-payment-setup" element={<CreatorPaymentSetupPage />} />
-                <Route path="/admin" element={<Admin />} />
+                <Route path="/admin/*" element={<Admin />} />
                 <Route path="/profile-settings" element={<ProfileSettings />} />
                 <Route path="/saved" element={<SavedItems />} />
                 <Route path="/orders" element={<OrderHistory />} />
