@@ -211,9 +211,13 @@ export const ConciergeChat: React.FC<ConciergeChatProps> = ({ threadId: initialT
 
   const handleFeedback = async (messageId: string, helpful: boolean, reason?: string) => {
     try {
+      // Generate anon_id if user is not authenticated
+      const anonId = user?.id || crypto.randomUUID();
+      
       await supabase.functions.invoke('concierge-feedback', {
         body: {
-          user_id: user?.id,
+          user_id: user?.id || null,
+          anon_id: anonId,
           answer_id: messageId,
           helpful,
           reason
