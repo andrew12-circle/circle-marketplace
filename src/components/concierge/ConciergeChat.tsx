@@ -478,7 +478,7 @@ export const ConciergeChat: React.FC<ConciergeChatProps> = ({ threadId: initialT
                 variant="outline"
                 size="sm"
                 onClick={() => handleQuickReply(reply)}
-                className="text-xs"
+                className="text-xs bg-white/50 hover:bg-white/80"
               >
                 {reply}
               </Button>
