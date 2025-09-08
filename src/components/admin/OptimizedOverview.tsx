@@ -21,29 +21,17 @@ export const OptimizedOverview = () => {
   const { data: stats, isLoading, error } = useQuery({
     queryKey: ['admin-stats'],
     queryFn: async () => {
-      try {
-        const { data, error } = await supabase.rpc('get_admin_stats');
-        if (error) throw error;
-        return data as AdminStats;
-      } catch (error) {
-        // Return mock data if RPC doesn't exist
-        console.warn('Admin stats RPC not available, using fallback data');
-        return {
-          total_users: 150,
-          admin_users: 3,
-          pro_users: 45,
-          verified_users: 120,
-          total_services: 25,
-          total_vendors: 12,
-          new_users_this_week: 8,
-          last_updated: new Date().toISOString(),
-        } as AdminStats;
+      const { data, error } = await supabase.rpc('get_admin_stats');
+      if (error) {
+        console.error('Admin stats RPC error:', error);
+        throw error;
       }
+      return data as AdminStats;
     },
     staleTime: 60 * 1000, // 1 minute
     gcTime: 5 * 60 * 1000, // 5 minutes
     refetchOnWindowFocus: false,
-    retry: false, // Don't retry failed RPC calls
+    retry: 1, // Retry once to handle temporary issues
   });
 
   if (isLoading) {
