@@ -93,7 +93,10 @@ export const UserMenu = () => {
         <div className="relative">
           <Button variant="ghost" className="relative h-10 w-10 rounded-full">
             <Avatar className={`h-10 w-10 ${profile?.is_pro_member ? 'ring-2 ring-circle-accent ring-offset-2 ring-offset-background' : ''}`}>
-              <AvatarImage src={profile?.avatar_url} alt={profile?.display_name || 'User'} />
+              <AvatarImage 
+                src={profile?.avatar_url || user?.user_metadata?.avatar_url} 
+                alt={profile?.display_name || 'User'} 
+              />
               <AvatarFallback className="bg-circle-primary text-primary-foreground">
                 {initials}
               </AvatarFallback>

@@ -149,9 +149,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       logger.log('Profile fetch already in progress for user:', userId);
       return;
     }
-    
-    // Add to in-flight set
-    setInFlightFetches(prev => new Set(prev.add(userId)));
 
   // ADMIN BYPASS: Check if user is in admin allowlist FIRST (before any caching or circuit breaker)
   const currentUser = user;
@@ -177,12 +174,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setProfileCache(prev => new Map(prev.set(userId, { profile: adminProfile, timestamp: now })));
       setRetryCount(0);
       setIsCircuitBreakerOpen(false); // Reset circuit breaker for admin
-      // Remove from in-flight
-      setInFlightFetches(prev => {
-        const next = new Set(prev);
-        next.delete(userId);
-        return next;
-      });
       return;
     }
 
@@ -264,13 +255,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       return;
     }
 
+    // Add to in-flight set just before network requests
+    setInFlightFetches(prev => new Set(prev.add(userId)));
+
     try {
       const startTime = performance.now();
       console.log('🔍 Starting profile fetch for userId:', userId);
       
       // Determine timeout based on route - longer for admin routes to prevent circuit breaker activation
       const isAdminRoute = window.location.pathname.includes('/admin');
-      const timeoutMs = isAdminRoute ? 15000 : 8000; // Extended timeouts: 15s for admin routes, 8s elsewhere
+      const timeoutMs = isAdminRoute ? 15000 : 12000; // 15s for admin routes, 12s elsewhere (increased from 8s)
       console.log(`⏱️ Using ${timeoutMs}ms timeout for ${isAdminRoute ? 'admin' : 'regular'} route`);
       
       // Create a timeout with proper cleanup
@@ -310,12 +304,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setProfileCache(prev => new Map(prev.set(userId, { profile: profileData, timestamp: now })));
         setRetryCount(0); // Reset retry count on success
         setIsCircuitBreakerOpen(false); // Reset circuit breaker on success
-        // Remove from in-flight
-        setInFlightFetches(prev => {
-          const next = new Set(prev);
-          next.delete(userId);
-          return next;
-        });
         return;
       }
 
@@ -333,6 +321,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           logger.warn('Permission denied for profile access');
           setProfile(null);
           setRetryCount(0);
+          // Still need to clear in-flight
+          setInFlightFetches(prev => {
+            const next = new Set(prev);
+            next.delete(userId);
+            return next;
+          });
           return;
         }
       }
@@ -392,15 +386,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       // If all else fails, check if we need to create a profile
       logger.warn('All profile fetch methods failed, user may need profile creation');
-      setProfile(null);
-      setRetryCount(0); // Reset retry count when giving up
       
-      // Always remove from in-flight at end of function
-      setInFlightFetches(prev => {
-        const next = new Set(prev);
-        next.delete(userId);
-        return next;
-      });
+      // Set provisional profile for non-admin users after timeout
+      if (!isAdminUser && now - lastFetchAttempt > timeoutMs) {
+        logger.log('Setting provisional profile due to persistent fetch failures');
+        const provisional = createProvisionalProfile(user);
+        setProfile(provisional);
+      } else {
+        setProfile(null);
+      }
+      setRetryCount(0); // Reset retry count when giving up
     } catch (error) {
       console.log('❌ fetchProfile exception:', error);
       
@@ -413,10 +408,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         
         // FOR ADMIN USERS: Don't open circuit breaker on timeout, just set null profile
         if (isAdminUser) {
-          console.log('🔑 Admin user timeout - not opening circuit breaker to prevent lockout');
-          setProfile(null);
-          setRetryCount(0);
-          return;
+        console.log('🔑 Admin user timeout - not opening circuit breaker to prevent lockout');
+        setProfile(null);
+        setRetryCount(0);
+        // Still need to clear in-flight for admin users
+        setInFlightFetches(prev => {
+          const next = new Set(prev);
+          next.delete(userId);
+          return next;
+        });
+        return;
         }
         
         setProfile(null);
@@ -434,9 +435,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       // Only retry for non-timeout errors (database connection issues, etc.)
       if (retryCount < 1) {
         console.log('🔄 Retrying profile fetch, attempt:', retryCount + 1);
-        const backoffDelay = 3000;
+        const backoffDelay = 1000; // Reduced from 3000ms
         setTimeout(() => {
           setRetryCount(prev => prev + 1);
+          // Clear in-flight before retry
+          setInFlightFetches(prev => {
+            const next = new Set(prev);
+            next.delete(userId);
+            return next;
+          });
           fetchProfile(userId);
         }, backoffDelay);
       } else {
@@ -453,7 +460,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }, 5000); // 5 seconds
       }
       
-      // Always remove from in-flight at end of catch block
+    } finally {
+      // Always remove from in-flight in finally block to ensure cleanup
       setInFlightFetches(prev => {
         const next = new Set(prev);
         next.delete(userId);
