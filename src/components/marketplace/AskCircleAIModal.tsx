@@ -16,26 +16,31 @@ export function AskCircleAIModal({ open, onOpenChange, initialMessage, expandTok
   const [threadId, setThreadId] = useState<string>();
   const [isMinimized, setIsMinimized] = useState(false);
 
-  // Reset minimized state when modal opens or when expandToken changes
+  // Debug logging
+  React.useEffect(() => {
+    console.log('🚀 AskCircleAIModal state:', { open, isMinimized, expandToken, hasInitialMessage: !!initialMessage });
+  }, [open, isMinimized, expandToken, initialMessage]);
+
+  // Reset minimized state when modal opens
   React.useEffect(() => {
     if (open) {
-      setIsMinimized(false);
-    } else {
-      // Reset when closed to ensure clean state
+      console.log('🔄 Modal opened, resetting minimized state');
       setIsMinimized(false);
     }
   }, [open]);
 
   // Reset minimized state when expandToken changes (new conversation trigger)
   React.useEffect(() => {
-    if (open && expandToken) {
+    if (expandToken) {
+      console.log('🎯 ExpandToken changed, ensuring modal is expanded:', expandToken);
       setIsMinimized(false);
     }
-  }, [expandToken, open]);
+  }, [expandToken]);
 
-  // Reset minimized state when initialMessage changes (if modal is already open)
+  // Reset minimized state when initialMessage changes
   React.useEffect(() => {
     if (open && initialMessage) {
+      console.log('📝 InitialMessage provided, ensuring modal is expanded');
       setIsMinimized(false);
     }
   }, [initialMessage, open]);
