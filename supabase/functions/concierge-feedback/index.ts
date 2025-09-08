@@ -18,12 +18,12 @@ serve(async (req) => {
   }
 
   try {
-    const { user_id, answer_id, helpful, reason } = await req.json();
+    const { user_id, anon_id, answer_id, helpful, reason } = await req.json();
 
-    if (!user_id || !answer_id || typeof helpful !== 'boolean') {
+    if (!answer_id || typeof helpful !== 'boolean') {
       return new Response(JSON.stringify({ 
         success: false,
-        error: 'Missing required fields: user_id, answer_id, helpful' 
+        error: 'Missing required fields: answer_id, helpful' 
       }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -34,7 +34,8 @@ serve(async (req) => {
     const { data, error } = await supabase
       .from('concierge_feedback')
       .insert({
-        user_id,
+        user_id: user_id || null,
+        anon_id: anon_id || null,
         answer_id,
         helpful,
         reason: reason || null
