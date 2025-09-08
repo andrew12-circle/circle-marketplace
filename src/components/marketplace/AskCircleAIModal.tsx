@@ -75,8 +75,18 @@ export function AskCircleAIModal({ open, onOpenChange, initialMessage, expandTok
 
   if (!open) return null;
 
-  // Minimized state - floating widget
-  if (isMinimized) {
+  // FORCE: Never show minimized if we have initial content
+  const shouldShowMinimized = isMinimized && !initialMessage && !expandToken;
+  
+  console.log('🎭 Render decision:', { 
+    isMinimized, 
+    hasInitialMessage: !!initialMessage, 
+    hasExpandToken: !!expandToken, 
+    shouldShowMinimized 
+  });
+
+  // Minimized state - floating widget (only if no initial content)
+  if (shouldShowMinimized) {
     return (
       <div className="fixed bottom-4 left-4 z-50">
         <Button
