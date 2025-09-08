@@ -63,8 +63,12 @@ serve(async (req) => {
                     req.headers.get('X-Forwarded-For') || 
                     req.headers.get('X-Real-IP');
 
-    // Verify Turnstile token first
-    if (turnstileToken) {
+    // Verify Turnstile token (skip in development)
+    const isDevelopment = req.headers.get('origin')?.includes('localhost') || 
+                         req.headers.get('origin')?.includes('127.0.0.1') ||
+                         req.headers.get('origin')?.includes('.sandbox.lovable.dev');
+
+    if (!isDevelopment && turnstileToken) {
       const isValidToken = await verifyTurnstileToken(turnstileToken, clientIP || undefined);
       
       if (!isValidToken) {
@@ -76,7 +80,7 @@ serve(async (req) => {
           }
         )
       }
-    } else {
+    } else if (!isDevelopment && !turnstileToken) {
       return new Response(
         JSON.stringify({ error: 'Security verification required' }),
         { 
@@ -85,6 +89,8 @@ serve(async (req) => {
         }
       )
     }
+
+    console.log(`Auth signup request - Development mode: ${isDevelopment}, Email: ${email}`);
 
     // Create Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
