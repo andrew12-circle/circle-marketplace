@@ -321,22 +321,6 @@ export const ConciergeChat: React.FC<ConciergeChatProps> = ({ threadId: initialT
                 </div>
               )}
 
-              {/* Quick replies */}
-              {message.quick_replies && message.quick_replies.length > 0 && (
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {message.quick_replies.map((reply, index) => (
-                    <Button
-                      key={index}
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleQuickReply(reply)}
-                      className="text-xs border"
-                    >
-                      {reply}
-                    </Button>
-                  ))}
-                </div>
-              )}
 
               {/* Feedback buttons for assistant messages */}
               {message.role === 'assistant' && (
@@ -395,6 +379,25 @@ export const ConciergeChat: React.FC<ConciergeChatProps> = ({ threadId: initialT
         
         <div ref={messagesEndRef} />
       </div>
+
+      {/* Quick Replies - Show latest assistant message's quick replies */}
+      {messages.length > 0 && messages[messages.length - 1]?.role === 'assistant' && messages[messages.length - 1]?.quick_replies && (
+        <div className="px-4 py-2 border-t bg-muted/30">
+          <div className="flex flex-wrap gap-2">
+            {messages[messages.length - 1].quick_replies.map((reply, index) => (
+              <Button
+                key={index}
+                variant="outline"
+                size="sm"
+                onClick={() => handleQuickReply(reply)}
+                className="text-xs h-8"
+              >
+                {reply}
+              </Button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Input */}
       <div className="p-4 border-t">
