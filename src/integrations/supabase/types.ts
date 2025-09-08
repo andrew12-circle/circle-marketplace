@@ -10790,6 +10790,10 @@ export type Database = {
         Args: { creator_user_id: string }
         Returns: Json
       }
+      get_current_uid: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       get_enhanced_creator_info: {
         Args: { p_content_id: string }
         Returns: {
