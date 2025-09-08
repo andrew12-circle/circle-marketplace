@@ -433,6 +433,32 @@ export const Auth = () => {
             {!showForgotPassword && (
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
+                
+                {/* Password Requirements (Signup only) */}
+                {!isLogin && (
+                  <div className="text-sm text-muted-foreground bg-muted/30 rounded-md p-3 space-y-1">
+                    <p className="font-medium">Password must contain:</p>
+                    <ul className="space-y-1 ml-2">
+                      <li className="flex items-center gap-2">
+                        <span className="w-1 h-1 bg-current rounded-full"></span>
+                        At least 8 characters
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="w-1 h-1 bg-current rounded-full"></span>
+                        Mix of uppercase and lowercase letters
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="w-1 h-1 bg-current rounded-full"></span>
+                        At least one number
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="w-1 h-1 bg-current rounded-full"></span>
+                        At least one symbol (!@#$%^&*)
+                      </li>
+                    </ul>
+                  </div>
+                )}
+                
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
