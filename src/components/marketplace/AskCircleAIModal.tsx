@@ -14,15 +14,8 @@ interface AskCircleAIModalProps {
 
 export function AskCircleAIModal({ open, onOpenChange, initialMessage, expandToken }: AskCircleAIModalProps) {
   const [threadId, setThreadId] = useState<string>();
-  // Initialize as not minimized when we have an initial message or expand token
-  const [isMinimized, setIsMinimizedState] = useState(() => {
-    // If we're opening with content, start expanded
-    if (initialMessage || expandToken) {
-      console.log('🎯 Initializing modal as EXPANDED due to:', { initialMessage: !!initialMessage, expandToken });
-      return false;
-    }
-    return false;
-  });
+  // Always start expanded, never minimized for new conversations
+  const [isMinimized, setIsMinimizedState] = useState(false);
   
   // Wrapper to debug when isMinimized gets set
   const setIsMinimized = (value: boolean) => {
@@ -34,6 +27,14 @@ export function AskCircleAIModal({ open, onOpenChange, initialMessage, expandTok
   React.useEffect(() => {
     console.log('🚀 AskCircleAIModal state:', { open, isMinimized, expandToken, hasInitialMessage: !!initialMessage });
   }, [open, isMinimized, expandToken, initialMessage]);
+
+  // CRITICAL: Force expanded state when opening with content
+  React.useEffect(() => {
+    if (open && (initialMessage || expandToken)) {
+      console.log('🔥 FORCING EXPANDED STATE - modal opened with content');
+      setIsMinimized(false);
+    }
+  }, [open, initialMessage, expandToken]);
 
   // Reset minimized state when modal opens
   React.useEffect(() => {
