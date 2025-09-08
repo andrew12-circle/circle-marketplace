@@ -1,7 +1,7 @@
+import React, { useState } from "react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { ConciergeChat } from "@/components/concierge/ConciergeChat";
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Minus, MessageSquare } from "lucide-react";
 
@@ -14,6 +14,13 @@ interface AskCircleAIModalProps {
 export function AskCircleAIModal({ open, onOpenChange, initialMessage }: AskCircleAIModalProps) {
   const [threadId, setThreadId] = useState<string>();
   const [isMinimized, setIsMinimized] = useState(false);
+
+  // Reset minimized state when modal opens
+  React.useEffect(() => {
+    if (open) {
+      setIsMinimized(false);
+    }
+  }, [open]);
 
   const handleMinimize = () => {
     setIsMinimized(true);
