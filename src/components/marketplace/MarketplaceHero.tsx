@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
+import { useAuth } from "@/contexts/AuthContext"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { CheckCircle, Percent, DollarSign } from "lucide-react"
@@ -11,6 +12,12 @@ interface MarketplaceHeroProps {
 export default function MarketplaceHero({ onExploreClick }: MarketplaceHeroProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  
+  // Don't show hero section if user is logged in
+  if (user) {
+    return null;
+  }
   
   const handleExploreClick = () => {
     if (onExploreClick) {
