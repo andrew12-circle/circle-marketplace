@@ -14,7 +14,13 @@ interface AskCircleAIModalProps {
 
 export function AskCircleAIModal({ open, onOpenChange, initialMessage, expandToken }: AskCircleAIModalProps) {
   const [threadId, setThreadId] = useState<string>();
-  const [isMinimized, setIsMinimized] = useState(false);
+  const [isMinimized, setIsMinimizedState] = useState(false);
+  
+  // Wrapper to debug when isMinimized gets set
+  const setIsMinimized = (value: boolean) => {
+    console.log('🎛️ setIsMinimized called with:', value, 'Stack:', new Error().stack?.split('\n')[2]);
+    setIsMinimizedState(value);
+  };
 
   // Debug logging
   React.useEffect(() => {
