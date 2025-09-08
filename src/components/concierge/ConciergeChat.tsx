@@ -289,7 +289,7 @@ export const ConciergeChat: React.FC<ConciergeChatProps> = ({ threadId: initialT
             <p className="text-sm text-muted-foreground">Your AI agent advisor</p>
           </div>
         </div>
-        <div className="mr-4">
+        <div className="mr-8">
           <Button variant="outline" size="sm" onClick={startNewConversation}>
             New Chat
           </Button>
