@@ -5,7 +5,6 @@ import { OptimizedServiceCard } from "./OptimizedServiceCard";
 import { MarketplaceVendorCard } from "./MarketplaceVendorCard";
 import { MarketplaceFilters } from "./MarketplaceFilters";
 import { MarketplaceSortingControls } from "./MarketplaceSortingControls";
-import { CampaignServicesHeader } from "./CampaignServicesHeader";
 import { CircleProBanner } from "./CircleProBanner";
 import { ServiceDetailsModal } from "./ServiceDetailsModal";
 import { ServiceFunnelModal } from "./ServiceFunnelModal";
@@ -17,10 +16,11 @@ import { TopDealsCarousel } from "./TopDealsCarousel";
 import { CategoryBlocks } from "./CategoryBlocks";
 import { AutoRecoverySystem } from "./AutoRecoverySystem";
 import MarketplaceHero from "./MarketplaceHero";
+import { InviteVendorModal } from "./InviteVendorModal";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Filter, Sparkles, Zap, Facebook, Globe, Mail, Share2, Monitor, TrendingUp, Database, Camera, Video, Printer, ArrowRight, BookOpen } from "lucide-react";
+import { Search, Filter, Sparkles, Zap, Facebook, Globe, Mail, Share2, Monitor, TrendingUp, Database, Camera, Video, Printer, ArrowRight, BookOpen, UserPlus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -490,6 +490,7 @@ export const MarketplaceGrid = () => {
   const [isConciergeModalOpen, setIsConciergeModalOpen] = useState(false);
   const [conciergeInitialMessage, setConciergeInitialMessage] = useState<string>();
   const [conciergeExpandToken, setConciergeExpandToken] = useState<number>();
+  const [isInviteVendorModalOpen, setIsInviteVendorModalOpen] = useState(false);
 
   // Handle deep linking to services from shared URLs
   const [isFunnelModalOpen, setIsFunnelModalOpen] = useState(false);
@@ -609,6 +610,10 @@ export const MarketplaceGrid = () => {
     setIsConciergeModalOpen(true);
   };
 
+  const handleInviteVendor = () => {
+    setIsInviteVendorModalOpen(true);
+  };
+
   const handleSaveService = useCallback(async (serviceId: string) => {
     if (!profile?.user_id) {
       toast({
@@ -716,9 +721,6 @@ export const MarketplaceGrid = () => {
 
           {/* Need Advice Home - Show for all users */}
           <NeedAdviceHome />
-
-          {/* Campaign Services Header */}
-          <CampaignServicesHeader />
 
           {marketplaceEnabled && (
             <>
@@ -944,30 +946,40 @@ export const MarketplaceGrid = () => {
               )}
 
               {viewMode === "vendors" && (
-                (isLoading || error) && vendors.length === 0 ? (
-                  <div className="space-y-4">
+                <>
+                  {/* Invite Vendor Button */}
+                  <div className="mb-6 flex justify-end">
+                    <Button onClick={handleInviteVendor} variant="secondary" className="flex items-center gap-2 h-10 px-4">
+                      <UserPlus className="w-4 h-4" />
+                      Invite Your Vendor
+                    </Button>
+                  </div>
+
+                  {(isLoading || error) && vendors.length === 0 ? (
+                    <div className="space-y-4">
+                      <div className="mobile-grid gap-4 sm:gap-6">
+                        {Array.from({ length: 6 }).map((_, i) => (
+                          <div key={i} className="h-48 bg-muted rounded-lg animate-pulse" />
+                        ))}
+                      </div>
+                      <div className="flex items-center justify-center gap-2">
+                        <Button variant="outline" onClick={handleReloadDataQuick}>Reload data</Button>
+                        <Button onClick={handleHardRefresh}>Try again</Button>
+                      </div>
+                    </div>
+                  ) : (
                     <div className="mobile-grid gap-4 sm:gap-6">
-                      {Array.from({ length: 6 }).map((_, i) => (
-                        <div key={i} className="h-48 bg-muted rounded-lg animate-pulse" />
+                      {filteredVendors.map(vendor => (
+                        <MarketplaceVendorCard 
+                          key={vendor.id} 
+                          vendor={vendor} 
+                          onConnect={() => {}} 
+                          onViewProfile={() => {}} 
+                        />
                       ))}
                     </div>
-                    <div className="flex items-center justify-center gap-2">
-                      <Button variant="outline" onClick={handleReloadDataQuick}>Reload data</Button>
-                      <Button onClick={handleHardRefresh}>Try again</Button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="mobile-grid gap-4 sm:gap-6">
-                    {filteredVendors.map(vendor => (
-                      <MarketplaceVendorCard 
-                        key={vendor.id} 
-                        vendor={vendor} 
-                        onConnect={() => {}} 
-                        onViewProfile={() => {}} 
-                      />
-                    ))}
-                  </div>
-                )
+                  )}
+                </>
               )}
 
               {/* Enhanced Empty State */}
@@ -1076,6 +1088,12 @@ export const MarketplaceGrid = () => {
         onOpenChange={setIsConciergeModalOpen}
         initialMessage={conciergeInitialMessage}
         expandToken={conciergeExpandToken}
+      />
+
+      {/* Invite Vendor Modal */}
+      <InviteVendorModal 
+        open={isInviteVendorModalOpen} 
+        onOpenChange={setIsInviteVendorModalOpen} 
       />
 
       {/* QA Overlay */}
