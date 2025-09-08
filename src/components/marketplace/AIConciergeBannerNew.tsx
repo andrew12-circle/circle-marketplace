@@ -19,6 +19,7 @@ export const AIConciergeBanner = () => {
   const [placeholderText, setPlaceholderText] = useState("");
   const [isInputFocused, setIsInputFocused] = useState(false);
   const [showRecommendationsDashboard, setShowRecommendationsDashboard] = useState(false);
+  const [expandToken, setExpandToken] = useState<number>();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -116,6 +117,7 @@ export const AIConciergeBanner = () => {
     }
     
     // Open modal with input as initial message
+    setExpandToken(Date.now());
     setIsAIModalOpen(true);
     setChatInput("");
   };
@@ -190,9 +192,11 @@ export const AIConciergeBanner = () => {
                       // Open modal with any existing input as initial message
                       if (chatInput.trim()) {
                         // Pass the input as initial message and clear the input
+                        setExpandToken(Date.now());
                         setIsAIModalOpen(true);
                         setChatInput("");
                       } else {
+                        setExpandToken(Date.now());
                         setIsAIModalOpen(true);
                       }
                     }}
@@ -230,6 +234,7 @@ export const AIConciergeBanner = () => {
           open={isAIModalOpen} 
           onOpenChange={setIsAIModalOpen}
           initialMessage={chatInput}
+          expandToken={expandToken}
         />
     </div>
   );

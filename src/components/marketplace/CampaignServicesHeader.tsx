@@ -10,7 +10,9 @@ export const CampaignServicesHeader = () => {
   } = useToast();
   const [isAIModalOpen, setIsAIModalOpen] = useState(false);
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+  const [expandToken, setExpandToken] = useState<number>();
   const handleAskCircleAI = () => {
+    setExpandToken(Date.now());
     setIsAIModalOpen(true);
   };
   const handleInviteVendor = () => {
@@ -37,7 +39,11 @@ export const CampaignServicesHeader = () => {
         </div>
       </div>
 
-      <AskCircleAIModal open={isAIModalOpen} onOpenChange={setIsAIModalOpen} />
+      <AskCircleAIModal 
+        open={isAIModalOpen} 
+        onOpenChange={setIsAIModalOpen} 
+        expandToken={expandToken}
+      />
       
       <InviteVendorModal open={isInviteModalOpen} onOpenChange={setIsInviteModalOpen} />
       

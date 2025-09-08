@@ -489,6 +489,7 @@ export const MarketplaceGrid = () => {
   const [showQAOverlay, setShowQAOverlay] = useState(false);
   const [isConciergeModalOpen, setIsConciergeModalOpen] = useState(false);
   const [conciergeInitialMessage, setConciergeInitialMessage] = useState<string>();
+  const [conciergeExpandToken, setConciergeExpandToken] = useState<number>();
 
   // Handle deep linking to services from shared URLs
   const [isFunnelModalOpen, setIsFunnelModalOpen] = useState(false);
@@ -516,6 +517,7 @@ export const MarketplaceGrid = () => {
   useEffect(() => {
     const handleOpenConciergeModal = (event: CustomEvent) => {
       setConciergeInitialMessage(event.detail.initialMessage);
+      setConciergeExpandToken(Date.now());
       setIsConciergeModalOpen(true);
     };
 
@@ -601,6 +603,7 @@ export const MarketplaceGrid = () => {
 
   const handleAIChat = (initialMessage: string) => {
     setConciergeInitialMessage(initialMessage);
+    setConciergeExpandToken(Date.now());
     setIsConciergeModalOpen(true);
   };
 
@@ -1070,6 +1073,7 @@ export const MarketplaceGrid = () => {
         open={isConciergeModalOpen} 
         onOpenChange={setIsConciergeModalOpen}
         initialMessage={conciergeInitialMessage}
+        expandToken={conciergeExpandToken}
       />
 
       {/* QA Overlay */}

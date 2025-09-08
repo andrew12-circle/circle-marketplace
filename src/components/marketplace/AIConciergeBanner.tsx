@@ -23,6 +23,7 @@ export const AIConciergeBanner = () => {
   const [showRecommendationsDashboard, setShowRecommendationsDashboard] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [aiResults, setAiResults] = useState<any>(null);
+  const [expandToken, setExpandToken] = useState<number>();
   const { toast } = useToast();
   const navigate = useNavigate();
   const { getRecommendation, isLoading } = useEnhancedAI();
@@ -198,9 +199,13 @@ export const AIConciergeBanner = () => {
                 goalTargetVolume: (profile as any)?.goal_target_volume || null,
                 persona: (profile as any)?.personality_type || null
               }}
-              onStart={() => setIsAIModalOpen(true)}
+              onStart={() => {
+                setExpandToken(Date.now());
+                setIsAIModalOpen(true);
+              }}
               onOpenGuide={() => {
                 // Navigate to AI strategy guide or show modal
+                setExpandToken(Date.now());
                 setIsAIModalOpen(true);
               }}
               onBookHuman={() => {
@@ -352,7 +357,11 @@ export const AIConciergeBanner = () => {
          </CardContent>
       </Card>
       
-      <AskCircleAIModal open={isAIModalOpen} onOpenChange={setIsAIModalOpen} />
+      <AskCircleAIModal 
+        open={isAIModalOpen} 
+        onOpenChange={setIsAIModalOpen} 
+        expandToken={expandToken}
+      />
     </div>
   );
 };

@@ -9,13 +9,14 @@ interface AskCircleAIModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   initialMessage?: string;
+  expandToken?: number;
 }
 
-export function AskCircleAIModal({ open, onOpenChange, initialMessage }: AskCircleAIModalProps) {
+export function AskCircleAIModal({ open, onOpenChange, initialMessage, expandToken }: AskCircleAIModalProps) {
   const [threadId, setThreadId] = useState<string>();
   const [isMinimized, setIsMinimized] = useState(false);
 
-  // Reset minimized state when modal opens - ensure it always starts unminimized
+  // Reset minimized state when modal opens or when expandToken changes
   React.useEffect(() => {
     if (open) {
       setIsMinimized(false);
@@ -24,6 +25,20 @@ export function AskCircleAIModal({ open, onOpenChange, initialMessage }: AskCirc
       setIsMinimized(false);
     }
   }, [open]);
+
+  // Reset minimized state when expandToken changes (new conversation trigger)
+  React.useEffect(() => {
+    if (open && expandToken) {
+      setIsMinimized(false);
+    }
+  }, [expandToken, open]);
+
+  // Reset minimized state when initialMessage changes (if modal is already open)
+  React.useEffect(() => {
+    if (open && initialMessage) {
+      setIsMinimized(false);
+    }
+  }, [initialMessage, open]);
 
   const handleMinimize = () => {
     setIsMinimized(true);
