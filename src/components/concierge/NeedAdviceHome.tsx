@@ -15,6 +15,7 @@ import {
   ShoppingCart,
   Brain,
   PhoneCall,
+  Send,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -238,7 +239,7 @@ export default function NeedAdviceHome() {
                 <Button
                   variant="default"
                   className="absolute right-12 top-1/2 -translate-y-1/2 rounded-full h-10 w-10 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700"
-                  aria-label="Open Smart Chat"
+                  aria-label="Send message"
                   onClick={() => {
                     if (query.trim()) {
                       openChatFromSearch();
@@ -247,7 +248,7 @@ export default function NeedAdviceHome() {
                     }
                   }}
                 >
-                  <Brain className="h-5 w-5 text-white" />
+                  <Send className="h-5 w-5 text-white" />
                 </Button>
               </div>
             </motion.div>
