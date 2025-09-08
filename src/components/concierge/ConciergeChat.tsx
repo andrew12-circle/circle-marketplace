@@ -7,7 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { BookAdvisorModal } from '@/components/marketplace/BookAdvisorModal';
+import { ConsultationBookingModal } from '@/components/marketplace/ConsultationBookingModal';
 
 interface ConciergeMessage {
   id: string;
@@ -54,6 +54,15 @@ export const ConciergeChat: React.FC<ConciergeChatProps> = ({ threadId: initialT
   const [showBookAdvisor, setShowBookAdvisor] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
+
+  // Mock service for Circle team consultation
+  const circleConsultationService = {
+    id: 'circle-consultation',
+    title: 'Circle Team Consultation',
+    vendor: {
+      name: 'Circle Marketplace Team'
+    }
+  };
 
   useEffect(() => {
     if (threadId) {
@@ -509,9 +518,14 @@ export const ConciergeChat: React.FC<ConciergeChatProps> = ({ threadId: initialT
         </div>
       </div>
 
-      <BookAdvisorModal 
-        open={showBookAdvisor} 
-        onOpenChange={setShowBookAdvisor} 
+      <ConsultationBookingModal 
+        isOpen={showBookAdvisor}
+        onClose={() => setShowBookAdvisor(false)}
+        service={circleConsultationService}
+        onBookingConfirmed={(consultationId) => {
+          console.log('Consultation booked:', consultationId);
+          setShowBookAdvisor(false);
+        }}
       />
     </div>
   );
