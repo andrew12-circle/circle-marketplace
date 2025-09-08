@@ -43,6 +43,9 @@ export const Auth = () => {
   const [passwordStrong, setPasswordStrong] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [showTurnstile, setShowTurnstile] = useState(false);
+  const [showEmailVerification, setShowEmailVerification] = useState(false);
+  const [userEmail, setUserEmail] = useState('');
+  const [resendingEmail, setResendingEmail] = useState(false);
   
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -99,6 +102,36 @@ export const Auth = () => {
     } catch (err) {
       console.error('Signup error:', err);
       throw err;
+    }
+  };
+
+  const handleResendVerification = async () => {
+    if (!userEmail) return;
+    
+    setResendingEmail(true);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: userEmail,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`
+        }
+      });
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Verification Email Sent",
+        description: "Please check your email (including spam folder) for the verification link.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Failed to Resend Email",
+        description: error.message || "Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setResendingEmail(false);
     }
   };
 
@@ -220,11 +253,15 @@ export const Auth = () => {
         
         // Log successful signup
         await logEvent('signup_success', { email: data.email });
+        
+        // Store email for resend functionality and show verification screen
+        setUserEmail(data.email);
+        setShowEmailVerification(true);
+        
         toast({
           title: "Account created!",
           description: "Please check your email to verify your account before signing in.",
         });
-        setIsLogin(true); // Switch to login mode after successful signup
       }
     } catch (error: any) {
       let errorMessage = "An error occurred. Please try again.";
@@ -305,8 +342,78 @@ export const Auth = () => {
   const toggleMode = () => {
     setIsLogin(!isLogin);
     setShowForgotPassword(false);
+    setShowEmailVerification(false);
     setFormData({ email: '', password: '', displayName: '' });
+    setUserEmail('');
   };
+
+  // Email verification success screen
+  if (showEmailVerification) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <Card className="w-full max-w-md relative z-10 bg-white/95 backdrop-blur-sm border-white/20">
+          <CardHeader className="space-y-4">
+            <div className="flex justify-center">
+              <img 
+                src="/circle-logo-updated.png"
+                alt="Circle Logo" 
+                className="w-24 h-24 sm:w-28 sm:h-28 object-contain"
+                width="112"
+                height="112"
+                style={{ imageRendering: 'crisp-edges' }}
+              />
+            </div>
+            <div className="space-y-1">
+              <CardTitle className="text-2xl font-bold text-center">
+                Check Your Email
+              </CardTitle>
+              <p className="text-sm text-muted-foreground text-center">
+                We've sent a verification link to <strong>{userEmail}</strong>
+              </p>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-3">
+              <h3 className="font-medium text-blue-900">Next Steps:</h3>
+              <ol className="text-sm text-blue-800 space-y-1 ml-4 list-decimal">
+                <li>Check your email inbox for a verification message</li>
+                <li>Click the verification link in the email</li>
+                <li>Return here to sign in to your account</li>
+              </ol>
+            </div>
+            
+            <div className="text-center space-y-3">
+              <p className="text-xs text-muted-foreground">
+                Don't see the email? Check your spam folder or click below to resend.
+              </p>
+              
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleResendVerification}
+                disabled={resendingEmail}
+                className="w-full"
+              >
+                {resendingEmail ? 'Sending...' : 'Resend Verification Email'}
+              </Button>
+              
+              <Button
+                type="button"
+                variant="link"
+                onClick={() => {
+                  setShowEmailVerification(false);
+                  setIsLogin(true);
+                }}
+                className="p-0 h-auto text-sm"
+              >
+                Back to Sign In
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
