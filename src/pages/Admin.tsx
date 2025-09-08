@@ -75,6 +75,17 @@ export const Admin = () => {
                     <h1 className="text-xl font-semibold">Admin Dashboard</h1>
                   </div>
                 </div>
+                <div className="flex items-center space-x-4">
+                  <button
+                    onClick={() => window.location.href = '/marketplace'}
+                    className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-muted-foreground hover:text-primary hover:bg-accent rounded-md transition-colors"
+                  >
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                    <span>Back to Marketplace</span>
+                  </button>
+                </div>
               </div>
             </header>
             <main className="flex-1 overflow-auto">
