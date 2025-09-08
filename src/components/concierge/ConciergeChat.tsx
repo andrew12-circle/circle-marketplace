@@ -300,7 +300,7 @@ export const ConciergeChat: React.FC<ConciergeChatProps> = ({ threadId: initialT
   };
 
   return (
-    <div className="flex flex-col h-full max-w-4xl mx-auto">
+    <div className="flex flex-col h-full w-full max-w-5xl mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b">
         <div className="flex items-center gap-3">
@@ -325,9 +325,11 @@ export const ConciergeChat: React.FC<ConciergeChatProps> = ({ threadId: initialT
               <MessageSquare className="w-8 h-8 text-primary" />
             </div>
             <h3 className="text-lg font-medium mb-2">How can I help you today?</h3>
-            <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-              I'm here to help you find the right tools, services, and strategies to grow your real estate business.
-            </p>
+            <div className="max-w-[80%] mx-auto">
+              <p className="text-muted-foreground mb-6">
+                I'm here to help you find the right tools, services, and strategies to grow your real estate business.
+              </p>
+            </div>
             <div className="flex flex-wrap gap-2 justify-center">
               {[
                 "I need a CRM recommendation",
