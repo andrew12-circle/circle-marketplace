@@ -54,7 +54,7 @@ export function AskCircleAIModal({ open, onOpenChange, initialMessage }: AskCirc
         </VisuallyHidden>
         
         {/* Add minimize button to the chat header */}
-        <div className="absolute top-4 right-12 z-10">
+        <div className="absolute top-4 left-4 z-10">
           <Button
             variant="ghost"
             size="sm"
