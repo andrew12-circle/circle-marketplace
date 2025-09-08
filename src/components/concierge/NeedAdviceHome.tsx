@@ -234,7 +234,7 @@ export default function NeedAdviceHome() {
                   onClick={toggleSearchMicrophone}
                   aria-label={isRecording ? "Stop voice input" : "Start voice input"}
                 >
-                  {isRecording ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+                  <Mic className={`h-4 w-4 ${isRecording ? 'text-green-500' : ''}`} />
                 </Button>
                 <Button
                   variant="default"
