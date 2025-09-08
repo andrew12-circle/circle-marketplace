@@ -103,7 +103,7 @@ export function AskCircleAIModal({ open, onOpenChange, initialMessage, expandTok
   // Full modal state
   return (
     <Dialog open={true} onOpenChange={handleClose}>
-      <DialogContent className="max-w-6xl h-[85vh] p-0">
+      <DialogContent className="max-w-6xl h-[85vh] p-0 flex flex-col">
         <VisuallyHidden>
           <DialogTitle>Circle Agent Concierge</DialogTitle>
         </VisuallyHidden>
@@ -120,11 +120,13 @@ export function AskCircleAIModal({ open, onOpenChange, initialMessage, expandTok
           </Button>
         </div>
         
-        <ConciergeChat
-          threadId={threadId} 
-          onThreadChange={setThreadId}
-          initialMessage={initialMessage}
-        />
+        <div className="flex-1 min-h-0">
+          <ConciergeChat
+            threadId={threadId} 
+            onThreadChange={setThreadId}
+            initialMessage={initialMessage}
+          />
+        </div>
       </DialogContent>
     </Dialog>
   );
