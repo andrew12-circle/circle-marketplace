@@ -181,3 +181,6 @@ verify_jwt = true
 
 [functions.nightly-learning-job]
 verify_jwt = false
+
+[functions.send-consultation-alert]
+verify_jwt = true
