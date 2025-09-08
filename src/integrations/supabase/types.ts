@@ -10546,6 +10546,10 @@ export type Database = {
         Args: { actor?: string; pro: boolean; target_user: string }
         Returns: undefined
       }
+      admin_toggle_admin_status: {
+        Args: { new_status: boolean; target_user: string }
+        Returns: boolean
+      }
       audit_security_definer_functions: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -10745,6 +10749,10 @@ export type Database = {
         Returns: undefined
       }
       get_admin_analytics_summary: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      get_admin_stats: {
         Args: Record<PropertyKey, never>
         Returns: Json
       }

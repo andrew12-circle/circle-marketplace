@@ -16,16 +16,16 @@ const OptimizedUserManagement = React.lazy(() =>
   import('./OptimizedUserManagement').then(module => ({ default: module.OptimizedUserManagement }))
 );
 
+const OptimizedOverview = React.lazy(() => 
+  import('./OptimizedOverview').then(module => ({ default: module.OptimizedOverview }))
+);
+
 const VendorManagementPanelWrapper = React.lazy(() => 
   import('./LazyAdminPanel').then(module => ({ default: module.VendorManagementPanelWrapper }))
 );
 
 const ServiceManagementPanelWrapper = React.lazy(() => 
   import('./LazyAdminPanel').then(module => ({ default: module.ServiceManagementPanelWrapper }))
-);
-
-const AdminDashboard = React.lazy(() => 
-  import('./AdminDashboard').then(module => ({ default: module.AdminDashboard }))
 );
 
 const RESPAComplianceManagerWrapper = React.lazy(() => 
@@ -81,7 +81,7 @@ export const OptimizedAdminTabs = () => {
 
         <TabsContent value="overview" className="mt-6">
           <Suspense fallback={<TabLoadingFallback title="Overview Dashboard" />}>
-            <AdminDashboard />
+            <OptimizedOverview />
           </Suspense>
         </TabsContent>
 

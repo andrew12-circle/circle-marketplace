@@ -1,5 +1,5 @@
-import AdminDashboard from "@/pages/AdminDashboard";
 import { AdminRouteWrapper } from "@/components/admin/AdminRouteWrapper";
+import { OptimizedAdminTabs } from "@/components/admin/OptimizedAdminTabs";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -162,7 +162,15 @@ export const Admin = () => {
 
   return (
     <AdminRouteWrapper>
-      <AdminDashboard />
+      <div className="container mx-auto px-4 py-6">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-foreground">Admin Dashboard</h1>
+          <p className="text-muted-foreground mt-2">
+            Manage users, services, and system settings with optimized performance.
+          </p>
+        </div>
+        <OptimizedAdminTabs />
+      </div>
     </AdminRouteWrapper>
   );
 };
