@@ -288,20 +288,6 @@ export const ConciergeChat: React.FC<ConciergeChatProps> = ({ threadId: initialT
           <div key={message.id} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             <div className={`max-w-[80%] ${message.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'} rounded-lg p-3`}>
               <p className="whitespace-pre-wrap">{message.content}</p>
-              
-              {/* Trust metrics for assistant messages */}
-              {message.role === 'assistant' && message.trust && (
-                <div className="mt-2 pt-2 border-t border-border/20">
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Badge variant="outline" className="text-xs">
-                      {message.trust.confidence}% confidence
-                    </Badge>
-                    {message.trust.peer_patterns[0] && (
-                      <span>{message.trust.peer_patterns[0]}</span>
-                    )}
-                  </div>
-                </div>
-              )}
 
               {/* Citations */}
               {message.citations && message.citations.length > 0 && (
