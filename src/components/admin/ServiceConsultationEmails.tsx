@@ -1,269 +1,53 @@
-
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { toast } from "sonner";
+"use client";
+import { useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useAutoRecovery } from "@/hooks/useAutoRecovery";
-import { 
-  Plus, 
-  Trash2, 
-  Mail, 
-  AlertCircle,
-  CheckCircle,
-  Save,
-  RefreshCw
-} from "lucide-react";
+import { saveWithTimeout } from "@/lib/saveWithTimeout";
+import { toast } from "sonner";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Mail } from "lucide-react";
+
+function normalizeEmails(input: string | string[]): string[] {
+  const asArray = Array.isArray(input) ? input : input.split(/[,\n]/);
+  const unique = new Set(
+    asArray
+      .map(e => e.trim().toLowerCase())
+      .filter(Boolean)
+      .filter(e => /\S+@\S+\.\S+/.test(e))
+  );
+  return Array.from(unique).slice(0, 4); // keep in sync with DB constraint
+}
 
 interface ServiceConsultationEmailsProps {
   serviceId: string;
   serviceName: string;
+  initialEmails?: string[];
 }
 
-export const ServiceConsultationEmails = ({ serviceId, serviceName }: ServiceConsultationEmailsProps) => {
-  const [emails, setEmails] = useState<string[]>(['']);
-  const [loading, setLoading] = useState(true);
+export const ServiceConsultationEmails = ({ 
+  serviceId, 
+  serviceName, 
+  initialEmails = [] 
+}: ServiceConsultationEmailsProps) => {
+  const [value, setValue] = useState(initialEmails.join(", "));
+  const emails = useMemo(() => normalizeEmails(value), [value]);
   const [saving, setSaving] = useState(false);
-  const { triggerRecovery, isRecovering } = useAutoRecovery();
 
-  useEffect(() => {
-    loadEmails();
-    
-    // Auto-recovery for stuck loading states
-    const timeout = setTimeout(() => {
-      if (loading) {
-        console.warn('ServiceConsultationEmails stuck in loading state, triggering recovery');
-        triggerRecovery();
-      }
-    }, 10000); // 10 seconds timeout
-    
-    return () => clearTimeout(timeout);
-  }, [serviceId, loading, triggerRecovery]);
-
-  const loadEmails = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('services')
-        .select('consultation_emails')
-        .eq('id', serviceId)
-        .maybeSingle();
-
-      if (error) {
-        console.error('Error loading consultation emails:', error);
-        toast.error('Failed to load consultation emails');
-        return;
-      }
-
-      if (!data) {
-        console.warn('No service found with ID:', serviceId);
-        toast.error('Service not found or access denied');
-        return;
-      }
-
-      const consultationEmails = (data as any)?.consultation_emails || [];
-      // Always show at least one empty field
-      setEmails(consultationEmails.length > 0 ? consultationEmails : ['']);
-    } catch (error) {
-      console.error('Error loading consultation emails:', error);
-      toast.error('Failed to load consultation emails');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const isValidEmail = (email: string): boolean => {
-    if (!email.trim()) return true; // Empty emails are ok
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email.trim());
-  };
-
-  const handleEmailChange = (index: number, value: string) => {
-    const newEmails = [...emails];
-    newEmails[index] = value;
-    setEmails(newEmails);
-  };
-
-  const addEmailField = () => {
-    if (emails.length < 4) {
-      setEmails([...emails, '']);
-    }
-  };
-
-  const removeEmailField = (index: number) => {
-    if (emails.length > 1) {
-      const newEmails = emails.filter((_, i) => i !== index);
-      setEmails(newEmails);
-    }
-  };
-
-  const handleSave = async () => {
-    console.log('=== SAVE BUTTON CLICKED ===');
-    
-    // Check admin access with allowlist priority
-    try {
-      // PRIORITY 1: Check admin allowlist FIRST
-      const { data: { user } } = await supabase.auth.getUser();
-      const adminAllowlist = ['robert@circlenetwork.io', 'andrew@heisleyteam.com'];
-      let adminAccess = false;
-      
-      if (user?.email && adminAllowlist.includes(user.email.toLowerCase())) {
-        console.log('ServiceConsultationEmails: Admin allowlist access granted', { email: user.email });
-        adminAccess = true;
-      } else {
-        // PRIORITY 2: For non-allowlisted users, check with timeout
-        const timeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error('Admin check timeout')), 2000);
-        });
-        
-        const adminPromise = supabase.rpc('get_user_admin_status');
-        
-        try {
-          const { data: adminCheck, error: adminError } = await Promise.race([
-            adminPromise, 
-            timeoutPromise
-          ]) as any;
-          
-          if (adminError || !adminCheck) {
-            console.log('Admin check failed:', { adminCheck, adminError });
-            toast.error('Admin access required to update consultation emails');
-            return;
-          }
-          
-          adminAccess = true;
-        } catch (timeoutError) {
-          console.warn('Admin check timeout for non-allowlisted user');
-          toast.error('Admin verification timeout. Please try again.');
-          return;
-        }
-      }
-      
-      if (!adminAccess) {
-        toast.error('Admin access required to update consultation emails');
-        return;
-      }
-    
-    } catch (error) {
-      console.error('Error during admin verification:', error);
-      toast.error('Failed to verify admin access');
-      return;
-    }
-    
+  async function handleSave() {
     setSaving(true);
     try {
-      console.log('Starting save process with emails:', emails);
-      console.log('Service ID:', serviceId);
-      
-      // Filter out empty emails and validate
-      const filteredEmails = emails
-        .map(email => email.trim())
-        .filter(email => email !== '');
-
-      console.log('Filtered emails:', filteredEmails);
-
-      // Validate all emails
-      const invalidEmails = filteredEmails.filter(email => !isValidEmail(email));
-      if (invalidEmails.length > 0) {
-        console.log('Invalid emails found:', invalidEmails);
-        toast.error(`Invalid email addresses: ${invalidEmails.join(', ')}`);
-        return;
-      }
-
-      // Check for duplicates
-      const uniqueEmails = [...new Set(filteredEmails)];
-      if (uniqueEmails.length !== filteredEmails.length) {
-        console.log('Duplicate emails detected');
-        toast.error('Duplicate email addresses found. Please remove duplicates.');
-        return;
-      }
-
-      // Ensure we have a valid array (empty array is fine for NOT NULL ARRAY column)
-      const emailsToSave = uniqueEmails.length > 0 ? uniqueEmails : [];
-      
-      console.log('About to update with emails:', emailsToSave);
-      console.log('Update query details:', {
-        table: 'services',
-        serviceId,
-        updateData: { consultation_emails: emailsToSave }
+      await saveWithTimeout(async () => {
+        const { error } = await supabase
+          .from("services")
+          .update({ consultation_emails: emails }) // empty array OK
+          .eq("id", serviceId);
+        if (error) throw error;
       });
-
-      const { data, error } = await supabase
-        .from('services')
-        .update({ consultation_emails: emailsToSave })
-        .eq('id', serviceId)
-        .select('id, title, consultation_emails');
-
-      console.log('Update response data:', data);
-      console.log('Update error details:', error);
-      
-      if (error) {
-        console.error('Supabase update error:', {
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
-          code: error.code
-        });
-        
-        if (error.code === 'PGRST116' || error.message?.includes('permission')) {
-          toast.error('Permission denied. You need admin access to update consultation emails.');
-        } else if (error.message?.includes('violates')) {
-          toast.error('Database constraint violation. Please check your permissions.');
-        } else {
-          toast.error(`Database error: ${error.message}`);
-        }
-        return;
-      }
-
-      if (!data || data.length === 0) {
-        toast.error('Service not found or no changes made');
-        return;
-      }
-
-      toast.success(`Consultation alert emails updated successfully for "${data[0].title}"`);
-      console.log('Successfully saved emails:', data[0].consultation_emails);
-      
-      // Reload to show the saved state
-      await loadEmails();
-    } catch (error: any) {
-      console.error('Error saving consultation emails:', error);
-      toast.error(error.message || 'Failed to save consultation emails');
+      toast.success("Consultation emails saved");
+    } catch (e: any) {
+      toast.error(e?.message ?? "Failed to save emails");
     } finally {
       setSaving(false);
     }
-  };
-
-  const getValidEmails = () => {
-    return emails.filter(email => email.trim() !== '' && isValidEmail(email.trim()));
-  };
-
-  if (loading) {
-    return (
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex flex-col items-center gap-3">
-            <div className="text-center">Loading consultation emails...</div>
-            {isRecovering && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <RefreshCw className="w-4 h-4 animate-spin" />
-                Refreshing system...
-              </div>
-            )}
-            <Button
-              variant="outline" 
-              size="sm"
-              onClick={triggerRecovery}
-              disabled={isRecovering}
-              className="mt-2"
-            >
-              <RefreshCw className={`w-4 h-4 mr-2 ${isRecovering ? 'animate-spin' : ''}`} />
-              {isRecovering ? 'Refreshing...' : 'Refresh'}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    );
   }
 
   return (
@@ -271,113 +55,30 @@ export const ServiceConsultationEmails = ({ serviceId, serviceName }: ServiceCon
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Mail className="w-5 h-5" />
-          Consultation Alert Emails
+          Consultation Alert Emails - {serviceName}
         </CardTitle>
-        <p className="text-sm text-muted-foreground">
-          Add up to 4 email addresses to notify when agents book consultations for "{serviceName}". 
-          These emails will receive immediate alerts with booking details.
-        </p>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <div className="flex items-start gap-2">
-            <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5" />
-            <div>
-              <h4 className="font-semibold text-blue-900">How it works:</h4>
-              <ul className="text-sm text-blue-800 mt-1 space-y-1">
-                <li>• When an agent books a consultation, ALL these emails receive an instant alert</li>
-                <li>• Emails include client contact info and scheduled time</li>
-                <li>• This ensures you never miss a booking opportunity</li>
-                <li>• Leave empty to disable email notifications for this service</li>
-              </ul>
-            </div>
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Consultation alert recipients (max 4)</label>
+          <textarea
+            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            placeholder="name@domain.com, ops@domain.com"
+            value={value}
+            onChange={e => setValue(e.target.value)}
+            rows={3}
+          />
+          <div className="text-xs text-muted-foreground">
+            Will save: {emails.join(", ") || "None"}
           </div>
-        </div>
-
-        <div className="space-y-3">
-          {emails.map((email, index) => (
-            <div key={index} className="flex items-center gap-2">
-              <div className="flex-1">
-                <Label htmlFor={`email-${index}`} className="text-sm">
-                  Alert Email {index + 1}
-                </Label>
-                <div className="flex items-center gap-2 mt-1">
-                  <Input
-                    id={`email-${index}`}
-                    type="email"
-                    value={email}
-                    onChange={(e) => handleEmailChange(index, e.target.value)}
-                    placeholder="Enter email address"
-                    className={`
-                      ${email.trim() && !isValidEmail(email.trim()) ? 'border-red-500' : ''}
-                    `}
-                  />
-                  <div className="flex items-center gap-1">
-                    {email.trim() && isValidEmail(email.trim()) && (
-                      <CheckCircle className="w-4 h-4 text-green-500" />
-                    )}
-                    {emails.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => removeEmailField(index)}
-                        className="text-red-600 hover:text-red-700"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    )}
-                  </div>
-                </div>
-                {email.trim() && !isValidEmail(email.trim()) && (
-                  <p className="text-sm text-red-600 mt-1">Please enter a valid email address</p>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="flex items-center justify-between">
-          <div>
-            {emails.length < 4 && (
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={addEmailField}
-                className="flex items-center gap-2"
-              >
-                <Plus className="w-4 h-4" />
-                Add Email ({emails.length}/4)
-              </Button>
-            )}
-          </div>
-          
-          <Button
+          <button
             onClick={handleSave}
-            disabled={saving || emails.some(email => email.trim() && !isValidEmail(email.trim()))}
-            className="flex items-center gap-2"
+            disabled={saving}
+            className="rounded-md bg-primary px-3 py-2 text-primary-foreground text-sm disabled:opacity-60 hover:bg-primary/90"
           >
-            <Save className="w-4 h-4" />
-            {saving ? 'Saving...' : 'Save Emails'}
-          </Button>
+            {saving ? "Saving…" : "Save"}
+          </button>
         </div>
-
-        {getValidEmails().length > 0 && (
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-            <h4 className="font-semibold text-green-900 mb-2">Active Alert Recipients:</h4>
-            <div className="flex flex-wrap gap-2">
-              {getValidEmails().map((email, index) => (
-                <Badge key={index} variant="outline" className="bg-green-100 text-green-800 border-green-300">
-                  {email.trim()}
-                </Badge>
-              ))}
-            </div>
-            <p className="text-sm text-green-700 mt-2">
-              {getValidEmails().length} email{getValidEmails().length !== 1 ? 's' : ''} will receive consultation alerts
-            </p>
-          </div>
-        )}
       </CardContent>
     </Card>
   );
