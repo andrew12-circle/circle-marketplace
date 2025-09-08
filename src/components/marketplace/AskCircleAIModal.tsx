@@ -15,9 +15,12 @@ export function AskCircleAIModal({ open, onOpenChange, initialMessage }: AskCirc
   const [threadId, setThreadId] = useState<string>();
   const [isMinimized, setIsMinimized] = useState(false);
 
-  // Reset minimized state when modal opens
+  // Reset minimized state when modal opens - ensure it always starts unminimized
   React.useEffect(() => {
     if (open) {
+      setIsMinimized(false);
+    } else {
+      // Reset when closed to ensure clean state
       setIsMinimized(false);
     }
   }, [open]);
