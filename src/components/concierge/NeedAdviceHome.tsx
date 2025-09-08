@@ -238,7 +238,7 @@ export default function NeedAdviceHome() {
                 </Button>
                 <Button
                   variant="default"
-                  className="absolute right-12 top-1/2 -translate-y-1/2 rounded-full h-10 w-10 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full h-10 w-10 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700"
                   aria-label="Send message"
                   onClick={() => {
                     if (query.trim()) {
