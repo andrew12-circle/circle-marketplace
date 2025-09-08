@@ -14,69 +14,56 @@ interface AskCircleAIModalProps {
 
 export function AskCircleAIModal({ open, onOpenChange, initialMessage, expandToken }: AskCircleAIModalProps) {
   const [threadId, setThreadId] = useState<string>();
-  // Always start expanded, never minimized for new conversations
-  const [isMinimized, setIsMinimizedState] = useState(false);
-  
-  // Wrapper to debug when isMinimized gets set
-  const setIsMinimized = (value: boolean) => {
-    console.log('🎛️ setIsMinimized called with:', value, 'Stack:', new Error().stack?.split('\n')[2]);
-    setIsMinimizedState(value);
-  };
+  const [isMinimized, setIsMinimized] = useState(false);
+  const [hasProcessedInitialContent, setHasProcessedInitialContent] = useState(false);
 
   // Debug logging
   React.useEffect(() => {
     console.log('🚀 AskCircleAIModal state:', { open, isMinimized, expandToken, hasInitialMessage: !!initialMessage });
   }, [open, isMinimized, expandToken, initialMessage]);
 
-  // CRITICAL: Force expanded state when opening with content
+  // Process initial content only once and allow minimizing after
   React.useEffect(() => {
     if (open && (initialMessage || expandToken)) {
-      console.log('🔥 FORCING EXPANDED STATE - modal opened with content');
+      console.log('🔥 Processing initial content - ensuring expanded');
       setIsMinimized(false);
+      setHasProcessedInitialContent(true);
     }
   }, [open, initialMessage, expandToken]);
 
-  // Reset minimized state when modal opens
+  // Reset states when modal opens
   React.useEffect(() => {
     if (open) {
-      console.log('🔄 Modal opened, resetting minimized state');
+      console.log('🔄 Modal opened, resetting states');
       setIsMinimized(false);
+      // Always mark as processed when modal opens (allows minimizing)
+      setHasProcessedInitialContent(true);
+    } else {
+      // Reset processed flag when modal closes
+      setHasProcessedInitialContent(false);
     }
   }, [open]);
 
-  // Reset minimized state when expandToken changes (new conversation trigger)
-  React.useEffect(() => {
-    if (expandToken) {
-      console.log('🎯 ExpandToken changed, ensuring modal is expanded:', expandToken);
-      setIsMinimized(false);
-    }
-  }, [expandToken]);
-
-  // Reset minimized state when initialMessage changes
-  React.useEffect(() => {
-    if (open && initialMessage) {
-      console.log('📝 InitialMessage provided, ensuring modal is expanded');
-      setIsMinimized(false);
-    }
-  }, [initialMessage, open]);
-
   const handleMinimize = () => {
+    console.log('📉 Minimize button clicked');
     setIsMinimized(true);
   };
 
   const handleRestore = () => {
+    console.log('📈 Restore button clicked');
     setIsMinimized(false);
   };
 
   const handleClose = () => {
+    console.log('❌ Close button clicked');
     setIsMinimized(false);
     onOpenChange(false);
   };
 
   if (!open) return null;
 
-  // FORCE: Never show minimized if we have initial content
-  const shouldShowMinimized = isMinimized && !initialMessage && !expandToken;
+  // Show minimized state if user clicked minimize and modal has been processed
+  const shouldShowMinimized = isMinimized;
   
   console.log('🎭 Render decision:', { 
     isMinimized, 
