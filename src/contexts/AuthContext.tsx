@@ -72,6 +72,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [provisionalProfile, setProvisionalProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [retryCount, setRetryCount] = useState(0);
   const [lastFetchAttempt, setLastFetchAttempt] = useState(0);
@@ -82,6 +83,33 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const queryClient = useQueryClient();
   const { handleSessionError, triggerRecoveryBanner } = useSessionPersistence();
   const sessionManagement = useSessionManagement();
+
+  // Helper functions for provisional profile support
+  const createProvisionalProfile = useCallback((user: User): Profile => {
+    const displayName = user.user_metadata?.name || 
+                       user.user_metadata?.display_name || 
+                       user.email?.split('@')[0] || 
+                       'User';
+    
+    return {
+      user_id: user.id,
+      display_name: displayName,
+      is_admin: user.email === 'andrew@circlenetwork.io',
+      is_verified: false,
+      is_pro: false,
+      is_creator: false,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    } as Profile;
+  }, []);
+
+  const ensureProfileExists = useCallback(async (userId: string) => {
+    try {
+      await supabase.rpc('ensure_profile_exists', { p_user_id: userId });
+    } catch (error) {
+      logger.warn('Could not ensure profile exists:', error);
+    }
+  }, []);
 
   // Add recovery mechanism for stuck states
   const recoverFromStuckState = useCallback(() => {
@@ -242,7 +270,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       
       // Determine timeout based on route - longer for admin routes to prevent circuit breaker activation
       const isAdminRoute = window.location.pathname.includes('/admin');
-      const timeoutMs = isAdminRoute ? 10000 : 5000; // 10s for admin routes, 5s elsewhere
+      const timeoutMs = isAdminRoute ? 15000 : 8000; // Extended timeouts: 15s for admin routes, 8s elsewhere
       console.log(`⏱️ Using ${timeoutMs}ms timeout for ${isAdminRoute ? 'admin' : 'regular'} route`);
       
       // Create a timeout with proper cleanup
@@ -439,6 +467,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     removeLegacyAuthCookies();
     initCookieMonitoring();
     
+    // Clear old auth storage keys
+    clearLegacyAuthKeys();
+    
     // Set up auth state listener FIRST (single instance)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
@@ -453,17 +484,32 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             break;
           case 'SIGNED_OUT':
             setProfile(null);
+            setProvisionalProfile(null);
             queryClient.clear();
             break;
         }
         
         // Defer any Supabase calls to prevent deadlock
         if (session?.user) {
-          setTimeout(() => {
-            fetchProfile(session.user.id);
+          // Create provisional profile immediately for UI responsiveness
+          const provisional = createProvisionalProfile(session.user);
+          setProvisionalProfile(provisional);
+          
+          setTimeout(async () => {
+            try {
+              // Ensure profile exists before fetching
+              await ensureProfileExists(session.user.id);
+              await fetchProfile(session.user.id);
+              // Clear provisional once real profile loads
+              setProvisionalProfile(null);
+            } catch (error) {
+              logger.error('Failed to fetch profile:', error);
+              // Keep provisional profile if real fetch fails
+            }
           }, 0);
         } else {
           setProfile(null);
+          setProvisionalProfile(null);
         }
         
         setLoading(false);
@@ -477,7 +523,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(session?.user ?? null);
       
       if (session?.user) {
-        await fetchProfile(session.user.id);
+        // Create provisional profile immediately
+        const provisional = createProvisionalProfile(session.user);
+        setProvisionalProfile(provisional);
+        
+        try {
+          await ensureProfileExists(session.user.id);
+          await fetchProfile(session.user.id);
+          // Clear provisional once real profile loads
+          setProvisionalProfile(null);
+        } catch (error) {
+          logger.error('Failed to fetch profile on session check:', error);
+          // Keep provisional profile if real fetch fails
+        }
       }
       
       setLoading(false);
@@ -545,8 +603,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const value = {
     user,
     session,
-    profile,
-    pro: getProStatus(profile),
+    profile: profile || provisionalProfile, // Use real profile if available, otherwise provisional
+    pro: getProStatus(profile || provisionalProfile),
     loading,
     signOut,
     updateProfile,

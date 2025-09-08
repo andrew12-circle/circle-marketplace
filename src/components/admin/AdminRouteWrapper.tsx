@@ -4,6 +4,7 @@ import { useAdminStatus } from '@/hooks/useAdminStatus';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/utils/logger';
 import { toast } from 'sonner';
+import { ProvisionalProfileBanner } from '@/components/auth/ProvisionalProfileBanner';
 
 interface AdminRouteWrapperProps {
   children: ReactNode;
@@ -80,5 +81,10 @@ export const AdminRouteWrapper = ({ children }: AdminRouteWrapperProps) => {
     };
   }, [user, isAdmin]);
 
-  return <>{children}</>;
+  return (
+    <>
+      <ProvisionalProfileBanner />
+      {children}
+    </>
+  );
 };

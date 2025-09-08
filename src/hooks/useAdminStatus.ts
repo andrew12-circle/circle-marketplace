@@ -12,7 +12,7 @@ export const useAdminStatus = () => {
     queryFn: async () => {
       if (!user) return false;
       
-      // Client-side admin allowlist for known admins
+      // Client-side admin allowlist for known admins - always short-circuit
       if (user.email === 'andrew@circlenetwork.io') {
         logger.log('Admin status: Allowed via client allowlist', { email: user.email });
         return true;
@@ -29,21 +29,46 @@ export const useAdminStatus = () => {
         logger.log('Admin status: Profile indicates non-admin, checking server...', { userId: user.id });
         
         try {
-          const { data: serverCheck, error } = await supabase.rpc('get_user_admin_status');
+          // Add timeout for server check - don't let it hang forever
+          const timeoutPromise = new Promise<never>((_, reject) => 
+            setTimeout(() => reject(new Error('Admin check timeout')), 4000)
+          );
+          
+          const checkPromise = supabase.rpc('get_user_admin_status');
+          
+          const { data: serverCheck, error } = await Promise.race([
+            checkPromise,
+            timeoutPromise
+          ]);
+          
           if (error) {
             logger.warn('Admin status: Server check failed, using profile data', { error });
             return false;
           }
           return !!serverCheck;
-        } catch (error) {
-          logger.warn('Admin status: Server check exception, using profile data', { error });
+        } catch (error: any) {
+          if (error?.message === 'Admin check timeout') {
+            logger.warn('Admin status: Server check timeout, treating as non-admin', { userId: user.id });
+          } else {
+            logger.warn('Admin status: Server check exception, using profile data', { error });
+          }
           return false;
         }
       }
       
-      // No profile data, check server
+      // No profile data, check server with timeout
       try {
-        const { data: serverCheck, error } = await supabase.rpc('get_user_admin_status');
+        const timeoutPromise = new Promise<never>((_, reject) => 
+          setTimeout(() => reject(new Error('Admin check timeout')), 4000)
+        );
+        
+        const checkPromise = supabase.rpc('get_user_admin_status');
+        
+        const { data: serverCheck, error } = await Promise.race([
+          checkPromise,
+          timeoutPromise
+        ]);
+        
         if (error) {
           logger.warn('Admin status: Server check failed', { error });
           return false;
@@ -51,8 +76,17 @@ export const useAdminStatus = () => {
         const result = !!serverCheck;
         logger.log('Admin status: Server result', { userId: user.id, isAdmin: result });
         return result;
-      } catch (error) {
-        logger.warn('Admin status: Server check exception', { error });
+      } catch (error: any) {
+        if (error?.message === 'Admin check timeout') {
+          // For allowlisted users, treat timeout as admin (fail-safe for known admins)
+          if (user.email === 'andrew@circlenetwork.io') {
+            logger.warn('Admin status: Timeout but user is allowlisted, treating as admin', { userId: user.id });
+            return true;
+          }
+          logger.warn('Admin status: Server check timeout', { userId: user.id });
+        } else {
+          logger.warn('Admin status: Server check exception', { error });
+        }
         return false;
       }
     },
