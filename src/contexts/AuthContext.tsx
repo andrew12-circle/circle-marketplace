@@ -6,6 +6,7 @@ import { removeLegacyAuthCookies, initCookieMonitoring } from '@/lib/cookies';
 
 import { logger } from '@/utils/logger';
 import { useQueryClient } from '@tanstack/react-query';
+import { clearLegacyAuthKeys } from '@/utils/authCleanup';
 import { useSessionPersistence } from '@/hooks/useSessionPersistence';
 import { getProStatus } from '@/lib/profile';
 import { useSessionManagement } from '@/hooks/useSessionManagement';
