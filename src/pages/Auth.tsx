@@ -72,21 +72,31 @@ export const Auth = () => {
   };
 
   const handleSignUp = async (email: string, password: string, displayName: string, turnstileToken?: string) => {
-    // Use Supabase client to call the edge function
-    const { data, error } = await supabase.functions.invoke('auth-signup', {
-      body: {
-        email,
-        password,
-        displayName,
-        turnstileToken
-      }
-    });
+    console.log('Starting signup process...', { email, displayName, hasTurnstileToken: !!turnstileToken });
     
-    if (error) {
-      throw new Error(error.message || 'Signup failed');
-    }
+    try {
+      // Use Supabase client to call the edge function
+      const { data, error } = await supabase.functions.invoke('auth-signup', {
+        body: {
+          email,
+          password,
+          displayName,
+          turnstileToken
+        }
+      });
+      
+      console.log('Edge function response:', { data, error });
+      
+      if (error) {
+        console.error('Edge function error details:', error);
+        throw new Error(error.message || 'Signup failed');
+      }
 
-    return data;
+      return data;
+    } catch (err) {
+      console.error('Signup error:', err);
+      throw err;
+    }
   };
 
   const handleForgotPassword = async (email: string) => {

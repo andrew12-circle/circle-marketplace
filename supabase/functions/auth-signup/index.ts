@@ -51,12 +51,21 @@ async function verifyTurnstileToken(token: string, ip?: string): Promise<boolean
 }
 
 serve(async (req) => {
+  console.log('Auth signup function called - Method:', req.method);
+  
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
 
   try {
+    console.log('Parsing request body...');
     const { email, password, displayName, turnstileToken } = await req.json()
+    console.log('Request data received:', { 
+      email, 
+      displayName, 
+      hasPassword: !!password, 
+      hasTurnstileToken: !!turnstileToken 
+    });
 
     // Get client IP for Turnstile verification
     const clientIP = req.headers.get('CF-Connecting-IP') || 
@@ -68,10 +77,14 @@ serve(async (req) => {
                          req.headers.get('origin')?.includes('127.0.0.1') ||
                          req.headers.get('origin')?.includes('.sandbox.lovable.dev');
 
+    console.log(`Development mode detected: ${isDevelopment}, Origin: ${req.headers.get('origin')}`);
+
     if (!isDevelopment && turnstileToken) {
+      console.log('Verifying Turnstile token...');
       const isValidToken = await verifyTurnstileToken(turnstileToken, clientIP || undefined);
       
       if (!isValidToken) {
+        console.log('Turnstile verification failed');
         return new Response(
           JSON.stringify({ error: 'Invalid security verification' }),
           { 
@@ -81,6 +94,7 @@ serve(async (req) => {
         )
       }
     } else if (!isDevelopment && !turnstileToken) {
+      console.log('No Turnstile token provided for production environment');
       return new Response(
         JSON.stringify({ error: 'Security verification required' }),
         { 
