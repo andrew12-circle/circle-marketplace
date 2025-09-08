@@ -32,11 +32,11 @@ interface CartItem {
     pro_price?: number;
   };
   // New unified flow fields
-  coverageType?: 'pro' | 'copay';
+  coverageType?: 'pro' | 'copay' | 'retail';
   selectedVendor?: any;
   affiliateUrl?: string;
   requiresConsultation?: boolean;
-  coverageStatus?: 'pending-selection' | 'pending-vendor-approval' | 'approved' | 'denied' | 'active';
+  coverageStatus?: 'pending-selection' | 'pending-vendor-approval' | 'approved' | 'denied' | 'active' | 'retail';
 }
 
 interface CartContextType {
@@ -49,7 +49,7 @@ interface CartContextType {
   getCartCount: () => number;
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
-  updateCartItemCoverage: (id: string, coverageType: 'pro' | 'copay', selectedVendor?: any) => void;
+  updateCartItemCoverage: (id: string, coverageType: 'pro' | 'copay' | 'retail', selectedVendor?: any) => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -240,7 +240,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     );
   };
 
-  const updateCartItemCoverage = (id: string, coverageType: 'pro' | 'copay', selectedVendor?: any) => {
+  const updateCartItemCoverage = (id: string, coverageType: 'pro' | 'copay' | 'retail', selectedVendor?: any) => {
     setCartItems(prev =>
       prev.map(cartItem =>
         cartItem.id === id
@@ -248,7 +248,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
               ...cartItem, 
               coverageType,
               selectedVendor,
-              coverageStatus: coverageType === 'pro' ? 'active' : 'pending-vendor-approval'
+              coverageStatus: coverageType === 'pro' ? 'active' : coverageType === 'retail' ? 'retail' : 'pending-vendor-approval'
             }
           : cartItem
       )
