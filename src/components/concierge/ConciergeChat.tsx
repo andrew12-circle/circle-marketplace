@@ -49,6 +49,7 @@ export const ConciergeChat: React.FC<ConciergeChatProps> = ({ threadId: initialT
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [threadId, setThreadId] = useState(initialThreadId || generateThreadId());
+  const [feedbackStates, setFeedbackStates] = useState<Record<string, { helpful?: boolean; showCorrection?: boolean; correction?: string }>>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
 
@@ -211,7 +212,56 @@ export const ConciergeChat: React.FC<ConciergeChatProps> = ({ threadId: initialT
 
   const handleFeedback = async (messageId: string, helpful: boolean, reason?: string) => {
     try {
-      // Generate anon_id if user is not authenticated
+      // Update feedback state
+      setFeedbackStates(prev => ({
+        ...prev,
+        [messageId]: { 
+          helpful, 
+          showCorrection: !helpful,
+          correction: prev[messageId]?.correction || ''
+        }
+      }));
+
+      // If thumbs down and we have a reason/correction, submit it
+      if (!helpful && reason) {
+        const anonId = user?.id || crypto.randomUUID();
+        
+        await supabase.functions.invoke('concierge-feedback', {
+          body: {
+            user_id: user?.id || null,
+            anon_id: anonId,
+            answer_id: messageId,
+            helpful,
+            reason
+          }
+        });
+        toast.success('Thank you for your feedback!');
+      } else if (helpful) {
+        // Submit positive feedback immediately
+        const anonId = user?.id || crypto.randomUUID();
+        
+        await supabase.functions.invoke('concierge-feedback', {
+          body: {
+            user_id: user?.id || null,
+            anon_id: anonId,
+            answer_id: messageId,
+            helpful,
+            reason: null
+          }
+        });
+        toast.success('Thank you for your feedback!');
+      }
+    } catch (error) {
+      console.error('Error submitting feedback:', error);
+      toast.error('Failed to submit feedback');
+    }
+  };
+
+  const submitCorrection = async (messageId: string) => {
+    const feedbackState = feedbackStates[messageId];
+    if (!feedbackState?.correction?.trim()) return;
+
+    try {
       const anonId = user?.id || crypto.randomUUID();
       
       await supabase.functions.invoke('concierge-feedback', {
@@ -219,14 +269,24 @@ export const ConciergeChat: React.FC<ConciergeChatProps> = ({ threadId: initialT
           user_id: user?.id || null,
           anon_id: anonId,
           answer_id: messageId,
-          helpful,
-          reason
+          helpful: false,
+          reason: feedbackState.correction
         }
       });
-      toast.success('Thank you for your feedback!');
+
+      // Hide correction input and mark as submitted
+      setFeedbackStates(prev => ({
+        ...prev,
+        [messageId]: { 
+          ...prev[messageId],
+          showCorrection: false
+        }
+      }));
+
+      toast.success('Thank you for the detailed feedback!');
     } catch (error) {
-      console.error('Error submitting feedback:', error);
-      toast.error('Failed to submit feedback');
+      console.error('Error submitting correction:', error);
+      toast.error('Failed to submit correction');
     }
   };
 
@@ -328,21 +388,65 @@ export const ConciergeChat: React.FC<ConciergeChatProps> = ({ threadId: initialT
 
               {/* Feedback buttons for assistant messages */}
               {message.role === 'assistant' && (
-                <div className="mt-2 flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleFeedback(message.id, true)}
-                  >
-                    <ThumbsUp className="w-3 h-3" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleFeedback(message.id, false)}
-                  >
-                    <ThumbsDown className="w-3 h-3" />
-                  </Button>
+                <div className="mt-2">
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleFeedback(message.id, true)}
+                      className={feedbackStates[message.id]?.helpful === true ? 'text-green-600' : ''}
+                    >
+                      <ThumbsUp className="w-3 h-3" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleFeedback(message.id, false)}
+                      className={feedbackStates[message.id]?.helpful === false ? 'text-red-600' : ''}
+                    >
+                      <ThumbsDown className="w-3 h-3" />
+                    </Button>
+                  </div>
+                  
+                  {/* Correction input for negative feedback */}
+                  {feedbackStates[message.id]?.showCorrection && (
+                    <div className="mt-2 space-y-2">
+                      <Input
+                        placeholder="What would be a better response?"
+                        value={feedbackStates[message.id]?.correction || ''}
+                        onChange={(e) => setFeedbackStates(prev => ({
+                          ...prev,
+                          [message.id]: { 
+                            ...prev[message.id],
+                            correction: e.target.value
+                          }
+                        }))}
+                        className="text-sm"
+                      />
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          onClick={() => submitCorrection(message.id)}
+                          disabled={!feedbackStates[message.id]?.correction?.trim()}
+                        >
+                          Submit
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setFeedbackStates(prev => ({
+                            ...prev,
+                            [message.id]: { 
+                              ...prev[message.id],
+                              showCorrection: false
+                            }
+                          }))}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
