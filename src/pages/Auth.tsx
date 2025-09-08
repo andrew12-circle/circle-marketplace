@@ -507,9 +507,9 @@ export const Auth = () => {
             )}
 
             {/* Turnstile Security Verification (Signup only) */}
-            {!isLogin && !showForgotPassword && (showTurnstile || process.env.NODE_ENV === 'production') && (
+            {!isLogin && !showForgotPassword && (showTurnstile || import.meta.env.MODE === 'production') && (
               <TurnstileGate
-                siteKey={process.env.REACT_APP_TURNSTILE_SITE_KEY || '1x00000000000000000000AA'}
+                siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY || '1x00000000000000000000AA'}
                 onSuccess={(token) => {
                   setTurnstileToken(token);
                   setShowTurnstile(false);
