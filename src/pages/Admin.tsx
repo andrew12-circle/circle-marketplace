@@ -3,7 +3,7 @@ import { AdminContentRouter } from "@/components/admin/AdminContentRouter";
 import { useAuthBootstrap } from "@/lib/useAuthBootstrap";
 import { useCanQuery } from "@/lib/dataLayer";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabaseClient";
+import { supabase } from "@/integrations/supabase/client";
 import { Navigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { AlertTriangle, Menu } from "lucide-react";

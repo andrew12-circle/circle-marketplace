@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { supabase } from "@/lib/supabaseClient"
+import { supabase } from "@/integrations/supabase/client"
 import { Session } from "@supabase/supabase-js"
 import { logGuardDecision } from "@/lib/diagnostics"
 

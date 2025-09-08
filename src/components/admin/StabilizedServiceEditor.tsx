@@ -9,7 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { queueServicePatch, isServiceSaving, cancelPendingSave } from "@/lib/adminServiceEditor";
 import { useCanQuery } from "@/lib/dataLayer";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabaseClient";
+import { supabase } from "@/integrations/supabase/client";
 import { Check, Save, AlertCircle, Undo } from "lucide-react";
 
 interface Service {
