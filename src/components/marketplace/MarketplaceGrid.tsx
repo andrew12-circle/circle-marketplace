@@ -517,7 +517,7 @@ export const MarketplaceGrid = () => {
   useEffect(() => {
     const handleOpenConciergeModal = (event: CustomEvent) => {
       setConciergeInitialMessage(event.detail.initialMessage);
-      setConciergeExpandToken(Date.now());
+      setConciergeExpandToken(event.detail.expandToken || Date.now());
       setIsConciergeModalOpen(true);
     };
 

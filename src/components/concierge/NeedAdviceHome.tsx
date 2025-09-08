@@ -68,7 +68,10 @@ export default function NeedAdviceHome() {
   function startConversation(initialTopic: string) {
     // Trigger the global modal to open with this topic as initial message
     const event = new CustomEvent('openConciergeModal', { 
-      detail: { initialMessage: `I need help with ${initialTopic}` }
+      detail: { 
+        initialMessage: `I need help with ${initialTopic}`,
+        expandToken: Date.now()
+      }
     });
     window.dispatchEvent(event);
   }
@@ -80,7 +83,10 @@ export default function NeedAdviceHome() {
     
     // Trigger the global modal to open with this search query
     const event = new CustomEvent('openConciergeModal', { 
-      detail: { initialMessage: q }
+      detail: { 
+        initialMessage: q,
+        expandToken: Date.now()
+      }
     });
     window.dispatchEvent(event);
   }
@@ -162,7 +168,10 @@ export default function NeedAdviceHome() {
       transcript = transcript.trim();
       // Trigger the global modal to open with voice input
       const event = new CustomEvent('openConciergeModal', { 
-        detail: { initialMessage: transcript }
+        detail: { 
+          initialMessage: transcript,
+          expandToken: Date.now()
+        }
       });
       window.dispatchEvent(event);
     };
