@@ -14,7 +14,15 @@ interface AskCircleAIModalProps {
 
 export function AskCircleAIModal({ open, onOpenChange, initialMessage, expandToken }: AskCircleAIModalProps) {
   const [threadId, setThreadId] = useState<string>();
-  const [isMinimized, setIsMinimizedState] = useState(false);
+  // Initialize as not minimized when we have an initial message or expand token
+  const [isMinimized, setIsMinimizedState] = useState(() => {
+    // If we're opening with content, start expanded
+    if (initialMessage || expandToken) {
+      console.log('🎯 Initializing modal as EXPANDED due to:', { initialMessage: !!initialMessage, expandToken });
+      return false;
+    }
+    return false;
+  });
   
   // Wrapper to debug when isMinimized gets set
   const setIsMinimized = (value: boolean) => {
