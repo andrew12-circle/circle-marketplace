@@ -157,8 +157,8 @@ const Index = () => {
                     </Button>
                   )}
 
-                  {/* Agent Questionnaire button */}
-                  {user && profile && !profile.goal_assessment_completed && (
+                  {/* Agent Questionnaire button - Pro feature only */}
+                  {user && profile && profile.is_pro_member && !profile.goal_assessment_completed && (
                     <Button asChild variant="outline" size="sm" className="text-xs sm:text-sm">
                       <Link to="/agent-questionnaire">
                         <BookOpen className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
