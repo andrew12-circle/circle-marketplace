@@ -1,21 +1,32 @@
+import React, { useState, useEffect } from "react";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { AdminContentRouter } from "@/components/admin/AdminContentRouter";
-import { useAuthBootstrap } from "@/lib/useAuthBootstrap";
-import { useCanQuery } from "@/lib/dataLayer";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Navigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { AlertTriangle, Menu } from "lucide-react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { ServiceEditorErrorBoundary } from "@/lib/errorBoundary";
 import { logGuardDecision } from "@/lib/diagnostics";
+import { Session } from "@supabase/supabase-js";
 
 const Admin = () => {
-  const { status, session } = useAuthBootstrap();
-  const canQuery = useCanQuery();
+  // ProtectedRoute already handles auth, so we just get the session
+  const [session, setSession] = useState<Session | null>(null);
+  
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
 
-  // Check admin status with new stable approach
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // Check admin status
   const { data: isAdmin, isLoading: adminLoading } = useQuery({
     queryKey: ['admin-status', session?.user?.id],
     queryFn: async () => {
@@ -36,32 +47,13 @@ const Admin = () => {
       }
       return !!data;
     },
-    enabled: canQuery,
+    enabled: !!session?.user?.id,
     staleTime: 60 * 1000, // 1 minute
     retry: 1,
   });
 
-  // Show loading state while bootstrapping
-  if (status === "loading") {
-    logGuardDecision('admin page loading', { path: '/admin' });
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 flex items-center justify-center">
-        <div className="flex items-center gap-3">
-          <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-          <span className="text-muted-foreground">Loading your session...</span>
-        </div>
-      </div>
-    );
-  }
-
-  // Redirect if not authenticated
-  if (!session) {
-    logGuardDecision('admin page redirect no session', { path: '/admin' });
-    return <Navigate to="/auth" replace />;
-  }
-
   // Show loading while checking admin status
-  if (adminLoading) {
+  if (!session || adminLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 flex items-center justify-center">
         <div className="flex items-center gap-3">
@@ -118,7 +110,7 @@ const Admin = () => {
                     Welcome, {session.user?.email}
                   </span>
                   <button
-                    onClick={() => window.location.href = '/marketplace'}
+                    onClick={() => window.location.href = '/'}
                     className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-muted-foreground hover:text-primary hover:bg-accent rounded-md transition-colors"
                   >
                     <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
