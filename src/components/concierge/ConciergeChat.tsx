@@ -280,20 +280,9 @@ export const ConciergeChat: React.FC<ConciergeChatProps> = ({ threadId: initialT
             <p className="text-sm text-muted-foreground">Your AI agent advisor</p>
           </div>
         </div>
-        <div className="flex gap-2">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => setShowBookAdvisor(true)}
-            className="flex items-center gap-2"
-          >
-            <Phone className="w-4 h-4" />
-            Book Human Advisor
-          </Button>
-          <Button variant="outline" size="sm" onClick={startNewConversation}>
-            New Chat
-          </Button>
-        </div>
+        <Button variant="outline" size="sm" onClick={startNewConversation}>
+          New Chat
+        </Button>
       </div>
 
       {/* Messages */}
@@ -505,6 +494,17 @@ export const ConciergeChat: React.FC<ConciergeChatProps> = ({ threadId: initialT
             className="self-end"
           >
             <Send className="w-4 h-4" />
+          </Button>
+        </div>
+        <div className="flex justify-center mt-3">
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={() => setShowBookAdvisor(true)}
+            className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
+          >
+            <Phone className="w-3 h-3" />
+            Book Human Advisor
           </Button>
         </div>
       </div>
