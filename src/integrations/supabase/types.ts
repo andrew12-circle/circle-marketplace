@@ -10843,6 +10843,19 @@ export type Database = {
           vendor_website_url: string
         }[]
       }
+      get_profiles_keyset: {
+        Args: { cursor_date?: string; page_size?: number; search_term?: string }
+        Returns: {
+          created_at: string
+          display_name: string
+          has_next: boolean
+          is_admin: boolean
+          is_pro: boolean
+          is_verified: boolean
+          updated_at: string
+          user_id: string
+        }[]
+      }
       get_public_profile: {
         Args: { profile_id: string }
         Returns: {
