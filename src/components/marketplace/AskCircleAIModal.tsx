@@ -33,7 +33,7 @@ export function AskCircleAIModal({ open, onOpenChange, initialMessage }: AskCirc
   // Minimized state - floating widget
   if (isMinimized) {
     return (
-      <div className="fixed bottom-4 right-4 z-50">
+      <div className="fixed bottom-4 left-4 z-50">
         <Button
           onClick={handleRestore}
           className="h-14 w-14 rounded-full shadow-lg"
