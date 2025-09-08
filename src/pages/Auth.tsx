@@ -413,19 +413,27 @@ export const Auth = () => {
             {/* Display Name Field (Signup only) */}
             {!isLogin && !showForgotPassword && (
               <div className="space-y-2">
-                <Label htmlFor="displayName">Full Name</Label>
+                <Label htmlFor="displayName" className="flex items-center gap-1 font-medium">
+                  Full Name 
+                  <span className="text-red-500">*</span>
+                </Label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
                     id="displayName"
                     name="displayName"
                     type="text"
-                    placeholder="Enter your full name"
-                    className="pl-10"
+                    placeholder="Your first and last name"
+                    className="pl-10 border-2 focus:border-primary"
                     autoComplete="name"
                     required
+                    value={formData.displayName}
+                    onChange={(e) => setFormData(prev => ({ ...prev, displayName: e.target.value }))}
                   />
                 </div>
+                <p className="text-xs text-muted-foreground">
+                  We'll use this to personalize your experience
+                </p>
               </div>
             )}
 
