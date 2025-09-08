@@ -3,7 +3,7 @@ import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { ConciergeChat } from "@/components/concierge/ConciergeChat";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Minimize2, Maximize2, MessageSquare } from "lucide-react";
+import { Minus, MessageSquare } from "lucide-react";
 
 interface AskCircleAIModalProps {
   open: boolean;
@@ -54,14 +54,14 @@ export function AskCircleAIModal({ open, onOpenChange, initialMessage }: AskCirc
         </VisuallyHidden>
         
         {/* Add minimize button to the chat header */}
-        <div className="absolute top-4 left-4 z-10">
+        <div className="absolute top-4 right-16 z-10">
           <Button
             variant="ghost"
             size="sm"
             onClick={handleMinimize}
             className="h-8 w-8 p-0"
           >
-            <Minimize2 className="w-4 h-4" />
+            <Minus className="w-4 h-4" />
           </Button>
         </div>
         
