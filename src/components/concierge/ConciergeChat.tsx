@@ -1,30 +1,30 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { Send, ThumbsUp, ThumbsDown, Calendar, ExternalLink, BookOpen, MessageSquare, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { Send, ThumbsUp, ThumbsDown, BookOpen, ExternalLink, Calendar, MessageSquare } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+import { useToast } from '@/hooks/use-toast';
 
 interface ConciergeMessage {
   id: string;
   role: 'user' | 'assistant';
   content: string;
-  created_at: string;
+  timestamp: Date;
   trust?: {
     confidence: number;
-    peer_patterns: string[];
+    peers: number;
   };
   citations?: Array<{
     title: string;
-    source: 'marketplace' | 'kb';
-    id: string;
+    source: string;
+    url?: string;
   }>;
   actions?: Array<{
+    action: string;
     label: string;
-    action: 'view_services' | 'start_workflow' | 'open_link' | 'book_meeting';
     params: Record<string, any>;
   }>;
   quick_replies?: string[];
@@ -83,60 +83,45 @@ export const ConciergeChat: React.FC<ConciergeChatProps> = ({ threadId: initialT
       if (user?.id) {
         query = query.eq('user_id', user.id);
       } else {
-        // For anonymous users, don't filter by user_id or filter for null
-        query = query.is('user_id', null);
+        // For anonymous users, we can't filter by user_id as it will be null
+        console.log('Loading messages for anonymous user');
       }
 
-      const { data, error } = await query;
+      const { data: dbMessages, error } = await query;
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error loading messages:', error);
+        return;
+      }
 
-      const formattedMessages: ConciergeMessage[] = (data || []).map(msg => {
-        if (msg.role === 'assistant') {
-          try {
-            const parsed = JSON.parse(msg.content);
-            return {
-              id: msg.id,
-              role: msg.role,
-              content: parsed.message || msg.content,
-              created_at: msg.created_at,
-              trust: parsed.trust,
-              citations: parsed.citations,
-              actions: parsed.actions,
-              quick_replies: parsed.quick_replies,
-              handoff: parsed.handoff
-            };
-          } catch {
-            return {
-              id: msg.id,
-              role: msg.role,
-              content: msg.content,
-              created_at: msg.created_at
-            };
-          }
-        }
-        return {
+      if (dbMessages && dbMessages.length > 0) {
+        const formattedMessages: ConciergeMessage[] = dbMessages.map(msg => ({
           id: msg.id,
-          role: msg.role,
+          role: msg.role as 'user' | 'assistant',
           content: msg.content,
-          created_at: msg.created_at
-        };
-      });
-
-      setMessages(formattedMessages);
+          timestamp: new Date(msg.created_at),
+          trust: msg.metadata?.trust,
+          citations: msg.metadata?.citations,
+          actions: msg.metadata?.actions,
+          quick_replies: msg.metadata?.quick_replies,
+          handoff: msg.metadata?.handoff
+        }));
+        
+        setMessages(formattedMessages);
+      }
     } catch (error) {
-      console.error('Error loading messages:', error);
+      console.error('Error in loadMessages:', error);
     }
   };
 
-  const sendMessage = async (text: string) => {
-    if (!text.trim() || loading) return;
+  const sendMessage = async (messageText: string = input) => {
+    if (!messageText.trim()) return;
 
     const userMessage: ConciergeMessage = {
-      id: `temp_${Date.now()}`,
+      id: `user_${Date.now()}`,
       role: 'user',
-      content: text,
-      created_at: new Date().toISOString()
+      content: messageText,
+      timestamp: new Date()
     };
 
     setMessages(prev => [...prev, userMessage]);
@@ -144,25 +129,22 @@ export const ConciergeChat: React.FC<ConciergeChatProps> = ({ threadId: initialT
     setLoading(true);
 
     try {
-      // Generate anon_id if user is not authenticated
-      const anonId = user?.id || crypto.randomUUID();
-      
       const { data, error } = await supabase.functions.invoke('concierge-respond', {
         body: {
           user_id: user?.id || null,
-          anon_id: anonId,
+          anon_id: user?.id ? null : 'anon_' + Date.now(),
           thread_id: threadId,
-          text: text
+          text: messageText
         }
       });
 
       if (error) throw error;
 
       const assistantMessage: ConciergeMessage = {
-        id: `response_${Date.now()}`,
+        id: `assistant_${Date.now()}`,
         role: 'assistant',
         content: data.message,
-        created_at: new Date().toISOString(),
+        timestamp: new Date(),
         trust: data.trust,
         citations: data.citations,
         actions: data.actions,
@@ -170,15 +152,16 @@ export const ConciergeChat: React.FC<ConciergeChatProps> = ({ threadId: initialT
         handoff: data.handoff
       };
 
-      setMessages(prev => [...prev.slice(0, -1), userMessage, assistantMessage]);
-      
-      if (onThreadChange) {
-        onThreadChange(threadId);
-      }
-    } catch (error) {
+      setMessages(prev => [...prev, assistantMessage]);
+    } catch (error: any) {
       console.error('Error sending message:', error);
-      toast.error('Failed to get response. Please try again.');
-      setMessages(prev => prev.slice(0, -1)); // Remove the user message
+      const errorMessage: ConciergeMessage = {
+        id: `error_${Date.now()}`,
+        role: 'assistant',
+        content: "I'm having trouble connecting right now. Please try again in a moment.",
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, errorMessage]);
     } finally {
       setLoading(false);
     }
@@ -188,93 +171,58 @@ export const ConciergeChat: React.FC<ConciergeChatProps> = ({ threadId: initialT
     sendMessage(reply);
   };
 
-  const handleAction = async (action: ConciergeMessage['actions'][0]) => {
+  const handleAction = (action: any) => {
     switch (action.action) {
       case 'view_services':
         // Navigate to marketplace with filters
-        window.location.href = `/marketplace?category=${action.params.category}`;
-        break;
-      case 'start_workflow':
-        // Open workflow or checklist
-        if (action.params.url) {
-          window.open(action.params.url, '_blank');
-        }
-        break;
-      case 'open_link':
-        window.open(action.params.url, '_blank');
+        window.scrollTo({ top: window.innerHeight, behavior: 'smooth' });
         break;
       case 'book_meeting':
-        // Handle booking meeting
-        toast.info('Booking feature coming soon!');
+        // Open booking modal
+        window.open(action.params?.booking_url || '/book-meeting', '_blank');
         break;
+      default:
+        console.log('Unknown action:', action);
     }
   };
 
-  const handleFeedback = async (messageId: string, helpful: boolean, reason?: string) => {
-    try {
-      // Update feedback state
-      setFeedbackStates(prev => ({
-        ...prev,
-        [messageId]: { 
-          helpful, 
-          showCorrection: !helpful,
-          correction: prev[messageId]?.correction || ''
-        }
-      }));
-
-      // If thumbs down and we have a reason/correction, submit it
-      if (!helpful && reason) {
-        const anonId = user?.id || crypto.randomUUID();
-        
-        await supabase.functions.invoke('concierge-feedback', {
-          body: {
-            user_id: user?.id || null,
-            anon_id: anonId,
-            answer_id: messageId,
-            helpful,
-            reason
-          }
-        });
-        toast.success('Thank you for your feedback!');
-      } else if (helpful) {
-        // Submit positive feedback immediately
-        const anonId = user?.id || crypto.randomUUID();
-        
-        await supabase.functions.invoke('concierge-feedback', {
-          body: {
-            user_id: user?.id || null,
-            anon_id: anonId,
-            answer_id: messageId,
-            helpful,
-            reason: null
-          }
-        });
-        toast.success('Thank you for your feedback!');
+  const handleFeedback = async (messageId: string, isHelpful: boolean) => {
+    setFeedbackStates(prev => ({
+      ...prev,
+      [messageId]: { 
+        helpful: isHelpful,
+        showCorrection: !isHelpful,
+        correction: ''
       }
-    } catch (error) {
-      console.error('Error submitting feedback:', error);
-      toast.error('Failed to submit feedback');
-    }
-  };
-
-  const submitCorrection = async (messageId: string) => {
-    const feedbackState = feedbackStates[messageId];
-    if (!feedbackState?.correction?.trim()) return;
+    }));
 
     try {
-      const anonId = user?.id || crypto.randomUUID();
-      
       await supabase.functions.invoke('concierge-feedback', {
         body: {
-          user_id: user?.id || null,
-          anon_id: anonId,
-          answer_id: messageId,
+          message_id: messageId,
+          helpful: isHelpful,
+          user_id: user?.id
+        }
+      });
+    } catch (error) {
+      console.error('Error submitting feedback:', error);
+    }
+  };
+
+  const submitFeedbackCorrection = async (messageId: string) => {
+    const correction = feedbackStates[messageId]?.correction;
+    if (!correction?.trim()) return;
+
+    try {
+      await supabase.functions.invoke('concierge-feedback', {
+        body: {
+          message_id: messageId,
           helpful: false,
-          reason: feedbackState.correction
+          correction: correction,
+          user_id: user?.id
         }
       });
 
-      // Hide correction input and mark as submitted
       setFeedbackStates(prev => ({
         ...prev,
         [messageId]: { 
@@ -282,20 +230,41 @@ export const ConciergeChat: React.FC<ConciergeChatProps> = ({ threadId: initialT
           showCorrection: false
         }
       }));
-
-      toast.success('Thank you for the detailed feedback!');
     } catch (error) {
       console.error('Error submitting correction:', error);
-      toast.error('Failed to submit correction');
     }
   };
 
   const startNewConversation = () => {
     const newThreadId = generateThreadId();
     setThreadId(newThreadId);
+    onThreadChange?.(newThreadId);
     setMessages([]);
-    if (onThreadChange) {
-      onThreadChange(newThreadId);
+    setInput('');
+    setFeedbackStates({});
+  };
+
+  // Trust indicator component
+  const TrustIndicator = ({ trust, className = "" }: { trust?: { confidence: number; peers: number }, className?: string }) => {
+    if (!trust) return null;
+
+    return (
+      <div className={`flex items-center gap-2 text-xs text-muted-foreground ${className}`}>
+        <div className="flex items-center gap-1">
+          <Sparkles className="w-3 h-3" />
+          <span>{Math.round(trust.confidence * 100)}% confidence</span>
+        </div>
+        {trust.peers > 0 && (
+          <span>• {trust.peers} peer insights</span>
+        )}
+      </div>
+    );
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
     }
   };
 
@@ -320,7 +289,7 @@ export const ConciergeChat: React.FC<ConciergeChatProps> = ({ threadId: initialT
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
         {messages.length === 0 && (
           <div className="text-center py-12">
             <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -353,17 +322,25 @@ export const ConciergeChat: React.FC<ConciergeChatProps> = ({ threadId: initialT
         )}
 
         {messages.map((message) => (
-          <div key={message.id} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[80%] ${message.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'} rounded-lg p-3`}>
-              <p className="whitespace-pre-wrap">{message.content}</p>
+          <div key={message.id} className={`flex mb-4 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+            <div className={`max-w-[75%] ${
+              message.role === 'user' 
+                ? 'bg-blue-500 text-white rounded-2xl rounded-br-md' 
+                : 'bg-white text-gray-900 rounded-2xl rounded-bl-md border border-gray-200'
+            } px-4 py-3 shadow-sm`}>
+              <p className="text-[15px] leading-[1.4] whitespace-pre-wrap">{message.content}</p>
 
               {/* Citations */}
               {message.citations && message.citations.length > 0 && (
-                <div className="mt-2 pt-2 border-t border-border/20">
-                  <div className="flex flex-wrap gap-1">
+                <div className="mt-3 pt-3 border-t border-white/20">
+                  <div className="flex flex-wrap gap-2">
                     {message.citations.map((citation, index) => (
-                      <Badge key={index} variant="outline" className="text-xs flex items-center gap-1">
-                        {citation.source === 'marketplace' ? <ExternalLink className="w-3 h-3" /> : <BookOpen className="w-3 h-3" />}
+                      <Badge 
+                        key={index} 
+                        variant="secondary" 
+                        className="text-xs bg-white/20 text-current border-0 hover:bg-white/30"
+                      >
+                        <ExternalLink className="w-3 h-3 mr-1" />
                         {citation.title}
                       </Badge>
                     ))}
@@ -380,7 +357,7 @@ export const ConciergeChat: React.FC<ConciergeChatProps> = ({ threadId: initialT
                       variant="outline"
                       size="sm"
                       onClick={() => handleAction(action)}
-                      className="text-xs"
+                      className="text-xs bg-white/10 border-white/30 text-current hover:bg-white/20"
                     >
                       {action.action === 'book_meeting' && <Calendar className="w-3 h-3 mr-1" />}
                       {action.label}
@@ -389,16 +366,19 @@ export const ConciergeChat: React.FC<ConciergeChatProps> = ({ threadId: initialT
                 </div>
               )}
 
-
               {/* Feedback buttons for assistant messages */}
               {message.role === 'assistant' && (
-                <div className="mt-2">
+                <div className="mt-3 pt-2">
                   <div className="flex items-center gap-2">
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => handleFeedback(message.id, true)}
-                      className={feedbackStates[message.id]?.helpful === true ? 'text-green-600' : ''}
+                      className={`h-7 w-7 p-0 rounded-full transition-colors ${
+                        feedbackStates[message.id]?.helpful === true 
+                          ? 'bg-green-100 text-green-600 hover:bg-green-200' 
+                          : 'hover:bg-gray-200 text-gray-500'
+                      }`}
                     >
                       <ThumbsUp className="w-3 h-3" />
                     </Button>
@@ -406,45 +386,44 @@ export const ConciergeChat: React.FC<ConciergeChatProps> = ({ threadId: initialT
                       variant="ghost"
                       size="sm"
                       onClick={() => handleFeedback(message.id, false)}
-                      className={feedbackStates[message.id]?.helpful === false ? 'text-red-600' : ''}
+                      className={`h-7 w-7 p-0 rounded-full transition-colors ${
+                        feedbackStates[message.id]?.helpful === false 
+                          ? 'bg-red-100 text-red-600 hover:bg-red-200' 
+                          : 'hover:bg-gray-200 text-gray-500'
+                      }`}
                     >
                       <ThumbsDown className="w-3 h-3" />
                     </Button>
                   </div>
-                  
-                  {/* Correction input for negative feedback */}
+
+                  {/* Feedback correction form */}
                   {feedbackStates[message.id]?.showCorrection && (
-                    <div className="mt-2 space-y-2">
-                      <Input
-                        placeholder="What would be a better response?"
+                    <div className="mt-3 p-3 bg-white/50 rounded-xl border border-gray-200">
+                      <Textarea
+                        placeholder="What could be improved?"
                         value={feedbackStates[message.id]?.correction || ''}
                         onChange={(e) => setFeedbackStates(prev => ({
                           ...prev,
-                          [message.id]: { 
-                            ...prev[message.id],
-                            correction: e.target.value
-                          }
+                          [message.id]: { ...prev[message.id], correction: e.target.value }
                         }))}
-                        className="text-sm"
+                        className="min-h-[60px] text-sm bg-transparent border-0 p-0 resize-none focus-visible:ring-0"
                       />
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          onClick={() => submitCorrection(message.id)}
-                          disabled={!feedbackStates[message.id]?.correction?.trim()}
+                      <div className="flex gap-2 mt-2">
+                        <Button 
+                          size="sm" 
+                          onClick={() => submitFeedbackCorrection(message.id)}
+                          className="h-7 px-3 text-xs"
                         >
                           Submit
                         </Button>
-                        <Button
-                          variant="ghost"
+                        <Button 
+                          variant="ghost" 
                           size="sm"
                           onClick={() => setFeedbackStates(prev => ({
                             ...prev,
-                            [message.id]: { 
-                              ...prev[message.id],
-                              showCorrection: false
-                            }
+                            [message.id]: { ...prev[message.id], showCorrection: false }
                           }))}
+                          className="h-7 px-3 text-xs"
                         >
                           Cancel
                         </Button>
@@ -454,32 +433,21 @@ export const ConciergeChat: React.FC<ConciergeChatProps> = ({ threadId: initialT
                 </div>
               )}
 
-              {/* Handoff suggestion */}
-              {message.handoff?.suggest && (
-                <Card className="mt-2">
-                  <CardContent className="p-3">
-                    <p className="text-sm text-muted-foreground mb-2">{message.handoff.reason}</p>
-                    <Button
-                      size="sm"
-                      onClick={() => handleAction({ 
-                        label: 'Book with an Agent Concierge', 
-                        action: 'book_meeting', 
-                        params: { source: 'concierge' }
-                      })}
-                    >
-                      <Calendar className="w-3 h-3 mr-1" />
-                      Book with Human Concierge
-                    </Button>
-                  </CardContent>
-                </Card>
+              {/* Trust indicator for assistant messages */}
+              {message.role === 'assistant' && (
+                <TrustIndicator 
+                  trust={message.trust} 
+                  className="mt-3 pt-2 border-t border-white/20" 
+                />
               )}
             </div>
           </div>
         ))}
-        
+
+        {/* Loading indicator */}
         {loading && (
-          <div className="flex justify-start">
-            <div className="bg-muted rounded-lg p-3 max-w-[80%]">
+          <div className="flex justify-start mb-4">
+            <div className="bg-white text-gray-900 rounded-2xl rounded-bl-md px-4 py-3 shadow-sm max-w-[75%] border border-gray-200">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
                 <div className="w-2 h-2 bg-primary rounded-full animate-pulse" style={{ animationDelay: '0.2s' }} />
@@ -492,7 +460,7 @@ export const ConciergeChat: React.FC<ConciergeChatProps> = ({ threadId: initialT
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Quick Replies - Show latest assistant message's quick replies */}
+      {/* Quick Replies */}
       {messages.length > 0 && messages[messages.length - 1]?.role === 'assistant' && messages[messages.length - 1]?.quick_replies && (
         <div className="px-4 py-2 border-t bg-muted/30">
           <div className="flex flex-wrap gap-2">
@@ -502,7 +470,7 @@ export const ConciergeChat: React.FC<ConciergeChatProps> = ({ threadId: initialT
                 variant="outline"
                 size="sm"
                 onClick={() => handleQuickReply(reply)}
-                className="text-xs h-8"
+                className="text-xs"
               >
                 {reply}
               </Button>
@@ -511,27 +479,24 @@ export const ConciergeChat: React.FC<ConciergeChatProps> = ({ threadId: initialT
         </div>
       )}
 
-      {/* Input */}
-      <div className="p-4 border-t">
+      {/* Input Area */}
+      <div className="p-4 border-t bg-white">
         <div className="flex gap-2">
-          <Input
+          <Textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask me anything about growing your real estate business..."
-            onKeyPress={(e) => e.key === 'Enter' && sendMessage(input)}
+            onKeyPress={handleKeyPress}
+            placeholder="Type your message..."
+            className="flex-1 min-h-[44px] max-h-32 resize-none"
             disabled={loading}
           />
           <Button 
-            onClick={() => sendMessage(input)}
-            disabled={loading || !input.trim()}
+            onClick={() => sendMessage()} 
+            disabled={!input.trim() || loading}
+            size="sm"
+            className="self-end"
           >
             <Send className="w-4 h-4" />
-          </Button>
-        </div>
-        <div className="mt-2">
-          <Button variant="ghost" size="sm" className="text-xs text-muted-foreground">
-            <Calendar className="w-3 h-3 mr-1" />
-            Book with Human Concierge
           </Button>
         </div>
       </div>
