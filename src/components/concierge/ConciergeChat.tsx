@@ -246,17 +246,14 @@ export const ConciergeChat: React.FC<ConciergeChatProps> = ({ threadId: initialT
 
   // Trust indicator component
   const TrustIndicator = ({ trust, className = "" }: { trust?: { confidence: number; peers: number }, className?: string }) => {
-    if (!trust) return null;
+    if (!trust || trust.peers === 0) return null;
 
     return (
       <div className={`flex items-center gap-2 text-xs text-muted-foreground ${className}`}>
         <div className="flex items-center gap-1">
           <Sparkles className="w-3 h-3" />
-          <span>{Math.round(trust.confidence * 100)}% confidence</span>
+          <span>{trust.peers} peer insights</span>
         </div>
-        {trust.peers > 0 && (
-          <span>• {trust.peers} peer insights</span>
-        )}
       </div>
     );
   };
