@@ -81,6 +81,8 @@ export default function NeedAdviceHome() {
     const q = query;
     setQuery("");
     
+    console.log('🔍 openChatFromSearch called with query:', q);
+    
     // Trigger the global modal to open with this search query
     const event = new CustomEvent('openConciergeModal', { 
       detail: { 
@@ -88,6 +90,8 @@ export default function NeedAdviceHome() {
         expandToken: Date.now()
       }
     });
+    
+    console.log('📤 Dispatching openConciergeModal event:', event.detail);
     window.dispatchEvent(event);
   }
 

@@ -516,9 +516,11 @@ export const MarketplaceGrid = () => {
   // Listen for concierge modal events
   useEffect(() => {
     const handleOpenConciergeModal = (event: CustomEvent) => {
+      console.log('📥 Received openConciergeModal event:', event.detail);
       setConciergeInitialMessage(event.detail.initialMessage);
       setConciergeExpandToken(event.detail.expandToken || Date.now());
       setIsConciergeModalOpen(true);
+      console.log('✅ Modal state updated - opening concierge');
     };
 
     window.addEventListener('openConciergeModal' as any, handleOpenConciergeModal);
