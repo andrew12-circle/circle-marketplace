@@ -506,8 +506,8 @@ export const Auth = () => {
               </div>
             )}
 
-            {/* Turnstile Security Verification (Signup only) */}
-            {!isLogin && !showForgotPassword && (showTurnstile || import.meta.env.MODE === 'production') && (
+            {/* Turnstile Security Verification (Signup only) - Disabled in development */}
+            {!isLogin && !showForgotPassword && import.meta.env.MODE === 'production' && (
               <TurnstileGate
                 siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY || '1x00000000000000000000AA'}
                 onSuccess={(token) => {
