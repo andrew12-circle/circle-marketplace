@@ -470,8 +470,8 @@ export const ConciergeChat: React.FC<ConciergeChatProps> = ({ threadId: initialT
 
       {/* Quick Replies */}
       {messages.length > 0 && messages[messages.length - 1]?.role === 'assistant' && messages[messages.length - 1]?.quick_replies && (
-        <div className="px-4 py-2 border-t bg-muted/30">
-          <div className="text-xs text-muted-foreground mb-2">Suggested responses:</div>
+        <div className="px-4 py-2 border-t bg-gray-50">
+          <div className="text-xs text-gray-500 mb-2">Quick responses:</div>
           <div className="flex flex-wrap gap-2">
             {messages[messages.length - 1].quick_replies.map((reply, index) => (
               <Button
@@ -479,7 +479,7 @@ export const ConciergeChat: React.FC<ConciergeChatProps> = ({ threadId: initialT
                 variant="ghost"
                 size="sm"
                 onClick={() => handleQuickReply(reply)}
-                className="text-xs bg-blue-500 text-white hover:bg-blue-600 rounded-full px-3 py-1 h-auto"
+                className="text-xs bg-blue-500 text-white hover:bg-blue-600 rounded-2xl rounded-br-md px-4 py-2 h-auto font-normal shadow-sm"
               >
                 {reply}
               </Button>
