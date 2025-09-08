@@ -126,7 +126,7 @@ export const PricingChoiceModal = ({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent 
-        className="max-w-md z-[100]"
+        className="max-w-md z-[100] max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
         onPointerDown={(e) => e.stopPropagation()}
       >
