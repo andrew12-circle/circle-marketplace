@@ -29,19 +29,29 @@ export const useKeysetPagination = <T extends Record<string, any>>({
   } = useQuery({
     queryKey: [rpcFunction, cursor, pageSize, searchTerm],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc(rpcFunction, {
-        cursor_date: cursor,
-        page_size: pageSize,
-        search_term: searchTerm || null,
-      });
+      try {
+        const { data, error } = await supabase.rpc(rpcFunction, {
+          cursor_date: cursor,
+          page_size: pageSize,
+          search_term: searchTerm || null,
+        });
 
-      if (error) throw error;
-      return data as T[];
+        if (error) throw error;
+        return data as T[];
+      } catch (error: any) {
+        // If RPC doesn't exist, return empty array
+        if (error?.message?.includes('function') || error?.code === '42883') {
+          console.warn(`RPC function ${rpcFunction} not available`);
+          return [];
+        }
+        throw error;
+      }
     },
     staleTime,
     gcTime: cacheTime,
     refetchOnWindowFocus: false,
     enabled: hasNextPage,
+    retry: false, // Don't retry missing RPC functions
   });
 
   const loadMore = useCallback(() => {

@@ -53,13 +53,13 @@ export const OptimizedUserManagement = () => {
         description: `User ${!currentStatus ? 'granted' : 'removed from'} admin privileges`,
       });
 
-      // Trigger refetch
       reset();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating admin status:', error);
+      const isRpcMissing = error?.message?.includes('function') || error?.code === '42883';
       toast({
         title: 'Error',
-        description: 'Failed to update admin status',
+        description: isRpcMissing ? 'Admin functions not yet deployed' : 'Failed to update admin status',
         variant: 'destructive',
       });
     }
@@ -79,13 +79,13 @@ export const OptimizedUserManagement = () => {
         description: `User ${!currentStatus ? 'granted' : 'removed from'} Pro membership`,
       });
 
-      // Trigger refetch
       reset();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating Pro status:', error);
+      const isRpcMissing = error?.message?.includes('function') || error?.code === '42883';
       toast({
         title: 'Error',
-        description: 'Failed to update Pro status',
+        description: isRpcMissing ? 'Admin functions not yet deployed' : 'Failed to update Pro status',
         variant: 'destructive',
       });
     }
@@ -174,15 +174,27 @@ export const OptimizedUserManagement = () => {
         </div>
       </CardHeader>
       <CardContent>
-        <VirtualizedTable
-          data={users}
-          columns={columns}
-          height={600}
-          itemHeight={60}
-          loading={isLoading}
-          onLoadMore={loadMore}
-          hasNextPage={hasNextPage}
-        />
+        {users.length === 0 && !isLoading ? (
+          <div className="text-center py-12">
+            <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <p className="text-muted-foreground">
+              User management functions not yet available
+            </p>
+            <p className="text-sm text-muted-foreground mt-2">
+              Admin RPCs need to be deployed to manage users
+            </p>
+          </div>
+        ) : (
+          <VirtualizedTable
+            data={users}
+            columns={columns}
+            height={600}
+            itemHeight={60}
+            loading={isLoading}
+            onLoadMore={loadMore}
+            hasNextPage={hasNextPage}
+          />
+        )}
       </CardContent>
     </Card>
   );
