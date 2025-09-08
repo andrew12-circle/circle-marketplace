@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, ThumbsUp, ThumbsDown, Calendar, ExternalLink, BookOpen, MessageSquare, Sparkles } from 'lucide-react';
+import { Send, ThumbsUp, ThumbsDown, Calendar, ExternalLink, BookOpen, MessageSquare, Sparkles, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { BookAdvisorModal } from '@/components/marketplace/BookAdvisorModal';
 
 interface ConciergeMessage {
   id: string;
@@ -50,6 +51,7 @@ export const ConciergeChat: React.FC<ConciergeChatProps> = ({ threadId: initialT
   const [loading, setLoading] = useState(false);
   const [threadId, setThreadId] = useState(initialThreadId || generateThreadId());
   const [feedbackStates, setFeedbackStates] = useState<Record<string, { helpful?: boolean; showCorrection?: boolean; correction?: string }>>({});
+  const [showBookAdvisor, setShowBookAdvisor] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
 
@@ -278,7 +280,16 @@ export const ConciergeChat: React.FC<ConciergeChatProps> = ({ threadId: initialT
             <p className="text-sm text-muted-foreground">Your AI agent advisor</p>
           </div>
         </div>
-        <div className="mr-8">
+        <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => setShowBookAdvisor(true)}
+            className="flex items-center gap-2"
+          >
+            <Phone className="w-4 h-4" />
+            Book Human Advisor
+          </Button>
           <Button variant="outline" size="sm" onClick={startNewConversation}>
             New Chat
           </Button>
@@ -497,6 +508,11 @@ export const ConciergeChat: React.FC<ConciergeChatProps> = ({ threadId: initialT
           </Button>
         </div>
       </div>
+
+      <BookAdvisorModal 
+        open={showBookAdvisor} 
+        onOpenChange={setShowBookAdvisor} 
+      />
     </div>
   );
 };
