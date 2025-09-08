@@ -36,7 +36,7 @@ export function AskCircleAIModal({ open, onOpenChange, initialMessage }: AskCirc
       <div className="fixed bottom-4 left-4 z-50">
         <Button
           onClick={handleRestore}
-          className="h-14 w-14 rounded-full shadow-lg"
+          className="h-14 w-14 rounded-full shadow-lg bg-green-600 hover:bg-green-700 text-white animate-pulse"
           size="sm"
         >
           <MessageSquare className="w-6 h-6" />
