@@ -1,32 +1,35 @@
 /**
- * Clear old authentication storage keys to prevent conflicts
+ * MIGRATION FLAG: One-time cleanup of non-Supabase keys only
+ * CRITICAL: Never touch keys that start with "sb-" to avoid auth disruption
  */
-export function clearLegacyAuthKeys() {
+export function clearLegacyNonSupabaseKeys() {
   try {
-    // Remove old supabase auth keys that might conflict
-    localStorage.removeItem('sb-session');
+    const migrationKey = 'non_supabase_keys_cleaned_v1';
     
-    // Clear any old supabase keys except our current one
-    Object.keys(localStorage).forEach(key => {
-      if (key.startsWith('supabase.') && key !== 'circle-auth-v1') {
-        localStorage.removeItem(key);
-      }
+    // Only run once per browser
+    if (localStorage.getItem(migrationKey)) {
+      return;
+    }
+
+    // Only clear non-Supabase keys that are known to be legacy
+    const legacyNonSupabaseKeys = [
+      'old-app-session',
+      'deprecated-user-data',
+      'legacy-auth-token'
+    ];
+    
+    legacyNonSupabaseKeys.forEach(key => {
+      localStorage.removeItem(key);
+      sessionStorage.removeItem(key);
     });
     
-    // Also check sessionStorage for old keys
-    Object.keys(sessionStorage).forEach(key => {
-      if (key.startsWith('sb-') && key !== 'circle-auth-v1') {
-        sessionStorage.removeItem(key);
-      }
-    });
-    
-    console.log('✅ Legacy auth keys cleared');
+    // Mark as completed
+    localStorage.setItem(migrationKey, 'true');
+    console.log('🔧 Non-Supabase legacy keys cleaned (one-time migration)');
   } catch (error) {
-    console.warn('Could not clear legacy auth keys:', error);
+    console.warn('Could not clean legacy non-Supabase keys:', error);
   }
 }
 
-// Clear keys on module load
-if (typeof window !== 'undefined') {
-  clearLegacyAuthKeys();
-}
+// Remove all legacy auth cleanup on module load since we're stabilizing auth
+// clearLegacyAuthKeys(); // REMOVED - no longer auto-clearing auth keys

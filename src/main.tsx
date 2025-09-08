@@ -17,7 +17,7 @@ import { removeLegacyAuthCookies, initCookieMonitoring, checkCookieSize, clearAl
 import { reportClientError } from "./utils/errorReporting";
 import "./utils/pageRecovery"; // Initialize page recovery
 import "./lib/console-filter"; // Initialize console filtering for extension noise
-import { bootstrapAuth } from "@/lib/auth-bootstrap";
+// Remove the old auth-bootstrap import - using new system
 import "./index.css";
 import "./i18n";
 
@@ -31,7 +31,7 @@ const Marketplace = lazy(() => import("./pages/Marketplace").then(m => ({ defaul
 const Academy = lazy(() => import("./pages/Academy").then(m => ({ default: m.Academy })));
 const CreatorDashboard = lazy(() => import("./pages/CreatorDashboard").then(m => ({ default: m.CreatorDashboard })));
 const CreatorPaymentSetupPage = lazy(() => import("./pages/CreatorPaymentSetup"));
-const Admin = lazy(() => import("./pages/Admin").then(m => ({ default: m.Admin })));
+const Admin = lazy(() => import("./pages/Admin"));
 const ProfileSettings = lazy(() => import("./pages/ProfileSettings").then(m => ({ default: m.ProfileSettings })));
 const SavedItems = lazy(() => import("./pages/SavedItems").then(m => ({ default: m.SavedItems })));
 const OrderHistory = lazy(() => import("./pages/OrderHistory").then(m => ({ default: m.OrderHistory })));
@@ -114,12 +114,13 @@ cacheManager.checkAndClearCache();
 // Initialize global error monitoring
 globalErrorMonitor.initialize();
 
-// Initialize cookie management for auth optimization
+// Initialize cookie management for auth optimization (cookies only, not auth keys)
 removeLegacyAuthCookies();
 initCookieMonitoring();
 
-// Initialize auth bootstrap once at app start
-bootstrapAuth();
+// Initialize one-time non-Supabase key cleanup
+import { clearLegacyNonSupabaseKeys } from "./utils/authCleanup";
+clearLegacyNonSupabaseKeys();
 
 // Make utilities available globally for debugging and recovery
 if (typeof window !== 'undefined') {
