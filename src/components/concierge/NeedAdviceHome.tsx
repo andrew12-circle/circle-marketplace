@@ -66,6 +66,12 @@ export default function NeedAdviceHome() {
   const recognitionRef = useRef<any>(null);
 
   function startConversation(initialTopic: string) {
+    // Special handling for Marketplace - scroll to show categories then services
+    if (initialTopic === 'Marketplace') {
+      scrollToMarketplaceWithPause();
+      return;
+    }
+
     // Trigger the global modal to open with this topic as initial message
     const event = new CustomEvent('openConciergeModal', { 
       detail: { 
@@ -74,6 +80,29 @@ export default function NeedAdviceHome() {
       }
     });
     window.dispatchEvent(event);
+  }
+
+  async function scrollToMarketplaceWithPause() {
+    // First scroll to categories
+    const categoryBlocks = document.querySelector('[data-section="category-blocks"]');
+    if (categoryBlocks) {
+      categoryBlocks.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      
+      // Add visual highlight to categories
+      categoryBlocks.classList.add('animate-pulse');
+      
+      // Wait 1.5 seconds to show categories
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Remove highlight
+      categoryBlocks.classList.remove('animate-pulse');
+      
+      // Then scroll to services grid
+      const servicesGrid = document.querySelector('#services-grid');
+      if (servicesGrid) {
+        servicesGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
   }
 
   function openChatFromSearch() {
