@@ -72,27 +72,30 @@ export const Auth = () => {
   };
 
   const handleSignUp = async (email: string, password: string, displayName: string, turnstileToken?: string) => {
-    console.log('Starting signup process...', { email, displayName, hasTurnstileToken: !!turnstileToken });
+    console.log('Starting direct Supabase signup...', { email, displayName });
     
     try {
-      // Use Supabase client to call the edge function
-      const { data, error } = await supabase.functions.invoke('auth-signup', {
-        body: {
-          email,
-          password,
-          displayName,
-          turnstileToken
+      // Use direct Supabase auth signup (bypassing edge function for now)
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`,
+          data: {
+            display_name: displayName,
+            full_name: displayName
+          }
         }
       });
       
-      console.log('Edge function response:', { data, error });
+      console.log('Supabase signup response:', { data, error });
       
       if (error) {
-        console.error('Edge function error details:', error);
+        console.error('Supabase signup error:', error);
         throw new Error(error.message || 'Signup failed');
       }
 
-      return data;
+      return { user: data.user, message: 'Account created successfully' };
     } catch (err) {
       console.error('Signup error:', err);
       throw err;
