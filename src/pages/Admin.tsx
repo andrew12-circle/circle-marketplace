@@ -1,10 +1,12 @@
 import { AdminRouteWrapper } from "@/components/admin/AdminRouteWrapper";
-import { OptimizedAdminTabs } from "@/components/admin/OptimizedAdminTabs";
+import { AdminSidebar } from "@/components/admin/AdminSidebar";
+import { AdminContentRouter } from "@/components/admin/AdminContentRouter";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAdminStatus } from "@/hooks/useAdminStatus";
 import { Navigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Menu } from "lucide-react";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 
 export const Admin = () => {
   const { user } = useAuth();
@@ -59,15 +61,28 @@ export const Admin = () => {
 
   return (
     <AdminRouteWrapper>
-      <div className="container mx-auto px-4 py-6">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-foreground">Admin Dashboard</h1>
-          <p className="text-muted-foreground mt-2">
-            Manage users, services, and system settings with optimized performance.
-          </p>
+      <SidebarProvider>
+        <div className="min-h-screen flex w-full">
+          <AdminSidebar />
+          <div className="flex-1 flex flex-col">
+            <header className="h-14 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+              <div className="flex items-center justify-between px-4 h-full">
+                <div className="flex items-center space-x-4">
+                  <SidebarTrigger>
+                    <Menu className="h-4 w-4" />
+                  </SidebarTrigger>
+                  <div>
+                    <h1 className="text-xl font-semibold">Admin Dashboard</h1>
+                  </div>
+                </div>
+              </div>
+            </header>
+            <main className="flex-1 overflow-auto">
+              <AdminContentRouter />
+            </main>
+          </div>
         </div>
-        <OptimizedAdminTabs />
-      </div>
+      </SidebarProvider>
     </AdminRouteWrapper>
   );
 };
