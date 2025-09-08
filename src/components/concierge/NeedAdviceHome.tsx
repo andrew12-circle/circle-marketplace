@@ -230,7 +230,7 @@ export default function NeedAdviceHome() {
                 />
                 <Button
                   variant="ghost"
-                  className="absolute right-20 top-1/2 -translate-y-1/2 rounded-full h-10 w-10 p-0"
+                  className="absolute right-14 top-1/2 -translate-y-1/2 rounded-full h-10 w-10 p-0"
                   onClick={toggleSearchMicrophone}
                   aria-label={isRecording ? "Stop voice input" : "Start voice input"}
                 >
