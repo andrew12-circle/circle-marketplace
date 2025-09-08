@@ -41,14 +41,17 @@ export const PerformanceMonitor = () => {
   });
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [memoryHistory, setMemoryHistory] = useState<number[]>([]);
+  const mountedRef = React.useRef(true);
 
   useEffect(() => {
     let lastTimestamp = performance.now();
     
-    const measurePerformance = () => {
+    const measurePerformance = async () => {
+      if (!mountedRef.current) return;
+      
       // Measure event loop lag (better than render time)
       const currentTimestamp = performance.now();
-      const expectedDelay = 100; // We set interval for 100ms
+      const expectedDelay = 2000; // We set interval for 2000ms now
       const actualDelay = currentTimestamp - lastTimestamp;
       const eventLoopLag = Math.max(0, actualDelay - expectedDelay);
       lastTimestamp = currentTimestamp;
@@ -62,31 +65,35 @@ export const PerformanceMonitor = () => {
       let memoryLabel = 'N/A';
       
       try {
-        // Try modern accurate memory API first
-        if ('measureUserAgentSpecificMemory' in performance) {
-          (performance as any).measureUserAgentSpecificMemory().then((result: any) => {
-            const totalBytes = result.bytes;
-            memoryMB = Math.round(totalBytes / 1024 / 1024);
-            memoryLabel = `${memoryMB}MB (Precise)`;
-            // We can't get percentage easily with this API, so we'll estimate
-            memoryUsage = Math.min((totalBytes / (256 * 1024 * 1024)) * 100, 100);
-          }).catch(() => {
-            // Fallback handled below
-          });
-        } else if ((performance as any).memory) {
-          // Chrome-only performance.memory API
+        // Try Chrome-only performance.memory API first (more reliable)
+        if ((performance as any).memory) {
           const memInfo = (performance as any).memory;
           memoryUsage = (memInfo.usedJSHeapSize / memInfo.totalJSHeapSize) * 100;
           memoryMB = Math.round(memInfo.usedJSHeapSize / 1024 / 1024);
           memoryLabel = `${memoryMB}MB (JS Heap)`;
+        } else if ('measureUserAgentSpecificMemory' in performance) {
+          try {
+            const result = await (performance as any).measureUserAgentSpecificMemory();
+            if (!mountedRef.current) return; // Check if still mounted after async operation
+            const totalBytes = result.bytes;
+            memoryMB = Math.round(totalBytes / 1024 / 1024);
+            memoryLabel = `${memoryMB}MB (Precise)`;
+            memoryUsage = Math.min((totalBytes / (256 * 1024 * 1024)) * 100, 100);
+          } catch {
+            // Fallback - use estimated values
+            memoryUsage = 0;
+            memoryLabel = 'N/A';
+          }
         }
       } catch (error) {
         console.debug('Memory measurement not available:', error);
       }
 
-      // Track memory history for stability
+      if (!mountedRef.current) return; // Final check before state update
+
+      // Batch all state updates
       setMemoryHistory(prev => {
-        const newHistory = [...prev, memoryUsage].slice(-3); // Keep last 3 readings
+        const newHistory = [...prev, memoryUsage].slice(-3);
         return newHistory;
       });
 
@@ -108,9 +115,12 @@ export const PerformanceMonitor = () => {
     };
 
     measurePerformance();
-    const interval = setInterval(measurePerformance, 100); // More frequent for event loop lag
+    const interval = setInterval(measurePerformance, 2000); // Reduced frequency to 2 seconds
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      mountedRef.current = false;
+    };
   }, []);
 
   const getPerformanceStatus = (value: number, thresholds: { good: number; warning: number }) => {
