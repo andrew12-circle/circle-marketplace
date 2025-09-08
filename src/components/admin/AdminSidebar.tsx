@@ -19,6 +19,8 @@ import {
   Globe,
   Calendar,
   Settings,
+  User,
+  LogOut,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -30,6 +32,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
+import { useAuth } from '@/contexts/AuthContext';
 
 const navigationGroups = [
   {
@@ -104,12 +107,55 @@ const navigationGroups = [
 export function AdminSidebar() {
   const location = useLocation();
   const currentPath = location.pathname;
+  const { user, profile, signOut } = useAuth();
 
   const isActive = (path: string) => currentPath === path;
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      window.location.href = '/';
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
 
   return (
     <Sidebar className="w-60">
       <SidebarContent>
+        {/* User Profile Section */}
+        <SidebarGroup>
+          <div className="p-4 border-b border-border">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                {profile?.avatar_url ? (
+                  <img 
+                    src={profile.avatar_url} 
+                    alt="Profile" 
+                    className="w-10 h-10 rounded-full object-cover"
+                  />
+                ) : (
+                  <User className="h-5 w-5 text-primary" />
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-foreground truncate">
+                  {profile?.display_name || user?.email?.split('@')[0] || 'Admin User'}
+                </p>
+                <p className="text-xs text-muted-foreground truncate">
+                  Administrator
+                </p>
+              </div>
+              <button
+                onClick={handleSignOut}
+                className="p-1 text-muted-foreground hover:text-foreground transition-colors"
+                title="Sign out"
+              >
+                <LogOut className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        </SidebarGroup>
         {navigationGroups.map((group) => (
           <SidebarGroup key={group.label}>
             <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
