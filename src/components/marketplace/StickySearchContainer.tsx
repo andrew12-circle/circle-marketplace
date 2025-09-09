@@ -21,7 +21,9 @@ export const StickySearchContainer = ({ children, className }: StickySearchConta
   useEffect(() => {
     // Update header height on mount and resize
     const updateHeaderHeight = () => {
-      setHeaderHeight(getHeaderHeight());
+      const newHeight = getHeaderHeight();
+      console.log('🔧 Header height updated:', newHeight);
+      setHeaderHeight(newHeight);
     };
     
     updateHeaderHeight();
@@ -37,11 +39,18 @@ export const StickySearchContainer = ({ children, className }: StickySearchConta
     const observer = new IntersectionObserver(
       ([entry]) => {
         // When the sentinel is not visible, the search bar should be sticky
-        setIsSticky(!entry.isIntersecting);
+        const shouldBeSticky = !entry.isIntersecting;
+        console.log('🔧 Sticky state change:', { 
+          isIntersecting: entry.isIntersecting, 
+          shouldBeSticky, 
+          headerHeight,
+          boundingClientRect: entry.boundingClientRect 
+        });
+        setIsSticky(shouldBeSticky);
       },
       {
-        rootMargin: `-${headerHeight}px 0px 0px 0px`, // Account for header height
-        threshold: 0
+        rootMargin: `0px 0px 0px 0px`, // No margin adjustment
+        threshold: [0, 1]
       }
     );
 
@@ -67,7 +76,7 @@ export const StickySearchContainer = ({ children, className }: StickySearchConta
           className
         )}
         style={{
-          top: `${headerHeight}px`,
+          top: isSticky ? `${headerHeight}px` : undefined,
         }}
       >
         <div className="container mx-auto px-4 py-2 sm:py-4">
