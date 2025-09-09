@@ -102,6 +102,10 @@ export const EnhancedSearch = ({
 
   // Dynamic placeholder based on view mode
   const getSearchPlaceholder = () => {
+    if (isMobile) {
+      return "search";
+    }
+    
     switch (viewMode) {
       case 'services':
         return serviceCount && serviceCount > 0 
