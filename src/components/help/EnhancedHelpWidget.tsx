@@ -127,7 +127,7 @@ export const EnhancedHelpWidget: React.FC = () => {
 
       {/* Enhanced Help Panel */}
       {isOpen && (
-        <div className="fixed bottom-6 right-6 z-50 w-80 h-96 animate-in slide-in-from-bottom-4">
+        <div className="fixed bottom-6 right-6 z-50 w-96 h-96 animate-in slide-in-from-bottom-4">
           <Card className="h-full flex flex-col shadow-2xl border-blue-200">
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
