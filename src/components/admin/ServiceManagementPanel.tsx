@@ -36,6 +36,7 @@ import { ServiceDisclaimerSection } from './ServiceDisclaimerSection';
 import { ServiceAIResearchEditor } from './ServiceAIResearchEditor';
 import { ServiceImageUploader } from './ServiceImageUploader';
 import { AIServiceUpdater } from './AIServiceUpdater';
+import { ServicePricingMirror } from './ServicePricingMirror';
 
 interface PricingFeature {
   id: string;
@@ -96,6 +97,9 @@ interface Service {
   };
   funnel_content?: any;
   pricing_tiers?: any;
+  pricing_screenshot_url?: string;
+  pricing_screenshot_captured_at?: string;
+  pricing_page_url?: string;
 }
 
 interface ThumbnailItem {
@@ -1102,10 +1106,11 @@ export const ServiceManagementPanel = () => {
           </CardHeader>
           <CardContent>
             <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-5">
                 <TabsTrigger value="details">Service Details</TabsTrigger>
                 <TabsTrigger value="disclaimer">Disclaimer</TabsTrigger>
                 <TabsTrigger value="ai-research">AI Research</TabsTrigger>
+                <TabsTrigger value="pricing-mirror">Pricing Mirror</TabsTrigger>
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -1638,6 +1643,16 @@ export const ServiceManagementPanel = () => {
                 <ServiceAIResearchEditor
                   serviceId={selectedService.id}
                   serviceName={selectedService.title}
+                />
+              </TabsContent>
+
+              <TabsContent value="pricing-mirror" className="space-y-4">
+                <ServicePricingMirror
+                  serviceId={selectedService.id}
+                  serviceName={selectedService.title}
+                  currentScreenshotUrl={selectedService.pricing_screenshot_url}
+                  currentPricingUrl={selectedService.pricing_page_url}
+                  lastCapturedAt={selectedService.pricing_screenshot_captured_at}
                 />
               </TabsContent>
 
