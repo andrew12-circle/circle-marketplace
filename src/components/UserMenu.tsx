@@ -90,7 +90,7 @@ export const UserMenu = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <div className="relative">
+        <div className="relative" data-tour="user-menu">
           <Button variant="ghost" className="relative h-10 w-10 rounded-full">
             <Avatar className={`h-10 w-10 ${profile?.is_pro_member ? 'ring-2 ring-circle-accent ring-offset-2 ring-offset-background' : ''}`}>
               <AvatarImage 
@@ -236,7 +236,7 @@ export const UserMenu = () => {
         </DropdownMenuItem>
         
         <DropdownMenuItem asChild>
-          <Link to="/profile-settings" className="flex items-center">
+          <Link to="/profile-settings" className="flex items-center" data-tour="profile-settings-link">
             <User className="mr-2 h-4 w-4" />
             <span>Profile Settings</span>
           </Link>

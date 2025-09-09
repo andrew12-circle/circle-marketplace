@@ -216,29 +216,29 @@ export const guides: Guide[] = [
       {
         id: 'step-1',
         title: 'Access Profile Settings',
-        content: 'Go to your profile settings to update your information.',
-        selector: '[data-testid="user-menu"]',
+        content: 'Click on your avatar to open the user menu, then select "Profile Settings" to update your information.',
+        selector: '[data-tour="user-menu"], .relative button[variant="ghost"], button:has(.avatar)',
         position: 'bottom'
       },
       {
         id: 'step-2',
-        title: 'Upload Profile Photo',
-        content: 'Add a professional photo to build trust with other users.',
-        selector: '[data-testid="profile-photo"]',
-        position: 'right'
-      },
-      {
-        id: 'step-3',
-        title: 'Complete Bio',
-        content: 'Write a compelling bio that describes your experience and expertise.',
-        selector: '[data-testid="profile-bio"]',
+        title: 'Navigate to Profile Settings',
+        content: 'Click on "Profile Settings" in the dropdown menu to access your profile customization options.',
+        selector: '[data-tour="profile-settings-link"], a[href="/profile-settings"]',
         position: 'left'
       },
       {
+        id: 'step-3',
+        title: 'Complete Your Profile',
+        content: 'Once in Profile Settings, upload a professional photo, complete your bio, and add your contact information to build trust with other users.',
+        selector: '.profile-form, .settings-form, form, main',
+        position: 'right'
+      },
+      {
         id: 'step-4',
-        title: 'Add Contact Information',
-        content: 'Ensure your contact details are up to date for better communication.',
-        selector: '[data-testid="contact-info"]',
+        title: 'Save Changes',
+        content: 'Make sure to save any changes to your profile information. A complete profile helps build trust and improves your experience on the platform.',
+        selector: 'button[type="submit"], .save-button, button:has-text("Save")',
         position: 'top'
       }
     ]
