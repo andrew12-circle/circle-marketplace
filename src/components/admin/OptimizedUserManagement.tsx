@@ -172,17 +172,32 @@ export const OptimizedUserManagement = () => {
         </div>
       </CardHeader>
       <CardContent>
-        {users.length === 0 && !isLoading ? (
+        {error && (
+          <div className="text-center py-12">
+            <Users className="h-12 w-12 text-red-500 mx-auto mb-4" />
+            <p className="text-red-600 font-semibold">Error loading users</p>
+            <p className="text-sm text-muted-foreground mt-2">
+              {error.message || 'Failed to load user data'}
+            </p>
+            <button 
+              onClick={reset}
+              className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/90"
+            >
+              Retry
+            </button>
+          </div>
+        )}
+        {!error && users.length === 0 && !isLoading ? (
           <div className="text-center py-12">
             <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <p className="text-muted-foreground">
-              User management functions not yet available
+              No users found
             </p>
             <p className="text-sm text-muted-foreground mt-2">
-              Admin RPCs need to be deployed to manage users
+              {debouncedSearch ? 'Try adjusting your search terms' : 'No users available'}
             </p>
           </div>
-        ) : (
+        ) : !error && (
           <VirtualizedTable
             data={users}
             columns={columns}
