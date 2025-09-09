@@ -263,83 +263,6 @@ export const PaymentChoiceModal = ({
               </CardContent>
             </Card>
 
-            {/* Agent Points Option - Pro Only */}
-            {loadingPoints ? (
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-center">
-                    <span>Loading your points...</span>
-                  </div>
-                </CardContent>
-              </Card>
-            ) : null}
-
-            {agentPoints > 0 && !loadingPoints && (
-              <>
-                <div className="text-center text-sm text-muted-foreground my-4">
-                  OR get your bill reduced
-                </div>
-                <Card className={!isProMember ? "opacity-75 border-dashed" : ""}>
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-3">
-                        <Coins className="w-5 h-5 text-blue-600" />
-                        <h3 className="font-semibold">Use Agent Points</h3>
-                      </div>
-                      {isProMember ? (
-                        <Badge variant="secondary" className="bg-primary/10 text-primary">
-                          <Crown className="w-3 h-3 mr-1" />
-                          Pro Member
-                        </Badge>
-                      ) : (
-                        <Badge variant="outline" className="border-orange-300 text-orange-600">
-                          <Lock className="w-3 h-3 mr-1" />
-                          Pro Only
-                        </Badge>
-                      )}
-                    </div>
-                    <div className="text-2xl font-bold text-blue-600 mb-2">
-                      {isProMember ? `${pointsBreakdown.pointsNeeded} points` : "1000+ points"}
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      {isProMember 
-                        ? `${pointsBreakdown.respaNote} • ${agentPoints} available`
-                        : "Use your accumulated points to reduce service costs"
-                      }
-                    </p>
-                    <Button 
-                      onClick={isProMember && pointsBreakdown.canUsePoints ? handlePointsChoice : undefined}
-                      disabled={!isProMember || !pointsBreakdown.canUsePoints}
-                      variant="outline"
-                      className="w-full"
-                    >
-                      {!isProMember ? (
-                        <>
-                          <Crown className="w-4 h-4 mr-2" />
-                          Upgrade to Pro to Use Points
-                        </>
-                      ) : (
-                        "Use Points"
-                      )}
-                    </Button>
-                    {!isProMember && (
-                      <div className="mt-2 text-center">
-                        <p className="text-sm text-muted-foreground">
-                          <a 
-                            href="/pricing" 
-                            className="text-primary hover:underline font-medium"
-                          >
-                            Upgrade to Circle Pro
-                          </a>{" "}
-                          to access your points balance and rewards
-                        </p>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </>
-            )}
-
             {/* Co-Pay Option - Pro Only */}
             {(coPayPrice || !isProMember) && (
               <Card className={!isProMember ? "opacity-75 border-dashed" : ""}>
@@ -428,6 +351,83 @@ export const PaymentChoiceModal = ({
                   )}
                 </CardContent>
               </Card>
+            )}
+
+            {/* Agent Points Option - Pro Only */}
+            {loadingPoints ? (
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-center">
+                    <span>Loading your points...</span>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : null}
+
+            {agentPoints > 0 && !loadingPoints && (
+              <>
+                <div className="text-center text-sm text-muted-foreground my-4">
+                  OR get your bill reduced
+                </div>
+                <Card className={!isProMember ? "opacity-75 border-dashed" : ""}>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <Coins className="w-5 h-5 text-blue-600" />
+                        <h3 className="font-semibold">Use Agent Points</h3>
+                      </div>
+                      {isProMember ? (
+                        <Badge variant="secondary" className="bg-primary/10 text-primary">
+                          <Crown className="w-3 h-3 mr-1" />
+                          Pro Member
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="border-orange-300 text-orange-600">
+                          <Lock className="w-3 h-3 mr-1" />
+                          Pro Only
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="text-2xl font-bold text-blue-600 mb-2">
+                      {isProMember ? `${pointsBreakdown.pointsNeeded} points` : "1000+ points"}
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      {isProMember 
+                        ? `${pointsBreakdown.respaNote} • ${agentPoints} available`
+                        : "Use your accumulated points to reduce service costs"
+                      }
+                    </p>
+                    <Button 
+                      onClick={isProMember && pointsBreakdown.canUsePoints ? handlePointsChoice : undefined}
+                      disabled={!isProMember || !pointsBreakdown.canUsePoints}
+                      variant="outline"
+                      className="w-full"
+                    >
+                      {!isProMember ? (
+                        <>
+                          <Crown className="w-4 h-4 mr-2" />
+                          Upgrade to Pro to Use Points
+                        </>
+                      ) : (
+                        "Use Points"
+                      )}
+                    </Button>
+                    {!isProMember && (
+                      <div className="mt-2 text-center">
+                        <p className="text-sm text-muted-foreground">
+                          <a 
+                            href="/pricing" 
+                            className="text-primary hover:underline font-medium"
+                          >
+                            Upgrade to Circle Pro
+                          </a>{" "}
+                          to access your points balance and rewards
+                        </p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </>
             )}
           </div>
         </DialogContent>
