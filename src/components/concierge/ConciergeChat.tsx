@@ -259,10 +259,7 @@ export const ConciergeChat: React.FC<ConciergeChatProps> = ({ threadId: initialT
   const TrustIndicator = ({ trust, className = "" }: { trust?: { confidence: number; peers: number }, className?: string }) => {
     if (!trust || trust.peers === 0) return null;
 
-    return (
-      <div className={`flex items-center gap-2 text-xs text-muted-foreground ${className}`}>
-      </div>
-    );
+    return null;
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
