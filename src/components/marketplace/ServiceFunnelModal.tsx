@@ -741,7 +741,7 @@ export const ServiceFunnelModal = ({
 
                     {/* Question 2 - ROI */}
                     <AccordionItem value="question-2">
-                      <AccordionTrigger className="text-xl font-bold text-gray-900 hover:no-underline border-l-4 border-l-purple-500 pl-4 bg-white rounded-t-lg shadow-sm">
+                      <AccordionTrigger className="text-sm sm:text-xl font-bold text-gray-900 hover:no-underline border-l-2 sm:border-l-4 border-l-purple-500 pl-2 sm:pl-4 bg-white rounded-t-lg shadow-sm">
                         <div className="flex items-center gap-2">
                           <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 font-bold text-sm">2</div>
                           What's My ROI Potential?
@@ -762,7 +762,7 @@ export const ServiceFunnelModal = ({
 
                     {/* Question 3 */}
                     <AccordionItem value="question-3">
-                      <AccordionTrigger className="text-xl font-bold text-gray-900 hover:no-underline border-l-4 border-l-orange-500 pl-4 bg-white rounded-t-lg shadow-sm">
+                      <AccordionTrigger className="text-sm sm:text-xl font-bold text-gray-900 hover:no-underline border-l-2 sm:border-l-4 border-l-orange-500 pl-2 sm:pl-4 bg-white rounded-t-lg shadow-sm">
                         <div className="flex items-center gap-2">
                           <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center text-orange-600 font-bold text-sm">3</div>
                           How Soon Will I See Results?
@@ -860,7 +860,7 @@ export const ServiceFunnelModal = ({
 
                     {/* Question 4 - What's Included */}
                     <AccordionItem value="question-4">
-                      <AccordionTrigger className="text-xl font-bold text-gray-900 hover:no-underline border-l-4 border-l-red-500 pl-4 bg-white rounded-t-lg shadow-sm">
+                      <AccordionTrigger className="text-sm sm:text-xl font-bold text-gray-900 hover:no-underline border-l-2 sm:border-l-4 border-l-red-500 pl-2 sm:pl-4 bg-white rounded-t-lg shadow-sm">
                         <div className="flex items-center gap-2">
                           <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center text-red-600 font-bold text-sm">4</div>
                           What's Included?
@@ -891,7 +891,7 @@ export const ServiceFunnelModal = ({
 
                     {/* Question 5 - Proof It Works */}
                     <AccordionItem value="question-5">
-                      <AccordionTrigger className="text-xl font-bold text-gray-900 hover:no-underline border-l-4 border-l-emerald-500 pl-4 bg-white rounded-t-lg shadow-sm">
+                      <AccordionTrigger className="text-sm sm:text-xl font-bold text-gray-900 hover:no-underline border-l-2 sm:border-l-4 border-l-emerald-500 pl-2 sm:pl-4 bg-white rounded-t-lg shadow-sm">
                         <div className="flex items-center gap-2">
                           <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 font-bold text-sm">5</div>
                           Proof It Works
