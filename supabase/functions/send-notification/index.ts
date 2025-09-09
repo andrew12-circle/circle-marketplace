@@ -11,9 +11,9 @@ const corsHeaders = {
 };
 
 interface NotificationRequest {
-  to: string;
-  subject: string;
-  type: 'welcome' | 'consultation_booked' | 'consultation_reminder' | 'co_pay_approved' | 'co_pay_denied' | 'billing_support' | 'generic';
+  to?: string;
+  subject?: string;
+  type: 'welcome' | 'consultation_booked' | 'consultation_reminder' | 'co_pay_approved' | 'co_pay_denied' | 'billing_support' | 'support_request' | 'generic';
   data?: Record<string, any>;
 }
 
@@ -137,6 +137,30 @@ const getEmailTemplate = (type: string, data: Record<string, any> = {}) => {
         `
       };
 
+    case 'support_request':
+      return {
+        subject: `Support Request: ${data.subject || 'Help Request'}`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h1 style="color: #333;">New Support Request</h1>
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h3>Request Details:</h3>
+              <p><strong>From:</strong> ${data.userEmail || 'Unknown'}</p>
+              <p><strong>Subject:</strong> ${data.subject || 'No subject'}</p>
+              <p><strong>Page:</strong> ${data.currentPage || 'Unknown'}</p>
+              <p><strong>Time:</strong> ${data.timestamp || 'Unknown'}</p>
+              <div style="margin-top: 15px;">
+                <strong>Message:</strong>
+                <div style="background: white; padding: 15px; border-left: 4px solid #007bff; margin-top: 5px;">
+                  ${data.message || 'No message provided'}
+                </div>
+              </div>
+            </div>
+            <p><em>Please respond within 24 hours as promised to the user.</em></p>
+          </div>
+        `
+      };
+
     default:
       return {
         subject: data.subject || 'Notification from Circle Network',
@@ -153,15 +177,34 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const { to, subject, type, data }: NotificationRequest = await req.json();
 
-    if (!to) {
+    // Handle support requests specially
+    let recipientEmail = to;
+    if (type === 'support_request') {
+      // For support requests, send to support team and confirmation to user
+      const supportEmails = Deno.env.get("SUPPORT_EMAILS") || "support@circleapp.com";
+      recipientEmail = supportEmails.split(',')[0].trim(); // Primary support email
+    }
+
+    if (!recipientEmail) {
       throw new Error("Recipient email is required");
     }
 
     const template = getEmailTemplate(type, data || {});
     const emailSubject = subject || template.subject;
 
-    // For billing support requests, also notify support team
-    const recipients = [to];
+    // Determine recipients
+    const recipients = [recipientEmail];
+    
+    // For support requests, also send to all support team members
+    if (type === 'support_request') {
+      const allSupportEmails = Deno.env.get("SUPPORT_EMAILS");
+      if (allSupportEmails) {
+        const emails = allSupportEmails.split(',').map(email => email.trim());
+        recipients.push(...emails.slice(1)); // Add additional support emails
+      }
+    }
+    
+    // For billing support, also notify alert emails
     if (type === 'billing_support') {
       const alertEmails = Deno.env.get("ALERT_EMAILS");
       if (alertEmails) {
