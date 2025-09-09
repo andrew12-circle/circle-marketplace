@@ -767,18 +767,18 @@ export const MarketplaceGrid = () => {
                 <div id="marketplace-results" className="flex gap-1 sm:gap-4 mt-4">
                   <Button variant={viewMode === "services" ? "default" : "outline"} onClick={() => setViewMode("services")} className="flex-1 sm:flex-none flex items-center justify-center gap-1 sm:gap-2 h-8 sm:h-10 text-xs sm:text-base px-2 sm:px-4">
                     <Sparkles className="w-3 h-3 sm:w-4 sm:h-4" />
-                    <span className="hidden xs:inline">{t('services')}</span>
-                    <span className="xs:hidden">Svc</span>
+                    <span className="hidden sm:inline">{t('services')}</span>
+                    <span className="sm:hidden">Svc</span>
                   </Button>
                   <Button variant={viewMode === "products" ? "default" : "outline"} onClick={() => setViewMode("products")} className="flex-1 sm:flex-none flex items-center justify-center gap-1 sm:gap-2 h-8 sm:h-10 text-xs sm:text-base px-2 sm:px-4">
                     <Filter className="w-3 h-3 sm:w-4 sm:h-4" />
-                    <span className="hidden xs:inline">Products</span>
-                    <span className="xs:hidden">Prod</span>
+                    <span className="hidden sm:inline">Products</span>
+                    <span className="sm:hidden">Prod</span>
                   </Button>
                   <Button variant={viewMode === "vendors" ? "default" : "outline"} onClick={() => setViewMode("vendors")} className="flex-1 sm:flex-none flex items-center justify-center gap-1 sm:gap-2 h-8 sm:h-10 text-xs sm:text-base px-2 sm:px-4">
                     <Zap className="w-3 h-3 sm:w-4 sm:h-4" />
-                    <span className="hidden xs:inline">{t('vendors')}</span>
-                    <span className="xs:hidden">Vend</span>
+                    <span className="hidden sm:inline">{t('vendors')}</span>
+                    <span className="sm:hidden">Vend</span>
                   </Button>
                 </div>
               </StickySearchContainer>
