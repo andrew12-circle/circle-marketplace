@@ -4,17 +4,20 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { X, ChevronLeft, ChevronRight, SkipForward } from 'lucide-react';
 import { Guide, GuideStep } from './guides';
+
 interface GuideTourProps {
   guide: Guide;
   onComplete: () => void;
   onSkip: () => void;
 }
+
 interface Position {
   top: number;
   left: number;
   width: number;
   height: number;
 }
+
 export const GuideTour: React.FC<GuideTourProps> = ({
   guide,
   onComplete,
@@ -29,65 +32,72 @@ export const GuideTour: React.FC<GuideTourProps> = ({
     top: 0,
     left: 0
   });
+  const [elementNotFound, setElementNotFound] = useState(false);
   const overlayRef = useRef<HTMLDivElement>(null);
+  const pollingRef = useRef<NodeJS.Timeout | null>(null);
+
   const currentStep = guide.steps[currentStepIndex];
   const isLastStep = currentStepIndex === guide.steps.length - 1;
   const progress = (currentStepIndex + 1) / guide.steps.length * 100;
+
   useEffect(() => {
     const updatePosition = () => {
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      
       if (currentStep?.selector) {
         const element = document.querySelector(currentStep.selector);
         if (element) {
           const rect = element.getBoundingClientRect();
+          
+          // Use fixed positioning - only viewport coordinates
           setTargetPosition({
-            top: rect.top + window.scrollY,
-            left: rect.left + window.scrollX,
+            top: rect.top,
+            left: rect.left,
             width: rect.width,
             height: rect.height
           });
+          setElementNotFound(false);
 
-          // Calculate tooltip position with improved viewport detection
-          const tooltipWidth = 320; // w-80 = 320px
-          const tooltipHeight = 280; // Increased estimated height
-          const viewportWidth = window.innerWidth;
-          const viewportHeight = window.innerHeight;
+          // Calculate tooltip position using viewport coordinates only
+          const tooltipWidth = 320;
+          const tooltipHeight = 280;
           const padding = 20;
           
           let preferredPosition = currentStep.position || 'bottom';
           
-          // Calculate positions for each direction
+          // Calculate positions for each direction (viewport coordinates)
           const positions = {
             top: {
-              top: rect.top + window.scrollY - tooltipHeight - 16,
-              left: rect.left + window.scrollX + rect.width / 2 - tooltipWidth / 2
+              top: rect.top - tooltipHeight - 16,
+              left: rect.left + rect.width / 2 - tooltipWidth / 2
             },
             bottom: {
-              top: rect.top + window.scrollY + rect.height + 16,
-              left: rect.left + window.scrollX + rect.width / 2 - tooltipWidth / 2
+              top: rect.top + rect.height + 16,
+              left: rect.left + rect.width / 2 - tooltipWidth / 2
             },
             left: {
-              top: rect.top + window.scrollY + rect.height / 2 - tooltipHeight / 2,
-              left: rect.left + window.scrollX - tooltipWidth - 16
+              top: rect.top + rect.height / 2 - tooltipHeight / 2,
+              left: rect.left - tooltipWidth - 16
             },
             right: {
-              top: rect.top + window.scrollY + rect.height / 2 - tooltipHeight / 2,
-              left: rect.left + window.scrollX + rect.width + 16
+              top: rect.top + rect.height / 2 - tooltipHeight / 2,
+              left: rect.left + rect.width + 16
             }
           };
           
-          // Check if preferred position fits in viewport
+          // Check if position fits in viewport
           const checkPosition = (pos: { top: number; left: number }) => {
             return pos.left >= padding && 
                    pos.left + tooltipWidth <= viewportWidth - padding &&
-                   pos.top >= window.scrollY + padding &&
-                   pos.top + tooltipHeight <= window.scrollY + viewportHeight - padding;
+                   pos.top >= padding &&
+                   pos.top + tooltipHeight <= viewportHeight - padding;
           };
           
           // Try preferred position first, then fallback to others
           let finalPosition = positions[preferredPosition as keyof typeof positions];
           
           if (!checkPosition(finalPosition)) {
-            // Try other positions in order of preference
             const fallbackOrder = ['bottom', 'top', 'right', 'left'];
             for (const position of fallbackOrder) {
               const testPos = positions[position as keyof typeof positions];
@@ -98,47 +108,83 @@ export const GuideTour: React.FC<GuideTourProps> = ({
             }
           }
           
-          // Force position within viewport bounds as last resort
+          // Clamp to viewport bounds
           finalPosition.left = Math.max(padding, Math.min(finalPosition.left, viewportWidth - tooltipWidth - padding));
-          finalPosition.top = Math.max(window.scrollY + padding, Math.min(finalPosition.top, window.scrollY + viewportHeight - tooltipHeight - padding));
+          finalPosition.top = Math.max(padding, Math.min(finalPosition.top, viewportHeight - tooltipHeight - padding));
           
-          setTooltipPosition({
-            top: finalPosition.top,
-            left: finalPosition.left
-          });
+          setTooltipPosition(finalPosition);
 
-          // Scroll element into view with better positioning
-          setTimeout(() => {
-            element.scrollIntoView({
-              behavior: 'smooth',
-              block: 'center',
-              inline: 'center'
-            });
-          }, 100);
+          // Scroll element into view
+          element.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center',
+            inline: 'center'
+          });
         } else {
-          // Element not found - fallback to center position
-          console.warn(`Tour element not found: ${currentStep.selector}`);
+          setElementNotFound(true);
           setTargetPosition(null);
           setTooltipPosition({
-            top: window.scrollY + window.innerHeight / 2 - 140,
-            left: window.innerWidth / 2 - 160
+            top: viewportHeight / 2 - 140,
+            left: viewportWidth / 2 - 160
           });
         }
       } else {
+        setElementNotFound(false);
         setTargetPosition(null);
-        // Center tooltip when no target element
         setTooltipPosition({
-          top: window.scrollY + window.innerHeight / 2 - 140,
-          left: window.innerWidth / 2 - 160
+          top: viewportHeight / 2 - 140,
+          left: viewportWidth / 2 - 160
         });
       }
     };
 
-    // Small delay to ensure DOM has updated
-    const timeoutId = setTimeout(updatePosition, 50);
+    // Clear any existing polling
+    if (pollingRef.current) {
+      clearInterval(pollingRef.current);
+    }
+
+    // Poll for element existence (up to 1 second)
+    let attempts = 0;
+    const maxAttempts = 20; // 20 * 50ms = 1 second
     
-    return () => clearTimeout(timeoutId);
+    const pollForElement = () => {
+      if (currentStep?.selector) {
+        const element = document.querySelector(currentStep.selector);
+        if (element || attempts >= maxAttempts) {
+          updatePosition();
+          if (pollingRef.current) {
+            clearInterval(pollingRef.current);
+            pollingRef.current = null;
+          }
+        } else {
+          attempts++;
+        }
+      } else {
+        updatePosition();
+      }
+    };
+
+    // Start polling
+    pollForElement();
+    pollingRef.current = setInterval(pollForElement, 50);
+
+    // Handle scroll and resize
+    const handleRecompute = () => {
+      requestAnimationFrame(updatePosition);
+    };
+    
+    window.addEventListener('scroll', handleRecompute);
+    window.addEventListener('resize', handleRecompute);
+    
+    return () => {
+      if (pollingRef.current) {
+        clearInterval(pollingRef.current);
+      }
+      window.removeEventListener('scroll', handleRecompute);
+      window.removeEventListener('resize', handleRecompute);
+    };
   }, [currentStep, currentStepIndex]);
+
   const handleNext = () => {
     if (currentStep?.action) {
       // Execute action if specified
@@ -149,40 +195,59 @@ export const GuideTour: React.FC<GuideTourProps> = ({
         }
       }
     }
+
     if (isLastStep) {
       onComplete();
     } else {
       setCurrentStepIndex(prev => prev + 1);
     }
   };
+
   const handlePrevious = () => {
     if (currentStepIndex > 0) {
       setCurrentStepIndex(prev => prev - 1);
     }
   };
+
   const handleSkip = () => {
     onSkip();
   };
-  return <div className="fixed inset-0 z-[9999]">
-      {/* Overlay with spotlight effect */}
-      <div ref={overlayRef} className="absolute inset-0 bg-black/50" style={{
-      clipPath: targetPosition ? `polygon(0% 0%, 0% 100%, ${targetPosition.left}px 100%, ${targetPosition.left}px ${targetPosition.top}px, ${targetPosition.left + targetPosition.width}px ${targetPosition.top}px, ${targetPosition.left + targetPosition.width}px ${targetPosition.top + targetPosition.height}px, ${targetPosition.left}px ${targetPosition.top + targetPosition.height}px, ${targetPosition.left}px 100%, 100% 100%, 100% 0%)` : 'none'
-    }} />
+
+  return (
+    <div className="fixed inset-0 z-[10000]">
+      {/* Overlay with improved spotlight effect */}
+      <div 
+        ref={overlayRef} 
+        className="absolute inset-0 bg-black/50 z-[10000]"
+        style={{
+          mask: targetPosition 
+            ? `radial-gradient(ellipse ${targetPosition.width + 40}px ${targetPosition.height + 40}px at ${targetPosition.left + targetPosition.width/2}px ${targetPosition.top + targetPosition.height/2}px, transparent 50%, black 60%)`
+            : 'none'
+        }}
+      />
 
       {/* Highlighted element border */}
-      {targetPosition && <div className="absolute border-2 border-primary rounded-lg shadow-lg pointer-events-none" style={{
-      top: targetPosition.top - 2,
-      left: targetPosition.left - 2,
-      width: targetPosition.width + 4,
-      height: targetPosition.height + 4
-    }} />}
+      {targetPosition && (
+        <div 
+          className="absolute border-2 border-primary rounded-lg shadow-lg pointer-events-none z-[10001]" 
+          style={{
+            top: targetPosition.top - 2,
+            left: targetPosition.left - 2,
+            width: targetPosition.width + 4,
+            height: targetPosition.height + 4
+          }} 
+        />
+      )}
 
       {/* Tour tooltip */}
-      <Card style={{
-      top: tooltipPosition.top,
-      left: tooltipPosition.left,
-      position: 'fixed'
-    }} className="w-80 shadow-2xl border-primary/20 py-[30px] bg-background z-[10001]">
+      <Card 
+        style={{
+          top: tooltipPosition.top,
+          left: tooltipPosition.left,
+          position: 'fixed'
+        }} 
+        className="w-80 shadow-2xl border-primary/20 py-[30px] bg-background z-[10002]"
+      >
         <CardContent className="p-4">
           {/* Header */}
           <div className="flex items-center justify-between mb-3">
@@ -200,7 +265,14 @@ export const GuideTour: React.FC<GuideTourProps> = ({
           {/* Step content */}
           <div className="space-y-3">
             <h4 className="font-medium text-sm">{currentStep.title}</h4>
-            <p className="text-sm text-muted-foreground">{currentStep.content}</p>
+            <p className="text-sm text-muted-foreground">
+              {currentStep.content}
+              {elementNotFound && (
+                <span className="block text-xs text-orange-500 mt-1">
+                  Couldn't locate the target element, but you can still continue.
+                </span>
+              )}
+            </p>
           </div>
 
           {/* Progress */}
@@ -208,7 +280,13 @@ export const GuideTour: React.FC<GuideTourProps> = ({
 
           {/* Navigation */}
           <div className="flex items-center justify-between mt-4">
-            <Button variant="ghost" size="sm" onClick={handlePrevious} disabled={currentStepIndex === 0} className="h-8">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={handlePrevious} 
+              disabled={currentStepIndex === 0} 
+              className="h-8"
+            >
               <ChevronLeft className="w-4 h-4 mr-1" />
               Previous
             </Button>
@@ -227,5 +305,6 @@ export const GuideTour: React.FC<GuideTourProps> = ({
           </div>
         </CardContent>
       </Card>
-    </div>;
+    </div>
+  );
 };
