@@ -556,13 +556,13 @@ export const ServiceCard = ({
           </div>
 
           {/* Description with dynamic height for expansion */}
-          <div className={`px-4 pt-1 pb-2 flex flex-col transition-all duration-300 ${isDescriptionExpanded ? 'h-auto' : 'h-20'}`}>
-            <p className={`text-sm text-muted-foreground leading-tight transition-all duration-300 ${isDescriptionExpanded ? 'overflow-visible' : 'line-clamp-2 overflow-hidden'}`}>
+          <div className={`px-4 py-3 flex flex-col transition-all duration-300 ${isDescriptionExpanded ? 'min-h-[6rem]' : 'h-24'}`}>
+            <p className={`text-sm text-muted-foreground leading-relaxed transition-all duration-300 ${isDescriptionExpanded ? 'overflow-visible' : 'line-clamp-3 overflow-hidden'}`}>
               {getLocalizedDescription()}
             </p>
             {getLocalizedDescription() && getLocalizedDescription().length > 100 && (
               <button
-                className="text-sm text-primary hover:text-primary/80 font-medium mt-1 transition-colors self-start"
+                className="text-sm text-primary hover:text-primary/80 font-medium mt-2 transition-colors self-start"
                 onClick={(e) => {
                   e.stopPropagation();
                   console.log('Expand button clicked, current state:', isDescriptionExpanded);
