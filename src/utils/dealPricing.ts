@@ -131,10 +131,34 @@ export const getSavingsInfo = (service: any): { amount: number; percentage: numb
   if (retailPrice <= 0) return null;
   
   const dealInfo = getDealDisplayPrice(service);
+  
+  // Debug logging for Starstix specifically
+  if (service.title && service.title.toLowerCase().includes('starstix')) {
+    console.log(`🔍 STARSTIX DEBUG:`, {
+      title: service.title,
+      retail_price_string: service.retail_price,
+      retail_price_numeric: retailPrice,
+      deal_price: dealInfo.price,
+      deal_label: dealInfo.label,
+      co_pay_price: service.co_pay_price,
+      pro_price: service.pro_price,
+      respa_split_limit: service.respa_split_limit
+    });
+  }
+  
   if (dealInfo.price >= retailPrice) return null;
   
   const amount = retailPrice - dealInfo.price;
   const percentage = Math.round((amount / retailPrice) * 100);
+  
+  // More debug for Starstix
+  if (service.title && service.title.toLowerCase().includes('starstix')) {
+    console.log(`🔍 STARSTIX CALCULATION:`, {
+      amount,
+      percentage,
+      formula: `(${retailPrice} - ${dealInfo.price}) / ${retailPrice} * 100 = ${percentage}%`
+    });
+  }
   
   return percentage > 0 ? { amount, percentage } : null;
 };
