@@ -56,8 +56,9 @@ serve(async (req) => {
       .eq('user_id', user.id)
       .single();
 
-    console.log('📄 Profile:', profile);
-    console.log('❌ Profile error:', profileError);
+    if (profileError) {
+      console.log('❌ Profile error:', profileError);
+    }
 
     // Try OpenAI key
     const openAIKey = Deno.env.get('OPENAI_API_KEY');

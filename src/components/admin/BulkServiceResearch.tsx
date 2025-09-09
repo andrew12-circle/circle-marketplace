@@ -98,29 +98,6 @@ export default function BulkServiceResearch() {
       while (batchIndex < maxBatches) {
         batchIndex += 1;
         appendLog(`🚀 Running batch ${batchIndex} (limit ${limit}, offset ${offset})...`);
-        
-        // Debug auth first
-        try {
-          appendLog('🔍 Testing authentication...');
-          const { data: debugData, error: debugError } = await supabase.functions.invoke('test-auth-debug', {
-            body: {}
-          });
-          
-          if (debugError) {
-            appendLog(`❌ Debug auth error: ${debugError.message}`);
-            throw debugError;
-          }
-          
-          if (debugData?.success) {
-            appendLog(`✅ Auth test successful: ${debugData.user?.email} - Admin: ${debugData.profile?.is_admin} - OpenAI Key: ${debugData.hasOpenAIKey}`);
-          } else {
-            appendLog(`❌ Auth test failed: ${JSON.stringify(debugData)}`);
-            throw new Error('Authentication test failed');
-          }
-        } catch (debugErr) {
-          appendLog(`❌ Debug function error: ${debugErr}`);
-          throw debugErr;
-        }
 
         let response;
         let currentLimit = limit;
