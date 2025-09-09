@@ -716,7 +716,7 @@ export const ServiceFunnelModal = ({
 
           {/* Main Content Section */}
           <div className="bg-gray-50/50 py-12">
-            <div className="max-w-6xl mx-auto px-6">
+        <div className="max-w-6xl mx-auto px-3 sm:px-6">
               <div className="grid lg:grid-cols-3 gap-8">
                 
                 {/* Left Column - Collapsible Questions */}
