@@ -78,7 +78,7 @@ export const StickySearchContainer = ({ children, className }: StickySearchConta
           className
         )}
         style={{
-          top: isSticky ? `${headerHeight + (isMobile ? 70 : 80)}px` : undefined,
+          top: isSticky ? `${headerHeight + (isMobile ? 70 : 80) - 15}px` : undefined,
         }}
       >
         <div className="container mx-auto px-4 py-2 sm:py-4 pt-8 sm:pt-10">
