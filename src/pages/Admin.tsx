@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import AdminDashboard from "@/pages/AdminDashboard";
+import { OptimizedAdminTabs } from "@/components/admin/OptimizedAdminTabs";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
@@ -103,7 +103,7 @@ const Admin = () => {
     userId: session.user.id 
   });
 
-  return <AdminDashboard />;
+  return <OptimizedAdminTabs />;
 };
 
 export default Admin;

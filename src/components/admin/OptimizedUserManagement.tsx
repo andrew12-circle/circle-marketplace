@@ -8,9 +8,9 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { useDebounce } from '@/hooks/useDebounce';
-import { useKeysetPagination } from '@/hooks/useKeysetPagination';
-import { Users, Search, Filter } from 'lucide-react';
+import { Users, Search, Filter, AlertTriangle } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface UserProfile {
   user_id: string;
@@ -24,19 +24,47 @@ interface UserProfile {
 export const OptimizedUserManagement = () => {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
-  const debouncedSearch = useDebounce(searchTerm, 300);
+  const [degradedMode, setDegraded] = useState(false);
+  const debouncedSearch = useDebounce(searchTerm, 500);
 
-  const {
-    data: users,
-    isLoading,
-    hasNextPage,
-    loadMore,
-    reset,
-    error,
-  } = useKeysetPagination<UserProfile>({
-    rpcFunction: 'debug_get_profiles_keyset',
-    searchTerm: debouncedSearch,
-    pageSize: 50,
+  // Direct Supabase query instead of relying on RPC
+  const { data: users = [], isLoading, error, refetch } = useQuery<UserProfile[]>({
+    queryKey: ['user-profiles', debouncedSearch],
+    queryFn: async (): Promise<UserProfile[]> => {
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('Query timeout')), 15000)
+      );
+
+      const queryPromise = async (): Promise<UserProfile[]> => {
+        let query = supabase
+          .from('profiles')
+          .select('user_id, display_name, is_admin, is_pro_member, created_at, updated_at')
+          .order('created_at', { ascending: false })
+          .limit(500);
+
+        if (debouncedSearch) {
+          query = query.or(`display_name.ilike.%${debouncedSearch}%,business_name.ilike.%${debouncedSearch}%`);
+        }
+
+        const { data, error } = await query;
+        if (error) throw error;
+        return data as UserProfile[];
+      };
+
+      try {
+        const result = await Promise.race([queryPromise(), timeoutPromise]);
+        setDegraded(false);
+        return result;
+      } catch (error: any) {
+        if (error.message === 'Query timeout') {
+          setDegraded(true);
+          return [];
+        }
+        throw error;
+      }
+    },
+    staleTime: 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 
   // Debug logging
@@ -61,7 +89,7 @@ export const OptimizedUserManagement = () => {
         description: `User ${!currentStatus ? 'granted' : 'removed from'} admin privileges`,
       });
 
-      reset();
+      refetch();
     } catch (error: any) {
       console.error('Error updating admin status:', error);
       const isRpcMissing = error?.message?.includes('function') || error?.code === '42883';
@@ -87,7 +115,7 @@ export const OptimizedUserManagement = () => {
         description: `User ${!currentStatus ? 'granted' : 'removed from'} Pro membership`,
       });
 
-      reset();
+      refetch();
     } catch (error: any) {
       console.error('Error updating Pro status:', error);
       const isRpcMissing = error?.message?.includes('function') || error?.code === '42883';
@@ -163,15 +191,30 @@ export const OptimizedUserManagement = () => {
             <Button
               variant="outline"
               size="sm"
-              onClick={reset}
+              onClick={() => refetch()}
             >
               <Filter className="h-4 w-4 mr-2" />
-              Reset
+              Refresh
             </Button>
           </div>
         </div>
       </CardHeader>
       <CardContent>
+        {degradedMode && (
+          <Alert className="mb-4">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>
+              System is running in degraded mode due to timeout. Some features may be limited.
+              <Button 
+                variant="link" 
+                className="p-0 ml-2 h-auto" 
+                onClick={() => refetch()}
+              >
+                Retry
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
         {error && (
           <div className="text-center py-12">
             <Users className="h-12 w-12 text-red-500 mx-auto mb-4" />
@@ -179,12 +222,12 @@ export const OptimizedUserManagement = () => {
             <p className="text-sm text-muted-foreground mt-2">
               {error.message || 'Failed to load user data'}
             </p>
-            <button 
-              onClick={reset}
-              className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/90"
+            <Button 
+              onClick={() => refetch()}
+              className="mt-4"
             >
               Retry
-            </button>
+            </Button>
           </div>
         )}
         {!error && users.length === 0 && !isLoading ? (
@@ -198,15 +241,39 @@ export const OptimizedUserManagement = () => {
             </p>
           </div>
         ) : !error && (
-          <VirtualizedTable
-            data={users}
-            columns={columns}
-            height={600}
-            itemHeight={60}
-            loading={isLoading}
-            onLoadMore={loadMore}
-            hasNextPage={hasNextPage}
-          />
+          <div className="space-y-4">
+            {users.map((user) => (
+              <div key={user.user_id} className="flex items-center justify-between p-4 border rounded-lg">
+                <div className="flex items-center gap-4">
+                  <div className="font-medium">{user.display_name || 'No name'}</div>
+                  <Badge variant={user.is_admin ? 'default' : 'secondary'}>
+                    {user.is_admin ? 'Admin' : 'User'}
+                  </Badge>
+                  <Badge variant={user.is_pro_member ? 'default' : 'outline'}>
+                    {user.is_pro_member ? 'Pro' : 'Free'}
+                  </Badge>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-sm text-muted-foreground">
+                    {new Date(user.created_at).toLocaleDateString()}
+                  </div>
+                  <Switch
+                    checked={user.is_admin}
+                    onCheckedChange={() => handleToggleAdmin(user.user_id, user.is_admin)}
+                  />
+                  <Switch
+                    checked={user.is_pro_member}
+                    onCheckedChange={() => handleTogglePro(user.user_id, user.is_pro_member)}
+                  />
+                </div>
+              </div>
+            ))}
+            {isLoading && (
+              <div className="text-center py-4">
+                <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full mx-auto" />
+              </div>
+            )}
+          </div>
         )}
       </CardContent>
     </Card>
