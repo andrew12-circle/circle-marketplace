@@ -734,7 +734,19 @@ export const ServiceCard = ({
                       </span>
                     </div>
                   )}
-                  
+                   
+                  {/* Savings Badge for Non-Pro Members */}
+                  {(() => {
+                    const savingsInfo = getSavingsInfo(service);
+                    return savingsInfo && savingsInfo.percentage > 0 && (
+                      <div className="flex justify-end mt-2">
+                         <Badge className="bg-red-500 text-white text-xs font-medium">
+                           {savingsInfo.percentage}{t('serviceCard.percentOff')}
+                        </Badge>
+                      </div>
+                    );
+                  })()}
+                   
                   {showDiscountPending ? (
                     <div className="space-y-2">
                       {/* Show Circle Pro price only if service is verified and has pro price */}
@@ -844,16 +856,9 @@ export const ServiceCard = ({
                            </div>
                          </TooltipTrigger>
                        </Tooltip>
-                        {(() => {
-                          const savingsInfo = getSavingsInfo(service);
-                          return savingsInfo && savingsInfo.percentage > 0 && (
-                            <div className="flex justify-end">
-                               <Badge className="bg-red-500 text-white text-xs font-medium">
-                                 {savingsInfo.percentage}{t('serviceCard.percentOff')}
-                              </Badge>
-                            </div>
-                          );
-                        })()}
+                         {(() => {
+                           return null; // Removed duplicate savings badge from here
+                         })()}
                      </div>
                    )}
                 </>
