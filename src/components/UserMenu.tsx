@@ -229,7 +229,7 @@ export const UserMenu = () => {
         
         {/* AI Dashboard Link */}
         <DropdownMenuItem asChild>
-          <Link to="/ai-dashboard" className="flex items-center">
+          <Link to="/ai-dashboard" className="flex items-center" data-tour="ai-concierge-link">
             <Brain className="mr-2 h-4 w-4 text-primary" />
             <span>AI Concierge</span>
           </Link>

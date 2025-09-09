@@ -184,23 +184,23 @@ export const guides: Guide[] = [
     steps: [
       {
         id: 'step-1',
-        title: 'Open AI Dashboard',
-        content: 'Navigate to the AI Dashboard to access intelligent insights.',
-        selector: 'nav a[href="/ai-dashboard"]',
+        title: 'Open AI Concierge',
+        content: 'Click on your user menu and select "AI Concierge" to access intelligent recommendations.',
+        selector: '[data-tour="ai-concierge-link"], a[href="/ai-dashboard"]',
         position: 'bottom'
       },
       {
         id: 'step-2',
-        title: 'Configure Preferences',
-        content: 'Set your business goals and preferences for better recommendations.',
-        selector: '[data-testid="ai-preferences"]',
+        title: 'Generate Recommendations',
+        content: 'Click the button to generate your personalized business growth recommendations.',
+        selector: '[data-tour="generate-recommendations-button"]',
         position: 'right'
       },
       {
         id: 'step-3',
         title: 'Review Recommendations',
-        content: 'Explore the AI-generated recommendations and insights.',
-        selector: '[data-testid="ai-recommendations"]',
+        content: 'Once generated, explore your personalized AI recommendations and growth strategies.',
+        selector: '[data-tour="ai-plan-display"], .space-y-6, .ai-recommendations',
         position: 'top'
       }
     ]

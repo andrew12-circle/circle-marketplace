@@ -194,7 +194,7 @@ export function AIRecommendationsDashboard() {
   const personalityType = (profile as any)?.personality_data?.personality_type || null;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-tour="ai-plan-display">
       {/* Show recovery system if we have errors */}
       {(agentError || errorCount > 0) && (
         <AutoRecoverySystem

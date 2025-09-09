@@ -38,7 +38,11 @@ export function RecommendationsHeader({
       </div>
 
       <div className="flex flex-wrap gap-2">
-        <Button onClick={hasCompleteProfile ? onGenerateRecommendations : onOpenAssessment} disabled={isGenerating}>
+        <Button 
+          onClick={hasCompleteProfile ? onGenerateRecommendations : onOpenAssessment} 
+          disabled={isGenerating}
+          data-tour="generate-recommendations-button"
+        >
           {isGenerating ? (
             <>
               <Bot className="h-4 w-4 mr-2 animate-pulse" />
