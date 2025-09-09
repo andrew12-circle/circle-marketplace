@@ -3,21 +3,21 @@ export const analyticsConfig = {
   // PostHog Configuration
   posthog: {
     // Disable PostHog completely if needed
-    enabled: process.env.REACT_APP_POSTHOG_DISABLE !== 'true',
+    enabled: import.meta.env.VITE_POSTHOG_DISABLE !== 'true',
     
     // Strict throttling mode for development/admin routes
-    strictThrottling: process.env.REACT_APP_POSTHOG_STRICT === 'true' || 
-                     process.env.NODE_ENV === 'development',
+    strictThrottling: import.meta.env.VITE_POSTHOG_STRICT === 'true' || 
+                     import.meta.env.DEV,
     
     // Rate limits
-    maxEventsPerSecond: parseInt(process.env.REACT_APP_POSTHOG_MAX_PER_SECOND || '5'),
-    maxEventsPerMinute: parseInt(process.env.REACT_APP_POSTHOG_MAX_PER_MINUTE || '50'),
+    maxEventsPerSecond: parseInt(import.meta.env.VITE_POSTHOG_MAX_PER_SECOND || '5'),
+    maxEventsPerMinute: parseInt(import.meta.env.VITE_POSTHOG_MAX_PER_MINUTE || '50'),
     
     // Debounce similar events
-    debounceMs: parseInt(process.env.REACT_APP_POSTHOG_DEBOUNCE_MS || '500'),
+    debounceMs: parseInt(import.meta.env.VITE_POSTHOG_DEBOUNCE_MS || '500'),
     
     // Admin route specific throttling
-    adminRouteThrottling: process.env.REACT_APP_POSTHOG_ADMIN_THROTTLE !== 'false'
+    adminRouteThrottling: import.meta.env.VITE_POSTHOG_ADMIN_THROTTLE !== 'false'
   },
   
   // Internal analytics (Supabase events) - not affected by PostHog throttling
@@ -34,7 +34,7 @@ export const shouldThrottleAdminRoutes = analyticsConfig.posthog.adminRouteThrot
 
 // Debug helper
 export const getAnalyticsDebugInfo = () => ({
-  environment: process.env.NODE_ENV,
+  environment: import.meta.env.MODE,
   posthogEnabled: isPostHogEnabled,
   strictThrottling: isStrictThrottling,
   adminThrottling: shouldThrottleAdminRoutes,
