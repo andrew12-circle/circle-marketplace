@@ -236,12 +236,12 @@ export const EnhancedSearch = ({
             {(['services', 'products', 'vendors'] as const).map((mode) => (
               <Button
                 key={mode}
-                variant={viewMode === mode ? "default" : "ghost"}
+                variant="ghost"
                 size="sm"
                 onClick={() => onViewModeChange(mode)}
                 className={`px-3 py-1 text-xs transition-all ${
                   viewMode === mode 
-                    ? "bg-background shadow-sm" 
+                    ? "bg-primary text-primary-foreground shadow-sm" 
                     : "hover:bg-background/50"
                 }`}
               >
