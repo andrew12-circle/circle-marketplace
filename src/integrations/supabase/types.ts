@@ -10543,12 +10543,14 @@ export type Database = {
         Returns: Json
       }
       admin_set_pro_status: {
-        Args: { actor?: string; pro: boolean; target_user: string }
+        Args:
+          | { actor?: string; pro: boolean; target_user: string }
+          | { pro: boolean; target_user: string }
         Returns: undefined
       }
       admin_toggle_admin_status: {
         Args: { new_status: boolean; target_user: string }
-        Returns: boolean
+        Returns: undefined
       }
       audit_security_definer_functions: {
         Args: Record<PropertyKey, never>
@@ -10856,11 +10858,16 @@ export type Database = {
         }[]
       }
       get_profiles_keyset: {
-        Args: { cursor_date?: string; page_size?: number; search_term?: string }
+        Args:
+          | { cursor_date?: string; page_size?: number; search_term?: string }
+          | {
+              cursor_user_id?: string
+              page_size?: number
+              search_term?: string
+            }
         Returns: {
           created_at: string
           display_name: string
-          has_next: boolean
           is_admin: boolean
           is_pro: boolean
           is_verified: boolean
