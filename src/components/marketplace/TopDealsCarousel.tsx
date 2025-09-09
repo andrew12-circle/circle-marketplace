@@ -231,12 +231,17 @@ export const TopDealsCarousel = ({ services, serviceRatings, onServiceClick }: T
                             <div className="text-lg font-bold text-green-600">
                               {formatPrice(effectivePrice)}
                             </div>
-                            <div className="text-sm text-muted-foreground line-through">
-                              {formatPrice(retailPrice)}
-                            </div>
-                            <Badge variant="secondary" className="text-xs bg-green-100 text-green-800 mt-1">
+                            <Badge variant="secondary" className="text-xs bg-green-100 text-green-800 mb-1">
                               {priceLabel}
                             </Badge>
+                            {service.pro_price && (
+                              <div className="text-sm text-muted-foreground">
+                                Pro: {formatPrice(parsePrice(service.pro_price))}
+                              </div>
+                            )}
+                            <div className="text-sm text-muted-foreground line-through">
+                              Retail: {formatPrice(retailPrice)}
+                            </div>
                           </>
                         ) : (
                           <>
