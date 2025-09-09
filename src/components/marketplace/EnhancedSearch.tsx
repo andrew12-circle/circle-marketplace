@@ -249,12 +249,7 @@ export const EnhancedSearch = ({
                       : "hover:bg-background/50"
                   }`}
                 >
-                  <span className="sm:hidden">
-                    {mode === 'services' ? 'Svc' : mode === 'products' ? 'Prod' : 'Vend'}
-                  </span>
-                  <span className="hidden sm:inline">
-                    {mode.charAt(0).toUpperCase() + mode.slice(1)}
-                  </span>
+                  {mode.charAt(0).toUpperCase() + mode.slice(1)}
                 </Button>
               ))}
             </div>
