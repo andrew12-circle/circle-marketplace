@@ -95,7 +95,7 @@ export const guides: Guide[] = [
     description: 'Discover how to find and enroll in Academy courses to advance your skills.',
     difficulty: 'beginner',
     estimatedTime: '2 min',
-    routes: ['/academy', '/'],
+    routes: ['/academy'],
     steps: [
       {
         id: 'step-1',
