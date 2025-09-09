@@ -93,6 +93,7 @@ export const CoPayCartItem = ({
           <Button 
             variant="outline"
             onClick={() => onContactVendor?.(item.id)}
+            data-tour="contact-vendor"
           >
             Contact Vendor
           </Button>

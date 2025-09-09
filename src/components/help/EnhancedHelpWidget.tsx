@@ -39,15 +39,24 @@ export const EnhancedHelpWidget: React.FC = () => {
     setChatInput('');
     
     try {
-      await getQuickInsight(message);
-      toast({
-        title: "AI Response",
-        description: "Check the AI Dashboard for detailed insights!",
-      });
+      const result = await getQuickInsight(message);
+      if (result) {
+        toast({
+          title: "AI Response Generated",
+          description: "Check the AI Dashboard for your personalized insights!",
+        });
+      } else {
+        toast({
+          title: "AI Temporarily Unavailable",
+          description: "The AI service is currently being updated. Please try the FAQ or contact support.",
+          variant: "destructive",
+        });
+      }
     } catch (error) {
+      console.error('Help widget AI error:', error);
       toast({
-        title: "Error",
-        description: "Failed to get AI response. Please try again.",
+        title: "AI Service Unavailable",
+        description: "Please try the FAQ section or contact support for assistance.",
         variant: "destructive",
       });
     }
@@ -166,8 +175,21 @@ export const EnhancedHelpWidget: React.FC = () => {
                   <TabsContent value="chat" className="h-full m-0">
                     <div className="h-full flex flex-col">
                       <div className="flex-1 p-3">
-                        <div className="text-center text-sm text-muted-foreground">
+                        <div className="text-center text-sm text-muted-foreground mb-3">
                           Ask me anything about the platform!
+                        </div>
+                        {isLoading && (
+                          <div className="text-center text-xs text-primary">
+                            AI is thinking...
+                          </div>
+                        )}
+                        <div className="text-xs text-muted-foreground">
+                          <strong>Try asking:</strong>
+                          <ul className="mt-1 space-y-1 list-disc list-inside">
+                            <li>"How do I find services?"</li>
+                            <li>"What is Co-Pay?"</li>
+                            <li>"How do guided tours work?"</li>
+                          </ul>
                         </div>
                       </div>
                       <div className="p-3 border-t">
@@ -177,7 +199,8 @@ export const EnhancedHelpWidget: React.FC = () => {
                             onChange={(e) => setChatInput(e.target.value)}
                             placeholder="Type your question..."
                             className="flex-1 h-8 text-xs"
-                            onKeyPress={(e) => e.key === 'Enter' && handleChatSend()}
+                            onKeyPress={(e) => e.key === 'Enter' && !isLoading && handleChatSend()}
+                            disabled={isLoading}
                           />
                           <Button
                             onClick={handleChatSend}
