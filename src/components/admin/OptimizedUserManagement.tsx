@@ -16,7 +16,6 @@ interface UserProfile {
   user_id: string;
   display_name: string;
   is_admin: boolean;
-  is_verified: boolean;
   is_pro: boolean;
   created_at: string;
   updated_at: string;
@@ -120,16 +119,6 @@ export const OptimizedUserManagement = () => {
           checked={value}
           onCheckedChange={() => handleTogglePro(user.user_id, value)}
         />
-      ),
-    },
-    {
-      key: 'is_verified' as keyof UserProfile,
-      header: 'Status',
-      width: 120,
-      render: (value: boolean) => (
-        <Badge variant={value ? 'default' : 'secondary'}>
-          {value ? 'Verified' : 'Unverified'}
-        </Badge>
       ),
     },
     {

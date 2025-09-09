@@ -10870,7 +10870,6 @@ export type Database = {
           display_name: string
           is_admin: boolean
           is_pro: boolean
-          is_verified: boolean
           updated_at: string
           user_id: string
         }[]
