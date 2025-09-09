@@ -990,10 +990,30 @@ export const MarketplaceGrid = () => {
                         <span className="text-sm text-center sm:text-left">
                           Our apologies, we hit a snag. The system has been automatically refreshed for you.
                         </span>
-                        <div className="flex gap-2 justify-center flex-wrap">
-                          <Button variant="outline" onClick={handleReloadDataQuick}>Reload data</Button>
-                          <Button onClick={handleHardRefresh}>Try again</Button>
-                        </div>
+                        <Button 
+                          onClick={() => {
+                            // Clear all cookies except authentication
+                            const cookies = document.cookie.split(";");
+                            for (let cookie of cookies) {
+                              const eqPos = cookie.indexOf("=");
+                              const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
+                              // Skip supabase auth cookies to preserve session
+                              if (!name.includes('supabase') && !name.includes('auth')) {
+                                document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+                              }
+                            }
+                            // Clear localStorage except auth data
+                            const authData = localStorage.getItem('supabase.auth.token');
+                            localStorage.clear();
+                            if (authData) {
+                              localStorage.setItem('supabase.auth.token', authData);
+                            }
+                            // Reload the page
+                            window.location.reload();
+                          }}
+                        >
+                          Try Again
+                        </Button>
                       </div>
                     </div>
                   ) : null}
