@@ -9790,6 +9790,9 @@ export type Database = {
           parent_vendor_id: string | null
           payment_terms: string | null
           phone: string | null
+          pricing_screenshot_captured_at: string | null
+          pricing_screenshot_url: string | null
+          pricing_url: string | null
           rating: number | null
           requires_circle_payout: boolean | null
           respa_risk_level: string | null
@@ -9876,6 +9879,9 @@ export type Database = {
           parent_vendor_id?: string | null
           payment_terms?: string | null
           phone?: string | null
+          pricing_screenshot_captured_at?: string | null
+          pricing_screenshot_url?: string | null
+          pricing_url?: string | null
           rating?: number | null
           requires_circle_payout?: boolean | null
           respa_risk_level?: string | null
@@ -9962,6 +9968,9 @@ export type Database = {
           parent_vendor_id?: string | null
           payment_terms?: string | null
           phone?: string | null
+          pricing_screenshot_captured_at?: string | null
+          pricing_screenshot_url?: string | null
+          pricing_url?: string | null
           rating?: number | null
           requires_circle_payout?: boolean | null
           respa_risk_level?: string | null
