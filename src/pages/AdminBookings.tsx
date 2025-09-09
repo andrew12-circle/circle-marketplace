@@ -61,9 +61,10 @@ export default function AdminBookings() {
         .from('consultation_bookings')
         .select(`
           *,
-          services (
+          services!inner (
             title,
-            vendors (
+            vendor_id,
+            vendors!inner (
               name,
               contact_email
             )
