@@ -311,7 +311,7 @@ export const CategoryBlocks = ({ onCategoryClick, onAIChat, services, allService
         <h3 className="text-lg font-semibold text-foreground">{title}</h3>
         <p className="text-sm text-muted-foreground">{subtitle}</p>
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
+      <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
         {categories.map((category) => {
           const IconComponent = category.icon;
           const isActive = activeFilters.some(filter => category.tags.includes(filter));
