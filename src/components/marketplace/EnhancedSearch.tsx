@@ -37,6 +37,7 @@ interface EnhancedSearchProps {
   availableCategories: string[];
   availableTags: string[];
   viewMode?: 'services' | 'products' | 'vendors';
+  onViewModeChange?: (mode: 'services' | 'products' | 'vendors') => void;
   // Sorting props
   sortStrategy?: 'ranked' | 'recent' | 'price-low' | 'price-high';
   onSortChange?: (strategy: 'ranked' | 'recent' | 'price-low' | 'price-high') => void;
@@ -65,6 +66,7 @@ export const EnhancedSearch = ({
   availableCategories, 
   availableTags,
   viewMode = 'services',
+  onViewModeChange,
   sortStrategy = 'ranked',
   onSortChange,
   isAdmin = false
@@ -226,9 +228,31 @@ export const EnhancedSearch = ({
 
   return (
     <div className="space-y-4">
-      {/* Search Bar + Filters */}
-      <div className="flex items-center gap-[5px]">
-        <div className="relative w-full max-w-xl flex-1">
+      {/* Single Compact Bar with Tabs, Search, and Filters */}
+      <div className="flex items-center gap-3">
+        {/* View Mode Tabs */}
+        {onViewModeChange && (
+          <div className="flex bg-muted rounded-lg p-1">
+            {(['services', 'products', 'vendors'] as const).map((mode) => (
+              <Button
+                key={mode}
+                variant={viewMode === mode ? "default" : "ghost"}
+                size="sm"
+                onClick={() => onViewModeChange(mode)}
+                className={`px-3 py-1 text-xs transition-all ${
+                  viewMode === mode 
+                    ? "bg-background shadow-sm" 
+                    : "hover:bg-background/50"
+                }`}
+              >
+                {mode.charAt(0).toUpperCase() + mode.slice(1)}
+              </Button>
+            ))}
+          </div>
+        )}
+
+        {/* Search Input */}
+        <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
           <Input
             placeholder={getSearchPlaceholder()}
@@ -238,6 +262,7 @@ export const EnhancedSearch = ({
           />
         </div>
 
+        {/* Filters Dropdown with Sorting */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm" className="gap-2">
@@ -251,161 +276,167 @@ export const EnhancedSearch = ({
               <ChevronDown className="w-4 h-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-[800px] p-6 bg-popover border shadow-md" align="start">
-            <div className="grid grid-cols-2 gap-8">
-              {/* Left Column */}
-              <div className="space-y-6">
-                {/* Categories */}
-                <div>
-                  <Label className="text-sm font-medium mb-3 block">Categories</Label>
-                  <div className="grid grid-cols-1 gap-2 max-h-32 overflow-y-auto">
-                    {availableCategories.map((category) => (
-                      <div key={category} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`category-${category}`}
-                          checked={filters.categories.includes(category)}
-                          onCheckedChange={() => toggleArrayFilter('categories', category)}
-                        />
-                        <Label htmlFor={`category-${category}`} className="text-sm cursor-pointer">
-                          {category}
-                        </Label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+          <DropdownMenuContent className="w-[800px] p-6 bg-popover border shadow-md" align="end">
+            <div className="space-y-6">
+              {/* Sort Controls - for services only */}
+              {viewMode === 'services' && onSortChange && (
+                <div className="pb-4 border-b">
+                  <Label className="text-sm font-medium mb-3 block">Sort By</Label>
+                  <div className="flex items-center gap-3">
+                    <Select value={sortStrategy} onValueChange={onSortChange}>
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue>
+                          <div className="flex items-center gap-2">
+                            <SortIcon className="h-4 w-4" />
+                            <span>{label}</span>
+                          </div>
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="ranked">
+                          <div className="flex items-center gap-2">
+                            <TrendingUp className="h-4 w-4" />
+                            Ranked
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="recent">
+                          <div className="flex items-center gap-2">
+                            <Clock className="h-4 w-4" />
+                            Newest
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="price-low">
+                          <div className="flex items-center gap-2">
+                            <DollarSign className="h-4 w-4" />
+                            Price: Low to High
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="price-high">
+                          <div className="flex items-center gap-2">
+                            <DollarSign className="h-4 w-4" />
+                            Price: High to Low
+                          </div>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
 
-                {/* Features */}
-                <div>
-                  <Label className="text-sm font-medium mb-3 block">Features</Label>
-                  <div className="space-y-2">
-                    {FEATURE_OPTIONS.map((feature) => (
-                      <div key={feature} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`feature-${feature}`}
-                          checked={filters.features.includes(feature)}
-                          onCheckedChange={() => toggleArrayFilter('features', feature)}
-                        />
-                        <Label htmlFor={`feature-${feature}`} className="text-sm cursor-pointer">
-                          {feature}
-                        </Label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Right Column */}
-              <div className="space-y-6">
-                {/* Price Range */}
-                <div>
-                  <Label className="text-sm font-medium mb-3 block">
-                    Price Range: ${filters.priceRange[0]} - ${filters.priceRange[1]}
-                    {priceRangeLoading && <span className="text-muted-foreground ml-2">(loading...)</span>}
-                  </Label>
-                  <Slider
-                    value={filters.priceRange}
-                    onValueChange={(value) => updateFilters('priceRange', value)}
-                    max={maxPrice}
-                    min={minPrice}
-                    step={Math.max(1, Math.floor((maxPrice - minPrice) / 100))} // Dynamic step based on range
-                    className="mt-2"
-                    disabled={priceRangeLoading}
-                  />
-                  <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                    <span>${minPrice}</span>
-                    <span>${maxPrice}</span>
-                  </div>
-                </div>
-
-                {/* Rating */}
-                <div>
-                  <Label className="text-sm font-medium mb-3 block">Minimum Rating</Label>
-                  <div className="grid grid-cols-3 gap-2 max-w-xs">
-                    {[1, 2, 3, 4, 5].map((rating) => (
+                    {/* Admin Rerank Button */}
+                    {isAdmin && (
                       <Button
-                        key={rating}
-                        variant={filters.rating >= rating ? "default" : "outline"}
+                        variant="outline"
                         size="sm"
-                        onClick={() => updateFilters('rating', rating)}
-                        className="px-2 py-1 text-xs"
+                        onClick={handleRerank}
+                        disabled={isReranking}
+                        className="px-3"
                       >
-                        <Star className="w-3 h-3 mr-1" />
-                        {rating}+
+                        <RotateCw className={`h-4 w-4 ${isReranking ? 'animate-spin' : ''}`} />
+                        <span className="ml-2">
+                          {isReranking ? 'Reranking...' : 'Rerank'}
+                        </span>
                       </Button>
-                    ))}
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Filters Grid */}
+              <div className="grid grid-cols-2 gap-8">
+                {/* Left Column */}
+                <div className="space-y-6">
+                  {/* Categories */}
+                  <div>
+                    <Label className="text-sm font-medium mb-3 block">Categories</Label>
+                    <div className="grid grid-cols-1 gap-2 max-h-32 overflow-y-auto">
+                      {availableCategories.map((category) => (
+                        <div key={category} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`category-${category}`}
+                            checked={filters.categories.includes(category)}
+                            onCheckedChange={() => toggleArrayFilter('categories', category)}
+                          />
+                          <Label htmlFor={`category-${category}`} className="text-sm cursor-pointer">
+                            {category}
+                          </Label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Features */}
+                  <div>
+                    <Label className="text-sm font-medium mb-3 block">Features</Label>
+                    <div className="space-y-2">
+                      {FEATURE_OPTIONS.map((feature) => (
+                        <div key={feature} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`feature-${feature}`}
+                            checked={filters.features.includes(feature)}
+                            onCheckedChange={() => toggleArrayFilter('features', feature)}
+                          />
+                          <Label htmlFor={`feature-${feature}`} className="text-sm cursor-pointer">
+                            {feature}
+                          </Label>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
 
-                {/* Clear All Button */}
-                {activeFiltersCount > 0 && (
-                  <div className="pt-4 border-t">
-                    <Button variant="ghost" size="sm" onClick={clearAllFilters} className="w-full">
-                      Clear All Filters
-                    </Button>
+                {/* Right Column */}
+                <div className="space-y-6">
+                  {/* Price Range */}
+                  <div>
+                    <Label className="text-sm font-medium mb-3 block">
+                      Price Range: ${filters.priceRange[0]} - ${filters.priceRange[1]}
+                      {priceRangeLoading && <span className="text-muted-foreground ml-2">(loading...)</span>}
+                    </Label>
+                    <Slider
+                      value={filters.priceRange}
+                      onValueChange={(value) => updateFilters('priceRange', value)}
+                      max={maxPrice}
+                      min={minPrice}
+                      step={Math.max(1, Math.floor((maxPrice - minPrice) / 100))} // Dynamic step based on range
+                      className="mt-2"
+                      disabled={priceRangeLoading}
+                    />
+                    <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                      <span>${minPrice}</span>
+                      <span>${maxPrice}</span>
+                    </div>
                   </div>
-                )}
+
+                  {/* Rating */}
+                  <div>
+                    <Label className="text-sm font-medium mb-3 block">Minimum Rating</Label>
+                    <div className="grid grid-cols-3 gap-2 max-w-xs">
+                      {[1, 2, 3, 4, 5].map((rating) => (
+                        <Button
+                          key={rating}
+                          variant={filters.rating >= rating ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => updateFilters('rating', rating)}
+                          className="px-2 py-1 text-xs"
+                        >
+                          <Star className="w-3 h-3 mr-1" />
+                          {rating}+
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Clear All Button */}
+                  {activeFiltersCount > 0 && (
+                    <div className="pt-4 border-t">
+                      <Button variant="ghost" size="sm" onClick={clearAllFilters} className="w-full">
+                        Clear All Filters
+                      </Button>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </DropdownMenuContent>
         </DropdownMenu>
-
-        {/* Sort Controls - only show for services */}
-        {viewMode === 'services' && onSortChange && (
-          <div className="flex items-center gap-2">
-            <Select value={sortStrategy} onValueChange={onSortChange}>
-               <SelectTrigger className={`h-10 ${isMobile ? 'w-[50px]' : 'w-[160px]'}`}>
-                <SelectValue>
-                  <div className="flex items-center gap-2">
-                    <SortIcon className={`${isMobile ? 'w-4 h-4' : 'h-4 w-4'}`} />
-                    {!isMobile && <span>{label}</span>}
-                  </div>
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ranked">
-                  <div className="flex items-center gap-2">
-                    <TrendingUp className="h-4 w-4" />
-                    Ranked
-                  </div>
-                </SelectItem>
-                <SelectItem value="recent">
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4" />
-                    Newest
-                  </div>
-                </SelectItem>
-                <SelectItem value="price-low">
-                  <div className="flex items-center gap-2">
-                    <DollarSign className="h-4 w-4" />
-                    Price: Low to High
-                  </div>
-                </SelectItem>
-                <SelectItem value="price-high">
-                  <div className="flex items-center gap-2">
-                    <DollarSign className="h-4 w-4" />
-                    Price: High to Low
-                  </div>
-                </SelectItem>
-              </SelectContent>
-            </Select>
-
-            {/* Admin Rerank Button */}
-            {isAdmin && (
-              <Button
-                variant="outline"
-                size="default"
-                onClick={handleRerank}
-                disabled={isReranking}
-                className="h-10 px-3"
-              >
-                <RotateCw className={`h-4 w-4 ${isReranking ? 'animate-spin' : ''}`} />
-                <span className="hidden sm:inline ml-2">
-                  {isReranking ? 'Reranking...' : 'Rerank'}
-                </span>
-              </Button>
-            )}
-          </div>
-        )}
       </div>
 
       {/* Filter Controls */}

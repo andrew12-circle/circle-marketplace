@@ -4,7 +4,6 @@ import { useTranslation } from "react-i18next";
 import { OptimizedServiceCard } from "./OptimizedServiceCard";
 import { MarketplaceVendorCard } from "./MarketplaceVendorCard";
 import { MarketplaceFilters } from "./MarketplaceFilters";
-import { MarketplaceSortingControls } from "./MarketplaceSortingControls";
 import { CircleProBanner } from "./CircleProBanner";
 import { ServiceDetailsModal } from "./ServiceDetailsModal";
 import { ServiceFunnelModal } from "./ServiceFunnelModal";
@@ -758,30 +757,14 @@ export const MarketplaceGrid = () => {
                   availableCategories={getCategories()} 
                   availableTags={getTags()} 
                   viewMode={viewMode}
+                  onViewModeChange={setViewMode}
                   sortStrategy={orderStrategy}
                   onSortChange={setOrderStrategy}
                   isAdmin={profile?.is_admin}
                 />
-                
-                {/* View Mode Toggle */}
-                <div id="marketplace-results" className="flex gap-1 sm:gap-4 mt-4">
-                  <Button variant={viewMode === "services" ? "default" : "outline"} onClick={() => setViewMode("services")} className="flex-1 sm:flex-none flex items-center justify-center gap-1 sm:gap-2 h-8 sm:h-10 text-xs sm:text-base px-2 sm:px-4">
-                    <Sparkles className="w-3 h-3 sm:w-4 sm:h-4" />
-                    <span className="hidden sm:inline">{t('services')}</span>
-                    <span className="sm:hidden">Svc</span>
-                  </Button>
-                  <Button variant={viewMode === "products" ? "default" : "outline"} onClick={() => setViewMode("products")} className="flex-1 sm:flex-none flex items-center justify-center gap-1 sm:gap-2 h-8 sm:h-10 text-xs sm:text-base px-2 sm:px-4">
-                    <Filter className="w-3 h-3 sm:w-4 sm:h-4" />
-                    <span className="hidden sm:inline">Products</span>
-                    <span className="sm:hidden">Prod</span>
-                  </Button>
-                  <Button variant={viewMode === "vendors" ? "default" : "outline"} onClick={() => setViewMode("vendors")} className="flex-1 sm:flex-none flex items-center justify-center gap-1 sm:gap-2 h-8 sm:h-10 text-xs sm:text-base px-2 sm:px-4">
-                    <Zap className="w-3 h-3 sm:w-4 sm:h-4" />
-                    <span className="hidden sm:inline">{t('vendors')}</span>
-                    <span className="sm:hidden">Vend</span>
-                  </Button>
-                </div>
-              </StickySearchContainer>
+                 
+                {/* Enhanced Search with integrated view mode tabs */}
+               </StickySearchContainer>
 
                {/* Cache Status Indicator for Admins */}
                {profile?.is_admin && (
