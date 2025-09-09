@@ -16,7 +16,7 @@ interface UserProfile {
   user_id: string;
   display_name: string;
   is_admin: boolean;
-  is_pro: boolean;
+  is_pro_member: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -120,7 +120,7 @@ export const OptimizedUserManagement = () => {
       ),
     },
     {
-      key: 'is_pro' as keyof UserProfile,
+      key: 'is_pro_member' as keyof UserProfile,
       header: 'Pro',
       width: 100,
       render: (value: boolean, user: UserProfile) => (

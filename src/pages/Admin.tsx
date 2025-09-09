@@ -1,17 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { AdminSidebar } from "@/components/admin/AdminSidebar";
-import { AdminContentRouter } from "@/components/admin/AdminContentRouter";
+import AdminDashboard from "@/pages/AdminDashboard";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
-import { AlertTriangle, Menu } from "lucide-react";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { ServiceEditorErrorBoundary } from "@/lib/errorBoundary";
+import { AlertTriangle } from "lucide-react";
 import { logGuardDecision } from "@/lib/diagnostics";
 import { Session } from "@supabase/supabase-js";
 
 const Admin = () => {
-  // ProtectedRoute already handles auth, so we just get the session
   const [session, setSession] = useState<Session | null>(null);
   
   useEffect(() => {
@@ -26,20 +22,36 @@ const Admin = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Check admin status
+  // Enhanced admin gating logic
   const { data: isAdmin, isLoading: adminLoading } = useQuery({
     queryKey: ['admin-status', session?.user?.id],
     queryFn: async () => {
       if (!session?.user?.id) return false;
       
-      // Client-side admin allowlist for known admins
-      const adminEmails = ['andrew@circlenetwork.io', 'andrew@heisleyteam.com'];
-      if (session.user.email && adminEmails.includes(session.user.email)) {
-        logGuardDecision('admin status allowlist match', { email: session.user.email });
+      // First check profile.is_admin
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('is_admin')
+        .eq('user_id', session.user.id)
+        .single();
+      
+      if (!profileError && profile?.is_admin === true) {
+        logGuardDecision('admin status profile match', { userId: session.user.id });
         return true;
       }
       
-      // Check via RPC
+      // Try enhanced admin check RPC
+      try {
+        const { data: enhancedCheck, error: enhancedError } = await supabase.rpc('admin_self_check_enhanced');
+        if (!enhancedError && enhancedCheck?.admin_checks?.any_admin_method === true) {
+          logGuardDecision('admin status enhanced RPC match', { userId: session.user.id });
+          return true;
+        }
+      } catch (error) {
+        console.warn('Enhanced admin check failed, trying fallback:', error);
+      }
+      
+      // Fallback to basic admin status check
       const { data, error } = await supabase.rpc('get_user_admin_status');
       if (error) {
         console.warn('Admin status check failed:', error);
@@ -91,44 +103,7 @@ const Admin = () => {
     userId: session.user.id 
   });
 
-  return (
-    <ServiceEditorErrorBoundary>
-      <SidebarProvider>
-        <div className="min-h-screen flex w-full" data-testid="admin-content">
-          <AdminSidebar />
-          <div className="flex-1 flex flex-col">
-            <header className="h-14 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-              <div className="flex items-center justify-between px-4 h-full">
-                <div className="flex items-center space-x-4">
-                  <SidebarTrigger>
-                    <Menu className="h-4 w-4" />
-                  </SidebarTrigger>
-                  <h1 className="text-lg font-semibold">Admin Dashboard</h1>
-                </div>
-                <div className="flex items-center space-x-4">
-                  <span className="text-sm text-muted-foreground">
-                    Welcome, {session.user?.email}
-                  </span>
-                  <button
-                    onClick={() => window.location.href = '/'}
-                    className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-muted-foreground hover:text-primary hover:bg-accent rounded-md transition-colors"
-                  >
-                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                    </svg>
-                    <span>Back to Marketplace</span>
-                  </button>
-                </div>
-              </div>
-            </header>
-            <main className="flex-1 overflow-auto">
-              <AdminContentRouter />
-            </main>
-          </div>
-        </div>
-      </SidebarProvider>
-    </ServiceEditorErrorBoundary>
-  );
+  return <AdminDashboard />;
 };
 
 export default Admin;
