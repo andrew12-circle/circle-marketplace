@@ -844,16 +844,16 @@ export const ServiceCard = ({
                            </div>
                           </TooltipTrigger>
                         </Tooltip>
-                          {/* Savings Badge for Non-Pro Members under Copay */}
-                          {(() => {
-                            const savingsInfo = getSavingsInfo(service);
-                            return savingsInfo && savingsInfo.percentage > 0 && (
-                              <div className="flex justify-center mt-2">
-                                 <Badge className="bg-red-500 text-white text-xs font-medium">
-                                   {savingsInfo.percentage}{t('serviceCard.percentOff')}
-                                </Badge>
-                              </div>
-                            );
+                           {/* Savings Badge for Non-Pro Members under Copay */}
+                           {(() => {
+                             const savingsInfo = getSavingsInfo(service);
+                             return savingsInfo && savingsInfo.percentage > 0 && (
+                               <div className="flex justify-end mt-2">
+                                  <Badge className="bg-red-500 text-white text-xs font-medium">
+                                    {savingsInfo.percentage}{t('serviceCard.percentOff')}
+                                 </Badge>
+                               </div>
+                             );
                           })()}
                       </div>
                    )}
