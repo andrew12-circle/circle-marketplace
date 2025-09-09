@@ -556,7 +556,7 @@ export const ServiceCard = ({
           </div>
 
           {/* Description with dynamic height for expansion */}
-          <div className={`px-4 py-3 flex flex-col transition-all duration-300 ${isDescriptionExpanded ? 'min-h-[6rem]' : 'h-20'}`}>
+          <div className={`px-4 py-3 flex flex-col transition-all duration-300 ${isDescriptionExpanded ? 'min-h-[6rem]' : 'h-[5.5rem]'}`}>
             <p className={`text-sm text-muted-foreground leading-tight whitespace-pre-line transition-all duration-300 ${isDescriptionExpanded ? 'overflow-visible' : 'line-clamp-2 overflow-hidden'}`}>
               {getLocalizedDescription()}
             </p>
