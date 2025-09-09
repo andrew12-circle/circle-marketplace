@@ -308,7 +308,7 @@ export default function NeedAdviceHome() {
                   hidden: { opacity: 0, y: 6 },
                   show: { opacity: 1, y: 0, transition: { staggerChildren: 0.04 } },
                 }}
-                className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-y-10 gap-x-6 justify-items-center"
+                className="grid grid-cols-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-y-10 gap-x-6 justify-items-center"
               >
                 {categories.map((c) => (
                   <motion.div
