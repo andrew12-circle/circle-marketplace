@@ -261,10 +261,6 @@ export const ConciergeChat: React.FC<ConciergeChatProps> = ({ threadId: initialT
 
     return (
       <div className={`flex items-center gap-2 text-xs text-muted-foreground ${className}`}>
-        <div className="flex items-center gap-1">
-          <Sparkles className="w-3 h-3" />
-          <span>{trust.peers} peer insights</span>
-        </div>
       </div>
     );
   };
