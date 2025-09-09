@@ -22,25 +22,13 @@ export function AskCircleAIModal({ open, onOpenChange, initialMessage, expandTok
     console.log('🚀 AskCircleAIModal state:', { open, isMinimized, expandToken, hasInitialMessage: !!initialMessage });
   }, [open, isMinimized, expandToken, initialMessage]);
 
-  // Process initial content only once and allow minimizing after
-  React.useEffect(() => {
-    if (open && (initialMessage || expandToken)) {
-      console.log('🔥 Processing initial content - ensuring expanded');
-      setIsMinimized(false);
-      setHasProcessedInitialContent(true);
-    }
-  }, [open, initialMessage, expandToken]);
-
-  // Reset states when modal opens
+  // Reset states when modal opens - always start expanded
   React.useEffect(() => {
     if (open) {
-      console.log('🔄 Modal opened, resetting states');
+      console.log('🔄 Modal opened, starting expanded');
       setIsMinimized(false);
-      // Don't automatically mark as processed - let it start expanded
-      if (!initialMessage && !expandToken) {
-        // Only allow minimizing if there's no initial content to process
-        setHasProcessedInitialContent(true);
-      }
+      // Always allow user to manually minimize after opening
+      setHasProcessedInitialContent(true);
     } else {
       // Reset processed flag when modal closes
       setHasProcessedInitialContent(false);
