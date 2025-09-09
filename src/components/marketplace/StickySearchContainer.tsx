@@ -40,7 +40,7 @@ export const StickySearchContainer = ({ children, className }: StickySearchConta
         setIsSticky(!entry.isIntersecting);
       },
       {
-        rootMargin: `-${headerHeight}px 0px -1px 0px`, // Account for header height only
+        rootMargin: `-${headerHeight}px 0px 0px 0px`, // Account for header height
         threshold: 0
       }
     );
