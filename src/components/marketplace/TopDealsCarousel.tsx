@@ -228,6 +228,9 @@ export const TopDealsCarousel = ({ services, serviceRatings, onServiceClick }: T
                       <div className="text-right">
                         {priceLabel === 'Potential Co-Pay' || priceLabel === 'Co-Pay' ? (
                           <>
+                            <div className="text-sm text-muted-foreground line-through">
+                              Retail: {formatPrice(retailPrice)}
+                            </div>
                             <div className="text-lg font-bold text-primary">
                               {service.pro_price ? formatPrice(parsePrice(service.pro_price)) : formatPrice(effectivePrice)}
                             </div>
@@ -237,9 +240,6 @@ export const TopDealsCarousel = ({ services, serviceRatings, onServiceClick }: T
                             <Badge variant="secondary" className="text-xs bg-green-100 text-green-800 mb-1">
                               {priceLabel}
                             </Badge>
-                            <div className="text-sm text-muted-foreground line-through">
-                              Retail: {formatPrice(retailPrice)}
-                            </div>
                           </>
                         ) : (
                           <>
