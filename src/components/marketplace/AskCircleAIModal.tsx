@@ -65,8 +65,8 @@ export function AskCircleAIModal({ open, onOpenChange, initialMessage, expandTok
 
   if (!open) return null;
 
-  // Show minimized state if user clicked minimize and modal has been processed
-  const shouldShowMinimized = isMinimized;
+  // Show minimized state only if user clicked minimize AND has processed initial content
+  const shouldShowMinimized = isMinimized && hasProcessedInitialContent;
   
   console.log('🎭 Render decision:', { 
     isMinimized, 
