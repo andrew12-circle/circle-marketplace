@@ -23,213 +23,61 @@ export const SecureAdminGuard: React.FC<SecureAdminGuardProps> = ({
   children, 
   requireElevatedPrivileges = false 
 }) => {
-  const { user, loading } = useAuth();
+  const { user, profile, loading } = useAuth();
   const { data: isAdmin, isLoading: adminLoading } = useAdminStatus();
-  const [securityVerified, setSecurityVerified] = useState(false);
-  const [securityWarning, setSecurityWarning] = useState<string | null>(null);
-  const [verificationLoading, setVerificationLoading] = useState(true);
-  const [safeMode, setSafeMode] = useState(false);
-  const [allowlisted, setAllowlisted] = useState(false);
+  const [backgroundCheckRan, setBackgroundCheckRan] = useState(false);
 
-  useEffect(() => {
-    const verifyAdminSecurity = async () => {
-      // Wait for auth to fully load before making decisions
-      if (loading) {
-        return;
-      }
-      
-      // Check allowlist first - immediate access for critical users
-      if (user?.email && ADMIN_ALLOWLIST.includes(user.email.toLowerCase())) {
-        logger.log('SecureAdminGuard: User in allowlist - granting immediate access', {
-          userEmail: user.email,
-          userId: user.id
-        });
-        setAllowlisted(true);
-        setSecurityVerified(true);
-        setVerificationLoading(false);
-        return;
-      }
-
-      // Only proceed with verification if we have a user and admin status
-      if (!user || !isAdmin) {
-        logger.log('SecureAdminGuard: User or admin status check failed', { 
-          hasUser: !!user, 
-          isAdmin: isAdmin,
-          adminLoading: adminLoading 
-        });
-        setVerificationLoading(false);
-        return;
-      }
-
-      // Safe Mode: Grant immediate access for admins, run security checks in background
-      if (!STRICT_ADMIN_SECURITY) {
-        logger.log('SecureAdminGuard: Safe Mode - Granting immediate admin access', {
-          userId: user.id,
-          isAdmin: isAdmin,
-          strictMode: false
-        });
-        
-        setSafeMode(true);
-        setSecurityVerified(true);
-        setVerificationLoading(false);
-
-        // Run security verification in background (non-blocking) with increased timeout
-        setTimeout(async () => {
-          try {
-            const timeoutPromise = new Promise((_, reject) =>
-              setTimeout(() => reject(new Error('Security check timeout')), 10000) // Increased to 10s
-            );
-            
-            // Use enhanced admin session validation for better stability
-            const securityPromise = supabase.rpc('admin_self_check_enhanced');
-            
-            const { data, error } = await Promise.race([securityPromise, timeoutPromise]) as any;
-            
-            if (error || !data) {
-              // Only show warning on non-timeout errors
-              if (error && !error.message?.includes('timeout')) {
-                setSecurityWarning('Background security check failed - this is informational only');
-              }
-              logger.warn('Background security verification failed:', error);
-            } else {
-              logger.log('Background security verification passed');
-              
-              // Also log the admin dashboard access in background
-              try {
-                await supabase.rpc('log_admin_operation_secure', {
-                  operation_type: 'dashboard_access',
-                  target_user_id: user.id,
-                  operation_data: {
-                    elevated_privileges: requireElevatedPrivileges,
-                    access_time: new Date().toISOString(),
-                    safe_mode: true
-                  }
-                });
-              } catch (err) {
-                logger.warn('Failed to log admin operation:', err);
-              }
-            }
-          } catch (error) {
-            // Suppress timeout messages for better UX
-            if (!error?.message?.includes('timeout')) {
-              setSecurityWarning('Background security check failed - this is informational only');
-            }
-            logger.warn('Background security check failed:', error);
-          }
-        }, 100);
-        
-        return;
-      }
-
-      // Strict Mode: Original blocking security verification
-      try {
-        const { data, error } = await supabase.rpc('admin_self_check_enhanced');
-        
-        if (error) throw error;
-        
-        if (!data) {
-          setSecurityWarning('Admin session validation failed. Functionality may be limited.');
-          setSecurityVerified(true); // Allow access but with warning
-          return;
-        }
-
-        await supabase.rpc('log_admin_operation_secure', {
-          operation_type: 'dashboard_access',
-          target_user_id: user.id,
-          operation_data: {
-            elevated_privileges: requireElevatedPrivileges,
-            access_time: new Date().toISOString(),
-            strict_mode: true
-          }
-        });
-
-        setSecurityVerified(true);
-      } catch (error) {
-        logger.error('Admin security verification failed:', error);
-        setSecurityWarning(
-          error instanceof Error 
-            ? `Security check failed: ${error.message}` 
-            : 'Failed to verify admin security context'
-        );
-        setSecurityVerified(true); // Allow access but with warning
-      } finally {
-        setVerificationLoading(false);
-      }
-    };
-
-    verifyAdminSecurity();
-  }, [user, isAdmin, loading, adminLoading, requireElevatedPrivileges]);
-
-  if (loading || adminLoading || verificationLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="flex items-center gap-2">
-          <Shield className="h-5 w-5 animate-spin" />
-          <span>Verifying security credentials...</span>
+  // Don't show loading spinner - render immediately for confirmed admins
+  if (loading || adminLoading) {
+    // Only show spinner if we're truly waiting for initial auth
+    if (loading) {
+      return (
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="flex items-center gap-2">
+            <Shield className="h-5 w-5 animate-spin" />
+            <span>Loading...</span>
+          </div>
         </div>
-      </div>
-    );
+      );
+    }
+    // Don't show spinner for admin loading if we have basic auth
+    return <>{children}</>;
   }
 
   if (!user || !isAdmin) {
     return <Navigate to="/" replace />;
   }
 
-  if (!securityVerified) {
-    return (
-      <div className="container mx-auto py-8 px-4">
-        <Alert>
-          <Shield className="h-4 w-4" />
-          <AlertDescription>
-            Security verification in progress. Please wait...
-          </AlertDescription>
-        </Alert>
-      </div>
-    );
+  // Check allowlist first - immediate render
+  const isAllowlisted = user.email && ADMIN_ALLOWLIST.includes(user.email.toLowerCase());
+  
+  // If user is confirmed admin (profile or allowlist), render immediately
+  const isConfirmedAdmin = isAllowlisted || profile?.is_admin === true;
+  
+  // Run background security check once per session (non-blocking)
+  if (isConfirmedAdmin && !backgroundCheckRan && !STRICT_ADMIN_SECURITY) {
+    setBackgroundCheckRan(true);
+    
+    setTimeout(async () => {
+      try {
+        await supabase.rpc('log_admin_operation_secure', {
+          operation_type: 'dashboard_access',
+          target_user_id: user.id,
+          operation_data: {
+            elevated_privileges: requireElevatedPrivileges,
+            access_time: new Date().toISOString(),
+            allowlisted: isAllowlisted,
+            profile_confirmed: profile?.is_admin === true
+          }
+        });
+        logger.log('Background admin access logged');
+      } catch (error) {
+        logger.warn('Background admin logging failed:', error);
+      }
+    }, 100);
   }
 
   return (
-    <>
-      {securityWarning && (
-        <div className="container mx-auto py-4 px-4">
-          <Alert variant="default">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertDescription>
-              <strong>Security Notice:</strong> {securityWarning}
-              {safeMode && (
-                <span className="ml-2 text-sm opacity-75">
-                  (Safe Mode: Admin access granted based on profile verification)
-                </span>
-              )}
-            </AlertDescription>
-          </Alert>
-        </div>
-      )}
-      
-      {allowlisted && (
-        <div className="container mx-auto py-2 px-4">
-          <Alert variant="default" className="border-blue-200 bg-blue-50">
-            <CheckCircle className="h-4 w-4 text-blue-600" />
-            <AlertDescription className="text-blue-800">
-              <strong>Admin Access (Allowlisted):</strong> Immediate access granted - all security checks bypassed.
-            </AlertDescription>
-          </Alert>
-        </div>
-      )}
-
-      
-      {children}
-
-      {safeMode && !allowlisted && (
-        <div className="container mx-auto py-2 px-4">
-          <Alert variant="default" className="border-green-200 bg-green-50">
-            <CheckCircle className="h-4 w-4 text-green-600" />
-            <AlertDescription className="text-green-800">
-              <strong>Safe Mode Active:</strong> Admin access granted. Background security checks running.
-            </AlertDescription>
-          </Alert>
-        </div>
-      )}
-    </>
+    <>{children}</>
   );
 };

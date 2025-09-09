@@ -12,40 +12,26 @@ export const useAdminStatus = () => {
     queryFn: async () => {
       if (!user) return false;
       
-      // Client-side admin allowlist for known admins - always short-circuit
+      // Client-side admin allowlist - immediate return
       if (user.email === 'andrew@circlenetwork.io' || user.email === 'andrew@heisleyteam.com') {
         logger.log('Admin status: Allowed via client allowlist', { email: user.email });
         return true;
       }
       
-      // Prioritize profile data - if we have it and it's true, use it immediately
+      // If profile confirms admin status, return immediately
       if (profile?.is_admin === true) {
         logger.log('Admin status: Confirmed via profile', { userId: user.id, isAdmin: true });
         return true;
       }
       
-      // If profile explicitly says false, check server to be sure
+      // Only check server if profile is explicitly false or missing
       if (profile?.is_admin === false) {
-        logger.log('Admin status: Profile indicates non-admin, checking server...', { userId: user.id });
-        
-        try {
-          // Direct RPC call without timeout race condition
-          const { data: serverCheck, error } = await supabase.rpc('get_user_admin_status');
-          
-          if (error) {
-            logger.warn('Admin status: Server check failed, using profile data', { error });
-            return false;
-          }
-          const result = !!serverCheck;
-          logger.log('Admin status: Server check completed', { userId: user.id, isAdmin: result });
-          return result;
-        } catch (error: any) {
-          logger.warn('Admin status: Server check exception, using profile data', { error });
-          return false;
-        }
+        logger.log('Admin status: Profile indicates non-admin', { userId: user.id });
+        return false;
       }
       
-      // No profile data, check server directly
+      // No profile data - check server once
+      logger.log('Admin status: No profile data, checking server...', { userId: user.id });
       try {
         const { data: serverCheck, error } = await supabase.rpc('get_user_admin_status');
         
@@ -62,13 +48,13 @@ export const useAdminStatus = () => {
       }
     },
     enabled: !!user,
-    staleTime: 60 * 1000, // 1 minute - admin status doesn't change frequently
-    gcTime: 5 * 60 * 1000, // 5 minutes
-    retry: 1, // Single retry on failure
+    staleTime: 15 * 60 * 1000, // 15 minutes - admin status rarely changes
+    gcTime: 60 * 60 * 1000, // 1 hour
+    retry: 1,
     retryDelay: 500,
     refetchOnWindowFocus: false,
-    refetchOnMount: false, // Don't refetch on every mount
-    refetchInterval: false, // Don't auto-refetch
-    networkMode: 'online', // Only run when online
+    refetchOnMount: false,
+    refetchInterval: false,
+    networkMode: 'online',
   });
 };
