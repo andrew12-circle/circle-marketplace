@@ -13,7 +13,7 @@ import { logger } from "@/utils/logger";
 import { type Service } from "@/hooks/useMarketplaceData";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCurrency } from "@/hooks/useCurrency";
-import { computeDiscountPercentage, getDealDisplayPrice } from "@/utils/dealPricing";
+import { getUnifiedDisplayPrice, calculateSavings } from "@/utils/sharedPricing";
 
 interface ServiceRatingStats {
   average_rating: number;
@@ -100,9 +100,10 @@ export const TopDealsCarousel = ({ services, serviceRatings, onServiceClick }: T
       .map(service => {
         try {
           const rating = serviceRatings?.get(service.id);
-          const discount = computeDiscountPercentage(service);
+          const savingsInfo = calculateSavings(service);
+          const discount = savingsInfo?.percentage || 0;
           const score = calculateScore(service, rating, discount);
-          const dealPrice = getDealDisplayPrice(service);
+          const dealPrice = getUnifiedDisplayPrice(service);
           
           return {
             ...service,
@@ -193,18 +194,6 @@ export const TopDealsCarousel = ({ services, serviceRatings, onServiceClick }: T
                   
                   <CardContent className="p-4">
                     <div className="space-y-3">
-                      {/* Debug service pricing data */}
-                      {(service.title === 'Loomly' || service.title === 'Real Geeks' || service.title === 'Market Leader' || service.title?.includes('Dee Sign')) && (
-                        <div className="text-xs bg-yellow-100 p-2 rounded">
-                          <div>Title: {service.title}</div>
-                          <div>RESPA Split: {service.respa_split_limit || 'None'}</div>
-                          <div>Copay Allowed: {service.copay_allowed ? 'Yes' : 'No'}</div>
-                          <div>Co-Pay Price: {service.co_pay_price || 'None'}</div>
-                          <div>Pro Price: {service.pro_price || 'None'}</div>
-                          <div>Label: {priceLabel}</div>
-                          <div>Effective: {formatPrice(effectivePrice)}</div>
-                        </div>
-                      )}
                       {/* Service image */}
                       {service.image_url && (
                         <div className="w-full h-32 mb-3 overflow-hidden rounded-md bg-white -mx-2">
