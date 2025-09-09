@@ -150,7 +150,7 @@ export const EnhancedHelpWidget: React.FC = () => {
 
             <CardContent className="flex-1 p-0 overflow-hidden">
               <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
-                <TabsList className="grid w-full grid-cols-4 mx-3 mb-2">
+                <TabsList className="grid w-full grid-cols-4 mx-2 mb-2 gap-1">
                   <TabsTrigger value="guides" className="text-xs">
                     <BookOpen className="w-3 h-3 mr-1" />
                     Tours
