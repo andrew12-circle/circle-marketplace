@@ -149,10 +149,10 @@ const Index = () => {
                   
                   {/* Pro upgrade button */}
                   {user && profile && !profile.is_pro_member && (
-                    <Button asChild variant="secondary" className="bg-gradient-to-r from-circle-primary to-circle-primary border-none text-white hover:from-circle-primary/90 hover:to-circle-primary/90 shadow-lg text-xs sm:text-sm">
+                    <Button asChild variant="secondary" className="bg-gradient-to-r from-circle-primary to-circle-primary border-none text-white hover:from-circle-primary/90 hover:to-circle-primary/90 shadow-lg text-xs sm:text-sm px-2 sm:px-4">
                       <Link to="/pricing">
                         <Crown className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                        <span className="hidden md:inline">Upgrade to</span> Pro
+                        <span className="hidden sm:inline">Upgrade to </span>Pro
                       </Link>
                     </Button>
                   )}
