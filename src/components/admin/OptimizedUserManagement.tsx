@@ -93,7 +93,6 @@ export const OptimizedUserManagement = () => {
           `
             id,
             user_id,
-            email,
             display_name,
             business_name,
             is_admin,
@@ -129,8 +128,7 @@ export const OptimizedUserManagement = () => {
         // Default to text ilike search
         const searchConditions = [
           `display_name.ilike.%${term}%`,
-          `business_name.ilike.%${term}%`,
-          `email.ilike.%${term}%`
+          `business_name.ilike.%${term}%`
         ];
         
         // Optionally include exact id match ONLY if UUID
@@ -172,7 +170,6 @@ export const OptimizedUserManagement = () => {
       filtered = filtered.filter(user => 
         user.display_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         user.business_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         user.user_id.includes(searchTerm)
       );
     }
@@ -431,7 +428,7 @@ export const OptimizedUserManagement = () => {
       <td className="p-4">
         <div>
           <div className="font-medium">{user.display_name || 'No name'}</div>
-          <div className="text-sm text-muted-foreground">{user.email}</div>
+          <div className="text-sm text-muted-foreground">ID: {user.user_id.slice(0, 8)}...</div>
           {user.business_name && (
             <div className="text-xs text-muted-foreground">{user.business_name}</div>
           )}
@@ -483,7 +480,7 @@ export const OptimizedUserManagement = () => {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => handleResetPassword(user.user_id, user.email || '')}>
+            <DropdownMenuItem onClick={() => handleResetPassword(user.user_id, '')}>
               <Key className="mr-2 h-4 w-4" />
               Reset Password
             </DropdownMenuItem>
