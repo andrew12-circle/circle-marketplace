@@ -32,10 +32,19 @@ export const OptimizedUserManagement = () => {
     hasNextPage,
     loadMore,
     reset,
+    error,
   } = useKeysetPagination<UserProfile>({
     rpcFunction: 'get_profiles_keyset',
     searchTerm: debouncedSearch,
     pageSize: 50,
+  });
+
+  // Debug logging
+  console.log('User Management Debug:', {
+    users: users,
+    isLoading,
+    error,
+    userCount: users?.length || 0
   });
 
   const handleToggleAdmin = async (userId: string, currentStatus: boolean) => {
