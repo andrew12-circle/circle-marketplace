@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { Search, Filter, X, DollarSign, Star, ChevronDown, TrendingUp, Clock, RotateCw } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -68,6 +69,7 @@ export const EnhancedSearch = ({
   onSortChange,
   isAdmin = false
 }: EnhancedSearchProps) => {
+  const isMobile = useIsMobile();
   const { min: minPrice, max: maxPrice, isLoading: priceRangeLoading } = useServicePriceRange();
   
   const [filters, setFilters] = useState<SearchFilters>({
@@ -236,7 +238,7 @@ export const EnhancedSearch = ({
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm" className="gap-2">
               <Filter className="w-4 h-4" />
-              Filters
+              {!isMobile && "Filters"}
               {activeFiltersCount > 0 && (
                 <Badge variant="secondary" className="ml-1 px-1 py-0 text-xs">
                   {activeFiltersCount}
@@ -347,12 +349,11 @@ export const EnhancedSearch = ({
         {viewMode === 'services' && onSortChange && (
           <div className="flex items-center gap-2">
             <Select value={sortStrategy} onValueChange={onSortChange}>
-              <SelectTrigger className="w-[160px] h-10">
+               <SelectTrigger className={`h-10 ${isMobile ? 'w-[50px]' : 'w-[160px]'}`}>
                 <SelectValue>
                   <div className="flex items-center gap-2">
                     <SortIcon className="h-4 w-4" />
-                    <span className="hidden sm:inline">{label}</span>
-                    <span className="sm:hidden">Sort</span>
+                    {!isMobile && <span>{label}</span>}
                   </div>
                 </SelectValue>
               </SelectTrigger>
