@@ -141,46 +141,48 @@ export const PaymentChoiceModal = ({
           </DialogHeader>
 
           <div className="space-y-4 mt-4">
-            {/* Retail Price Option - Always Available */}
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3 mb-3">
-                  <DollarSign className="w-5 h-5 text-gray-600" />
-                  <h3 className="font-semibold">Pay Retail Price</h3>
-                </div>
-                <div className="text-2xl font-bold text-gray-600 mb-2">{retailPrice}/mo</div>
-                <p className="text-sm text-muted-foreground mb-4">Standard retail pricing available to everyone.</p>
-                <Button 
-                  onClick={handleRetailChoice} 
-                  variant="outline"
-                  className="w-full"
-                  disabled={!user}
-                >
-                  {!user ? (
-                    <>
-                      <UserPlus className="w-4 h-4 mr-2" />
-                      Sign In to Add to Cart
-                    </>
-                  ) : (
-                    `Add to Cart - ${retailPrice}/mo`
-                  )}
-                </Button>
-                {!user && (
-                  <div className="mt-2 text-center">
-                    <p className="text-sm text-muted-foreground">
-                      Please{" "}
-                      <a 
-                        href="/auth" 
-                        className="text-primary hover:underline font-medium"
-                      >
-                        sign in or create an account
-                      </a>{" "}
-                      to add items to your cart
-                    </p>
+            {/* Retail Price Option - Hidden for pro members when pro price exists */}
+            {(!isProMember || !service.pro_price) && (
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3 mb-3">
+                    <DollarSign className="w-5 h-5 text-gray-600" />
+                    <h3 className="font-semibold">Pay Retail Price</h3>
                   </div>
-                )}
-              </CardContent>
-            </Card>
+                  <div className="text-2xl font-bold text-gray-600 mb-2">{retailPrice}/mo</div>
+                  <p className="text-sm text-muted-foreground mb-4">Standard retail pricing available to everyone.</p>
+                  <Button 
+                    onClick={handleRetailChoice} 
+                    variant="outline"
+                    className="w-full"
+                    disabled={!user}
+                  >
+                    {!user ? (
+                      <>
+                        <UserPlus className="w-4 h-4 mr-2" />
+                        Sign In to Add to Cart
+                      </>
+                    ) : (
+                      `Add to Cart - ${retailPrice}/mo`
+                    )}
+                  </Button>
+                  {!user && (
+                    <div className="mt-2 text-center">
+                      <p className="text-sm text-muted-foreground">
+                        Please{" "}
+                        <a 
+                          href="/auth" 
+                          className="text-primary hover:underline font-medium"
+                        >
+                          sign in or create an account
+                        </a>{" "}
+                        to add items to your cart
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
 
             {/* Circle Pro Price Option - Locked for Non-Pro */}
             <Card className={!isProMember ? "opacity-75 border-dashed" : ""}>
