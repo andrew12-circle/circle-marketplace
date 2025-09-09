@@ -295,14 +295,8 @@ export const CategoryBlocks = ({ onCategoryClick, onAIChat, services, allService
   const handleCategoryClick = (tags: string[], categoryName: string) => {
     logger.log('category_block_clicked', { tags, categoryName });
     
-    // If AI chat is available, use it with a formulated question
-    if (onAIChat) {
-      const question = `What's the best ${categoryName.toLowerCase()} service for a real estate agent?`;
-      onAIChat(question);
-    } else {
-      // Fallback to old behavior
-      onCategoryClick(tags[0], categoryName); // Use first tag for search
-    }
+    // Always show service cards first by filtering the category
+    onCategoryClick(tags[0], categoryName); // Use first tag for search
   };
 
   const renderCategoryGrid = (categories: typeof DIGITAL_CATEGORIES, title: string, subtitle: string) => (
