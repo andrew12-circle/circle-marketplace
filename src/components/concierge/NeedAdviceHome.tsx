@@ -268,7 +268,7 @@ export default function NeedAdviceHome() {
                     if (e.key === "Enter") openChatFromSearch();
                   }}
                   placeholder="Search or ask us anything…"
-                  className="h-14 pl-12 pr-24 rounded-full shadow-sm"
+                  className="h-14 pl-12 pr-24 rounded-full shadow-sm placeholder:text-sm md:placeholder:text-base"
                 />
                 <Button
                   variant="ghost"
