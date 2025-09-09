@@ -196,6 +196,12 @@ export const CartDrawer = () => {
 
   const getStatusBadge = (item: any) => {
     if (item.coverageStatus === 'pending-selection') {
+      // Check if user is pro member - if not, show upgrade message instead
+      const isProMember = user?.user_metadata?.is_pro || false;
+      if (!isProMember) {
+        const potentialSavings = item.price ? Math.round(item.price * 0.3) : 30; // Assume 30% savings
+        return <Badge variant="outline" className="text-primary font-medium">Get Vendor Help - Save ${potentialSavings}+ with Pro</Badge>;
+      }
       return <Badge variant="outline" className="text-amber-600">Needs Coverage Selection</Badge>;
     }
     if (item.coverageType === 'copay' && item.coverageStatus === 'pending-vendor-approval') {
