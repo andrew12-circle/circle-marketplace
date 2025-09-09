@@ -34,7 +34,7 @@ export default function MarketplaceHero({ onExploreClick }: MarketplaceHeroProps
   return (
     <section className="bg-gradient-to-br from-gray-50 to-white py-8 sm:py-20 px-4 sm:px-6 text-center">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl sm:text-6xl font-bold tracking-tight mb-3 sm:mb-4">
+        <h1 className="text-3xl sm:text-6xl font-bold tracking-tight mb-3 sm:mb-4 max-w-xs sm:max-w-none mx-auto leading-tight sm:leading-none">
           {t('heroTitle')}<br />
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-500">{t('heroSubtitle')}</span>
         </h1>
