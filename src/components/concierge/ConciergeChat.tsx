@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, ThumbsUp, ThumbsDown, Calendar, ExternalLink, BookOpen, MessageSquare, Sparkles, Phone } from 'lucide-react';
+import { Send, ThumbsUp, ThumbsDown, Calendar, ExternalLink, BookOpen, MessageSquare, Sparkles, Phone, ArrowUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
@@ -487,22 +487,23 @@ export const ConciergeChat: React.FC<ConciergeChatProps> = ({ threadId: initialT
 
       {/* Input Area */}
       <div className="p-4 border-t bg-white">
-        <div className="flex gap-2">
+        <div className="relative">
           <Textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Type your message..."
-            className="flex-1 min-h-[44px] max-h-32 resize-none"
+            className="flex-1 w-full min-h-[40px] max-h-32 resize-none pr-12"
             disabled={loading}
           />
           <Button 
             onClick={() => sendMessage()} 
             disabled={!input.trim() || loading}
             size="sm"
-            className="self-end"
+            variant="ghost"
+            className="absolute right-2 bottom-2 h-8 w-8 p-0"
           >
-            <Send className="w-4 h-4" />
+            <ArrowUp className="w-4 h-4" />
           </Button>
         </div>
         <div className="flex justify-center mt-3">
