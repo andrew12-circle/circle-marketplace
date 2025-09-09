@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 // Calculate header height only (no extra spacing)
 const getHeaderHeight = () => {
@@ -13,6 +14,7 @@ interface StickySearchContainerProps {
 }
 
 export const StickySearchContainer = ({ children, className }: StickySearchContainerProps) => {
+  const isMobile = useIsMobile();
   const [isSticky, setIsSticky] = useState(false);
   const [headerHeight, setHeaderHeight] = useState(76); // default fallback
   const containerRef = useRef<HTMLDivElement>(null);
@@ -76,7 +78,7 @@ export const StickySearchContainer = ({ children, className }: StickySearchConta
           className
         )}
         style={{
-          top: isSticky ? `${headerHeight + 80}px` : undefined,
+          top: isSticky ? `${headerHeight + (isMobile ? 70 : 80)}px` : undefined,
         }}
       >
         <div className="container mx-auto px-4 py-2 sm:py-4">
