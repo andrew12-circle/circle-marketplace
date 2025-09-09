@@ -470,7 +470,7 @@ export const ConciergeChat: React.FC<ConciergeChatProps> = ({ threadId: initialT
 
       {/* Quick Replies */}
       {messages.length > 0 && messages[messages.length - 1]?.role === 'assistant' && messages[messages.length - 1]?.quick_replies && (
-        <div className="px-4 py-2 border-t bg-gray-50">
+        <div className="hidden md:block px-4 py-2 border-t bg-gray-50">
           <div className="text-xs text-gray-500 mb-2">Quick responses:</div>
           <div className="flex flex-wrap gap-2">
             {messages[messages.length - 1].quick_replies.map((reply, index) => (
