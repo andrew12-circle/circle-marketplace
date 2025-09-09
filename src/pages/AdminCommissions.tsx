@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Download, TrendingUp } from 'lucide-react';
+import { Download, TrendingUp, ChevronLeft } from 'lucide-react';
 
 interface TrackingEventRow {
   id: string;
@@ -194,7 +194,18 @@ export default function AdminCommissions() {
     <SecureAdminGuard requireElevatedPrivileges>
       <div className="container mx-auto px-6 py-8">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-semibold">Commissions Tracking</h1>
+          <div className="flex items-center gap-3">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => navigate('/admin')}
+              className="flex items-center gap-2"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              Back
+            </Button>
+            <h1 className="text-2xl font-semibold">Commissions Tracking</h1>
+          </div>
           <div className="flex items-center gap-3">
             <Select value={days} onValueChange={setDays}>
               <SelectTrigger className="w-40">
