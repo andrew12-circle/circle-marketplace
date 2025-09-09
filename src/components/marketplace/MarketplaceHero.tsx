@@ -53,7 +53,7 @@ export default function MarketplaceHero({ onExploreClick }: MarketplaceHeroProps
           <Card className="rounded-2xl shadow-sm">
             <CardContent className="flex flex-col items-center p-4 sm:p-6">
               <CheckCircle className="w-6 h-6 sm:w-8 sm:h-8 text-blue-500 mb-2" />
-              <p className="text-xs sm:text-sm font-medium">Agent Advice</p>
+              <p className="text-xs sm:text-sm font-medium">Agent Advice backed by nationwide data on what top realtors use</p>
             </CardContent>
           </Card>
 
