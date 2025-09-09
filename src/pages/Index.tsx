@@ -82,7 +82,7 @@ const Index = () => {
                   <div className="flex items-center gap-2">
                     {location.pathname === "/" && <CartDrawer />}
                     
-                    {user && profile && !profile.goal_assessment_completed && (
+                    {user && profile && profile.is_pro && !profile.goal_assessment_completed && (
                       <Button asChild variant="outline" size="sm" className="text-xs">
                         <Link to="/agent-questionnaire">
                           <BookOpen className="w-3 h-3 mr-1" />
