@@ -34,7 +34,7 @@ export const OptimizedUserManagement = () => {
     reset,
     error,
   } = useKeysetPagination<UserProfile>({
-    rpcFunction: 'get_profiles_keyset',
+    rpcFunction: 'debug_get_profiles_keyset',
     searchTerm: debouncedSearch,
     pageSize: 50,
   });

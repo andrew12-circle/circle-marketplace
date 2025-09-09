@@ -10730,6 +10730,18 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      debug_get_profiles_keyset: {
+        Args: { cursor_date?: string; page_size?: number; search_term?: string }
+        Returns: {
+          auth_uid: string
+          created_at: string
+          display_name: string
+          is_admin: boolean
+          is_pro: boolean
+          updated_at: string
+          user_id: string
+        }[]
+      }
       detect_affiliate_fraud: {
         Args: { p_affiliate_id: string }
         Returns: Json
