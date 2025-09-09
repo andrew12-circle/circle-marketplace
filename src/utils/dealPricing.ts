@@ -71,19 +71,21 @@ export const computeDiscountPercentage = (service: any): number | null => {
       copayPrice = computePotentialCopayForService(service);
     }
     
-    if (copayPrice > 0) {
+    if (copayPrice > 0 && copayPrice < retailPrice) {
       const discountAmount = retailPrice - copayPrice;
       const percentage = Math.round((discountAmount / retailPrice) * 100);
-      return percentage;
+      return percentage > 0 ? percentage : null;
     }
   }
   
   // Fallback: show Circle Pro discount only when verified
   if (service.pro_price && service.is_verified) {
     const proPrice = extractNumericPrice(service.pro_price);
-    const discountAmount = retailPrice - proPrice;
-    const percentage = Math.round((discountAmount / retailPrice) * 100);
-    return percentage;
+    if (proPrice > 0 && proPrice < retailPrice) {
+      const discountAmount = retailPrice - proPrice;
+      const percentage = Math.round((discountAmount / retailPrice) * 100);
+      return percentage > 0 ? percentage : null;
+    }
   }
   
   return null;
