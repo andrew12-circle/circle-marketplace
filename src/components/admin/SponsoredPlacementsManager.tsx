@@ -46,13 +46,10 @@ export const SponsoredPlacementsManager = () => {
         .select(`
           id,
           title,
+          vendor_id,
           is_sponsored,
           sponsored_rank_boost,
-          is_active,
-          vendors!inner(
-            id,
-            name
-          )
+          is_active
         `)
         .order('title');
 
@@ -85,10 +82,22 @@ export const SponsoredPlacementsManager = () => {
       const servicesWithStats = await Promise.all(
         data.map(async (service: any) => {
           const stats = await getServiceStats(service.id);
+          
+          // Get vendor info separately if vendor_id exists
+          let vendorName = 'Unknown Vendor';
+          if (service.vendor_id) {
+            const { data: vendorData } = await supabase
+              .from('vendors')
+              .select('name')
+              .eq('id', service.vendor_id)
+              .single();
+            vendorName = vendorData?.name || 'Unknown Vendor';
+          }
+          
           return {
             id: service.id,
             title: service.title,
-            vendor_name: service.vendors?.name || 'Unknown Vendor',
+            vendor_name: vendorName,
             is_sponsored: service.is_sponsored || false,
             sponsored_rank_boost: service.sponsored_rank_boost || 0,
             is_active: service.is_active || false,
