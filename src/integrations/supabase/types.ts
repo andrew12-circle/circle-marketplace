@@ -10858,9 +10858,7 @@ export type Database = {
         }[]
       }
       get_profiles_keyset: {
-        Args:
-          | { cursor_date?: string; page_size?: number; search_term?: string }
-          | { cursor_date?: string; page_size?: number; search_term?: string }
+        Args: { cursor_date?: string; page_size?: number; search_term?: string }
         Returns: {
           created_at: string
           display_name: string
