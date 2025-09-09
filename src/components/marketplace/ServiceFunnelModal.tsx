@@ -724,7 +724,7 @@ export const ServiceFunnelModal = ({
                   <Accordion type="single" collapsible value={openItem} onValueChange={setOpenItem} className="space-y-4">
                     {/* Question 1 */}
                     <AccordionItem value="question-1">
-                      <AccordionTrigger className="text-xl font-bold text-gray-900 hover:no-underline border-l-4 border-l-blue-500 pl-4 bg-white rounded-t-lg shadow-sm">
+                      <AccordionTrigger className="text-sm sm:text-xl font-bold text-gray-900 hover:no-underline border-l-2 sm:border-l-4 border-l-blue-500 pl-2 sm:pl-4 bg-white rounded-t-lg shadow-sm">
                         <div className="flex items-center gap-2">
                           <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold text-sm">1</div>
                           Why Should I Care?
