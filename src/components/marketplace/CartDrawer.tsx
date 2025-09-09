@@ -200,7 +200,15 @@ export const CartDrawer = () => {
       const isProMember = user?.user_metadata?.is_pro || false;
       if (!isProMember) {
         const potentialSavings = item.price ? Math.round(item.price * 0.3) : 30; // Assume 30% savings
-        return <Badge variant="outline" className="text-primary font-medium">Get Vendor Help - Save ${potentialSavings}+ with Pro</Badge>;
+        return (
+          <Badge 
+            variant="outline" 
+            className="text-primary font-medium cursor-pointer hover:bg-primary/10 transition-colors"
+            onClick={() => navigate('/pricing')}
+          >
+            Get Vendor Help - Save ${potentialSavings}+ with Pro
+          </Badge>
+        );
       }
       return <Badge variant="outline" className="text-amber-600">Needs Coverage Selection</Badge>;
     }
