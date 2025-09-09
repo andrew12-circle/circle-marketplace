@@ -48,8 +48,8 @@ function Shortcut({ label, Icon, color, onClick }: ShortcutProps) {
       onClick={onClick}
     >
       <div
-        className={`h-16 w-16 rounded-full shadow-md grid place-items-center ${color} ring-1 ring-black/5 hover:ring-2 hover:ring-current transition`}>
-        <Icon className="h-7 w-7" aria-hidden />
+        className={`h-12 w-12 md:h-16 md:w-16 rounded-full shadow-md grid place-items-center ${color} ring-1 ring-black/5 hover:ring-2 hover:ring-current transition`}>
+        <Icon className="h-5 w-5 md:h-7 md:w-7" aria-hidden />
       </div>
       <span className="text-sm font-medium text-center max-w-[8rem] leading-tight">
         {label}
