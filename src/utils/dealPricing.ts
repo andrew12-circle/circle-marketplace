@@ -14,14 +14,10 @@ export const extractNumericPrice = (priceString: string): number => {
 };
 
 /**
- * Get the base price for copay calculation
+ * Get the base price for copay calculation (always use retail for RESPA)
  */
 export const getCopayBasePrice = (service: any): number => {
-  // For verified vendors with pro price, use pro price as base
-  if (service.is_verified && service.pro_price) {
-    return extractNumericPrice(service.pro_price);
-  }
-  // Otherwise use retail price as base
+  // Always use retail price as base for RESPA split calculations
   return extractNumericPrice(service.retail_price || '0');
 };
 
@@ -97,16 +93,28 @@ export const computeDiscountPercentage = (service: any): number | null => {
 export const getDealDisplayPrice = (service: any): { price: number; label: string } => {
   // Always prefer Potential Co-Pay when RESPA split limit exists
   if (service.respa_split_limit) {
+    const retailBasedCopay = computePotentialCopayForService(service);
     let copayPrice: number;
+    let label: string;
     
     if (service.co_pay_price) {
-      copayPrice = extractNumericPrice(service.co_pay_price);
+      const explicitCopay = extractNumericPrice(service.co_pay_price);
+      // Validate co_pay_price against retail-based floor
+      if (explicitCopay >= retailBasedCopay) {
+        copayPrice = explicitCopay;
+        label = 'Co-Pay';
+      } else {
+        // Use retail-based copay if explicit copay is unrealistically low
+        copayPrice = retailBasedCopay;
+        label = 'Potential Co-Pay';
+      }
     } else {
-      copayPrice = computePotentialCopayForService(service);
+      copayPrice = retailBasedCopay;
+      label = 'Potential Co-Pay';
     }
     
     if (copayPrice > 0) {
-      return { price: copayPrice, label: 'Potential Co-Pay' };
+      return { price: copayPrice, label };
     }
   }
   
@@ -132,33 +140,10 @@ export const getSavingsInfo = (service: any): { amount: number; percentage: numb
   
   const dealInfo = getDealDisplayPrice(service);
   
-  // Debug logging for Starstix specifically
-  if (service.title && service.title.toLowerCase().includes('starstix')) {
-    console.log(`🔍 STARSTIX DEBUG:`, {
-      title: service.title,
-      retail_price_string: service.retail_price,
-      retail_price_numeric: retailPrice,
-      deal_price: dealInfo.price,
-      deal_label: dealInfo.label,
-      co_pay_price: service.co_pay_price,
-      pro_price: service.pro_price,
-      respa_split_limit: service.respa_split_limit
-    });
-  }
-  
   if (dealInfo.price >= retailPrice) return null;
   
   const amount = retailPrice - dealInfo.price;
   const percentage = Math.round((amount / retailPrice) * 100);
-  
-  // More debug for Starstix
-  if (service.title && service.title.toLowerCase().includes('starstix')) {
-    console.log(`🔍 STARSTIX CALCULATION:`, {
-      amount,
-      percentage,
-      formula: `(${retailPrice} - ${dealInfo.price}) / ${retailPrice} * 100 = ${percentage}%`
-    });
-  }
   
   return percentage > 0 ? { amount, percentage } : null;
 };
@@ -167,9 +152,9 @@ export const getSavingsInfo = (service: any): { amount: number; percentage: numb
  * Get the effective price for display (considering membership and copay)
  */
 export const getEffectivePrice = (service: any, isProMember: boolean): { price: number; label: string } => {
-  // For pro members with copay eligible services, show potential copay
-  if (isProMember && service.is_verified && service.copay_allowed && service.pro_price && service.respa_split_limit) {
-    const coPayPrice = computePotentialCopay(service.pro_price, service.respa_split_limit);
+  // For pro members with copay eligible services, show retail-based potential copay
+  if (isProMember && service.is_verified && service.copay_allowed && service.respa_split_limit) {
+    const coPayPrice = computePotentialCopayForService(service);
     return { price: coPayPrice, label: 'Potential Co-Pay' };
   }
   
