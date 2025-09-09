@@ -719,7 +719,7 @@ export const ServiceCard = ({
                   {service.is_verified && service.pro_price && service.retail_price && (
                     <div className="text-center">
                       <div className="inline-flex items-center gap-1 bg-blue-50 text-blue-700 text-xs font-medium px-2 py-1 rounded-full">
-                        <span>Save {formatPrice(extractNumericPrice(service.retail_price) - extractNumericPrice(service.pro_price), service.price_duration || 'mo')}</span>
+                        <span>Save {formatPrice(extractNumericPrice(service.retail_price) - extractNumericPrice(service.pro_price), service.price_duration || 'mo')} ({Math.round(((extractNumericPrice(service.retail_price) - extractNumericPrice(service.pro_price)) / extractNumericPrice(service.retail_price)) * 100)}%)</span>
                       </div>
                     </div>
                   )}
