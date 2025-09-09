@@ -61,6 +61,19 @@ import { AutoRecoverySystem } from '@/components/marketplace/AutoRecoverySystem'
 import { logEvent } from '@/lib/events';
 import { getProStatus } from '@/lib/profile';
 
+// --- Helpers (logic only; no UI) ---
+const isMaybeUUID = (v: string) =>
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(v);
+
+function withTimeout<T>(p: Promise<T>, ms = 15000): Promise<T> {
+  let t: ReturnType<typeof setTimeout>;
+  return new Promise((resolve, reject) => {
+    t = setTimeout(() => reject(new Error("users_fetch_timeout")), ms);
+    p.then((v) => { clearTimeout(t); resolve(v); })
+     .catch((e) => { clearTimeout(t); reject(e); });
+  });
+}
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Upload, Building, Youtube, DollarSign, BarChart3, Coins, Shield as ShieldIcon, Users2, Send, BookOpen, Heart, MessageSquare, Calendar } from 'lucide-react';
 import { SpiritualDashboard } from '@/components/admin/SpiritualDashboard';
@@ -103,6 +116,7 @@ export default function AdminDashboard() {
   
   // Enhanced user management state
   const [userSearchTerm, setUserSearchTerm] = useState('');
+  const [debouncedUserSearchTerm, setDebouncedUserSearchTerm] = useState('');
   const [userFilter, setUserFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -121,13 +135,19 @@ export default function AdminDashboard() {
   const isKnownAdmin = user?.email && ['robert@circlenetwork.io', 'andrew@heisleyteam.com'].includes(user.email.toLowerCase());
   const isAdmin = profile?.is_admin || isKnownAdmin || false;
 
+  // Debounce: logic only, no UI impact
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedUserSearchTerm(userSearchTerm.trim()), 500);
+    return () => clearTimeout(t);
+  }, [userSearchTerm]);
+
   useEffect(() => {
     if (!loading && (!user || !isAdmin)) {
       return;
     }
 
     loadUsers();
-  }, [user, isAdmin, loading, currentPage, userSearchTerm, userFilter]);
+  }, [user, isAdmin, loading, currentPage, debouncedUserSearchTerm, userFilter]);
 
   useEffect(() => {
     filterUsers();
@@ -137,9 +157,32 @@ export default function AdminDashboard() {
     setLoadingUsers(true);
     setIsError(false);
     try {
+      const from = (currentPage - 1) * USERS_PER_PAGE;
+      const to = from + USERS_PER_PAGE - 1;
+
+      // Build query safely: search only text cols by default
       let query = supabase
         .from('profiles')
-        .select('*', { count: 'exact' });
+        .select(
+          `
+            id,
+            user_id,
+            email,
+            display_name,
+            business_name,
+            is_admin,
+            is_pro_member,
+            is_pro,
+            is_creator,
+            creator_verified,
+            creator_joined_at,
+            specialties,
+            created_at
+          `,
+          { count: 'exact' }
+        )
+        .order('created_at', { ascending: false })
+        .range(from, to);
 
       // Apply filters
       if (userFilter === 'admins') {
@@ -154,29 +197,45 @@ export default function AdminDashboard() {
         query = query.gte('created_at', sevenDaysAgo.toISOString());
       }
 
-      // Apply search - fix the search logic to avoid UUID type errors
-      if (userSearchTerm) {
-        // Only search in text fields, not UUID fields
-        query = query.or(`display_name.ilike.%${userSearchTerm}%,business_name.ilike.%${userSearchTerm}%`);
+      const term = debouncedUserSearchTerm;
+      if (term) {
+        // Default to text ilike search
+        const searchConditions = [
+          `display_name.ilike.%${term}%`,
+          `business_name.ilike.%${term}%`,
+          `email.ilike.%${term}%`
+        ];
+        
+        // Optionally include exact id match ONLY if UUID
+        if (isMaybeUUID(term)) {
+          searchConditions.push(`user_id.eq.${term}`);
+        }
+        
+        query = query.or(searchConditions.join(','));
       }
 
-      const { data, error, count } = await query
-        .order('created_at', { ascending: false })
-        .range((currentPage - 1) * USERS_PER_PAGE, currentPage * USERS_PER_PAGE - 1);
+      const result = await withTimeout(query, 15000);
+      if (result.error) throw result.error;
 
-      if (error) throw error;
+      const rows = result.data || [];
+      // Normalize Pro flag without changing UI:
+      const normalized = rows.map((r: any) => ({
+        ...r,
+        // read: prefer is_pro_member, fall back to legacy is_pro
+        __isProResolved: r.is_pro_member ?? r.is_pro ?? false,
+      }));
+
+      setUsers(normalized);
+      setTotalUsers(result.count || 0);
+      setTotalPages(Math.ceil((result.count || 0) / USERS_PER_PAGE));
       
-      setUsers(data || []);
-      setTotalUsers(count || 0);
-      setTotalPages(Math.ceil((count || 0) / USERS_PER_PAGE));
-      
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error loading users:', error);
       setIsError(true);
       setErrorCount(prev => prev + 1);
       toast({
         title: 'Error',
-        description: 'Failed to load users',
+        description: error?.message === 'users_fetch_timeout' ? 'Request timed out - please try again' : 'Failed to load users',
         variant: 'destructive',
       });
     } finally {
@@ -399,20 +458,31 @@ export default function AdminDashboard() {
     }
   };
 
+  // Toggle Pro (write both fields for fwd/back compat, no UI changes)
   const handleToggleProStatus = async (userId: string, currentStatus: boolean) => {
     try {
-      // Use the secure RPC function to toggle Pro status
-      const { error } = await supabase.rpc('admin_set_pro_status', {
-        target_user: userId,
-        pro: !currentStatus
-      });
+      const nextStatus = !currentStatus;
+      
+      // Update both is_pro_member and is_pro for compatibility
+      const { error } = await supabase
+        .from('profiles')
+        .update({ 
+          is_pro_member: nextStatus, 
+          is_pro: nextStatus 
+        })
+        .eq('user_id', userId);
 
       if (error) throw error;
 
       // Update local state
-      const updateUser = (user: UserProfile) => 
+      const updateUser = (user: UserProfile & { __isProResolved?: boolean }) => 
         user.user_id === userId 
-          ? { ...user, is_pro: !currentStatus, is_pro_member: !currentStatus }
+          ? { 
+              ...user, 
+              is_pro: nextStatus, 
+              is_pro_member: nextStatus,
+              __isProResolved: nextStatus 
+            }
           : user;
 
       setUsers(users.map(updateUser));
@@ -421,12 +491,12 @@ export default function AdminDashboard() {
       // Log the admin action
       await logEvent('admin_pro_toggle', { 
         target_user: userId, 
-        new_status: !currentStatus 
+        new_status: nextStatus 
       });
 
       toast({
         title: 'Pro Status Updated',
-        description: `User ${!currentStatus ? 'granted' : 'removed from'} Pro membership`,
+        description: `User ${nextStatus ? 'granted' : 'removed from'} Pro membership`,
       });
     } catch (error) {
       console.error('Error updating Pro status:', error);
