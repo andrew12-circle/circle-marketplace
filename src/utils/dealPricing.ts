@@ -125,17 +125,29 @@ export const getDealDisplayPrice = (service: any): { price: number; label: strin
  * Get savings info (amount and percentage) for a service
  */
 export const getSavingsInfo = (service: any): { amount: number; percentage: number } | null => {
-  if (!service.retail_price) return null;
+  if (!service.retail_price) {
+    console.log(`No savings for ${service.title}: no retail price`);
+    return null;
+  }
   
   const retailPrice = extractNumericPrice(service.retail_price);
-  if (retailPrice <= 0) return null;
+  if (retailPrice <= 0) {
+    console.log(`No savings for ${service.title}: invalid retail price ${retailPrice}`);
+    return null;
+  }
   
   const dealInfo = getDealDisplayPrice(service);
-  if (dealInfo.price >= retailPrice) return null;
+  console.log(`Savings calc for ${service.title}: retail=${retailPrice}, deal=${dealInfo.price}, label=${dealInfo.label}`);
+  
+  if (dealInfo.price >= retailPrice) {
+    console.log(`No savings for ${service.title}: deal price ${dealInfo.price} >= retail ${retailPrice}`);
+    return null;
+  }
   
   const amount = retailPrice - dealInfo.price;
   const percentage = Math.round((amount / retailPrice) * 100);
   
+  console.log(`Savings for ${service.title}: $${amount} (${percentage}%)`);
   return percentage > 0 ? { amount, percentage } : null;
 };
 
