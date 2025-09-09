@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -138,6 +138,9 @@ export const PaymentChoiceModal = ({
               <ShoppingCart className="w-5 h-5" />
               Choose how to cover "{service.title}"
             </DialogTitle>
+            <DialogDescription>
+              Select your preferred payment method for this service
+            </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 mt-4">
@@ -271,7 +274,7 @@ export const PaymentChoiceModal = ({
               </Card>
             ) : null}
 
-            {((agentPoints > 0 && isProMember) || !isProMember) && !loadingPoints && (
+            {agentPoints > 0 && !loadingPoints && (
               <>
                 <div className="text-center text-sm text-muted-foreground my-4">
                   OR get your bill reduced
