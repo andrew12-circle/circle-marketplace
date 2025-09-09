@@ -647,18 +647,18 @@ export const ServiceFunnelModal = ({
                       </div>}
 
                     {/* Quick Stats */}
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
-                        <div className="text-center p-2 sm:p-3 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 flex flex-col items-center justify-center">
-                          <div className="text-lg sm:text-2xl font-bold">{isVerified && service.estimated_roi ? `${service.estimated_roi}%` : 'TBD'}</div>
-                          <div className="text-xs text-blue-200">Avg ROI</div>
+                    <div className="grid grid-cols-3 gap-1 sm:gap-4">
+                        <div className="text-center p-1 sm:p-3 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 flex flex-col items-center justify-center">
+                          <div className="text-sm sm:text-2xl font-bold">{isVerified && service.estimated_roi ? `${service.estimated_roi}%` : 'TBD'}</div>
+                          <div className="text-[10px] sm:text-xs text-blue-200">Avg ROI</div>
                         </div>
-                        <div className="text-center p-2 sm:p-3 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 flex flex-col items-center justify-center">
-                          <div className="text-lg sm:text-2xl font-bold">{isVerified && service.duration ? service.duration : 'TBD'}</div>
-                          <div className="text-xs text-blue-200">Time to Results</div>
+                        <div className="text-center p-1 sm:p-3 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 flex flex-col items-center justify-center">
+                          <div className="text-sm sm:text-2xl font-bold">{isVerified && service.duration ? service.duration : 'TBD'}</div>
+                          <div className="text-[10px] sm:text-xs text-blue-200">Time to Results</div>
                         </div>
-                        <div className="text-center p-2 sm:p-3 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 flex flex-col items-center justify-center">
-                          <div className="text-lg sm:text-2xl font-bold">TBD</div>
-                          <div className="text-xs text-blue-200">Time to Setup</div>
+                        <div className="text-center p-1 sm:p-3 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 flex flex-col items-center justify-center">
+                          <div className="text-sm sm:text-2xl font-bold">TBD</div>
+                          <div className="text-[10px] sm:text-xs text-blue-200">Time to Setup</div>
                         </div>
                     </div>
                   </div>
