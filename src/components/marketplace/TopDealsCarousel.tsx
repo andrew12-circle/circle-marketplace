@@ -231,15 +231,43 @@ export const TopDealsCarousel = ({ services, serviceRatings, onServiceClick }: T
                             <div className="text-sm text-muted-foreground line-through">
                               Retail: {formatPrice(retailPrice)}
                             </div>
-                            <div className="text-lg font-bold text-primary">
-                              {service.pro_price ? formatPrice(parsePrice(service.pro_price)) : formatPrice(effectivePrice)}
-                            </div>
-                            <div className="text-sm text-green-600 font-medium">
-                              Co-Pay: {formatPrice(effectivePrice)}
-                            </div>
-                            <Badge variant="secondary" className="text-xs bg-green-100 text-green-800 mb-1">
-                              {priceLabel}
-                            </Badge>
+                            {(() => {
+                              // Calculate actual prices to show the best deal structure
+                              const proPrice = service.pro_price ? parsePrice(service.pro_price) : retailPrice;
+                              const copayPrice = effectivePrice;
+                              
+                              // Show the lower of pro or copay as main price, but prefer copay when significantly lower
+                              const shouldShowCopayAsMain = copayPrice < proPrice * 0.8;
+                              
+                              if (shouldShowCopayAsMain) {
+                                return (
+                                  <>
+                                    <div className="text-lg font-bold text-green-600">
+                                      {formatPrice(copayPrice)}
+                                    </div>
+                                    <Badge variant="secondary" className="text-xs bg-green-100 text-green-800 mb-1">
+                                      {priceLabel}
+                                    </Badge>
+                                    <div className="text-sm text-muted-foreground">
+                                      Pro: {formatPrice(proPrice)}
+                                    </div>
+                                  </>
+                                );
+                              } else {
+                                return (
+                                  <>
+                                    <div className="text-lg font-bold text-primary">
+                                      {formatPrice(proPrice)}
+                                    </div>
+                                    {copayPrice < proPrice && (
+                                      <div className="text-sm text-green-600 font-medium">
+                                        Co-Pay: {formatPrice(copayPrice)}
+                                      </div>
+                                    )}
+                                  </>
+                                );
+                              }
+                            })()}
                           </>
                         ) : (
                           <>
