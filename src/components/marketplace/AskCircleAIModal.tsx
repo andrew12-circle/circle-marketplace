@@ -36,8 +36,11 @@ export function AskCircleAIModal({ open, onOpenChange, initialMessage, expandTok
     if (open) {
       console.log('🔄 Modal opened, resetting states');
       setIsMinimized(false);
-      // Always mark as processed when modal opens (allows minimizing)
-      setHasProcessedInitialContent(true);
+      // Don't automatically mark as processed - let it start expanded
+      if (!initialMessage && !expandToken) {
+        // Only allow minimizing if there's no initial content to process
+        setHasProcessedInitialContent(true);
+      }
     } else {
       // Reset processed flag when modal closes
       setHasProcessedInitialContent(false);
