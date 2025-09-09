@@ -365,7 +365,7 @@ export const CategoryBlocks = ({ onCategoryClick, onAIChat, services, allService
 
   return (
     <div className="mb-8" data-tour="category-blocks" data-section="category-blocks">
-      <h2 className="text-2xl font-semibold mb-6 mt-8 text-foreground">{t('shopByCategory')}</h2>
+      <h2 className="text-2xl font-semibold mb-6 mt-1 text-foreground">{t('shopByCategory')}</h2>
       
       {renderCategoryGrid(
         OLD_SCHOOL_CATEGORIES, 
