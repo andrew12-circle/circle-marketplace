@@ -660,10 +660,6 @@ export const ServiceFunnelModal = ({
                           <div className="text-2xl font-bold">TBD</div>
                           <div className="text-xs text-blue-200">Time to Setup</div>
                         </div>
-                      {showSupportStats && <div className="text-center p-3 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
-                          <div className="text-2xl font-bold">{service.vendor?.support_hours || 'Business Hours'}</div>
-                          <div className="text-xs text-blue-200">Support</div>
-                        </div>}
                     </div>
                   </div>
 
