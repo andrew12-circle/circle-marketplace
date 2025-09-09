@@ -143,13 +143,21 @@ export const GuideTour: React.FC<GuideTourProps> = ({
       clearInterval(pollingRef.current);
     }
 
-    // Poll for element existence (up to 1 second)
+    // Poll for element existence with longer timeout and better fallbacks
     let attempts = 0;
-    const maxAttempts = 20; // 20 * 50ms = 1 second
+    const maxAttempts = 40; // 40 * 100ms = 4 seconds
     
     const pollForElement = () => {
       if (currentStep?.selector) {
-        const element = document.querySelector(currentStep.selector);
+        // Try multiple selector variations
+        const selectors = currentStep.selector.split(',').map(s => s.trim());
+        let element = null;
+        
+        for (const selector of selectors) {
+          element = document.querySelector(selector);
+          if (element) break;
+        }
+        
         if (element || attempts >= maxAttempts) {
           updatePosition();
           if (pollingRef.current) {
@@ -166,7 +174,7 @@ export const GuideTour: React.FC<GuideTourProps> = ({
 
     // Start polling
     pollForElement();
-    pollingRef.current = setInterval(pollForElement, 50);
+    pollingRef.current = setInterval(pollForElement, 100);
 
     // Handle scroll and resize
     const handleRecompute = () => {

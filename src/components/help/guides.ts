@@ -41,14 +41,14 @@ export const guides: Guide[] = [
         id: 'step-2',
         title: 'Use Smart Search',
         content: 'Use the search bar to find specific services. You can search by service name, category, or keywords. The search will suggest relevant services as you type.',
-        selector: '[data-tour="search-container"]',
+        selector: '[data-tour="search-container"], .search-container, input[type="search"], input[placeholder*="Search"], .sticky-search',
         position: 'bottom'
       },
       {
         id: 'step-3',
         title: 'Apply Filters & Sort',
         content: 'Use the filter options to narrow down services by price range, features (like Co-Pay Available), or verification status. Sort by featured, rating, or price to find what works best for you.',
-        selector: '.marketplace-filters, [data-tour="filters"]',
+        selector: '[data-tour="filters"], .marketplace-filters, .filters-container, .filter-section',
         position: 'right'
       },
       {
