@@ -34,95 +34,110 @@ export const GuideTour: React.FC<GuideTourProps> = ({
   const isLastStep = currentStepIndex === guide.steps.length - 1;
   const progress = (currentStepIndex + 1) / guide.steps.length * 100;
   useEffect(() => {
-    if (currentStep?.selector) {
-      const element = document.querySelector(currentStep.selector);
-      if (element) {
-        const rect = element.getBoundingClientRect();
-        setTargetPosition({
-          top: rect.top + window.scrollY,
-          left: rect.left + window.scrollX,
-          width: rect.width,
-          height: rect.height
-        });
+    const updatePosition = () => {
+      if (currentStep?.selector) {
+        const element = document.querySelector(currentStep.selector);
+        if (element) {
+          const rect = element.getBoundingClientRect();
+          setTargetPosition({
+            top: rect.top + window.scrollY,
+            left: rect.left + window.scrollX,
+            width: rect.width,
+            height: rect.height
+          });
 
-        // Calculate tooltip position with improved viewport detection
-        const tooltipWidth = 320; // w-80 = 320px
-        const tooltipHeight = 250; // Estimated height including padding and content
-        const viewportWidth = window.innerWidth;
-        const viewportHeight = window.innerHeight;
-        const padding = 24; // Increased padding for safety
-        
-        let tooltipTop = rect.top + window.scrollY;
-        let tooltipLeft = rect.left + window.scrollX;
-        let preferredPosition = currentStep.position || 'bottom';
-        
-        // Calculate positions for each direction
-        const positions = {
-          top: {
-            top: rect.top + window.scrollY - tooltipHeight - 16,
-            left: rect.left + window.scrollX + rect.width / 2 - tooltipWidth / 2
-          },
-          bottom: {
-            top: rect.top + window.scrollY + rect.height + 16,
-            left: rect.left + window.scrollX + rect.width / 2 - tooltipWidth / 2
-          },
-          left: {
-            top: rect.top + window.scrollY + rect.height / 2 - tooltipHeight / 2,
-            left: rect.left + window.scrollX - tooltipWidth - 16
-          },
-          right: {
-            top: rect.top + window.scrollY + rect.height / 2 - tooltipHeight / 2,
-            left: rect.left + window.scrollX + rect.width + 16
-          }
-        };
-        
-        // Check if preferred position fits in viewport
-        const checkPosition = (pos: { top: number; left: number }) => {
-          return pos.left >= padding && 
-                 pos.left + tooltipWidth <= viewportWidth - padding &&
-                 pos.top >= window.scrollY + padding &&
-                 pos.top + tooltipHeight <= window.scrollY + viewportHeight - padding;
-        };
-        
-        // Try preferred position first, then fallback to others
-        let finalPosition = positions[preferredPosition as keyof typeof positions];
-        
-        if (!checkPosition(finalPosition)) {
-          // Try other positions in order of preference
-          const fallbackOrder = ['bottom', 'top', 'right', 'left'];
-          for (const position of fallbackOrder) {
-            const testPos = positions[position as keyof typeof positions];
-            if (checkPosition(testPos)) {
-              finalPosition = testPos;
-              break;
+          // Calculate tooltip position with improved viewport detection
+          const tooltipWidth = 320; // w-80 = 320px
+          const tooltipHeight = 280; // Increased estimated height
+          const viewportWidth = window.innerWidth;
+          const viewportHeight = window.innerHeight;
+          const padding = 20;
+          
+          let preferredPosition = currentStep.position || 'bottom';
+          
+          // Calculate positions for each direction
+          const positions = {
+            top: {
+              top: rect.top + window.scrollY - tooltipHeight - 16,
+              left: rect.left + window.scrollX + rect.width / 2 - tooltipWidth / 2
+            },
+            bottom: {
+              top: rect.top + window.scrollY + rect.height + 16,
+              left: rect.left + window.scrollX + rect.width / 2 - tooltipWidth / 2
+            },
+            left: {
+              top: rect.top + window.scrollY + rect.height / 2 - tooltipHeight / 2,
+              left: rect.left + window.scrollX - tooltipWidth - 16
+            },
+            right: {
+              top: rect.top + window.scrollY + rect.height / 2 - tooltipHeight / 2,
+              left: rect.left + window.scrollX + rect.width + 16
+            }
+          };
+          
+          // Check if preferred position fits in viewport
+          const checkPosition = (pos: { top: number; left: number }) => {
+            return pos.left >= padding && 
+                   pos.left + tooltipWidth <= viewportWidth - padding &&
+                   pos.top >= window.scrollY + padding &&
+                   pos.top + tooltipHeight <= window.scrollY + viewportHeight - padding;
+          };
+          
+          // Try preferred position first, then fallback to others
+          let finalPosition = positions[preferredPosition as keyof typeof positions];
+          
+          if (!checkPosition(finalPosition)) {
+            // Try other positions in order of preference
+            const fallbackOrder = ['bottom', 'top', 'right', 'left'];
+            for (const position of fallbackOrder) {
+              const testPos = positions[position as keyof typeof positions];
+              if (checkPosition(testPos)) {
+                finalPosition = testPos;
+                break;
+              }
             }
           }
-        }
-        
-        // Force position within viewport bounds as last resort
-        finalPosition.left = Math.max(padding, Math.min(finalPosition.left, viewportWidth - tooltipWidth - padding));
-        finalPosition.top = Math.max(window.scrollY + padding, Math.min(finalPosition.top, window.scrollY + viewportHeight - tooltipHeight - padding));
-        
-        setTooltipPosition({
-          top: finalPosition.top,
-          left: finalPosition.left
-        });
+          
+          // Force position within viewport bounds as last resort
+          finalPosition.left = Math.max(padding, Math.min(finalPosition.left, viewportWidth - tooltipWidth - padding));
+          finalPosition.top = Math.max(window.scrollY + padding, Math.min(finalPosition.top, window.scrollY + viewportHeight - tooltipHeight - padding));
+          
+          setTooltipPosition({
+            top: finalPosition.top,
+            left: finalPosition.left
+          });
 
-        // Scroll element into view with better positioning
-        element.scrollIntoView({
-          behavior: 'smooth',
-          block: 'center',
-          inline: 'center'
+          // Scroll element into view with better positioning
+          setTimeout(() => {
+            element.scrollIntoView({
+              behavior: 'smooth',
+              block: 'center',
+              inline: 'center'
+            });
+          }, 100);
+        } else {
+          // Element not found - fallback to center position
+          console.warn(`Tour element not found: ${currentStep.selector}`);
+          setTargetPosition(null);
+          setTooltipPosition({
+            top: window.scrollY + window.innerHeight / 2 - 140,
+            left: window.innerWidth / 2 - 160
+          });
+        }
+      } else {
+        setTargetPosition(null);
+        // Center tooltip when no target element
+        setTooltipPosition({
+          top: window.scrollY + window.innerHeight / 2 - 140,
+          left: window.innerWidth / 2 - 160
         });
       }
-    } else {
-      setTargetPosition(null);
-      // Center tooltip when no target element
-      setTooltipPosition({
-        top: window.scrollY + window.innerHeight / 2 - 125,
-        left: window.innerWidth / 2 - 160
-      });
-    }
+    };
+
+    // Small delay to ensure DOM has updated
+    const timeoutId = setTimeout(updatePosition, 50);
+    
+    return () => clearTimeout(timeoutId);
   }, [currentStep, currentStepIndex]);
   const handleNext = () => {
     if (currentStep?.action) {
@@ -165,8 +180,9 @@ export const GuideTour: React.FC<GuideTourProps> = ({
       {/* Tour tooltip */}
       <Card style={{
       top: tooltipPosition.top,
-      left: tooltipPosition.left
-    }} className="absolute w-80 shadow-2xl border-primary/20 py-[30px] bg-background z-[10000]">
+      left: tooltipPosition.left,
+      position: 'fixed'
+    }} className="w-80 shadow-2xl border-primary/20 py-[30px] bg-background z-[10001]">
         <CardContent className="p-4">
           {/* Header */}
           <div className="flex items-center justify-between mb-3">
