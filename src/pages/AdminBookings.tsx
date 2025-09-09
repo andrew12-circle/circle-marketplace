@@ -23,10 +23,6 @@ interface ConsultationBooking {
   created_at: string;
   services?: {
     title: string;
-    vendor?: {
-      name: string;
-      contact_email: string;
-    };
   };
 }
 
@@ -62,8 +58,7 @@ export default function AdminBookings() {
         .select(`
           *,
           services (
-            title,
-            vendor_id
+            title
           )
         `)
         .order('created_at', { ascending: false });
