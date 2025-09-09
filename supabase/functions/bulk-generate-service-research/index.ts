@@ -59,7 +59,8 @@ interface ServiceRecord {
   retail_price: string;
   pro_price: string;
   rating: number;
-  vendors?: { name: string; website_url?: string; };
+  service_provider_id?: string;
+  website_url?: string;
 }
 
 interface BulkRequest {
@@ -223,11 +224,12 @@ serve(async (req) => {
     
     console.log(`📊 Total services in database: ${totalCount || 'unknown'}`);
     
+    // Fetch services without vendor join to avoid relationship error
     const { data: services, error: servicesError } = await supabase
       .from('services')
       .select(`
         id, title, description, category, tags, retail_price, pro_price, rating,
-        vendors (name, website_url)
+        service_provider_id, website_url
       `)
       .order('title')
       .range(offset, offset + limit - 1);
@@ -421,12 +423,23 @@ async function gatherServiceContext(supabase: any, service: ServiceRecord) {
       .order('rating', { ascending: false })
       .limit(5);
 
+    // Get vendor information if service_provider_id exists
+    let vendor = null;
+    if (service.service_provider_id) {
+      const { data: vendorData } = await supabase
+        .from('vendors')
+        .select('name, website_url')
+        .eq('id', service.service_provider_id)
+        .single();
+      vendor = vendorData;
+    }
+
     return {
       metrics: metrics || {},
       isBestseller,
       bundles: bundles || [],
       relatedServices: relatedServices || [],
-      vendor: service.vendors
+      vendor: vendor
     };
   } catch (error) {
     console.error('Error gathering service context:', error);
@@ -447,6 +460,11 @@ function buildResearchPrompt(masterPrompt: string, service: ServiceRecord, conte
   
   if (context.vendor) {
     prompt += `Vendor: ${context.vendor.name}\n`;
+    if (context.vendor.website_url) {
+      prompt += `Vendor Website: ${context.vendor.website_url}\n`;
+    }
+  } else if (service.website_url) {
+    prompt += `Service Website: ${service.website_url}\n`;
     if (context.vendor.website_url) {
       prompt += `Website: ${context.vendor.website_url}\n`;
     }
