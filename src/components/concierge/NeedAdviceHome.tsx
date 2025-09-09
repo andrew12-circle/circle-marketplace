@@ -230,12 +230,12 @@ export default function NeedAdviceHome() {
   return (
     <div className="min-h-[100dvh] bg-background">
       {/* Header / Logo */}
-      <header className="pt-12 pb-8 flex flex-col items-center select-none">
+      <header className="pt-6 md:pt-12 pb-4 md:pb-8 flex flex-col items-center select-none">
         <motion.h1
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
-          className="text-5xl font-semibold tracking-tight flex items-center gap-3"
+          className="text-3xl md:text-5xl font-semibold tracking-tight flex items-center gap-3"
         >
           <span className="bg-clip-text text-transparent bg-gradient-to-r from-sky-600 to-blue-700">
             Need Advice?
