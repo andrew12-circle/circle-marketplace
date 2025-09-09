@@ -225,67 +225,41 @@ export const TopDealsCarousel = ({ services, serviceRatings, onServiceClick }: T
                         )}
                       </div>
 
-                      {/* Price */}
-                      <div className="text-right">
-                        {priceLabel === 'Potential Co-Pay' || priceLabel === 'Co-Pay' ? (
-                          <>
-                            <div className="text-sm text-muted-foreground line-through">
-                              Retail: {formatPrice(retailPrice)}
+                      {/* Price - Match ServiceCard display */}
+                      <div className="text-right space-y-1">
+                        {service.retail_price && (
+                          <div className="text-xs text-muted-foreground line-through">
+                            Retail: {formatPrice(retailPrice)}
+                          </div>
+                        )}
+                        
+                        {/* Pro Price */}
+                        {service.is_verified && service.pro_price && (
+                          <div className="text-lg font-bold text-primary">
+                            {formatPrice(parsePrice(service.pro_price))}
+                          </div>
+                        )}
+                        
+                        {/* Co-Pay Available */}
+                        {service.copay_allowed && service.respa_split_limit && (
+                          <div className="bg-green-50 border border-green-200 rounded p-2 mt-2">
+                            <div className="text-xs text-green-700 font-medium mb-1">
+                              Co-Pay Available
                             </div>
-                            {(() => {
-                              // Calculate actual prices to show the best deal structure
-                              const proPrice = service.pro_price ? parsePrice(service.pro_price) : retailPrice;
-                              const copayPrice = effectivePrice;
-                              
-                              // Show the lower of pro or copay as main price, but prefer copay when significantly lower
-                              const shouldShowCopayAsMain = copayPrice < proPrice * 0.8;
-                              
-                              if (shouldShowCopayAsMain) {
-                                return (
-                                  <>
-                                    <div className="text-lg font-bold text-green-600">
-                                      {formatPrice(copayPrice)}
-                                    </div>
-                                    <Badge variant="secondary" className="text-xs bg-green-100 text-green-800 mb-1">
-                                      {priceLabel}
-                                    </Badge>
-                                    <div className="text-sm text-muted-foreground">
-                                      Pro: {formatPrice(proPrice)}
-                                    </div>
-                                  </>
-                                );
-                              } else {
-                                return (
-                                  <>
-                                    <div className="text-lg font-bold text-primary">
-                                      {formatPrice(proPrice)}
-                                    </div>
-                                    {copayPrice < proPrice && (
-                                      <div className="text-sm text-green-600 font-medium">
-                                        Co-Pay: {formatPrice(copayPrice)}
-                                      </div>
-                                    )}
-                                  </>
-                                );
-                              }
-                            })()}
-                          </>
-                        ) : (
-                          <>
-                            <div className="text-lg font-bold text-primary">
-                              {formatPrice(effectivePrice)}
+                            <div className="text-sm font-bold text-green-600">
+                              Your cost: {formatPrice(effectivePrice)}
                             </div>
-                            {priceLabel !== 'Retail Price' && (
-                              <div className="text-xs text-muted-foreground mt-1">
-                                {priceLabel}
-                              </div>
-                            )}
-                            {priceLabel === 'Circle Pro Price' && retailPrice !== effectivePrice && (
-                              <div className="text-sm text-muted-foreground line-through">
-                                {formatPrice(retailPrice)}
-                              </div>
-                            )}
-                          </>
+                            <div className="text-xs text-green-600">
+                              Up to {service.respa_split_limit}% vendor contribution
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Fallback for services without pro price or copay */}
+                        {!service.is_verified && !service.copay_allowed && (
+                          <div className="text-lg font-bold text-foreground">
+                            {formatPrice(retailPrice)}
+                          </div>
                         )}
                       </div>
 
