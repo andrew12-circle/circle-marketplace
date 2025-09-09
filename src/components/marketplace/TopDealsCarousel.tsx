@@ -92,7 +92,11 @@ export const TopDealsCarousel = ({ services, serviceRatings, onServiceClick }: T
 
   const topDeals = useMemo(() => {
     return safeServices
-      .filter(service => (service as any).is_affiliate) // Only show affiliate services
+      .filter(service => 
+        (service as any).is_affiliate || // Affiliate services
+        service.respa_split_limit ||     // Copay-enabled services
+        (service.is_verified && service.pro_price) // Circle Pro services
+      )
       .map(service => {
         try {
           const rating = serviceRatings?.get(service.id);
