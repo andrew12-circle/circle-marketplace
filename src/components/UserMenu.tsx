@@ -16,7 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAdminStatus } from "@/hooks/useAdminStatus";
 
 import { supabase } from "@/integrations/supabase/client";
-import { User, Settings, ShoppingBag, Crown, LogOut, Loader2, Heart, BarChart3, Shield, Building2, DollarSign, Store, Briefcase, Package, Brain, Command } from "lucide-react";
+import { User, ShoppingBag, Crown, LogOut, Loader2, Heart, BarChart3, Shield, Building2, DollarSign, Store, Briefcase, Package, Brain, Command } from "lucide-react";
 import { CustomerPortalButton } from "@/components/marketplace/CustomerPortalButton";
 
 
@@ -261,12 +261,6 @@ export const UserMenu = () => {
           <CustomerPortalButton />
         </DropdownMenuItem>
         
-        <DropdownMenuItem asChild>
-          <Link to="/profile" className="flex items-center">
-            <Settings className="mr-2 h-4 w-4" />
-            <span>Settings</span>
-          </Link>
-        </DropdownMenuItem>
         
         <DropdownMenuSeparator />
         
