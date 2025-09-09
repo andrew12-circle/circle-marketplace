@@ -270,11 +270,11 @@ export const CartDrawer = () => {
                       <h4 className="font-medium text-sm line-clamp-2">
                         {item.title}
                       </h4>
-                      <p className="text-xs text-muted-foreground">
-                        {item.coverageType === 'copay' && item.selectedVendor
-                          ? `Co-Pay with ${item.selectedVendor?.name || 'Selected Vendor'}`
-                          : item.vendor}
-                      </p>
+                      {item.coverageType === 'copay' && item.selectedVendor && (
+                        <p className="text-xs text-muted-foreground">
+                          Co-Pay with {item.selectedVendor?.name || 'Selected Vendor'}
+                        </p>
+                      )}
                       
                       {/* Status Badge */}
                       <div className="mt-1">
