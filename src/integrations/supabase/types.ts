@@ -7803,6 +7803,9 @@ export type Database = {
           pricing_external_url: string | null
           pricing_mode: string
           pricing_note: string | null
+          pricing_page_url: string | null
+          pricing_screenshot_captured_at: string | null
+          pricing_screenshot_url: string | null
           pricing_tiers: Json | null
           pro_price: string | null
           profile_image_url: string | null
@@ -7871,6 +7874,9 @@ export type Database = {
           pricing_external_url?: string | null
           pricing_mode?: string
           pricing_note?: string | null
+          pricing_page_url?: string | null
+          pricing_screenshot_captured_at?: string | null
+          pricing_screenshot_url?: string | null
           pricing_tiers?: Json | null
           pro_price?: string | null
           profile_image_url?: string | null
@@ -7939,6 +7945,9 @@ export type Database = {
           pricing_external_url?: string | null
           pricing_mode?: string
           pricing_note?: string | null
+          pricing_page_url?: string | null
+          pricing_screenshot_captured_at?: string | null
+          pricing_screenshot_url?: string | null
           pricing_tiers?: Json | null
           pro_price?: string | null
           profile_image_url?: string | null
