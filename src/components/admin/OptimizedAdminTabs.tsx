@@ -183,7 +183,7 @@ const TabLoadingFallback = ({ title }: { title: string }) => (
 export const OptimizedAdminTabs = () => {
   return (
     <div className="space-y-6">
-      <Tabs defaultValue="users" className="w-full">
+      <Tabs defaultValue="overview" className="w-full">
         <div className="overflow-x-auto">
           <TabsList className="inline-flex w-max min-w-full">
             <TabsTrigger value="overview" className="flex items-center gap-2 whitespace-nowrap">

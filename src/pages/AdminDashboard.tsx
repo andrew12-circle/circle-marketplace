@@ -78,7 +78,8 @@ interface UserProfile {
   creator_joined_at: string | null;
   specialties: string[] | null;
   is_admin: boolean | null;
-  is_pro_member: boolean | null;
+  is_pro?: boolean | null;
+  is_pro_member?: boolean | null;
   created_at: string;
 }
 
@@ -100,11 +101,9 @@ export default function AdminDashboard() {
     autoTriggerDelay: 3000
   });
   
-  // Enhanced user management state with debouncing
+  // Enhanced user management state
   const [userSearchTerm, setUserSearchTerm] = useState('');
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [userFilter, setUserFilter] = useState('all');
-  const [usersLoadTimeout, setUsersLoadTimeout] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalUsers, setTotalUsers] = useState(0);
@@ -122,37 +121,22 @@ export default function AdminDashboard() {
   const isKnownAdmin = user?.email && ['robert@circlenetwork.io', 'andrew@heisleyteam.com'].includes(user.email.toLowerCase());
   const isAdmin = profile?.is_admin || isKnownAdmin || false;
 
-  // Debounce search term with 500ms delay
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      setDebouncedSearchTerm(userSearchTerm);
-    }, 500);
-    return () => clearTimeout(timeoutId);
-  }, [userSearchTerm]);
-
   useEffect(() => {
     if (!loading && (!user || !isAdmin)) {
       return;
     }
 
     loadUsers();
-  }, [user, isAdmin, loading, currentPage, debouncedSearchTerm, userFilter]);
+  }, [user, isAdmin, loading, currentPage, userSearchTerm, userFilter]);
 
   useEffect(() => {
     filterUsers();
-  }, [users, debouncedSearchTerm, userFilter, currentPage]);
+  }, [users, userSearchTerm, userFilter, currentPage]);
 
   const loadUsers = async () => {
     setLoadingUsers(true);
     setIsError(false);
-    setUsersLoadTimeout(false);
-    
     try {
-      // Create timeout promise for 15 seconds
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Request timeout')), 15000);
-      });
-
       let query = supabase
         .from('profiles')
         .select('*', { count: 'exact' });
@@ -170,22 +154,15 @@ export default function AdminDashboard() {
         query = query.gte('created_at', sevenDaysAgo.toISOString());
       }
 
-      // Apply search - only search text fields, validate UUID if searching user_id
-      if (debouncedSearchTerm) {
-        const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(debouncedSearchTerm);
-        if (isValidUUID) {
-          query = query.or(`display_name.ilike.%${debouncedSearchTerm}%,business_name.ilike.%${debouncedSearchTerm}%,user_id.eq.${debouncedSearchTerm}`);
-        } else {
-          query = query.or(`display_name.ilike.%${debouncedSearchTerm}%,business_name.ilike.%${debouncedSearchTerm}%`);
-        }
+      // Apply search - fix the search logic to avoid UUID type errors
+      if (userSearchTerm) {
+        // Only search in text fields, not UUID fields
+        query = query.or(`display_name.ilike.%${userSearchTerm}%,business_name.ilike.%${userSearchTerm}%`);
       }
 
-      const queryPromise = query
+      const { data, error, count } = await query
         .order('created_at', { ascending: false })
         .range((currentPage - 1) * USERS_PER_PAGE, currentPage * USERS_PER_PAGE - 1);
-
-      // Race the query against timeout
-      const { data, error, count } = await Promise.race([queryPromise, timeoutPromise]);
 
       if (error) throw error;
       
@@ -197,14 +174,9 @@ export default function AdminDashboard() {
       console.error('Error loading users:', error);
       setIsError(true);
       setErrorCount(prev => prev + 1);
-      
-      if (error.message === 'Request timeout') {
-        setUsersLoadTimeout(true);
-      }
-      
       toast({
         title: 'Error',
-        description: error.message === 'Request timeout' ? 'Request timed out - showing degraded mode' : 'Failed to load users',
+        description: 'Failed to load users',
         variant: 'destructive',
       });
     } finally {
@@ -215,12 +187,12 @@ export default function AdminDashboard() {
   const filterUsers = () => {
     let filtered = users;
     
-    if (debouncedSearchTerm) {
+    if (userSearchTerm) {
       filtered = filtered.filter(user => 
-        user.display_name?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-        user.business_name?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-        user.email?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-        user.user_id.includes(debouncedSearchTerm)
+        user.display_name?.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
+        user.business_name?.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
+        user.email?.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
+        user.user_id.includes(userSearchTerm)
       );
     }
     
@@ -440,7 +412,7 @@ export default function AdminDashboard() {
       // Update local state
       const updateUser = (user: UserProfile) => 
         user.user_id === userId 
-          ? { ...user, is_pro_member: !currentStatus }
+          ? { ...user, is_pro: !currentStatus, is_pro_member: !currentStatus }
           : user;
 
       setUsers(users.map(updateUser));
@@ -565,7 +537,7 @@ export default function AdminDashboard() {
           )}
 
           {/* Modern Tab Navigation */}
-          <Tabs defaultValue="users" className="w-full space-y-8">
+          <Tabs defaultValue="spiritual" className="w-full space-y-8">
           <div className="bg-card rounded-xl border border-border shadow-sm p-4 space-y-4">
             <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 xl:grid-cols-17 gap-1 bg-muted/50 p-1 rounded-lg h-auto min-h-[60px]">
               {/* Spiritual Group - Moved to first position */}
@@ -824,26 +796,7 @@ export default function AdminDashboard() {
                   </div>
                 </div>
               ) : (
-                <>
-                  {/* Timeout/Degraded Mode Warning */}
-                  {usersLoadTimeout && (
-                    <Alert variant="destructive" className="mb-6 border-orange-200 bg-orange-50">
-                      <AlertTriangle className="h-4 w-4" />
-                      <AlertDescription>
-                        <strong>Degraded Mode:</strong> User data request timed out after 15 seconds. 
-                        Some features may be limited. 
-                        <Button 
-                          variant="link" 
-                          className="p-0 h-auto text-orange-700 underline ml-2"
-                          onClick={loadUsers}
-                        >
-                          Retry Loading
-                        </Button>
-                      </AlertDescription>
-                    </Alert>
-                  )}
-                  
-                  <div className="space-y-3">
+                <div className="space-y-3">
                   {filteredUsers.map((user) => (
                     <Card
                       key={user.id}
@@ -989,8 +942,7 @@ export default function AdminDashboard() {
                       </CardContent>
                     </Card>
                   ))}
-                  </div>
-                </>
+                </div>
               )}
 
               {/* Bulk Actions */}
