@@ -61,13 +61,9 @@ export default function AdminBookings() {
         .from('consultation_bookings')
         .select(`
           *,
-          services!inner (
+          services (
             title,
-            vendor_id,
-            vendors!inner (
-              name,
-              contact_email
-            )
+            vendor_id
           )
         `)
         .order('created_at', { ascending: false });
@@ -140,8 +136,7 @@ export default function AdminBookings() {
     const matchesSearch = 
       booking.client_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       booking.client_email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      booking.services?.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      booking.services?.vendor?.name.toLowerCase().includes(searchTerm.toLowerCase());
+      booking.services?.title.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesStatus = statusFilter === 'all' || booking.status === statusFilter;
     
@@ -293,7 +288,6 @@ export default function AdminBookings() {
                 </h3>
                 <div className="space-y-2 text-sm">
                   <div><strong>Service:</strong> {booking.services?.title}</div>
-                  <div><strong>Vendor:</strong> {booking.services?.vendor?.name}</div>
                   <div className="flex items-center gap-2">
                     <Calendar className="w-3 h-3" />
                     {format(new Date(booking.scheduled_date), 'EEEE, MMMM d, yyyy')}
@@ -317,21 +311,6 @@ export default function AdminBookings() {
               </div>
             )}
 
-            {/* Vendor Contact */}
-            {booking.services?.vendor?.contact_email && (
-              <div className="mt-4 pt-4 border-t">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium">Vendor Contact:</span>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => window.open(`mailto:${booking.services?.vendor?.contact_email}?subject=Consultation Booking - ${booking.services?.title}&body=Hi,\n\nWe have a consultation booking for ${booking.client_name} on ${format(new Date(booking.scheduled_date), 'MMMM d, yyyy')} at ${booking.scheduled_time}.\n\nClient Contact:\n- Email: ${booking.client_email}\n- Phone: ${booking.client_phone || 'Not provided'}\n\nProject Details:\n${booking.project_details || 'No details provided'}\n\nPlease confirm your availability or suggest alternative times.\n\nThanks!`)}
-                  >
-                    Email Vendor
-                  </Button>
-                </div>
-              </div>
-            )}
           </Card>
         ))}
       </div>
