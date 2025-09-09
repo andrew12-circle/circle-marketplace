@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { ShoppingBag, Clock, CheckCircle, XCircle, ExternalLink } from "lucide-react";
+import { ShoppingBag, Clock, CheckCircle, XCircle, ExternalLink, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 
@@ -121,9 +121,21 @@ export const OrderHistory = () => {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center gap-2 mb-6">
-          <ShoppingBag className="w-6 h-6" />
-          <h1 className="text-3xl font-bold">Order History</h1>
+        <div className="flex items-center gap-4 mb-6">
+          <Button 
+            variant="ghost" 
+            size="icon"
+            asChild
+            className="h-10 w-10"
+          >
+            <Link to="/">
+              <ArrowLeft className="w-5 h-5" />
+            </Link>
+          </Button>
+          <div className="flex items-center gap-2">
+            <ShoppingBag className="w-6 h-6" />
+            <h1 className="text-3xl font-bold">Order History</h1>
+          </div>
         </div>
 
         {loading ? (
