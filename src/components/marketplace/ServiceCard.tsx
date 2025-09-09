@@ -31,7 +31,7 @@ import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { useABTest } from "@/hooks/useABTest";
 import { SponsoredLabel } from "./SponsoredLabel";
 import { ServiceBadges } from "./ServiceBadges";
-import { extractNumericPrice, computeDiscountPercentage, getDealDisplayPrice } from '@/utils/dealPricing';
+import { extractNumericPrice, computeDiscountPercentage, getDealDisplayPrice, getSavingsInfo } from '@/utils/dealPricing';
 import { useSponsoredTracking } from '@/hooks/useSponsoredTracking';
 
 interface ServiceRatingStats {
@@ -138,10 +138,6 @@ export const ServiceCard = ({
     }
   };
 
-  // Calculate dynamic discount percentage using shared logic
-  const calculateDiscountPercentage = (): number | null => {
-    return computeDiscountPercentage(service);
-  };
 
   const handleSave = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -426,7 +422,7 @@ export const ServiceCard = ({
     setIsSharePopoverOpen(false);
   };
 
-  const discountPercentage = calculateDiscountPercentage();
+  
 
   // Helper functions to get localized content
   const getLocalizedTitle = () => {
@@ -716,13 +712,16 @@ export const ServiceCard = ({
                   )}
 
                   {/* Savings Badge */}
-                  {service.is_verified && service.pro_price && service.retail_price && (
-                    <div className="text-center">
-                      <div className="inline-flex items-center gap-1 bg-blue-50 text-blue-700 text-xs font-medium px-2 py-1 rounded-full">
-                        <span>Save {formatPrice(extractNumericPrice(service.retail_price) - extractNumericPrice(service.pro_price), service.price_duration || 'mo')} ({Math.round(((extractNumericPrice(service.retail_price) - extractNumericPrice(service.pro_price)) / extractNumericPrice(service.retail_price)) * 100)}%)</span>
+                  {(() => {
+                    const savingsInfo = getSavingsInfo(service);
+                    return savingsInfo && (
+                      <div className="text-center">
+                        <div className="inline-flex items-center gap-1 bg-blue-50 text-blue-700 text-xs font-medium px-2 py-1 rounded-full">
+                          <span>Save {formatPrice(savingsInfo.amount, service.price_duration || 'mo')} ({savingsInfo.percentage}%)</span>
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    );
+                  })()}
                 </>
               ) : (
                 <>
@@ -845,13 +844,16 @@ export const ServiceCard = ({
                            </div>
                          </TooltipTrigger>
                        </Tooltip>
-                       {discountPercentage && discountPercentage > 0 && (
-                         <div className="flex justify-end">
-                            <Badge className="bg-red-500 text-white text-xs font-medium">
-                              {discountPercentage}{t('serviceCard.percentOff')}
-                           </Badge>
-                         </div>
-                       )}
+                        {(() => {
+                          const savingsInfo = getSavingsInfo(service);
+                          return savingsInfo && savingsInfo.percentage > 0 && (
+                            <div className="flex justify-end">
+                               <Badge className="bg-red-500 text-white text-xs font-medium">
+                                 {savingsInfo.percentage}{t('serviceCard.percentOff')}
+                              </Badge>
+                            </div>
+                          );
+                        })()}
                      </div>
                    )}
                 </>

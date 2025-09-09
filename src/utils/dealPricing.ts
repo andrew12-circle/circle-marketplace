@@ -122,6 +122,24 @@ export const getDealDisplayPrice = (service: any): { price: number; label: strin
 };
 
 /**
+ * Get savings info (amount and percentage) for a service
+ */
+export const getSavingsInfo = (service: any): { amount: number; percentage: number } | null => {
+  if (!service.retail_price) return null;
+  
+  const retailPrice = extractNumericPrice(service.retail_price);
+  if (retailPrice <= 0) return null;
+  
+  const dealInfo = getDealDisplayPrice(service);
+  if (dealInfo.price >= retailPrice) return null;
+  
+  const amount = retailPrice - dealInfo.price;
+  const percentage = Math.round((amount / retailPrice) * 100);
+  
+  return percentage > 0 ? { amount, percentage } : null;
+};
+
+/**
  * Get the effective price for display (considering membership and copay)
  */
 export const getEffectivePrice = (service: any, isProMember: boolean): { price: number; label: string } => {
