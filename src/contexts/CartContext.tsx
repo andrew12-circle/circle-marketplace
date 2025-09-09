@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { ToastAction } from '@/components/ui/toast';
@@ -66,6 +67,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   // Load cart from localStorage on mount
   useEffect(() => {
@@ -154,7 +156,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
             <ToastAction
               altText="Go to sign in"
               onClick={() => {
-                window.location.href = '/auth';
+                navigate('/auth');
               }}
             >
               Sign In
@@ -174,7 +176,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
           <ToastAction
             altText="Go to sign in"
             onClick={() => {
-              window.location.href = '/auth';
+              navigate('/auth');
             }}
           >
             Sign In
