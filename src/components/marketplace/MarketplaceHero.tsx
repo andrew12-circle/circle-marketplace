@@ -60,7 +60,7 @@ export default function MarketplaceHero({ onExploreClick }: MarketplaceHeroProps
           <Card className="rounded-2xl shadow-sm">
             <CardContent className="flex flex-col items-center p-4 sm:p-6">
               <DollarSign className="w-6 h-6 sm:w-8 sm:h-8 text-purple-500 mb-2" />
-              <p className="text-xs sm:text-sm font-medium">{t('vendorsCoPayUpTo')}</p>
+              <p className="text-xs sm:text-sm font-medium">Vendors lined up ready to help cover up to 50% of your costs</p>
             </CardContent>
           </Card>
         </div>
