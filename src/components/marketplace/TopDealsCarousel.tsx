@@ -214,8 +214,8 @@ export const TopDealsCarousel = ({ services, serviceRatings, onServiceClick }: T
                       {/* Badges */}
                       <div className="flex gap-1 flex-wrap">
                         {discountPct > 0 && (
-                          <Badge variant="destructive" className="text-[10px] px-1.5 py-0.5 h-5">
-                            {discountPct}% OFF
+                          <Badge variant="destructive" className="text-xs px-2 py-1">
+                            {Math.round(discountPct)}% OFF
                           </Badge>
                         )}
                       </div>
