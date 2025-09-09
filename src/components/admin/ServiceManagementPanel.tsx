@@ -419,13 +419,10 @@ export const ServiceManagementPanel = () => {
       setError(null);
       console.log('ServiceManagementPanel: Fetching services...');
       
+      // First try a simple query without the join to see if that's the issue
       const { data, error } = await supabase
         .from('services')
-        .select(`
-          *,
-          service_providers (name, logo_url)
-        `)
-        .order('sort_order', { ascending: true })
+        .select('*')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
