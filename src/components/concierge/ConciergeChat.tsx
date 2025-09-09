@@ -276,7 +276,7 @@ export const ConciergeChat: React.FC<ConciergeChatProps> = ({ threadId: initialT
       <div className="flex items-center justify-between p-4 border-b">
         <div className="flex items-center gap-3">
           <Avatar className="w-10 h-10">
-            <AvatarImage src="/api/placeholder/40/40" alt="Circle Concierge" />
+            <AvatarImage src="/lovable-uploads/048e15b5-2fbf-4d02-acfe-1f2f3baa6ed0.png" alt="Circle Concierge" />
             <AvatarFallback className="bg-primary/10 text-primary font-medium">
               CC
             </AvatarFallback>
