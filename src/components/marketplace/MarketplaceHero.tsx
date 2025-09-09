@@ -38,7 +38,7 @@ export default function MarketplaceHero({ onExploreClick }: MarketplaceHeroProps
           {t('heroTitle')}<br />
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-500">{t('heroSubtitle')}</span>
         </h1>
-        <p className="text-base sm:text-lg text-gray-600 mb-6 sm:mb-8">
+        <p className="text-sm sm:text-lg text-gray-600 mb-6 sm:mb-8 max-w-sm sm:max-w-none mx-auto leading-relaxed">
           {t('heroDescription')}
         </p>
 
