@@ -1,10 +1,10 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Search, ChevronRight } from 'lucide-react';
-import { faqs, FAQSection } from './faqs';
+import { getFaqItems, type AgentFaqSection } from './faqProvider';
 
 interface HelpAnswersProps {
   currentRoute: string;
@@ -12,30 +12,35 @@ interface HelpAnswersProps {
 
 export const HelpAnswers: React.FC<HelpAnswersProps> = ({ currentRoute }) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [faqSections, setFaqSections] = useState<AgentFaqSection[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Get context-aware FAQs
-  const contextFAQs = useMemo(() => {
-    const routeKey = Object.keys(faqs.routes).find(route => 
-      currentRoute.startsWith(route)
-    ) || 'general';
-    
-    return faqs.routes[routeKey] || faqs.routes.general;
-  }, [currentRoute]);
+  // Load FAQ data on component mount
+  useEffect(() => {
+    getFaqItems()
+      .then(setFaqSections)
+      .catch((error) => {
+        console.error('Error loading FAQ items:', error);
+        setFaqSections([]);
+      })
+      .finally(() => setLoading(false));
+  }, []);
 
   // Filter FAQs based on search
   const filteredFAQs = useMemo(() => {
-    if (!searchQuery.trim()) return contextFAQs;
+    if (!searchQuery.trim()) return faqSections;
 
     const query = searchQuery.toLowerCase();
-    return contextFAQs.map(section => ({
+    return faqSections.map(section => ({
       ...section,
       items: section.items.filter(item =>
         item.question.toLowerCase().includes(query) ||
         item.answer.toLowerCase().includes(query) ||
-        item.tags?.some(tag => tag.toLowerCase().includes(query))
+        item.tags?.some(tag => tag.toLowerCase().includes(query)) ||
+        item.keywords?.some(keyword => keyword.toLowerCase().includes(query))
       )
     })).filter(section => section.items.length > 0);
-  }, [contextFAQs, searchQuery]);
+  }, [faqSections, searchQuery]);
 
   return (
     <div className="h-full flex flex-col">
@@ -55,7 +60,11 @@ export const HelpAnswers: React.FC<HelpAnswersProps> = ({ currentRoute }) => {
       {/* FAQ Content */}
       <ScrollArea className="flex-1">
         <div className="p-3">
-          {filteredFAQs.length === 0 ? (
+          {loading ? (
+            <div className="text-center text-muted-foreground text-sm py-8">
+              Loading help content...
+            </div>
+          ) : filteredFAQs.length === 0 ? (
             <div className="text-center text-muted-foreground text-sm py-8">
               {searchQuery ? 'No results found. Try different keywords.' : 'No FAQs available.'}
             </div>
@@ -83,20 +92,17 @@ export const HelpAnswers: React.FC<HelpAnswersProps> = ({ currentRoute }) => {
                             <p key={i} className="mb-2 last:mb-0">{line}</p>
                           ))}
                         </div>
-                        {item.links && item.links.length > 0 && (
-                          <div className="mt-3 space-y-1">
-                            {item.links.map((link, linkIndex) => (
-                              <Button
-                                key={linkIndex}
-                                variant="ghost"
-                                size="sm"
-                                className="h-auto p-1 text-xs text-primary hover:text-primary/80"
-                                onClick={() => window.open(link.url, '_blank')}
-                              >
-                                <ChevronRight className="w-3 h-3 mr-1" />
-                                {link.text}
-                              </Button>
-                            ))}
+                        {item.cta_text && item.cta_href && (
+                          <div className="mt-3">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-auto p-1 text-xs text-primary hover:text-primary/80"
+                              onClick={() => window.open(item.cta_href, '_blank')}
+                            >
+                              <ChevronRight className="w-3 h-3 mr-1" />
+                              {item.cta_text}
+                            </Button>
                           </div>
                         )}
                       </AccordionContent>

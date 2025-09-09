@@ -1,0 +1,208 @@
+[
+  {
+    "id": "getting-started-signup",
+    "question": "How do I get started with Circle Marketplace?",
+    "answer": "Complete your profile setup, verify your license, and set your territory. Then explore the Academy for training and the Marketplace for professional services. Your AI Dashboard will provide personalized recommendations based on your business needs.",
+    "category": "Getting Started",
+    "tags": ["signup", "onboarding", "profile", "setup"],
+    "last_updated": "2024-01-15T00:00:00Z",
+    "cta_text": "Complete Your Profile",
+    "cta_href": "/profile-settings"
+  },
+  {
+    "id": "getting-started-checklist",
+    "question": "What's the complete setup checklist for new agents?",
+    "answer": "1. Verify your real estate license\n2. Complete your profile and territory settings\n3. Connect your calendar for automated scheduling\n4. Set up your Agent Wallet payment preferences\n5. Browse the Marketplace and bookmark preferred vendors\n6. Schedule your welcome call with Concierge",
+    "category": "Getting Started",
+    "tags": ["checklist", "setup", "onboarding", "verification"],
+    "last_updated": "2024-01-15T00:00:00Z"
+  },
+  {
+    "id": "getting-started-territory",
+    "question": "How do I set up my territory and coverage area?",
+    "answer": "Go to Profile Settings > Territory. Define your primary market areas using ZIP codes or city boundaries. This ensures you see relevant vendors and services in your area, and helps with marketing coverage eligibility.",
+    "category": "Getting Started",
+    "tags": ["territory", "coverage", "markets", "profile"],
+    "last_updated": "2024-01-15T00:00:00Z",
+    "cta_text": "Set Territory",
+    "cta_href": "/profile-settings"
+  },
+  {
+    "id": "membership-pro-features",
+    "question": "What's included in Circle Pro membership?",
+    "answer": "Circle Pro includes unlimited service bookings, priority Concierge support, advanced ROI analytics, team seat management, enhanced vendor access, and preferred partner benefits. Pro members also get early access to new features and expanded marketing coverage opportunities.",
+    "category": "Membership",
+    "tags": ["circle pro", "membership", "features", "benefits"],
+    "last_updated": "2024-01-15T00:00:00Z"
+  },
+  {
+    "id": "membership-cost-seats",
+    "question": "How much does Circle Pro cost and how do team seats work?",
+    "answer": "Circle Pro is $99/month for your primary seat. Additional team members are $49/month each. Each seat gets full platform access including their own Agent Wallet, booking privileges, and analytics dashboard. Manage team seats from your billing dashboard.",
+    "category": "Membership",
+    "tags": ["pricing", "team", "seats", "billing", "cost"],
+    "last_updated": "2024-01-15T00:00:00Z",
+    "cta_text": "Manage Billing",
+    "cta_href": "/billing"
+  },
+  {
+    "id": "membership-cancellation",
+    "question": "Can I cancel my Circle Pro membership anytime?",
+    "answer": "Yes, you can cancel anytime from your billing settings. Your access continues until the end of your current billing period. No cancellation fees apply. You can also downgrade to the free tier while keeping your vendor relationships and booking history.",
+    "category": "Membership",
+    "tags": ["cancellation", "billing", "downgrade", "refund"],
+    "last_updated": "2024-01-15T00:00:00Z"
+  },
+  {
+    "id": "wallet-how-it-works",
+    "question": "How does the Agent Wallet work?",
+    "answer": "Your Agent Wallet tracks all service expenses, co-pay arrangements, and Circle Points earned from vendor partnerships. It provides real-time spending analytics, tax-ready expense reports, and seamless payment processing for all marketplace bookings.",
+    "category": "Agent Wallet",
+    "tags": ["wallet", "payments", "tracking", "expenses"],
+    "last_updated": "2024-01-15T00:00:00Z",
+    "cta_text": "Open Wallet",
+    "cta_href": "/wallet"
+  },
+  {
+    "id": "wallet-payments-exports",
+    "question": "How do I export expenses and manage payments?",
+    "answer": "Visit your Agent Wallet dashboard to download monthly or custom date range expense reports in CSV, PDF, or QuickBooks format. Set up autopay for recurring services or pay individual invoices. All transactions include vendor details and tax categories.",
+    "category": "Agent Wallet",
+    "tags": ["export", "payments", "expenses", "reports", "quickbooks"],
+    "last_updated": "2024-01-15T00:00:00Z"
+  },
+  {
+    "id": "wallet-troubleshooting",
+    "question": "What if I have issues with payments or wallet balance?",
+    "answer": "Check your payment methods in wallet settings first. For failed payments, update your card info and retry. For balance discrepancies, review your transaction history. Contact Concierge for payment disputes or refund requests - we typically resolve issues within 24 hours.",
+    "category": "Agent Wallet",
+    "tags": ["troubleshooting", "payment issues", "balance", "support"],
+    "last_updated": "2024-01-15T00:00:00Z"
+  },
+  {
+    "id": "marketplace-book-service",
+    "question": "How do I book a service through the Marketplace?",
+    "answer": "Browse by category or search for specific services. Click any service card to view details, pricing, and availability. Click 'Book Now' to select your date/time and complete payment. You'll get confirmation with vendor contact info and next steps.",
+    "category": "Marketplace",
+    "tags": ["booking", "services", "scheduling", "payment"],
+    "last_updated": "2024-01-15T00:00:00Z",
+    "cta_text": "Browse Marketplace",
+    "cta_href": "/marketplace"
+  },
+  {
+    "id": "marketplace-invite-vendors",
+    "question": "How do I invite a vendor I already work with?",
+    "answer": "Click 'Invite Vendor' in the Marketplace header. Enter their business info and they'll receive an onboarding link. Once approved, you can book their services and track everything in one place. Existing vendor relationships often qualify for special co-pay arrangements.",
+    "category": "Marketplace",
+    "tags": ["invite", "vendors", "onboarding", "relationships"],
+    "last_updated": "2024-01-15T00:00:00Z"
+  },
+  {
+    "id": "marketplace-categories",
+    "question": "What types of services are available in the Marketplace?",
+    "answer": "Photography, videography, staging, marketing, lead generation, transaction coordination, legal services, inspections, appraisals, contractor services, and more. Each category includes vetted professionals with transparent pricing and verified reviews.",
+    "category": "Marketplace",
+    "tags": ["categories", "services", "types", "vendors"],
+    "last_updated": "2024-01-15T00:00:00Z"
+  },
+  {
+    "id": "marketplace-revisions-favorites",
+    "question": "How do I request revisions and save favorite vendors?",
+    "answer": "Each completed service includes a review period for requesting revisions per the vendor's policy. Heart icon saves vendors to your favorites list. Star vendors you work with regularly to see them first in search results and get priority booking slots.",
+    "category": "Marketplace",
+    "tags": ["revisions", "favorites", "reviews", "vendors"],
+    "last_updated": "2024-01-15T00:00:00Z"
+  },
+  {
+    "id": "concierge-contact",
+    "question": "How do I contact Concierge support?",
+    "answer": "Click the Concierge tab in this help widget, use the chat bubble on any page, or email support@circleapp.com. For urgent issues during business hours, call the priority line shown in your dashboard. Circle Pro members get dedicated support.",
+    "category": "Concierge",
+    "tags": ["contact", "support", "concierge", "chat"],
+    "last_updated": "2024-01-15T00:00:00Z"
+  },
+  {
+    "id": "concierge-response-times",
+    "question": "What are Concierge response times and hours?",
+    "answer": "Standard support: 4-6 hours during business days. Circle Pro: 1-2 hours. Emergency issues: immediate during business hours (8 AM - 6 PM PT). Weekend support available for urgent booking or payment issues. Most complex issues resolved within 24 hours.",
+    "category": "Concierge",
+    "tags": ["response time", "hours", "support", "emergency"],
+    "last_updated": "2024-01-15T00:00:00Z"
+  },
+  {
+    "id": "marketing-eligibility",
+    "question": "How do I qualify for marketing coverage opportunities?",
+    "answer": "Complete your profile, maintain active vendor relationships, and participate in partner programs. Coverage opportunities vary by market and vendor partnerships. Your eligibility appears in the Marketing Coverage dashboard with specific requirements and available partners.",
+    "category": "Marketing Coverage",
+    "tags": ["eligibility", "coverage", "marketing", "partners"],
+    "last_updated": "2024-01-15T00:00:00Z"
+  },
+  {
+    "id": "marketing-partners-fallback",
+    "question": "How do I invite partners and what if coverage isn't available?",
+    "answer": "Use the 'Invite Partner' feature to bring in lenders or other professionals. They cover their proportional share of marketing exposure. If coverage isn't available in your area, explore individual vendor partnerships or join the waitlist for upcoming market expansion.",
+    "category": "Marketing Coverage",
+    "tags": ["partners", "coverage", "invite", "waitlist"],
+    "last_updated": "2024-01-15T00:00:00Z"
+  },
+  {
+    "id": "billing-refunds-brokerage",
+    "question": "How do refunds work and can I use my brokerage card?",
+    "answer": "Refunds process within 3-5 business days to your original payment method. Most vendors accept brokerage credit cards. For expense reimbursement from your broker, download itemized receipts from your Agent Wallet. Some services offer broker direct-pay options.",
+    "category": "Pricing & Billing",
+    "tags": ["refunds", "brokerage", "payment", "reimbursement"],
+    "last_updated": "2024-01-15T00:00:00Z"
+  },
+  {
+    "id": "billing-fees-invoices",
+    "question": "What are the platform fees and how do invoices work?",
+    "answer": "Circle charges a small service fee on marketplace bookings (shown before payment). No monthly fees for basic tier. Detailed invoices available in your billing dashboard with vendor details, tax info, and business expense categories for easy bookkeeping.",
+    "category": "Pricing & Billing",
+    "tags": ["fees", "invoices", "billing", "taxes"],
+    "last_updated": "2024-01-15T00:00:00Z"
+  },
+  {
+    "id": "billing-disputes",
+    "question": "How do I handle billing disputes or incorrect charges?",
+    "answer": "Contact Concierge within 30 days of the charge with transaction details. We'll investigate with the vendor and process refunds for valid disputes. For subscription billing issues, check your billing dashboard first, then contact support for adjustments or prorated refunds.",
+    "category": "Pricing & Billing",
+    "tags": ["disputes", "charges", "billing", "refunds"],
+    "last_updated": "2024-01-15T00:00:00Z"
+  },
+  {
+    "id": "integrations-calendar",
+    "question": "How do I sync my calendar with Circle bookings?",
+    "answer": "Go to Integrations > Calendar in your settings. Connect Google Calendar, Outlook, or other supported platforms. Bookings automatically appear in your calendar with vendor details, service info, and location. Two-way sync prevents double-booking conflicts.",
+    "category": "Integrations",
+    "tags": ["calendar", "sync", "google", "outlook", "booking"],
+    "last_updated": "2024-01-15T00:00:00Z",
+    "cta_text": "Setup Integrations",
+    "cta_href": "/integrations"
+  },
+  {
+    "id": "integrations-ghl-tasks",
+    "question": "How do I connect GoHighLevel and automate task flows?",
+    "answer": "In Integrations settings, enter your GHL API key. This enables automatic task creation for bookings, vendor communications, and follow-ups. Configure workflows to trigger specific actions in your GHL account based on service completion or client milestones.",
+    "category": "Integrations",
+    "tags": ["gohighlevel", "api", "automation", "tasks", "workflow"],
+    "last_updated": "2024-01-15T00:00:00Z"
+  },
+  {
+    "id": "roi-reports",
+    "question": "How do I track ROI and service performance?",
+    "answer": "Your ROI dashboard shows cost per conversion, vendor performance metrics, and client acquisition analytics. Export detailed reports by date range, service type, or vendor. Track which investments drive listings, sales, and client satisfaction over time.",
+    "category": "ROI",
+    "tags": ["roi", "reports", "performance", "analytics"],
+    "last_updated": "2024-01-15T00:00:00Z",
+    "cta_text": "View ROI Dashboard",
+    "cta_href": "/analytics"
+  },
+  {
+    "id": "roi-attribution",
+    "question": "How does campaign attribution work for vendor services?",
+    "answer": "Circle tracks service usage to client outcomes when possible. Link specific services to listings or closings in your ROI dashboard. Attribution helps identify which vendor relationships and service combinations deliver the best return on your marketing investment.",
+    "category": "ROI",
+    "tags": ["attribution", "campaigns", "tracking", "outcomes"],
+    "last_updated": "2024-01-15T00:00:00Z"
+  }
+]
