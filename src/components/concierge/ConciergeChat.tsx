@@ -53,7 +53,7 @@ export const ConciergeChat: React.FC<ConciergeChatProps> = ({ threadId: initialT
   const [feedbackStates, setFeedbackStates] = useState<Record<string, { helpful?: boolean; showCorrection?: boolean; correction?: string }>>({});
   const [showBookAdvisor, setShowBookAdvisor] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
 
   // Mock service for Circle team consultation
   const circleConsultationService = {
@@ -370,8 +370,8 @@ export const ConciergeChat: React.FC<ConciergeChatProps> = ({ threadId: initialT
                 </div>
               )}
 
-              {/* Feedback buttons for assistant messages */}
-              {message.role === 'assistant' && (
+              {/* Feedback buttons for assistant messages - admin only */}
+              {message.role === 'assistant' && profile?.is_admin && (
                 <div className="mt-3 pt-2">
                   <div className="flex items-center gap-2">
                     <Button
