@@ -764,18 +764,21 @@ export const MarketplaceGrid = () => {
                 />
                 
                 {/* View Mode Toggle */}
-                <div id="marketplace-results" className="flex gap-2 mt-4">
-                  <Button variant={viewMode === "services" ? "default" : "outline"} onClick={() => setViewMode("services")} className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-9 sm:h-10 text-sm sm:text-base">
+                <div id="marketplace-results" className="flex gap-1 sm:gap-2 mt-4">
+                  <Button variant={viewMode === "services" ? "default" : "outline"} onClick={() => setViewMode("services")} className="flex-1 sm:flex-none flex items-center justify-center gap-1 sm:gap-2 h-8 sm:h-10 text-xs sm:text-base px-2 sm:px-4">
                     <Sparkles className="w-3 h-3 sm:w-4 sm:h-4" />
-                    {t('services')}
+                    <span className="hidden xs:inline">{t('services')}</span>
+                    <span className="xs:hidden">Svc</span>
                   </Button>
-                  <Button variant={viewMode === "products" ? "default" : "outline"} onClick={() => setViewMode("products")} className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-9 sm:h-10 text-sm sm:text-base">
+                  <Button variant={viewMode === "products" ? "default" : "outline"} onClick={() => setViewMode("products")} className="flex-1 sm:flex-none flex items-center justify-center gap-1 sm:gap-2 h-8 sm:h-10 text-xs sm:text-base px-2 sm:px-4">
                     <Filter className="w-3 h-3 sm:w-4 sm:h-4" />
-                    Products
+                    <span className="hidden xs:inline">Products</span>
+                    <span className="xs:hidden">Prod</span>
                   </Button>
-                  <Button variant={viewMode === "vendors" ? "default" : "outline"} onClick={() => setViewMode("vendors")} className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-9 sm:h-10 text-sm sm:text-base">
+                  <Button variant={viewMode === "vendors" ? "default" : "outline"} onClick={() => setViewMode("vendors")} className="flex-1 sm:flex-none flex items-center justify-center gap-1 sm:gap-2 h-8 sm:h-10 text-xs sm:text-base px-2 sm:px-4">
                     <Zap className="w-3 h-3 sm:w-4 sm:h-4" />
-                    {t('vendors')}
+                    <span className="hidden xs:inline">{t('vendors')}</span>
+                    <span className="xs:hidden">Vend</span>
                   </Button>
                 </div>
               </StickySearchContainer>
