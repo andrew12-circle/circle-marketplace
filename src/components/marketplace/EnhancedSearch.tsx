@@ -356,7 +356,7 @@ export const EnhancedSearch = ({
                <SelectTrigger className={`h-10 ${isMobile ? 'w-[50px]' : 'w-[160px]'}`}>
                 <SelectValue>
                   <div className="flex items-center gap-2">
-                    <SortIcon className="h-4 w-4" />
+                    <SortIcon className={`${isMobile ? 'w-4 h-4' : 'h-4 w-4'}`} />
                     {!isMobile && <span>{label}</span>}
                   </div>
                 </SelectValue>
