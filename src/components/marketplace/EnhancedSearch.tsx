@@ -337,23 +337,29 @@ export const EnhancedSearch = ({
                   {/* Left Column */}
                   <div className="space-y-4 sm:space-y-6">
                     {/* Categories */}
-                    <div>
-                      <Label className="text-sm font-medium mb-3 block">Categories</Label>
-                      <div className="grid grid-cols-1 gap-2 max-h-32 overflow-y-auto">
-                        {availableCategories.map((category) => (
-                          <div key={category} className="flex items-center space-x-2">
-                            <Checkbox
-                              id={`category-${category}`}
-                              checked={filters.categories.includes(category)}
-                              onCheckedChange={() => toggleArrayFilter('categories', category)}
-                            />
-                            <Label htmlFor={`category-${category}`} className="text-sm cursor-pointer">
-                              {category}
-                            </Label>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
+                     <div>
+                       <Label className="text-sm font-medium mb-3 block">
+                         Categories {filters.categories.length > 0 && (
+                           <span className="text-xs text-muted-foreground">
+                             ({filters.categories.length} selected)
+                           </span>
+                         )}
+                       </Label>
+                       <div className="grid grid-cols-1 gap-2 max-h-32 overflow-y-auto">
+                         {availableCategories.map((category) => (
+                           <div key={category} className="flex items-center space-x-2 hover:bg-accent/50 p-1 rounded">
+                             <Checkbox
+                               id={`category-${category}`}
+                               checked={filters.categories.includes(category)}
+                               onCheckedChange={() => toggleArrayFilter('categories', category)}
+                             />
+                             <Label htmlFor={`category-${category}`} className="text-sm cursor-pointer flex-1">
+                               {category}
+                             </Label>
+                           </div>
+                         ))}
+                       </div>
+                     </div>
 
                     {/* Features */}
                     <div>
