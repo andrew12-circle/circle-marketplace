@@ -42,9 +42,6 @@ interface EnhancedSearchProps {
   sortStrategy?: 'ranked' | 'recent' | 'price-low' | 'price-high';
   onSortChange?: (strategy: 'ranked' | 'recent' | 'price-low' | 'price-high') => void;
   isAdmin?: boolean;
-  // External category selection (from CategoryBlocks)
-  externalCategory?: string | null;
-  onClearExternalCategory?: () => void;
 }
 
 export interface SearchFilters {
@@ -72,9 +69,7 @@ export const EnhancedSearch = ({
   onViewModeChange,
   sortStrategy = 'ranked',
   onSortChange,
-  isAdmin = false,
-  externalCategory,
-  onClearExternalCategory
+  isAdmin = false
 }: EnhancedSearchProps) => {
   const isMobile = useIsMobile();
   const { min: minPrice, max: maxPrice, isLoading: priceRangeLoading } = useServicePriceRange();
@@ -127,16 +122,6 @@ export const EnhancedSearch = ({
     }
   };
 
-  // Sync external category with internal filters
-  useEffect(() => {
-    if (externalCategory && !filters.categories.includes(externalCategory)) {
-      setFilters(prev => ({
-        ...prev,
-        categories: [externalCategory]
-      }));
-    }
-  }, [externalCategory, filters.categories]);
-
   useEffect(() => {
     // Count active filters from current state (immediate update)
     let count = 0;
@@ -180,11 +165,6 @@ export const EnhancedSearch = ({
       rating: 0,
       features: []
     });
-  };
-
-  const clearCategories = () => {
-    updateFilters('categories', []);
-    onClearExternalCategory?.();
   };
 
   const handleRerank = async () => {
@@ -289,7 +269,7 @@ export const EnhancedSearch = ({
                 <ChevronDown className="w-4 h-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-[95vw] sm:w-[800px] p-4 sm:p-6 bg-background border shadow-lg z-50" align="end">
+            <DropdownMenuContent className="w-[95vw] sm:w-[800px] p-4 sm:p-6 bg-popover border shadow-md" align="end">
               <div className="space-y-4 sm:space-y-6">
                 {/* Sort Controls - for services only */}
                 {viewMode === 'services' && onSortChange && (
@@ -357,29 +337,23 @@ export const EnhancedSearch = ({
                   {/* Left Column */}
                   <div className="space-y-4 sm:space-y-6">
                     {/* Categories */}
-                     <div>
-                       <Label className="text-sm font-medium mb-3 block">
-                         Categories {filters.categories.length > 0 && (
-                           <span className="text-xs text-muted-foreground">
-                             ({filters.categories.length} selected)
-                           </span>
-                         )}
-                       </Label>
-                       <div className="grid grid-cols-1 gap-2 max-h-32 overflow-y-auto">
-                         {availableCategories.map((category) => (
-                           <div key={category} className="flex items-center space-x-2 hover:bg-accent/50 p-1 rounded">
-                             <Checkbox
-                               id={`category-${category}`}
-                               checked={filters.categories.includes(category)}
-                               onCheckedChange={() => toggleArrayFilter('categories', category)}
-                             />
-                             <Label htmlFor={`category-${category}`} className="text-sm cursor-pointer flex-1">
-                               {category}
-                             </Label>
-                           </div>
-                         ))}
-                       </div>
-                     </div>
+                    <div>
+                      <Label className="text-sm font-medium mb-3 block">Categories</Label>
+                      <div className="grid grid-cols-1 gap-2 max-h-32 overflow-y-auto">
+                        {availableCategories.map((category) => (
+                          <div key={category} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={`category-${category}`}
+                              checked={filters.categories.includes(category)}
+                              onCheckedChange={() => toggleArrayFilter('categories', category)}
+                            />
+                            <Label htmlFor={`category-${category}`} className="text-sm cursor-pointer">
+                              {category}
+                            </Label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
 
                     {/* Features */}
                     <div>
@@ -458,29 +432,15 @@ export const EnhancedSearch = ({
           </DropdownMenu>
         </div>
 
-        {/* Search Input with Clear Category Button - Full width on mobile, constrained on desktop */}
-        <div className="relative w-full sm:flex-1 sm:max-w-xl flex gap-2">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-            <Input
-              placeholder={getSearchPlaceholder()}
-              value={filters.query}
-              onChange={(e) => updateFilters('query', e.target.value)}
-              className="pl-10 pr-4 h-10 sm:h-9"
-            />
-          </div>
-          {/* Clear Category Button - appears when categories are selected */}
-          {filters.categories.length > 0 && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={clearCategories}
-              className="px-3 py-2 h-10 sm:h-9 text-xs shrink-0"
-            >
-              <X className="w-3 h-3 mr-1" />
-              Clear category
-            </Button>
-          )}
+        {/* Search Input - Full width on mobile, constrained on desktop */}
+        <div className="relative w-full sm:flex-1 sm:max-w-xl">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+          <Input
+            placeholder={getSearchPlaceholder()}
+            value={filters.query}
+            onChange={(e) => updateFilters('query', e.target.value)}
+            className="pl-10 pr-4 h-10 sm:h-9"
+          />
         </div>
       </div>
 
@@ -488,108 +448,70 @@ export const EnhancedSearch = ({
       {/* Filter Controls moved next to search bar above */}
 
       {/* Active Filters Display */}
-      {(activeFiltersCount > 0 || filters.categories.length > 0) && (
-        <div className="bg-muted/50 border border-border rounded-lg p-3">
-          <div className="flex flex-wrap items-center gap-2 mb-2">
-            <div className="text-sm font-medium text-foreground">Active filters:</div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={clearAllFilters}
-              className="text-xs h-6 px-2 text-destructive hover:text-destructive hover:bg-destructive/10"
-            >
-              <X className="w-3 h-3 mr-1" />
-              Clear All
-            </Button>
-          </div>
+      {activeFiltersCount > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {filters.query && (
+            <Badge variant="secondary" className="gap-1">
+              "{filters.query}"
+              <X 
+                className="w-3 h-3 cursor-pointer" 
+                onClick={() => removeFilter('query')}
+              />
+            </Badge>
+          )}
           
-          <div className="flex flex-wrap gap-2">
-            {filters.query && (
-              <Badge variant="secondary" className="gap-2 bg-background border text-sm px-3 py-1">
-                Search: "{filters.query}"
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-4 w-4 p-0 hover:bg-destructive/20 rounded-full"
-                  onClick={() => removeFilter('query')}
-                >
-                  <X className="w-3 h-3 text-destructive" />
-                </Button>
-              </Badge>
-            )}
-            
-            {filters.categories.map((category) => (
-              <Badge key={category} variant="secondary" className="gap-2 bg-primary/10 border border-primary/30 text-sm px-3 py-1">
-                Category: {category}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-4 w-4 p-0 hover:bg-destructive/20 rounded-full"
-                  onClick={() => removeFilter('category', category)}
-                >
-                  <X className="w-3 h-3 text-destructive" />
-                </Button>
-              </Badge>
-            ))}
-            
-            {filters.tags.map((tag) => (
-              <Badge key={tag} variant="secondary" className="gap-2 bg-blue-50 border border-blue-200 text-sm px-3 py-1">
-                Tag: #{tag}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-4 w-4 p-0 hover:bg-destructive/20 rounded-full"
-                  onClick={() => removeFilter('tag', tag)}
-                >
-                  <X className="w-3 h-3 text-destructive" />
-                </Button>
-              </Badge>
-            ))}
-            
-            {filters.features.map((feature) => (
-              <Badge key={feature} variant="secondary" className="gap-2 bg-green-50 border border-green-200 text-sm px-3 py-1">
-                Feature: {feature}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-4 w-4 p-0 hover:bg-destructive/20 rounded-full"
-                  onClick={() => removeFilter('feature', feature)}
-                >
-                  <X className="w-3 h-3 text-destructive" />
-                </Button>
-              </Badge>
-            ))}
-            
-            {(filters.priceRange[0] > minPrice || filters.priceRange[1] < maxPrice) && (
-              <Badge variant="secondary" className="gap-2 bg-yellow-50 border border-yellow-200 text-sm px-3 py-1">
-                <DollarSign className="w-3 h-3" />
-                Price: ${filters.priceRange[0]}-${filters.priceRange[1]}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-4 w-4 p-0 hover:bg-destructive/20 rounded-full"
-                  onClick={() => removeFilter('price')}
-                >
-                  <X className="w-3 h-3 text-destructive" />
-                </Button>
-              </Badge>
-            )}
-            
-            {filters.rating > 0 && (
-              <Badge variant="secondary" className="gap-2 bg-orange-50 border border-orange-200 text-sm px-3 py-1">
-                <Star className="w-3 h-3" />
-                Rating: {filters.rating}+ stars
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-4 w-4 p-0 hover:bg-destructive/20 rounded-full"
-                  onClick={() => removeFilter('rating')}
-                >
-                  <X className="w-3 h-3 text-destructive" />
-                </Button>
-              </Badge>
-            )}
-          </div>
+          {filters.categories.map((category) => (
+            <Badge key={category} variant="secondary" className="gap-1">
+              {category}
+              <X 
+                className="w-3 h-3 cursor-pointer" 
+                onClick={() => removeFilter('category', category)}
+              />
+            </Badge>
+          ))}
+          
+          {filters.tags.map((tag) => (
+            <Badge key={tag} variant="secondary" className="gap-1">
+              #{tag}
+              <X 
+                className="w-3 h-3 cursor-pointer" 
+                onClick={() => removeFilter('tag', tag)}
+              />
+            </Badge>
+          ))}
+          
+          {filters.features.map((feature) => (
+            <Badge key={feature} variant="secondary" className="gap-1">
+              {feature}
+              <X 
+                className="w-3 h-3 cursor-pointer" 
+                onClick={() => removeFilter('feature', feature)}
+              />
+            </Badge>
+          ))}
+          
+          {(filters.priceRange[0] > minPrice || filters.priceRange[1] < maxPrice) && (
+            <Badge variant="secondary" className="gap-1">
+              <DollarSign className="w-3 h-3" />
+              ${filters.priceRange[0]}-${filters.priceRange[1]}
+              <X 
+                className="w-3 h-3 cursor-pointer" 
+                onClick={() => removeFilter('price')}
+              />
+            </Badge>
+          )}
+          
+          {filters.rating > 0 && (
+            <Badge variant="secondary" className="gap-1">
+              <Star className="w-3 h-3" />
+              {filters.rating}+ stars
+              <X 
+                className="w-3 h-3 cursor-pointer" 
+                onClick={() => removeFilter('rating')}
+              />
+            </Badge>
+          )}
+          
         </div>
       )}
     </div>
