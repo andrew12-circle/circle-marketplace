@@ -109,7 +109,10 @@ export const useMarketplaceFilters = (
         ? true
         : Array.from(tokens).some(tok => haystackParts.some(part => part.includes(tok)));
       
-      const matchesCategory = filters.category === "all" || service.category === filters.category;
+      const matchesCategory = filters.category === "all" || 
+        (filters.category.startsWith('cat:') 
+          ? service.tags?.includes(filters.category) 
+          : service.category === filters.category);
       
       const priceValue = extractNumericPrice(service.retail_price);
       const matchesPrice = priceValue >= filters.priceRange[0] && priceValue <= filters.priceRange[1];

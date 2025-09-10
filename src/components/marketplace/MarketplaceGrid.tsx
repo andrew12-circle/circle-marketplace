@@ -370,9 +370,16 @@ export const MarketplaceGrid = () => {
       );
     }
     
-    // Apply category filter
+    // Apply category filter - handle both category names and cat: tags
     if (filters.category && filters.category !== 'all' && filters.category !== 'All') {
-      filteredItems = filteredItems.filter(service => service.category === filters.category);
+      filteredItems = filteredItems.filter(service => {
+        // Check if it's a "cat:" prefixed tag
+        if (filters.category.startsWith('cat:')) {
+          return service.tags?.includes(filters.category);
+        }
+        // Otherwise check category name match
+        return service.category === filters.category;
+      });
     }
     
     // Apply featured filter
