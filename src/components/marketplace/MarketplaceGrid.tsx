@@ -597,7 +597,8 @@ export const MarketplaceGrid = () => {
     setSearchTerm("");
     setExternalCategory(categoryName);
     setSearchFilters(prev => ({ ...prev, query: "", categories: [categoryName] }));
-    setFilters(prev => ({ ...prev, category: categoryName }));
+    // Use the searchTerm (tag) for filtering instead of display name
+    setFilters(prev => ({ ...prev, category: searchTerm }));
     setViewMode("services");
     // Scroll to results after state update
     setTimeout(() => {

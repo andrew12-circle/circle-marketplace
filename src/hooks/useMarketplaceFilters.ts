@@ -111,6 +111,11 @@ export const useMarketplaceFilters = (
       
       const matchesCategory = filters.category === "all" || 
         service.category === filters.category ||
+        // Handle category tags like "cat:finance-business"
+        (filters.category.startsWith('cat:') && 
+         (service.category?.toLowerCase().includes(filters.category.replace('cat:', '').replace('-', ' ')) ||
+          service.tags?.some((tag: string) => tag.toLowerCase().includes(filters.category.replace('cat:', ''))))) ||
+        // Existing fallback matching
         (service.tags && service.tags.some((tag: string) => tag.includes(filters.category.toLowerCase().replace(/\s+/g, '-')))) ||
         service.category?.toLowerCase().includes(filters.category.toLowerCase()) ||
         filters.category.toLowerCase().includes(service.category?.toLowerCase() || '');
