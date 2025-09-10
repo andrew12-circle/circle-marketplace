@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { Resend } from "npm:resend@4.0.0";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -52,7 +53,6 @@ serve(async (req) => {
     const recipients: string[] = (service.consultation_emails ?? []).filter(Boolean);
     
     if (recipients.length === 0) {
-      // Log that no recipients were found
       console.log("No recipients found for consultation alert");
       return new Response("no recipients", { 
         status: 200,
@@ -60,22 +60,61 @@ serve(async (req) => {
       });
     }
 
-    // For now, just log the email that would be sent
-    // In production, integrate with Resend or your email service
-    console.log("Would send consultation alert:", {
-      to: recipients,
-      booking: booking,
-      service: service.title
-    });
+    // Initialize Resend client
+    const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
-    return new Response(JSON.stringify({ 
-      success: true, 
-      recipients: recipients.length,
-      booking_id 
-    }), { 
-      status: 200,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-    });
+    // Send consultation alert email
+    const emailHTML = `
+      <h2>New Consultation Booking Alert</h2>
+      <p><strong>Service:</strong> ${service.title}</p>
+      <p><strong>Agent Name:</strong> ${booking.agent_name}</p>
+      <p><strong>Agent Email:</strong> ${booking.agent_email}</p>
+      <p><strong>Booking ID:</strong> ${booking.id}</p>
+      <p>A new consultation has been booked for your service. Please follow up with the agent accordingly.</p>
+    `;
+
+    try {
+      const { data: emailData, error: emailError } = await resend.emails.send({
+        from: "Circle Marketplace <no-reply@resend.dev>",
+        to: recipients,
+        subject: `New Consultation Booking: ${service.title}`,
+        html: emailHTML,
+      });
+
+      if (emailError) {
+        console.error("Failed to send consultation alert:", emailError);
+        throw emailError;
+      }
+
+      console.log("Consultation alert sent successfully:", {
+        recipients: recipients.length,
+        emailId: emailData?.id
+      });
+
+      return new Response(JSON.stringify({ 
+        success: true, 
+        recipients: recipients.length,
+        booking_id,
+        email_sent: true,
+        email_id: emailData?.id
+      }), { 
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    } catch (emailErr: any) {
+      console.error("Email sending failed:", emailErr);
+      // Still return success for the booking process, but log the email failure
+      return new Response(JSON.stringify({ 
+        success: true, 
+        recipients: recipients.length,
+        booking_id,
+        email_sent: false,
+        error: "Failed to send notification email"
+      }), { 
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
   } catch (e: any) {
     console.error("Consultation alert error:", e);
     return new Response(JSON.stringify({ 
