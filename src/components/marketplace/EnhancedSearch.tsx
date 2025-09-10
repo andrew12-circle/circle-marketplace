@@ -455,71 +455,107 @@ export const EnhancedSearch = ({
 
       {/* Active Filters Display */}
       {(activeFiltersCount > 0 || filters.categories.length > 0) && (
-        <div className="flex flex-wrap gap-2 p-2 bg-muted/30 rounded-lg">
-          <div className="text-xs text-muted-foreground font-medium">Active filters:</div>
+        <div className="bg-muted/50 border border-border rounded-lg p-3">
+          <div className="flex flex-wrap items-center gap-2 mb-2">
+            <div className="text-sm font-medium text-foreground">Active filters:</div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={clearAllFilters}
+              className="text-xs h-6 px-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+            >
+              <X className="w-3 h-3 mr-1" />
+              Clear All
+            </Button>
+          </div>
           
-          {filters.query && (
-            <Badge variant="secondary" className="gap-1 bg-background border">
-              Search: "{filters.query}"
-              <X 
-                className="w-3 h-3 cursor-pointer hover:text-destructive" 
-                onClick={() => removeFilter('query')}
-              />
-            </Badge>
-          )}
-          
-          {filters.categories.map((category) => (
-            <Badge key={category} variant="secondary" className="gap-1 bg-background border border-primary/20">
-              Category: {category}
-              <X 
-                className="w-3 h-3 cursor-pointer hover:text-destructive transition-colors" 
-                onClick={() => removeFilter('category', category)}
-              />
-            </Badge>
-          ))}
-          
-          {filters.tags.map((tag) => (
-            <Badge key={tag} variant="secondary" className="gap-1 bg-background border border-blue-200">
-              Tag: #{tag}
-              <X 
-                className="w-3 h-3 cursor-pointer hover:text-destructive transition-colors" 
-                onClick={() => removeFilter('tag', tag)}
-              />
-            </Badge>
-          ))}
-          
-          {filters.features.map((feature) => (
-            <Badge key={feature} variant="secondary" className="gap-1 bg-background border border-green-200">
-              Feature: {feature}
-              <X 
-                className="w-3 h-3 cursor-pointer hover:text-destructive transition-colors" 
-                onClick={() => removeFilter('feature', feature)}
-              />
-            </Badge>
-          ))}
-          
-          {(filters.priceRange[0] > minPrice || filters.priceRange[1] < maxPrice) && (
-            <Badge variant="secondary" className="gap-1 bg-background border border-yellow-200">
-              <DollarSign className="w-3 h-3" />
-              Price: ${filters.priceRange[0]}-${filters.priceRange[1]}
-              <X 
-                className="w-3 h-3 cursor-pointer hover:text-destructive transition-colors" 
-                onClick={() => removeFilter('price')}
-              />
-            </Badge>
-          )}
-          
-          {filters.rating > 0 && (
-            <Badge variant="secondary" className="gap-1 bg-background border border-orange-200">
-              <Star className="w-3 h-3" />
-              Rating: {filters.rating}+ stars
-              <X 
-                className="w-3 h-3 cursor-pointer hover:text-destructive transition-colors" 
-                onClick={() => removeFilter('rating')}
-              />
-            </Badge>
-          )}
-          
+          <div className="flex flex-wrap gap-2">
+            {filters.query && (
+              <Badge variant="secondary" className="gap-2 bg-background border text-sm px-3 py-1">
+                Search: "{filters.query}"
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-4 w-4 p-0 hover:bg-destructive/20 rounded-full"
+                  onClick={() => removeFilter('query')}
+                >
+                  <X className="w-3 h-3 text-destructive" />
+                </Button>
+              </Badge>
+            )}
+            
+            {filters.categories.map((category) => (
+              <Badge key={category} variant="secondary" className="gap-2 bg-primary/10 border border-primary/30 text-sm px-3 py-1">
+                Category: {category}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-4 w-4 p-0 hover:bg-destructive/20 rounded-full"
+                  onClick={() => removeFilter('category', category)}
+                >
+                  <X className="w-3 h-3 text-destructive" />
+                </Button>
+              </Badge>
+            ))}
+            
+            {filters.tags.map((tag) => (
+              <Badge key={tag} variant="secondary" className="gap-2 bg-blue-50 border border-blue-200 text-sm px-3 py-1">
+                Tag: #{tag}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-4 w-4 p-0 hover:bg-destructive/20 rounded-full"
+                  onClick={() => removeFilter('tag', tag)}
+                >
+                  <X className="w-3 h-3 text-destructive" />
+                </Button>
+              </Badge>
+            ))}
+            
+            {filters.features.map((feature) => (
+              <Badge key={feature} variant="secondary" className="gap-2 bg-green-50 border border-green-200 text-sm px-3 py-1">
+                Feature: {feature}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-4 w-4 p-0 hover:bg-destructive/20 rounded-full"
+                  onClick={() => removeFilter('feature', feature)}
+                >
+                  <X className="w-3 h-3 text-destructive" />
+                </Button>
+              </Badge>
+            ))}
+            
+            {(filters.priceRange[0] > minPrice || filters.priceRange[1] < maxPrice) && (
+              <Badge variant="secondary" className="gap-2 bg-yellow-50 border border-yellow-200 text-sm px-3 py-1">
+                <DollarSign className="w-3 h-3" />
+                Price: ${filters.priceRange[0]}-${filters.priceRange[1]}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-4 w-4 p-0 hover:bg-destructive/20 rounded-full"
+                  onClick={() => removeFilter('price')}
+                >
+                  <X className="w-3 h-3 text-destructive" />
+                </Button>
+              </Badge>
+            )}
+            
+            {filters.rating > 0 && (
+              <Badge variant="secondary" className="gap-2 bg-orange-50 border border-orange-200 text-sm px-3 py-1">
+                <Star className="w-3 h-3" />
+                Rating: {filters.rating}+ stars
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-4 w-4 p-0 hover:bg-destructive/20 rounded-full"
+                  onClick={() => removeFilter('rating')}
+                >
+                  <X className="w-3 h-3 text-destructive" />
+                </Button>
+              </Badge>
+            )}
+          </div>
         </div>
       )}
     </div>
