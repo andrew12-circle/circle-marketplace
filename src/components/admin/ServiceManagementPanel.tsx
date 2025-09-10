@@ -1683,9 +1683,10 @@ export const ServiceManagementPanel = () => {
               </TabsContent>
 
               <TabsContent value="compliance" className="space-y-4">
-                <div className="p-4 text-center text-muted-foreground">
-                  Compliance tracking temporarily disabled for debugging.
-                </div>
+                <ServiceComplianceTracker 
+                  serviceId={selectedService.id}
+                  serviceName={selectedService.title}
+                />
               </TabsContent>
             </Tabs>
           </CardContent>
