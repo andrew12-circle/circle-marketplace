@@ -269,7 +269,7 @@ export const EnhancedSearch = ({
                 <ChevronDown className="w-4 h-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-[95vw] sm:w-[800px] p-4 sm:p-6 bg-popover border shadow-md" align="end">
+            <DropdownMenuContent className="w-[95vw] sm:w-[800px] p-4 sm:p-6 bg-background border shadow-lg z-50" align="end">
               <div className="space-y-4 sm:space-y-6">
                 {/* Sort Controls - for services only */}
                 {viewMode === 'services' && onSortChange && (
@@ -461,52 +461,52 @@ export const EnhancedSearch = ({
           )}
           
           {filters.categories.map((category) => (
-            <Badge key={category} variant="secondary" className="gap-1">
+            <Badge key={category} variant="secondary" className="gap-1 bg-secondary/80 hover:bg-secondary">
               {category}
               <X 
-                className="w-3 h-3 cursor-pointer" 
+                className="w-3 h-3 cursor-pointer hover:text-destructive transition-colors" 
                 onClick={() => removeFilter('category', category)}
               />
             </Badge>
           ))}
           
           {filters.tags.map((tag) => (
-            <Badge key={tag} variant="secondary" className="gap-1">
+            <Badge key={tag} variant="secondary" className="gap-1 bg-secondary/80 hover:bg-secondary">
               #{tag}
               <X 
-                className="w-3 h-3 cursor-pointer" 
+                className="w-3 h-3 cursor-pointer hover:text-destructive transition-colors" 
                 onClick={() => removeFilter('tag', tag)}
               />
             </Badge>
           ))}
           
           {filters.features.map((feature) => (
-            <Badge key={feature} variant="secondary" className="gap-1">
+            <Badge key={feature} variant="secondary" className="gap-1 bg-secondary/80 hover:bg-secondary">
               {feature}
               <X 
-                className="w-3 h-3 cursor-pointer" 
+                className="w-3 h-3 cursor-pointer hover:text-destructive transition-colors" 
                 onClick={() => removeFilter('feature', feature)}
               />
             </Badge>
           ))}
           
           {(filters.priceRange[0] > minPrice || filters.priceRange[1] < maxPrice) && (
-            <Badge variant="secondary" className="gap-1">
+            <Badge variant="secondary" className="gap-1 bg-secondary/80 hover:bg-secondary">
               <DollarSign className="w-3 h-3" />
               ${filters.priceRange[0]}-${filters.priceRange[1]}
               <X 
-                className="w-3 h-3 cursor-pointer" 
+                className="w-3 h-3 cursor-pointer hover:text-destructive transition-colors" 
                 onClick={() => removeFilter('price')}
               />
             </Badge>
           )}
           
           {filters.rating > 0 && (
-            <Badge variant="secondary" className="gap-1">
+            <Badge variant="secondary" className="gap-1 bg-secondary/80 hover:bg-secondary">
               <Star className="w-3 h-3" />
               {filters.rating}+ stars
               <X 
-                className="w-3 h-3 cursor-pointer" 
+                className="w-3 h-3 cursor-pointer hover:text-destructive transition-colors" 
                 onClick={() => removeFilter('rating')}
               />
             </Badge>
