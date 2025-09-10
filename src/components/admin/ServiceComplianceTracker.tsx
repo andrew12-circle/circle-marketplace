@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -65,12 +65,10 @@ export function ServiceComplianceTracker({ serviceId, serviceName }: ServiceComp
     response_content: ''
   });
 
-  useEffect(() => {
-    loadComplianceData();
-  }, [serviceId]);
-
-  const loadComplianceData = async () => {
+  const loadComplianceData = useCallback(async () => {
+    console.log('ServiceComplianceTracker: loadComplianceData called for serviceId:', serviceId);
     try {
+      setLoading(true);
       // Load compliance tracking record
       let { data: compliance, error: complianceError } = await supabase
         .from('service_compliance_tracking')
@@ -110,7 +108,12 @@ export function ServiceComplianceTracker({ serviceId, serviceName }: ServiceComp
     } finally {
       setLoading(false);
     }
-  };
+  }, [serviceId]);
+
+  useEffect(() => {
+    console.log('ServiceComplianceTracker: useEffect triggered for serviceId:', serviceId);
+    loadComplianceData();
+  }, [serviceId, loadComplianceData]);
 
   const updateApprovalStatus = async (status: 'approved' | 'rejected', notes?: string) => {
     if (!complianceData) return;
