@@ -1653,6 +1653,7 @@ export const ServiceManagementPanel = () => {
                   currentScreenshotUrl={selectedService.pricing_screenshot_url}
                   currentPricingUrl={selectedService.pricing_page_url}
                   lastCapturedAt={selectedService.pricing_screenshot_captured_at}
+                  serviceWebsiteUrl={selectedService.website_url}
                 />
               </TabsContent>
 

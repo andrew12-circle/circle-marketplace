@@ -15,6 +15,7 @@ interface ServicePricingMirrorProps {
   currentScreenshotUrl?: string;
   currentPricingUrl?: string;
   lastCapturedAt?: string;
+  serviceWebsiteUrl?: string;
 }
 
 export function ServicePricingMirror({
@@ -22,9 +23,10 @@ export function ServicePricingMirror({
   serviceName,
   currentScreenshotUrl,
   currentPricingUrl,
-  lastCapturedAt
+  lastCapturedAt,
+  serviceWebsiteUrl
 }: ServicePricingMirrorProps) {
-  const [pricingUrl, setPricingUrl] = useState(currentPricingUrl || '');
+  const [pricingUrl, setPricingUrl] = useState(currentPricingUrl || serviceWebsiteUrl || '');
   const [isCapturing, setIsCapturing] = useState(false);
   const [screenshotUrl, setScreenshotUrl] = useState(currentScreenshotUrl);
   const { toast } = useToast();
@@ -95,7 +97,7 @@ export function ServicePricingMirror({
             <Input
               id="pricing-url"
               type="url"
-              placeholder="https://service.com/pricing"
+              placeholder={serviceWebsiteUrl || "https://service.com/pricing"}
               value={pricingUrl}
               onChange={(e) => setPricingUrl(e.target.value)}
               className="flex-1"
