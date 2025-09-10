@@ -18,7 +18,8 @@ import {
   Building,
   Tag,
   ShoppingCart,
-  CheckCircle
+  CheckCircle,
+  Clock
 } from 'lucide-react';
 import { ServiceFunnelEditor } from './ServiceFunnelEditor';
 import { ServicePricingTiersEditor } from '@/components/marketplace/ServicePricingTiersEditor';
@@ -28,6 +29,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useInvalidateMarketplace, QUERY_KEYS } from '@/hooks/useMarketplaceData';
+import { formatDistanceToNow } from 'date-fns';
 import { useQueryClient } from '@tanstack/react-query';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ServiceConsultationEmails } from './ServiceConsultationEmails';
@@ -1027,8 +1029,16 @@ export const ServiceManagementPanel = () => {
                                   <Building className="h-3 w-3" />
                                   {service.service_providers.name}
                                 </span>
-                              )}
-                            </div>
+                               )}
+                               {/* Last Updated Timestamp */}
+                               <span className="flex items-center gap-1">
+                                 <Clock className="h-3 w-3" />
+                                 {service.updated_at ? 
+                                   formatDistanceToNow(new Date(service.updated_at), { addSuffix: true }) : 
+                                   'Unknown'
+                                 }
+                               </span>
+                             </div>
                              <div className="flex justify-between items-start mt-2">
                                {/* Left side switches */}
                                <div className="flex flex-col gap-1">
