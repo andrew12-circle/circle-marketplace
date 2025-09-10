@@ -7314,6 +7314,54 @@ export type Database = {
         }
         Relationships: []
       }
+      service_compliance_tracking: {
+        Row: {
+          approval_date: string | null
+          approval_notes: string | null
+          approval_status: string
+          created_at: string
+          created_by: string
+          current_outreach_count: number
+          deadline_date: string
+          id: string
+          initial_listing_date: string
+          minimum_outreach_count: number
+          service_id: string
+          updated_at: string
+          updated_by: string
+        }
+        Insert: {
+          approval_date?: string | null
+          approval_notes?: string | null
+          approval_status?: string
+          created_at?: string
+          created_by?: string
+          current_outreach_count?: number
+          deadline_date?: string
+          id?: string
+          initial_listing_date?: string
+          minimum_outreach_count?: number
+          service_id: string
+          updated_at?: string
+          updated_by?: string
+        }
+        Update: {
+          approval_date?: string | null
+          approval_notes?: string | null
+          approval_status?: string
+          created_at?: string
+          created_by?: string
+          current_outreach_count?: number
+          deadline_date?: string
+          id?: string
+          initial_listing_date?: string
+          minimum_outreach_count?: number
+          service_id?: string
+          updated_at?: string
+          updated_by?: string
+        }
+        Relationships: []
+      }
       service_customizations: {
         Row: {
           created_at: string
@@ -7590,6 +7638,68 @@ export type Database = {
             columns: ["service_id"]
             isOneToOne: false
             referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_outreach_attempts: {
+        Row: {
+          attempt_date: string
+          compliance_tracking_id: string
+          contact_method: string
+          contact_target: string
+          created_at: string
+          created_by: string
+          evidence_type: string | null
+          evidence_url: string | null
+          id: string
+          message_content: string | null
+          response_content: string | null
+          response_date: string | null
+          response_received: boolean
+          service_id: string
+          subject_line: string | null
+        }
+        Insert: {
+          attempt_date?: string
+          compliance_tracking_id: string
+          contact_method: string
+          contact_target: string
+          created_at?: string
+          created_by?: string
+          evidence_type?: string | null
+          evidence_url?: string | null
+          id?: string
+          message_content?: string | null
+          response_content?: string | null
+          response_date?: string | null
+          response_received?: boolean
+          service_id: string
+          subject_line?: string | null
+        }
+        Update: {
+          attempt_date?: string
+          compliance_tracking_id?: string
+          contact_method?: string
+          contact_target?: string
+          created_at?: string
+          created_by?: string
+          evidence_type?: string | null
+          evidence_url?: string | null
+          id?: string
+          message_content?: string | null
+          response_content?: string | null
+          response_date?: string | null
+          response_received?: boolean
+          service_id?: string
+          subject_line?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_outreach_compliance"
+            columns: ["compliance_tracking_id"]
+            isOneToOne: false
+            referencedRelation: "service_compliance_tracking"
             referencedColumns: ["id"]
           },
         ]

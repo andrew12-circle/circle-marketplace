@@ -1116,11 +1116,12 @@ export const ServiceManagementPanel = () => {
           </CardHeader>
           <CardContent>
             <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-              <TabsList className="grid w-full grid-cols-5">
+              <TabsList className="grid w-full grid-cols-6">
                 <TabsTrigger value="details">Service Details</TabsTrigger>
                 <TabsTrigger value="disclaimer">Disclaimer</TabsTrigger>
                 <TabsTrigger value="ai-research">AI Research</TabsTrigger>
                 <TabsTrigger value="pricing-mirror">Pricing Mirror</TabsTrigger>
+                <TabsTrigger value="compliance">Compliance</TabsTrigger>
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -1679,6 +1680,13 @@ export const ServiceManagementPanel = () => {
                     }}
                   />
                 </div>
+              </TabsContent>
+
+              <TabsContent value="compliance" className="space-y-4">
+                <ServiceComplianceTracker 
+                  serviceId={selectedService.id}
+                  serviceName={selectedService.title}
+                />
               </TabsContent>
             </Tabs>
           </CardContent>
