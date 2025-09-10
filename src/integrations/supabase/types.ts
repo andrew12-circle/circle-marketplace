@@ -10526,6 +10526,279 @@ export type Database = {
           },
         ]
       }
+      web_analytics_click_events: {
+        Row: {
+          click_x: number | null
+          click_y: number | null
+          created_at: string | null
+          element_selector: string | null
+          element_text: string | null
+          id: string
+          page_view_id: string | null
+          session_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          click_x?: number | null
+          click_y?: number | null
+          created_at?: string | null
+          element_selector?: string | null
+          element_text?: string | null
+          id?: string
+          page_view_id?: string | null
+          session_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          click_x?: number | null
+          click_y?: number | null
+          created_at?: string | null
+          element_selector?: string | null
+          element_text?: string | null
+          id?: string
+          page_view_id?: string | null
+          session_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "web_analytics_click_events_page_view_id_fkey"
+            columns: ["page_view_id"]
+            isOneToOne: false
+            referencedRelation: "web_analytics_page_views"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "web_analytics_click_events_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "web_analytics_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      web_analytics_conversions: {
+        Row: {
+          created_at: string | null
+          event_name: string
+          event_type: string
+          id: string
+          metadata: Json | null
+          session_id: string
+          updated_at: string | null
+          value: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          event_name: string
+          event_type: string
+          id?: string
+          metadata?: Json | null
+          session_id: string
+          updated_at?: string | null
+          value?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          event_name?: string
+          event_type?: string
+          id?: string
+          metadata?: Json | null
+          session_id?: string
+          updated_at?: string | null
+          value?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "web_analytics_conversions_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "web_analytics_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      web_analytics_page_views: {
+        Row: {
+          created_at: string | null
+          ended_at: string | null
+          id: string
+          is_exit: boolean | null
+          page_title: string | null
+          page_url: string
+          session_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          ended_at?: string | null
+          id?: string
+          is_exit?: boolean | null
+          page_title?: string | null
+          page_url: string
+          session_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          ended_at?: string | null
+          id?: string
+          is_exit?: boolean | null
+          page_title?: string | null
+          page_url?: string
+          session_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "web_analytics_page_views_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "web_analytics_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      web_analytics_scroll_events: {
+        Row: {
+          created_at: string | null
+          id: string
+          page_view_id: string | null
+          scroll_depth: number | null
+          session_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          page_view_id?: string | null
+          scroll_depth?: number | null
+          session_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          page_view_id?: string | null
+          scroll_depth?: number | null
+          session_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "web_analytics_scroll_events_page_view_id_fkey"
+            columns: ["page_view_id"]
+            isOneToOne: false
+            referencedRelation: "web_analytics_page_views"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "web_analytics_scroll_events_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "web_analytics_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      web_analytics_sessions: {
+        Row: {
+          anonymous_id: string
+          browser_name: string | null
+          browser_version: string | null
+          city: string | null
+          country: string | null
+          created_at: string | null
+          device_type: string | null
+          ended_at: string | null
+          id: string
+          is_new_visitor: boolean | null
+          operating_system: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          anonymous_id: string
+          browser_name?: string | null
+          browser_version?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          device_type?: string | null
+          ended_at?: string | null
+          id?: string
+          is_new_visitor?: boolean | null
+          operating_system?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          anonymous_id?: string
+          browser_name?: string | null
+          browser_version?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          device_type?: string | null
+          ended_at?: string | null
+          id?: string
+          is_new_visitor?: boolean | null
+          operating_system?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      web_analytics_traffic_sources: {
+        Row: {
+          created_at: string | null
+          id: string
+          referrer_domain: string | null
+          session_id: string
+          source_type: string | null
+          updated_at: string | null
+          utm_campaign: string | null
+          utm_content: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          utm_term: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          referrer_domain?: string | null
+          session_id: string
+          source_type?: string | null
+          updated_at?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          referrer_domain?: string | null
+          session_id?: string
+          source_type?: string | null
+          updated_at?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "web_analytics_traffic_sources_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "web_analytics_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       web_vitals: {
         Row: {
           created_at: string
