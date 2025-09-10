@@ -5,6 +5,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "next-themes";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import { WebAnalyticsTracker } from "@/components/analytics/WebAnalyticsTracker";
 
 // Lazy load pages for better performance
 import { lazy, Suspense } from "react";
@@ -30,7 +31,8 @@ function App() {
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
         <TooltipProvider>
           <Router>
-            <Suspense 
+            <WebAnalyticsTracker />
+            <Suspense
               fallback={
                 <div className="min-h-screen flex items-center justify-center">
                   <div className="text-sm text-muted-foreground">Loading...</div>

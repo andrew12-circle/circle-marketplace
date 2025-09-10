@@ -12,6 +12,7 @@ import { VendorAnalytics } from '@/components/marketplace/VendorAnalytics';
 import { OptimizedVendorAnalytics } from '@/components/admin/OptimizedVendorAnalytics';
 import SecurityMonitoringPanel from '@/components/admin/SecurityMonitoringPanel';
 import { TrafficAnalytics } from '@/components/analytics/TrafficAnalytics';
+import { WebsiteAnalyticsDashboard } from './WebsiteAnalyticsDashboard';
 
 interface PlatformMetrics {
   totalUsers: number;
@@ -153,6 +154,7 @@ export const ComprehensiveAnalyticsDashboard = () => {
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="traffic">Traffic</TabsTrigger>
+          <TabsTrigger value="website">Website</TabsTrigger>
           <TabsTrigger value="vendors">Vendor Analytics</TabsTrigger>
           <TabsTrigger value="activity">Activity Tracking</TabsTrigger>
           <TabsTrigger value="security">Security</TabsTrigger>
@@ -269,6 +271,10 @@ export const ComprehensiveAnalyticsDashboard = () => {
 
         <TabsContent value="traffic">
           <TrafficAnalytics />
+        </TabsContent>
+
+        <TabsContent value="website">
+          <WebsiteAnalyticsDashboard />
         </TabsContent>
 
         <TabsContent value="vendors">

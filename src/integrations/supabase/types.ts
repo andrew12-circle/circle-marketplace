@@ -2232,6 +2232,48 @@ export type Database = {
           },
         ]
       }
+      click_events: {
+        Row: {
+          anon_id: string
+          click_x: number | null
+          click_y: number | null
+          created_at: string
+          element_selector: string | null
+          element_text: string | null
+          id: string
+          metadata: Json | null
+          page_url: string
+          session_id: string
+          user_id: string | null
+        }
+        Insert: {
+          anon_id: string
+          click_x?: number | null
+          click_y?: number | null
+          created_at?: string
+          element_selector?: string | null
+          element_text?: string | null
+          id?: string
+          metadata?: Json | null
+          page_url: string
+          session_id: string
+          user_id?: string | null
+        }
+        Update: {
+          anon_id?: string
+          click_x?: number | null
+          click_y?: number | null
+          created_at?: string
+          element_selector?: string | null
+          element_text?: string | null
+          id?: string
+          metadata?: Json | null
+          page_url?: string
+          session_id?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       client_errors: {
         Row: {
           component: string | null
@@ -4522,8 +4564,10 @@ export type Database = {
           country: string | null
           created_at: string
           device: string | null
+          ended_at: string | null
           id: string
           landing_page: string | null
+          last_activity_at: string | null
           referrer: string | null
           started_at: string
           updated_at: string
@@ -4537,8 +4581,10 @@ export type Database = {
           country?: string | null
           created_at?: string
           device?: string | null
+          ended_at?: string | null
           id?: string
           landing_page?: string | null
+          last_activity_at?: string | null
           referrer?: string | null
           started_at?: string
           updated_at?: string
@@ -4552,8 +4598,10 @@ export type Database = {
           country?: string | null
           created_at?: string
           device?: string | null
+          ended_at?: string | null
           id?: string
           landing_page?: string | null
+          last_activity_at?: string | null
           referrer?: string | null
           started_at?: string
           updated_at?: string
@@ -5620,6 +5668,57 @@ export type Database = {
           user_agent?: string | null
           user_id?: string | null
           vendor_id?: string | null
+        }
+        Relationships: []
+      }
+      page_views: {
+        Row: {
+          anon_id: string
+          created_at: string
+          entered_at: string
+          exited_at: string | null
+          id: string
+          metadata: Json | null
+          page_title: string | null
+          page_url: string
+          referrer_url: string | null
+          session_id: string
+          user_id: string | null
+          utm_campaign: string | null
+          utm_medium: string | null
+          utm_source: string | null
+        }
+        Insert: {
+          anon_id: string
+          created_at?: string
+          entered_at?: string
+          exited_at?: string | null
+          id?: string
+          metadata?: Json | null
+          page_title?: string | null
+          page_url: string
+          referrer_url?: string | null
+          session_id: string
+          user_id?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Update: {
+          anon_id?: string
+          created_at?: string
+          entered_at?: string
+          exited_at?: string | null
+          id?: string
+          metadata?: Json | null
+          page_title?: string | null
+          page_url?: string
+          referrer_url?: string | null
+          session_id?: string
+          user_id?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
         }
         Relationships: []
       }
@@ -10768,6 +10867,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      end_session: {
+        Args: { p_session_id: string }
+        Returns: undefined
+      }
       ensure_profile_exists: {
         Args: { p_user_id: string }
         Returns: boolean
@@ -11063,6 +11166,10 @@ export type Database = {
           website_url: string
         }[]
       }
+      get_web_analytics: {
+        Args: { p_period?: string }
+        Returns: Json
+      }
       halfvec_avg: {
         Args: { "": number[] }
         Returns: unknown
@@ -11267,6 +11374,10 @@ export type Database = {
       start_admin_session: {
         Args: Record<PropertyKey, never>
         Returns: boolean
+      }
+      touch_session: {
+        Args: { p_session_id: string }
+        Returns: undefined
       }
       track_vendor_activity: {
         Args: {
