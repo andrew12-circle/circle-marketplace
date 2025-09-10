@@ -593,6 +593,7 @@ export const MarketplaceGrid = () => {
   });
 
   const handleCategoryClick = (searchTerm: string, categoryName: string) => {
+    console.log('🔍 Category clicked:', { searchTerm, categoryName });
     setSearchTerm("");
     setExternalCategory(categoryName);
     setSearchFilters(prev => ({ ...prev, query: "", categories: [categoryName] }));

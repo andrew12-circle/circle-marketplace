@@ -109,7 +109,11 @@ export const useMarketplaceFilters = (
         ? true
         : Array.from(tokens).some(tok => haystackParts.some(part => part.includes(tok)));
       
-      const matchesCategory = filters.category === "all" || service.category === filters.category;
+      const matchesCategory = filters.category === "all" || 
+        service.category === filters.category ||
+        (service.tags && service.tags.some((tag: string) => tag.includes(filters.category.toLowerCase().replace(/\s+/g, '-')))) ||
+        service.category?.toLowerCase().includes(filters.category.toLowerCase()) ||
+        filters.category.toLowerCase().includes(service.category?.toLowerCase() || '');
       
       const priceValue = extractNumericPrice(service.retail_price);
       const matchesPrice = priceValue >= filters.priceRange[0] && priceValue <= filters.priceRange[1];
