@@ -50,6 +50,7 @@ import { ServiceBundles } from "./ServiceBundles";
 import { QAOverlay } from "../common/QAOverlay";
 import { useAutoRecovery } from "@/hooks/useAutoRecovery";
 import { CacheStatusIndicator } from "@/components/admin/CacheStatusIndicator";
+import { normalizeCategoryToTag } from "@/utils/categoryTags";
 
 interface FilterState {
   category: string;
@@ -235,6 +236,9 @@ export const MarketplaceGrid = () => {
     coPayEligible: false,
     locationFilter: false
   });
+
+  // External category state for CategoryBlocks integration
+  const [externalCategory, setExternalCategory] = useState<string | null>(null);
 
   const handleEnhancedSearchChange = useCallback((sf: SearchFilters) => {
     setSearchFilters(sf);
@@ -598,9 +602,16 @@ export const MarketplaceGrid = () => {
     return matchesSearch;
   });
 
-  const handleCategoryClick = (searchTerm: string, categoryName: string) => {
-    setSearchTerm(searchTerm);
+  const handleCategoryClick = (displayNameOrTag: string, categoryName: string) => {
+    // Normalize to a cat tag slug
+    const tag = normalizeCategoryToTag(displayNameOrTag);
+    setExternalCategory(tag);
     setViewMode("services");
+    // Optional reset of searchTerm so category drives results
+    setSearchTerm('');
+    setSearchFilters(prev => ({ ...prev, categories: [tag] }));
+    setFilters(prev => ({ ...prev, category: tag }));
+    
     // Scroll to results after state update
     setTimeout(() => {
       const resultsElement = document.getElementById('marketplace-results');
@@ -768,6 +779,13 @@ export const MarketplaceGrid = () => {
                   sortStrategy={orderStrategy}
                   onSortChange={setOrderStrategy}
                   isAdmin={profile?.is_admin}
+                  externalCategory={externalCategory}
+                  onClearExternalCategory={() => {
+                    setExternalCategory(null);
+                    setSearchTerm('');
+                    setSearchFilters(prev => ({ ...prev, categories: [] }));
+                    setFilters(prev => ({ ...prev, category: 'all' }));
+                  }}
                 />
                  
                 {/* Enhanced Search with integrated view mode tabs */}
