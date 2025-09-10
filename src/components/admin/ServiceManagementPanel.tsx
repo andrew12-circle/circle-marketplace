@@ -39,6 +39,7 @@ import { ServiceAIResearchEditor } from './ServiceAIResearchEditor';
 import { ServiceImageUploader } from './ServiceImageUploader';
 import { AIServiceUpdater } from './AIServiceUpdater';
 import { ServicePricingMirror } from './ServicePricingMirror';
+import { ServiceComplianceTracker } from './ServiceComplianceTracker';
 
 interface PricingFeature {
   id: string;
