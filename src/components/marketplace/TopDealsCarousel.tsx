@@ -14,6 +14,7 @@ import { type Service } from "@/hooks/useMarketplaceData";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCurrency } from "@/hooks/useCurrency";
 import { getUnifiedDisplayPrice, calculateSavings } from "@/utils/sharedPricing";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ServiceRatingStats {
   average_rating: number;
@@ -28,37 +29,47 @@ interface TopDealsCarouselProps {
 
 import { parsePrice } from "@/utils/parsePrice";
 
-const calculateScore = (service: Service, rating?: ServiceRatingStats, discount?: number | null): number => {
+const calculateScore = (service: Service, rating?: ServiceRatingStats, discount?: number | null, config?: any): number => {
   let score = 0;
+  
+  // Use config weights or defaults
+  const weights = config || {
+    discountWeight: 0.3,
+    ratingWeight: 10,
+    featuredBonus: 20,
+    copayBonus: 15,
+    brandBonus: 0.1,
+    sponsoredBonus: 5,
+    brandNames: ['hubspot', 'salesforce', 'mailchimp', 'canva', 'zoom']
+  };
   
   // Use shared discount calculation for consistency
   const discountValue = discount || 0;
-  score += discountValue * 0.3;
+  score += discountValue * weights.discountWeight;
   
   // Trust score weight
   if (rating?.average_rating) {
-    score += rating.average_rating * 10;
+    score += rating.average_rating * weights.ratingWeight;
   }
   
   // Featured service weight
   if (service.is_featured) {
-    score += 20;
+    score += weights.featuredBonus;
   }
   
   // Co-pay availability weight
   if (service.copay_allowed) {
-    score += 15;
+    score += weights.copayBonus;
   }
   
-  // Brand boost (simple heuristic)
-  const brandNames = ['hubspot', 'salesforce', 'mailchimp', 'canva', 'zoom'];
+  // Brand boost
   const vendorName = (service.vendor?.name || '').toLowerCase();
-  const brandBoost = brandNames.some(brand => vendorName.includes(brand)) ? 10 : 0;
-  score += brandBoost * 0.1;
+  const brandBoost = weights.brandNames.some((brand: string) => vendorName.includes(brand)) ? 10 : 0;
+  score += brandBoost * weights.brandBonus;
   
-  // Sponsored content weight (lower priority)
+  // Sponsored content weight
   if ((service as any).is_sponsored) {
-    score += 5;
+    score += weights.sponsoredBonus;
   }
   
   return score;
@@ -67,6 +78,26 @@ const calculateScore = (service: Service, rating?: ServiceRatingStats, discount?
 export const TopDealsCarousel = ({ services, serviceRatings, onServiceClick }: TopDealsCarouselProps) => {
   const { profile } = useAuth();
   const { formatPrice } = useCurrency();
+  const [topDealsConfig, setTopDealsConfig] = useState<any>(null);
+
+  // Load Top Deals configuration
+  useEffect(() => {
+    const loadConfig = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('app_config')
+          .select('top_deals_config')
+          .single();
+
+        if (!error && data?.top_deals_config) {
+          setTopDealsConfig(data.top_deals_config);
+        }
+      } catch (error) {
+        console.warn('Failed to load Top Deals config:', error);
+      }
+    };
+    loadConfig();
+  }, []);
   
   const topDealsEnabled = useTopDealsEnabled();
   

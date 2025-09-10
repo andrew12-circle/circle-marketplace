@@ -54,6 +54,7 @@ const navigationGroups = [
     items: [
       { title: 'Content', url: '/admin/content', icon: Upload },
       { title: 'Services', url: '/admin/services', icon: BarChart3 },
+      { title: 'Top Deals', url: '/admin/top-deals', icon: TrendingUp },
       { title: 'Reviews', url: '/admin/reviews', icon: Star },
     ]
   },

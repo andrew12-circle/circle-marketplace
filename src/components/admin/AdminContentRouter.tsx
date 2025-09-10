@@ -129,6 +129,10 @@ const EnhancedWebAnalyticsDashboard = React.lazy(() =>
   import('../analytics/EnhancedWebAnalyticsDashboard').then(module => ({ default: module.EnhancedWebAnalyticsDashboard })).catch(() => ({ default: () => <PlaceholderCard title="Enhanced Website Analytics" /> }))
 );
 
+const TopDealsManager = React.lazy(() => 
+  import('./TopDealsManager').then(module => ({ default: module.TopDealsManager })).catch(() => ({ default: () => <PlaceholderCard title="Top Deals Configuration" /> }))
+);
+
 const BulkServiceResearch = React.lazy(() => 
   import('./BulkServiceResearch').then(module => ({ default: module.default })).catch(() => ({ default: () => <PlaceholderCard title="Bulk Service Research" /> }))
 );
@@ -228,6 +232,12 @@ export function AdminContentRouter() {
               <ServiceManagementPanelWrapper />
               <BulkServiceResearch />
             </div>
+          </Suspense>
+        } />
+        
+        <Route path="/top-deals" element={
+          <Suspense fallback={<LoadingFallback title="Top Deals Configuration" />}>
+            <TopDealsManager />
           </Suspense>
         } />
         
