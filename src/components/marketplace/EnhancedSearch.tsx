@@ -454,21 +454,23 @@ export const EnhancedSearch = ({
       {/* Filter Controls moved next to search bar above */}
 
       {/* Active Filters Display */}
-      {activeFiltersCount > 0 && (
-        <div className="flex flex-wrap gap-2">
+      {(activeFiltersCount > 0 || filters.categories.length > 0) && (
+        <div className="flex flex-wrap gap-2 p-2 bg-muted/30 rounded-lg">
+          <div className="text-xs text-muted-foreground font-medium">Active filters:</div>
+          
           {filters.query && (
-            <Badge variant="secondary" className="gap-1">
-              "{filters.query}"
+            <Badge variant="secondary" className="gap-1 bg-background border">
+              Search: "{filters.query}"
               <X 
-                className="w-3 h-3 cursor-pointer" 
+                className="w-3 h-3 cursor-pointer hover:text-destructive" 
                 onClick={() => removeFilter('query')}
               />
             </Badge>
           )}
           
           {filters.categories.map((category) => (
-            <Badge key={category} variant="secondary" className="gap-1 bg-secondary/80 hover:bg-secondary">
-              {category}
+            <Badge key={category} variant="secondary" className="gap-1 bg-background border border-primary/20">
+              Category: {category}
               <X 
                 className="w-3 h-3 cursor-pointer hover:text-destructive transition-colors" 
                 onClick={() => removeFilter('category', category)}
@@ -477,8 +479,8 @@ export const EnhancedSearch = ({
           ))}
           
           {filters.tags.map((tag) => (
-            <Badge key={tag} variant="secondary" className="gap-1 bg-secondary/80 hover:bg-secondary">
-              #{tag}
+            <Badge key={tag} variant="secondary" className="gap-1 bg-background border border-blue-200">
+              Tag: #{tag}
               <X 
                 className="w-3 h-3 cursor-pointer hover:text-destructive transition-colors" 
                 onClick={() => removeFilter('tag', tag)}
@@ -487,8 +489,8 @@ export const EnhancedSearch = ({
           ))}
           
           {filters.features.map((feature) => (
-            <Badge key={feature} variant="secondary" className="gap-1 bg-secondary/80 hover:bg-secondary">
-              {feature}
+            <Badge key={feature} variant="secondary" className="gap-1 bg-background border border-green-200">
+              Feature: {feature}
               <X 
                 className="w-3 h-3 cursor-pointer hover:text-destructive transition-colors" 
                 onClick={() => removeFilter('feature', feature)}
@@ -497,9 +499,9 @@ export const EnhancedSearch = ({
           ))}
           
           {(filters.priceRange[0] > minPrice || filters.priceRange[1] < maxPrice) && (
-            <Badge variant="secondary" className="gap-1 bg-secondary/80 hover:bg-secondary">
+            <Badge variant="secondary" className="gap-1 bg-background border border-yellow-200">
               <DollarSign className="w-3 h-3" />
-              ${filters.priceRange[0]}-${filters.priceRange[1]}
+              Price: ${filters.priceRange[0]}-${filters.priceRange[1]}
               <X 
                 className="w-3 h-3 cursor-pointer hover:text-destructive transition-colors" 
                 onClick={() => removeFilter('price')}
@@ -508,9 +510,9 @@ export const EnhancedSearch = ({
           )}
           
           {filters.rating > 0 && (
-            <Badge variant="secondary" className="gap-1 bg-secondary/80 hover:bg-secondary">
+            <Badge variant="secondary" className="gap-1 bg-background border border-orange-200">
               <Star className="w-3 h-3" />
-              {filters.rating}+ stars
+              Rating: {filters.rating}+ stars
               <X 
                 className="w-3 h-3 cursor-pointer hover:text-destructive transition-colors" 
                 onClick={() => removeFilter('rating')}
