@@ -217,6 +217,7 @@ export const MarketplaceGrid = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>("services");
   const [selectedProductCategory, setSelectedProductCategory] = useState<string | null>(null);
+  const [externalCategory, setExternalCategory] = useState<string | null>(null);
   const [searchFilters, setSearchFilters] = useState<SearchFilters>({
     query: "",
     categories: [],
@@ -592,7 +593,10 @@ export const MarketplaceGrid = () => {
   });
 
   const handleCategoryClick = (searchTerm: string, categoryName: string) => {
-    setSearchTerm(searchTerm);
+    setSearchTerm("");
+    setExternalCategory(categoryName);
+    setSearchFilters(prev => ({ ...prev, query: "", categories: [categoryName] }));
+    setFilters(prev => ({ ...prev, category: categoryName }));
     setViewMode("services");
     // Scroll to results after state update
     setTimeout(() => {
@@ -601,6 +605,13 @@ export const MarketplaceGrid = () => {
         resultsElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     }, 100);
+  };
+
+  const handleClearExternalCategory = () => {
+    setExternalCategory(null);
+    setSearchTerm("");
+    setSearchFilters(prev => ({ ...prev, query: "", categories: [] }));
+    setFilters(prev => ({ ...prev, category: "all" }));
   };
 
   const handleAIChat = (initialMessage: string) => {
@@ -761,6 +772,8 @@ export const MarketplaceGrid = () => {
                   sortStrategy={orderStrategy}
                   onSortChange={setOrderStrategy}
                   isAdmin={profile?.is_admin}
+                  externalCategory={externalCategory}
+                  onClearExternalCategory={handleClearExternalCategory}
                 />
                  
                 {/* Enhanced Search with integrated view mode tabs */}

@@ -42,6 +42,9 @@ interface EnhancedSearchProps {
   sortStrategy?: 'ranked' | 'recent' | 'price-low' | 'price-high';
   onSortChange?: (strategy: 'ranked' | 'recent' | 'price-low' | 'price-high') => void;
   isAdmin?: boolean;
+  // External category selection (from CategoryBlocks)
+  externalCategory?: string | null;
+  onClearExternalCategory?: () => void;
 }
 
 export interface SearchFilters {
@@ -69,7 +72,9 @@ export const EnhancedSearch = ({
   onViewModeChange,
   sortStrategy = 'ranked',
   onSortChange,
-  isAdmin = false
+  isAdmin = false,
+  externalCategory,
+  onClearExternalCategory
 }: EnhancedSearchProps) => {
   const isMobile = useIsMobile();
   const { min: minPrice, max: maxPrice, isLoading: priceRangeLoading } = useServicePriceRange();
@@ -122,6 +127,16 @@ export const EnhancedSearch = ({
     }
   };
 
+  // Sync external category with internal filters
+  useEffect(() => {
+    if (externalCategory && !filters.categories.includes(externalCategory)) {
+      setFilters(prev => ({
+        ...prev,
+        categories: [externalCategory]
+      }));
+    }
+  }, [externalCategory, filters.categories]);
+
   useEffect(() => {
     // Count active filters from current state (immediate update)
     let count = 0;
@@ -165,6 +180,11 @@ export const EnhancedSearch = ({
       rating: 0,
       features: []
     });
+  };
+
+  const clearCategories = () => {
+    updateFilters('categories', []);
+    onClearExternalCategory?.();
   };
 
   const handleRerank = async () => {
@@ -438,15 +458,29 @@ export const EnhancedSearch = ({
           </DropdownMenu>
         </div>
 
-        {/* Search Input - Full width on mobile, constrained on desktop */}
-        <div className="relative w-full sm:flex-1 sm:max-w-xl">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-          <Input
-            placeholder={getSearchPlaceholder()}
-            value={filters.query}
-            onChange={(e) => updateFilters('query', e.target.value)}
-            className="pl-10 pr-4 h-10 sm:h-9"
-          />
+        {/* Search Input with Clear Category Button - Full width on mobile, constrained on desktop */}
+        <div className="relative w-full sm:flex-1 sm:max-w-xl flex gap-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+            <Input
+              placeholder={getSearchPlaceholder()}
+              value={filters.query}
+              onChange={(e) => updateFilters('query', e.target.value)}
+              className="pl-10 pr-4 h-10 sm:h-9"
+            />
+          </div>
+          {/* Clear Category Button - appears when categories are selected */}
+          {filters.categories.length > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={clearCategories}
+              className="px-3 py-2 h-10 sm:h-9 text-xs shrink-0"
+            >
+              <X className="w-3 h-3 mr-1" />
+              Clear category
+            </Button>
+          )}
         </div>
       </div>
 
