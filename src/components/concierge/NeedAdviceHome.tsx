@@ -349,7 +349,7 @@ export default function NeedAdviceHome() {
       </main>
 
       {/* Footer */}
-      <footer className="mt-16 pb-10 flex justify-center">
+      <footer className="mt-16 pb-4 flex justify-center">
         <div className="text-xs text-muted-foreground flex items-center gap-1">
           <Sparkles className="h-3.5 w-3.5" />
           Advice powered by curated data and Live Agent Interviews
