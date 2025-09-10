@@ -187,19 +187,8 @@ const CommissionsContent = () => (
   </Card>
 );
 
-// Static settings component
-const SettingsContent = () => (
-  <Card>
-    <CardContent className="p-6 text-center">
-      <div className="h-12 w-12 text-blue-600 mx-auto mb-4 flex items-center justify-center">
-        ⚙️
-      </div>
-      <h3 className="text-lg font-semibold mb-2">System Configuration</h3>
-      <p className="text-muted-foreground">
-        Global application settings and preferences
-      </p>
-    </CardContent>
-  </Card>
+const AdminSettings = React.lazy(() => 
+  import('./AdminSettings').then(module => ({ default: module.AdminSettings })).catch(() => ({ default: () => <PlaceholderCard title="Settings" /> }))
 );
 
 export function AdminContentRouter() {
@@ -368,7 +357,11 @@ export function AdminContentRouter() {
           </Suspense>
         } />
         
-        <Route path="/settings" element={<SettingsContent />} />
+        <Route path="/settings" element={
+          <Suspense fallback={<LoadingFallback title="Settings" />}>
+            <AdminSettings />
+          </Suspense>
+        } />
         
         {/* Fallback route */}
         <Route path="/*" element={<Navigate to="/admin/overview" replace />} />
