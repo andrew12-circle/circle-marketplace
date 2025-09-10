@@ -26,9 +26,6 @@ const Admin = () => {
                     <h1 className="text-lg font-semibold">Admin Dashboard</h1>
                   </div>
                   <div className="flex items-center space-x-4">
-                    <span className="text-sm text-muted-foreground">
-                      Welcome, {user?.email}
-                    </span>
                     <button
                       onClick={() => window.location.href = '/'}
                       className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-muted-foreground hover:text-primary hover:bg-accent rounded-md transition-colors"
