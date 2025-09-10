@@ -69,6 +69,7 @@ const navigationGroups = [
     label: 'Analytics & Performance',
     items: [
       { title: 'Analytics', url: '/admin/analytics', icon: TrendingUp },
+      { title: 'Website Analytics', url: '/admin/website-analytics', icon: Eye },
       { title: 'Ranking', url: '/admin/ranking', icon: BarChart3 },
       { title: 'Retention', url: '/admin/retention', icon: TrendingUp },
     ]
