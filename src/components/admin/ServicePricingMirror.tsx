@@ -5,9 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Camera, ExternalLink, RefreshCw } from 'lucide-react';
+import { Camera, ExternalLink, RefreshCw, Search, Info } from 'lucide-react';
 
 interface ServicePricingMirrorProps {
   serviceId: string;
@@ -29,6 +30,8 @@ export function ServicePricingMirror({
   const [pricingUrl, setPricingUrl] = useState(currentPricingUrl || serviceWebsiteUrl || '');
   const [isCapturing, setIsCapturing] = useState(false);
   const [screenshotUrl, setScreenshotUrl] = useState(currentScreenshotUrl);
+  const [autoDetect, setAutoDetect] = useState(false);
+  const [detectedUrl, setDetectedUrl] = useState<string | null>(null);
   const { toast } = useToast();
 
   const handleCapture = async () => {
@@ -46,7 +49,8 @@ export function ServicePricingMirror({
       const { data, error } = await supabase.functions.invoke('capture-service-pricing', {
         body: {
           service_id: serviceId,
-          pricing_url: pricingUrl
+          pricing_url: pricingUrl,
+          auto_detect: autoDetect
         }
       });
 
@@ -54,9 +58,14 @@ export function ServicePricingMirror({
 
       if (data?.success) {
         setScreenshotUrl(data.screenshot_url);
+        if (data.detected_url) {
+          setDetectedUrl(data.detected_url);
+        }
         toast({
           title: "Screenshot Captured",
-          description: `Pricing page screenshot for ${serviceName} has been captured successfully`,
+          description: data.auto_detected 
+            ? `Auto-detected and captured pricing page for ${serviceName}`
+            : `Pricing page screenshot for ${serviceName} has been captured successfully`,
         });
       } else {
         throw new Error(data?.error || 'Failed to capture screenshot');
@@ -90,31 +99,76 @@ export function ServicePricingMirror({
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* URL Input and Capture */}
-        <div className="space-y-2">
-          <Label htmlFor="pricing-url">Service Pricing Page URL</Label>
-          <div className="flex gap-2">
-            <Input
-              id="pricing-url"
-              type="url"
-              placeholder={serviceWebsiteUrl || "https://service.com/pricing"}
-              value={pricingUrl}
-              onChange={(e) => setPricingUrl(e.target.value)}
-              className="flex-1"
-            />
-            <Button 
-              onClick={handleCapture} 
-              disabled={isCapturing || !pricingUrl}
-              className="flex items-center gap-2"
-            >
-              {isCapturing ? (
-                <RefreshCw className="w-4 h-4 animate-spin" />
-              ) : (
-                <Camera className="w-4 h-4" />
-              )}
-              {isCapturing ? 'Capturing...' : 'Capture'}
-            </Button>
+        {/* URL Input and Auto-Detect */}
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="pricing-url">Service Pricing Page URL</Label>
+            <div className="flex gap-2">
+              <Input
+                id="pricing-url"
+                type="url"
+                placeholder={serviceWebsiteUrl || "https://service.com/pricing"}
+                value={pricingUrl}
+                onChange={(e) => setPricingUrl(e.target.value)}
+                className="flex-1"
+              />
+              <Button 
+                onClick={handleCapture} 
+                disabled={isCapturing || !pricingUrl}
+                className="flex items-center gap-2"
+              >
+                {isCapturing ? (
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                ) : autoDetect ? (
+                  <Search className="w-4 h-4" />
+                ) : (
+                  <Camera className="w-4 h-4" />
+                )}
+                {isCapturing ? 'Capturing...' : autoDetect ? 'Auto-Detect & Capture' : 'Capture'}
+              </Button>
+            </div>
           </div>
+
+          {/* Auto-Detect Toggle */}
+          <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+            <div className="flex items-center gap-3">
+              <Search className="w-4 h-4 text-muted-foreground" />
+              <div>
+                <Label className="text-sm font-medium">Auto-Detect Pricing Page</Label>
+                <p className="text-xs text-muted-foreground">
+                  If enabled, will try to find the pricing page automatically from the main website URL
+                </p>
+              </div>
+            </div>
+            <Switch
+              checked={autoDetect}
+              onCheckedChange={setAutoDetect}
+            />
+          </div>
+
+          {/* Auto-Detect Info */}
+          {autoDetect && (
+            <Alert>
+              <Info className="w-4 h-4" />
+              <AlertDescription>
+                Auto-detect will search for common pricing page paths like /pricing, /plans, /subscribe, etc.
+                If no specific pricing page is found, it will capture the provided URL.
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {/* Detected URL Display */}
+          {detectedUrl && detectedUrl !== pricingUrl && (
+            <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+              <div className="flex items-start gap-2">
+                <Search className="w-4 h-4 text-green-600 mt-0.5" />
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-green-800">Auto-Detected Pricing Page</p>
+                  <p className="text-xs text-green-600 break-all">{detectedUrl}</p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Status Info */}

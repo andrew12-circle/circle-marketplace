@@ -13,19 +13,116 @@ const screenshotApiKey = Deno.env.get('SCREENSHOT_API_KEY')!;
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+// Auto-detect pricing page from main website URL
+async function detectPricingPage(baseUrl: string): Promise<string> {
+  const commonPricingPaths = [
+    '/pricing',
+    '/plans',
+    '/subscribe',
+    '/subscription',
+    '/price',
+    '/packages',
+    '/billing',
+    '/cost',
+    '/fees'
+  ];
+  
+  const baseUrlObj = new URL(baseUrl);
+  const domain = baseUrlObj.origin;
+  
+  // First, try common pricing page paths
+  for (const path of commonPricingPaths) {
+    const testUrl = `${domain}${path}`;
+    try {
+      const response = await fetch(testUrl, { 
+        method: 'HEAD',
+        signal: AbortSignal.timeout(5000) // 5 second timeout
+      });
+      if (response.ok) {
+        console.log(`✅ Found pricing page at: ${testUrl}`);
+        return testUrl;
+      }
+    } catch (error) {
+      console.log(`❌ No pricing page at: ${testUrl}`);
+      continue;
+    }
+  }
+  
+  // If no common paths work, try to scrape the main page to find pricing links
+  try {
+    const response = await fetch(baseUrl, {
+      signal: AbortSignal.timeout(10000), // 10 second timeout
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+      }
+    });
+    
+    if (response.ok) {
+      const html = await response.text();
+      
+      // Look for pricing-related links in the HTML
+      const pricingPatterns = [
+        /href=["']([^"']*(?:pricing|plans|subscribe|subscription|price|packages|billing|cost|fees)[^"']*)["']/gi,
+        /href=["']([^"']*\/(?:pricing|plans|subscribe|subscription|price|packages|billing|cost|fees)(?:\/|$)[^"']*)["']/gi
+      ];
+      
+      for (const pattern of pricingPatterns) {
+        const matches = html.matchAll(pattern);
+        for (const match of matches) {
+          let href = match[1];
+          if (href.startsWith('/')) {
+            href = `${domain}${href}`;
+          } else if (!href.startsWith('http')) {
+            href = `${domain}/${href}`;
+          }
+          
+          // Validate the URL and test if accessible
+          try {
+            const testResponse = await fetch(href, { 
+              method: 'HEAD',
+              signal: AbortSignal.timeout(5000)
+            });
+            if (testResponse.ok) {
+              console.log(`✅ Found pricing page via link detection: ${href}`);
+              return href;
+            }
+          } catch (error) {
+            continue;
+          }
+        }
+      }
+    }
+  } catch (error) {
+    console.log(`❌ Failed to scrape main page: ${error.message}`);
+  }
+  
+  // If nothing found, return original URL
+  console.log(`⚠️ No pricing page detected, using original URL: ${baseUrl}`);
+  return baseUrl;
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { service_id, pricing_url } = await req.json();
+    const { service_id, pricing_url, auto_detect = false } = await req.json();
 
     if (!service_id || !pricing_url) {
       throw new Error('service_id and pricing_url are required');
     }
 
-    console.log(`📸 Capturing pricing screenshot for service ${service_id} at ${pricing_url}`);
+    let finalUrl = pricing_url;
+
+    // Auto-detect pricing page if requested
+    if (auto_detect) {
+      console.log(`🔍 Auto-detecting pricing page for ${pricing_url}`);
+      finalUrl = await detectPricingPage(pricing_url);
+      console.log(`📍 Auto-detected pricing URL: ${finalUrl}`);
+    }
+
+    console.log(`📸 Capturing pricing screenshot for service ${service_id} at ${finalUrl}`);
 
     // Capture screenshot using ScrapingBee API
     const screenshotResponse = await fetch('https://app.scrapingbee.com/api/v1/screenshot', {
@@ -35,7 +132,7 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         api_key: screenshotApiKey,
-        url: pricing_url,
+        url: finalUrl,
         width: 1920,
         height: 1080,
         full_page: true,
@@ -85,7 +182,7 @@ serve(async (req) => {
       .update({
         pricing_screenshot_url: publicUrl,
         pricing_screenshot_captured_at: new Date().toISOString(),
-        pricing_page_url: pricing_url
+        pricing_page_url: finalUrl
       })
       .eq('id', service_id);
 
@@ -98,7 +195,9 @@ serve(async (req) => {
       success: true,
       screenshot_url: publicUrl,
       service_id,
-      captured_at: new Date().toISOString()
+      captured_at: new Date().toISOString(),
+      detected_url: auto_detect ? finalUrl : undefined,
+      auto_detected: auto_detect && finalUrl !== pricing_url
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
