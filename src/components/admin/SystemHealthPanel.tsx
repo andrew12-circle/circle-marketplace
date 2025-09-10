@@ -37,6 +37,22 @@ export const SystemHealthPanel = () => {
     });
   };
 
+  const handleDevRecovery = async () => {
+    try {
+      toast({
+        title: "Dev Recovery Started",
+        description: "Clearing cache and reloading page...",
+      });
+      await cacheManager.forceDevRecovery();
+    } catch (error) {
+      toast({
+        title: "Recovery Failed",
+        description: "Could not perform dev recovery",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -62,13 +78,24 @@ export const SystemHealthPanel = () => {
           <p className="text-sm text-muted-foreground mb-3">
             {cacheInfo.size} items in localStorage
           </p>
-          <Button 
-            variant="outline" 
-            onClick={handleClearCachePreserveSession}
-            className="w-full"
-          >
-            Clear Cache (Preserve Session)
-          </Button>
+          <div className="space-y-2">
+            <Button 
+              variant="outline" 
+              onClick={handleClearCachePreserveSession}
+              className="w-full"
+            >
+              Clear Cache (Preserve Session)
+            </Button>
+            {process.env.NODE_ENV === 'development' && (
+              <Button 
+                variant="destructive" 
+                onClick={handleDevRecovery}
+                className="w-full"
+              >
+                🚨 Dev Recovery (Clear & Reload)
+              </Button>
+            )}
+          </div>
         </div>
 
         {/* Server Configuration */}

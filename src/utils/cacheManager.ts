@@ -151,13 +151,22 @@ class CacheManager {
   /**
    * Force page reload with cache bypass using query parameter
    */
-  forceReload(reason: 'self_heal' | 'version_update' | 'manual' = 'manual'): void {
+  forceReload(reason: 'self_heal' | 'version_update' | 'manual' | 'dev_recovery' | 'asset_recovery' = 'manual'): void {
     // Store reload reason for diagnostic banner
     sessionStorage.setItem('last_reload_reason', reason);
     
     const url = new URL(window.location.href);
     url.searchParams.set('_cb', Date.now().toString());
     window.location.href = url.toString();
+  }
+
+  /**
+   * Force dev recovery with immediate reload
+   */
+  async forceDevRecovery(): Promise<void> {
+    console.log('🚨 Dev Recovery: Clearing cache and forcing reload...');
+    await this.clearAllCachePreserveSession();
+    this.forceReload('dev_recovery');
   }
 
   /**

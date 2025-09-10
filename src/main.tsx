@@ -115,6 +115,10 @@ cacheManager.checkAndClearCache();
 // Initialize global error monitoring
 globalErrorMonitor.initialize();
 
+// Initialize asset recovery system
+import { assetRecovery } from "./utils/assetRecovery";
+assetRecovery.initialize();
+
 // Initialize cookie management for auth optimization (cookies only, not auth keys)
 removeLegacyAuthCookies();
 initCookieMonitoring();
