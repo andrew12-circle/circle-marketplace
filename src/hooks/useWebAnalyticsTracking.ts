@@ -39,7 +39,15 @@ export function useWebAnalyticsTracking(config: WebAnalyticsConfig = {}) {
       }
       anonId.current = storedAnonId;
 
-      // Create new session
+      // Check if returning visitor
+      const isReturning = localStorage.getItem('circle_previous_visit') !== null;
+      localStorage.setItem('circle_previous_visit', 'true');
+
+      // Detect device and browser info
+      const deviceInfo = getDeviceInfo();
+      const geoInfo = await getGeoInfo();
+
+      // Create new session with enhanced data
       const { data: session, error } = await supabase
         .from('funnel_sessions')
         .insert({
@@ -47,7 +55,22 @@ export function useWebAnalyticsTracking(config: WebAnalyticsConfig = {}) {
           user_id: user?.id || null,
           started_at: new Date().toISOString(),
           user_agent: navigator.userAgent,
-          referrer_url: document.referrer || null
+          referrer_url: document.referrer || null,
+          browser_name: deviceInfo.browser_name,
+          browser_version: deviceInfo.browser_version,
+          os_name: deviceInfo.os_name,
+          device_type: deviceInfo.device_type,
+          screen_resolution: `${screen.width}x${screen.height}`,
+          viewport_size: `${window.innerWidth}x${window.innerHeight}`,
+          is_returning_visitor: isReturning,
+          country_code: geoInfo.country_code,
+          city: geoInfo.city,
+          region: geoInfo.region,
+          session_metadata: {
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            language: navigator.language,
+            platform: navigator.platform
+          }
         })
         .select('id')
         .single();
@@ -60,11 +83,17 @@ export function useWebAnalyticsTracking(config: WebAnalyticsConfig = {}) {
       sessionId.current = session.id;
       isTracking.current = true;
 
+      // Track traffic source
+      await trackTrafficSource(session.id);
+
       // Start heartbeat
       startHeartbeat();
       
       // Track initial page view
       trackPageView();
+
+      // Setup scroll tracking
+      setupScrollTracking();
 
     } catch (error) {
       console.error('Analytics initialization failed:', error);
@@ -228,8 +257,164 @@ export function useWebAnalyticsTracking(config: WebAnalyticsConfig = {}) {
       }
     }
     
-    return selector;
+  return selector;
   };
+
+  // Get device information
+  const getDeviceInfo = () => {
+    const userAgent = navigator.userAgent;
+    let browser_name = 'Unknown';
+    let browser_version = '';
+    let os_name = 'Unknown';
+    let device_type = 'Desktop';
+
+    // Browser detection
+    if (userAgent.includes('Chrome')) browser_name = 'Chrome';
+    else if (userAgent.includes('Firefox')) browser_name = 'Firefox';
+    else if (userAgent.includes('Safari')) browser_name = 'Safari';
+    else if (userAgent.includes('Edge')) browser_name = 'Edge';
+
+    // OS detection
+    if (userAgent.includes('Windows')) os_name = 'Windows';
+    else if (userAgent.includes('Mac')) os_name = 'macOS';
+    else if (userAgent.includes('Linux')) os_name = 'Linux';
+    else if (userAgent.includes('Android')) os_name = 'Android';
+    else if (userAgent.includes('iOS')) os_name = 'iOS';
+
+    // Device type detection
+    if (/Mobi|Android/i.test(userAgent)) device_type = 'Mobile';
+    else if (/Tablet|iPad/i.test(userAgent)) device_type = 'Tablet';
+
+    return { browser_name, browser_version, os_name, device_type };
+  };
+
+  // Get basic geo info (you might want to integrate with a proper service)
+  const getGeoInfo = async () => {
+    try {
+      // This is a placeholder - in production you'd use a real geo IP service
+      return {
+        country_code: 'US',
+        city: 'Unknown',
+        region: 'Unknown'
+      };
+    } catch {
+      return {
+        country_code: 'Unknown',
+        city: 'Unknown',
+        region: 'Unknown'
+      };
+    }
+  };
+
+  // Track traffic source
+  const trackTrafficSource = async (sessionId: string) => {
+    if (!anonId.current) return;
+
+    try {
+      const url = new URL(window.location.href);
+      const referrer = document.referrer;
+      let source_type = 'direct';
+      let source_name = null;
+      let referrer_domain = null;
+
+      if (referrer) {
+        referrer_domain = new URL(referrer).hostname;
+        
+        // Categorize traffic source
+        if (referrer_domain.includes('google')) {
+          source_type = 'search';
+          source_name = 'google';
+        } else if (referrer_domain.includes('facebook')) {
+          source_type = 'social';
+          source_name = 'facebook';
+        } else if (referrer_domain.includes('linkedin')) {
+          source_type = 'social';
+          source_name = 'linkedin';
+        } else if (referrer_domain.includes('twitter') || referrer_domain.includes('x.com')) {
+          source_type = 'social';
+          source_name = 'twitter';
+        } else {
+          source_type = 'referral';
+        }
+      }
+
+      // Check for UTM parameters
+      if (url.searchParams.get('utm_source')) {
+        source_type = url.searchParams.get('utm_medium') || 'campaign';
+        source_name = url.searchParams.get('utm_source');
+      }
+
+      await supabase.from('traffic_sources').insert({
+        session_id: sessionId,
+        anon_id: anonId.current,
+        source_type,
+        source_name,
+        campaign_name: url.searchParams.get('utm_campaign'),
+        medium: url.searchParams.get('utm_medium'),
+        content: url.searchParams.get('utm_content'),
+        term: url.searchParams.get('utm_term'),
+        referrer_domain,
+        referrer_path: referrer ? new URL(referrer).pathname : null,
+        landing_page: location.pathname
+      });
+    } catch (error) {
+      console.error('Traffic source tracking failed:', error);
+    }
+  };
+
+  // Setup scroll depth tracking
+  const setupScrollTracking = () => {
+    let scrollDepthMarks = [25, 50, 75, 100];
+    let trackedDepths = new Set();
+    
+    const trackScrollDepth = () => {
+      const scrollTop = window.pageYOffset;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const scrollPercentage = Math.round((scrollTop / docHeight) * 100);
+
+      scrollDepthMarks.forEach(mark => {
+        if (scrollPercentage >= mark && !trackedDepths.has(mark) && sessionId.current && anonId.current) {
+          trackedDepths.add(mark);
+          
+          supabase.from('scroll_depth_events').insert({
+            session_id: sessionId.current,
+            anon_id: anonId.current,
+            user_id: user?.id || null,
+            page_url: location.pathname,
+            page_title: document.title,
+            scroll_depth_percentage: mark,
+            viewport_height: window.innerHeight,
+            page_height: document.documentElement.scrollHeight
+          });
+          // Handle error separately since supabase doesn't chain promises the same way
+          // Error handling is already in place with try/catch in the calling function
+        }
+      });
+    };
+
+    window.addEventListener('scroll', trackScrollDepth, { passive: true });
+    return () => window.removeEventListener('scroll', trackScrollDepth);
+  };
+
+  // Track conversion events
+  const trackConversion = useCallback(async (eventType: string, eventName: string, value: number = 0, metadata: any = {}) => {
+    if (!sessionId.current || !anonId.current) return;
+
+    try {
+      await supabase.from('conversion_events').insert({
+        session_id: sessionId.current,
+        anon_id: anonId.current,
+        user_id: user?.id || null,
+        event_type: eventType,
+        event_name: eventName,
+        page_url: location.pathname,
+        conversion_value: value,
+        metadata
+      });
+    } catch (error) {
+      console.error('Conversion tracking failed:', error);
+    }
+  }, [sessionId, anonId, user?.id, location.pathname]);
 
   // Effect to handle route changes
   useEffect(() => {
@@ -289,6 +474,7 @@ export function useWebAnalyticsTracking(config: WebAnalyticsConfig = {}) {
     anonId: anonId.current,
     isTracking: isTracking.current,
     trackPageView,
+    trackConversion,
     endSession
   };
 }

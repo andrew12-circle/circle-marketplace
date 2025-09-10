@@ -3525,6 +3525,53 @@ export type Database = {
         }
         Relationships: []
       }
+      conversion_events: {
+        Row: {
+          anon_id: string
+          conversion_value: number | null
+          created_at: string
+          event_name: string
+          event_type: string
+          id: string
+          metadata: Json | null
+          page_url: string
+          session_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          anon_id: string
+          conversion_value?: number | null
+          created_at?: string
+          event_name: string
+          event_type: string
+          id?: string
+          metadata?: Json | null
+          page_url: string
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          anon_id?: string
+          conversion_value?: number | null
+          created_at?: string
+          event_name?: string
+          event_type?: string
+          id?: string
+          metadata?: Json | null
+          page_url?: string
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversion_events_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "funnel_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       copay_notification_preferences: {
         Row: {
           created_at: string
@@ -4297,6 +4344,56 @@ export type Database = {
           },
         ]
       }
+      exit_events: {
+        Row: {
+          anon_id: string
+          created_at: string
+          destination_url: string | null
+          exit_page_title: string | null
+          exit_page_url: string
+          exit_type: string | null
+          id: string
+          scroll_depth_percentage: number | null
+          session_id: string | null
+          time_on_page_seconds: number | null
+          user_id: string | null
+        }
+        Insert: {
+          anon_id: string
+          created_at?: string
+          destination_url?: string | null
+          exit_page_title?: string | null
+          exit_page_url: string
+          exit_type?: string | null
+          id?: string
+          scroll_depth_percentage?: number | null
+          session_id?: string | null
+          time_on_page_seconds?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          anon_id?: string
+          created_at?: string
+          destination_url?: string | null
+          exit_page_title?: string | null
+          exit_page_url?: string
+          exit_type?: string | null
+          id?: string
+          scroll_depth_percentage?: number | null
+          session_id?: string | null
+          time_on_page_seconds?: number | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exit_events_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "funnel_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       failed_login_attempts: {
         Row: {
           attempt_type: string
@@ -4561,54 +4658,96 @@ export type Database = {
       funnel_sessions: {
         Row: {
           anon_id: string
+          browser_name: string | null
+          browser_version: string | null
+          city: string | null
           country: string | null
+          country_code: string | null
           created_at: string
           device: string | null
+          device_type: string | null
           ended_at: string | null
           id: string
+          ip_address: unknown | null
+          is_returning_visitor: boolean | null
           landing_page: string | null
           last_activity_at: string | null
+          os_name: string | null
           referrer: string | null
+          referrer_url: string | null
+          region: string | null
+          screen_resolution: string | null
+          session_metadata: Json | null
           started_at: string
           updated_at: string
+          user_agent: string | null
           user_id: string | null
           utm_campaign: string | null
           utm_medium: string | null
           utm_source: string | null
+          viewport_size: string | null
         }
         Insert: {
           anon_id: string
+          browser_name?: string | null
+          browser_version?: string | null
+          city?: string | null
           country?: string | null
+          country_code?: string | null
           created_at?: string
           device?: string | null
+          device_type?: string | null
           ended_at?: string | null
           id?: string
+          ip_address?: unknown | null
+          is_returning_visitor?: boolean | null
           landing_page?: string | null
           last_activity_at?: string | null
+          os_name?: string | null
           referrer?: string | null
+          referrer_url?: string | null
+          region?: string | null
+          screen_resolution?: string | null
+          session_metadata?: Json | null
           started_at?: string
           updated_at?: string
+          user_agent?: string | null
           user_id?: string | null
           utm_campaign?: string | null
           utm_medium?: string | null
           utm_source?: string | null
+          viewport_size?: string | null
         }
         Update: {
           anon_id?: string
+          browser_name?: string | null
+          browser_version?: string | null
+          city?: string | null
           country?: string | null
+          country_code?: string | null
           created_at?: string
           device?: string | null
+          device_type?: string | null
           ended_at?: string | null
           id?: string
+          ip_address?: unknown | null
+          is_returning_visitor?: boolean | null
           landing_page?: string | null
           last_activity_at?: string | null
+          os_name?: string | null
           referrer?: string | null
+          referrer_url?: string | null
+          region?: string | null
+          screen_resolution?: string | null
+          session_metadata?: Json | null
           started_at?: string
           updated_at?: string
+          user_agent?: string | null
           user_id?: string | null
           utm_campaign?: string | null
           utm_medium?: string | null
           utm_source?: string | null
+          viewport_size?: string | null
         }
         Relationships: []
       }
@@ -6933,6 +7072,56 @@ export type Database = {
         }
         Relationships: []
       }
+      scroll_depth_events: {
+        Row: {
+          anon_id: string
+          created_at: string
+          id: string
+          page_height: number | null
+          page_title: string | null
+          page_url: string
+          scroll_depth_percentage: number
+          session_id: string | null
+          time_to_depth_seconds: number | null
+          user_id: string | null
+          viewport_height: number | null
+        }
+        Insert: {
+          anon_id: string
+          created_at?: string
+          id?: string
+          page_height?: number | null
+          page_title?: string | null
+          page_url: string
+          scroll_depth_percentage: number
+          session_id?: string | null
+          time_to_depth_seconds?: number | null
+          user_id?: string | null
+          viewport_height?: number | null
+        }
+        Update: {
+          anon_id?: string
+          created_at?: string
+          id?: string
+          page_height?: number | null
+          page_title?: string | null
+          page_url?: string
+          scroll_depth_percentage?: number
+          session_id?: string | null
+          time_to_depth_seconds?: number | null
+          user_id?: string | null
+          viewport_height?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scroll_depth_events_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "funnel_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       security_config: {
         Row: {
           config_key: string
@@ -8718,6 +8907,62 @@ export type Database = {
           phone?: string | null
         }
         Relationships: []
+      }
+      traffic_sources: {
+        Row: {
+          anon_id: string
+          campaign_name: string | null
+          content: string | null
+          created_at: string
+          id: string
+          landing_page: string
+          medium: string | null
+          referrer_domain: string | null
+          referrer_path: string | null
+          session_id: string | null
+          source_name: string | null
+          source_type: string
+          term: string | null
+        }
+        Insert: {
+          anon_id: string
+          campaign_name?: string | null
+          content?: string | null
+          created_at?: string
+          id?: string
+          landing_page: string
+          medium?: string | null
+          referrer_domain?: string | null
+          referrer_path?: string | null
+          session_id?: string | null
+          source_name?: string | null
+          source_type: string
+          term?: string | null
+        }
+        Update: {
+          anon_id?: string
+          campaign_name?: string | null
+          content?: string | null
+          created_at?: string
+          id?: string
+          landing_page?: string
+          medium?: string | null
+          referrer_domain?: string | null
+          referrer_path?: string | null
+          session_id?: string | null
+          source_name?: string | null
+          source_type?: string
+          term?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "traffic_sources_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "funnel_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       transactions: {
         Row: {
@@ -11167,6 +11412,10 @@ export type Database = {
         }[]
       }
       get_web_analytics: {
+        Args: { p_period?: string }
+        Returns: Json
+      }
+      get_web_analytics_enhanced: {
         Args: { p_period?: string }
         Returns: Json
       }

@@ -125,8 +125,8 @@ const AdminBookings = React.lazy(() =>
   import('../../pages/AdminBookings').then(module => ({ default: module.default })).catch(() => ({ default: () => <PlaceholderCard title="Booking Management" /> }))
 );
 
-const WebsiteAnalyticsDashboard = React.lazy(() => 
-  import('../analytics/WebsiteAnalyticsDashboard').then(module => ({ default: module.WebsiteAnalyticsDashboard })).catch(() => ({ default: () => <PlaceholderCard title="Website Analytics" /> }))
+const EnhancedWebAnalyticsDashboard = React.lazy(() => 
+  import('../analytics/EnhancedWebAnalyticsDashboard').then(module => ({ default: module.EnhancedWebAnalyticsDashboard })).catch(() => ({ default: () => <PlaceholderCard title="Enhanced Website Analytics" /> }))
 );
 
 const BulkServiceResearch = React.lazy(() => 
@@ -269,7 +269,7 @@ export function AdminContentRouter() {
         
         <Route path="/website-analytics" element={
           <Suspense fallback={<LoadingFallback title="Website Analytics" />}>
-            <WebsiteAnalyticsDashboard />
+            <EnhancedWebAnalyticsDashboard />
           </Suspense>
         } />
         
