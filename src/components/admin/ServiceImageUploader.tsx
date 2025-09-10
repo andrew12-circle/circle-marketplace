@@ -165,17 +165,27 @@ export const ServiceImageUploader = ({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex items-center gap-4">
-          <Avatar className="h-16 w-16">
-            <AvatarImage src={imageUrl} />
-            <AvatarFallback className="text-lg">
-              {serviceName?.charAt(0) || 'S'}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex-1">
+        <div className="space-y-3">
+          <div className="w-full h-20 bg-muted rounded-lg overflow-hidden border">
+            {imageUrl ? (
+              <img 
+                src={imageUrl} 
+                alt={serviceName}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                <div className="text-center">
+                  <ImageIcon className="h-8 w-8 mx-auto mb-1" />
+                  <p className="text-xs">No image uploaded</p>
+                </div>
+              </div>
+            )}
+          </div>
+          <div>
             <h3 className="font-semibold">{serviceName}</h3>
             <p className="text-sm text-muted-foreground">
-              {imageUrl ? 'Custom service image' : 'Using default letter avatar'}
+              {imageUrl ? 'Custom service image' : 'Upload an image to preview it here'}
             </p>
           </div>
         </div>
