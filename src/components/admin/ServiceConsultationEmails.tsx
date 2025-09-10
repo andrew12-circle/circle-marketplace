@@ -33,17 +33,24 @@ export const ServiceConsultationEmails = ({
   const [saving, setSaving] = useState(false);
 
   async function handleSave() {
+    console.log("🔄 Saving consultation emails:", { serviceId, emails });
     setSaving(true);
     try {
       await saveWithTimeout(async () => {
-        const { error } = await supabase
+        console.log("📤 Making Supabase update call...");
+        const { error, data } = await supabase
           .from("services")
-          .update({ consultation_emails: emails }) // empty array OK
-          .eq("id", serviceId);
+          .update({ consultation_emails: emails })
+          .eq("id", serviceId)
+          .select();
+        
+        console.log("📨 Supabase response:", { data, error });
         if (error) throw error;
       });
+      console.log("✅ Save successful");
       toast.success("Consultation emails saved");
     } catch (e: any) {
+      console.error("❌ Save failed:", e);
       toast.error(e?.message ?? "Failed to save emails");
     } finally {
       setSaving(false);

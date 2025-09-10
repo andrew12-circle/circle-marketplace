@@ -460,6 +460,7 @@ export const VendorContentManager = ({ vendorId, vendorName }: VendorContentMana
                         key={service.id}
                         serviceId={service.id}
                         serviceName={service.title}
+                        initialEmails={(service as any).consultation_emails || []}
                       />
                     ))}
                   </div>

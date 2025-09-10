@@ -1562,6 +1562,7 @@ export const ServiceManagementPanel = () => {
                       <ServiceConsultationEmails
                         serviceId={selectedService.id}
                         serviceName={selectedService.title}
+                        initialEmails={(selectedService as any).consultation_emails || []}
                       />
                     </div>
 
