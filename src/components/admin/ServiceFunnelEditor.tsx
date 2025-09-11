@@ -79,7 +79,7 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
   const { save: resilientSave, isSaving } = useResilientSave({
     maxRetries: 3,
     retryDelay: 1500,
-    timeout: 25000
+    timeout: 90000
   });
 
   // Draft management
@@ -254,7 +254,7 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
     
     console.log("[Admin ServiceFunnelEditor] Starting database update...");
     
-    const { data: response, error } = await supabase
+    const { error } = await supabase
       .from('services')
       .update({
         funnel_content: sanitizedFunnel,
@@ -266,8 +266,7 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
         pricing_note: service.pricing_note,
         updated_at: new Date().toISOString()
       })
-      .eq('id', service.id)
-      .select();
+      .eq('id', service.id);
 
     if (error) {
       console.error("[Admin ServiceFunnelEditor] Database error:", error);
@@ -287,10 +286,12 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
     // Only do scoped invalidation during autosave - no heavy operations
     queryClient.invalidateQueries({ queryKey: QUERY_KEYS.serviceById(service.id) });
     
-    return response;
+    return true;
   }, [service, onUpdate, invalidateServices]);
 
   const handleSave = async () => {
+    if (isSaving) return;
+    
     try {
       await resilientSave({ funnelData, pricingTiers }, performSave);
       setHasChanges(false);
