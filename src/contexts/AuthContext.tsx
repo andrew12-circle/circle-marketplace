@@ -11,6 +11,7 @@ import { getProStatus } from '@/lib/profile';
 import { useSessionManagement } from '@/hooks/useSessionManagement';
 import { SessionWarningDialog } from '@/components/session/SessionWarningDialog';
 import { ActiveSessionsDialog } from '@/components/session/ActiveSessionsDialog';
+import { AuthErrorHandler } from '@/utils/authErrorHandler';
 
 interface Profile {
   id: string;
@@ -479,44 +480,84 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     
     // Set up auth state listener FIRST (single instance)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         logger.log('Auth state change:', { event, hasUser: !!session?.user });
+        
+        // Handle auth errors during state changes
+        if (event === 'SIGNED_OUT' && session === null) {
+          const urlParams = new URLSearchParams(window.location.search);
+          const reason = urlParams.get('reason');
+          
+          if (reason === 'session_expired') {
+            logger.log('Session expired sign out detected');
+          }
+        }
+        
         setSession(session);
         setUser(session?.user ?? null);
         
-        switch (event) {
-          case 'TOKEN_REFRESHED':
-          case 'USER_UPDATED':
-            // nothing heavy; state above is enough
-            break;
-          case 'SIGNED_OUT':
+        try {
+          switch (event) {
+            case 'TOKEN_REFRESHED':
+              logger.log('Token refreshed successfully');
+              // Reset any auth error recovery state
+              AuthErrorHandler['resetRecoveryState']?.();
+              break;
+            case 'USER_UPDATED':
+              // nothing heavy; state above is enough
+              break;
+            case 'SIGNED_OUT':
+              setProfile(null);
+              setProvisionalProfile(null);
+              queryClient.clear();
+              break;
+          }
+          
+          // Defer any Supabase calls to prevent deadlock
+          if (session?.user) {
+            // Create provisional profile immediately for UI responsiveness
+            const provisional = createProvisionalProfile(session.user);
+            setProvisionalProfile(provisional);
+            
+            setTimeout(async () => {
+              try {
+                // Ensure profile exists before fetching
+                await ensureProfileExists(session.user.id);
+                await fetchProfile(session.user.id);
+                // Clear provisional once real profile loads
+                setProvisionalProfile(null);
+              } catch (error) {
+                // Handle potential auth errors during profile fetch
+                const handled = await AuthErrorHandler.handleAuthError(
+                  error, 
+                  'profile_fetch_on_auth_change',
+                  {
+                    onSignOut: () => signOut(),
+                    showToast: false // Don't show toast during auth state changes
+                  }
+                );
+                
+                if (!handled) {
+                  logger.error('Failed to fetch profile:', error);
+                  // Keep provisional profile if real fetch fails
+                }
+              }
+            }, 0);
+          } else {
             setProfile(null);
             setProvisionalProfile(null);
-            queryClient.clear();
-            break;
-        }
-        
-        // Defer any Supabase calls to prevent deadlock
-        if (session?.user) {
-          // Create provisional profile immediately for UI responsiveness
-          const provisional = createProvisionalProfile(session.user);
-          setProvisionalProfile(provisional);
-          
-          setTimeout(async () => {
-            try {
-              // Ensure profile exists before fetching
-              await ensureProfileExists(session.user.id);
-              await fetchProfile(session.user.id);
-              // Clear provisional once real profile loads
-              setProvisionalProfile(null);
-            } catch (error) {
-              logger.error('Failed to fetch profile:', error);
-              // Keep provisional profile if real fetch fails
+          }
+        } catch (stateError) {
+          logger.error('Error during auth state change:', stateError);
+          // Handle errors during auth state processing
+          await AuthErrorHandler.handleAuthError(
+            stateError,
+            'auth_state_change',
+            {
+              onSignOut: () => signOut(),
+              showToast: false
             }
-          }, 0);
-        } else {
-          setProfile(null);
-          setProvisionalProfile(null);
+          );
         }
         
         setLoading(false);
@@ -524,8 +565,26 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     );
 
     // THEN check for existing session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      logger.log('Initial session check:', { hasUser: !!session?.user });
+    supabase.auth.getSession().then(async ({ data: { session }, error: sessionError }) => {
+      logger.log('Initial session check:', { hasUser: !!session?.user, error: sessionError });
+      
+      // Handle session retrieval errors
+      if (sessionError) {
+        const handled = await AuthErrorHandler.handleAuthError(
+          sessionError,
+          'initial_session_check',
+          {
+            onSignOut: () => signOut(),
+            showToast: false // Don't show toast during initial load
+          }
+        );
+        
+        if (handled) {
+          setLoading(false);
+          return;
+        }
+      }
+      
       setSession(session);
       setUser(session?.user ?? null);
       
@@ -540,11 +599,35 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           // Clear provisional once real profile loads
           setProvisionalProfile(null);
         } catch (error) {
-          logger.error('Failed to fetch profile on session check:', error);
-          // Keep provisional profile if real fetch fails
+          // Handle auth errors during initial profile fetch
+          const handled = await AuthErrorHandler.handleAuthError(
+            error,
+            'initial_profile_fetch',
+            {
+              onSignOut: () => signOut(),
+              showToast: false
+            }
+          );
+          
+          if (!handled) {
+            logger.error('Failed to fetch profile on session check:', error);
+            // Keep provisional profile if real fetch fails
+          }
         }
       }
       
+      setLoading(false);
+    }).catch(async (error) => {
+      logger.error('Session check exception:', error);
+      // Handle exceptions during session check
+      await AuthErrorHandler.handleAuthError(
+        error,
+        'session_check_exception',
+        {
+          onSignOut: () => signOut(),
+          showToast: false
+        }
+      );
       setLoading(false);
     });
 

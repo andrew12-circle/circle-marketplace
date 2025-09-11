@@ -18,6 +18,7 @@ import { reportClientError } from "./utils/errorReporting";
 import "./utils/pageRecovery"; // Initialize page recovery
 import "./lib/console-filter"; // Initialize console filtering for extension noise
 import "./lib/analytics/posthog-throttle"; // Initialize PostHog rate limiting
+import "./utils/supabaseAuthInterceptor"; // Initialize auth error handling
 // Remove the old auth-bootstrap import - using new system
 import "./index.css";
 import "./i18n";
