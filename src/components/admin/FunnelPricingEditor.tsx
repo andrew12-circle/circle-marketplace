@@ -329,6 +329,13 @@ export const FunnelPricingEditor = ({
                             <option value="monthly">Monthly</option>
                             <option value="yearly">Yearly</option>
                             <option value="one-time">One-time</option>
+                            <option value="per-file">Per-file</option>
+                            <option value="per-user">Per-user</option>
+                            <option value="per-transaction">Per-transaction</option>
+                            <option value="per-listing">Per-listing</option>
+                            <option value="hourly">Hourly</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="quarterly">Quarterly</option>
                           </select>
                         </div>
                       </div>
