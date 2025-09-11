@@ -1110,11 +1110,19 @@ export const ServiceFunnelModal = ({
                                   {pkg.requestPricing ? 'Request Pricing' : `$${service.pro_price ? Math.round(parseFloat(service.pro_price)) : currentOriginalPrice || currentPrice}${period}`}
                                 </span>
                               </div>
-                              <div className="flex items-center justify-between text-sm bg-green-50 p-3 rounded-lg border border-green-200">
-                                <span className="text-green-700 font-medium">Co-Pay:</span>
-                                <span className="font-bold text-green-700 text-lg">
-                                  {pkg.requestPricing ? 'Request Pricing' : `$${Math.round(currentPrice * (1 - (service.respa_split_limit || 0) / 100))}${period}`}
-                                </span>
+                              <div className="bg-green-50 p-4 rounded-lg border border-green-200 space-y-1">
+                                <div className="flex items-center gap-2 text-sm text-green-700 font-medium">
+                                  <span>Co-Pay Available</span>
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                  </svg>
+                                </div>
+                                <div className="text-green-800 font-bold text-lg">
+                                  Your cost: {pkg.requestPricing ? 'Request Pricing' : `$${Math.round(currentPrice * (1 - (service.respa_split_limit || 0) / 100))}${period}`}
+                                </div>
+                                <div className="text-green-600 text-sm">
+                                  Up to {service.respa_split_limit || 50}% vendor contribution
+                                </div>
                               </div>
                             </>
                           );
