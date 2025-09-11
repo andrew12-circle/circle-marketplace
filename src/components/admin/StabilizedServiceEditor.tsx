@@ -10,7 +10,7 @@ import { queueServicePatch, isServiceSaving, cancelPendingSave } from "@/lib/adm
 import { useCanQuery } from "@/lib/dataLayer";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Check, Save, AlertCircle, Undo } from "lucide-react";
+import { Check, Save, AlertCircle, Undo, DollarSign, Percent } from "lucide-react";
 
 interface Service {
   id: string;
@@ -19,6 +19,10 @@ interface Service {
   category: string;
   is_active: boolean;
   is_featured: boolean;
+  retail_price?: number;
+  pro_price?: number;
+  copay_allowed?: boolean;
+  respa_split_limit?: number;
 }
 
 interface ServiceEditorProps {
@@ -219,6 +223,100 @@ export const StabilizedServiceEditor = ({ serviceId }: ServiceEditorProps) => {
             rows={3}
           />
         </div>
+
+        {/* Pricing & Copay Configuration */}
+        <Card className="bg-muted/10 border-l-4 border-l-primary">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <DollarSign className="w-4 h-4" />
+              Pricing & Copay Configuration
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="retail_price">Retail Price ($)</Label>
+                <Input
+                  id="retail_price"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={localData.retail_price || ''}
+                  onChange={(e) => handleFieldChange('retail_price', parseFloat(e.target.value) || 0)}
+                  disabled={isSaving}
+                  placeholder="0.00"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="pro_price">Circle Pro Price ($)</Label>
+                <Input
+                  id="pro_price"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={localData.pro_price || ''}
+                  onChange={(e) => handleFieldChange('pro_price', parseFloat(e.target.value) || 0)}
+                  disabled={isSaving}
+                  placeholder="0.00"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="copay_allowed"
+                  checked={localData.copay_allowed || false}
+                  onChange={(e) => handleFieldChange('copay_allowed', e.target.checked)}
+                  disabled={isSaving}
+                  className="w-4 h-4"
+                />
+                <Label htmlFor="copay_allowed">Allow Copay</Label>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="respa_split_limit" className="flex items-center gap-1">
+                  RESPA Split Limit
+                  <Percent className="w-3 h-3" />
+                </Label>
+                <Input
+                  id="respa_split_limit"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  max="100"
+                  value={localData.respa_split_limit || ''}
+                  onChange={(e) => handleFieldChange('respa_split_limit', parseFloat(e.target.value) || 0)}
+                  disabled={isSaving}
+                  placeholder="0.00"
+                />
+              </div>
+            </div>
+
+            {/* Copay Preview */}
+            {localData.copay_allowed && (localData.retail_price || localData.pro_price) && localData.respa_split_limit && (
+              <div className="p-3 bg-muted/20 rounded border">
+                <Label className="text-sm font-medium text-muted-foreground">Copay Preview</Label>
+                <div className="text-sm mt-1">
+                  {(() => {
+                    const basePrice = localData.pro_price || localData.retail_price || 0;
+                    const copayPrice = basePrice * (localData.respa_split_limit / 100);
+                    const savings = basePrice - copayPrice;
+                    return (
+                      <div className="space-y-1">
+                        <div>Base Price: ${basePrice.toFixed(2)}</div>
+                        <div>Copay Price: ${copayPrice.toFixed(2)}</div>
+                        <div className="text-green-600 font-medium">Agent Savings: ${savings.toFixed(2)} ({(100 - localData.respa_split_limit).toFixed(1)}% off)</div>
+                      </div>
+                    );
+                  })()}
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2">
