@@ -1107,7 +1107,7 @@ export const ServiceFunnelModal = ({
                               <div className="flex items-center justify-between text-sm">
                                 <span className="text-blue-600">Pro Member:</span>
                                 <span className="font-medium text-blue-600">
-                                  {pkg.requestPricing ? 'Request Pricing' : `$${Math.round(currentPrice * 0.85)}${period}`}
+                                  {pkg.requestPricing ? 'Request Pricing' : `$${service.pro_price ? Math.round(parseFloat(service.pro_price)) : currentOriginalPrice || currentPrice}${period}`}
                                 </span>
                               </div>
                               <div className="flex items-center justify-between text-sm bg-green-50 p-3 rounded-lg border border-green-200">
