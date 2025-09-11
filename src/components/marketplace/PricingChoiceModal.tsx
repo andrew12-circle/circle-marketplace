@@ -236,6 +236,98 @@ export const PricingChoiceModal = ({
             </CardContent>
           </Card>
 
+          {/* Co-Pay Option */}
+          <Card className={`border-2 ${isProMember ? 'border-green-200' : 'opacity-75 border-dashed border-orange-300'}`}>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Users className="w-5 h-5 text-green-600" />
+                Get Vendor Help (Co-Pay)
+                {!isProMember && (
+                  <Badge variant="outline" className="border-orange-300 text-orange-600 ml-auto">
+                    <Lock className="w-3 h-3 mr-1" />
+                    Pro Only
+                  </Badge>
+                )}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {/* Standard SSP Pricing */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className={`text-lg font-bold ${isProMember ? 'text-green-600' : 'text-gray-500'}`}>
+                    {isProMember ? coPayPrice.toFixed(2) : "0-50"}{service.price_duration ? `/${service.price_duration}` : ''}
+                  </span>
+                  <Badge variant="secondary" className="text-xs">SSP</Badge>
+                </div>
+                <span className="text-sm text-muted-foreground">
+                  Standard Rate
+                </span>
+              </div>
+              
+              {/* Non-SSP Potential Pricing */}
+              {isProMember && nonSspCoPayPrice > 0 && nonSspCoPayPrice < coPayPrice && (
+                <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-semibold text-blue-700">
+                        As low as ~{nonSspCoPayPrice.toFixed(2)}
+                      </span>
+                      <Badge variant="default" className="text-xs bg-blue-100 text-blue-700">Non-SSP</Badge>
+                    </div>
+                    <Info className="w-4 h-4 text-blue-600" />
+                  </div>
+                  <p className="text-xs text-blue-600">
+                    Potential price with Non-SSP vendors (subject to approval)
+                  </p>
+                </div>
+              )}
+              
+              <p className="text-sm text-muted-foreground">
+                {isProMember 
+                  ? `Get connected with a vendor partner. SSP vendors limited to ${service.respa_split_limit}% by RESPA compliance.`
+                  : "Connect with vetted vendor partners who can help with service costs."
+                }
+              </p>
+              
+              {isProMember && (
+                <div className="bg-amber-50 border border-amber-200 p-2 rounded text-xs text-amber-700">
+                  <AlertTriangle className="w-3 h-3 inline mr-1" />
+                  Final pricing depends on vendor approval and compliance requirements.
+                </div>
+              )}
+              
+              <Button 
+                className={`w-full ${isProMember ? 'bg-green-600 hover:bg-green-700 text-white' : ''}`} 
+                onClick={isProMember ? onChooseCoPay : undefined}
+                disabled={!isProMember}
+                variant={isProMember ? "default" : "outline"}
+              >
+                <Users className="w-4 h-4 mr-2" />
+                {isProMember ? "Find Vendor Partner" : "Upgrade to Pro for Vendor Network"}
+              </Button>
+              {!isProMember && (
+                <div className="mt-2 text-center">
+                  <p className="text-sm text-muted-foreground">
+                    <a 
+                      href="/pricing" 
+                      className="text-primary hover:underline font-medium"
+                    >
+                      Upgrade to Circle Pro
+                    </a>{" "}
+                    to access our exclusive vendor network
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* OR Divider */}
+          <div className="flex items-center justify-center">
+            <div className="flex-1 border-t border-muted-foreground/20"></div>
+            <span className="px-4 text-sm font-medium text-muted-foreground bg-background">OR use points</span>
+            <div className="flex-1 border-t border-muted-foreground/20"></div>
+          </div>
+
           {/* Agent Points Option */}
           {loadingPoints ? (
             <Card className="border-2 border-blue-200">
@@ -354,98 +446,6 @@ export const PricingChoiceModal = ({
               </CardContent>
             </Card>
           ) : null}
-
-          {/* OR Divider */}
-          <div className="flex items-center justify-center">
-            <div className="flex-1 border-t border-muted-foreground/20"></div>
-            <span className="px-4 text-sm font-medium text-muted-foreground bg-background">OR get your bill reduced</span>
-            <div className="flex-1 border-t border-muted-foreground/20"></div>
-          </div>
-
-          {/* Co-Pay Option */}
-          <Card className={`border-2 ${isProMember ? 'border-green-200' : 'opacity-75 border-dashed border-orange-300'}`}>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Users className="w-5 h-5 text-green-600" />
-                Get Vendor Help (Co-Pay)
-                {!isProMember && (
-                  <Badge variant="outline" className="border-orange-300 text-orange-600 ml-auto">
-                    <Lock className="w-3 h-3 mr-1" />
-                    Pro Only
-                  </Badge>
-                )}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {/* Standard SSP Pricing */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className={`text-lg font-bold ${isProMember ? 'text-green-600' : 'text-gray-500'}`}>
-                    {isProMember ? coPayPrice.toFixed(2) : "0-50"}{service.price_duration ? `/${service.price_duration}` : ''}
-                  </span>
-                  <Badge variant="secondary" className="text-xs">SSP</Badge>
-                </div>
-                <span className="text-sm text-muted-foreground">
-                  Standard Rate
-                </span>
-              </div>
-              
-              {/* Non-SSP Potential Pricing */}
-              {isProMember && nonSspCoPayPrice > 0 && nonSspCoPayPrice < coPayPrice && (
-                <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
-                  <div className="flex items-center justify-between mb-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-semibold text-blue-700">
-                        As low as ~{nonSspCoPayPrice.toFixed(2)}
-                      </span>
-                      <Badge variant="default" className="text-xs bg-blue-100 text-blue-700">Non-SSP</Badge>
-                    </div>
-                    <Info className="w-4 h-4 text-blue-600" />
-                  </div>
-                  <p className="text-xs text-blue-600">
-                    Potential price with Non-SSP vendors (subject to approval)
-                  </p>
-                </div>
-              )}
-              
-              <p className="text-sm text-muted-foreground">
-                {isProMember 
-                  ? `Get connected with a vendor partner. SSP vendors limited to ${service.respa_split_limit}% by RESPA compliance.`
-                  : "Connect with vetted vendor partners who can help with service costs."
-                }
-              </p>
-              
-              {isProMember && (
-                <div className="bg-amber-50 border border-amber-200 p-2 rounded text-xs text-amber-700">
-                  <AlertTriangle className="w-3 h-3 inline mr-1" />
-                  Final pricing depends on vendor approval and compliance requirements.
-                </div>
-              )}
-              
-              <Button 
-                className={`w-full ${isProMember ? 'bg-green-600 hover:bg-green-700 text-white' : ''}`} 
-                onClick={isProMember ? onChooseCoPay : undefined}
-                disabled={!isProMember}
-                variant={isProMember ? "default" : "outline"}
-              >
-                <Users className="w-4 h-4 mr-2" />
-                {isProMember ? "Find Vendor Partner" : "Upgrade to Pro for Vendor Network"}
-              </Button>
-              {!isProMember && (
-                <div className="mt-2 text-center">
-                  <p className="text-sm text-muted-foreground">
-                    <a 
-                      href="/pricing" 
-                      className="text-primary hover:underline font-medium"
-                    >
-                      Upgrade to Circle Pro
-                    </a>{" "}
-                    to access our exclusive vendor network
-                  </p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
 
           <Button variant="ghost" onClick={onClose} className="w-full">
             Cancel
