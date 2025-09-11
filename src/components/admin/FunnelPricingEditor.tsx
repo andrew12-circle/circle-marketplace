@@ -20,6 +20,7 @@ interface PricingTier {
   name: string;
   description: string;
   price: string;
+  pro_price?: string;
   originalPrice?: string;
   yearlyPrice?: string;
   yearlyOriginalPrice?: string;
@@ -303,43 +304,55 @@ export const FunnelPricingEditor = ({
                       </div>
                     </div>
 
-                    {/* Only show price fields in fixed mode */}
-                    {pricingMode !== 'features_only' && (
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor={`price-${tierIndex}`}>Price ($)</Label>
-                          <Input
-                            id={`price-${tierIndex}`}
-                            type="number"
-                            value={tier.price || ""}
-                            onChange={(e) => updateTier(tierIndex, 'price', e.target.value)}
-                            placeholder="0"
-                            min="0"
-                            step="0.01"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor={`duration-${tierIndex}`}>Duration</Label>
-                          <select
-                            id={`duration-${tierIndex}`}
-                            value={tier.duration || "monthly"}
-                            onChange={(e) => updateTier(tierIndex, 'duration', e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          >
-                            <option value="monthly">Monthly</option>
-                            <option value="yearly">Yearly</option>
-                            <option value="one-time">One-time</option>
-                            <option value="per-file">Per-file</option>
-                            <option value="per-user">Per-user</option>
-                            <option value="per-transaction">Per-transaction</option>
-                            <option value="per-listing">Per-listing</option>
-                            <option value="hourly">Hourly</option>
-                            <option value="weekly">Weekly</option>
-                            <option value="quarterly">Quarterly</option>
-                          </select>
-                        </div>
-                      </div>
-                    )}
+                     {/* Only show price fields in fixed mode */}
+                     {pricingMode !== 'features_only' && (
+                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                         <div className="space-y-2">
+                           <Label htmlFor={`price-${tierIndex}`}>Retail Price ($)</Label>
+                           <Input
+                             id={`price-${tierIndex}`}
+                             type="number"
+                             value={tier.price || ""}
+                             onChange={(e) => updateTier(tierIndex, 'price', e.target.value)}
+                             placeholder="0"
+                             min="0"
+                             step="0.01"
+                           />
+                         </div>
+                         <div className="space-y-2">
+                           <Label htmlFor={`pro-price-${tierIndex}`}>Circle Pro Price ($)</Label>
+                           <Input
+                             id={`pro-price-${tierIndex}`}
+                             type="number"
+                             value={tier.pro_price || ""}
+                             onChange={(e) => updateTier(tierIndex, 'pro_price', e.target.value)}
+                             placeholder="0"
+                             min="0"
+                             step="0.01"
+                           />
+                         </div>
+                         <div className="space-y-2">
+                           <Label htmlFor={`duration-${tierIndex}`}>Duration</Label>
+                           <select
+                             id={`duration-${tierIndex}`}
+                             value={tier.duration || "monthly"}
+                             onChange={(e) => updateTier(tierIndex, 'duration', e.target.value)}
+                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           >
+                             <option value="monthly">Monthly</option>
+                             <option value="yearly">Yearly</option>
+                             <option value="one-time">One-time</option>
+                             <option value="per-file">Per-file</option>
+                             <option value="per-user">Per-user</option>
+                             <option value="per-transaction">Per-transaction</option>
+                             <option value="per-listing">Per-listing</option>
+                             <option value="hourly">Hourly</option>
+                             <option value="weekly">Weekly</option>
+                             <option value="quarterly">Quarterly</option>
+                           </select>
+                         </div>
+                       </div>
+                     )}
 
                     {/* Options */}
                     <div className="flex items-center gap-6">
