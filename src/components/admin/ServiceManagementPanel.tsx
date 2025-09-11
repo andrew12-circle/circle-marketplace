@@ -560,6 +560,8 @@ export const ServiceManagementPanel = () => {
         direct_purchase_enabled: !!editForm.direct_purchase_enabled,
         respa_split_limit: respa,
         max_split_percentage_non_ssp: nonSsp,
+        ssp_allowed: editForm.ssp_allowed ?? true,
+        max_split_percentage_ssp: editForm.ssp_allowed ? (editForm.max_split_percentage_ssp ?? 0) : 0,
         retail_price: editForm.retail_price ?? null,
         pro_price: editForm.pro_price ?? null,
         price_duration: editForm.price_duration ?? null,
@@ -1490,37 +1492,70 @@ export const ServiceManagementPanel = () => {
                      </div>
                    </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                       <div className="space-y-2">
-                         <label className="text-sm font-medium">RESPA Split % (0–1000)</label>
-                         <div className="relative">
-                           <Input
-                             type="number"
-                             min="0"
-                             max="1000"
-                             step="1"
-                             className="pr-10"
-                            value={editForm.respa_split_limit || ''}
-                            onChange={(e) => setEditForm({ ...editForm, respa_split_limit: Number(e.target.value) })}
-                            placeholder="Enter percentage"
-                           />
-                           <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">%</span>
-                         </div>
-                       </div>
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">Non-SSP Split % (0–1000)</label>
-                        <div className="relative">
-                          <Input
-                            type="number"
-                            min="0"
-                            max="1000"
-                            step="1"
-                            className="pr-10"
-                            value={editForm.max_split_percentage_non_ssp || ''}
-                            onChange={(e) => setEditForm({ ...editForm, max_split_percentage_non_ssp: Number(e.target.value) })}
-                            placeholder="Enter percentage"
+                    <div className="space-y-4">
+                      {/* SSP Coverage Section */}
+                      <div className="p-4 border rounded-lg bg-gray-50">
+                        <h4 className="text-sm font-semibold mb-3">Settlement Service Provider Coverage</h4>
+                        <div className="flex items-center space-x-2 mb-3">
+                          <Switch
+                            checked={editForm.ssp_allowed !== false}
+                            onCheckedChange={(checked) => setEditForm({ ...editForm, ssp_allowed: checked })}
                           />
-                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">%</span>
+                          <label className="text-sm font-medium">SSP Allowed</label>
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">Max SSP Percentage (0–100)</label>
+                          <div className="relative">
+                            <Input
+                              type="number"
+                              min="0"
+                              max="100"
+                              step="1"
+                              className="pr-10"
+                              disabled={editForm.ssp_allowed === false}
+                              value={editForm.ssp_allowed === false ? 0 : (editForm.max_split_percentage_ssp || '')}
+                              onChange={(e) => {
+                                const value = Number(e.target.value);
+                                if (value >= 0 && value <= 100) {
+                                  setEditForm({ ...editForm, max_split_percentage_ssp: value });
+                                }
+                              }}
+                              placeholder="Enter percentage"
+                            />
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">%</span>
+                          </div>
+                          {editForm.max_split_percentage_ssp && (editForm.max_split_percentage_ssp < 0 || editForm.max_split_percentage_ssp > 100) && (
+                            <p className="text-red-500 text-xs">Percentage must be between 0 and 100</p>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Non-SSP Coverage Section */}
+                      <div className="p-4 border rounded-lg bg-blue-50">
+                        <h4 className="text-sm font-semibold mb-3">Non-Settlement Service Provider Coverage</h4>
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">Max Non-SSP Percentage (0–100)</label>
+                          <div className="relative">
+                            <Input
+                              type="number"
+                              min="0"
+                              max="100"
+                              step="1"
+                              className="pr-10"
+                              value={editForm.max_split_percentage_non_ssp || ''}
+                              onChange={(e) => {
+                                const value = Number(e.target.value);
+                                if (value >= 0 && value <= 100) {
+                                  setEditForm({ ...editForm, max_split_percentage_non_ssp: value });
+                                }
+                              }}
+                              placeholder="Enter percentage"
+                            />
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">%</span>
+                          </div>
+                          {editForm.max_split_percentage_non_ssp && (editForm.max_split_percentage_non_ssp < 0 || editForm.max_split_percentage_non_ssp > 100) && (
+                            <p className="text-red-500 text-xs">Percentage must be between 0 and 100</p>
+                          )}
                         </div>
                       </div>
                     </div>

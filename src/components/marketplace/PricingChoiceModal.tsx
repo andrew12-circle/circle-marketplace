@@ -21,6 +21,8 @@ interface PricingChoiceModalProps {
     price_duration?: string;
     requires_quote?: boolean;
     max_split_percentage_non_ssp?: number;
+    ssp_allowed?: boolean;
+    max_split_percentage_ssp?: number;
   };
   onChooseProPrice: () => void;
   onChooseCoPay: () => void;
@@ -253,43 +255,54 @@ export const PricingChoiceModal = ({
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {/* Standard SSP Pricing */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className={`text-lg font-bold ${isProMember ? 'text-green-600' : 'text-gray-500'}`}>
-                    {isProMember ? coPayPrice.toFixed(2) : "0-50"}{service.price_duration ? `/${service.price_duration}` : ''}
-                  </span>
-                  <Badge variant="secondary" className="text-xs">SSP</Badge>
-                </div>
-                <span className="text-sm text-muted-foreground">
-                  Standard Rate
-                </span>
-              </div>
-              
-              {/* Non-SSP Potential Pricing */}
-              {isProMember && nonSspCoPayPrice > 0 && nonSspCoPayPrice < coPayPrice && (
-                <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
-                  <div className="flex items-center justify-between mb-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-semibold text-blue-700">
-                        As low as ~{nonSspCoPayPrice.toFixed(2)}
-                      </span>
-                      <Badge variant="default" className="text-xs bg-blue-100 text-blue-700">Non-SSP</Badge>
-                    </div>
-                    <Info className="w-4 h-4 text-blue-600" />
-                  </div>
-                  <p className="text-xs text-blue-600">
-                    Potential price with Non-SSP vendors (subject to approval)
-                  </p>
-                </div>
-              )}
-              
-              <p className="text-sm text-muted-foreground">
-                {isProMember 
-                  ? `Get connected with a vendor partner. SSP vendors limited to ${service.respa_split_limit}% by RESPA compliance.`
-                  : "Connect with vetted vendor partners who can help with service costs."
-                }
-              </p>
+               {/* Dual Marketing Coverage Display */}
+               {(() => {
+                 const basePrice = parseFloat(service.pro_price?.replace(/[^\d.]/g, '') || service.retail_price?.replace(/[^\d.]/g, '') || '0');
+                 const sspAllowed = service.ssp_allowed !== false;
+                 const sspPct = service.max_split_percentage_ssp || 0;
+                 const nonSspPct = service.max_split_percentage_non_ssp || 0;
+                 
+                 const sspAgentPays = sspAllowed && sspPct > 0 ? basePrice * (1 - sspPct / 100) : null;
+                 const nonSspAgentPays = nonSspPct > 0 ? basePrice * (1 - nonSspPct / 100) : null;
+                 
+                 return (
+                   <div className="space-y-3">
+                     {/* SSP Coverage */}
+                     <div className="flex items-center justify-between">
+                       <div className="flex items-center gap-2">
+                         <span className={`text-sm font-medium ${isProMember ? 'text-green-600' : 'text-gray-500'}`}>
+                           Marketing Coverage from Settlement Service Provider:
+                         </span>
+                         <Badge variant="secondary" className="text-xs">SSP</Badge>
+                       </div>
+                     </div>
+                     <div className={`text-lg font-bold ${isProMember ? 'text-green-600' : 'text-gray-500'}`}>
+                       {isProMember ? (
+                         sspAgentPays !== null ? `Agent pays approximately $${sspAgentPays.toFixed(2)}` : 'Not eligible'
+                       ) : 'Pro Member Required'}
+                     </div>
+
+                     {/* Non-SSP Coverage */}
+                     <div className="flex items-center justify-between">
+                       <div className="flex items-center gap-2">
+                         <span className={`text-sm font-medium ${isProMember ? 'text-blue-600' : 'text-gray-500'}`}>
+                           Marketing Coverage from Non Settlement Service Provider:
+                         </span>
+                         <Badge variant="default" className="text-xs bg-blue-100 text-blue-700">Non-SSP</Badge>
+                       </div>
+                     </div>
+                     <div className={`text-lg font-bold ${isProMember ? 'text-blue-600' : 'text-gray-500'}`}>
+                       {isProMember ? (
+                         nonSspAgentPays !== null ? `Agent pays as low as approximately $${nonSspAgentPays.toFixed(2)}` : 'Not shown'
+                       ) : 'Pro Member Required'}
+                     </div>
+                   </div>
+                 );
+               })()}
+               
+               <div className="text-xs text-gray-600 border-t pt-2">
+                 Coverage requires an approved partner. Availability varies by vendor and agent profile. Amounts are examples only and not a guarantee of coverage. Circle is not stating RESPA compliance and does not assign a monetary value to points.
+               </div>
               
               {isProMember && (
                 <div className="bg-amber-50 border border-amber-200 p-2 rounded text-xs text-amber-700">

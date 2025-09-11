@@ -67,6 +67,9 @@ interface Service {
   requires_quote?: boolean;
   website_url?: string;
   direct_purchase_enabled?: boolean;
+  ssp_allowed?: boolean;
+  max_split_percentage_ssp?: number;
+  max_split_percentage_non_ssp?: number;
   pricing_tiers?: Array<{
     id: string;
     name: string;
@@ -1110,18 +1113,43 @@ export const ServiceFunnelModal = ({
                                   {pkg.requestPricing ? 'Request Pricing' : `$${service.pro_price ? Math.round(parseFloat(service.pro_price)) : currentOriginalPrice || currentPrice}${period}`}
                                 </span>
                               </div>
-                              <div className="bg-green-50 p-4 rounded-lg border border-green-200 space-y-1">
+                              <div className="bg-green-50 p-4 rounded-lg border border-green-200 space-y-3">
                                 <div className="flex items-center gap-2 text-sm text-green-700 font-medium">
-                                  <span>Co-Pay Available</span>
+                                  <span>Marketing Coverage Available</span>
                                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                   </svg>
                                 </div>
-                                <div className="text-green-800 font-bold text-lg">
-                                  Your cost: {pkg.requestPricing ? 'Request Pricing' : `$${Math.round(currentPrice * (1 - (service.respa_split_limit || 0) / 100))}${period}`}
-                                </div>
-                                <div className="text-green-600 text-sm">
-                                  Up to {service.respa_split_limit || 50}% vendor contribution
+                                
+                                {(() => {
+                                  const basePrice = parseFloat(service.pro_price?.replace(/[^\d.]/g, '') || service.retail_price?.replace(/[^\d.]/g, '') || '0');
+                                  const sspAllowed = service.ssp_allowed !== false;
+                                  const sspPct = service.max_split_percentage_ssp || 0;
+                                  const nonSspPct = service.max_split_percentage_non_ssp || 0;
+                                  
+                                  const sspAgentPays = sspAllowed && sspPct > 0 ? Math.round(basePrice * (1 - sspPct / 100)) : null;
+                                  const nonSspAgentPays = nonSspPct > 0 ? Math.round(basePrice * (1 - nonSspPct / 100)) : null;
+                                  
+                                  return (
+                                    <div className="space-y-2">
+                                      <div className="text-sm">
+                                        <div className="font-medium text-gray-700">Marketing Coverage from Settlement Service Provider:</div>
+                                        <div className="text-green-700">
+                                          {sspAgentPays !== null ? `Agent pays approximately $${sspAgentPays}${period}` : 'Not eligible'}
+                                        </div>
+                                      </div>
+                                      <div className="text-sm">
+                                        <div className="font-medium text-gray-700">Marketing Coverage from Non Settlement Service Provider:</div>
+                                        <div className="text-green-700">
+                                          {nonSspAgentPays !== null ? `Agent pays as low as approximately $${nonSspAgentPays}${period}` : 'Not shown'}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  );
+                                })()}
+                                
+                                <div className="text-xs text-gray-600 border-t pt-2">
+                                  Coverage requires an approved partner. Availability varies by vendor and agent profile. Amounts are examples only and not a guarantee of coverage. Circle is not stating RESPA compliance and does not assign a monetary value to points.
                                 </div>
                               </div>
                             </>

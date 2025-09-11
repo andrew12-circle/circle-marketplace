@@ -817,10 +817,10 @@ export const ServiceCard = ({
                      <div className="space-y-1">
                        <Tooltip delayDuration={0}>
                          <TooltipTrigger asChild>
-                            <div className="flex items-center justify-between p-2 bg-green-50 rounded-lg border border-green-200 opacity-75 cursor-pointer hover:opacity-100 transition-opacity" data-tour="copay-badge">
-                              <div className="flex items-center gap-1">
+                            <div className="space-y-2 p-2 bg-green-50 rounded-lg border border-green-200 opacity-75 cursor-pointer hover:opacity-100 transition-opacity" data-tour="copay-badge">
+                              <div className="flex items-center gap-1 mb-2">
                                 <Lock className="w-3 h-3 text-green-600" />
-                                <span className="text-sm font-medium text-green-600">{t('serviceCard.potentialCoPay')}</span>
+                                <span className="text-sm font-medium text-green-600">Marketing Coverage</span>
                                <button 
                                  className="w-3 h-3 rounded-full bg-green-600 flex items-center justify-center cursor-help hover:bg-green-700 transition-colors"
                                  onMouseEnter={() => {
@@ -832,15 +832,35 @@ export const ServiceCard = ({
                                  <span className="text-xs text-white">i</span>
                                </button>
                              </div>
-                             <span className="text-lg font-bold text-green-600">
-                               {formatPrice(
-                                 (service.is_verified 
-                                   ? extractNumericPrice(service.pro_price!) 
-                                   : extractNumericPrice(service.retail_price!)
-                                 ) * (1 - (service.respa_split_limit / 100)), 
-                                 service.price_duration || 'mo'
-                               )}
-                             </span>
+                             
+                             {(() => {
+                               const basePrice = service.is_verified 
+                                 ? extractNumericPrice(service.pro_price!) 
+                                 : extractNumericPrice(service.retail_price!);
+                               const sspAllowed = service.ssp_allowed !== false;
+                               const sspPct = service.max_split_percentage_ssp || 0;
+                               const nonSspPct = service.max_split_percentage_non_ssp || 0;
+                               
+                               const sspAgentPays = sspAllowed && sspPct > 0 ? basePrice * (1 - sspPct / 100) : null;
+                               const nonSspAgentPays = nonSspPct > 0 ? basePrice * (1 - nonSspPct / 100) : null;
+                               
+                               return (
+                                 <div className="space-y-1">
+                                   <div className="text-xs">
+                                     <span className="text-gray-600">Settlement Service Provider: </span>
+                                     <span className="font-medium text-green-600">
+                                       {sspAgentPays !== null ? formatPrice(sspAgentPays, service.price_duration || 'mo') : 'Not eligible'}
+                                     </span>
+                                   </div>
+                                   <div className="text-xs">
+                                     <span className="text-gray-600">Non Settlement Service Provider: </span>
+                                     <span className="font-medium text-blue-600">
+                                       {nonSspAgentPays !== null ? formatPrice(nonSspAgentPays, service.price_duration || 'mo') : 'Not shown'}
+                                     </span>
+                                   </div>
+                                 </div>
+                               );
+                             })()}
                            </div>
                           </TooltipTrigger>
                         </Tooltip>
