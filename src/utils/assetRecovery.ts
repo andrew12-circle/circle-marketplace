@@ -15,6 +15,10 @@ class AssetRecovery {
    * Initialize asset failure detection
    */
   initialize(): void {
+    // Temporarily disabled to stop fallback framework loop
+    console.log('🛑 Asset recovery temporarily disabled to prevent fallback loop');
+    return;
+    
     if (typeof window === 'undefined') return;
 
     // Listen for CSS MIME type failures

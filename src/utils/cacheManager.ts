@@ -21,6 +21,10 @@ class CacheManager {
    * Clear all browser caches if version mismatch (throttled)
    */
   checkAndClearCache(): void {
+    // Temporarily disabled to stop fallback framework loop
+    console.log('🛑 Cache version checking temporarily disabled to prevent recovery loop');
+    return;
+    
     const now = Date.now();
     const lastCheck = localStorage.getItem(LAST_CHECK_KEY);
     const oneHour = 60 * 60 * 1000; // 1 hour throttle
