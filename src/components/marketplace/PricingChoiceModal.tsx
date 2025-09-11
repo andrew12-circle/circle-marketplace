@@ -331,7 +331,7 @@ export const PricingChoiceModal = ({
           </div>
 
           {/* Agent Points Option */}
-          {loadingPoints ? (
+          {loadingPoints && user && isProMember ? (
             <Card className="border-2 border-blue-200">
               <CardContent className="p-4">
                 <p className="text-sm text-muted-foreground text-center">Loading your points...</p>
