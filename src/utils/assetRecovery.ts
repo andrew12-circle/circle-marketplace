@@ -7,9 +7,9 @@ import { cacheManager } from './cacheManager';
 
 class AssetRecovery {
   private failureCount = 0;
-  private readonly MAX_FAILURES = 2;
+  private readonly MAX_FAILURES = 5; // Increased from 2 to 5 to reduce false triggers
   private hasRecovered = false;
-  private readonly isDev = process.env.NODE_ENV === 'development';
+  private readonly isDev = window.location.hostname === 'localhost' || window.location.hostname.includes('localhost');
 
   /**
    * Initialize asset failure detection

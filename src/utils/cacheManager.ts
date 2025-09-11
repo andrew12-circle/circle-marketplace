@@ -4,7 +4,8 @@
  */
 
 const CACHE_VERSION_KEY = 'app_cache_version';
-const CURRENT_VERSION = '1.0.2';
+const CURRENT_VERSION = '1.0.3'; // Only increment when absolutely necessary
+const LAST_CHECK_KEY = 'cache_version_last_check';
 const SUPABASE_SESSION_KEYS = [
   'sb-ihzyuyfawapweamqzzlj-auth-token',
   'supabase.auth.token',
@@ -17,15 +18,27 @@ class CacheManager {
   private readonly SELF_HEAL_THROTTLE = 10 * 60 * 1000; // 10 minutes
 
   /**
-   * Clear all browser caches if version mismatch
+   * Clear all browser caches if version mismatch (throttled)
    */
   checkAndClearCache(): void {
+    const now = Date.now();
+    const lastCheck = localStorage.getItem(LAST_CHECK_KEY);
+    const oneHour = 60 * 60 * 1000; // 1 hour throttle
+    
+    // Only check version once per hour to prevent constant cache clearing
+    if (lastCheck && (now - parseInt(lastCheck)) < oneHour) {
+      return;
+    }
+    
     const storedVersion = localStorage.getItem(CACHE_VERSION_KEY);
     
     if (storedVersion !== CURRENT_VERSION) {
+      console.log(`Cache version mismatch: ${storedVersion} -> ${CURRENT_VERSION}`);
       this.clearAllCachePreserveSession();
       localStorage.setItem(CACHE_VERSION_KEY, CURRENT_VERSION);
     }
+    
+    localStorage.setItem(LAST_CHECK_KEY, now.toString());
   }
 
   /**
