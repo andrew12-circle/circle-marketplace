@@ -139,35 +139,37 @@ export const PricingChoiceModal = ({
             How would you like to purchase "{service.title}"?
           </p>
 
-          {/* Retail Price Option - Always Available */}
-          <Card className="border-2 border-gray-200">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base flex items-center gap-2">
-                <DollarSign className="w-5 h-5 text-gray-600" />
-                Pay Retail Price
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-lg font-bold text-gray-600">
-                  {retailPrice.toFixed(2)}{service.price_duration ? `/${service.price_duration}` : ''}
-                </span>
-                <span className="text-sm text-muted-foreground">
-                  {service.requires_quote ? "Book Consultation" : "Standard Price"}
-                </span>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Standard retail pricing available to everyone.
-              </p>
-              <Button 
-                className="w-full" 
-                onClick={onChooseProPrice}
-              >
-                <ShoppingCart className="w-4 h-4 mr-2" />
-                Add to Cart - {retailPrice.toFixed(2)}{service.price_duration ? `/${service.price_duration}` : ''}
-              </Button>
-            </CardContent>
-          </Card>
+          {/* Retail Price Option - Only for Non-Pro Members */}
+          {!isProMember && (
+            <Card className="border-2 border-gray-200">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <DollarSign className="w-5 h-5 text-gray-600" />
+                  Pay Retail Price
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-lg font-bold text-gray-600">
+                    {retailPrice.toFixed(2)}{service.price_duration ? `/${service.price_duration}` : ''}
+                  </span>
+                  <span className="text-sm text-muted-foreground">
+                    {service.requires_quote ? "Book Consultation" : "Standard Price"}
+                  </span>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Standard retail pricing available to everyone.
+                </p>
+                <Button 
+                  className="w-full" 
+                  onClick={onChooseProPrice}
+                >
+                  <ShoppingCart className="w-4 h-4 mr-2" />
+                  Add to Cart - {retailPrice.toFixed(2)}{service.price_duration ? `/${service.price_duration}` : ''}
+                </Button>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Circle Pro Price Option - Locked for Non-Pro */}
           <Card className={`border-2 ${isProMember ? 'border-circle-primary/20' : 'opacity-75 border-dashed border-orange-300'}`}>
