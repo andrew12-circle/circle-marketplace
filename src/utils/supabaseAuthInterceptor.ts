@@ -48,86 +48,18 @@ export function installSupabaseAuthInterceptor() {
  * Wrap Postgrest builder methods with auth error handling
  */
 function wrapPostgrestMethods() {
-  // We can't easily intercept all Postgrest methods due to how the builder pattern works
-  // Instead, we'll patch the client's from method to return wrapped builders
-  const originalFrom = supabase.from.bind(supabase);
-  
-  supabase.from = function(table: string) {
-    const builder = originalFrom(table);
-    
-    // Wrap the builder's promise methods
-    const originalThen = builder.then?.bind(builder);
-    const originalCatch = builder.catch?.bind(builder);
-    
-    if (originalThen) {
-      builder.then = function(onFulfilled?: any, onRejected?: any) {
-        return originalThen(
-          onFulfilled,
-          async (error: any) => {
-            // Handle auth errors
-            const handled = await AuthErrorHandler.handleAuthError(
-              error,
-              `supabase_query_${table}`,
-              {
-                showToast: false // Let the calling code decide on toasts
-              }
-            );
-            
-            // If we handled the error (like session refresh), we might want to retry
-            if (handled && error?.message?.includes('session')) {
-              logger.log('Auth error handled, original error will still be thrown for retry logic');
-            }
-            
-            // Always call the original rejection handler
-            if (onRejected) {
-              return onRejected(error);
-            }
-            throw error;
-          }
-        );
-      };
-    }
-    
-    if (originalCatch) {
-      builder.catch = function(onRejected: any) {
-        return originalCatch(async (error: any) => {
-          await AuthErrorHandler.handleAuthError(
-            error,
-            `supabase_query_${table}_catch`,
-            {
-              showToast: false
-            }
-          );
-          
-          return onRejected(error);
-        });
-      };
-    }
-    
-    return builder;
-  };
+  // Temporarily disabled to avoid breaking existing functionality
+  // The auth error handling is better handled in the AuthContext and AdminAuthWrapper
+  logger.log('Postgrest method wrapping skipped to maintain compatibility');
 }
 
 /**
  * Wrap RPC method with auth error handling
  */
 function wrapRpcMethod() {
-  supabase.rpc = function(fn: string, args?: any, options?: any) {
-    const promise = originalRpc(fn, args, options);
-    
-    return promise.catch(async (error: any) => {
-      await AuthErrorHandler.handleAuthError(
-        error,
-        `supabase_rpc_${fn}`,
-        {
-          showToast: false
-        }
-      );
-      
-      // Re-throw the error so calling code can handle it
-      throw error;
-    });
-  };
+  // For now, don't wrap RPC to avoid breaking existing functionality
+  // The RPC calls are working fine and the main auth issues are in the AuthContext
+  logger.log('RPC method wrapping skipped to maintain compatibility');
 }
 
 /**
