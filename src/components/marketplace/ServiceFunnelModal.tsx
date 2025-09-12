@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { useState, useEffect, useRef } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -68,9 +67,22 @@ interface Service {
   requires_quote?: boolean;
   website_url?: string;
   direct_purchase_enabled?: boolean;
+  copay_allowed?: boolean;
   ssp_allowed?: boolean;
   max_split_percentage_ssp?: number;
   max_split_percentage_non_ssp?: number;
+  default_package_id?: string;
+  pricing_packages?: Array<{
+    id: string;
+    label: string;
+    retail_price: number | null;
+    pro_price: number | null;
+    co_pay_price: number | null;
+    features?: string[];
+    popular?: boolean;
+    is_default?: boolean;
+    requestPricing?: boolean;
+  }>;
   pricing_tiers?: Array<{
     id: string;
     name: string;
@@ -91,6 +103,13 @@ interface Service {
     badge?: string;
     position: number;
     requestPricing?: boolean;
+    // Add missing properties for package compatibility
+    label?: string;
+    retail_price?: number | null;
+    pro_price?: number | null;
+    co_pay_price?: number | null;
+    popular?: boolean;
+    is_default?: boolean;
   }>;
   vendor: {
     id?: string;
@@ -186,17 +205,17 @@ interface ServiceFunnelModalProps {
   isOpen: boolean;
   onClose: () => void;
   service: Service;
-  initialPackageId?: string | null;
+  requestedId?: string | null;
 }
 export const ServiceFunnelModal = ({
   isOpen,
   onClose,
   service,
-  initialPackageId
+  requestedId
 }: ServiceFunnelModalProps) => {
-  // State for active package selection - prefer initialPackageId, then default, then resolved
+  // State for active package selection - prefer requestedId, then default, then resolved
   const [activePackageId, setActivePackageId] = useState<string | null>(
-    initialPackageId ?? service.default_package_id ?? null
+    requestedId ?? service.default_package_id ?? null
   );
   const [quantity, setQuantity] = useState(1);
   const [isConsultationFlowOpen, setIsConsultationFlowOpen] = useState(false);
@@ -257,28 +276,35 @@ export const ServiceFunnelModal = ({
     content: string;
   }> = fc?.faqSections as any || [];
 
-  // Use resolved package pricing
-  const { activePackage, retail, pro, coPay } = getPackagePrices(service, activePackageId);
+  // Use resolved package pricing - cast service for compatibility
+  const serviceForResolver = {
+    ...service,
+    retail_price: service.retail_price ? parseFloat(service.retail_price.replace(/[^\d.]/g, '')) : 0,
+    pro_price: service.pro_price ? parseFloat(service.pro_price.replace(/[^\d.]/g, '')) : 0,
+    co_pay_price: service.co_pay_price ? parseFloat(service.co_pay_price.replace(/[^\d.]/g, '')) : 0
+  };
+  const { activePackage, retail, pro, coPay } = getPackagePrices(serviceForResolver, activePackageId);
   
   // Debug package resolution in development
   if (process.env.NODE_ENV === 'development') {
-    debugPackageResolution(service, activePackageId);
+    debugPackageResolution(serviceForResolver, activePackageId);
   }
 
-  // Use actual pricing packages from database
-  const packages = service.pricing_packages?.length ? service.pricing_packages.map(pkg => ({
-    id: pkg.id,
-    name: pkg.label,
-    price: pkg.pro_price || pkg.retail_price || 0,
-    originalPrice: pkg.retail_price || undefined,
-    yearlyPrice: undefined, // Not supported in new structure yet
-    yearlyOriginalPrice: undefined,
-    duration: service.duration,
-    description: pkg.features?.join(', ') || '',
-    features: pkg.features || [],
-    popular: tier.isPopular,
-    requestPricing: tier.requestPricing
-  })) : [{
+  // Normalize packages from database - prioritize pricing_tiers, fallback to pricing_packages
+  const packages = (service.pricing_tiers?.length ? service.pricing_tiers : service.pricing_packages)?.length 
+    ? (service.pricing_tiers?.length ? service.pricing_tiers : service.pricing_packages).map(pkg => ({
+        id: pkg.id,
+        name: pkg.label || pkg.name,
+        price: pkg.pro_price || pkg.retail_price || 0,
+        originalPrice: pkg.retail_price || undefined,
+        yearlyPrice: undefined, // Not supported in new structure yet
+        yearlyOriginalPrice: undefined,
+        duration: service.duration,
+        description: pkg.features?.join(', ') || '',
+        features: pkg.features || [],
+        popular: pkg.popular || pkg.is_default,
+        requestPricing: pkg.requestPricing
+      })) : [{
     id: "basic",
     name: "Basic Package",
     price: retail * 0.75,
@@ -316,14 +342,15 @@ export const ServiceFunnelModal = ({
   
   const hasYearlyPricing = packages.some(pkg => pkg.yearlyPrice);
   
-  // Get the actual selected package from service.pricing_packages
-  const selectedPkgData = service.pricing_packages?.find(pkg => pkg.id === activePackageId) || service.pricing_packages?.[0];
+  // Get the actual selected package from database - prioritize pricing_tiers, fallback to pricing_packages
+  const dbPackages = service.pricing_tiers?.length ? service.pricing_tiers : service.pricing_packages;
+  const selectedPkgData = dbPackages?.find(pkg => pkg.id === activePackageId) || dbPackages?.[0];
   const selectedPkg = packages.find(pkg => pkg.id === activePackageId) || packages[0];
 
   // Initialize active package on component mount
   useEffect(() => {
     if (!activePackageId) {
-      const resolved = resolveActivePackage(service, initialPackageId);
+      const resolved = resolveActivePackage(serviceForResolver, requestedId);
       if (resolved) {
         setActivePackageId(resolved.id);
       } else if (packages.length > 0) {
@@ -332,7 +359,7 @@ export const ServiceFunnelModal = ({
         setActivePackageId(popularPackage?.id || packages[0].id);
       }
     }
-  }, [service, initialPackageId, activePackageId, packages]);
+  }, [service, requestedId, activePackageId, packages]);
   const handleAddToCart = () => {
     if (!user) {
       // Store the item for after sign in
@@ -348,7 +375,7 @@ export const ServiceFunnelModal = ({
       
       localStorage.setItem('circle-pending-cart-item', JSON.stringify(pendingItem));
       
-      toast({
+      toastHook({
         title: "Sign in required",
         description: "Create a free account or sign in to add items to your cart.",
       });
@@ -1125,8 +1152,8 @@ export const ServiceFunnelModal = ({
                                 <span className="text-gray-600">Retail:</span>
                                  <span className={`font-medium ${isProMember ? 'text-gray-500 line-through' : 'text-gray-800'}`}>
                                    {(() => {
-                                     // Find the actual package being rendered from service.pricing_packages
-                                     const actualPkg = service.pricing_packages?.find(p => p.id === pkg.id);
+                                     // Find the actual package being rendered from database packages
+                                     const actualPkg = dbPackages?.find(p => p.id === pkg.id);
                                      const retailPrice = actualPkg?.retail_price ?? (service.retail_price ? parseFloat(service.retail_price.replace(/[^\d.]/g, '')) : null);
                                      return retailPrice != null ? `$${retailPrice}${period}` : 'Request Pricing';
                                    })()}
@@ -1136,8 +1163,8 @@ export const ServiceFunnelModal = ({
                                 <span className="text-blue-600">Pro Member:</span>
                                  <span className="font-medium text-blue-600">
                                    {(() => {
-                                     // Find the actual package being rendered from service.pricing_packages
-                                     const actualPkg = service.pricing_packages?.find(p => p.id === pkg.id);
+                                     // Find the actual package being rendered from database packages
+                                     const actualPkg = dbPackages?.find(p => p.id === pkg.id);
                                      const proPrice = actualPkg?.pro_price ?? actualPkg?.retail_price ?? (service.pro_price ? parseFloat(service.pro_price.replace(/[^\d.]/g, '')) : null);
                                      return proPrice != null ? `$${proPrice}${period}` : 'Request Pricing';
                                    })()}
@@ -1152,11 +1179,13 @@ export const ServiceFunnelModal = ({
                                     </svg>
                                   </div>
                                   
-                                  {(() => {
-                                    const basePrice = parseFloat(service.pro_price?.replace(/[^\d.]/g, '') || service.retail_price?.replace(/[^\d.]/g, '') || '0');
-                                    const sspAllowed = service.ssp_allowed !== false;
-                                    const sspPct = service.max_split_percentage_ssp || 0;
-                                    const nonSspPct = service.max_split_percentage_non_ssp || 0;
+                                   {(() => {
+                                     // Use selected package pricing for co-pay calculation
+                                     const actualPkg = dbPackages?.find(p => p.id === pkg.id);
+                                     const basePrice = actualPkg?.pro_price ?? actualPkg?.retail_price ?? parseFloat(service.pro_price?.replace(/[^\d.]/g, '') || service.retail_price?.replace(/[^\d.]/g, '') || '0');
+                                     const sspAllowed = service.ssp_allowed !== false;
+                                     const sspPct = service.max_split_percentage_ssp || 0;
+                                     const nonSspPct = service.max_split_percentage_non_ssp || 0;
                                     
                                     const sspAgentPays = sspAllowed && sspPct > 0 ? Math.round(basePrice * (1 - sspPct / 100)) : null;
                                     const nonSspAgentPays = nonSspPct > 0 ? Math.round(basePrice * (1 - nonSspPct / 100)) : null;

@@ -583,7 +583,7 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
         isOpen={isPreviewOpen}
         onClose={() => setIsPreviewOpen(false)}
         service={previewService}
-        initialPackageId={currentEditingPackageId}
+        requestedId={currentEditingPackageId}
       />
     </div>
   );

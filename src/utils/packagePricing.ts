@@ -5,12 +5,14 @@
 
 export interface PricingPackage {
   id: string;
-  label: string;
+  label?: string;
+  name?: string;
   retail_price: number | null;
   pro_price: number | null;
   co_pay_price: number | null;
   features?: string[];
   popular?: boolean;
+  is_default?: boolean;
 }
 
 export interface Service {
@@ -20,6 +22,8 @@ export interface Service {
   pro_price: string | null;
   co_pay_price: string | null;
   pricing_packages?: PricingPackage[];
+  pricing_tiers?: PricingPackage[];
+  default_package_id?: string | null;
   [key: string]: any;
 }
 
@@ -78,15 +82,27 @@ export function formatCurrency(amount: number): string {
 }
 
 /**
- * Get the active package from service pricing packages
+ * Get normalized packages array from service
+ * Prioritizes pricing_tiers, falls back to pricing_packages
+ */
+export function getNormalizedPackages(service: Service): PricingPackage[] {
+  const packages = service.pricing_tiers?.length ? service.pricing_tiers : service.pricing_packages;
+  return packages ?? [];
+}
+
+/**
+ * Get the active package from service pricing
+ * Uses requestedId or default_package_id or first package
  */
 export function getActivePackage(
   service: Service,
-  activePackageId: string | null
+  requestedId?: string | null
 ): PricingPackage | null {
-  const packages = service.pricing_packages ?? [];
+  const packages = getNormalizedPackages(service);
   if (!packages.length) return null;
 
-  // Find by ID or return first package
-  return packages.find(pkg => pkg.id === activePackageId) ?? packages[0];
+  // Find by requested ID, then default ID, then first package
+  return packages.find(pkg => pkg.id === requestedId) 
+    ?? packages.find(pkg => pkg.id === service.default_package_id)
+    ?? packages[0];
 }
