@@ -87,11 +87,14 @@ export const TopDealsCarousel = ({ services, serviceRatings, onServiceClick }: T
         const { data, error } = await supabase
           .from('app_config')
           .select('top_deals_enabled')
-          .single();
+          .eq('id', '00000000-0000-0000-0000-000000000001')
+          .maybeSingle();
 
         if (!error && data?.top_deals_enabled !== undefined) {
           // For now, just use default weights since we only store enabled flag
           setTopDealsConfig({ enabled: data.top_deals_enabled });
+        } else if (error) {
+          console.warn('Failed to load top deals config:', error);
         }
       } catch (error) {
         console.warn('Failed to load Top Deals config:', error);

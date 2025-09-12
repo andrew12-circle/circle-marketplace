@@ -75,9 +75,13 @@ export const TopDealsManager = () => {
       const { data, error } = await supabase
         .from('app_config')
         .select('top_deals_enabled')
-        .single();
+        .eq('id', '00000000-0000-0000-0000-000000000001')
+        .maybeSingle();
 
-      if (error) throw error;
+      if (error) {
+        console.warn('Error loading top deals config:', error);
+        return;
+      }
 
       if (data?.top_deals_enabled !== undefined) {
         setConfig({ ...DEFAULT_CONFIG, enabled: data.top_deals_enabled });

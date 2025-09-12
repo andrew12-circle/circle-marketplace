@@ -28,7 +28,8 @@ export const useFacilitatorConfig = (): FacilitatorConfig => {
         const { data, error } = await supabase
           .from('app_config')
           .select('facilitator_checkout_enabled')
-          .single();
+          .eq('id', '00000000-0000-0000-0000-000000000001')
+          .maybeSingle();
 
         if (error) {
           console.error('Error fetching facilitator config:', error);

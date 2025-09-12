@@ -41,7 +41,7 @@ export function useRemoteFeatureFlags() {
       const { data } = await supabase
         .from('app_config')
         .select('*')
-        .limit(1)
+        .eq('id', '00000000-0000-0000-0000-000000000001')
         .maybeSingle();
       
       // Parse any feature flag config if we add it later

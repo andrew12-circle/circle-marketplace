@@ -431,7 +431,7 @@ export const ServiceManagementPanel = () => {
   const fetchServices = async () => {
     try {
       setError(null);
-      console.log('ServiceManagementPanel: Fetching services...');
+      console.log('📋 ServiceManagementPanel: Fetching services...');
 
       // First try a simple query without the join to see if that's the issue
       const {
@@ -441,10 +441,10 @@ export const ServiceManagementPanel = () => {
         ascending: false
       });
       if (error) throw error;
-      console.log('ServiceManagementPanel: Successfully loaded', data?.length || 0, 'services');
+      console.log('✅ ServiceManagementPanel: Successfully loaded', data?.length || 0, 'services');
       setServices(data || []);
     } catch (error) {
-      console.error('ServiceManagementPanel: Error fetching services:', error);
+      console.error('❌ ServiceManagementPanel: Error fetching services:', error);
       const errorMessage = error instanceof Error ? error.message : 'Failed to fetch services';
       setError(errorMessage);
       toast({
