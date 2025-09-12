@@ -74,21 +74,17 @@ export const TopDealsManager = () => {
     try {
       const { data, error } = await supabase
         .from('app_config')
-        .select('top_deals_config')
+        .select('top_deals_enabled')
         .single();
 
       if (error) throw error;
 
-      if (data?.top_deals_config) {
-        setConfig({ ...DEFAULT_CONFIG, ...data.top_deals_config });
+      if (data?.top_deals_enabled !== undefined) {
+        setConfig({ ...DEFAULT_CONFIG, enabled: data.top_deals_enabled });
       }
     } catch (error) {
       console.error('Error loading config:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to load Top Deals configuration',
-        variant: 'destructive',
-      });
+      // Don't show error toast for missing config, just use defaults
     }
   };
 
@@ -99,7 +95,7 @@ export const TopDealsManager = () => {
         .from('app_config')
         .upsert({ 
           id: '00000000-0000-0000-0000-000000000001',
-          top_deals_config: config 
+          top_deals_enabled: config.enabled 
         });
 
       if (error) throw error;
