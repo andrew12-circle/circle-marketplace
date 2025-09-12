@@ -265,17 +265,17 @@ export const ServiceFunnelModal = ({
     debugPackageResolution(service, activePackageId);
   }
 
-  // Use pricing tiers if available, otherwise fallback to default packages
-  const packages = service.pricing_tiers?.length ? service.pricing_tiers.map(tier => ({
-    id: tier.id,
-    name: tier.name,
-    price: tier.requestPricing ? 0 : parseFloat(tier.price || "100"),
-    originalPrice: tier.originalPrice ? parseFloat(tier.originalPrice) : undefined,
-    yearlyPrice: tier.yearlyPrice ? parseFloat(tier.yearlyPrice) : undefined,
-    yearlyOriginalPrice: tier.yearlyOriginalPrice ? parseFloat(tier.yearlyOriginalPrice) : undefined,
-    duration: tier.duration,
-    description: tier.description,
-    features: tier.features?.map(f => f.text) || [],
+  // Use actual pricing packages from database
+  const packages = service.pricing_packages?.length ? service.pricing_packages.map(pkg => ({
+    id: pkg.id,
+    name: pkg.label,
+    price: pkg.pro_price || pkg.retail_price || 0,
+    originalPrice: pkg.retail_price || undefined,
+    yearlyPrice: undefined, // Not supported in new structure yet
+    yearlyOriginalPrice: undefined,
+    duration: service.duration,
+    description: pkg.features?.join(', ') || '',
+    features: pkg.features || [],
     popular: tier.isPopular,
     requestPricing: tier.requestPricing
   })) : [{
@@ -316,7 +316,9 @@ export const ServiceFunnelModal = ({
   
   const hasYearlyPricing = packages.some(pkg => pkg.yearlyPrice);
   
-  const selectedPkg = packages.find(pkg => pkg.id === activePackageId) || packages[1];
+  // Get the actual selected package from service.pricing_packages
+  const selectedPkgData = service.pricing_packages?.find(pkg => pkg.id === activePackageId) || service.pricing_packages?.[0];
+  const selectedPkg = packages.find(pkg => pkg.id === activePackageId) || packages[0];
 
   // Initialize active package on component mount
   useEffect(() => {
@@ -336,8 +338,8 @@ export const ServiceFunnelModal = ({
       // Store the item for after sign in
       const pendingItem = {
         id: service.id,
-      title: `${service.title} - ${selectedPkg.name}`,
-      price: selectedPkg.price * quantity,
+        title: `${service.title} - ${selectedPkgData?.label || 'Selected Package'}`,
+        price: (selectedPkgData?.pro_price || selectedPkgData?.retail_price || 0) * quantity,
         vendor: service.vendor?.name || 'Direct Service',
         image_url: service.image_url,
         requiresQuote: service.requires_quote,
@@ -360,8 +362,8 @@ export const ServiceFunnelModal = ({
 
     addToCart({
       id: service.id,
-      title: `${service.title} - ${selectedPkg.name}`,
-      price: selectedPkg.price * quantity,
+      title: `${service.title} - ${selectedPkgData?.label || 'Selected Package'}`,
+      price: (selectedPkgData?.pro_price || selectedPkgData?.retail_price || 0) * quantity,
       vendor: service.vendor?.name || 'Direct Service',
       image_url: service.image_url,
       requiresQuote: service.requires_quote,
@@ -371,8 +373,8 @@ export const ServiceFunnelModal = ({
     // Track the purchase action
     trackPurchase({
       id: service.id,
-      package_type: selectedPkg.name,
-      amount: selectedPkg.price * quantity,
+      package_type: selectedPkgData?.label || 'Default Package',
+      amount: (selectedPkgData?.pro_price || selectedPkgData?.retail_price || 0) * quantity,
       payment_method: 'cart'
     });
     onClose();
@@ -443,7 +445,7 @@ export const ServiceFunnelModal = ({
   };
 
   const buildShareMessage = () => {
-    const currentPrice = showYearlyPricing ? selectedPkg.yearlyPrice || selectedPkg.price : selectedPkg.price;
+    const currentPrice = selectedPkgData?.pro_price || selectedPkgData?.retail_price || 0;
     const shareUrl = buildShareUrl();
     
     return `Check out this deal: ${service.title} - ${formatPrice(currentPrice)}${service.description ? `\n\n${service.description.substring(0, 100)}${service.description.length > 100 ? '...' : ''}` : ''}\n\n${shareUrl}`;
@@ -1121,45 +1123,25 @@ export const ServiceFunnelModal = ({
                             <>
                               <div className="flex items-center justify-between text-sm">
                                 <span className="text-gray-600">Retail:</span>
-                                <span className={`font-medium ${isProMember ? 'text-gray-500 line-through' : 'text-gray-800'}`}>
-                                  {pkg.requestPricing ? 'Request Pricing' : (() => {
-                                    // Priority 1: Use service.retail_price (core field) first
-                                    const retailPrice = service.retail_price ? parseFloat(service.retail_price.replace(/[^\d.]/g, '')) : null;
-                                    if (retailPrice != null && !isNaN(retailPrice)) {
-                                      return `$${retailPrice}${period}`;
-                                    }
-                                    // Fallback: Use pricing tier only if core field is null/invalid
-                                    return `$${currentOriginalPrice || currentPrice}${period}`;
-                                  })()}
-                                </span>
+                                 <span className={`font-medium ${isProMember ? 'text-gray-500 line-through' : 'text-gray-800'}`}>
+                                   {(() => {
+                                     // Find the actual package being rendered from service.pricing_packages
+                                     const actualPkg = service.pricing_packages?.find(p => p.id === pkg.id);
+                                     const retailPrice = actualPkg?.retail_price ?? (service.retail_price ? parseFloat(service.retail_price.replace(/[^\d.]/g, '')) : null);
+                                     return retailPrice != null ? `$${retailPrice}${period}` : 'Request Pricing';
+                                   })()}
+                                 </span>
                               </div>
                               <div className="flex items-center justify-between text-sm">
                                 <span className="text-blue-600">Pro Member:</span>
-                                <span className="font-medium text-blue-600">
-                                  {pkg.requestPricing ? 'Request Pricing' : (() => {
-                                    console.log('[Pricing DEBUG] ServiceFunnelModal Pro Price Display', {
-                                      service_id: service.id,
-                                      service_pro_price: service.pro_price,
-                                      service_retail_price: service.retail_price,
-                                      pricing_tier_price: currentOriginalPrice || currentPrice
-                                    });
-                                    
-                                    // Priority 1: Use service.pro_price (core field) first
-                                    const proPrice = service.pro_price ? parseFloat(service.pro_price.replace(/[^\d.]/g, '')) : null;
-                                    if (proPrice != null && !isNaN(proPrice)) {
-                                      return `$${proPrice}${period}`;
-                                    }
-                                    
-                                    // Priority 2: Fallback to retail price if pro_price is null
-                                    const retailPrice = service.retail_price ? parseFloat(service.retail_price.replace(/[^\d.]/g, '')) : null;
-                                    if (retailPrice != null && !isNaN(retailPrice)) {
-                                      return `$${retailPrice}${period}`;
-                                    }
-                                    
-                                    // Final fallback: Use pricing tier only if both core fields are null/invalid
-                                    return `$${currentOriginalPrice || currentPrice}${period}`;
-                                  })()}
-                                </span>
+                                 <span className="font-medium text-blue-600">
+                                   {(() => {
+                                     // Find the actual package being rendered from service.pricing_packages
+                                     const actualPkg = service.pricing_packages?.find(p => p.id === pkg.id);
+                                     const proPrice = actualPkg?.pro_price ?? actualPkg?.retail_price ?? (service.pro_price ? parseFloat(service.pro_price.replace(/[^\d.]/g, '')) : null);
+                                     return proPrice != null ? `$${proPrice}${period}` : 'Request Pricing';
+                                   })()}
+                                 </span>
                               </div>
                               {service.copay_allowed && (
                                 <div className="bg-green-50 p-4 rounded-lg border border-green-200 space-y-3">
@@ -1247,7 +1229,7 @@ export const ServiceFunnelModal = ({
                   <>
                     <Button onClick={handleBuyNow} className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all flex-1">
                       <ShoppingCart className="w-5 h-5 mr-2" />
-                      Buy Now - ${selectedPkg?.price || '0'}
+                      Buy Now - ${selectedPkgData?.pro_price || selectedPkgData?.retail_price || '0'}
                       <ArrowRight className="w-5 h-5 ml-2" />
                     </Button>
                     <Button variant="outline" onClick={() => setIsConsultationFlowOpen(true)} className="border-2 border-gray-300 hover:border-gray-400 px-8 py-4 rounded-xl font-semibold text-lg flex-1">
@@ -1262,7 +1244,7 @@ export const ServiceFunnelModal = ({
                       Book Consultation
                       <ArrowRight className="w-5 h-5 ml-2" />
                     </Button>
-                    {!selectedPkg?.requestPricing && (
+                    {!service.requires_quote && (
                       <Button 
                         onClick={() => {
                           if (!user) {
@@ -1271,8 +1253,8 @@ export const ServiceFunnelModal = ({
                               type: 'service',
                               serviceId: service.id,
                               serviceName: service.title,
-                              packageName: selectedPkg?.name || 'Default Package',
-                              price: selectedPkg?.price || 0,
+                               packageName: selectedPkgData?.label || 'Default Package',
+                               price: selectedPkgData?.pro_price || selectedPkgData?.retail_price || 0,
                               timestamp: Date.now()
                             };
                             localStorage.setItem('pendingCartItem', JSON.stringify(pendingItem));
@@ -1286,7 +1268,7 @@ export const ServiceFunnelModal = ({
                         className="bg-primary text-primary-foreground hover:bg-primary/90 px-8 py-4 rounded-xl font-semibold text-lg flex-1"
                       >
                         <ShoppingCart className="w-5 h-5 mr-2" />
-                        {!user ? "Sign In to Add to Cart" : `Add to Cart - $${selectedPkg?.price || '0'}`}
+                        {!user ? "Sign In to Add to Cart" : `Add to Cart - $${selectedPkgData?.pro_price || selectedPkgData?.retail_price || '0'}`}
                       </Button>
                     )}
                   </>
@@ -1432,13 +1414,13 @@ export const ServiceFunnelModal = ({
         {/* Pricing Choice Modal */}
         {isPricingChoiceOpen && <PricingChoiceModal isOpen={isPricingChoiceOpen} onClose={() => setIsPricingChoiceOpen(false)} service={{
         id: service.id,
-        title: `${service.title} - ${selectedPkg?.name || 'Selected Package'}`,
-        pro_price: selectedPkg?.price?.toString() || '0',
-        retail_price: selectedPkg?.originalPrice?.toString() || selectedPkg?.price?.toString() || '0',
+         title: `${service.title} - ${selectedPkgData?.label || 'Selected Package'}`,
+         pro_price: (selectedPkgData?.pro_price || 0).toString(),
+         retail_price: (selectedPkgData?.retail_price || selectedPkgData?.pro_price || 0).toString(),
         respa_split_limit: 50,
         // Default 50% split limit
         price_duration: service.duration,
-        requires_quote: selectedPkg?.requestPricing || service.requires_quote,
+        requires_quote: service.requires_quote,
         max_split_percentage_non_ssp: (service as any).max_split_percentage_non_ssp
       }} onChooseProPrice={handleChooseProPrice} onChooseCoPay={handleChooseCoPay} onChooseAgentPoints={handleChooseAgentPoints} />}
 
@@ -1456,12 +1438,12 @@ export const ServiceFunnelModal = ({
           service={{
             id: service.id,
             title: service.title,
-            co_pay_price: selectedPkg?.price ? (selectedPkg.price * 0.5).toString() : '0',
-            retail_price: selectedPkg?.originalPrice?.toString() || selectedPkg?.price?.toString() || '0',
-            pro_price: selectedPkg?.price?.toString() || '0',
+             co_pay_price: selectedPkgData ? ((selectedPkgData.pro_price || selectedPkgData.retail_price || 0) * 0.5).toString() : '0',
+             retail_price: (selectedPkgData?.retail_price || selectedPkgData?.pro_price || 0).toString(),
+             pro_price: (selectedPkgData?.pro_price || selectedPkgData?.retail_price || 0).toString(),
             image_url: service.image_url,
             respa_split_limit: 50,
-            requires_quote: selectedPkg?.requestPricing || service.requires_quote
+            requires_quote: service.requires_quote
           }}
         />}
       </DialogContent>
