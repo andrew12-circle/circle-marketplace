@@ -23,6 +23,7 @@ import { useProviderTracking } from "@/hooks/useProviderTracking";
 import { supabase } from "@/integrations/supabase/client";
 import { ReviewRatingSystem } from "@/components/marketplace/ReviewRatingSystem";
 import { CustomersAlsoViewed } from "@/components/marketplace/CustomersAlsoViewed";
+import { FeatureRenderGuard } from "@/components/common/FeatureRenderGuard";
 import { SafeHTML } from "@/utils/htmlSanitizer";
 import { computePotentialCopayForService, extractNumericPrice } from "@/utils/dealPricing";
 import { resolveActivePackage, getPackagePrices, debugPackageResolution } from '@/utils/pricingResolver';
@@ -216,20 +217,20 @@ function findPkgByFlexibleKey(list: Pkg[], value?: string | null): Pkg | null {
   )
 }
 
-// Feature normalizer
+// Feature normalizer with safety guards
 function normalizeFeatures(feats: Pkg["features"]): NormFeature[] {
   if (!Array.isArray(feats)) return []
   return feats
     .map((f, i) => {
       if (typeof f === 'string') return { id: i, text: f, included: true }
-      if (f && typeof f === 'object') {
-        const text = String(f.text ?? '')
+      if (f && typeof f === 'object' && f.text) {
+        const text = String(f.text).trim()
         const included = f.included !== false
         return { id: f.id ?? i, text, included }
       }
       return null
     })
-    .filter((x): x is NormFeature => !!x && x.text.trim().length > 0)
+    .filter((x): x is NormFeature => !!x && x.text.length > 0)
 }
 
 export const ServiceFunnelModal = ({
@@ -238,11 +239,11 @@ export const ServiceFunnelModal = ({
   service,
   requestedId
 }: ServiceFunnelModalProps) => {
-  // Get normalized packages and resolve initial package
-  const packages: Pkg[] = Array.isArray(service.pricing_packages)
-    ? service.pricing_packages
-    : Array.isArray(service.pricing_tiers)
-      ? service.pricing_tiers
+  // Get normalized packages using centralized utility
+  const packages: Pkg[] = Array.isArray(service.pricing_tiers) && service.pricing_tiers.length
+    ? service.pricing_tiers
+    : Array.isArray(service.pricing_packages) && service.pricing_packages.length
+      ? service.pricing_packages
       : []
 
   const initialPkg =
@@ -329,7 +330,7 @@ export const ServiceFunnelModal = ({
     })
   }
 
-  // Create display packages from normalized packages
+  // Create display packages from normalized packages using utility functions
   const displayPackages = packages.length ? packages.map(pkg => ({
     id: pkg.id,
     name: pkg.label || pkg.name || `Package ${pkg.id}`,
@@ -1242,27 +1243,18 @@ export const ServiceFunnelModal = ({
                     </div>
 
                     <div className="space-y-3 mb-6">
-                      {(expandedFeatures[pkg.id] ? pkg.features : pkg.features.slice(0, 4)).map((feature, idx) => <div key={idx} className="flex items-start gap-2 text-sm">
-                          <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-                          <span className={`text-gray-600 ${!feature.included ? 'line-through opacity-60' : ''}`}>
-                            {feature.text}
-                          </span>
-                        </div>)}
-                      {pkg.features.length > 4 && <div 
-                          className="text-sm text-blue-500 hover:text-blue-600 text-center cursor-pointer transition-colors"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setExpandedFeatures(prev => ({
-                              ...prev,
-                              [pkg.id]: !prev[pkg.id]
-                            }));
-                          }}
-                        >
-                          {expandedFeatures[pkg.id] 
-                            ? '− Show less features' 
-                            : `+ ${pkg.features.length - 4} more features`
-                          }
-                        </div>}
+                      <FeatureRenderGuard 
+                        features={pkg.features}
+                        expandedFeatures={expandedFeatures}
+                        packageId={pkg.id}
+                        maxInitialFeatures={4}
+                        onToggleExpanded={(id) => {
+                          setExpandedFeatures(prev => ({
+                            ...prev,
+                            [id]: !prev[id]
+                          }));
+                        }}
+                      />
                     </div>
 
                     <Button className={`w-full py-3 rounded-xl font-semibold transition-all ${selected ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'}`} onClick={e => {

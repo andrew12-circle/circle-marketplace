@@ -13,6 +13,7 @@ export interface PricingPackage {
   features?: string[];
   popular?: boolean;
   is_default?: boolean;
+  sort_order?: number;
 }
 
 export interface Service {
@@ -101,8 +102,33 @@ export function getActivePackage(
   const packages = getNormalizedPackages(service);
   if (!packages.length) return null;
 
-  // Find by requested ID, then default ID, then first package
+  // Find by requested ID, then default ID, then first package with priority sorting
   return packages.find(pkg => pkg.id === requestedId) 
     ?? packages.find(pkg => pkg.id === service.default_package_id)
-    ?? packages[0];
+    ?? packages.find(pkg => pkg.popular || pkg.is_default)
+    ?? packages.sort((a, b) => (a.sort_order ?? 999) - (b.sort_order ?? 999))[0];
+}
+
+/**
+ * Normalize features to consistent format
+ * Handles both string arrays and feature objects
+ */
+export function normalizeFeatures(features: any): Array<{ text: string; included: boolean; id?: any }> {
+  if (!Array.isArray(features)) return [];
+  
+  return features
+    .map((f, i) => {
+      if (typeof f === 'string') return { text: f, included: true, id: i };
+      if (f && typeof f === 'object' && f.text) {
+        return { 
+          text: String(f.text), 
+          included: f.included !== false, 
+          id: f.id ?? i 
+        };
+      }
+      return null;
+    })
+    .filter((f): f is { text: string; included: boolean; id: any } => 
+      f !== null && f.text.trim().length > 0
+    );
 }
