@@ -55,7 +55,8 @@ export const FunnelPricingEditor = ({
   pricingCtaType = 'quote',
   pricingNote = '',
   onPricingModeChange,
-  onPricingFieldChange
+  onPricingFieldChange,
+  service
 }: PricingModeEditorProps) => {
   const [tiers, setTiers] = useState<PricingTier[]>(pricingTiers || []);
 
@@ -305,9 +306,7 @@ export const FunnelPricingEditor = ({
             </div>
           )}
         </div>
-      </CardHeader>
-      
-      <CardContent>
+
         {/* Show pricing cards editor only for fixed and features_only modes */}
         {(pricingMode === 'fixed' || pricingMode === 'features_only' || pricingMode === 'auto') && (
           <>
