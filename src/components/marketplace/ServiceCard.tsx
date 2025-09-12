@@ -905,56 +905,16 @@ export const ServiceCard = ({
 
             {/* Action Buttons - Responsive sizing */}
             <div className="flex gap-2 mt-auto">
-              {service.requires_quote ? (
-                <Button
-                  variant="outline" 
-                  className="flex-1 h-8 sm:h-9 md:h-10 text-xs sm:text-sm px-2 sm:px-3"
-                  onClick={handleAddToCart}
-                >
-                  <ShoppingCart className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
-                  <span className="hidden xs:inline">{t('serviceCard.addToCart')}</span>
-                  <span className="xs:hidden">Add</span>
-                </Button>
-              ) : service.direct_purchase_enabled && service.website_url ? (
-                <>
-                  {/* Only Add to Cart Button - Buy Now will be handled in cart */}
-                  <Button
-                    variant="outline"
-                    className="flex-1 h-8 sm:h-9 md:h-10 text-xs sm:text-sm px-2 sm:px-3"
-                    onClick={handleAddToCart}
-                  >
-                    <ShoppingCart className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
-                    <span className="hidden xs:inline">{t('serviceCard.addToCart')}</span>
-                    <span className="xs:hidden">Add</span>
-                  </Button>
-                </>
-              ) : (
-                <>
-                  {/* Primary action - Consultation (traditional flow) */}
-                  <Button
-                    className="flex-1 h-8 sm:h-9 md:h-10 text-xs sm:text-sm px-2 sm:px-3"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setIsConsultationFlowOpen(true);
-                    }}
-                  >
-                    <Calendar className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
-                    <span className="hidden sm:inline">{t('serviceCard.bookConsultation')}</span>
-                    <span className="sm:hidden">Book</span>
-                  </Button>
-                  
-                  {/* Add to Cart Button */}
-                  <Button
-                    variant="outline"
-                    className="flex-1 h-8 sm:h-9 md:h-10 text-xs sm:text-sm px-2 sm:px-3"
-                    onClick={handleAddToCart}
-                  >
-                    <ShoppingCart className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
-                    <span className="hidden xs:inline">{t('serviceCard.addToCart')}</span>
-                    <span className="xs:hidden">Add</span>
-                  </Button>
-                </>
-              )}
+              {/* Unified Add to Cart Button - all services go through funnel */}
+              <Button
+                variant="outline"
+                className="flex-1 h-8 sm:h-9 md:h-10 text-xs sm:text-sm px-2 sm:px-3"
+                onClick={handleAddToCart}
+              >
+                <ShoppingCart className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                <span className="hidden xs:inline">{t('serviceCard.addToCart')}</span>
+                <span className="xs:hidden">Add</span>
+              </Button>
               
               <Button 
                 variant="outline" 
