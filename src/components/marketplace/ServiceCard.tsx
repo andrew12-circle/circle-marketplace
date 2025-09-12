@@ -32,6 +32,7 @@ import { useABTest } from "@/hooks/useABTest";
 import { SponsoredLabel } from "./SponsoredLabel";
 import { ServiceBadges } from "./ServiceBadges";
 import { extractNumericPrice, computeDiscountPercentage, getDealDisplayPrice, getSavingsInfo } from '@/utils/dealPricing';
+import { getPackagePrices } from '@/utils/pricingResolver';
 import { useSponsoredTracking } from '@/hooks/useSponsoredTracking';
 
 interface ServiceRatingStats {
@@ -192,15 +193,16 @@ export const ServiceCard = ({
   };
 
   const addDirectlyToCart = async (coverageType?: 'pro' | 'copay', selectedVendor?: any) => {
-    // Determine price based on coverage type and user's membership
+  // Use resolved package pricing with fallback to service-level pricing
+    const { retail, pro, coPay } = getPackagePrices(service);
     let finalPrice = 0;
     
-    if (coverageType === 'copay' && service.co_pay_price) {
-      finalPrice = extractNumericPrice(service.co_pay_price);
-    } else if (isProMember && service.is_verified && service.pro_price) {
-      finalPrice = extractNumericPrice(service.pro_price);
-    } else if (service.retail_price) {
-      finalPrice = extractNumericPrice(service.retail_price);
+    if (coverageType === 'copay' && coPay) {
+      finalPrice = coPay;
+    } else if (isProMember && service.is_verified && pro) {
+      finalPrice = pro;
+    } else if (retail) {
+      finalPrice = retail;
     }
     
     // Critical: Validate pricing integrity before adding to cart

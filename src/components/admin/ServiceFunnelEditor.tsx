@@ -260,6 +260,14 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
     pricing_note: service.pricing_note
   });
 
+  // Track current editing package ID for preview
+  const [currentEditingPackageId, setCurrentEditingPackageId] = useState<string | null>(null);
+
+  // Track selected default package ID
+  const [selectedDefaultPackageId, setSelectedDefaultPackageId] = useState<string | null>(
+    (service as any).default_package_id || null
+  );
+
   // Update local pricing when service changes
   useEffect(() => {
     setLocalPricing({
@@ -272,6 +280,7 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
       pricing_cta_type: service.pricing_cta_type,
       pricing_note: service.pricing_note
     });
+    setSelectedDefaultPackageId((service as any).default_package_id || null);
   }, [service]);
 
   const performSave = useCallback(async (data: { funnelData: any; pricingTiers: any[] }) => {
@@ -287,6 +296,14 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
     const sanitizedFunnel = sanitizeFunnel(data.funnelData);
     const sanitizedPricing = JSON.parse(JSON.stringify(data.pricingTiers || []));
     
+    // Convert pricing packages to proper format with numeric prices
+    const updatedPackages = sanitizedPricing.map((p: any) => ({
+      ...p,
+      retail_price: p.retail_price == null ? null : Number(p.retail_price),
+      pro_price: p.pro_price == null ? null : Number(p.pro_price),
+      co_pay_price: p.co_pay_price == null ? null : Number(p.co_pay_price),
+    }));
+    
     console.log("[Admin ServiceFunnelEditor] Starting database update with fresh pricing data...");
     
     // CRITICAL: Use .select().single() to get fresh row back from database
@@ -294,11 +311,13 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
       .from('services')
       .update({
         funnel_content: sanitizedFunnel,
-        pricing_tiers: sanitizedPricing,
+        pricing_tiers: updatedPackages,
         // Use local pricing state that includes any edits made
-        retail_price: localPricing.retail_price,
-        pro_price: localPricing.pro_price,
-        co_pay_price: localPricing.co_pay_price,
+        retail_price: Number(localPricing.retail_price) || null,
+        pro_price: Number(localPricing.pro_price) || null,
+        co_pay_price: Number(localPricing.co_pay_price) || null,
+        pricing_packages: updatedPackages,  // Save as both pricing_tiers and pricing_packages
+        default_package_id: selectedDefaultPackageId || null,
         pricing_mode: localPricing.pricing_mode,
         pricing_external_url: localPricing.pricing_external_url,
         pricing_cta_label: localPricing.pricing_cta_label,
@@ -405,6 +424,8 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
     ...service,
     funnel_content: funnelData,
     pricing_tiers: pricingTiers,
+    pricing_packages: pricingTiers,  // Ensure both keys are available
+    default_package_id: selectedDefaultPackageId,
     category: service.category || 'general',
     is_featured: service.is_featured || false,
     is_top_pick: service.is_top_pick || false,
@@ -557,11 +578,12 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
         </TabsContent>
       </Tabs>
 
-      {/* Preview Modal */}
+      {/* Preview Modal - pass currentEditingPackageId for Package Two testing */}
       <ServiceFunnelModal
         isOpen={isPreviewOpen}
         onClose={() => setIsPreviewOpen(false)}
         service={previewService}
+        initialPackageId={currentEditingPackageId}
       />
     </div>
   );

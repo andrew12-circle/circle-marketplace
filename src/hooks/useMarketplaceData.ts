@@ -47,8 +47,45 @@ export interface Service {
   estimated_agent_split_percentage?: number;
   respa_category?: string;
   respa_notes?: string;
+  // Pricing package system
+  default_package_id?: string | null;
+  pricing_packages?: Array<{
+    id: string;
+    label: string;
+    retail_price: number | null;
+    pro_price: number | null;
+    co_pay_price: number | null;
+    features?: string[];
+    sort_order?: number;
+    is_default?: boolean;
+  }>;
+  // Legacy pricing tiers
+  pricing_tiers?: Array<{
+    id: string;
+    name: string;
+    description: string;
+    price: string;
+    originalPrice?: string;
+    yearlyPrice?: string;
+    yearlyOriginalPrice?: string;
+    duration: string;
+    features: Array<{
+      id: string;
+      text: string;
+      included: boolean;
+      isHtml?: boolean;
+    }>;
+    isPopular: boolean;
+    buttonText: string;
+    badge?: string;
+    position: number;
+    requestPricing?: boolean;
+    retail_price?: number | null;
+    pro_price?: number | null;
+    co_pay_price?: number | null;
+  }>;
   vendor: {
-    id?: string; // Added missing id field
+    id?: string;
     name: string;
     rating: number;
     review_count: number;
@@ -56,7 +93,7 @@ export interface Service {
     website_url?: string;
     logo_url?: string;
     support_hours?: string;
-    contact_email?: string; // Add contact email for upvote validation
+    contact_email?: string;
   } | null;
 }
 

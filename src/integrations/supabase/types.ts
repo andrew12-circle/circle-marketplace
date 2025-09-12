@@ -8171,6 +8171,7 @@ export type Database = {
           consultation_phone: string | null
           copay_allowed: boolean | null
           created_at: string | null
+          default_package_id: string | null
           description: string | null
           description_es: string | null
           description_fr: string | null
@@ -8244,6 +8245,7 @@ export type Database = {
           consultation_phone?: string | null
           copay_allowed?: boolean | null
           created_at?: string | null
+          default_package_id?: string | null
           description?: string | null
           description_es?: string | null
           description_fr?: string | null
@@ -8317,6 +8319,7 @@ export type Database = {
           consultation_phone?: string | null
           copay_allowed?: boolean | null
           created_at?: string | null
+          default_package_id?: string | null
           description?: string | null
           description_es?: string | null
           description_fr?: string | null

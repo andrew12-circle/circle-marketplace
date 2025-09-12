@@ -26,6 +26,7 @@ import { ReviewRatingSystem } from "@/components/marketplace/ReviewRatingSystem"
 import { CustomersAlsoViewed } from "@/components/marketplace/CustomersAlsoViewed";
 import { SafeHTML } from "@/utils/htmlSanitizer";
 import { computePotentialCopayForService, extractNumericPrice } from "@/utils/dealPricing";
+import { resolveActivePackage, getPackagePrices, debugPackageResolution } from '@/utils/pricingResolver';
 import { useSponsoredTracking } from '@/hooks/useSponsoredTracking';
 
 // Helper: detect and embed YouTube videos
@@ -185,13 +186,18 @@ interface ServiceFunnelModalProps {
   isOpen: boolean;
   onClose: () => void;
   service: Service;
+  initialPackageId?: string | null;
 }
 export const ServiceFunnelModal = ({
   isOpen,
   onClose,
-  service
+  service,
+  initialPackageId
 }: ServiceFunnelModalProps) => {
-  const [selectedPackage, setSelectedPackage] = useState<string>("");
+  // State for active package selection - prefer initialPackageId, then default, then resolved
+  const [activePackageId, setActivePackageId] = useState<string | null>(
+    initialPackageId ?? service.default_package_id ?? null
+  );
   const [quantity, setQuantity] = useState(1);
   const [isConsultationFlowOpen, setIsConsultationFlowOpen] = useState(false);
   const [isPricingChoiceOpen, setIsPricingChoiceOpen] = useState(false);
@@ -251,6 +257,14 @@ export const ServiceFunnelModal = ({
     content: string;
   }> = fc?.faqSections as any || [];
 
+  // Use resolved package pricing
+  const { activePackage, retail, pro, coPay } = getPackagePrices(service, activePackageId);
+  
+  // Debug package resolution in development
+  if (process.env.NODE_ENV === 'development') {
+    debugPackageResolution(service, activePackageId);
+  }
+
   // Use pricing tiers if available, otherwise fallback to default packages
   const packages = service.pricing_tiers?.length ? service.pricing_tiers.map(tier => ({
     id: tier.id,
@@ -267,8 +281,8 @@ export const ServiceFunnelModal = ({
   })) : [{
     id: "basic",
     name: "Basic Package",
-    price: parseFloat(service.retail_price || "100") * 0.75,
-    originalPrice: parseFloat(service.retail_price || "100"),
+    price: retail * 0.75,
+    originalPrice: retail,
     yearlyPrice: undefined,
     yearlyOriginalPrice: undefined,
     duration: "monthly",
@@ -278,8 +292,8 @@ export const ServiceFunnelModal = ({
   }, {
     id: "standard",
     name: "Standard Package",
-    price: parseFloat(service.retail_price || "100"),
-    originalPrice: parseFloat(service.retail_price || "100") * 1.33,
+    price: retail,
+    originalPrice: retail * 1.33,
     yearlyPrice: undefined,
     yearlyOriginalPrice: undefined,
     duration: "monthly",
@@ -290,36 +304,40 @@ export const ServiceFunnelModal = ({
   }, {
     id: "premium",
     name: "Premium Package",
-    price: parseFloat(service.retail_price || "100") * 1.5,
-    originalPrice: parseFloat(service.retail_price || "100") * 2,
+    price: retail * 1.5,
+    originalPrice: retail * 2,
     yearlyPrice: undefined,
     yearlyOriginalPrice: undefined,
     duration: "monthly",
     description: "Full-service solution with dedicated support",
     features: ["Everything in Standard", "Dedicated account manager", `${service.vendor?.support_hours || 'Business Hours'} support`, "Custom integrations"],
-    // Dynamic support hours
     requestPricing: false
   }];
   
   const hasYearlyPricing = packages.some(pkg => pkg.yearlyPrice);
   
-  const selectedPkg = packages.find(pkg => pkg.id === selectedPackage) || packages[1];
+  const selectedPkg = packages.find(pkg => pkg.id === activePackageId) || packages[1];
 
-  // Initialize selected package on component mount or when packages change
+  // Initialize active package on component mount
   useEffect(() => {
-    if (packages.length > 0 && !selectedPackage) {
-      // Find popular package first, otherwise use the first one
-      const popularPackage = packages.find(pkg => pkg.popular);
-      setSelectedPackage(popularPackage?.id || packages[0].id);
+    if (!activePackageId) {
+      const resolved = resolveActivePackage(service, initialPackageId);
+      if (resolved) {
+        setActivePackageId(resolved.id);
+      } else if (packages.length > 0) {
+        // Fallback to popular package or first package
+        const popularPackage = packages.find(pkg => pkg.popular);
+        setActivePackageId(popularPackage?.id || packages[0].id);
+      }
     }
-  }, [packages, selectedPackage]);
+  }, [service, initialPackageId, activePackageId, packages]);
   const handleAddToCart = () => {
     if (!user) {
       // Store the item for after sign in
       const pendingItem = {
         id: service.id,
-        title: `${service.title} - ${selectedPkg.name}`,
-        price: selectedPkg.price * quantity,
+      title: `${service.title} - ${selectedPkg.name}`,
+      price: selectedPkg.price * quantity,
         vendor: service.vendor?.name || 'Direct Service',
         image_url: service.image_url,
         requiresQuote: service.requires_quote,
