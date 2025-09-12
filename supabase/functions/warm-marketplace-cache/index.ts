@@ -18,22 +18,10 @@ Deno.serve(async (req) => {
 
     console.log('🔥 Starting marketplace cache warming...');
 
-    // Fetch all active services (to match frontend filtering)
+    // Fetch all active services (without join to avoid FK issues)
     const { data: services, error: servicesError } = await supabase
       .from('services')
-      .select(`
-        *,
-        vendors (
-          id,
-          name,
-          rating,
-          review_count,
-          is_verified,
-          website_url,
-          logo_url,
-          support_hours
-        )
-      `)
+      .select('*')
       .eq('is_active', true)
       .order('sort_order', { ascending: true })
       .order('created_at', { ascending: false })
