@@ -51,6 +51,10 @@ interface Service {
   category?: string;
   is_featured?: boolean;
   is_top_pick?: boolean;
+  // Add pricing fields
+  retail_price?: string | null;
+  pro_price?: string | null;
+  co_pay_price?: string | null;
   vendor?: {
     name: string;
     rating: number;
@@ -247,6 +251,11 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
   const performSave = useCallback(async (data: { funnelData: any; pricingTiers: any[] }) => {
     console.log("[Admin ServiceFunnelEditor] Resilient save started", {
       serviceId: service.id,
+      pricingFields: {
+        retail_price: service.retail_price,
+        pro_price: service.pro_price,
+        co_pay_price: service.co_pay_price
+      }
     });
     
     const sanitizedFunnel = sanitizeFunnel(data.funnelData);
@@ -259,6 +268,10 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
       .update({
         funnel_content: sanitizedFunnel,
         pricing_tiers: sanitizedPricing,
+        // Include all service pricing fields
+        retail_price: service.retail_price,
+        pro_price: service.pro_price,
+        co_pay_price: service.co_pay_price,
         pricing_mode: service.pricing_mode,
         pricing_external_url: service.pricing_external_url,
         pricing_cta_label: service.pricing_cta_label,
