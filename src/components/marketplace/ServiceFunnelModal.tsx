@@ -1274,6 +1274,29 @@ export const ServiceFunnelModal = ({
                 })}
               </div>
 
+              {/* Action Buttons with corrected CTA */}
+              <div className="mt-12 flex flex-col sm:flex-row gap-4 justify-center max-w-2xl mx-auto">
+                {service.direct_purchase_enabled && service.website_url ? (
+                  <>
+                    <Button onClick={handleBuyNow} className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all flex-1">
+                      <ShoppingCart className="w-5 h-5 mr-2" />
+                      Buy Now • {fmt(payNow)}
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button onClick={handleAddToCart} className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all flex-1">
+                      <ShoppingCart className="w-5 h-5 mr-2" />
+                      Add to Cart • {fmt(payNow)}
+                    </Button>
+                    <Button onClick={() => setIsConsultationFlowOpen(true)} variant="outline" className="border-2 border-gray-300 hover:border-gray-400 px-8 py-4 rounded-xl font-semibold text-lg flex-1">
+                      <Calendar className="w-5 h-5 mr-2" />
+                      Book Consultation
+                    </Button>
+                  </>
+                )}
+              </div>
+
               {/* Action Buttons */}
               <div className="mt-12 flex flex-col sm:flex-row gap-4 justify-center max-w-2xl mx-auto">
                 {service.direct_purchase_enabled && service.website_url ? (
