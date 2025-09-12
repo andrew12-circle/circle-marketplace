@@ -291,7 +291,17 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
     const updatedService = {
       ...service,
       funnel_content: data.funnelData,
-      pricing_tiers: data.pricingTiers
+      pricing_tiers: data.pricingTiers,
+      // Include all the pricing fields that were just saved to the database
+      retail_price: service.retail_price,
+      pro_price: service.pro_price,
+      co_pay_price: service.co_pay_price,
+      pricing_mode: service.pricing_mode,
+      pricing_external_url: service.pricing_external_url,
+      pricing_cta_label: service.pricing_cta_label,
+      pricing_cta_type: service.pricing_cta_type,
+      pricing_note: service.pricing_note,
+      updated_at: new Date().toISOString()
     };
 
     onUpdate(updatedService);
