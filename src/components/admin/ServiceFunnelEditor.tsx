@@ -306,6 +306,14 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
 
     onUpdate(updatedService);
     
+    console.log("[Admin ServiceFunnelEditor] Calling onUpdate with service data:", {
+      id: updatedService.id,
+      title: updatedService.title,
+      retail_price: updatedService.retail_price,
+      pro_price: updatedService.pro_price,
+      co_pay_price: updatedService.co_pay_price
+    });
+    
     // Only do scoped invalidation during autosave - no heavy operations
     queryClient.invalidateQueries({ queryKey: QUERY_KEYS.serviceById(service.id) });
     
@@ -486,7 +494,13 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
             }}
             onPricingFieldChange={(field, value) => {
               // Update service pricing fields immediately for UI responsiveness
+              console.log("[Admin ServiceFunnelEditor] Pricing field changed:", { field, value });
               const updatedService = { ...service, [field]: value };
+              console.log("[Admin ServiceFunnelEditor] Updated service pricing fields:", {
+                retail_price: updatedService.retail_price,
+                pro_price: updatedService.pro_price,
+                co_pay_price: updatedService.co_pay_price
+              });
               onUpdate(updatedService);
               setHasChanges(true);
             }}
