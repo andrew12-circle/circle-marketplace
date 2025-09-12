@@ -191,6 +191,14 @@ export const ServiceFunnelModal = ({
   onClose,
   service
 }: ServiceFunnelModalProps) => {
+  // Debug: Log service data to help identify the pricing issue
+  console.log('ServiceFunnelModal - Service Data:', {
+    id: service?.id,
+    title: service?.title,
+    pro_price: service?.pro_price,
+    retail_price: service?.retail_price
+  });
+
   const [selectedPackage, setSelectedPackage] = useState<string>("");
   const [quantity, setQuantity] = useState(1);
   const [isConsultationFlowOpen, setIsConsultationFlowOpen] = useState(false);
