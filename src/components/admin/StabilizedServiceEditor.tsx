@@ -288,7 +288,7 @@ export const StabilizedServiceEditor = ({ serviceId }: ServiceEditorProps) => {
                   min="0"
                   max="100"
                   value={localData.respa_split_limit || ''}
-                  onChange={(e) => handleFieldChange('respa_split_limit', parseFloat(e.target.value) || 0)}
+                  onChange={(e) => handleFieldChange('respa_split_limit', parseFloat(e.target.value) || 50)}
                   disabled={isSaving}
                   placeholder="0.00"
                 />
