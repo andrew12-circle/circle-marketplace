@@ -37,8 +37,8 @@ export function getPricesForPackage(
   pkg: PricingPackage,
   isPro: boolean = false
 ) {
-  // Parse package-level prices first
-  let retail = pkg.retail_price;
+  // Parse package-level prices first - handle both field name formats
+  let retail = pkg.retail_price ?? (pkg as any).price; // Handle 'price' fallback for pricing_tiers
   let pro = pkg.pro_price;
   let coPay = pkg.co_pay_price;
 
