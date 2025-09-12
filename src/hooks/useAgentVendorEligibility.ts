@@ -11,7 +11,7 @@ export const useAgentVendorEligibility = (vendorId: string) => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) {
-          setIsEligible(false);
+          setIsEligible(true); // Allow unauthenticated users to see pricing
           setLoading(false);
           return;
         }
