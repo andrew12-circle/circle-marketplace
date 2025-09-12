@@ -125,6 +125,7 @@ export const ServiceCard = ({
       const activePackage = getActivePackage(service);
       if (activePackage) {
         const { retail, pro, coPay } = getPricesForPackage(service, activePackage, isProMember);
+        console.log(`[${service.title}] Package pricing:`, { retail, pro, coPay, activePackage });
         return {
           retail,
           pro,
@@ -143,6 +144,12 @@ export const ServiceCard = ({
   };
 
   const effectivePricing = getEffectivePricing();
+  console.log(`[${service.title}] Final pricing:`, { 
+    effectivePricing, 
+    isVerified: service.is_verified, 
+    copayAllowed: service.copay_allowed,
+    respaSplitLimit: service.respa_split_limit
+  });
 
   const ensureDisclaimerLoaded = async () => {
     if (disclaimerContent) return;
