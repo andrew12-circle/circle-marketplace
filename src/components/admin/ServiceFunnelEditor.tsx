@@ -316,7 +316,6 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
         retail_price: Number(localPricing.retail_price) || null,
         pro_price: Number(localPricing.pro_price) || null,
         co_pay_price: Number(localPricing.co_pay_price) || null,
-        pricing_packages: updatedPackages,  // Save as both pricing_tiers and pricing_packages
         default_package_id: selectedDefaultPackageId || null,
         pricing_mode: localPricing.pricing_mode,
         pricing_external_url: localPricing.pricing_external_url,
