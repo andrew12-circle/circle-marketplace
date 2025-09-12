@@ -598,7 +598,13 @@ export const ServiceCard = ({
               {isProMember ? (
                 <>
                   {/* Pro Member View: Show pro price prominently or discount pending */}
-                  {showDiscountPending ? (
+                  {service.requires_quote && !service.retail_price && !service.pro_price ? (
+                    /* Quote-only service fallback */
+                    <div className="text-center">
+                      <div className="text-lg font-semibold text-foreground mb-1">Custom Pricing Available</div>
+                      <div className="text-sm text-muted-foreground">Contact for personalized quote</div>
+                    </div>
+                  ) : showDiscountPending ? (
                     <div className="text-center space-y-3">
                       {/* Discount Pending Status */}
                       <div className="inline-flex items-center gap-2 bg-amber-100 text-amber-800 text-sm font-medium px-3 py-1 rounded-full hidden">
@@ -728,14 +734,20 @@ export const ServiceCard = ({
               ) : (
                 <>
                   {/* Non-Pro Member View: Show retail as main price, others as incentives */}
-                  {service.retail_price && (
+                  {service.requires_quote && !service.retail_price && !service.pro_price ? (
+                    /* Quote-only service fallback */
+                    <div className="text-center mt-4">
+                      <div className="text-lg font-semibold text-foreground mb-1">Contact for Quote</div>
+                      <div className="text-sm text-muted-foreground">Custom pricing available</div>
+                    </div>
+                  ) : service.retail_price ? (
                     <div className="flex items-center justify-between mt-4">
                       <span className="text-sm text-muted-foreground">{t('serviceCard.listPrice')}</span>
                       <span className="text-xl font-bold text-foreground">
                         {formatPrice(extractNumericPrice(service.retail_price), service.price_duration || 'mo')}
                       </span>
                     </div>
-                   )}
+                   ) : null}
                     
                   {showDiscountPending ? (
                     <div className="space-y-2">
