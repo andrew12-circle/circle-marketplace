@@ -33,6 +33,7 @@ import { SponsoredLabel } from "./SponsoredLabel";
 import { ServiceBadges } from "./ServiceBadges";
 import { extractNumericPrice, computeDiscountPercentage, getDealDisplayPrice, getSavingsInfo } from '@/utils/dealPricing';
 import { getPackagePrices } from '@/utils/pricingResolver';
+import { getNormalizedPackages, getActivePackage, getPricesForPackage } from '@/utils/packagePricing';
 import { useSponsoredTracking } from '@/hooks/useSponsoredTracking';
 
 interface ServiceRatingStats {
@@ -103,6 +104,45 @@ export const ServiceCard = ({
   const shouldShowRating = !ratingsLoading || bulkRatings;
   
   const { disclaimer: activeDisclaimer } = useActiveDisclaimer();
+
+  // Helper to get effective pricing with package fallback
+  const getEffectivePricing = () => {
+    // First check if service has direct pricing
+    const hasDirectPricing = service.retail_price || service.pro_price || service.co_pay_price;
+    
+    if (hasDirectPricing) {
+      return {
+        retail: service.retail_price ? extractNumericPrice(service.retail_price) : 0,
+        pro: service.pro_price ? extractNumericPrice(service.pro_price) : 0,
+        coPay: service.co_pay_price ? extractNumericPrice(String(service.co_pay_price)) : null,
+        hasValidPricing: true
+      };
+    }
+    
+    // Fallback to package pricing
+    const packages = getNormalizedPackages(service);
+    if (packages.length > 0) {
+      const activePackage = getActivePackage(service);
+      if (activePackage) {
+        const { retail, pro, coPay } = getPricesForPackage(service, activePackage, isProMember);
+        return {
+          retail,
+          pro,
+          coPay,
+          hasValidPricing: retail > 0 || pro > 0
+        };
+      }
+    }
+    
+    return {
+      retail: 0,
+      pro: 0,
+      coPay: null,
+      hasValidPricing: false
+    };
+  };
+
+  const effectivePricing = getEffectivePricing();
 
   const ensureDisclaimerLoaded = async () => {
     if (disclaimerContent) return;
@@ -598,7 +638,7 @@ export const ServiceCard = ({
               {isProMember ? (
                 <>
                   {/* Pro Member View: Show pro price prominently or discount pending */}
-                  {service.requires_quote && !service.retail_price && !service.pro_price ? (
+                  {service.requires_quote && !effectivePricing.hasValidPricing ? (
                     /* Quote-only service fallback */
                     <div className="bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20 rounded-lg p-4">
                       <div className="flex items-center justify-center gap-2 mb-2">
@@ -655,39 +695,39 @@ export const ServiceCard = ({
                       </div>
                       
                       {/* Show retail price as fallback */}
-                      {service.retail_price && (
+                      {effectivePricing.retail > 0 && (
                         <div className="text-xl font-bold text-foreground">
-                          {formatPrice(extractNumericPrice(service.retail_price), service.price_duration || 'mo')}
+                          {formatPrice(effectivePricing.retail, service.price_duration || 'mo')}
                         </div>
                       )}
                     </div>
                   ) : (
                     <div className="text-center">
-                      {service.is_verified && service.pro_price ? (
+                      {service.is_verified && effectivePricing.pro > 0 ? (
                         <>
-                          {service.retail_price && (
+                          {effectivePricing.retail > 0 && (
                             <div className="text-xs text-muted-foreground mb-1">
                               <span className="line-through">
-                                Retail: {formatPrice(extractNumericPrice(service.retail_price), service.price_duration || 'mo')}
+                                Retail: {formatPrice(effectivePricing.retail, service.price_duration || 'mo')}
                               </span>
                             </div>
                           )}
                           <div className="flex items-center justify-center gap-2 text-xl font-bold text-blue-600">
                             <Crown className="w-4 h-4" />
-                            <span>{formatPrice(extractNumericPrice(service.pro_price), service.price_duration || 'mo')}</span>
+                            <span>{formatPrice(effectivePricing.pro, service.price_duration || 'mo')}</span>
                           </div>
                           <div className="text-xs text-blue-600 font-medium">Circle Pro Price</div>
                         </>
                       ) : (
                         <div className="text-xl font-bold text-foreground">
-                          {formatPrice(extractNumericPrice(service.retail_price || '0'), service.price_duration || 'mo')}
+                          {formatPrice(effectivePricing.retail, service.price_duration || 'mo')}
                         </div>
                       )}
                     </div>
                   )}
 
                   {/* Co-Pay Section - Mobile Optimized */}
-                  {service.copay_allowed && service.respa_split_limit && ((service.is_verified && service.pro_price) || (!service.is_verified && service.retail_price)) && (
+                  {service.copay_allowed && service.respa_split_limit && ((service.is_verified && effectivePricing.pro > 0) || (!service.is_verified && effectivePricing.retail > 0)) && (
                     <div className="bg-green-50 border-2 border-green-200 rounded-lg p-3" data-tour="copay-option">
                       <div className="text-center">
                         <div className="flex items-center justify-center gap-2 text-sm font-medium text-green-700 mb-1">
@@ -710,8 +750,8 @@ export const ServiceCard = ({
                         <div className="text-green-600 font-medium text-lg">
                           Your cost: {formatPrice(
                             (service.is_verified 
-                              ? extractNumericPrice(service.pro_price!) 
-                              : extractNumericPrice(service.retail_price!)
+                              ? effectivePricing.pro
+                              : effectivePricing.retail
                             ) * (1 - (service.respa_split_limit / 100)), 
                             service.price_duration || 'mo'
                           )}
@@ -738,7 +778,7 @@ export const ServiceCard = ({
               ) : (
                 <>
                   {/* Non-Pro Member View: Show retail as main price, others as incentives */}
-                  {service.requires_quote && !service.retail_price && !service.pro_price ? (
+                  {service.requires_quote && !effectivePricing.hasValidPricing ? (
                     /* Quote-only service fallback */
                     <div className="bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20 rounded-lg p-4 mt-4">
                       <div className="flex items-center justify-center gap-2 mb-2">
@@ -748,11 +788,11 @@ export const ServiceCard = ({
                       <div className="text-sm text-muted-foreground mb-2">Custom pricing available</div>
                       <div className="text-xs text-primary/70 font-medium">Tailored to your specific needs</div>
                     </div>
-                  ) : service.retail_price ? (
+                  ) : effectivePricing.retail > 0 ? (
                     <div className="flex items-center justify-between mt-4">
                       <span className="text-sm text-muted-foreground">{t('serviceCard.listPrice')}</span>
                       <span className="text-xl font-bold text-foreground">
-                        {formatPrice(extractNumericPrice(service.retail_price), service.price_duration || 'mo')}
+                        {formatPrice(effectivePricing.retail, service.price_duration || 'mo')}
                       </span>
                     </div>
                    ) : null}
@@ -760,11 +800,11 @@ export const ServiceCard = ({
                   {showDiscountPending ? (
                     <div className="space-y-2">
                       {/* Show Circle Pro price only if service is verified and has pro price */}
-                      {service.is_verified && service.pro_price ? (
+                      {service.is_verified && effectivePricing.pro > 0 ? (
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-muted-foreground">{t('serviceCard.circlePro')}</span>
                           <span className="font-semibold text-primary">
-                            {formatPrice(extractNumericPrice(service.pro_price), service.price_duration || 'mo')}
+                            {formatPrice(effectivePricing.pro, service.price_duration || 'mo')}
                           </span>
                         </div>
                       ) : (service.vendor?.contact_email && (
@@ -811,7 +851,7 @@ export const ServiceCard = ({
                       ))}
                     </div>
                   ) : (
-                    service.is_verified && service.pro_price && (
+                    service.is_verified && effectivePricing.pro > 0 && (
                       <div className="space-y-1">
                         <Tooltip>
                           <TooltipTrigger asChild>
@@ -822,7 +862,7 @@ export const ServiceCard = ({
                                 <Crown className="w-4 h-4 text-circle-primary" />
                               </div>
                               <span className="text-lg font-bold text-circle-primary">
-                                {formatPrice(extractNumericPrice(service.pro_price), service.price_duration || 'mo')}
+                                {formatPrice(effectivePricing.pro, service.price_duration || 'mo')}
                               </span>
                             </div>
                           </TooltipTrigger>
@@ -835,7 +875,7 @@ export const ServiceCard = ({
                     )
                   )}
                    
-                    {service.copay_allowed && service.respa_split_limit && ((service.is_verified && service.pro_price) || (!service.is_verified && service.retail_price)) && (
+                    {service.copay_allowed && service.respa_split_limit && ((service.is_verified && effectivePricing.pro > 0) || (!service.is_verified && effectivePricing.retail > 0)) && (
                      <div className="space-y-1">
                        <Tooltip delayDuration={0}>
                          <TooltipTrigger asChild>
@@ -855,11 +895,11 @@ export const ServiceCard = ({
                                </button>
                              </div>
                              
-                             {(() => {
-                               const basePrice = service.is_verified 
-                                 ? extractNumericPrice(service.pro_price!) 
-                                 : extractNumericPrice(service.retail_price!);
-                               const sspAllowed = service.ssp_allowed !== false;
+                              {(() => {
+                                const basePrice = service.is_verified 
+                                  ? effectivePricing.pro
+                                  : effectivePricing.retail;
+                                const sspAllowed = service.ssp_allowed !== false;
                                const sspPct = service.max_split_percentage_ssp || 0;
                                const nonSspPct = service.max_split_percentage_non_ssp || 0;
                                
