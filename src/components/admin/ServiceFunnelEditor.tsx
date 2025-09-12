@@ -423,7 +423,6 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
     ...service,
     funnel_content: funnelData,
     pricing_tiers: pricingTiers,
-    pricing_packages: pricingTiers,  // Ensure both keys are available
     default_package_id: selectedDefaultPackageId,
     category: service.category || 'general',
     is_featured: service.is_featured || false,

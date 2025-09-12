@@ -105,7 +105,6 @@ interface Service {
   max_split_percentage_ssp?: number;
   max_split_percentage_non_ssp?: number;
   default_package_id?: string;
-  pricing_packages?: Pkg[];
   pricing_tiers?: Pkg[];
   vendor: {
     id?: string;
@@ -242,9 +241,7 @@ export const ServiceFunnelModal = ({
   // Get normalized packages using centralized utility
   const packages: Pkg[] = Array.isArray(service.pricing_tiers) && service.pricing_tiers.length
     ? service.pricing_tiers
-    : Array.isArray(service.pricing_packages) && service.pricing_packages.length
-      ? service.pricing_packages
-      : []
+    : []
 
   const initialPkg =
     findPkgByFlexibleKey(packages, requestedId) ??
