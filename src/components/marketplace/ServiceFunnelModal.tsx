@@ -1100,7 +1100,7 @@ export const ServiceFunnelModal = ({
               </div>
               
               <div className={`grid gap-6 ${packages.length === 1 ? 'grid-cols-1 max-w-md mx-auto' : packages.length === 2 ? 'grid-cols-1 lg:grid-cols-2 max-w-4xl mx-auto' : packages.length === 3 ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 max-w-7xl mx-auto'}`}>
-                {packages.slice(0, 4).map((pkg, index) => <div key={pkg.id} className={`relative p-6 rounded-2xl border-2 cursor-pointer transition-all hover:scale-105 hover:shadow-xl ${selectedPackage === pkg.id ? 'border-blue-500 bg-white shadow-xl ring-4 ring-blue-100' : 'border-gray-200 bg-white hover:border-gray-300 shadow-lg'} ${pkg.popular ? 'ring-2 ring-blue-200' : ''}`} onClick={() => setSelectedPackage(pkg.id)}>
+                {packages.slice(0, 4).map((pkg, index) => <div key={pkg.id} className={`relative p-6 rounded-2xl border-2 cursor-pointer transition-all hover:scale-105 hover:shadow-xl ${activePackageId === pkg.id ? 'border-blue-500 bg-white shadow-xl ring-4 ring-blue-100' : 'border-gray-200 bg-white hover:border-gray-300 shadow-lg'} ${pkg.popular ? 'ring-2 ring-blue-200' : ''}`} onClick={() => setActivePackageId(pkg.id)}>
                     {pkg.popular && <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
                         <Badge className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-2 text-sm font-semibold shadow-lg border-0 rounded-full whitespace-nowrap">
                           ⭐ Most Popular
@@ -1232,11 +1232,11 @@ export const ServiceFunnelModal = ({
                         </div>}
                     </div>
 
-                    <Button className={`w-full py-3 rounded-xl font-semibold transition-all ${selectedPackage === pkg.id ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'}`} onClick={e => {
+                    <Button className={`w-full py-3 rounded-xl font-semibold transition-all ${activePackageId === pkg.id ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'}`} onClick={e => {
                   e.stopPropagation();
-                  setSelectedPackage(pkg.id);
+                  setActivePackageId(pkg.id);
                 }}>
-                      {selectedPackage === pkg.id ? '✓ Selected' : 'Select Package'}
+                      {activePackageId === pkg.id ? '✓ Selected' : 'Select Package'}
                     </Button>
                   </div>)}
               </div>
