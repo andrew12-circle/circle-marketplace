@@ -1103,7 +1103,7 @@ export const ServiceFunnelModal = ({
                             <>
                               <div className="flex items-center justify-between text-sm">
                                 <span className="text-gray-600">Retail:</span>
-                                <span className="font-medium text-gray-800">
+                                <span className={`font-medium ${isProMember ? 'text-gray-500 line-through' : 'text-gray-800'}`}>
                                   {pkg.requestPricing ? 'Request Pricing' : `$${currentOriginalPrice || currentPrice}${period}`}
                                 </span>
                               </div>
