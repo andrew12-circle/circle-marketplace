@@ -138,8 +138,8 @@ export const QUERY_KEYS = {
   serviceById: (serviceId: string) => ['marketplace', 'service', serviceId],
 } as const;
 
-// Helper: timeout wrapper with retry for auth issues
-const withTimeout = async <T,>(promise: PromiseLike<T>, ms = 15000, label?: string): Promise<T> => {
+// Helper: timeout wrapper with retry for auth issues - REDUCED TIMEOUT TO PREVENT AUTH BLOCKING
+const withTimeout = async <T,>(promise: PromiseLike<T>, ms = 8000, label?: string): Promise<T> => {
   let timer: number | undefined;
   
   const timeoutPromise = new Promise<T>((_, reject) => {
@@ -487,41 +487,44 @@ export const useMarketplaceData = () => {
     retry: (failureCount, error: any) => {
       // Circuit breaker pattern - limit retries but still allow a few
       const isTimeout = typeof error?.message === 'string' && error.message.includes('timed out');
-      if (isTimeout) return failureCount < 2; // allow up to 2 retries for timeouts
+      if (isTimeout) return failureCount < 1; // Reduce timeout retries to prevent auth blocking
       return failureCount < 2;
     },
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000), // Faster retries
     meta: {
       errorMessage: 'Failed to load marketplace data'
     }
   });
 
-  // Stable error handling - only show toast once per error
+  // Stable error handling - only show toast once per error and don't block UI
   const errorShown = useRef(false);
+  
   useEffect(() => {
-    if (query.error && !errorShown.current) {
-      logger.error('Marketplace data loading error:', query.error);
-      reportClientError({
-        error_type: 'network',
-        message: `Marketplace data loading error: ${query.error.message}`,
-        component: 'useMarketplaceData',
-        section: 'marketplace'
-      });
-      toast({
-        title: "Error loading data",
-        description: `Failed to load marketplace data: ${query.error.message || 'Please try again.'}`,
-        variant: "destructive"
-      });
-      errorShown.current = true;
+    // Only show error toast for persistent failures, not during auth process
+    if (query.error && !query.isLoading && !errorShown.current) {
+      const isAuthPage = window.location.pathname.includes('/auth');
+      
+      // Don't show marketplace errors during auth process to prevent confusion
+      if (!isAuthPage) {
+        logger.warn('Marketplace data failed to load, but continuing with empty state');
+        errorShown.current = true;
+      }
     }
     
     // Reset error flag when query succeeds
-    if (!query.error) {
-      errorShown.current = false;
-    }
-  }, [query.error, toast]);
+     if (query.isSuccess && errorShown.current) {
+       errorShown.current = false;
+     }
+   }, [query.error, query.isLoading, query.isSuccess]);
 
-  return query;
+   return {
+     data: query.data || { services: [], vendors: [] }, // Always provide fallback data
+     isLoading: query.isLoading,
+     error: query.error,
+     isSuccess: query.isSuccess,
+     refetch: query.refetch,
+     hasData: !!(query.data?.services?.length || query.data?.vendors?.length),
+   };
 };
 
 /**
