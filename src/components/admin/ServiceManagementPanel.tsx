@@ -6,21 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { 
-  Package, 
-  Search, 
-  Edit, 
-  Globe, 
-  MapPin, 
-  Star,
-  DollarSign,
-  Eye,
-  Building,
-  Tag,
-  ShoppingCart,
-  CheckCircle,
-  Clock
-} from 'lucide-react';
+import { Package, Search, Edit, Globe, MapPin, Star, DollarSign, Eye, Building, Tag, ShoppingCart, CheckCircle, Clock } from 'lucide-react';
 import { ServiceFunnelEditor } from './ServiceFunnelEditor';
 import { ServicePricingTiersEditor } from '@/components/marketplace/ServicePricingTiersEditor';
 import { ServiceFunnelModal } from '@/components/marketplace/ServiceFunnelModal';
@@ -40,14 +26,12 @@ import { ServiceImageUploader } from './ServiceImageUploader';
 import { AIServiceUpdater } from './AIServiceUpdater';
 import { ServicePricingMirror } from './ServicePricingMirror';
 import { ServiceComplianceTracker } from './ServiceComplianceTracker';
-
 interface PricingFeature {
   id: string;
   text: string;
   included: boolean;
   isHtml?: boolean;
 }
-
 interface PricingTier {
   id: string;
   name: string;
@@ -61,7 +45,6 @@ interface PricingTier {
   badge?: string;
   position: number;
 }
-
 interface Service {
   id: string;
   title: string;
@@ -104,7 +87,6 @@ interface Service {
   pricing_screenshot_captured_at?: string;
   pricing_page_url?: string;
 }
-
 interface ThumbnailItem {
   id: string;
   label: string;
@@ -112,7 +94,6 @@ interface ThumbnailItem {
   mediaUrl?: string;
   description?: string;
 }
-
 interface FunnelContent {
   headline: string;
   subheadline: string;
@@ -216,15 +197,17 @@ interface FunnelContent {
     message: string;
   };
 }
-
 type SaveResult = {
   savedAt?: string;
   verified?: boolean;
   message?: string;
 };
-
 const safeParseJSON = (val: string) => {
-  try { return JSON.parse(val); } catch { return null; }
+  try {
+    return JSON.parse(val);
+  } catch {
+    return null;
+  }
 };
 
 // Helper function to compare values with proper type handling
@@ -232,7 +215,7 @@ const compareValues = (a: any, b: any): boolean => {
   // Handle null/undefined cases
   if (a === null || a === undefined) a = '';
   if (b === null || b === undefined) b = '';
-  
+
   // Handle arrays
   if (Array.isArray(a) && Array.isArray(b)) {
     return JSON.stringify(a.sort()) === JSON.stringify(b.sort());
@@ -240,23 +223,24 @@ const compareValues = (a: any, b: any): boolean => {
   if (Array.isArray(a) || Array.isArray(b)) {
     return false;
   }
-  
+
   // Handle numbers
   if (typeof a === 'number' || typeof b === 'number') {
     return Number(a) === Number(b);
   }
-  
+
   // Handle booleans
   if (typeof a === 'boolean' || typeof b === 'boolean') {
     return Boolean(a) === Boolean(b);
   }
-  
+
   // Handle strings
   return String(a) === String(b);
 };
-
 export const ServiceManagementPanel = () => {
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
   const invalidateCache = useInvalidateMarketplace();
   const queryClient = useQueryClient();
   const [services, setServices] = useState<Service[]>([]);
@@ -290,12 +274,23 @@ export const ServiceManagementPanel = () => {
     thumbnailGallery: {
       enabled: false,
       title: 'What You\'ll Get',
-      items: [
-        { id: '1', label: 'Demo Video', icon: 'video' },
-        { id: '2', label: 'Case Study', icon: 'chart' },
-        { id: '3', label: 'Training', icon: 'book' },
-        { id: '4', label: 'Results', icon: 'trophy' }
-      ]
+      items: [{
+        id: '1',
+        label: 'Demo Video',
+        icon: 'video'
+      }, {
+        id: '2',
+        label: 'Case Study',
+        icon: 'chart'
+      }, {
+        id: '3',
+        label: 'Training',
+        icon: 'book'
+      }, {
+        id: '4',
+        label: 'Results',
+        icon: 'trophy'
+      }]
     },
     roiCalculator: {
       enabled: false,
@@ -309,30 +304,27 @@ export const ServiceManagementPanel = () => {
     testimonialCards: {
       enabled: false,
       title: 'Recent Success Stories',
-      cards: [
-        {
-          id: '1',
-          name: 'Sarah T.',
-          role: 'Keller Williams',
-          content: 'Increased my closings by 200% in just 3 months!',
-          rating: 5,
-          timeAgo: '2 weeks ago',
-          borderColor: 'green',
-          iconColor: 'green',
-          icon: 'trending'
-        },
-        {
-          id: '2',
-          name: 'Mike R.',
-          role: 'RE/MAX',
-          content: 'ROI was 320% in the first quarter alone.',
-          rating: 5,
-          timeAgo: '1 week ago',
-          borderColor: 'blue',
-          iconColor: 'blue',
-          icon: 'dollar'
-        }
-      ]
+      cards: [{
+        id: '1',
+        name: 'Sarah T.',
+        role: 'Keller Williams',
+        content: 'Increased my closings by 200% in just 3 months!',
+        rating: 5,
+        timeAgo: '2 weeks ago',
+        borderColor: 'green',
+        iconColor: 'green',
+        icon: 'trending'
+      }, {
+        id: '2',
+        name: 'Mike R.',
+        role: 'RE/MAX',
+        content: 'ROI was 320% in the first quarter alone.',
+        rating: 5,
+        timeAgo: '1 week ago',
+        borderColor: 'blue',
+        iconColor: 'blue',
+        icon: 'dollar'
+      }]
     },
     urgencySection: {
       enabled: false,
@@ -369,106 +361,121 @@ export const ServiceManagementPanel = () => {
   });
 
   // Default pricing tiers
-  const [pricingTiers, setPricingTiers] = useState<PricingTier[]>([
-    {
+  const [pricingTiers, setPricingTiers] = useState<PricingTier[]>([{
+    id: '1',
+    name: 'Basic',
+    description: 'Perfect for getting started',
+    price: '99',
+    duration: 'mo',
+    features: [{
       id: '1',
-      name: 'Basic',
-      description: 'Perfect for getting started',
-      price: '99',
-      duration: 'mo',
-      features: [
-        { id: '1', text: 'Basic Support', included: true },
-        { id: '2', text: 'Standard Features', included: true },
-        { id: '3', text: 'Email Support', included: true },
-        { id: '4', text: 'Priority Support', included: false }
-      ],
-      isPopular: false,
-      buttonText: 'Get Started',
-      position: 0
-    },
-    {
+      text: 'Basic Support',
+      included: true
+    }, {
       id: '2',
-      name: 'Professional',
-      description: 'Most popular choice for professionals',
-      price: '199',
-      originalPrice: '249',
-      duration: 'mo',
-      features: [
-        { id: '1', text: 'Priority Support', included: true },
-        { id: '2', text: 'Advanced Features', included: true },
-        { id: '3', text: 'Phone & Email Support', included: true },
-        { id: '4', text: 'Custom Integrations', included: true },
-        { id: '5', text: 'Dedicated Account Manager', included: false }
-      ],
-      isPopular: true,
-      buttonText: 'Choose Professional',
-      badge: 'Most Popular',
-      position: 1
-    }
-  ]);
-
+      text: 'Standard Features',
+      included: true
+    }, {
+      id: '3',
+      text: 'Email Support',
+      included: true
+    }, {
+      id: '4',
+      text: 'Priority Support',
+      included: false
+    }],
+    isPopular: false,
+    buttonText: 'Get Started',
+    position: 0
+  }, {
+    id: '2',
+    name: 'Professional',
+    description: 'Most popular choice for professionals',
+    price: '199',
+    originalPrice: '249',
+    duration: 'mo',
+    features: [{
+      id: '1',
+      text: 'Priority Support',
+      included: true
+    }, {
+      id: '2',
+      text: 'Advanced Features',
+      included: true
+    }, {
+      id: '3',
+      text: 'Phone & Email Support',
+      included: true
+    }, {
+      id: '4',
+      text: 'Custom Integrations',
+      included: true
+    }, {
+      id: '5',
+      text: 'Dedicated Account Manager',
+      included: false
+    }],
+    isPopular: true,
+    buttonText: 'Choose Professional',
+    badge: 'Most Popular',
+    position: 1
+  }]);
   useEffect(() => {
     fetchServices();
   }, []);
-
-
   useEffect(() => {
-    const filtered = services.filter(service =>
-      service.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      service.category?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      service.service_providers?.name?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filtered = services.filter(service => service.title.toLowerCase().includes(searchTerm.toLowerCase()) || service.category?.toLowerCase().includes(searchTerm.toLowerCase()) || service.service_providers?.name?.toLowerCase().includes(searchTerm.toLowerCase()));
     setFilteredServices(filtered);
   }, [services, searchTerm]);
-
   const fetchServices = async () => {
     try {
       setError(null);
       console.log('ServiceManagementPanel: Fetching services...');
-      
-      // First try a simple query without the join to see if that's the issue
-      const { data, error } = await supabase
-        .from('services')
-        .select('*')
-        .order('created_at', { ascending: false });
 
+      // First try a simple query without the join to see if that's the issue
+      const {
+        data,
+        error
+      } = await supabase.from('services').select('*').order('created_at', {
+        ascending: false
+      });
       if (error) throw error;
-      
       console.log('ServiceManagementPanel: Successfully loaded', data?.length || 0, 'services');
       setServices(data || []);
     } catch (error) {
       console.error('ServiceManagementPanel: Error fetching services:', error);
       const errorMessage = error instanceof Error ? error.message : 'Failed to fetch services';
       setError(errorMessage);
-      
       toast({
         title: 'Error Loading Services',
         description: errorMessage,
-        variant: 'destructive',
+        variant: 'destructive'
       });
     } finally {
       setLoading(false);
     }
   };
-
   const handleServiceSelect = (service: Service) => {
     setSelectedService(service);
     setEditForm(service);
     setIsEditingDetails(false);
     // Removed setShowFunnelEditor(false) - editor shows directly on funnel tab
-    
+
     // Load saved funnel content if present and normalize keys; otherwise seed from service
     const rawFunnel: any = (service as any).funnel_content;
     if (rawFunnel) {
       const parsed = typeof rawFunnel === 'string' ? safeParseJSON(rawFunnel) : rawFunnel;
-      const merged: any = { ...funnelContent, ...(parsed || {}) };
+      const merged: any = {
+        ...funnelContent,
+        ...(parsed || {})
+      };
       const normalized: FunnelContent = {
         ...merged,
         headline: merged.headline ?? service.title,
         subheadline: merged.subheadline ?? merged.subHeadline ?? merged.sub_headline ?? (service.description || ''),
         heroDescription: merged.heroDescription ?? merged.hero_description ?? merged.description ?? (service.description || ''),
-        estimatedRoi: typeof merged.estimatedRoi === 'number' ? merged.estimatedRoi : (service.estimated_roi || 0),
-        duration: merged.duration ?? (service.duration || ''),
+        estimatedRoi: typeof merged.estimatedRoi === 'number' ? merged.estimatedRoi : service.estimated_roi || 0,
+        duration: merged.duration ?? (service.duration || '')
       };
       setFunnelContent(normalized);
     } else {
@@ -492,23 +499,18 @@ export const ServiceManagementPanel = () => {
         setPricingTiers(rawTiers as PricingTier[]);
       }
     }
-
   };
-
   const handleServiceUpdate = async () => {
     if (!selectedService || saving || saveInProgress) return;
-
     setSaveInProgress(true);
     setSaving(true);
-
     try {
-
       // Basic required field validation
       if (!editForm.title || !editForm.category) {
         toast({
           title: 'Missing required fields',
           description: 'Please provide both Title and Category before saving.',
-          variant: 'destructive',
+          variant: 'destructive'
         });
         return;
       }
@@ -517,7 +519,7 @@ export const ServiceManagementPanel = () => {
       let respa = editForm.respa_split_limit ?? null;
       let nonSsp = editForm.max_split_percentage_non_ssp ?? null;
       const adjustments: string[] = [];
-      
+
       // Allow high ROI values up to 10000%
       if (typeof roi === 'number') {
         if (roi > 10000) {
@@ -529,7 +531,6 @@ export const ServiceManagementPanel = () => {
           adjustments.push(`ROI cannot be negative`);
         }
       }
-      
       if (typeof respa === 'number') {
         const original = respa;
         respa = Math.min(1000, Math.max(0, Math.round(respa)));
@@ -541,7 +542,10 @@ export const ServiceManagementPanel = () => {
         if (nonSsp !== original) adjustments.push(`Non-SSP split normalized to ${nonSsp}%`);
       }
       if (adjustments.length) {
-        toast({ title: 'Adjusted values', description: adjustments.join(' • ') });
+        toast({
+          title: 'Adjusted values',
+          description: adjustments.join(' • ')
+        });
       }
 
       // Prepare update data with direct field mapping
@@ -561,7 +565,7 @@ export const ServiceManagementPanel = () => {
         respa_split_limit: respa,
         max_split_percentage_non_ssp: nonSsp,
         ssp_allowed: editForm.ssp_allowed ?? true,
-        max_split_percentage_ssp: editForm.ssp_allowed ? (editForm.max_split_percentage_ssp ?? 0) : 0,
+        max_split_percentage_ssp: editForm.ssp_allowed ? editForm.max_split_percentage_ssp ?? 0 : 0,
         retail_price: editForm.retail_price ?? null,
         pro_price: editForm.pro_price ?? null,
         price_duration: editForm.price_duration ?? null,
@@ -569,14 +573,10 @@ export const ServiceManagementPanel = () => {
         tags: Array.isArray(editForm.tags) ? editForm.tags : null,
         updated_at: new Date().toISOString()
       };
-
       console.debug('Updating service with data:', updateData);
-
-      const { error } = await supabase
-        .from('services')
-        .update(updateData as any)
-        .eq('id', selectedService.id as any);
-
+      const {
+        error
+      } = await supabase.from('services').update(updateData as any).eq('id', selectedService.id as any);
       if (error) {
         console.error('Update error details:', {
           error,
@@ -589,15 +589,13 @@ export const ServiceManagementPanel = () => {
       }
 
       // Fetch updated service to get latest data
-      const { data: updatedServiceData, error: fetchError } = await supabase
-        .from('services')
-        .select(`
+      const {
+        data: updatedServiceData,
+        error: fetchError
+      } = await supabase.from('services').select(`
           *,
           service_providers (name, logo_url)
-        `)
-        .eq('id' as any, selectedService.id as any)
-        .single();
-
+        `).eq('id' as any, selectedService.id as any).single();
       if (fetchError) {
         console.error('Fetch error:', fetchError);
         throw fetchError;
@@ -607,244 +605,222 @@ export const ServiceManagementPanel = () => {
       setSelectedService(updatedServiceData as any);
       setServices(services.map(s => s.id === selectedService.id ? updatedServiceData as any : s));
       setEditForm(updatedServiceData as any);
-      
+
       // Optimistically update marketplace cache so front-end reflects changes immediately
       queryClient.setQueryData(QUERY_KEYS.marketplaceCombined, (prev: any) => {
         if (!prev) return prev;
         const updated = {
           ...prev,
-          services: Array.isArray(prev.services)
-            ? prev.services.map((s: any) =>
-                s.id === selectedService.id
-                  ? { ...s, ...(updatedServiceData as any) }
-                  : s
-              )
-            : prev.services,
+          services: Array.isArray(prev.services) ? prev.services.map((s: any) => s.id === selectedService.id ? {
+            ...s,
+            ...(updatedServiceData as any)
+          } : s) : prev.services
         };
         return updated;
       });
       // Narrow cache invalidation - only invalidate services, not everything
       invalidateCache.invalidateServices();
-      
       toast({
         title: 'Success',
-        description: 'Service updated successfully',
+        description: 'Service updated successfully'
       });
     } catch (error) {
       console.error('Error updating service:', error);
       const err: any = error;
       const code = err?.code || err?.status || '';
       const details = err?.details || err?.hint || err?.message || 'Failed to update service';
-      const permissionHint = (typeof details === 'string' && details.toLowerCase().includes('permission')) || code === '42501';
+      const permissionHint = typeof details === 'string' && details.toLowerCase().includes('permission') || code === '42501';
       const isPrecisionError = code === '22003';
       toast({
         title: 'Error',
-        description: isPrecisionError
-          ? 'Numeric limit exceeded: use percentages below 1000 (e.g., 999.99) and valid 2‑decimal values.'
-          : permissionHint
-            ? 'You do not have permission to update services. Please ensure you are signed in as an admin.'
-            : `${details}${code ? ` (code: ${code})` : ''}`,
-        variant: 'destructive',
+        description: isPrecisionError ? 'Numeric limit exceeded: use percentages below 1000 (e.g., 999.99) and valid 2‑decimal values.' : permissionHint ? 'You do not have permission to update services. Please ensure you are signed in as an admin.' : `${details}${code ? ` (code: ${code})` : ''}`,
+        variant: 'destructive'
       });
     } finally {
       setSaving(false);
       setSaveInProgress(false);
     }
   };
-
   const handleVerificationToggle = async (serviceId: string, currentStatus: boolean, event?: React.MouseEvent) => {
     if (event) {
       event.stopPropagation();
     }
-    
     try {
-      const { error } = await (supabase
-        .from('services')
-        .update as any)({ is_verified: !currentStatus })
-        .eq('id' as any, serviceId);
-
+      const {
+        error
+      } = await (supabase.from('services').update as any)({
+        is_verified: !currentStatus
+      }).eq('id' as any, serviceId);
       if (error) throw error;
 
       // Update local state
-      setServices(services.map(service => 
-        service.id === serviceId 
-          ? { ...service, is_verified: !currentStatus }
-          : service
-      ));
-
+      setServices(services.map(service => service.id === serviceId ? {
+        ...service,
+        is_verified: !currentStatus
+      } : service));
       if (selectedService?.id === serviceId) {
-        const updatedService = { ...selectedService, is_verified: !currentStatus };
+        const updatedService = {
+          ...selectedService,
+          is_verified: !currentStatus
+        };
         setSelectedService(updatedService);
         setEditForm(updatedService);
       }
-
       toast({
         title: 'Success',
-        description: `Service ${!currentStatus ? 'verified' : 'unverified'} successfully`,
+        description: `Service ${!currentStatus ? 'verified' : 'unverified'} successfully`
       });
     } catch (error) {
       console.error('Error updating verification:', error);
       toast({
         title: 'Error',
         description: 'Failed to update verification status',
-        variant: 'destructive',
+        variant: 'destructive'
       });
     }
   };
-
   const handleVisibilityToggle = async (serviceId: string, currentStatus: boolean, event?: React.MouseEvent) => {
     if (event) {
       event.stopPropagation();
     }
-    
     try {
-      const { error } = await (supabase
-        .from('services')
-        .update as any)({ is_active: !currentStatus })
-        .eq('id' as any, serviceId);
-
+      const {
+        error
+      } = await (supabase.from('services').update as any)({
+        is_active: !currentStatus
+      }).eq('id' as any, serviceId);
       if (error) throw error;
 
       // Update local state
-      setServices(services.map(service => 
-        service.id === serviceId 
-          ? { ...service, is_active: !currentStatus }
-          : service
-      ));
-
+      setServices(services.map(service => service.id === serviceId ? {
+        ...service,
+        is_active: !currentStatus
+      } : service));
       if (selectedService?.id === serviceId) {
-        const updatedService = { ...selectedService, is_active: !currentStatus };
+        const updatedService = {
+          ...selectedService,
+          is_active: !currentStatus
+        };
         setSelectedService(updatedService);
         setEditForm(updatedService);
       }
-
       toast({
         title: 'Success',
-        description: `Service ${!currentStatus ? 'activated' : 'deactivated'} successfully`,
+        description: `Service ${!currentStatus ? 'activated' : 'deactivated'} successfully`
       });
     } catch (error) {
       console.error('Error updating visibility:', error);
       toast({
         title: 'Error',
         description: 'Failed to update visibility status',
-        variant: 'destructive',
+        variant: 'destructive'
       });
     }
   };
-
   const handleAffiliateToggle = async (serviceId: string, currentStatus: boolean, event?: React.MouseEvent) => {
     if (event) {
       event.stopPropagation();
     }
-    
     try {
-      const { error } = await (supabase
-        .from('services')
-        .update as any)({ is_affiliate: !currentStatus })
-        .eq('id' as any, serviceId);
-
+      const {
+        error
+      } = await (supabase.from('services').update as any)({
+        is_affiliate: !currentStatus
+      }).eq('id' as any, serviceId);
       if (error) throw error;
 
       // Update local state
-      setServices(services.map(service => 
-        service.id === serviceId 
-          ? { ...service, is_affiliate: !currentStatus }
-          : service
-      ));
-
+      setServices(services.map(service => service.id === serviceId ? {
+        ...service,
+        is_affiliate: !currentStatus
+      } : service));
       if (selectedService?.id === serviceId) {
-        const updatedService = { ...selectedService, is_affiliate: !currentStatus };
+        const updatedService = {
+          ...selectedService,
+          is_affiliate: !currentStatus
+        };
         setSelectedService(updatedService);
         setEditForm(updatedService);
       }
-
       toast({
         title: 'Success',
-        description: `Service affiliate status ${!currentStatus ? 'enabled' : 'disabled'}`,
+        description: `Service affiliate status ${!currentStatus ? 'enabled' : 'disabled'}`
       });
     } catch (error) {
       console.error('Error updating affiliate status:', error);
       toast({
         title: 'Error',
         description: 'Failed to update affiliate status',
-        variant: 'destructive',
+        variant: 'destructive'
       });
     }
   };
-
   const handleBookingLinkToggle = async (serviceId: string, currentStatus: boolean, event?: React.MouseEvent) => {
     if (event) {
       event.stopPropagation();
     }
-    
     try {
-      const { error } = await (supabase
-        .from('services')
-        .update as any)({ is_booking_link: !currentStatus })
-        .eq('id' as any, serviceId);
-
+      const {
+        error
+      } = await (supabase.from('services').update as any)({
+        is_booking_link: !currentStatus
+      }).eq('id' as any, serviceId);
       if (error) throw error;
 
       // Update local state
-      setServices(services.map(service => 
-        service.id === serviceId 
-          ? { ...service, is_booking_link: !currentStatus }
-          : service
-      ));
-
+      setServices(services.map(service => service.id === serviceId ? {
+        ...service,
+        is_booking_link: !currentStatus
+      } : service));
       if (selectedService?.id === serviceId) {
-        const updatedService = { ...selectedService, is_booking_link: !currentStatus };
+        const updatedService = {
+          ...selectedService,
+          is_booking_link: !currentStatus
+        };
         setSelectedService(updatedService);
         setEditForm(updatedService);
       }
-
       toast({
         title: 'Success',
-        description: `Service booking link ${!currentStatus ? 'enabled' : 'disabled'}`,
+        description: `Service booking link ${!currentStatus ? 'enabled' : 'disabled'}`
       });
     } catch (error) {
       console.error('Error updating booking link status:', error);
       toast({
         title: 'Error',
         description: 'Failed to update booking link status',
-        variant: 'destructive',
+        variant: 'destructive'
       });
     }
   };
-
   const handleFunnelSave = async (): Promise<SaveResult> => {
-    if (!selectedService) return { savedAt: new Date().toISOString(), verified: false };
-
+    if (!selectedService) return {
+      savedAt: new Date().toISOString(),
+      verified: false
+    };
     try {
       // Save the funnel content to the database
-      const { error: updateError } = await (supabase
-        .from('services')
-        .update as any)({ 
-          funnel_content: JSON.parse(JSON.stringify(funnelContent)),
-          pricing_tiers: JSON.parse(JSON.stringify(pricingTiers))
-        })
-        .eq('id' as any, selectedService.id);
-
+      const {
+        error: updateError
+      } = await (supabase.from('services').update as any)({
+        funnel_content: JSON.parse(JSON.stringify(funnelContent)),
+        pricing_tiers: JSON.parse(JSON.stringify(pricingTiers))
+      }).eq('id' as any, selectedService.id);
       if (updateError) throw updateError;
 
       // Read back to verify persistence
-      const { data: verifyRow, error: fetchError } = await supabase
-        .from('services')
-        .select('id, funnel_content, pricing_tiers, updated_at')
-        .eq('id' as any, selectedService.id as any)
-        .maybeSingle();
-
+      const {
+        data: verifyRow,
+        error: fetchError
+      } = await supabase.from('services').select('id, funnel_content, pricing_tiers, updated_at').eq('id' as any, selectedService.id as any).maybeSingle();
       if (fetchError) throw fetchError;
-
       const rowData = verifyRow as any;
       const savedAt = rowData?.updated_at || new Date().toISOString();
-      const verified = !!rowData &&
-        JSON.stringify(rowData.funnel_content ?? null) === JSON.stringify(funnelContent) &&
-        JSON.stringify(rowData.pricing_tiers ?? null) === JSON.stringify(pricingTiers);
+      const verified = !!rowData && JSON.stringify(rowData.funnel_content ?? null) === JSON.stringify(funnelContent) && JSON.stringify(rowData.pricing_tiers ?? null) === JSON.stringify(pricingTiers);
 
       // Update local state
-      const updatedService = { 
-        ...selectedService, 
+      const updatedService = {
+        ...selectedService,
         funnel_content: funnelContent,
         pricing_tiers: pricingTiers,
         updated_at: savedAt as any
@@ -858,25 +834,24 @@ export const ServiceManagementPanel = () => {
         if (!prev) return prev;
         const updated = {
           ...prev,
-          services: Array.isArray(prev.services)
-            ? prev.services.map((s: any) =>
-                s.id === selectedService.id
-                  ? { ...s, funnel_content: funnelContent, pricing_tiers: pricingTiers }
-                  : s
-              )
-            : prev.services,
+          services: Array.isArray(prev.services) ? prev.services.map((s: any) => s.id === selectedService.id ? {
+            ...s,
+            funnel_content: funnelContent,
+            pricing_tiers: pricingTiers
+          } : s) : prev.services
         };
         return updated;
       });
-
       toast({
         title: 'Success',
-        description: verified ? 'Service funnel saved and verified' : 'Service funnel saved',
+        description: verified ? 'Service funnel saved and verified' : 'Service funnel saved'
       });
       // Narrow cache invalidation - only invalidate services, not everything
       invalidateCache.invalidateServices();
-
-      return { savedAt, verified };
+      return {
+        savedAt,
+        verified
+      };
     } catch (error) {
       console.error('Error saving funnel:', error);
       const err: any = error;
@@ -885,24 +860,24 @@ export const ServiceManagementPanel = () => {
       toast({
         title: 'Save failed',
         description: code ? `${message} (code: ${code})` : message,
-        variant: 'destructive',
+        variant: 'destructive'
       });
-      return { savedAt: new Date().toISOString(), verified: false, message };
+      return {
+        savedAt: new Date().toISOString(),
+        verified: false,
+        message
+      };
     }
   };
-
   const handleTabChange = (value: 'details' | 'funnel') => {
     setActiveTab(value);
   };
-
-  const detailKeys = ['title','description','category','duration','estimated_roi','sort_order','is_featured','is_top_pick','is_verified','requires_quote','copay_allowed','direct_purchase_enabled','respa_split_limit','max_split_percentage_non_ssp','retail_price','pro_price','price_duration','tags'] as const;
-  
-  const isDetailsDirty = selectedService ? detailKeys.some((key) => {
+  const detailKeys = ['title', 'description', 'category', 'duration', 'estimated_roi', 'sort_order', 'is_featured', 'is_top_pick', 'is_verified', 'requires_quote', 'copay_allowed', 'direct_purchase_enabled', 'respa_split_limit', 'max_split_percentage_non_ssp', 'retail_price', 'pro_price', 'price_duration', 'tags'] as const;
+  const isDetailsDirty = selectedService ? detailKeys.some(key => {
     const currentValue = (editForm as any)[key];
     const originalValue = (selectedService as any)[key];
     return !compareValues(currentValue, originalValue);
   }) : false;
-
   const formatRelativeTime = (iso?: string | null) => {
     if (!iso) return '';
     const diffMs = Date.now() - new Date(iso).getTime();
@@ -911,59 +886,57 @@ export const ServiceManagementPanel = () => {
     if (mins === 1) return '1 minute ago';
     return `${mins} minutes ago`;
   };
-
   if (loading) {
     return <p>Loading services...</p>;
   }
-
   if (error) {
-    return (
-      <div className="p-6">
+    return <div className="p-6">
         <Card>
           <CardContent className="p-6">
             <h3 className="text-lg font-semibold text-destructive mb-2">Error Loading Services</h3>
             <p className="text-muted-foreground">{error}</p>
-            <Button onClick={() => { setError(null); fetchServices(); }} className="mt-4">
+            <Button onClick={() => {
+            setError(null);
+            fetchServices();
+          }} className="mt-4">
               Try Again
             </Button>
           </CardContent>
         </Card>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="space-y-6">
+  return <div className="space-y-6">
       {/* Service Selection */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Package className="h-5 w-5" />
             Service Management - Edit Service Cards & Funnels
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={async () => {
-                try {
-                  const { data: adminStatus, error } = await supabase.rpc('get_user_admin_status');
-                  const { data: session } = await supabase.auth.getSession();
-                  console.log('Debug - Admin Status:', adminStatus);
-                  console.log('Debug - Session:', session);
-                  console.log('Debug - User ID:', session?.session?.user?.id);
-                  toast({
-                    title: 'Debug Info',
-                    description: `Admin: ${adminStatus}, User: ${session?.session?.user?.id ? 'Logged in' : 'Not logged in'}`,
-                  });
-                } catch (err) {
-                  console.error('Debug error:', err);
-                  toast({
-                    title: 'Debug Error',
-                    description: String(err),
-                    variant: 'destructive',
-                  });
-                }
-              }}
-            >
+            <Button variant="outline" size="sm" onClick={async () => {
+            try {
+              const {
+                data: adminStatus,
+                error
+              } = await supabase.rpc('get_user_admin_status');
+              const {
+                data: session
+              } = await supabase.auth.getSession();
+              console.log('Debug - Admin Status:', adminStatus);
+              console.log('Debug - Session:', session);
+              console.log('Debug - User ID:', session?.session?.user?.id);
+              toast({
+                title: 'Debug Info',
+                description: `Admin: ${adminStatus}, User: ${session?.session?.user?.id ? 'Logged in' : 'Not logged in'}`
+              });
+            } catch (err) {
+              console.error('Debug error:', err);
+              toast({
+                title: 'Debug Error',
+                description: String(err),
+                variant: 'destructive'
+              });
+            }
+          }}>
               Test Admin Status
             </Button>
           </CardTitle>
@@ -976,23 +949,11 @@ export const ServiceManagementPanel = () => {
             <div className="flex items-center gap-4 mb-4">
               <div className="relative flex-1 max-w-md">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                <Input
-                  placeholder="Search services, categories, or companies..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-9"
-                />
+                <Input placeholder="Search services, categories, or companies..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-9" />
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-96 overflow-y-auto">
-              {filteredServices.map((service) => (
-                <Card 
-                  key={service.id} 
-                  className={`cursor-pointer transition-colors hover:bg-muted/50 ${
-                    selectedService?.id === service.id ? 'ring-2 ring-primary' : ''
-                  }`}
-                  onClick={() => handleServiceSelect(service)}
-                >
+              {filteredServices.map(service => <Card key={service.id} className={`cursor-pointer transition-colors hover:bg-muted/50 ${selectedService?.id === service.id ? 'ring-2 ring-primary' : ''}`} onClick={() => handleServiceSelect(service)}>
                   <CardContent className="p-4">
                       <div className="space-y-3">
                         <div className="flex items-center justify-between gap-2">
@@ -1000,46 +961,31 @@ export const ServiceManagementPanel = () => {
                             <Badge variant="secondary" className="text-[10px] shrink-0">#{service.sort_order ?? '-'}</Badge>
                             <h3 className="font-semibold truncate">{service.title}</h3>
                           </div>
-                          {service.image_url ? (
-                            <img
-                              src={service.image_url}
-                              alt={service.title}
-                              className="w-32 h-12 rounded-lg object-contain"
-                            />
-                          ) : (
-                            <div className="w-32 h-12 rounded-lg bg-muted flex items-center justify-center">
+                          {service.image_url ? <img src={service.image_url} alt={service.title} className="w-32 h-12 rounded-lg object-contain" /> : <div className="w-32 h-12 rounded-lg bg-muted flex items-center justify-center">
                               <Package className="h-6 w-6 text-muted-foreground" />
-                            </div>
-                          )}
+                            </div>}
                         </div>
                         <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-1 mt-1">
-                              {service.is_featured && (
-                                <Badge variant="secondary" className="text-xs">
+                              {service.is_featured && <Badge variant="secondary" className="text-xs">
                                   <Star className="h-3 w-3 mr-1" />
                                   Featured
-                                </Badge>
-                              )}
-                              {service.is_top_pick && (
-                                <Badge variant="outline" className="text-xs">
+                                </Badge>}
+                              {service.is_top_pick && <Badge variant="outline" className="text-xs">
                                   Top Pick
-                                </Badge>
-                              )}
+                                </Badge>}
                             </div>
                             <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
-                              {(service.service_providers?.name && service.service_providers.name !== 'Circle Marketplace') && (
-                                <span className="flex items-center gap-1">
+                              {service.service_providers?.name && service.service_providers.name !== 'Circle Marketplace' && <span className="flex items-center gap-1">
                                   <Building className="h-3 w-3" />
                                   {service.service_providers.name}
-                                </span>
-                               )}
+                                </span>}
                                {/* Last Updated Timestamp */}
                                <span className="flex items-center gap-1">
                                  <Clock className="h-3 w-3" />
-                                 {service.updated_at ? 
-                                   formatDistanceToNow(new Date(service.updated_at), { addSuffix: true }) : 
-                                   'Unknown'
-                                 }
+                                 {service.updated_at ? formatDistanceToNow(new Date(service.updated_at), {
+                          addSuffix: true
+                        }) : 'Unknown'}
                                </span>
                              </div>
                              <div className="flex justify-between items-start mt-2">
@@ -1047,17 +993,11 @@ export const ServiceManagementPanel = () => {
                                <div className="flex flex-col gap-1">
                                  <div className="flex items-center gap-2">
                                    <span className="text-xs text-muted-foreground w-12">Verified</span>
-                                   <Switch
-                                     checked={service.is_verified || false}
-                                     onCheckedChange={() => handleVerificationToggle(service.id, service.is_verified || false)}
-                                   />
+                                   <Switch checked={service.is_verified || false} onCheckedChange={() => handleVerificationToggle(service.id, service.is_verified || false)} />
                                  </div>
                                  <div className="flex items-center gap-2">
                                    <span className="text-xs text-muted-foreground w-12">Active</span>
-                                   <Switch
-                                     checked={service.is_active || false}
-                                     onCheckedChange={() => handleVisibilityToggle(service.id, service.is_active || false)}
-                                   />
+                                   <Switch checked={service.is_active || false} onCheckedChange={() => handleVisibilityToggle(service.id, service.is_active || false)} />
                                  </div>
                                </div>
                                
@@ -1065,56 +1005,40 @@ export const ServiceManagementPanel = () => {
                                <div className="flex flex-col gap-1">
                                  <div className="flex items-center gap-2">
                                    <span className="text-xs text-muted-foreground w-12">Affiliate</span>
-                                   <Switch
-                                     checked={service.is_affiliate || false}
-                                     onCheckedChange={() => handleAffiliateToggle(service.id, service.is_affiliate || false)}
-                                   />
+                                   <Switch checked={service.is_affiliate || false} onCheckedChange={() => handleAffiliateToggle(service.id, service.is_affiliate || false)} />
                                  </div>
                                  <div className="flex items-center gap-2">
                                    <span className="text-xs text-muted-foreground w-12">Booking</span>
-                                   <Switch
-                                     checked={service.is_booking_link || false}
-                                     onCheckedChange={() => handleBookingLinkToggle(service.id, service.is_booking_link || false)}
-                                   />
+                                   <Switch checked={service.is_booking_link || false} onCheckedChange={() => handleBookingLinkToggle(service.id, service.is_booking_link || false)} />
                                  </div>
                                </div>
                              </div>
                            </div>
                          </div>
                   </CardContent>
-                </Card>
-              ))}
+                </Card>)}
             </div>
 
-            {filteredServices.length === 0 && (
-              <p className="text-center text-muted-foreground py-8">
+            {filteredServices.length === 0 && <p className="text-center text-muted-foreground py-8">
                 {searchTerm ? 'No services found matching your search.' : 'No services available.'}
-              </p>
-            )}
+              </p>}
           </div>
         </CardContent>
       </Card>
 
-      {selectedService && (
-        <Card>
+      {selectedService && <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Edit className="h-5 w-5" />
               Editing: {selectedService.title}
             </CardTitle>
             <div className="flex items-center gap-2">
-              {selectedService.website_url && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  asChild
-                >
+              {selectedService.website_url && <Button variant="outline" size="sm" asChild>
                   <a href={selectedService.website_url} target="_blank" rel="noopener noreferrer">
                     <Globe className="h-4 w-4 mr-2" />
                     Visit Website
                   </a>
-                </Button>
-              )}
+                </Button>}
             </div>
           </CardHeader>
           <CardContent>
@@ -1138,8 +1062,7 @@ export const ServiceManagementPanel = () => {
               </TabsList>
 
               <TabsContent value="details" className="space-y-4">
-                {isEditingDetails ? (
-                  <div className="space-y-4">
+                {isEditingDetails ? <div className="space-y-4">
                     {/* Service Images Section */}
                     <div className="space-y-4 p-4 border rounded-lg bg-blue-50/50">
                       <h4 className="font-medium text-blue-900">Service Images</h4>
@@ -1147,29 +1070,31 @@ export const ServiceManagementPanel = () => {
                       <div className="space-y-2">
                         <label className="text-sm font-medium text-blue-900">Profile Image</label>
                         <p className="text-xs text-muted-foreground">Small circular image shown on service cards (like a user profile photo)</p>
-                        <ServiceImageUploader 
-                          serviceId={selectedService.id}
-                          serviceName={selectedService.title}
-                          currentImageUrl={selectedService.profile_image_url}
-                          onImageUpdated={(newImageUrl) => {
-                            setEditForm({ ...editForm, profile_image_url: newImageUrl });
-                            setSelectedService({ ...selectedService, profile_image_url: newImageUrl });
-                          }}
-                        />
+                        <ServiceImageUploader serviceId={selectedService.id} serviceName={selectedService.title} currentImageUrl={selectedService.profile_image_url} onImageUpdated={newImageUrl => {
+                    setEditForm({
+                      ...editForm,
+                      profile_image_url: newImageUrl
+                    });
+                    setSelectedService({
+                      ...selectedService,
+                      profile_image_url: newImageUrl
+                    });
+                  }} />
                       </div>
 
                       <div className="space-y-2">
                         <label className="text-sm font-medium text-blue-900">Main Service Image</label>
                         <p className="text-xs text-muted-foreground">Large banner image used in funnel pages and detailed views</p>
-                        <ServiceImageUploader 
-                          serviceId={selectedService.id}
-                          serviceName={`${selectedService.title}-banner`}
-                          currentImageUrl={selectedService.image_url}
-                          onImageUpdated={(newImageUrl) => {
-                            setEditForm({ ...editForm, image_url: newImageUrl });
-                            setSelectedService({ ...selectedService, image_url: newImageUrl });
-                          }}
-                        />
+                        <ServiceImageUploader serviceId={selectedService.id} serviceName={`${selectedService.title}-banner`} currentImageUrl={selectedService.image_url} onImageUpdated={newImageUrl => {
+                    setEditForm({
+                      ...editForm,
+                      image_url: newImageUrl
+                    });
+                    setSelectedService({
+                      ...selectedService,
+                      image_url: newImageUrl
+                    });
+                  }} />
                       </div>
                     </div>
 
@@ -1210,19 +1135,11 @@ export const ServiceManagementPanel = () => {
                       
                       <div className="bg-white p-4 rounded-lg border shadow-sm max-w-sm">
                         <div className="flex items-start gap-3 mb-3">
-                          {editForm.profile_image_url ? (
-                            <img 
-                              src={editForm.profile_image_url} 
-                              alt="Profile"
-                              className="w-8 h-8 rounded-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                          {editForm.profile_image_url ? <img src={editForm.profile_image_url} alt="Profile" className="w-8 h-8 rounded-full object-cover" /> : <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
                               <span className="text-blue-600 font-semibold text-sm">
                                 {(editForm.title || selectedService.title || 'S').charAt(0).toUpperCase()}
                               </span>
-                            </div>
-                          )}
+                            </div>}
                           <div className="flex-1 min-w-0">
                             <h3 className="font-semibold text-sm line-clamp-2">
                               {editForm.title || selectedService.title || 'Service Title'}
@@ -1246,25 +1163,21 @@ export const ServiceManagementPanel = () => {
                       </div>
                     </div>
                     
-                    {isDetailsDirty && (
-                      <Badge variant="outline" className="text-xs">Unsaved changes</Badge>
-                    )}
+                    {isDetailsDirty && <Badge variant="outline" className="text-xs">Unsaved changes</Badge>}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <label className="text-sm font-medium">Service Title</label>
-                        <Input
-                          value={editForm.title || ''}
-                          onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
-                         />
+                        <Input value={editForm.title || ''} onChange={e => setEditForm({
+                    ...editForm,
+                    title: e.target.value
+                  })} />
                        </div>
                        <div className="space-y-2">
                          <label className="text-sm font-medium">Card Subheadline</label>
-                         <Textarea
-                           value={editForm.description || ''}
-                           onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
-                           placeholder="Brief description shown on service cards (90-140 characters recommended)"
-                           className="min-h-[80px]"
-                         />
+                         <Textarea value={editForm.description || ''} onChange={e => setEditForm({
+                    ...editForm,
+                    description: e.target.value
+                  })} placeholder="Brief description shown on service cards (90-140 characters recommended)" className="min-h-[80px]" />
                          <div className="text-xs text-muted-foreground">
                            {(editForm.description || '').length}/140 characters
                          </div>
@@ -1279,64 +1192,45 @@ export const ServiceManagementPanel = () => {
                           <div className="space-y-2">
                             <label className="text-sm font-medium text-green-900">Primary Category</label>
                             <p className="text-xs text-muted-foreground">Main category for filtering (shown prominently on cards)</p>
-                            <Input
-                              value={editForm.category || ''}
-                              onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
-                              placeholder="e.g., Marketing, CRM, Lead Generation"
-                              className="bg-white"
-                            />
+                            <Input value={editForm.category || ''} onChange={e => setEditForm({
+                      ...editForm,
+                      category: e.target.value
+                    })} placeholder="e.g., Marketing, CRM, Lead Generation" className="bg-white" />
                           </div>
                           
                           <div className="space-y-2">
                             <label className="text-sm font-medium text-green-900">Search Keywords</label>
                             <p className="text-xs text-muted-foreground">Additional searchable terms (comma-separated)</p>
-                            <Input
-                              value={(editForm.tags || []).filter(tag => !tag.startsWith('cat:')).join(', ')}
-                              onChange={(e) => {
-                                const categoryTags = (editForm.tags || []).filter(tag => tag.startsWith('cat:'));
-                                const additionalTags = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
-                                setEditForm({ ...editForm, tags: [...categoryTags, ...additionalTags] });
-                              }}
-                              placeholder="automation, lead-gen, crm, marketing"
-                              className="bg-white"
-                            />
+                            <Input value={(editForm.tags || []).filter(tag => !tag.startsWith('cat:')).join(', ')} onChange={e => {
+                      const categoryTags = (editForm.tags || []).filter(tag => tag.startsWith('cat:'));
+                      const additionalTags = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
+                      setEditForm({
+                        ...editForm,
+                        tags: [...categoryTags, ...additionalTags]
+                      });
+                    }} placeholder="automation, lead-gen, crm, marketing" className="bg-white" />
                           </div>
                         </div>
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="space-y-2">
-                        <label className="text-sm font-medium">Duration</label>
-                        <Input
-                          value={editForm.duration || ''}
-                          onChange={(e) => setEditForm({ ...editForm, duration: e.target.value })}
-                          placeholder="e.g., 30 days"
-                        />
+                        <label className="text-sm font-medium">Time to Results</label>
+                        <Input value={editForm.duration || ''} onChange={e => setEditForm({
+                    ...editForm,
+                    duration: e.target.value
+                  })} placeholder="e.g., 30 days" />
                       </div>
                       <div className="space-y-2">
                         <label className="text-sm font-medium">ROI (%)</label>
                         <div className="relative">
-                          {!editForm.is_verified ? (
-                            <Input
-                              value="TBD"
-                              disabled
-                              className="pr-8 text-muted-foreground"
-                            />
-                          ) : (
-                            <Input
-                              type="number"
-                              min="0"
-                              max="10000"
-                              step="0.1"
-                              value={editForm.estimated_roi || ''}
-                              onChange={(e) => {
-                                const value = e.target.value === '' ? null : Number(e.target.value);
-                                setEditForm({ ...editForm, estimated_roi: value });
-                              }}
-                              placeholder="Enter ROI percentage (e.g., 1200 for 1200%)"
-                              className="pr-8"
-                            />
-                          )}
+                          {!editForm.is_verified ? <Input value="TBD" disabled className="pr-8 text-muted-foreground" /> : <Input type="number" min="0" max="10000" step="0.1" value={editForm.estimated_roi || ''} onChange={e => {
+                      const value = e.target.value === '' ? null : Number(e.target.value);
+                      setEditForm({
+                        ...editForm,
+                        estimated_roi: value
+                      });
+                    }} placeholder="Enter ROI percentage (e.g., 1200 for 1200%)" className="pr-8" />}
                           <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">%</span>
                         </div>
                         <p className="text-xs text-muted-foreground">
@@ -1345,11 +1239,10 @@ export const ServiceManagementPanel = () => {
                       </div>
                       <div className="space-y-2">
                         <label className="text-sm font-medium">Sort Order</label>
-                        <Input
-                          type="number"
-                          value={editForm.sort_order || ''}
-                          onChange={(e) => setEditForm({ ...editForm, sort_order: Number(e.target.value) })}
-                        />
+                        <Input type="number" value={editForm.sort_order || ''} onChange={e => setEditForm({
+                    ...editForm,
+                    sort_order: Number(e.target.value)
+                  })} />
                       </div>
                     </div>
 
@@ -1357,27 +1250,24 @@ export const ServiceManagementPanel = () => {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="space-y-2">
                         <label className="text-sm font-medium">List Price</label>
-                          <Input
-                            value={editForm.retail_price || ''}
-                            onChange={(e) => setEditForm({ ...editForm, retail_price: e.target.value })}
-                            placeholder="e.g., $0.00"
-                          />
+                          <Input value={editForm.retail_price || ''} onChange={e => setEditForm({
+                    ...editForm,
+                    retail_price: e.target.value
+                  })} placeholder="e.g., $0.00" />
                       </div>
                       <div className="space-y-2">
                         <label className="text-sm font-medium">Pro Price</label>
-                        <Input
-                          value={editForm.pro_price || ''}
-                          onChange={(e) => setEditForm({ ...editForm, pro_price: e.target.value })}
-                          placeholder="e.g., $0.00"
-                        />
+                        <Input value={editForm.pro_price || ''} onChange={e => setEditForm({
+                    ...editForm,
+                    pro_price: e.target.value
+                  })} placeholder="e.g., $0.00" />
                       </div>
                       <div className="space-y-2">
                         <label className="text-sm font-medium">Price Duration</label>
-                        <Input
-                          value={editForm.price_duration || ''}
-                          onChange={(e) => setEditForm({ ...editForm, price_duration: e.target.value })}
-                          placeholder="e.g., mo"
-                        />
+                        <Input value={editForm.price_duration || ''} onChange={e => setEditForm({
+                    ...editForm,
+                    price_duration: e.target.value
+                  })} placeholder="e.g., mo" />
                       </div>
                     </div>
                       <div className="space-y-2">
@@ -1388,103 +1278,149 @@ export const ServiceManagementPanel = () => {
                         <div className="space-y-2">
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                             {[
-                              // Digital-first categories
-                              { tag: 'cat:crms', label: 'CRMs' },
-                              { tag: 'cat:ads-lead-gen', label: 'Ads & Lead Gen' },
-                              { tag: 'cat:website-idx', label: 'Website / IDX' },
-                              { tag: 'cat:seo', label: 'SEO' },
-                              { tag: 'cat:coaching', label: 'Coaching' },
-                              { tag: 'cat:marketing-automation', label: 'Marketing Automation & Content' },
-                              { tag: 'cat:video-media', label: 'Video & Media Tools' },
-                              { tag: 'cat:listing-showing', label: 'Listing & Showing Tools' },
-                              { tag: 'cat:data-analytics', label: 'Data & Analytics' },
-                              { tag: 'cat:finance-business', label: 'Finance & Business Tools' },
-                              { tag: 'cat:productivity', label: 'Productivity & Collaboration' },
-                              { tag: 'cat:virtual-assistants', label: 'Virtual Assistants & Dialers' },
-                              { tag: 'cat:team-recruiting', label: 'Team & Recruiting Tools' },
-                              { tag: 'cat:ce-licensing', label: 'CE & Licensing' },
-                              // Old-school categories
-                              { tag: 'cat:client-events', label: 'Client Event Kits' },
-                              { tag: 'cat:print-mail', label: 'Print & Mail' },
-                              { tag: 'cat:signs', label: 'Signage & Branding' },
-                              { tag: 'cat:presentations', label: 'Presentations' },
-                              { tag: 'cat:branding', label: 'Branding' },
-                               { tag: 'cat:client-retention', label: 'Client Retention' },
-                               { tag: 'cat:transaction-coordinator', label: 'Transaction Coordinator' }
-                          ].map(({ tag, label }) => (
-                            <div key={tag} className="flex items-center space-x-2">
-                              <Switch
-                                checked={(editForm.tags || []).includes(tag)}
-                                onCheckedChange={(checked) => {
-                                  const currentTags = editForm.tags || [];
-                                  if (checked) {
-                                    setEditForm({ ...editForm, tags: [...currentTags, tag] });
-                                  } else {
-                                    setEditForm({ ...editForm, tags: currentTags.filter(t => t !== tag) });
-                                  }
-                                }}
-                              />
+                    // Digital-first categories
+                    {
+                      tag: 'cat:crms',
+                      label: 'CRMs'
+                    }, {
+                      tag: 'cat:ads-lead-gen',
+                      label: 'Ads & Lead Gen'
+                    }, {
+                      tag: 'cat:website-idx',
+                      label: 'Website / IDX'
+                    }, {
+                      tag: 'cat:seo',
+                      label: 'SEO'
+                    }, {
+                      tag: 'cat:coaching',
+                      label: 'Coaching'
+                    }, {
+                      tag: 'cat:marketing-automation',
+                      label: 'Marketing Automation & Content'
+                    }, {
+                      tag: 'cat:video-media',
+                      label: 'Video & Media Tools'
+                    }, {
+                      tag: 'cat:listing-showing',
+                      label: 'Listing & Showing Tools'
+                    }, {
+                      tag: 'cat:data-analytics',
+                      label: 'Data & Analytics'
+                    }, {
+                      tag: 'cat:finance-business',
+                      label: 'Finance & Business Tools'
+                    }, {
+                      tag: 'cat:productivity',
+                      label: 'Productivity & Collaboration'
+                    }, {
+                      tag: 'cat:virtual-assistants',
+                      label: 'Virtual Assistants & Dialers'
+                    }, {
+                      tag: 'cat:team-recruiting',
+                      label: 'Team & Recruiting Tools'
+                    }, {
+                      tag: 'cat:ce-licensing',
+                      label: 'CE & Licensing'
+                    },
+                    // Old-school categories
+                    {
+                      tag: 'cat:client-events',
+                      label: 'Client Event Kits'
+                    }, {
+                      tag: 'cat:print-mail',
+                      label: 'Print & Mail'
+                    }, {
+                      tag: 'cat:signs',
+                      label: 'Signage & Branding'
+                    }, {
+                      tag: 'cat:presentations',
+                      label: 'Presentations'
+                    }, {
+                      tag: 'cat:branding',
+                      label: 'Branding'
+                    }, {
+                      tag: 'cat:client-retention',
+                      label: 'Client Retention'
+                    }, {
+                      tag: 'cat:transaction-coordinator',
+                      label: 'Transaction Coordinator'
+                    }].map(({
+                      tag,
+                      label
+                    }) => <div key={tag} className="flex items-center space-x-2">
+                              <Switch checked={(editForm.tags || []).includes(tag)} onCheckedChange={checked => {
+                        const currentTags = editForm.tags || [];
+                        if (checked) {
+                          setEditForm({
+                            ...editForm,
+                            tags: [...currentTags, tag]
+                          });
+                        } else {
+                          setEditForm({
+                            ...editForm,
+                            tags: currentTags.filter(t => t !== tag)
+                          });
+                        }
+                      }} />
                               <label className="text-xs font-medium">{label}</label>
-                            </div>
-                          ))}
+                            </div>)}
                         </div>
                          <div className="mt-2">
                            <label className="text-sm font-medium">Additional Search Keywords</label>
                            <p className="text-xs text-muted-foreground">Extra searchable terms beyond the standard categories (comma-separated)</p>
-                           <Input
-                             value={(editForm.tags || []).filter(tag => !tag.startsWith('cat:')).join(', ')}
-                             onChange={(e) => {
-                               const categoryTags = (editForm.tags || []).filter(tag => tag.startsWith('cat:'));
-                               const additionalTags = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
-                               setEditForm({ ...editForm, tags: [...categoryTags, ...additionalTags] });
-                             }}
-                             placeholder="automation, luxury, enterprise, local"
-                           />
+                           <Input value={(editForm.tags || []).filter(tag => !tag.startsWith('cat:')).join(', ')} onChange={e => {
+                      const categoryTags = (editForm.tags || []).filter(tag => tag.startsWith('cat:'));
+                      const additionalTags = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
+                      setEditForm({
+                        ...editForm,
+                        tags: [...categoryTags, ...additionalTags]
+                      });
+                    }} placeholder="automation, luxury, enterprise, local" />
                          </div>
                       </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
                      <div className="flex items-center space-x-2">
-                       <Switch
-                         checked={editForm.is_verified || false}
-                         onCheckedChange={(checked) => setEditForm({ ...editForm, is_verified: checked })}
-                       />
+                       <Switch checked={editForm.is_verified || false} onCheckedChange={checked => setEditForm({
+                    ...editForm,
+                    is_verified: checked
+                  })} />
                        <label className="text-sm font-medium">Verified</label>
                      </div>
                      <div className="flex items-center space-x-2">
-                       <Switch
-                         checked={editForm.is_featured || false}
-                         onCheckedChange={(checked) => setEditForm({ ...editForm, is_featured: checked })}
-                       />
+                       <Switch checked={editForm.is_featured || false} onCheckedChange={checked => setEditForm({
+                    ...editForm,
+                    is_featured: checked
+                  })} />
                        <label className="text-sm font-medium">Featured</label>
                      </div>
                      <div className="flex items-center space-x-2">
-                       <Switch
-                         checked={editForm.is_top_pick || false}
-                         onCheckedChange={(checked) => setEditForm({ ...editForm, is_top_pick: checked })}
-                       />
+                       <Switch checked={editForm.is_top_pick || false} onCheckedChange={checked => setEditForm({
+                    ...editForm,
+                    is_top_pick: checked
+                  })} />
                        <label className="text-sm font-medium">Top Pick</label>
                      </div>
                      <div className="flex items-center space-x-2">
-                       <Switch
-                         checked={editForm.requires_quote || false}
-                         onCheckedChange={(checked) => setEditForm({ ...editForm, requires_quote: checked })}
-                       />
+                       <Switch checked={editForm.requires_quote || false} onCheckedChange={checked => setEditForm({
+                    ...editForm,
+                    requires_quote: checked
+                  })} />
                        <label className="text-sm font-medium">Requires Quote</label>
                      </div>
                      <div className="flex items-center space-x-2">
-                       <Switch
-                         checked={editForm.copay_allowed || false}
-                         onCheckedChange={(checked) => setEditForm({ ...editForm, copay_allowed: checked })}
-                       />
+                       <Switch checked={editForm.copay_allowed || false} onCheckedChange={checked => setEditForm({
+                    ...editForm,
+                    copay_allowed: checked
+                  })} />
                        <label className="text-sm font-medium">Co-Pay Allowed</label>
                      </div>
                      <div className="flex items-center space-x-2">
-                       <Switch
-                         checked={editForm.direct_purchase_enabled || false}
-                         onCheckedChange={(checked) => setEditForm({ ...editForm, direct_purchase_enabled: checked })}
-                       />
+                       <Switch checked={editForm.direct_purchase_enabled || false} onCheckedChange={checked => setEditForm({
+                    ...editForm,
+                    direct_purchase_enabled: checked
+                  })} />
                        <div className="flex items-center gap-1">
                          <ShoppingCart className="h-3 w-3 text-green-600" />
                          <label className="text-sm font-medium">Direct Purchase</label>
@@ -1497,36 +1433,27 @@ export const ServiceManagementPanel = () => {
                       <div className="p-4 border rounded-lg bg-gray-50">
                         <h4 className="text-sm font-semibold mb-3">Settlement Service Provider Coverage</h4>
                         <div className="flex items-center space-x-2 mb-3">
-                          <Switch
-                            checked={editForm.ssp_allowed !== false}
-                            onCheckedChange={(checked) => setEditForm({ ...editForm, ssp_allowed: checked })}
-                          />
+                          <Switch checked={editForm.ssp_allowed !== false} onCheckedChange={checked => setEditForm({
+                      ...editForm,
+                      ssp_allowed: checked
+                    })} />
                           <label className="text-sm font-medium">SSP Allowed</label>
                         </div>
                         <div className="space-y-2">
                           <label className="text-sm font-medium">Max SSP Percentage (0–100)</label>
                           <div className="relative">
-                            <Input
-                              type="number"
-                              min="0"
-                              max="100"
-                              step="1"
-                              className="pr-10"
-                              disabled={editForm.ssp_allowed === false}
-                              value={editForm.ssp_allowed === false ? 0 : (editForm.max_split_percentage_ssp || '')}
-                              onChange={(e) => {
-                                const value = Number(e.target.value);
-                                if (value >= 0 && value <= 100) {
-                                  setEditForm({ ...editForm, max_split_percentage_ssp: value });
-                                }
-                              }}
-                              placeholder="Enter percentage"
-                            />
+                            <Input type="number" min="0" max="100" step="1" className="pr-10" disabled={editForm.ssp_allowed === false} value={editForm.ssp_allowed === false ? 0 : editForm.max_split_percentage_ssp || ''} onChange={e => {
+                        const value = Number(e.target.value);
+                        if (value >= 0 && value <= 100) {
+                          setEditForm({
+                            ...editForm,
+                            max_split_percentage_ssp: value
+                          });
+                        }
+                      }} placeholder="Enter percentage" />
                             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">%</span>
                           </div>
-                          {editForm.max_split_percentage_ssp && (editForm.max_split_percentage_ssp < 0 || editForm.max_split_percentage_ssp > 100) && (
-                            <p className="text-red-500 text-xs">Percentage must be between 0 and 100</p>
-                          )}
+                          {editForm.max_split_percentage_ssp && (editForm.max_split_percentage_ssp < 0 || editForm.max_split_percentage_ssp > 100) && <p className="text-red-500 text-xs">Percentage must be between 0 and 100</p>}
                         </div>
                       </div>
 
@@ -1536,32 +1463,23 @@ export const ServiceManagementPanel = () => {
                         <div className="space-y-2">
                           <label className="text-sm font-medium">Max Non-SSP Percentage (0–100)</label>
                           <div className="relative">
-                            <Input
-                              type="number"
-                              min="0"
-                              max="100"
-                              step="1"
-                              className="pr-10"
-                              value={editForm.max_split_percentage_non_ssp || ''}
-                              onChange={(e) => {
-                                const value = Number(e.target.value);
-                                if (value >= 0 && value <= 100) {
-                                  setEditForm({ ...editForm, max_split_percentage_non_ssp: value });
-                                }
-                              }}
-                              placeholder="Enter percentage"
-                            />
+                            <Input type="number" min="0" max="100" step="1" className="pr-10" value={editForm.max_split_percentage_non_ssp || ''} onChange={e => {
+                        const value = Number(e.target.value);
+                        if (value >= 0 && value <= 100) {
+                          setEditForm({
+                            ...editForm,
+                            max_split_percentage_non_ssp: value
+                          });
+                        }
+                      }} placeholder="Enter percentage" />
                             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">%</span>
                           </div>
-                          {editForm.max_split_percentage_non_ssp && (editForm.max_split_percentage_non_ssp < 0 || editForm.max_split_percentage_non_ssp > 100) && (
-                            <p className="text-red-500 text-xs">Percentage must be between 0 and 100</p>
-                          )}
+                          {editForm.max_split_percentage_non_ssp && (editForm.max_split_percentage_non_ssp < 0 || editForm.max_split_percentage_non_ssp > 100) && <p className="text-red-500 text-xs">Percentage must be between 0 and 100</p>}
                         </div>
                       </div>
                     </div>
 
-                    {editForm.direct_purchase_enabled && (
-                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-4">
+                    {editForm.direct_purchase_enabled && <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-4">
                         <div className="flex items-start gap-3">
                           <div className="w-5 h-5 rounded-full bg-blue-600 flex items-center justify-center mt-0.5">
                             <ShoppingCart className="w-3 h-3 text-white" />
@@ -1581,55 +1499,40 @@ export const ServiceManagementPanel = () => {
                          {/* Website/Purchase URL Field - Only shown when direct purchase is enabled */}
                          <div className="space-y-2">
                            <label className="text-sm font-medium text-blue-900">Website / Purchase URL</label>
-                           <Input
-                             value={editForm.website_url || ''}
-                             onChange={(e) => setEditForm({ ...editForm, website_url: e.target.value })}
-                             placeholder="https://example.com/checkout or https://calendly.com/yourlink"
-                             className="bg-white"
-                           />
+                           <Input value={editForm.website_url || ''} onChange={e => setEditForm({
+                    ...editForm,
+                    website_url: e.target.value
+                  })} placeholder="https://example.com/checkout or https://calendly.com/yourlink" className="bg-white" />
                            <p className="text-xs text-blue-600">
                              Official website or direct purchase/booking link. Used for "View Website" and "Buy Now" buttons.
                            </p>
                          </div>
-                      </div>
-                    )}
+                      </div>}
 
                     {/* Consultation Email Alerts */}
                     <div className="border-t pt-6">
-                      <ServiceConsultationEmails
-                        serviceId={selectedService.id}
-                        serviceName={selectedService.title}
-                        initialEmails={(selectedService as any).consultation_emails || []}
-                      />
+                      <ServiceConsultationEmails serviceId={selectedService.id} serviceName={selectedService.title} initialEmails={(selectedService as any).consultation_emails || []} />
                     </div>
 
                     {/* Service Notes */}
                     <div className="border-t pt-6">
-                      <AdminNotes
-                        serviceId={selectedService.id}
-                        serviceName={selectedService.title}
-                      />
+                      <AdminNotes serviceId={selectedService.id} serviceName={selectedService.title} />
                     </div>
 
                     <div className="flex gap-2">
                       <Button onClick={handleServiceUpdate} disabled={!isDetailsDirty || saving || saveInProgress}>
                         {saving || saveInProgress ? 'Saving...' : 'Save Changes'}
                       </Button>
-                      <Button 
-                        variant="outline" 
-                        onClick={() => { 
-                          if (selectedService) {
-                            setEditForm(selectedService); 
-                            setIsEditingDetails(false);
-                          }
-                        }}
-                      >
+                      <Button variant="outline" onClick={() => {
+                  if (selectedService) {
+                    setEditForm(selectedService);
+                    setIsEditingDetails(false);
+                  }
+                }}>
                         Cancel
                       </Button>
                     </div>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
+                  </div> : <div className="space-y-4">
                     <div className="flex justify-between items-center">
                       <h3 className="text-lg font-semibold">Service Details</h3>
                       <Button onClick={() => setIsEditingDetails(true)}>
@@ -1644,27 +1547,21 @@ export const ServiceManagementPanel = () => {
                         <p className="text-sm text-muted-foreground">Title: {selectedService.title}</p>
                         <div className="text-sm text-muted-foreground">
                           <span>Primary Category: {selectedService.category || 'Not set'}</span>
-                          {selectedService.tags && selectedService.tags.length > 0 && (
-                            <div className="mt-1">
+                          {selectedService.tags && selectedService.tags.length > 0 && <div className="mt-1">
                               <span>Tags: </span>
                               <div className="flex flex-wrap gap-1 mt-1">
-                                {selectedService.tags.map((tag: string, index: number) => (
-                                  <Badge key={index} variant="outline" className="text-xs">
+                                {selectedService.tags.map((tag: string, index: number) => <Badge key={index} variant="outline" className="text-xs">
                                     {tag}
-                                  </Badge>
-                                ))}
+                                  </Badge>)}
                               </div>
-                            </div>
-                          )}
+                            </div>}
                         </div>
                         <p className="text-sm text-muted-foreground">Duration: {selectedService.duration || 'Not set'}</p>
                         <p className="text-sm text-muted-foreground">ROI: {selectedService.estimated_roi || 0}%</p>
                         <p className="text-sm text-muted-foreground">
-                          Purchase URL: {selectedService.website_url ? (
-                            <a href={selectedService.website_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
+                          Purchase URL: {selectedService.website_url ? <a href={selectedService.website_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
                               {selectedService.website_url}
-                            </a>
-                          ) : 'Not set'}
+                            </a> : 'Not set'}
                         </p>
                       </div>
                       <div>
@@ -1676,82 +1573,58 @@ export const ServiceManagementPanel = () => {
                         </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  </div>}
               </TabsContent>
 
               <TabsContent value="disclaimer" className="space-y-4">
-                <ServiceDisclaimerSection
-                  serviceId={selectedService.id}
-                  serviceName={selectedService.title}
-                />
+                <ServiceDisclaimerSection serviceId={selectedService.id} serviceName={selectedService.title} />
               </TabsContent>
 
               <TabsContent value="ai-research" className="space-y-4">
-                <ServiceAIResearchEditor
-                  serviceId={selectedService.id}
-                  serviceName={selectedService.title}
-                />
+                <ServiceAIResearchEditor serviceId={selectedService.id} serviceName={selectedService.title} />
               </TabsContent>
 
               <TabsContent value="pricing-mirror" className="space-y-4">
-                <ServicePricingMirror
-                  serviceId={selectedService.id}
-                  serviceName={selectedService.title}
-                  currentScreenshotUrl={selectedService.pricing_screenshot_url}
-                  currentPricingUrl={selectedService.pricing_page_url}
-                  lastCapturedAt={selectedService.pricing_screenshot_captured_at}
-                  serviceWebsiteUrl={selectedService.website_url}
-                />
+                <ServicePricingMirror serviceId={selectedService.id} serviceName={selectedService.title} currentScreenshotUrl={selectedService.pricing_screenshot_url} currentPricingUrl={selectedService.pricing_page_url} lastCapturedAt={selectedService.pricing_screenshot_captured_at} serviceWebsiteUrl={selectedService.website_url} />
               </TabsContent>
 
               <TabsContent value="funnel" className="space-y-4">
                 <div className="space-y-4">
-                <ServiceFunnelEditor
-                  service={selectedService}
-                  onUpdate={(updatedService) => {
-                    console.log("[ServiceManagementPanel] Received updated service from funnel editor:", {
-                      id: updatedService.id,
-                      retail_price: updatedService.retail_price,
-                      pro_price: updatedService.pro_price,
-                      co_pay_price: updatedService.co_pay_price
-                    });
-                    
-                    // CRITICAL: Replace entire service object by ID (no mutation)
-                    setServices(prev => prev.map(s => s.id === updatedService.id ? updatedService as Service : s));
-                    
-                    // Also update selected service if it matches
-                    setSelectedService(prev => prev && prev.id === updatedService.id ? updatedService as Service : prev);
-                    
-                    console.log("[ServiceManagementPanel] Updated services state with fresh pricing data");
-                  }}
-                />
+                <ServiceFunnelEditor service={selectedService} onUpdate={updatedService => {
+                console.log("[ServiceManagementPanel] Received updated service from funnel editor:", {
+                  id: updatedService.id,
+                  retail_price: updatedService.retail_price,
+                  pro_price: updatedService.pro_price,
+                  co_pay_price: updatedService.co_pay_price
+                });
+
+                // CRITICAL: Replace entire service object by ID (no mutation)
+                setServices(prev => prev.map(s => s.id === updatedService.id ? updatedService as Service : s));
+
+                // Also update selected service if it matches
+                setSelectedService(prev => prev && prev.id === updatedService.id ? updatedService as Service : prev);
+                console.log("[ServiceManagementPanel] Updated services state with fresh pricing data");
+              }} />
                 </div>
               </TabsContent>
 
               <TabsContent value="compliance" className="space-y-4">
-                <ServiceComplianceTracker 
-                  serviceId={selectedService.id}
-                  serviceName={selectedService.title}
-                />
+                <ServiceComplianceTracker serviceId={selectedService.id} serviceName={selectedService.title} />
               </TabsContent>
             </Tabs>
           </CardContent>
-        </Card>
-      )}
+        </Card>}
 
       {/* AI Service Updater */}
-      <AIServiceUpdater 
-        services={services}
-        onServiceUpdate={(serviceId) => {
-          // Invalidate queries to trigger refresh without full refetch
-          queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SERVICES] });
-          toast({
-            title: 'Service Updated',
-            description: 'Service has been updated by AI. Please review and verify the changes.',
-          });
-        }}
-      />
-    </div>
-  );
+      <AIServiceUpdater services={services} onServiceUpdate={serviceId => {
+      // Invalidate queries to trigger refresh without full refetch
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.SERVICES]
+      });
+      toast({
+        title: 'Service Updated',
+        description: 'Service has been updated by AI. Please review and verify the changes.'
+      });
+    }} />
+    </div>;
 };
