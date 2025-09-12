@@ -399,7 +399,8 @@ export const MarketplaceGrid = () => {
     // Apply price range and verified filters
     return filteredItems.filter(s => {
       const price = extractNumericPrice(s.retail_price);
-      const withinPrice = price >= filters.priceRange[0] && price <= filters.priceRange[1];
+      // If price is 0 (null/undefined retail_price), don't filter it out unless user specifically set a minimum price
+      const withinPrice = price === 0 || (price >= filters.priceRange[0] && price <= filters.priceRange[1]);
       const matchesVerified = !filters.verified || !!s.vendor?.is_verified;
       return withinPrice && matchesVerified;
     });
