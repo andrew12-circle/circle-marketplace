@@ -48,6 +48,37 @@ const getYouTubeEmbedUrl = (url?: string): string | null => {
   const id = getYouTubeId(url);
   return id ? `https://www.youtube-nocookie.com/embed/${id}?rel=0&modestbranding=1` : null;
 };
+// Package type with flexible matching support - compatible with existing service structure
+type Pkg = {
+  id: string
+  label?: string
+  slug?: string
+  key?: string
+  name?: string
+  retail_price?: number | null
+  pro_price?: number | null
+  co_pay_price?: number | null
+  features?: Array<string | { id?: string; text?: string; included?: boolean }>
+  sort_order?: number
+  is_default?: boolean
+  popular?: boolean
+  requestPricing?: boolean
+  // Legacy compatibility fields
+  price?: string | number
+  originalPrice?: string | number
+  yearlyPrice?: string | number
+  yearlyOriginalPrice?: string | number
+  duration?: string
+  description?: string
+  isPopular?: boolean
+  buttonText?: string
+  badge?: string
+  position?: number
+}
+
+// Normalized feature type
+type NormFeature = { id: string | number; text: string; included: boolean }
+
 interface Service {
   id: string;
   title: string;
@@ -72,45 +103,8 @@ interface Service {
   max_split_percentage_ssp?: number;
   max_split_percentage_non_ssp?: number;
   default_package_id?: string;
-  pricing_packages?: Array<{
-    id: string;
-    label: string;
-    retail_price: number | null;
-    pro_price: number | null;
-    co_pay_price: number | null;
-    features?: string[];
-    popular?: boolean;
-    is_default?: boolean;
-    requestPricing?: boolean;
-  }>;
-  pricing_tiers?: Array<{
-    id: string;
-    name: string;
-    description: string;
-    price: string;
-    originalPrice?: string;
-    yearlyPrice?: string;
-    yearlyOriginalPrice?: string;
-    duration: string;
-    features: Array<{
-      id: string;
-      text: string;
-      included: boolean;
-      isHtml?: boolean;
-    }>;
-    isPopular: boolean;
-    buttonText: string;
-    badge?: string;
-    position: number;
-    requestPricing?: boolean;
-    // Add missing properties for package compatibility
-    label?: string;
-    retail_price?: number | null;
-    pro_price?: number | null;
-    co_pay_price?: number | null;
-    popular?: boolean;
-    is_default?: boolean;
-  }>;
+  pricing_packages?: Pkg[];
+  pricing_tiers?: Pkg[];
   vendor: {
     id?: string;
     name: string;
@@ -207,16 +201,56 @@ interface ServiceFunnelModalProps {
   service: Service;
   requestedId?: string | null;
 }
+// Flexible package resolver
+function findPkgByFlexibleKey(list: Pkg[], value?: string | null): Pkg | null {
+  if (!value) return null
+  const v = String(value).toLowerCase()
+  return (
+    list.find(p => p.id === value) ||
+    list.find(p => p.slug?.toLowerCase() === v) ||
+    list.find(p => p.key?.toLowerCase() === v) ||
+    list.find(p => p.label && p.label.toLowerCase().replace(/\s+/g, '-') === v) ||
+    list.find(p => p.name && p.name.toLowerCase().replace(/\s+/g, '-') === v) ||
+    null
+  )
+}
+
+// Feature normalizer
+function normalizeFeatures(feats: Pkg["features"]): NormFeature[] {
+  if (!Array.isArray(feats)) return []
+  return feats
+    .map((f, i) => {
+      if (typeof f === 'string') return { id: i, text: f, included: true }
+      if (f && typeof f === 'object') {
+        const text = String(f.text ?? '')
+        const included = f.included !== false
+        return { id: f.id ?? i, text, included }
+      }
+      return null
+    })
+    .filter((x): x is NormFeature => !!x && x.text.trim().length > 0)
+}
+
 export const ServiceFunnelModal = ({
   isOpen,
   onClose,
   service,
   requestedId
 }: ServiceFunnelModalProps) => {
-  // State for active package selection - prefer requestedId, then default, then resolved
-  const [activePackageId, setActivePackageId] = useState<string | null>(
-    requestedId ?? service.default_package_id ?? null
-  );
+  // Get normalized packages and resolve initial package
+  const packages: Pkg[] = Array.isArray(service.pricing_packages)
+    ? service.pricing_packages
+    : Array.isArray(service.pricing_tiers)
+      ? service.pricing_tiers
+      : []
+
+  const initialPkg =
+    findPkgByFlexibleKey(packages, requestedId) ??
+    (service.default_package_id ? packages.find(p => p.id === service.default_package_id) ?? null : null) ??
+    (packages.length ? packages.sort((a,b)=>(a.sort_order??999)-(b.sort_order??999))[0] : null)
+
+  const [activePackageId, setActivePackageId] = useState<string | null>(initialPkg?.id ?? null)
+  const activePkg = (activePackageId && packages.find(p => p.id === activePackageId)) ?? initialPkg
   const [quantity, setQuantity] = useState(1);
   const [isConsultationFlowOpen, setIsConsultationFlowOpen] = useState(false);
   const [isPricingChoiceOpen, setIsPricingChoiceOpen] = useState(false);
@@ -276,44 +310,47 @@ export const ServiceFunnelModal = ({
     content: string;
   }> = fc?.faqSections as any || [];
 
-  // Use resolved package pricing - cast service for compatibility
-  const serviceForResolver = {
-    ...service,
-    retail_price: service.retail_price ? parseFloat(service.retail_price.replace(/[^\d.]/g, '')) : 0,
-    pro_price: service.pro_price ? parseFloat(service.pro_price.replace(/[^\d.]/g, '')) : 0,
-    co_pay_price: service.co_pay_price ? parseFloat(service.co_pay_price.replace(/[^\d.]/g, '')) : 0
-  };
-  const { activePackage, retail, pro, coPay } = getPackagePrices(serviceForResolver, activePackageId);
+  // Calculate pricing from selected package
+  const isPro = !!profile?.is_pro_member
+  const retail = Number(activePkg?.retail_price ?? service.retail_price ?? 0)
+  const pro = Number(activePkg?.pro_price ?? service.pro_price ?? retail)
+  const coPay = activePkg?.co_pay_price ?? service.co_pay_price ?? null
+  const payNow = isPro ? pro : retail
+  const fmt = (n: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n)
   
   // Debug package resolution in development
   if (process.env.NODE_ENV === 'development') {
-    debugPackageResolution(serviceForResolver, activePackageId);
+    console.log('Package Resolution Debug:', {
+      requestedId,
+      activePackageId,
+      activePkg: activePkg ? { id: activePkg.id, label: activePkg.label || activePkg.name } : null,
+      packages: packages.map(p => ({ id: p.id, label: p.label || p.name }))
+    })
   }
 
-  // Normalize packages from database - prioritize pricing_tiers, fallback to pricing_packages
-  const packages = (service.pricing_tiers?.length ? service.pricing_tiers : service.pricing_packages)?.length 
-    ? (service.pricing_tiers?.length ? service.pricing_tiers : service.pricing_packages).map(pkg => ({
-        id: pkg.id,
-        name: pkg.label || pkg.name,
-        price: pkg.pro_price || pkg.retail_price || 0,
-        originalPrice: pkg.retail_price || undefined,
-        yearlyPrice: undefined, // Not supported in new structure yet
-        yearlyOriginalPrice: undefined,
-        duration: service.duration,
-        description: pkg.features?.join(', ') || '',
-        features: pkg.features || [],
-        popular: pkg.popular || pkg.is_default,
-        requestPricing: pkg.requestPricing
-      })) : [{
+  // Create display packages from normalized packages
+  const displayPackages = packages.length ? packages.map(pkg => ({
+    id: pkg.id,
+    name: pkg.label || pkg.name || `Package ${pkg.id}`,
+    price: Number(pkg.pro_price || pkg.retail_price || 0),
+    originalPrice: Number(pkg.retail_price) || undefined,
+    yearlyPrice: undefined, // Not supported in new structure yet
+    yearlyOriginalPrice: undefined,
+    duration: pkg.duration || service.duration || "monthly",
+    description: Array.isArray(pkg.features) ? normalizeFeatures(pkg.features).map(f => f.text).join(', ') : '',
+    features: normalizeFeatures(pkg.features),
+    popular: pkg.popular || pkg.is_default,
+    requestPricing: pkg.requestPricing
+  })) : [{
     id: "basic",
-    name: "Basic Package",
+    name: "Basic Package", 
     price: retail * 0.75,
     originalPrice: retail,
     yearlyPrice: undefined,
     yearlyOriginalPrice: undefined,
     duration: "monthly",
     description: "Essential service features for getting started",
-    features: ["Core service delivery", "Email support", "Basic reporting"],
+    features: normalizeFeatures(["Core service delivery", "Email support", "Basic reporting"]),
     requestPricing: false
   }, {
     id: "standard",
@@ -324,7 +361,7 @@ export const ServiceFunnelModal = ({
     yearlyOriginalPrice: undefined,
     duration: "monthly",
     description: "Complete solution for most needs",
-    features: ["Everything in Basic", "Priority support", "Advanced reporting", "Custom consultation"],
+    features: normalizeFeatures(["Everything in Basic", "Priority support", "Advanced reporting", "Custom consultation"]),
     popular: true,
     requestPricing: false
   }, {
@@ -336,37 +373,27 @@ export const ServiceFunnelModal = ({
     yearlyOriginalPrice: undefined,
     duration: "monthly",
     description: "Full-service solution with dedicated support",
-    features: ["Everything in Standard", "Dedicated account manager", `${service.vendor?.support_hours || 'Business Hours'} support`, "Custom integrations"],
+    features: normalizeFeatures(["Everything in Standard", "Dedicated account manager", `${service.vendor?.support_hours || 'Business Hours'} support`, "Custom integrations"]),
     requestPricing: false
   }];
   
-  const hasYearlyPricing = packages.some(pkg => pkg.yearlyPrice);
-  
-  // Get the actual selected package from database - prioritize pricing_tiers, fallback to pricing_packages
-  const dbPackages = service.pricing_tiers?.length ? service.pricing_tiers : service.pricing_packages;
-  const selectedPkgData = dbPackages?.find(pkg => pkg.id === activePackageId) || dbPackages?.[0];
-  const selectedPkg = packages.find(pkg => pkg.id === activePackageId) || packages[0];
+  const hasYearlyPricing = displayPackages.some(pkg => pkg.yearlyPrice);
+  const selectedPkg = displayPackages.find(pkg => pkg.id === activePackageId) || displayPackages[0];
 
-  // Initialize active package on component mount
+  // Initialize active package on component mount if not already set
   useEffect(() => {
-    if (!activePackageId) {
-      const resolved = resolveActivePackage(serviceForResolver, requestedId);
-      if (resolved) {
-        setActivePackageId(resolved.id);
-      } else if (packages.length > 0) {
-        // Fallback to popular package or first package
-        const popularPackage = packages.find(pkg => pkg.popular);
-        setActivePackageId(popularPackage?.id || packages[0].id);
-      }
+    if (!activePackageId && packages.length > 0) {
+      const popularPackage = packages.find(pkg => pkg.popular || pkg.is_default);
+      setActivePackageId(popularPackage?.id || packages[0].id);
     }
-  }, [service, requestedId, activePackageId, packages]);
+  }, [packages, activePackageId]);
   const handleAddToCart = () => {
     if (!user) {
       // Store the item for after sign in
       const pendingItem = {
         id: service.id,
-        title: `${service.title} - ${selectedPkgData?.label || 'Selected Package'}`,
-        price: (selectedPkgData?.pro_price || selectedPkgData?.retail_price || 0) * quantity,
+        title: `${service.title} - ${activePkg?.label || activePkg?.name || 'Selected Package'}`,
+        price: payNow * quantity,
         vendor: service.vendor?.name || 'Direct Service',
         image_url: service.image_url,
         requiresQuote: service.requires_quote,
@@ -389,8 +416,8 @@ export const ServiceFunnelModal = ({
 
     addToCart({
       id: service.id,
-      title: `${service.title} - ${selectedPkgData?.label || 'Selected Package'}`,
-      price: (selectedPkgData?.pro_price || selectedPkgData?.retail_price || 0) * quantity,
+      title: `${service.title} - ${activePkg?.label || activePkg?.name || 'Selected Package'}`,
+      price: payNow * quantity,
       vendor: service.vendor?.name || 'Direct Service',
       image_url: service.image_url,
       requiresQuote: service.requires_quote,
@@ -400,8 +427,8 @@ export const ServiceFunnelModal = ({
     // Track the purchase action
     trackPurchase({
       id: service.id,
-      package_type: selectedPkgData?.label || 'Default Package',
-      amount: (selectedPkgData?.pro_price || selectedPkgData?.retail_price || 0) * quantity,
+      package_type: activePkg?.label || activePkg?.name || 'Default Package',
+      amount: payNow * quantity,
       payment_method: 'cart'
     });
     onClose();
@@ -472,10 +499,9 @@ export const ServiceFunnelModal = ({
   };
 
   const buildShareMessage = () => {
-    const currentPrice = selectedPkgData?.pro_price || selectedPkgData?.retail_price || 0;
     const shareUrl = buildShareUrl();
     
-    return `Check out this deal: ${service.title} - ${formatPrice(currentPrice)}${service.description ? `\n\n${service.description.substring(0, 100)}${service.description.length > 100 ? '...' : ''}` : ''}\n\n${shareUrl}`;
+    return `Check out this deal: ${service.title} - ${fmt(payNow)}${service.description ? `\n\n${service.description.substring(0, 100)}${service.description.length > 100 ? '...' : ''}` : ''}\n\n${shareUrl}`;
   };
 
   const getSmsHref = (message: string) => {
@@ -1128,8 +1154,14 @@ export const ServiceFunnelModal = ({
                 )}
               </div>
               
-              <div className={`grid gap-6 ${packages.length === 1 ? 'grid-cols-1 max-w-md mx-auto' : packages.length === 2 ? 'grid-cols-1 lg:grid-cols-2 max-w-4xl mx-auto' : packages.length === 3 ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 max-w-7xl mx-auto'}`}>
-                {packages.slice(0, 4).map((pkg, index) => <div key={pkg.id} className={`relative p-6 rounded-2xl border-2 cursor-pointer transition-all hover:scale-105 hover:shadow-xl ${activePackageId === pkg.id ? 'border-blue-500 bg-white shadow-xl ring-4 ring-blue-100' : 'border-gray-200 bg-white hover:border-gray-300 shadow-lg'} ${pkg.popular ? 'ring-2 ring-blue-200' : ''}`} onClick={() => setActivePackageId(pkg.id)}>
+              <div className={`grid gap-6 ${displayPackages.length === 1 ? 'grid-cols-1 max-w-md mx-auto' : displayPackages.length === 2 ? 'grid-cols-1 lg:grid-cols-2 max-w-4xl mx-auto' : displayPackages.length === 3 ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 max-w-7xl mx-auto'}`}>
+                {displayPackages.slice(0, 4).map((pkg, index) => {
+                  const dbPkg = packages.find(p => p.id === pkg.id)
+                  const pkgRetail = Number(dbPkg?.retail_price ?? service.retail_price ?? 0)
+                  const pkgPro = Number(dbPkg?.pro_price ?? service.pro_price ?? pkgRetail)
+                  const selected = pkg.id === activePackageId
+
+                  return <div key={pkg.id} className={`relative p-6 rounded-2xl border-2 cursor-pointer transition-all hover:scale-105 hover:shadow-xl ${selected ? 'border-blue-500 bg-white shadow-xl ring-4 ring-blue-100' : 'border-gray-200 bg-white hover:border-gray-300 shadow-lg'} ${pkg.popular ? 'ring-2 ring-blue-200' : ''}`} onClick={() => setActivePackageId(pkg.id)}>
                     {pkg.popular && <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
                         <Badge className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-2 text-sm font-semibold shadow-lg border-0 rounded-full whitespace-nowrap">
                           ⭐ Most Popular
@@ -1148,26 +1180,16 @@ export const ServiceFunnelModal = ({
                           
                           return (
                             <>
-                              <div className="flex items-center justify-between text-sm">
+                               <div className="flex items-center justify-between text-sm">
                                 <span className="text-gray-600">Retail:</span>
                                  <span className={`font-medium ${isProMember ? 'text-gray-500 line-through' : 'text-gray-800'}`}>
-                                   {(() => {
-                                     // Find the actual package being rendered from database packages
-                                     const actualPkg = dbPackages?.find(p => p.id === pkg.id);
-                                     const retailPrice = actualPkg?.retail_price ?? (service.retail_price ? parseFloat(service.retail_price.replace(/[^\d.]/g, '')) : null);
-                                     return retailPrice != null ? `$${retailPrice}${period}` : 'Request Pricing';
-                                   })()}
+                                   {pkgRetail ? fmt(pkgRetail) + period : 'Request Pricing'}
                                  </span>
                               </div>
                               <div className="flex items-center justify-between text-sm">
                                 <span className="text-blue-600">Pro Member:</span>
                                  <span className="font-medium text-blue-600">
-                                   {(() => {
-                                     // Find the actual package being rendered from database packages
-                                     const actualPkg = dbPackages?.find(p => p.id === pkg.id);
-                                     const proPrice = actualPkg?.pro_price ?? actualPkg?.retail_price ?? (service.pro_price ? parseFloat(service.pro_price.replace(/[^\d.]/g, '')) : null);
-                                     return proPrice != null ? `$${proPrice}${period}` : 'Request Pricing';
-                                   })()}
+                                   {pkgPro ? fmt(pkgPro) + period : 'Request Pricing'}
                                  </span>
                               </div>
                               {service.copay_allowed && (
@@ -1180,28 +1202,27 @@ export const ServiceFunnelModal = ({
                                   </div>
                                   
                                    {(() => {
-                                     // Use selected package pricing for co-pay calculation
-                                     const actualPkg = dbPackages?.find(p => p.id === pkg.id);
-                                     const basePrice = actualPkg?.pro_price ?? actualPkg?.retail_price ?? parseFloat(service.pro_price?.replace(/[^\d.]/g, '') || service.retail_price?.replace(/[^\d.]/g, '') || '0');
+                                     // Use current package pricing for co-pay calculation
+                                     const basePrice = pkgPro || pkgRetail
                                      const sspAllowed = service.ssp_allowed !== false;
                                      const sspPct = service.max_split_percentage_ssp || 0;
                                      const nonSspPct = service.max_split_percentage_non_ssp || 0;
                                     
-                                    const sspAgentPays = sspAllowed && sspPct > 0 ? Math.round(basePrice * (1 - sspPct / 100)) : null;
-                                    const nonSspAgentPays = nonSspPct > 0 ? Math.round(basePrice * (1 - nonSspPct / 100)) : null;
+                                    const sspAgentPays = sspAllowed && sspPct > 0 && basePrice ? Math.round(basePrice * (1 - sspPct / 100)) : null;
+                                    const nonSspAgentPays = nonSspPct > 0 && basePrice ? Math.round(basePrice * (1 - nonSspPct / 100)) : null;
                                     
                                     return (
                                       <div className="space-y-2">
                                         <div className="text-sm">
                                           <div className="font-medium text-gray-700">Marketing Coverage from Settlement Service Provider:</div>
                                           <div className="text-green-700">
-                                            {sspAgentPays !== null ? `Agent pays approximately $${sspAgentPays}${period}` : 'Not eligible'}
+                                            {sspAgentPays !== null ? `Agent pays approximately ${fmt(sspAgentPays)}${period}` : 'Not eligible'}
                                           </div>
                                         </div>
                                         <div className="text-sm">
                                           <div className="font-medium text-gray-700">Marketing Coverage from Non Settlement Service Provider:</div>
                                           <div className="text-green-700">
-                                            {nonSspAgentPays !== null ? `Agent pays as low as approximately $${nonSspAgentPays}${period}` : 'Not shown'}
+                                            {nonSspAgentPays !== null ? `Agent pays as low as approximately ${fmt(nonSspAgentPays)}${period}` : 'Not shown'}
                                           </div>
                                         </div>
                                       </div>
@@ -1224,7 +1245,9 @@ export const ServiceFunnelModal = ({
                     <div className="space-y-3 mb-6">
                       {(expandedFeatures[pkg.id] ? pkg.features : pkg.features.slice(0, 4)).map((feature, idx) => <div key={idx} className="flex items-start gap-2 text-sm">
                           <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-                          <span className="text-gray-600">{feature}</span>
+                          <span className={`text-gray-600 ${!feature.included ? 'line-through opacity-60' : ''}`}>
+                            {feature.text}
+                          </span>
                         </div>)}
                       {pkg.features.length > 4 && <div 
                           className="text-sm text-blue-500 hover:text-blue-600 text-center cursor-pointer transition-colors"
@@ -1243,13 +1266,37 @@ export const ServiceFunnelModal = ({
                         </div>}
                     </div>
 
-                    <Button className={`w-full py-3 rounded-xl font-semibold transition-all ${activePackageId === pkg.id ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'}`} onClick={e => {
+                    <Button className={`w-full py-3 rounded-xl font-semibold transition-all ${selected ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'}`} onClick={e => {
                   e.stopPropagation();
                   setActivePackageId(pkg.id);
                 }}>
-                      {activePackageId === pkg.id ? '✓ Selected' : 'Select Package'}
+                      {selected ? '✓ Selected' : 'Select Package'}
                     </Button>
-                  </div>)}
+                  </div>
+                })}
+              </div>
+
+              {/* Action Buttons with corrected CTA */}
+              <div className="mt-12 flex flex-col sm:flex-row gap-4 justify-center max-w-2xl mx-auto">
+                {service.direct_purchase_enabled && service.website_url ? (
+                  <>
+                    <Button onClick={handleBuyNow} className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all flex-1">
+                      <ShoppingCart className="w-5 h-5 mr-2" />
+                      Buy Now • {fmt(payNow)}
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button onClick={handleAddToCart} className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all flex-1">
+                      <ShoppingCart className="w-5 h-5 mr-2" />
+                      Add to Cart • {fmt(payNow)}
+                    </Button>
+                    <Button onClick={() => setIsConsultationFlowOpen(true)} variant="outline" className="border-2 border-gray-300 hover:border-gray-400 px-8 py-4 rounded-xl font-semibold text-lg flex-1">
+                      <Calendar className="w-5 h-5 mr-2" />
+                      Book Consultation
+                    </Button>
+                  </>
+                )}
               </div>
 
               {/* Action Buttons */}
@@ -1258,7 +1305,7 @@ export const ServiceFunnelModal = ({
                   <>
                     <Button onClick={handleBuyNow} className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all flex-1">
                       <ShoppingCart className="w-5 h-5 mr-2" />
-                      Buy Now - ${selectedPkgData?.pro_price || selectedPkgData?.retail_price || '0'}
+                      Buy Now • {fmt(payNow)}
                       <ArrowRight className="w-5 h-5 ml-2" />
                     </Button>
                     <Button variant="outline" onClick={() => setIsConsultationFlowOpen(true)} className="border-2 border-gray-300 hover:border-gray-400 px-8 py-4 rounded-xl font-semibold text-lg flex-1">
@@ -1282,8 +1329,8 @@ export const ServiceFunnelModal = ({
                               type: 'service',
                               serviceId: service.id,
                               serviceName: service.title,
-                               packageName: selectedPkgData?.label || 'Default Package',
-                               price: selectedPkgData?.pro_price || selectedPkgData?.retail_price || 0,
+                               packageName: activePkg?.label || activePkg?.name || 'Default Package',
+                               price: payNow,
                               timestamp: Date.now()
                             };
                             localStorage.setItem('pendingCartItem', JSON.stringify(pendingItem));
@@ -1297,7 +1344,7 @@ export const ServiceFunnelModal = ({
                         className="bg-primary text-primary-foreground hover:bg-primary/90 px-8 py-4 rounded-xl font-semibold text-lg flex-1"
                       >
                         <ShoppingCart className="w-5 h-5 mr-2" />
-                        {!user ? "Sign In to Add to Cart" : `Add to Cart - $${selectedPkgData?.pro_price || selectedPkgData?.retail_price || '0'}`}
+                        {!user ? "Sign In to Add to Cart" : `Add to Cart • ${fmt(payNow)}`}
                       </Button>
                     )}
                   </>
@@ -1309,7 +1356,7 @@ export const ServiceFunnelModal = ({
 
           {/* Customers Also Viewed Section */}
           <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
-            <CustomersAlsoViewed currentService={service} maxSuggestions={6} />
+            <CustomersAlsoViewed currentService={service as any} maxSuggestions={6} />
           </div>
 
           {/* Disclaimer Section for Non-Verified Services */}
@@ -1443,9 +1490,9 @@ export const ServiceFunnelModal = ({
         {/* Pricing Choice Modal */}
         {isPricingChoiceOpen && <PricingChoiceModal isOpen={isPricingChoiceOpen} onClose={() => setIsPricingChoiceOpen(false)} service={{
         id: service.id,
-         title: `${service.title} - ${selectedPkgData?.label || 'Selected Package'}`,
-         pro_price: (selectedPkgData?.pro_price || 0).toString(),
-         retail_price: (selectedPkgData?.retail_price || selectedPkgData?.pro_price || 0).toString(),
+         title: `${service.title} - ${activePkg?.label || activePkg?.name || 'Selected Package'}`,
+         pro_price: pro.toString(),
+         retail_price: retail.toString(),
         respa_split_limit: 50,
         // Default 50% split limit
         price_duration: service.duration,
@@ -1467,9 +1514,9 @@ export const ServiceFunnelModal = ({
           service={{
             id: service.id,
             title: service.title,
-             co_pay_price: selectedPkgData ? ((selectedPkgData.pro_price || selectedPkgData.retail_price || 0) * 0.5).toString() : '0',
-             retail_price: (selectedPkgData?.retail_price || selectedPkgData?.pro_price || 0).toString(),
-             pro_price: (selectedPkgData?.pro_price || selectedPkgData?.retail_price || 0).toString(),
+             co_pay_price: (payNow * 0.5).toString(),
+             retail_price: retail.toString(),
+             pro_price: pro.toString(),
             image_url: service.image_url,
             respa_split_limit: 50,
             requires_quote: service.requires_quote
