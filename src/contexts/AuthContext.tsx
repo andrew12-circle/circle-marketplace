@@ -167,6 +167,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         updated_at: new Date().toISOString(),
         is_verified: true,
         is_pro: true,
+        is_pro_member: true, // CRITICAL: Set both is_pro AND is_pro_member for consistent Pro status
         is_creator: true
       };
       setProfile(adminProfile);
@@ -244,6 +245,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             updated_at: new Date().toISOString(),
             is_verified: true,
             is_pro: true,
+            is_pro_member: true, // CRITICAL: Set both for consistent Pro status
             is_creator: true
           };
           setProfile(emergencyProfile);
@@ -300,6 +302,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           displayName: profileData.display_name,
           fetchDurationMs: Math.round(fetchDuration)
         });
+        
+        // CRITICAL: For admin users, ensure Pro status consistency
+        // If this is an admin user but database profile doesn't have proper Pro status, fix it
+        if (isAdminUser && (!profileData.is_pro || !profileData.is_pro_member)) {
+          logger.log('Admin user detected - ensuring Pro status consistency in database profile');
+          profileData.is_pro = true;
+          profileData.is_pro_member = true;
+        }
+        
         setProfile(profileData);
         // Cache the profile
         setProfileCache(prev => new Map(prev.set(userId, { profile: profileData, timestamp: now })));
@@ -686,6 +697,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const refreshProfile = async () => {
     if (user?.id) {
+      // For admin users, preserve Pro status during refresh to prevent race conditions
+      const currentProStatus = getProStatus(profile);
+      const isAdminUser = user.email && ['robert@circlenetwork.io', 'andrew@heisleyteam.com', 'andrew@circlenetwork.io'].includes(user.email.toLowerCase());
+      
+      if (isAdminUser && currentProStatus) {
+        logger.log('Admin user refresh - will preserve Pro status to prevent race condition');
+      }
+      
       await fetchProfile(user.id);
     }
   };
@@ -694,7 +713,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     user,
     session,
     profile: profile || provisionalProfile, // Use real profile if available, otherwise provisional
-    pro: getProStatus(profile || provisionalProfile),
+    pro: (() => {
+      // Safety net: Admin users should always have Pro status regardless of profile inconsistencies
+      const isAdminUser = user?.email && ['robert@circlenetwork.io', 'andrew@heisleyteam.com', 'andrew@circlenetwork.io'].includes(user.email.toLowerCase());
+      if (isAdminUser) {
+        return true; // Admin users always have Pro access
+      }
+      return getProStatus(profile || provisionalProfile);
+    })(),
     loading,
     signOut,
     updateProfile,

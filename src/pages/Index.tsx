@@ -41,18 +41,9 @@ const Index = () => {
     }
   }, [user, profile]);
 
-  // Also refresh when the page becomes visible (user returns from another tab/app)
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (!document.hidden && user && profile) {
-        console.log('🔄 Index page requesting profile refresh on visibility change');
-        refreshProfile();
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, [user, profile]); // Removed refreshProfile from dependencies
+  // Remove aggressive visibility change refresh to prevent race conditions with Pro status
+  // This was causing the temporary admin profile to be overwritten by database profile
+  // that might not have matching Pro status fields
 
   return (
     <div className="min-h-screen bg-background">
