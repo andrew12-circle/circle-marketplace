@@ -983,13 +983,11 @@ export const ServiceFunnelModal = ({
                                  : null;
                                const content = faqContent?.content || "Over 1000+ successful implementations with verified case studies and testimonials";
                                
-                               return content && content.trim() ? (
-                                 <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4 mb-6">
-                                   <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
-                                     {content}
-                                   </p>
-                                 </div>
-                               ) : null;
+                                return content && content.trim() ? (
+                                  <p className="text-gray-700 leading-relaxed whitespace-pre-wrap mb-6">
+                                    {content}
+                                  </p>
+                                ) : null;
                              })()}
 
                              {/* Intro Text */}
