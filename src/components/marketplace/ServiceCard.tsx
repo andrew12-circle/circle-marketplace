@@ -600,9 +600,13 @@ export const ServiceCard = ({
                   {/* Pro Member View: Show pro price prominently or discount pending */}
                   {service.requires_quote && !service.retail_price && !service.pro_price ? (
                     /* Quote-only service fallback */
-                    <div className="text-center">
-                      <div className="text-lg font-semibold text-foreground mb-1">Custom Pricing Available</div>
-                      <div className="text-sm text-muted-foreground">Contact for personalized quote</div>
+                    <div className="bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20 rounded-lg p-4">
+                      <div className="flex items-center justify-center gap-2 mb-2">
+                        <MessageCircle className="w-5 h-5 text-primary" />
+                        <div className="text-lg font-semibold text-primary">Contact for Quote</div>
+                      </div>
+                      <div className="text-sm text-muted-foreground mb-2">Custom pricing available</div>
+                      <div className="text-xs text-primary/70 font-medium">Tailored to your specific needs</div>
                     </div>
                   ) : showDiscountPending ? (
                     <div className="text-center space-y-3">
