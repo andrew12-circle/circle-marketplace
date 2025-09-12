@@ -736,9 +736,13 @@ export const ServiceCard = ({
                   {/* Non-Pro Member View: Show retail as main price, others as incentives */}
                   {service.requires_quote && !service.retail_price && !service.pro_price ? (
                     /* Quote-only service fallback */
-                    <div className="text-center mt-4">
-                      <div className="text-lg font-semibold text-foreground mb-1">Contact for Quote</div>
-                      <div className="text-sm text-muted-foreground">Custom pricing available</div>
+                    <div className="bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20 rounded-lg p-4 mt-4">
+                      <div className="flex items-center justify-center gap-2 mb-2">
+                        <MessageCircle className="w-5 h-5 text-primary" />
+                        <div className="text-lg font-semibold text-primary">Contact for Quote</div>
+                      </div>
+                      <div className="text-sm text-muted-foreground mb-2">Custom pricing available</div>
+                      <div className="text-xs text-primary/70 font-medium">Tailored to your specific needs</div>
                     </div>
                   ) : service.retail_price ? (
                     <div className="flex items-center justify-between mt-4">
