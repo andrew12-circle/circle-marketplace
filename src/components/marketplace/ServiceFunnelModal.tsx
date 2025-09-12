@@ -1291,38 +1291,36 @@ export const ServiceFunnelModal = ({
                   </>
                 ) : (
                   <>
+                    <Button 
+                      onClick={() => {
+                        if (!user) {
+                          // Store the pending item in localStorage
+                          const pendingItem = {
+                            type: 'service',
+                            serviceId: service.id,
+                            serviceName: service.title,
+                             packageName: activePkg?.label || activePkg?.name || 'Default Package',
+                             price: payNow,
+                            timestamp: Date.now()
+                          };
+                          localStorage.setItem('pendingCartItem', JSON.stringify(pendingItem));
+                          
+                          // Redirect to auth page
+                          window.location.href = '/auth';
+                          return;
+                        }
+                        setIsPricingChoiceOpen(true);
+                      }} 
+                      className="bg-primary text-primary-foreground hover:bg-primary/90 px-8 py-4 rounded-xl font-semibold text-lg flex-1"
+                    >
+                      <ShoppingCart className="w-5 h-5 mr-2" />
+                      {!user ? "Sign In to Add to Cart" : `Add to Cart • ${fmt(payNow)}`}
+                    </Button>
                     <Button onClick={() => setIsConsultationFlowOpen(true)} className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all flex-1">
                       <Calendar className="w-5 h-5 mr-2" />
                       Book Consultation
                       <ArrowRight className="w-5 h-5 ml-2" />
                     </Button>
-                    {!service.requires_quote && (
-                      <Button 
-                        onClick={() => {
-                          if (!user) {
-                            // Store the pending item in localStorage
-                            const pendingItem = {
-                              type: 'service',
-                              serviceId: service.id,
-                              serviceName: service.title,
-                               packageName: activePkg?.label || activePkg?.name || 'Default Package',
-                               price: payNow,
-                              timestamp: Date.now()
-                            };
-                            localStorage.setItem('pendingCartItem', JSON.stringify(pendingItem));
-                            
-                            // Redirect to auth page
-                            window.location.href = '/auth';
-                            return;
-                          }
-                          setIsPricingChoiceOpen(true);
-                        }} 
-                        className="bg-primary text-primary-foreground hover:bg-primary/90 px-8 py-4 rounded-xl font-semibold text-lg flex-1"
-                      >
-                        <ShoppingCart className="w-5 h-5 mr-2" />
-                        {!user ? "Sign In to Add to Cart" : `Add to Cart • ${fmt(payNow)}`}
-                      </Button>
-                    )}
                   </>
                 )}
               </div>
