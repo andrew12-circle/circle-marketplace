@@ -43,6 +43,7 @@ interface PricingModeEditorProps {
   pricingNote?: string;
   onPricingModeChange?: (mode: string) => void;
   onPricingFieldChange?: (field: string, value: string) => void;
+  service?: any;
 }
 
 export const FunnelPricingEditor = ({ 
@@ -137,6 +138,73 @@ export const FunnelPricingEditor = ({
     <Card>
       <CardHeader>
         <CardTitle>Pricing Configuration</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {/* Core Pricing Fields - Always show when service and callback are provided */}
+        {service && onPricingFieldChange && (
+          <div className="space-y-4 border rounded-lg p-4 bg-gray-50">
+            <h4 className="font-semibold">Core Pricing Fields</h4>
+            <p className="text-sm text-muted-foreground">
+              These are the main pricing fields used throughout the application. Changes here update immediately.
+            </p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <Label htmlFor="retail_price">Retail Price ($)</Label>
+                <input
+                  id="retail_price"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={service.retail_price ? parseFloat(service.retail_price.replace(/[^\d.]/g, '')) || '' : ''}
+                  onChange={(e) => {
+                    const value = e.target.value === '' ? null : parseFloat(e.target.value);
+                    console.log('[FunnelPricingEditor] Retail price changed:', value);
+                    onPricingFieldChange('retail_price', value === null ? null : value.toString());
+                  }}
+                  placeholder="199.00"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="pro_price">Pro Member Price ($)</Label>
+                <input
+                  id="pro_price"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={service.pro_price ? parseFloat(service.pro_price.replace(/[^\d.]/g, '')) || '' : ''}
+                  onChange={(e) => {
+                    const value = e.target.value === '' ? null : parseFloat(e.target.value);
+                    console.log('[FunnelPricingEditor] Pro price changed:', value);
+                    onPricingFieldChange('pro_price', value === null ? null : value.toString());
+                  }}
+                  placeholder="149.00"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="co_pay_price">Co-Pay Price ($)</Label>
+                <input
+                  id="co_pay_price"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={service.co_pay_price ? parseFloat(service.co_pay_price.replace(/[^\d.]/g, '')) || '' : ''}
+                  onChange={(e) => {
+                    const value = e.target.value === '' ? null : parseFloat(e.target.value);
+                    console.log('[FunnelPricingEditor] Co-pay price changed:', value);
+                    onPricingFieldChange('co_pay_price', value === null ? null : value.toString());
+                  }}
+                  placeholder="99.00"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+          </div>
+        )}
         
         {/* Pricing Mode Selector */}
         <div className="space-y-4">

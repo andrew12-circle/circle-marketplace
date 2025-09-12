@@ -1104,13 +1104,43 @@ export const ServiceFunnelModal = ({
                               <div className="flex items-center justify-between text-sm">
                                 <span className="text-gray-600">Retail:</span>
                                 <span className={`font-medium ${isProMember ? 'text-gray-500 line-through' : 'text-gray-800'}`}>
-                                  {pkg.requestPricing ? 'Request Pricing' : `$${currentOriginalPrice || currentPrice}${period}`}
+                                  {pkg.requestPricing ? 'Request Pricing' : (() => {
+                                    // Priority 1: Use service.retail_price (core field) first
+                                    const retailPrice = service.retail_price ? parseFloat(service.retail_price.replace(/[^\d.]/g, '')) : null;
+                                    if (retailPrice != null && !isNaN(retailPrice)) {
+                                      return `$${retailPrice}${period}`;
+                                    }
+                                    // Fallback: Use pricing tier only if core field is null/invalid
+                                    return `$${currentOriginalPrice || currentPrice}${period}`;
+                                  })()}
                                 </span>
                               </div>
                               <div className="flex items-center justify-between text-sm">
                                 <span className="text-blue-600">Pro Member:</span>
                                 <span className="font-medium text-blue-600">
-                                  {pkg.requestPricing ? 'Request Pricing' : `$${service.pro_price ? extractNumericPrice(service.pro_price) : currentOriginalPrice || currentPrice}${period}`}
+                                  {pkg.requestPricing ? 'Request Pricing' : (() => {
+                                    console.log('[Pricing DEBUG] ServiceFunnelModal Pro Price Display', {
+                                      service_id: service.id,
+                                      service_pro_price: service.pro_price,
+                                      service_retail_price: service.retail_price,
+                                      pricing_tier_price: currentOriginalPrice || currentPrice
+                                    });
+                                    
+                                    // Priority 1: Use service.pro_price (core field) first
+                                    const proPrice = service.pro_price ? parseFloat(service.pro_price.replace(/[^\d.]/g, '')) : null;
+                                    if (proPrice != null && !isNaN(proPrice)) {
+                                      return `$${proPrice}${period}`;
+                                    }
+                                    
+                                    // Priority 2: Fallback to retail price if pro_price is null
+                                    const retailPrice = service.retail_price ? parseFloat(service.retail_price.replace(/[^\d.]/g, '')) : null;
+                                    if (retailPrice != null && !isNaN(retailPrice)) {
+                                      return `$${retailPrice}${period}`;
+                                    }
+                                    
+                                    // Final fallback: Use pricing tier only if both core fields are null/invalid
+                                    return `$${currentOriginalPrice || currentPrice}${period}`;
+                                  })()}
                                 </span>
                               </div>
                               {service.copay_allowed && (

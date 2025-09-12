@@ -1707,14 +1707,25 @@ export const ServiceManagementPanel = () => {
 
               <TabsContent value="funnel" className="space-y-4">
                 <div className="space-y-4">
-                  <ServiceFunnelEditor
-                    service={selectedService}
-                    onUpdate={(updatedService) => {
-                      setSelectedService(updatedService as Service);
-                      setServices(services.map(s => s.id === updatedService.id ? updatedService as Service : s));
-                      // Removed setShowFunnelEditor(false) - stay in editor after saving
-                    }}
-                  />
+                <ServiceFunnelEditor
+                  service={selectedService}
+                  onUpdate={(updatedService) => {
+                    console.log("[ServiceManagementPanel] Received updated service from funnel editor:", {
+                      id: updatedService.id,
+                      retail_price: updatedService.retail_price,
+                      pro_price: updatedService.pro_price,
+                      co_pay_price: updatedService.co_pay_price
+                    });
+                    
+                    // CRITICAL: Replace entire service object by ID (no mutation)
+                    setServices(prev => prev.map(s => s.id === updatedService.id ? updatedService as Service : s));
+                    
+                    // Also update selected service if it matches
+                    setSelectedService(prev => prev && prev.id === updatedService.id ? updatedService as Service : prev);
+                    
+                    console.log("[ServiceManagementPanel] Updated services state with fresh pricing data");
+                  }}
+                />
                 </div>
               </TabsContent>
 

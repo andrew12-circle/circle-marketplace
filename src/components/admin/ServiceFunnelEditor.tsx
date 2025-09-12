@@ -248,51 +248,21 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
     return cleaned;
   };
 
-  const performSave = useCallback(async (data: { funnelData: any; pricingTiers: any[] }) => {
-    console.log("[Admin ServiceFunnelEditor] Resilient save started", {
-      serviceId: service.id,
-      pricingFields: {
-        retail_price: service.retail_price,
-        pro_price: service.pro_price,
-        co_pay_price: service.co_pay_price
-      }
-    });
-    
-    const sanitizedFunnel = sanitizeFunnel(data.funnelData);
-    const sanitizedPricing = JSON.parse(JSON.stringify(data.pricingTiers || []));
-    
-    console.log("[Admin ServiceFunnelEditor] Starting database update...");
-    
-    const { error } = await supabase
-      .from('services')
-      .update({
-        funnel_content: sanitizedFunnel,
-        pricing_tiers: sanitizedPricing,
-        // Include all service pricing fields
-        retail_price: service.retail_price,
-        pro_price: service.pro_price,
-        co_pay_price: service.co_pay_price,
-        pricing_mode: service.pricing_mode,
-        pricing_external_url: service.pricing_external_url,
-        pricing_cta_label: service.pricing_cta_label,
-        pricing_cta_type: service.pricing_cta_type,
-        pricing_note: service.pricing_note,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', service.id);
+  // Track local pricing changes separate from service object
+  const [localPricing, setLocalPricing] = useState({
+    retail_price: service.retail_price,
+    pro_price: service.pro_price,
+    co_pay_price: service.co_pay_price,
+    pricing_mode: service.pricing_mode,
+    pricing_external_url: service.pricing_external_url,
+    pricing_cta_label: service.pricing_cta_label,
+    pricing_cta_type: service.pricing_cta_type,
+    pricing_note: service.pricing_note
+  });
 
-    if (error) {
-      console.error("[Admin ServiceFunnelEditor] Database error:", error);
-      throw error;
-    }
-
-    console.log("[Admin ServiceFunnelEditor] Database updated successfully");
-    
-    const updatedService = {
-      ...service,
-      funnel_content: data.funnelData,
-      pricing_tiers: data.pricingTiers,
-      // Include all the pricing fields that were just saved to the database
+  // Update local pricing when service changes
+  useEffect(() => {
+    setLocalPricing({
       retail_price: service.retail_price,
       pro_price: service.pro_price,
       co_pay_price: service.co_pay_price,
@@ -300,25 +270,68 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
       pricing_external_url: service.pricing_external_url,
       pricing_cta_label: service.pricing_cta_label,
       pricing_cta_type: service.pricing_cta_type,
-      pricing_note: service.pricing_note,
-      updated_at: new Date().toISOString()
-    };
+      pricing_note: service.pricing_note
+    });
+  }, [service]);
 
-    onUpdate(updatedService);
+  const performSave = useCallback(async (data: { funnelData: any; pricingTiers: any[] }) => {
+    console.log("[Admin ServiceFunnelEditor] Resilient save started", {
+      serviceId: service.id,
+      currentPricingFields: {
+        retail_price: localPricing.retail_price,
+        pro_price: localPricing.pro_price,
+        co_pay_price: localPricing.co_pay_price
+      }
+    });
     
-    console.log("[Admin ServiceFunnelEditor] Calling onUpdate with service data:", {
+    const sanitizedFunnel = sanitizeFunnel(data.funnelData);
+    const sanitizedPricing = JSON.parse(JSON.stringify(data.pricingTiers || []));
+    
+    console.log("[Admin ServiceFunnelEditor] Starting database update with fresh pricing data...");
+    
+    // CRITICAL: Use .select().single() to get fresh row back from database
+    const { data: updatedService, error } = await supabase
+      .from('services')
+      .update({
+        funnel_content: sanitizedFunnel,
+        pricing_tiers: sanitizedPricing,
+        // Use local pricing state that includes any edits made
+        retail_price: localPricing.retail_price,
+        pro_price: localPricing.pro_price,
+        co_pay_price: localPricing.co_pay_price,
+        pricing_mode: localPricing.pricing_mode,
+        pricing_external_url: localPricing.pricing_external_url,
+        pricing_cta_label: localPricing.pricing_cta_label,
+        pricing_cta_type: localPricing.pricing_cta_type,
+        pricing_note: localPricing.pricing_note,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', service.id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error("[Admin ServiceFunnelEditor] Database error:", error);
+      throw error;
+    }
+
+    console.log("[Admin ServiceFunnelEditor] Database updated successfully, fresh row returned:", {
       id: updatedService.id,
-      title: updatedService.title,
       retail_price: updatedService.retail_price,
       pro_price: updatedService.pro_price,
       co_pay_price: updatedService.co_pay_price
     });
     
+    // CRITICAL: Pass the fresh DB row to parent, not a constructed object
+    onUpdate(updatedService);
+    
+    console.log("[Admin ServiceFunnelEditor] Calling onUpdate with fresh service data from database");
+    
     // Only do scoped invalidation during autosave - no heavy operations
     queryClient.invalidateQueries({ queryKey: QUERY_KEYS.serviceById(service.id) });
     
     return true;
-  }, [service, onUpdate, invalidateServices]);
+  }, [service.id, localPricing, onUpdate, invalidateServices]);
 
   const handleSave = async () => {
     if (isSaving) return;
@@ -331,8 +344,19 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
       // Only run heavy operations on explicit save
       setTimeout(async () => {
         try {
-          await supabase.functions.invoke('warm-marketplace-cache');
-          console.log("[Admin ServiceFunnelEditor] Cache warmed after explicit save");
+          // Add cache busting to ensure fresh data
+          const cacheBuster = Date.now();
+          await fetch(
+            `${window.location.origin}/functions/v1/warm-marketplace-cache?v=${cacheBuster}`,
+            { 
+              method: 'POST', 
+              headers: { 
+                'cache-control': 'no-store',
+                'pragma': 'no-cache'
+              } 
+            }
+          );
+          console.log("[Admin ServiceFunnelEditor] Cache warmed with cache busting");
         } catch (e) {
           console.warn('[Admin ServiceFunnelEditor] Cache warm failed', e);
         }
@@ -355,6 +379,16 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
 
   const handlePricingChange = (tiers: any[]) => {
     setPricingTiers(tiers);
+    setHasChanges(true);
+  };
+
+  // Handle pricing field changes (retail_price, pro_price, etc.)
+  const handlePricingFieldChange = (field: string, value: string | number | null) => {
+    console.log(`[Admin ServiceFunnelEditor] Pricing field changed: ${field} = ${value}`);
+    setLocalPricing(prev => ({
+      ...prev,
+      [field]: value
+    }));
     setHasChanges(true);
   };
 
@@ -486,21 +520,14 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
             pricingCtaLabel={service.pricing_cta_label}
             pricingCtaType={service.pricing_cta_type}
             pricingNote={service.pricing_note}
+            service={{
+              ...service,
+              ...localPricing
+            }}
+            onPricingFieldChange={handlePricingFieldChange}
             onPricingModeChange={(mode) => {
               // Update service pricing mode immediately for UI responsiveness
               const updatedService = { ...service, pricing_mode: mode };
-              onUpdate(updatedService);
-              setHasChanges(true);
-            }}
-            onPricingFieldChange={(field, value) => {
-              // Update service pricing fields immediately for UI responsiveness
-              console.log("[Admin ServiceFunnelEditor] Pricing field changed:", { field, value });
-              const updatedService = { ...service, [field]: value };
-              console.log("[Admin ServiceFunnelEditor] Updated service pricing fields:", {
-                retail_price: updatedService.retail_price,
-                pro_price: updatedService.pro_price,
-                co_pay_price: updatedService.co_pay_price
-              });
               onUpdate(updatedService);
               setHasChanges(true);
             }}
