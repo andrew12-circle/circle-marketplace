@@ -1110,7 +1110,7 @@ export const ServiceFunnelModal = ({
                               <div className="flex items-center justify-between text-sm">
                                 <span className="text-blue-600">Pro Member:</span>
                                 <span className="font-medium text-blue-600">
-                                  {pkg.requestPricing ? 'Request Pricing' : `$${service.pro_price ? Math.round(parseFloat(service.pro_price)) : currentOriginalPrice || currentPrice}${period}`}
+                                  {pkg.requestPricing ? 'Request Pricing' : `$${service.pro_price ? extractNumericPrice(service.pro_price) : currentOriginalPrice || currentPrice}${period}`}
                                 </span>
                               </div>
                               {service.copay_allowed && (
