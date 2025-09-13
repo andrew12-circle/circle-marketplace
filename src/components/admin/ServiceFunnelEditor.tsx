@@ -20,6 +20,7 @@ import { useNavigationGuard } from "@/hooks/useNavigationGuard";
 import { FunnelSectionEditor } from "./FunnelSectionEditor";
 import { FunnelMediaEditor } from "./FunnelMediaEditor";
 import { FunnelPricingEditor } from "./FunnelPricingEditor";
+import { normalizePrice, dlogPriceTransform } from "@/utils/priceNormalization";
 
 import { FunnelFAQEditor } from "./FunnelFAQEditor";
 import { FunnelProofEditor } from "./FunnelProofEditor";
@@ -296,15 +297,25 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
     const sanitizedFunnel = sanitizeFunnel(data.funnelData);
     const sanitizedPricing = JSON.parse(JSON.stringify(data.pricingTiers || []));
     
-    // Convert pricing packages to proper format with numeric prices
+    // Normalize pricing fields to prevent NaN errors
+    const normalizedRetailPrice = normalizePrice(localPricing.retail_price);
+    const normalizedProPrice = normalizePrice(localPricing.pro_price);
+    const normalizedCoPayPrice = normalizePrice(localPricing.co_pay_price);
+    
+    // Debug log the price transformations
+    dlogPriceTransform('retail_price', localPricing.retail_price, normalizedRetailPrice);
+    dlogPriceTransform('pro_price', localPricing.pro_price, normalizedProPrice);
+    dlogPriceTransform('co_pay_price', localPricing.co_pay_price, normalizedCoPayPrice);
+    
+    // Convert pricing packages to proper format with normalized prices
     const updatedPackages = sanitizedPricing.map((p: any) => ({
       ...p,
-      retail_price: p.retail_price == null ? null : Number(p.retail_price),
-      pro_price: p.pro_price == null ? null : Number(p.pro_price),
-      co_pay_price: p.co_pay_price == null ? null : Number(p.co_pay_price),
+      retail_price: normalizePrice(p.retail_price),
+      pro_price: normalizePrice(p.pro_price),
+      co_pay_price: normalizePrice(p.co_pay_price),
     }));
     
-    console.log("[Admin ServiceFunnelEditor] Starting database update with fresh pricing data...");
+    console.log("[Admin ServiceFunnelEditor] Starting database update with normalized pricing data...");
     
     // CRITICAL: Use .select().single() to get fresh row back from database
     const { data: updatedService, error } = await supabase
@@ -312,10 +323,10 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
       .update({
         funnel_content: sanitizedFunnel,
         pricing_tiers: updatedPackages,
-        // Use local pricing state that includes any edits made
-        retail_price: Number(localPricing.retail_price) || null,
-        pro_price: Number(localPricing.pro_price) || null,
-        co_pay_price: Number(localPricing.co_pay_price) || null,
+        // Use normalized pricing values to prevent NaN database errors
+        retail_price: normalizedRetailPrice,
+        pro_price: normalizedProPrice,
+        co_pay_price: normalizedCoPayPrice,
         default_package_id: selectedDefaultPackageId || null,
         pricing_mode: localPricing.pricing_mode,
         pricing_external_url: localPricing.pricing_external_url,
@@ -330,7 +341,17 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
 
     if (error) {
       console.error("[Admin ServiceFunnelEditor] Database error:", error);
-      throw error;
+      console.error("[Admin ServiceFunnelEditor] Failed pricing values:", {
+        retail_price: normalizedRetailPrice,
+        pro_price: normalizedProPrice,
+        co_pay_price: normalizedCoPayPrice
+      });
+      throw new Error(`Save failed: ${error.message}`);
+    }
+
+    if (!updatedService) {
+      console.error("[Admin ServiceFunnelEditor] No service data returned from database");
+      throw new Error("Save failed: No data returned from database");
     }
 
     console.log("[Admin ServiceFunnelEditor] Database updated successfully, fresh row returned:", {
