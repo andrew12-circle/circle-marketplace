@@ -517,8 +517,11 @@ export const ServiceManagementPanel = () => {
     setSaveInProgress(true);
     setSaving(true);
     try {
+      console.log('Step 1: Starting validation...');
+      
       // Basic required field validation
       if (!editForm.title || !editForm.category) {
+        console.log('Validation failed: missing required fields');
         toast({
           title: 'Missing required fields',
           description: 'Please provide both Title and Category before saving.',
@@ -526,6 +529,9 @@ export const ServiceManagementPanel = () => {
         });
         return;
       }
+      
+      console.log('Step 2: Validation passed, processing numeric fields...');
+      
       // Normalize numeric fields to match DB constraints
       let roi = editForm.estimated_roi ?? null;
       let respa = editForm.respa_split_limit ?? null;
@@ -586,10 +592,15 @@ export const ServiceManagementPanel = () => {
         tags: Array.isArray(editForm.tags) ? editForm.tags : null,
         updated_at: new Date().toISOString()
       };
+      console.log('Step 3: Prepared update data, sending to database...');
       console.debug('Updating service with data:', updateData);
+      
       const {
         error
       } = await supabase.from('services').update(updateData as any).eq('id', selectedService.id as any);
+      
+      console.log('Step 4: Database update completed, checking for errors...');
+      
       if (error) {
         console.error('Update error details:', {
           error,
@@ -600,7 +611,8 @@ export const ServiceManagementPanel = () => {
         });
         throw error;
       }
-
+      console.log('Step 5: No database error, fetching updated service...');
+      
       // Fetch updated service to get latest data
       const {
         data: updatedServiceData,
@@ -610,9 +622,11 @@ export const ServiceManagementPanel = () => {
           service_providers (name, logo_url)
         `).eq('id' as any, selectedService.id as any).single();
       if (fetchError) {
-        console.error('Fetch error:', fetchError);
+        console.error('Step 6: Fetch error:', fetchError);
         throw fetchError;
       }
+
+      console.log('Step 7: Successfully fetched updated service, updating local state...');
 
       // Update local state with fresh data
       setSelectedService(updatedServiceData as any);
