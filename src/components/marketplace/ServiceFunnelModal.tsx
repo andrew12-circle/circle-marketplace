@@ -1159,8 +1159,8 @@ export const ServiceFunnelModal = ({
               <div className={`grid gap-6 ${displayPackages.length === 1 ? 'grid-cols-1 max-w-md mx-auto' : displayPackages.length === 2 ? 'grid-cols-1 lg:grid-cols-2 max-w-4xl mx-auto' : displayPackages.length === 3 ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 max-w-7xl mx-auto'}`}>
                 {displayPackages.slice(0, 4).map((pkg, index) => {
                   const dbPkg = packages.find(p => p.id === pkg.id)
-                  const pkgRetail = Number(dbPkg?.retail_price ?? service.retail_price ?? 0)
-                  const pkgPro = Number(dbPkg?.pro_price ?? service.pro_price ?? pkgRetail)
+                  const pkgRetail = Number(dbPkg?.retail_price ?? pkg.originalPrice ?? service.retail_price ?? 0)
+                  const pkgPro = Number(dbPkg?.pro_price ?? pkg.price ?? service.pro_price ?? pkgRetail)
                   const selected = pkg.id === activePackageId
 
                   return <div key={pkg.id} className={`relative p-6 rounded-2xl border-2 cursor-pointer transition-all hover:scale-105 hover:shadow-xl ${selected ? 'border-blue-500 bg-white shadow-xl ring-4 ring-blue-100' : 'border-gray-200 bg-white hover:border-gray-300 shadow-lg'} ${pkg.popular ? 'ring-2 ring-blue-200' : ''}`} onClick={() => setActivePackageId(pkg.id)}>
