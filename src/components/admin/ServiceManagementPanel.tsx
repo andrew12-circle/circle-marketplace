@@ -30,6 +30,7 @@ import { dlog, dwarn } from '@/utils/debugLogger';
 import { AIServiceUpdater } from './AIServiceUpdater';
 import { ServicePricingMirror } from './ServicePricingMirror';
 import { ServiceComplianceTracker } from './ServiceComplianceTracker';
+import ServiceCard from './ServiceCard';
 interface PricingFeature {
   id: string;
   text: string;
@@ -437,14 +438,22 @@ export const ServiceManagementPanel = () => {
   useEffect(() => {
     fetchServices();
   }, []);
+  
   useEffect(() => {
     const filtered = services.filter(service => service.title.toLowerCase().includes(searchTerm.toLowerCase()) || service.category?.toLowerCase().includes(searchTerm.toLowerCase()) || service.service_providers?.name?.toLowerCase().includes(searchTerm.toLowerCase()));
     setFilteredServices(filtered);
   }, [services, searchTerm]);
+
+  // Sync editForm when selectedService changes (critical for form stability)
+  useEffect(() => {
+    if (selectedService) {
+      setEditForm(selectedService);
+    }
+  }, [selectedService]);
   const fetchServices = async () => {
     try {
       setError(null);
-      console.log('📋 ServiceManagementPanel: Fetching services...');
+      dlog('📋 ServiceManagementPanel: Fetching services...');
 
       // First try a simple query without the join to see if that's the issue
       const {
@@ -454,7 +463,7 @@ export const ServiceManagementPanel = () => {
         ascending: false
       });
       if (error) throw error;
-      console.log('✅ ServiceManagementPanel: Successfully loaded', data?.length || 0, 'services');
+      dlog('✅ ServiceManagementPanel: Successfully loaded', data?.length || 0, 'services');
       setServices(data || []);
     } catch (error) {
       console.error('❌ ServiceManagementPanel: Error fetching services:', error);
@@ -959,9 +968,9 @@ export const ServiceManagementPanel = () => {
     const originalValue = (selectedService as any)[key];
     const isDifferent = !compareValues(currentValue, originalValue);
     
-    // Debug logging for save button issue
+    // Only log when DEBUG is enabled to prevent render cascade
     if (isDifferent) {
-      console.log(`Field ${key} is dirty:`, { current: currentValue, original: originalValue });
+      dlog(`Field ${key} is dirty:`, { current: currentValue, original: originalValue });
     }
     
     return isDifferent;
@@ -1009,9 +1018,9 @@ export const ServiceManagementPanel = () => {
               const {
                 data: session
               } = await supabase.auth.getSession();
-              console.log('Debug - Admin Status:', adminStatus);
-              console.log('Debug - Session:', session);
-              console.log('Debug - User ID:', session?.session?.user?.id);
+              dlog('Debug - Admin Status:', adminStatus);
+              dlog('Debug - Session:', session);
+              dlog('Debug - User ID:', session?.session?.user?.id);
               toast({
                 title: 'Debug Info',
                 description: `Admin: ${adminStatus}, User: ${session?.session?.user?.id ? 'Logged in' : 'Not logged in'}`
@@ -1041,70 +1050,18 @@ export const ServiceManagementPanel = () => {
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-96 overflow-y-auto">
-              {filteredServices.map(service => <Card key={service.id} className={`cursor-pointer transition-colors hover:bg-muted/50 ${selectedService?.id === service.id ? 'ring-2 ring-primary' : ''}`} onClick={() => handleServiceSelect(service)}>
-                  <CardContent className="p-4">
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between gap-2">
-                          <div className="flex items-center gap-2 min-w-0">
-                            <Badge variant="secondary" className="text-[10px] shrink-0">#{service.sort_order ?? '-'}</Badge>
-                            <h3 className="font-semibold truncate">{service.title}</h3>
-                          </div>
-                          {service.image_url ? <img src={service.image_url} alt={service.title} className="w-32 h-12 rounded-lg object-contain" /> : <div className="w-32 h-12 rounded-lg bg-muted flex items-center justify-center">
-                              <Package className="h-6 w-6 text-muted-foreground" />
-                            </div>}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-1 mt-1">
-                              {service.is_featured && <Badge variant="secondary" className="text-xs">
-                                  <Star className="h-3 w-3 mr-1" />
-                                  Featured
-                                </Badge>}
-                              {service.is_top_pick && <Badge variant="outline" className="text-xs">
-                                  Top Pick
-                                </Badge>}
-                            </div>
-                            <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
-                              {service.service_providers?.name && service.service_providers.name !== 'Circle Marketplace' && <span className="flex items-center gap-1">
-                                  <Building className="h-3 w-3" />
-                                  {service.service_providers.name}
-                                </span>}
-                               {/* Last Updated Timestamp */}
-                               <span className="flex items-center gap-1">
-                                 <Clock className="h-3 w-3" />
-                                 {service.updated_at ? formatDistanceToNow(new Date(service.updated_at), {
-                          addSuffix: true
-                        }) : 'Unknown'}
-                               </span>
-                             </div>
-                             <div className="flex justify-between items-start mt-2">
-                               {/* Left side switches */}
-                               <div className="flex flex-col gap-1">
-                                 <div className="flex items-center gap-2">
-                                   <span className="text-xs text-muted-foreground w-12">Verified</span>
-                                   <Switch checked={service.is_verified || false} onCheckedChange={() => handleVerificationToggle(service.id, service.is_verified || false)} />
-                                 </div>
-                                 <div className="flex items-center gap-2">
-                                   <span className="text-xs text-muted-foreground w-12">Active</span>
-                                   <Switch checked={service.is_active || false} onCheckedChange={() => handleVisibilityToggle(service.id, service.is_active || false)} />
-                                 </div>
-                               </div>
-                               
-                               {/* Right side switches */}
-                               <div className="flex flex-col gap-1">
-                                 <div className="flex items-center gap-2">
-                                   <span className="text-xs text-muted-foreground w-12">Affiliate</span>
-                                   <Switch checked={service.is_affiliate || false} onCheckedChange={() => handleAffiliateToggle(service.id, service.is_affiliate || false)} />
-                                 </div>
-                                 <div className="flex items-center gap-2">
-                                   <span className="text-xs text-muted-foreground w-12">Booking</span>
-                                   <Switch checked={service.is_booking_link || false} onCheckedChange={() => handleBookingLinkToggle(service.id, service.is_booking_link || false)} />
-                                 </div>
-                               </div>
-                             </div>
-                           </div>
-                         </div>
-                  </CardContent>
-                </Card>)}
+              {filteredServices.map(service => (
+                <ServiceCard
+                  key={service.id}
+                  service={service}
+                  isSelected={selectedService?.id === service.id}
+                  onSelect={handleServiceSelect}
+                  onVerificationToggle={handleVerificationToggle}
+                  onVisibilityToggle={handleVisibilityToggle}
+                  onAffiliateToggle={handleAffiliateToggle}
+                  onBookingLinkToggle={handleBookingLinkToggle}
+                />
+              ))}
             </div>
 
             {filteredServices.length === 0 && <p className="text-center text-muted-foreground py-8">
@@ -1712,7 +1669,7 @@ export const ServiceManagementPanel = () => {
               <TabsContent value="funnel" className="space-y-4">
                 <div className="space-y-4">
                 <ServiceFunnelEditor service={selectedService} onUpdate={updatedService => {
-                console.log("[ServiceManagementPanel] Received updated service from funnel editor:", {
+                dlog("[ServiceManagementPanel] Received updated service from funnel editor:", {
                   id: updatedService.id,
                   retail_price: updatedService.retail_price,
                   pro_price: updatedService.pro_price,
@@ -1724,7 +1681,13 @@ export const ServiceManagementPanel = () => {
 
                 // Also update selected service if it matches
                 setSelectedService(prev => prev && prev.id === updatedService.id ? updatedService as Service : prev);
-                console.log("[ServiceManagementPanel] Updated services state with fresh pricing data");
+                
+                // Update editForm to sync with the new selected service data
+                if (selectedService && selectedService.id === updatedService.id) {
+                  setEditForm(updatedService as Service);
+                }
+                
+                dlog("[ServiceManagementPanel] Updated services state with fresh pricing data");
               }} />
                 </div>
               </TabsContent>
