@@ -1194,41 +1194,70 @@ export const ServiceFunnelModal = ({
                                    {pkgPro ? fmt(pkgPro) + period : 'Request Pricing'}
                                  </span>
                               </div>
-                              {service.copay_allowed && (
-                                <div className="bg-green-50 p-3 rounded-lg border border-green-200">
-                                  <div className="flex items-center gap-2 text-sm text-green-700 font-medium mb-2">
-                                    <span>💰 Co-Pay Available</span>
-                                    <CoPayInfoPopover />
-                                  </div>
-                                  
-                                   {(() => {
-                                     const basePrice = pkgPro || pkgRetail
-                                     const sspPct = service.max_split_percentage_ssp || 0;
-                                     const nonSspPct = service.max_split_percentage_non_ssp || 0;
-                                    
-                                    const sspAgentPays = sspPct > 0 && basePrice ? Math.round(basePrice * (1 - sspPct / 100)) : null;
-                                    const nonSspAgentPays = nonSspPct > 0 && basePrice ? Math.round(basePrice * (1 - nonSspPct / 100)) : null;
-                                    
-                                    const bestPrice = sspAgentPays && nonSspAgentPays ? Math.min(sspAgentPays, nonSspAgentPays) : (sspAgentPays || nonSspAgentPays);
-                                    
-                                    return (
-                                      <div className="text-sm">
-                                        {bestPrice ? (
-                                          <div className="text-green-700 font-medium">
-                                            You could pay as low as {fmt(bestPrice)}{period}
+                               {service.copay_allowed && (
+                                 <div className={`p-3 rounded-lg border ${isProMember ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200 opacity-60'}`}>
+                                   <div className="flex items-center gap-2 text-sm font-medium mb-2">
+                                     {isProMember ? (
+                                       <>
+                                         <span className="text-green-700">💰 Co-Pay Available</span>
+                                         <CoPayInfoPopover />
+                                       </>
+                                     ) : (
+                                       <>
+                                         <span className="text-gray-500">🔒 Co-Pay Feature</span>
+                                         <CoPayInfoPopover />
+                                       </>
+                                     )}
+                                   </div>
+                                   
+                                   {isProMember ? (
+                                     <>
+                                       {(() => {
+                                         const basePrice = pkgPro || pkgRetail
+                                         const sspPct = service.max_split_percentage_ssp || 0;
+                                         const nonSspPct = service.max_split_percentage_non_ssp || 0;
+                                        
+                                        const sspAgentPays = sspPct > 0 && basePrice ? Math.round(basePrice * (1 - sspPct / 100)) : null;
+                                        const nonSspAgentPays = nonSspPct > 0 && basePrice ? Math.round(basePrice * (1 - nonSspPct / 100)) : null;
+                                        
+                                        const bestPrice = sspAgentPays && nonSspAgentPays ? Math.min(sspAgentPays, nonSspAgentPays) : (sspAgentPays || nonSspAgentPays);
+                                        
+                                        return (
+                                          <div className="text-sm">
+                                            {bestPrice ? (
+                                              <div className="text-green-700 font-medium">
+                                                You could pay as low as {fmt(bestPrice)}{period}
+                                              </div>
+                                            ) : (
+                                              <div className="text-gray-600">Contact vendor for co-pay options</div>
+                                            )}
                                           </div>
-                                        ) : (
-                                          <div className="text-gray-600">Contact vendor for co-pay options</div>
-                                        )}
+                                        );
+                                      })()}
+                                      
+                                      <div className="text-xs text-gray-500 mt-2">
+                                        Requires approved partner. Not guaranteed.
                                       </div>
-                                    );
-                                  })()}
-                                  
-                                  <div className="text-xs text-gray-500 mt-2">
-                                    Requires approved partner. Not guaranteed.
-                                  </div>
-                                </div>
-                              )}
+                                     </>
+                                   ) : (
+                                     <>
+                                       <div className="text-sm text-gray-600 mb-2">
+                                         Get vendor co-pay coverage with Circle Pro membership
+                                       </div>
+                                       <Button 
+                                         size="sm" 
+                                         className="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white text-xs"
+                                         onClick={() => {
+                                           window.open('/upgrade', '_blank');
+                                         }}
+                                       >
+                                         <Crown className="w-3 h-3 mr-1" />
+                                         Upgrade to Pro
+                                       </Button>
+                                     </>
+                                   )}
+                                 </div>
+                               )}
                             </>
                           );
                         })()}
