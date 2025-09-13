@@ -1252,10 +1252,10 @@ export const ServiceManagementPanel = () => {
                          <Textarea value={editForm.description || ''} onChange={e => setEditForm({
                     ...editForm,
                     description: e.target.value
-                  })} placeholder="Brief description shown on service cards (90-140 characters recommended)" className="min-h-[80px]" />
-                         <div className="text-xs text-muted-foreground">
-                           {(editForm.description || '').length}/140 characters
-                         </div>
+                   })} placeholder="Brief description shown on service cards (up to 1,500 characters)" className="min-h-[80px]" />
+                          <div className="text-xs text-muted-foreground">
+                            {(editForm.description || '').length}/1,500 characters
+                          </div>
                        </div>
                       </div>
 
