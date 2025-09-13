@@ -1303,7 +1303,10 @@ export const ServiceFunnelModal = ({
                       <ShoppingCart className="w-5 h-5 mr-2" />
                       {!user ? "Sign In to Add to Cart" : `Add to Cart • ${fmt(payNow)}`}
                     </Button>
-                    <Button onClick={() => setIsConsultationFlowOpen(true)} className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all flex-1">
+                    <Button onClick={() => {
+                      console.log('Book Consultation clicked');
+                      setIsConsultationFlowOpen(true);
+                    }} className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all flex-1">
                       <Calendar className="w-5 h-5 mr-2" />
                       Book Consultation
                       <ArrowRight className="w-5 h-5 ml-2" />
@@ -1446,7 +1449,12 @@ export const ServiceFunnelModal = ({
         </div>
 
         {/* Consultation Flow Modal */}
-        {isConsultationFlowOpen && <ConsultationFlow isOpen={isConsultationFlowOpen} onClose={() => setIsConsultationFlowOpen(false)} service={service} />}
+        {isConsultationFlowOpen && (
+          <>
+            {console.log('Rendering ConsultationFlow', { isConsultationFlowOpen })}
+            <ConsultationFlow isOpen={isConsultationFlowOpen} onClose={() => setIsConsultationFlowOpen(false)} service={service} />
+          </>
+        )}
 
         {/* Pricing Choice Modal */}
         {isPricingChoiceOpen && <PricingChoiceModal isOpen={isPricingChoiceOpen} onClose={() => setIsPricingChoiceOpen(false)} service={{
