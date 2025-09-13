@@ -1178,7 +1178,7 @@ export const ServiceFunnelModal = ({
                         {(() => {
                           const currentPrice = showYearlyPricing && pkg.yearlyPrice ? pkg.yearlyPrice : pkg.price;
                           const currentOriginalPrice = showYearlyPricing && pkg.yearlyOriginalPrice ? pkg.yearlyOriginalPrice : pkg.originalPrice;
-                          const period = showYearlyPricing && pkg.yearlyPrice ? '/year' : (pkg.duration?.includes('month') ? '/month' : '');
+                          const period = showYearlyPricing && pkg.yearlyPrice ? '/yr' : (pkg.duration?.includes('month') ? '/mo' : '');
                           
                           return (
                             <>
