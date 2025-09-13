@@ -239,15 +239,25 @@ export const VendorSelectionModal = ({
   const loadVendors = async () => {
     console.log('VendorSelectionModal: Starting to load vendors...');
     setIsLoading(true);
+    
     try {
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      // Add timeout wrapper to prevent infinite loading
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Request timeout')), 10000)
+      );
+      
+      const authPromise = supabase.auth.getUser();
+      const { data: { user }, error: userError } = await Promise.race([authPromise, timeoutPromise]);
+      
       if (userError || !user) {
         console.error('Authentication error:', userError);
+        // Show empty state instead of infinite loading
+        setVendors([]);
         return;
       }
 
-      // Query vendors with calculated real-time stats - include pending vendors
-      const { data, error } = await supabase
+      // Query vendors with timeout protection
+      const vendorQuery = supabase
         .from('vendors')
         .select(`
           id, 
@@ -268,11 +278,24 @@ export const VendorSelectionModal = ({
         .order('rating', { ascending: false })
         .limit(100);
 
+      const vendorTimeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Vendor query timeout')), 8000)
+      );
+
+      const { data, error } = await Promise.race([vendorQuery, vendorTimeoutPromise]);
+
       console.log('VendorSelectionModal: Supabase response:', { data, error, dataLength: data?.length });
 
       if (error) {
-        console.error('VendorSelectionModal: Supabase error details:', error);
-        throw error;
+        console.error('VendorSelectionModal: Database error:', error);
+        // Set empty vendors array to show "no vendors" state instead of infinite loading
+        setVendors([]);
+        toast({
+          title: "Unable to load vendors",
+          description: "Database connection issue. Please try again later.",
+          variant: "destructive",
+        });
+        return;
       }
 
       // Filter vendors based on agent profile and calculate real-time stats
