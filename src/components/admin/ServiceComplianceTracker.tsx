@@ -358,12 +358,42 @@ export function ServiceComplianceTracker({ serviceId, serviceName }: ServiceComp
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <label className="text-sm font-medium">Evidence URL</label>
-                      <Input
-                        placeholder="Link to screenshot, document, etc."
-                        value={newOutreach.evidence_url}
-                        onChange={(e) => setNewOutreach({...newOutreach, evidence_url: e.target.value})}
-                      />
+                      <label className="text-sm font-medium">Evidence</label>
+                      <div className="space-y-2">
+                        <Input
+                          type="file"
+                          accept="image/*,.pdf,.doc,.docx"
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              try {
+                                const fileExt = file.name.split('.').pop();
+                                const fileName = `compliance-evidence-${Date.now()}.${fileExt}`;
+                                const { data, error } = await supabase.storage
+                                  .from('compliance-evidence')
+                                  .upload(fileName, file);
+                                
+                                if (error) throw error;
+                                
+                                const { data: urlData } = supabase.storage
+                                  .from('compliance-evidence')
+                                  .getPublicUrl(fileName);
+                                
+                                setNewOutreach({...newOutreach, evidence_url: urlData.publicUrl});
+                                toast.success('File uploaded successfully');
+                              } catch (error) {
+                                console.error('Upload error:', error);
+                                toast.error('Failed to upload file');
+                              }
+                            }
+                          }}
+                        />
+                        <Input
+                          placeholder="Or paste URL to evidence"
+                          value={newOutreach.evidence_url}
+                          onChange={(e) => setNewOutreach({...newOutreach, evidence_url: e.target.value})}
+                        />
+                      </div>
                     </div>
                     
                     <div className="space-y-2">
