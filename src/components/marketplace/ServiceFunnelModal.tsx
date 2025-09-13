@@ -1194,44 +1194,36 @@ export const ServiceFunnelModal = ({
                                  </span>
                               </div>
                               {service.copay_allowed && (
-                                <div className="bg-green-50 p-4 rounded-lg border border-green-200 space-y-3">
-                                  <div className="flex items-center gap-2 text-sm text-green-700 font-medium">
-                                    <span>Marketing Coverage Available</span>
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
+                                <div className="bg-green-50 p-3 rounded-lg border border-green-200">
+                                  <div className="flex items-center gap-2 text-sm text-green-700 font-medium mb-2">
+                                    <span>💰 Co-Pay Available</span>
                                   </div>
                                   
                                    {(() => {
-                                     // Use current package pricing for co-pay calculation
                                      const basePrice = pkgPro || pkgRetail
-                                     const sspAllowed = service.ssp_allowed !== false;
                                      const sspPct = service.max_split_percentage_ssp || 0;
                                      const nonSspPct = service.max_split_percentage_non_ssp || 0;
                                     
-                                    const sspAgentPays = sspAllowed && sspPct > 0 && basePrice ? Math.round(basePrice * (1 - sspPct / 100)) : null;
+                                    const sspAgentPays = sspPct > 0 && basePrice ? Math.round(basePrice * (1 - sspPct / 100)) : null;
                                     const nonSspAgentPays = nonSspPct > 0 && basePrice ? Math.round(basePrice * (1 - nonSspPct / 100)) : null;
                                     
+                                    const bestPrice = sspAgentPays && nonSspAgentPays ? Math.min(sspAgentPays, nonSspAgentPays) : (sspAgentPays || nonSspAgentPays);
+                                    
                                     return (
-                                      <div className="space-y-2">
-                                        <div className="text-sm">
-                                          <div className="font-medium text-gray-700">Marketing Coverage from Settlement Service Provider:</div>
-                                          <div className="text-green-700">
-                                            {sspAgentPays !== null ? `Agent pays approximately ${fmt(sspAgentPays)}${period}` : 'Not eligible'}
+                                      <div className="text-sm">
+                                        {bestPrice ? (
+                                          <div className="text-green-700 font-medium">
+                                            You could pay as low as {fmt(bestPrice)}{period}
                                           </div>
-                                        </div>
-                                        <div className="text-sm">
-                                          <div className="font-medium text-gray-700">Marketing Coverage from Non Settlement Service Provider:</div>
-                                          <div className="text-green-700">
-                                            {nonSspAgentPays !== null ? `Agent pays as low as approximately ${fmt(nonSspAgentPays)}${period}` : 'Not shown'}
-                                          </div>
-                                        </div>
+                                        ) : (
+                                          <div className="text-gray-600">Contact vendor for co-pay options</div>
+                                        )}
                                       </div>
                                     );
                                   })()}
                                   
-                                  <div className="text-xs text-gray-600 border-t pt-2">
-                                    Coverage requires an approved partner. Availability varies by vendor and agent profile. Amounts are examples only and not a guarantee of coverage. Circle is not stating RESPA compliance and does not assign a monetary value to points.
+                                  <div className="text-xs text-gray-500 mt-2">
+                                    Requires approved partner. Not guaranteed.
                                   </div>
                                 </div>
                               )}
