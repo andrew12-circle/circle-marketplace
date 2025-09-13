@@ -792,7 +792,7 @@ export const ServiceCard = ({
                     <div className="flex items-center justify-between mt-4">
                       <span className="text-sm text-muted-foreground">{t('serviceCard.listPrice')}</span>
                       <span className="text-xl font-bold text-foreground">
-                        {formatPrice(effectivePricing.retail, service.price_duration || 'mo')}
+                         {formatPrice(effectivePricing.retail, service.price_duration || 'month')}
                       </span>
                     </div>
                    ) : null}
@@ -809,7 +809,7 @@ export const ServiceCard = ({
                               <Crown className="w-4 h-4 text-circle-primary" />
                             </div>
                             <span className="text-lg font-bold text-circle-primary">
-                              {formatPrice(effectivePricing.pro, service.price_duration || 'mo')}
+                               {formatPrice(effectivePricing.pro, service.price_duration || 'month')}
                             </span>
                           </div>
                         </TooltipTrigger>
