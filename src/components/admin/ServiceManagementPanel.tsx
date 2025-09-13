@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback, memo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -23,6 +23,10 @@ import { AdminNotes } from './AdminNotes';
 import { ServiceDisclaimerSection } from './ServiceDisclaimerSection';
 import { ServiceAIResearchEditor } from './ServiceAIResearchEditor';
 import { ServiceImageUploader } from './ServiceImageUploader';
+import { useServiceSaver } from '@/hooks/useServiceSaver';
+import { useDebouncedCommit } from '@/hooks/useDebouncedCommit';
+import { diffPatch } from '@/lib/diff';
+import { dlog, dwarn } from '@/utils/debugLogger';
 import { AIServiceUpdater } from './AIServiceUpdater';
 import { ServicePricingMirror } from './ServicePricingMirror';
 import { ServiceComplianceTracker } from './ServiceComplianceTracker';
@@ -249,6 +253,15 @@ export const ServiceManagementPanel = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saveInProgress, setSaveInProgress] = useState(false);
+  
+  // Queued service saver to prevent concurrent updates
+  const { save: saveService } = useServiceSaver(async (id: string, patch: any, signal: AbortSignal) => {
+    const { updateServiceResilient } = await import('@/lib/resilientServiceUpdate');
+    await updateServiceResilient(id, patch, signal);
+  });
+  
+  // Memoize service lookup for performance
+  const serviceById = useMemo(() => new Map(services.map(s => [s.id, s])), [services]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [isEditingDetails, setIsEditingDetails] = useState(false);
@@ -502,10 +515,10 @@ export const ServiceManagementPanel = () => {
     }
   };
   const handleServiceUpdate = async () => {
-    console.log('handleServiceUpdate called:', { selectedService: !!selectedService, saving, saveInProgress });
+    dlog('handleServiceUpdate called:', { selectedService: !!selectedService, saving, saveInProgress });
     
     if (!selectedService || saving || saveInProgress) {
-      console.log('Early return from handleServiceUpdate:', { 
+      dlog('Early return from handleServiceUpdate:', { 
         hasSelectedService: !!selectedService, 
         saving, 
         saveInProgress 
@@ -513,15 +526,15 @@ export const ServiceManagementPanel = () => {
       return;
     }
     
-    console.log('Starting save process...');
+    dlog('Starting save process...');
     setSaveInProgress(true);
     setSaving(true);
     try {
-      console.log('Step 1: Starting validation...');
+      dlog('Step 1: Starting validation...');
       
       // Basic required field validation
       if (!editForm.title || !editForm.category) {
-        console.log('Validation failed: missing required fields');
+        dlog('Validation failed: missing required fields');
         toast({
           title: 'Missing required fields',
           description: 'Please provide both Title and Category before saving.',
@@ -530,7 +543,7 @@ export const ServiceManagementPanel = () => {
         return;
       }
       
-      console.log('Step 2: Validation passed, processing numeric fields...');
+      dlog('Step 2: Validation passed, processing numeric fields...');
       
       // Normalize numeric fields to match DB constraints
       let roi = editForm.estimated_roi ?? null;
@@ -595,11 +608,11 @@ export const ServiceManagementPanel = () => {
       const cleanUpdateData = Object.fromEntries(
         Object.entries(updateData).filter(([_, value]) => value !== undefined)
       );
-      console.log('Step 3: Prepared update data, sending to database...');
-      console.debug('Updating service with cleaned data:', cleanUpdateData);
-      console.log('Service ID:', selectedService.id);
-      console.log('Update data keys:', Object.keys(cleanUpdateData));
-      console.log('Update data types:', Object.entries(cleanUpdateData).map(([key, value]) => [key, typeof value, value]));
+      dlog('Step 3: Prepared update data, sending to database...');
+      dlog('Updating service with cleaned data:', cleanUpdateData);
+      dlog('Service ID:', selectedService.id);
+      dlog('Update data keys:', Object.keys(cleanUpdateData));
+      dlog('Update data types:', Object.entries(cleanUpdateData).map(([key, value]) => [key, typeof value, value]));
       
       let error = null;
       let result = null;
@@ -615,11 +628,11 @@ export const ServiceManagementPanel = () => {
           setTimeout(() => reject(new Error('Database update timeout after 15 seconds')), 15000)
         );
         
-        console.log('Step 4: Starting database update...');
+        dlog('Step 4: Starting database update...');
         result = await Promise.race([updatePromise, timeoutPromise]) as any;
         error = result?.error;
         
-        console.log('Step 5: Database update completed, result:', result);
+        dlog('Step 5: Database update completed, result:', result);
       } catch (timeoutError) {
         console.error('Database update timed out:', timeoutError);
         toast({
@@ -630,7 +643,7 @@ export const ServiceManagementPanel = () => {
         throw timeoutError;
       }
       
-      console.log('Step 6: Checking for database errors...');
+      dlog('Step 6: Checking for database errors...');
       
       if (error) {
         console.error('Update error details:', {
@@ -650,7 +663,7 @@ export const ServiceManagementPanel = () => {
         throw error;
       }
       
-      console.log('Step 7: No database error, fetching updated service...');
+      dlog('Step 7: No database error, fetching updated service...');
       
       // Fetch updated service to get latest data
       const {
@@ -665,7 +678,7 @@ export const ServiceManagementPanel = () => {
         throw fetchError;
       }
 
-      console.log('Step 7: Successfully fetched updated service, updating local state...');
+      dlog('Step 7: Successfully fetched updated service, updating local state...');
 
       // Update local state with fresh data
       setSelectedService(updatedServiceData as any);
@@ -687,7 +700,7 @@ export const ServiceManagementPanel = () => {
       // Narrow cache invalidation - only invalidate services, not everything
       invalidateCache.invalidateServices();
       
-      console.log('Save completed successfully!');
+      dlog('Save completed successfully!');
       toast({
         title: 'Success',
         description: 'Service updated successfully'

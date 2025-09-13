@@ -69,7 +69,7 @@ interface ServiceUpdateTracking {
 }
 
 export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdaterProps) => {
-  console.log('🏗️ AIServiceUpdater rendering with', services.length, 'services');
+  // Removed console.log to reduce log noise
   
   const { toast } = useToast();
   const [isRunning, setIsRunning] = useState(false);
