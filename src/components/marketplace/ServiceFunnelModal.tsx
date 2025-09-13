@@ -1033,7 +1033,9 @@ export const ServiceFunnelModal = ({
                                    </div>
                                    <div className="text-center mt-3">
                                      <div className="text-lg font-semibold text-emerald-600">+{service.funnel_content.proofItWorks.caseStudy.data.percentageIncrease}% Lead Increase</div>
-                                     <div className="text-sm text-gray-600">{service.funnel_content.proofItWorks.caseStudy.data.description}</div>
+                                      {service.funnel_content.proofItWorks.caseStudy.data.description && (
+                                        <div className="text-sm text-gray-600">{service.funnel_content.proofItWorks.caseStudy.data.description}</div>
+                                      )}
                                    </div>
                                  </div>
                                </div>}
@@ -1238,7 +1240,7 @@ export const ServiceFunnelModal = ({
                         })()}
                       </div>
                       
-                       {pkg.description && (
+                       {pkg.description && pkg.description.trim() && (
                          <p className="text-sm text-gray-600 mt-3">{pkg.description}</p>
                        )}
                     </div>
