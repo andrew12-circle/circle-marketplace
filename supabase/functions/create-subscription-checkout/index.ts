@@ -42,23 +42,45 @@ serve(async (req) => {
     if (!user?.email) throw new Error("User not authenticated or email not available");
     logStep("User authenticated", { userId: user.id, email: user.email });
 
-    // Get request body to determine the plan
-    const { plan } = await req.json();
-    logStep("Plan selected", { plan });
+    // Get request body to determine the plan and pricing
+    const { priceId, plan } = await req.json();
+    logStep("Plan selected", { plan, priceId });
 
-    // Define pricing based on plan
+    // Define pricing based on priceId or plan
     let priceAmount: number;
     let planName: string;
     let subscriptionTier: string;
+    let interval: string = 'month';
     
-    switch (plan) {
-      case "pro":
-        priceAmount = 9700; // $97.00 in cents per agent
-        planName = "Circle Pro";
-        subscriptionTier = "Pro";
-        break;
-      default:
-        throw new Error("Invalid plan selected");
+    if (priceId) {
+      // Use specific price ID for new pricing structure
+      switch (priceId) {
+        case "price_pro_monthly":
+          priceAmount = 9700; // $97.00 in cents
+          planName = "Circle Pro Monthly";
+          subscriptionTier = "Pro";
+          interval = 'month';
+          break;
+        case "price_pro_yearly_7off":
+          priceAmount = 108300; // $1,083.00 in cents (7% off annual)
+          planName = "Circle Pro Annual";
+          subscriptionTier = "Pro";
+          interval = 'year';
+          break;
+        default:
+          throw new Error("Invalid price ID selected");
+      }
+    } else {
+      // Fallback for legacy plan parameter
+      switch (plan) {
+        case "pro":
+          priceAmount = 9700; // $97.00 in cents per agent
+          planName = "Circle Pro";
+          subscriptionTier = "Pro";
+          break;
+        default:
+          throw new Error("Invalid plan selected");
+      }
     }
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
@@ -77,32 +99,35 @@ serve(async (req) => {
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
-      line_items: [
-        {
-          price_data: {
-            currency: "usd",
-            product_data: { 
-              name: planName,
-              description: "30-day free trial, then monthly billing"
+        line_items: [
+          {
+            price_data: {
+              currency: "usd",
+              product_data: { 
+                name: planName,
+                description: interval === 'year' 
+                  ? "30-day free trial, then annual billing (7% savings)" 
+                  : "30-day free trial, then monthly billing"
+              },
+              unit_amount: priceAmount,
+              recurring: { 
+                interval: interval as 'month' | 'year'
+              },
             },
-            unit_amount: priceAmount,
-            recurring: { 
-              interval: "month"
-            },
+            quantity: 1,
           },
-          quantity: 1,
-        },
-      ],
+        ],
       mode: "subscription",
       success_url: `${req.headers.get("origin")}/payment-success`,
       cancel_url: `${req.headers.get("origin")}/pricing`,
-      subscription_data: {
-        trial_period_days: 30,
-        metadata: {
-          subscription_tier: subscriptionTier,
-          user_id: user.id,
+        subscription_data: {
+          trial_period_days: 30,
+          metadata: {
+            subscription_tier: subscriptionTier,
+            user_id: user.id,
+            plan_interval: interval,
+          },
         },
-      },
     });
 
     logStep("Checkout session created", { sessionId: session.id, url: session.url });

@@ -8,9 +8,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { sbInvoke } from "@/utils/sb";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import { PRICING_CONFIG, PricingInterval, formatPrice, getAnnualSavings } from "@/lib/pricing";
 const circleLogoUrl = "/circle-logo-updated.png";
 export const Pricing = () => {
   const [loading, setLoading] = useState<string | null>(null);
+  const [billingInterval, setBillingInterval] = useState<PricingInterval>('month');
   const [coreOpen, setCoreOpen] = useState(true);
   const [businessOpen, setBusinessOpen] = useState(true);
   const [lifestyleOpen, setLifestyleOpen] = useState(true);
@@ -21,9 +23,13 @@ export const Pricing = () => {
     user
   } = useAuth();
   const navigate = useNavigate();
-  const handleSubscription = async (plan: "pro") => {
+  
+  const currentPricing = billingInterval === 'month' ? PRICING_CONFIG.MONTHLY : PRICING_CONFIG.ANNUAL;
+  const annualSavings = getAnnualSavings();
+  
+  const handleSubscription = async (priceId: string, interval: PricingInterval) => {
     try {
-      setLoading(plan);
+      setLoading(priceId);
       const {
         data: {
           session
@@ -39,7 +45,8 @@ export const Pricing = () => {
         error
       } = await sbInvoke('create-subscription-checkout', {
         body: {
-          plan
+          priceId,
+          plan: 'pro' // For backward compatibility
         }
       });
       if (error) throw error;
@@ -109,7 +116,32 @@ export const Pricing = () => {
       <section className="pb-6 md:pb-12">
         <div className="container mx-auto px-4">
           <div className="text-center mb-6 md:mb-8">
-            
+            {/* Billing Toggle */}
+            <div className="inline-flex items-center bg-gray-100 rounded-lg p-1 mb-8">
+              <button
+                onClick={() => setBillingInterval('month')}
+                className={`px-4 py-2 rounded-md font-medium transition-all ${
+                  billingInterval === 'month' 
+                    ? 'bg-white text-gray-900 shadow-sm' 
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                Monthly
+              </button>
+              <button
+                onClick={() => setBillingInterval('year')}
+                className={`px-4 py-2 rounded-md font-medium transition-all ${
+                  billingInterval === 'year' 
+                    ? 'bg-white text-gray-900 shadow-sm' 
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                Annual
+                <span className="ml-2 bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">
+                  Save {annualSavings.percentage}%
+                </span>
+              </button>
+            </div>
           </div>
 
           <div className="max-w-6xl mx-auto">
@@ -133,10 +165,26 @@ export const Pricing = () => {
                   Most Popular
                 </Badge>
                 <h3 className="text-xl font-semibold mb-2">Circle Pro</h3>
-                <div className="text-3xl font-bold mb-4">$97<span className="text-sm font-normal text-muted-foreground">/agent/month</span></div>
-                <p className="text-sm text-muted-foreground mb-6">Per agent pricing that scales with your team</p>
-                <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white" onClick={() => handleSubscription("pro")} disabled={loading === "pro"}>
-                  {loading === "pro" ? "Loading..." : "Start Your Free Trial"}
+                <div className="text-3xl font-bold mb-2">
+                  {formatPrice(currentPricing.amount, currentPricing.interval)}
+                  <span className="text-sm font-normal text-muted-foreground">
+                    /{currentPricing.interval === 'year' ? 'year' : 'month'}
+                  </span>
+                </div>
+                {billingInterval === 'year' && (
+                  <div className="text-sm text-green-600 mb-2">
+                    Save {annualSavings.percentage}% • ≈ {annualSavings.monthlyEquivalent}/mo
+                  </div>
+                )}
+                <p className="text-sm text-muted-foreground mb-6">
+                  {currentPricing.description} • Per agent pricing that scales with your team
+                </p>
+                <Button 
+                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white" 
+                  onClick={() => handleSubscription(currentPricing.priceId, currentPricing.interval)} 
+                  disabled={loading === currentPricing.priceId}
+                >
+                  {loading === currentPricing.priceId ? "Loading..." : `Start ${billingInterval === 'year' ? 'Annual' : 'Monthly'} Plan`}
                 </Button>
               </div>
             </div>
@@ -165,10 +213,26 @@ export const Pricing = () => {
                     Most Popular
                   </Badge>
                   <h3 className="text-xl font-semibold mb-2">Circle Pro</h3>
-                  <div className="text-3xl font-bold mb-4">$97<span className="text-sm font-normal text-muted-foreground">/agent/month</span></div>
-                  <p className="text-sm text-muted-foreground mb-6">Unlock Pro Pricing & Vendor Support Get exclusive rates, expert vendor help, and curated content — all backed by marketplace insights tailored to your stage of business. We meet you where you are and help take you where you want to go.</p>
-                  <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white" onClick={() => handleSubscription("pro")} disabled={loading === "pro"}>
-                    {loading === "pro" ? "Loading..." : "Start Your Free 30-Day Trial"}
+                  <div className="text-3xl font-bold mb-2">
+                    {formatPrice(currentPricing.amount, currentPricing.interval)}
+                    <span className="text-sm font-normal text-muted-foreground">
+                      /{currentPricing.interval === 'year' ? 'year' : 'month'}
+                    </span>
+                  </div>
+                  {billingInterval === 'year' && (
+                    <div className="text-sm text-green-600 mb-2">
+                      Save {annualSavings.percentage}% • ≈ {annualSavings.monthlyEquivalent}/mo
+                    </div>
+                  )}
+                  <p className="text-sm text-muted-foreground mb-6">
+                    {currentPricing.description} • Unlock Pro Pricing & Vendor Support Get exclusive rates, expert vendor help, and curated content — all backed by marketplace insights tailored to your stage of business.
+                  </p>
+                  <Button 
+                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white" 
+                    onClick={() => handleSubscription(currentPricing.priceId, currentPricing.interval)} 
+                    disabled={loading === currentPricing.priceId}
+                  >
+                    {loading === currentPricing.priceId ? "Loading..." : "Start Your Free 30-Day Trial"}
                   </Button>
                 </div>
                </div>
@@ -1091,6 +1155,66 @@ export const Pricing = () => {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Trust Indicators */}
+        <div className="text-center text-sm text-muted-foreground mt-8 max-w-2xl mx-auto">
+          <p className="mb-2">No hidden fees • Secure checkout by Stripe • VAT/Sales tax calculated at checkout</p>
+          <p className="text-xs">Cancel anytime in the Customer Portal</p>
+        </div>
+
+        {/* FAQ Section */}
+        <div className="mt-16 max-w-3xl mx-auto">
+          <h3 className="text-2xl font-bold text-center mb-8">Frequently Asked Questions</h3>
+          <div className="space-y-4">
+            <Collapsible>
+              <CollapsibleTrigger className="w-full">
+                <div className="flex items-center justify-between p-4 bg-white rounded-lg border hover:bg-gray-50 transition-colors">
+                  <span className="font-medium text-left">Can I switch plans later?</span>
+                  <ChevronDown className="w-5 h-5 text-gray-400" />
+                </div>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <div className="p-4 bg-gray-50 rounded-b-lg border border-t-0">
+                  <p className="text-sm text-gray-600">
+                    Yes, you can upgrade or downgrade your plan at any time. Changes are prorated and take effect immediately for upgrades, or at the end of your current billing period for downgrades.
+                  </p>
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
+
+            <Collapsible>
+              <CollapsibleTrigger className="w-full">
+                <div className="flex items-center justify-between p-4 bg-white rounded-lg border hover:bg-gray-50 transition-colors">
+                  <span className="font-medium text-left">What happens if payment fails?</span>
+                  <ChevronDown className="w-5 h-5 text-gray-400" />
+                </div>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <div className="p-4 bg-gray-50 rounded-b-lg border border-t-0">
+                  <p className="text-sm text-gray-600">
+                    We'll retry payment automatically and send email reminders. You'll have a 7-day grace period to update your payment method through the Customer Portal before any features are restricted.
+                  </p>
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
+
+            <Collapsible>
+              <CollapsibleTrigger className="w-full">
+                <div className="flex items-center justify-between p-4 bg-white rounded-lg border hover:bg-gray-50 transition-colors">
+                  <span className="font-medium text-left">Can I cancel my subscription?</span>
+                  <ChevronDown className="w-5 h-5 text-gray-400" />
+                </div>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <div className="p-4 bg-gray-50 rounded-b-lg border border-t-0">
+                  <p className="text-sm text-gray-600">
+                    Yes, you can cancel anytime through the Customer Portal. Your subscription will remain active until the end of your current billing period.
+                  </p>
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
           </div>
         </div>
       </section>

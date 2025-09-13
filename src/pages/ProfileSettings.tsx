@@ -14,13 +14,24 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { User, Upload, ArrowLeft, Crown, Building, Store, Briefcase } from "lucide-react";
+import { useSubscription } from "@/hooks/useSubscription";
+import { User, Upload, ArrowLeft, Crown, Building, Store, Briefcase, CreditCard } from "lucide-react";
 
 
 export const ProfileSettings = () => {
   const { user, profile, updateProfile } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { 
+    subscription, 
+    loading: subscriptionLoading, 
+    portalLoading, 
+    isProActive, 
+    subscriptionTier, 
+    planInterval, 
+    renewalDate, 
+    openCustomerPortal 
+  } = useSubscription();
   
   const [loading, setLoading] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
@@ -476,19 +487,104 @@ export const ProfileSettings = () => {
                 <div className="flex justify-between items-center">
                   <div>
                     <p className="font-medium">Membership Status</p>
-                    <p className="text-sm text-muted-foreground">
-                      {profile.is_pro_member ? "Circle Pro Member" : "Free Member"}
-                    </p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm text-muted-foreground">
+                        {isProActive ? `Circle Pro ${planInterval === 'year' ? 'Annual' : 'Monthly'}` : "Free Member"}
+                      </p>
+                      {isProActive && <Crown className="w-4 h-4 text-yellow-500" />}
+                    </div>
+                    {isProActive && renewalDate && (
+                      <p className="text-xs text-muted-foreground">
+                        Renews on {renewalDate}
+                      </p>
+                    )}
                   </div>
-                  {!profile.is_pro_member && (
+                  {!isProActive ? (
                     <Button asChild variant="outline">
                       <Link to="/pricing">Upgrade to Pro</Link>
+                    </Button>
+                  ) : (
+                    <Button 
+                      variant="outline" 
+                      onClick={openCustomerPortal}
+                      disabled={portalLoading}
+                    >
+                      {portalLoading ? "Loading..." : "Manage Billing"}
                     </Button>
                   )}
                 </div>
               </div>
             </CardContent>
           </Card>
+
+          {/* Subscription Management */}
+          {isProActive && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <CreditCard className="w-5 h-5" />
+                  Subscription Management
+                </CardTitle>
+                <CardDescription>
+                  Manage your Circle Pro subscription and billing settings
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid gap-4">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="font-medium">Current Plan</p>
+                      <p className="text-sm text-muted-foreground">
+                        Circle Pro {planInterval === 'year' ? 'Annual' : 'Monthly'}
+                        {planInterval === 'year' && ' (7% savings)'}
+                      </p>
+                    </div>
+                    <Badge variant="secondary">
+                      {subscription?.subscription_status === 'trialing' ? 'Free Trial' : 'Active'}
+                    </Badge>
+                  </div>
+                  
+                  {renewalDate && (
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <p className="font-medium">Next Billing Date</p>
+                        <p className="text-sm text-muted-foreground">{renewalDate}</p>
+                      </div>
+                    </div>
+                  )}
+                  
+                  <Separator />
+                  
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      onClick={openCustomerPortal}
+                      disabled={portalLoading}
+                      className="flex-1"
+                    >
+                      {portalLoading ? "Loading..." : "Manage Billing"}
+                    </Button>
+                    <Button asChild variant="outline" className="flex-1">
+                      <Link to="/pricing">View Plans</Link>
+                    </Button>
+                  </div>
+                </div>
+                
+                <div className="bg-muted/30 p-4 rounded-lg">
+                  <h4 className="font-medium mb-2">Billing Portal</h4>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Use the billing portal to update payment methods, download invoices, change plans, or cancel your subscription.
+                  </p>
+                  <ul className="text-sm text-muted-foreground space-y-1">
+                    <li>• Update payment methods and billing address</li>
+                    <li>• Download invoices and payment history</li>
+                    <li>• Switch between monthly and annual billing</li>
+                    <li>• Cancel subscription (effective at period end)</li>
+                  </ul>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Creator Onboarding Section */}
           {!profile.is_creator && (

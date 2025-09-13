@@ -8570,8 +8570,11 @@ export type Database = {
       subscribers: {
         Row: {
           created_at: string
+          current_period_end: string | null
           email: string
           id: string
+          plan_interval: string | null
+          pro_price_id: string | null
           stripe_customer_id: string | null
           subscribed: boolean
           subscription_end: string | null
@@ -8581,8 +8584,11 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          current_period_end?: string | null
           email: string
           id?: string
+          plan_interval?: string | null
+          pro_price_id?: string | null
           stripe_customer_id?: string | null
           subscribed?: boolean
           subscription_end?: string | null
@@ -8592,8 +8598,11 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          current_period_end?: string | null
           email?: string
           id?: string
+          plan_interval?: string | null
+          pro_price_id?: string | null
           stripe_customer_id?: string | null
           subscribed?: boolean
           subscription_end?: string | null
@@ -10962,7 +10971,9 @@ export type Database = {
           payload: Json
           processed: boolean | null
           processed_at: string | null
+          processing_error: string | null
           provider: string
+          stripe_event_id: string | null
         }
         Insert: {
           consultation_booking_id?: string | null
@@ -10974,7 +10985,9 @@ export type Database = {
           payload?: Json
           processed?: boolean | null
           processed_at?: string | null
+          processing_error?: string | null
           provider: string
+          stripe_event_id?: string | null
         }
         Update: {
           consultation_booking_id?: string | null
@@ -10986,7 +10999,9 @@ export type Database = {
           payload?: Json
           processed?: boolean | null
           processed_at?: string | null
+          processing_error?: string | null
           provider?: string
+          stripe_event_id?: string | null
         }
         Relationships: [
           {

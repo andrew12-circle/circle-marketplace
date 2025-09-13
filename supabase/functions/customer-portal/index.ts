@@ -7,7 +7,6 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Helper logging function for debugging
 const logStep = (step: string, details?: any) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
   console.log(`[CUSTOMER-PORTAL] ${step}${detailsStr}`);
@@ -23,40 +22,54 @@ serve(async (req) => {
 
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
-    logStep("Stripe key verified");
 
-    // Initialize Supabase client with the service role key
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-      { auth: { persistSession: false } }
+      Deno.env.get("SUPABASE_ANON_KEY") ?? ""
     );
 
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) throw new Error("No authorization header provided");
-    logStep("Authorization header found");
 
     const token = authHeader.replace("Bearer ", "");
     const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
     if (userError) throw new Error(`Authentication error: ${userError.message}`);
+    
     const user = userData.user;
     if (!user?.email) throw new Error("User not authenticated or email not available");
     logStep("User authenticated", { userId: user.id, email: user.email });
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
+    
+    // Find or create customer
+    let customerId: string;
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
-    if (customers.data.length === 0) {
-      throw new Error("No Stripe customer found for this user");
+    
+    if (customers.data.length > 0) {
+      customerId = customers.data[0].id;
+      logStep("Found existing customer", { customerId });
+    } else {
+      // Create customer if none exists
+      const customer = await stripe.customers.create({
+        email: user.email,
+        metadata: { user_id: user.id }
+      });
+      customerId = customer.id;
+      logStep("Created new customer", { customerId });
     }
-    const customerId = customers.data[0].id;
-    logStep("Found Stripe customer", { customerId });
 
-    const origin = req.headers.get("origin") || "https://ihzyuyfawapweamqzzlj.lovable.app";
+    // Get return URL from request or use default
+    const { returnUrl } = await req.json().catch(() => ({ returnUrl: null }));
+    const origin = req.headers.get("origin") || "https://ihzyuyfawapweamqzzlj.supabase.co";
+    const defaultReturnUrl = `${origin}/profile-settings`;
+
+    // Create billing portal session
     const portalSession = await stripe.billingPortal.sessions.create({
       customer: customerId,
-      return_url: `${origin}/pricing`,
+      return_url: returnUrl || defaultReturnUrl,
     });
-    logStep("Customer portal session created", { sessionId: portalSession.id, url: portalSession.url });
+
+    logStep("Portal session created", { sessionId: portalSession.id, url: portalSession.url });
 
     return new Response(JSON.stringify({ url: portalSession.url }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -65,6 +78,7 @@ serve(async (req) => {
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     logStep("ERROR in customer-portal", { message: errorMessage });
+    
     return new Response(JSON.stringify({ error: errorMessage }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
