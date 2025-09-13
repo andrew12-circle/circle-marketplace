@@ -1188,12 +1188,27 @@ export const ServiceFunnelModal = ({
                                    {pkgRetail ? fmt(pkgRetail) + period : 'Request Pricing'}
                                  </span>
                               </div>
-                              <div className="flex items-center justify-between text-sm">
-                                <span className="text-blue-600">Pro Member:</span>
-                                 <span className="font-medium text-blue-600">
-                                   {pkgPro ? fmt(pkgPro) + period : 'Request Pricing'}
-                                 </span>
-                              </div>
+                               {isProMember ? (
+                                 <div className="flex items-center justify-between text-sm">
+                                   <span className="text-blue-600">Pro Member:</span>
+                                    <span className="font-medium text-blue-600">
+                                      {pkgPro ? fmt(pkgPro) + period : 'Request Pricing'}
+                                    </span>
+                                 </div>
+                               ) : (
+                                 <div className="flex items-center justify-between text-sm">
+                                   <span className="text-gray-400">🔒 Pro Member:</span>
+                                    <Button 
+                                      size="sm" 
+                                      variant="outline"
+                                      className="h-6 text-xs border-yellow-300 text-yellow-700 hover:bg-yellow-50"
+                                      onClick={() => window.open('/upgrade', '_blank')}
+                                    >
+                                      <Crown className="w-3 h-3 mr-1" />
+                                      Upgrade
+                                    </Button>
+                                 </div>
+                               )}
                                {service.copay_allowed && (
                                  <div className={`p-3 rounded-lg border ${isProMember ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200 opacity-60'}`}>
                                    <div className="flex items-center gap-2 text-sm font-medium mb-2">
