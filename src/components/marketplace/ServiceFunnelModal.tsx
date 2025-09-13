@@ -1240,9 +1240,6 @@ export const ServiceFunnelModal = ({
                         })()}
                       </div>
                       
-                       {pkg.description && pkg.description.trim() && (
-                         <p className="text-sm text-gray-600 mt-3">{pkg.description}</p>
-                       )}
                     </div>
 
                     <div className="space-y-3 mb-6">
