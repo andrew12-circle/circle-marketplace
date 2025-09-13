@@ -23,6 +23,7 @@ import { useProviderTracking } from "@/hooks/useProviderTracking";
 import { supabase } from "@/integrations/supabase/client";
 import { ReviewRatingSystem } from "@/components/marketplace/ReviewRatingSystem";
 import { CustomersAlsoViewed } from "@/components/marketplace/CustomersAlsoViewed";
+import { CoPayInfoPopover } from "./CoPayInfoPopover";
 import { FeatureRenderGuard } from "@/components/common/FeatureRenderGuard";
 import { SafeHTML } from "@/utils/htmlSanitizer";
 import { computePotentialCopayForService, extractNumericPrice } from "@/utils/dealPricing";
@@ -1197,6 +1198,7 @@ export const ServiceFunnelModal = ({
                                 <div className="bg-green-50 p-3 rounded-lg border border-green-200">
                                   <div className="flex items-center gap-2 text-sm text-green-700 font-medium mb-2">
                                     <span>💰 Co-Pay Available</span>
+                                    <CoPayInfoPopover />
                                   </div>
                                   
                                    {(() => {
