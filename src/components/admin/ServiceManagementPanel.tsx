@@ -566,7 +566,7 @@ export const ServiceManagementPanel = () => {
         });
       }
 
-      // Prepare update data with direct field mapping (removed non-existent fields)
+      // Prepare update data with only valid database fields
       const updateData = {
         title: editForm.title,
         description: editForm.description,
@@ -590,20 +590,47 @@ export const ServiceManagementPanel = () => {
         tags: Array.isArray(editForm.tags) ? editForm.tags : null,
         updated_at: new Date().toISOString()
       };
-      console.log('Step 3: Prepared update data, sending to database...');
-      console.debug('Updating service with data:', updateData);
       
-      // Add timeout to prevent hanging
-      const updatePromise = supabase.from('services').update(updateData as any).eq('id', selectedService.id as any);
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Database update timeout after 10 seconds')), 10000)
+      // Filter out any undefined values that might cause issues
+      const cleanUpdateData = Object.fromEntries(
+        Object.entries(updateData).filter(([_, value]) => value !== undefined)
       );
+      console.log('Step 3: Prepared update data, sending to database...');
+      console.debug('Updating service with cleaned data:', cleanUpdateData);
+      console.log('Service ID:', selectedService.id);
+      console.log('Update data keys:', Object.keys(cleanUpdateData));
+      console.log('Update data types:', Object.entries(cleanUpdateData).map(([key, value]) => [key, typeof value, value]));
       
-      const {
-        error
-      } = await Promise.race([updatePromise, timeoutPromise]) as any;
+      let error = null;
+      let result = null;
       
-      console.log('Step 4: Database update completed, checking for errors...');
+      try {
+        // Add timeout to prevent hanging
+        const updatePromise = supabase
+          .from('services')
+          .update(cleanUpdateData as any)
+          .eq('id', selectedService.id as any);
+        
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Database update timeout after 15 seconds')), 15000)
+        );
+        
+        console.log('Step 4: Starting database update...');
+        result = await Promise.race([updatePromise, timeoutPromise]) as any;
+        error = result?.error;
+        
+        console.log('Step 5: Database update completed, result:', result);
+      } catch (timeoutError) {
+        console.error('Database update timed out:', timeoutError);
+        toast({
+          title: 'Database Timeout',
+          description: 'The save operation took too long and timed out. Please try again.',
+          variant: 'destructive'
+        });
+        throw timeoutError;
+      }
+      
+      console.log('Step 6: Checking for database errors...');
       
       if (error) {
         console.error('Update error details:', {
@@ -611,11 +638,19 @@ export const ServiceManagementPanel = () => {
           code: error.code,
           message: error.message,
           details: error.details,
-          hint: error.hint
+          hint: error.hint,
+          serviceId: selectedService.id,
+          updateData: cleanUpdateData
+        });
+        toast({
+          title: 'Failed to save service',
+          description: `Database error: ${error.message || 'Unknown error'}`,
+          variant: 'destructive'
         });
         throw error;
       }
-      console.log('Step 5: No database error, fetching updated service...');
+      
+      console.log('Step 7: No database error, fetching updated service...');
       
       // Fetch updated service to get latest data
       const {
