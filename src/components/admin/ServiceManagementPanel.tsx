@@ -566,7 +566,7 @@ export const ServiceManagementPanel = () => {
         });
       }
 
-      // Prepare update data with direct field mapping
+      // Prepare update data with direct field mapping (removed non-existent fields)
       const updateData = {
         title: editForm.title,
         description: editForm.description,
@@ -583,8 +583,6 @@ export const ServiceManagementPanel = () => {
         direct_purchase_enabled: !!editForm.direct_purchase_enabled,
         respa_split_limit: respa,
         max_split_percentage_non_ssp: nonSsp,
-        ssp_allowed: editForm.ssp_allowed ?? true,
-        max_split_percentage_ssp: editForm.ssp_allowed ? editForm.max_split_percentage_ssp ?? 0 : 0,
         retail_price: editForm.retail_price ?? null,
         pro_price: editForm.pro_price ?? null,
         price_duration: editForm.price_duration ?? null,
@@ -595,9 +593,15 @@ export const ServiceManagementPanel = () => {
       console.log('Step 3: Prepared update data, sending to database...');
       console.debug('Updating service with data:', updateData);
       
+      // Add timeout to prevent hanging
+      const updatePromise = supabase.from('services').update(updateData as any).eq('id', selectedService.id as any);
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Database update timeout after 10 seconds')), 10000)
+      );
+      
       const {
         error
-      } = await supabase.from('services').update(updateData as any).eq('id', selectedService.id as any);
+      } = await Promise.race([updatePromise, timeoutPromise]) as any;
       
       console.log('Step 4: Database update completed, checking for errors...');
       
