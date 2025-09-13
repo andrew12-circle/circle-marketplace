@@ -335,7 +335,7 @@ export const ServiceFunnelModal = ({
     id: pkg.id,
     name: pkg.label || pkg.name || `Package ${pkg.id}`,
     price: Number(pkg.pro_price || pkg.retail_price || 0),
-    originalPrice: Number(pkg.retail_price) || undefined,
+    originalPrice: Number(pkg.retail_price || pkg.price || pkg.originalPrice) || undefined,
     yearlyPrice: undefined, // Not supported in new structure yet
     yearlyOriginalPrice: undefined,
     duration: pkg.duration || service.duration || "monthly",
