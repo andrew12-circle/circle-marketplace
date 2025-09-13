@@ -878,7 +878,14 @@ export const ServiceManagementPanel = () => {
   const isDetailsDirty = selectedService ? detailKeys.some(key => {
     const currentValue = (editForm as any)[key];
     const originalValue = (selectedService as any)[key];
-    return !compareValues(currentValue, originalValue);
+    const isDifferent = !compareValues(currentValue, originalValue);
+    
+    // Debug logging for save button issue
+    if (isDifferent) {
+      console.log(`Field ${key} is dirty:`, { current: currentValue, original: originalValue });
+    }
+    
+    return isDifferent;
   }) : false;
   const formatRelativeTime = (iso?: string | null) => {
     if (!iso) return '';
@@ -1529,7 +1536,13 @@ export const ServiceManagementPanel = () => {
                     </div>
 
                     <div className="flex gap-2">
-                      <Button onClick={handleServiceUpdate} disabled={!isDetailsDirty || saving || saveInProgress}>
+                      <Button 
+                        onClick={() => {
+                          console.log('Save button clicked:', { isDetailsDirty, saving, saveInProgress });
+                          handleServiceUpdate();
+                        }} 
+                        disabled={saving || saveInProgress}
+                      >
                         {saving || saveInProgress ? 'Saving...' : 'Save Changes'}
                       </Button>
                       <Button variant="outline" onClick={() => {
