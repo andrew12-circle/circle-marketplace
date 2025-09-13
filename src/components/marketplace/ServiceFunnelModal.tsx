@@ -1196,17 +1196,24 @@ export const ServiceFunnelModal = ({
                                     </span>
                                  </div>
                                ) : (
-                                 <div className="flex items-center justify-between text-sm">
-                                   <span className="text-gray-400">🔒 Pro Member:</span>
-                                    <Button 
-                                      size="sm" 
-                                      variant="outline"
-                                      className="h-6 text-xs border-yellow-300 text-yellow-700 hover:bg-yellow-50"
-                                      onClick={() => window.open('/upgrade', '_blank')}
-                                    >
-                                      <Crown className="w-3 h-3 mr-1" />
-                                      Upgrade
-                                    </Button>
+                                 <div className="flex items-center justify-between text-sm opacity-60">
+                                   <span className="text-gray-500 flex items-center gap-1">
+                                     🔒 Pro Member:
+                                   </span>
+                                   <div className="flex items-center gap-2">
+                                     <span className="font-medium text-blue-600 line-through">
+                                       {pkgPro ? fmt(pkgPro) + period : 'Request Pricing'}
+                                     </span>
+                                     <Button 
+                                       size="sm" 
+                                       variant="outline"
+                                       className="h-6 text-xs border-yellow-300 text-yellow-700 hover:bg-yellow-50"
+                                       onClick={() => window.open('/upgrade', '_blank')}
+                                     >
+                                       <Crown className="w-3 h-3 mr-1" />
+                                       Upgrade
+                                     </Button>
+                                   </div>
                                  </div>
                                )}
                                {service.copay_allowed && (
@@ -1225,52 +1232,44 @@ export const ServiceFunnelModal = ({
                                      )}
                                    </div>
                                    
-                                   {isProMember ? (
-                                     <>
-                                       {(() => {
-                                         const basePrice = pkgPro || pkgRetail
-                                         const sspPct = service.max_split_percentage_ssp || 0;
-                                         const nonSspPct = service.max_split_percentage_non_ssp || 0;
-                                        
-                                        const sspAgentPays = sspPct > 0 && basePrice ? Math.round(basePrice * (1 - sspPct / 100)) : null;
-                                        const nonSspAgentPays = nonSspPct > 0 && basePrice ? Math.round(basePrice * (1 - nonSspPct / 100)) : null;
-                                        
-                                        const bestPrice = sspAgentPays && nonSspAgentPays ? Math.min(sspAgentPays, nonSspAgentPays) : (sspAgentPays || nonSspAgentPays);
-                                        
-                                        return (
-                                          <div className="text-sm">
-                                            {bestPrice ? (
-                                              <div className="text-green-700 font-medium">
-                                                You could pay as low as {fmt(bestPrice)}{period}
-                                              </div>
-                                            ) : (
-                                              <div className="text-gray-600">Contact vendor for co-pay options</div>
-                                            )}
+                                   {(() => {
+                                     const basePrice = pkgPro || pkgRetail
+                                     const sspPct = service.max_split_percentage_ssp || 0;
+                                     const nonSspPct = service.max_split_percentage_non_ssp || 0;
+                                    
+                                    const sspAgentPays = sspPct > 0 && basePrice ? Math.round(basePrice * (1 - sspPct / 100)) : null;
+                                    const nonSspAgentPays = nonSspPct > 0 && basePrice ? Math.round(basePrice * (1 - nonSspPct / 100)) : null;
+                                    
+                                    const bestPrice = sspAgentPays && nonSspAgentPays ? Math.min(sspAgentPays, nonSspAgentPays) : (sspAgentPays || nonSspAgentPays);
+                                    
+                                    return (
+                                      <div className="text-sm">
+                                        {bestPrice ? (
+                                          <div className={`font-medium mb-2 ${isProMember ? 'text-green-700' : 'text-gray-600'}`}>
+                                            {isProMember ? 'You could pay as low as ' : 'Could pay as low as '}{fmt(bestPrice)}{period}
+                                            {!isProMember && <span className="text-gray-500"> (with upgrade)</span>}
                                           </div>
-                                        );
-                                      })()}
-                                      
-                                      <div className="text-xs text-gray-500 mt-2">
-                                        Requires approved partner. Not guaranteed.
+                                        ) : (
+                                          <div className="text-gray-600">Contact vendor for co-pay options</div>
+                                        )}
+                                        
+                                        {!isProMember && (
+                                          <Button 
+                                            size="sm" 
+                                            className="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white text-xs"
+                                            onClick={() => window.open('/upgrade', '_blank')}
+                                          >
+                                            <Crown className="w-3 h-3 mr-1" />
+                                            Upgrade to Access Co-Pay
+                                          </Button>
+                                        )}
                                       </div>
-                                     </>
-                                   ) : (
-                                     <>
-                                       <div className="text-sm text-gray-600 mb-2">
-                                         Get vendor co-pay coverage with Circle Pro membership
-                                       </div>
-                                       <Button 
-                                         size="sm" 
-                                         className="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white text-xs"
-                                         onClick={() => {
-                                           window.open('/upgrade', '_blank');
-                                         }}
-                                       >
-                                         <Crown className="w-3 h-3 mr-1" />
-                                         Upgrade to Pro
-                                       </Button>
-                                     </>
-                                   )}
+                                    );
+                                  })()}
+                                   
+                                  <div className="text-xs text-gray-500 mt-2">
+                                    {isProMember ? 'Requires approved partner. Not guaranteed.' : 'Pro feature: Requires approved partner. Not guaranteed.'}
+                                  </div>
                                  </div>
                                )}
                             </>
