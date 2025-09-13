@@ -14,6 +14,7 @@ const Index = lazy(() => import("./pages/Index"));
 const Auth = lazy(() => import("./pages/Auth"));
 const Admin = lazy(() => import("./pages/Admin"));
 const Health = lazy(() => import("./pages/Health"));
+const FunnelPage = lazy(() => import("./pages/FunnelPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -43,6 +44,7 @@ function App() {
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/health" element={<Health />} />
+                <Route path="/funnel/:serviceId" element={<FunnelPage />} />
                 <Route 
                   path="/admin/*" 
                   element={

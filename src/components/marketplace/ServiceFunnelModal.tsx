@@ -201,6 +201,7 @@ interface ServiceFunnelModalProps {
   onClose: () => void;
   service: Service;
   requestedId?: string | null;
+  isPublicView?: boolean;
 }
 // Flexible package resolver
 function findPkgByFlexibleKey(list: Pkg[], value?: string | null): Pkg | null {
@@ -236,7 +237,8 @@ export const ServiceFunnelModal = ({
   isOpen,
   onClose,
   service,
-  requestedId
+  requestedId,
+  isPublicView = false
 }: ServiceFunnelModalProps) => {
   // Get normalized packages using centralized utility
   const packages: Pkg[] = Array.isArray(service.pricing_tiers) && service.pricing_tiers.length

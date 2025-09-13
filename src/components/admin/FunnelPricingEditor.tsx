@@ -455,7 +455,7 @@ export const FunnelPricingEditor = ({
                         </Button>
                       </div>
                       <div className="space-y-2">
-                        {tier.features.map((feature, featureIndex) => (
+                        {(tier.features || []).map((feature, featureIndex) => (
                           <div key={feature.id} className="flex items-center gap-2 p-2 bg-white rounded border">
                             <Switch
                               checked={feature.included}
