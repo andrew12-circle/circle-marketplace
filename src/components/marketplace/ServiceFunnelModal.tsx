@@ -1196,24 +1196,24 @@ export const ServiceFunnelModal = ({
                                     </span>
                                  </div>
                                ) : (
-                                 <div className="flex items-center justify-between text-sm opacity-60">
-                                   <span className="text-gray-500 flex items-center gap-1">
-                                     🔒 Pro Member:
-                                   </span>
-                                   <div className="flex items-center gap-2">
-                                     <span className="font-medium text-blue-600 line-through">
+                                 <div className="text-sm space-y-1">
+                                   <div className="flex items-center justify-between">
+                                     <span className="text-gray-500 flex items-center gap-1">
+                                       🔒 Pro Member:
+                                     </span>
+                                     <span className="font-medium text-blue-600 line-through opacity-60">
                                        {pkgPro ? fmt(pkgPro) + period : 'Request Pricing'}
                                      </span>
-                                     <Button 
-                                       size="sm" 
-                                       variant="outline"
-                                       className="h-6 text-xs border-yellow-300 text-yellow-700 hover:bg-yellow-50"
-                                       onClick={() => window.open('/upgrade', '_blank')}
-                                     >
-                                       <Crown className="w-3 h-3 mr-1" />
-                                       Upgrade
-                                     </Button>
                                    </div>
+                                   <Button 
+                                     size="sm" 
+                                     variant="outline"
+                                     className="w-full h-7 text-xs border-yellow-300 text-yellow-700 hover:bg-yellow-50"
+                                     onClick={() => window.open('/upgrade', '_blank')}
+                                   >
+                                     <Crown className="w-3 h-3 mr-1" />
+                                     Upgrade for Pro Pricing
+                                   </Button>
                                  </div>
                                )}
                                {service.copay_allowed && (
@@ -1247,7 +1247,7 @@ export const ServiceFunnelModal = ({
                                         {bestPrice ? (
                                           <div className={`font-medium mb-2 ${isProMember ? 'text-green-700' : 'text-gray-600'}`}>
                                             {isProMember ? 'You could pay as low as ' : 'Could pay as low as '}{fmt(bestPrice)}{period}
-                                            {!isProMember && <span className="text-gray-500"> (with upgrade)</span>}
+                                            {!isProMember && <span className="text-gray-500"> (with Pro)</span>}
                                           </div>
                                         ) : (
                                           <div className="text-gray-600">Contact vendor for co-pay options</div>
@@ -1256,11 +1256,11 @@ export const ServiceFunnelModal = ({
                                         {!isProMember && (
                                           <Button 
                                             size="sm" 
-                                            className="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white text-xs"
+                                            className="w-full h-7 bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white text-xs mt-1"
                                             onClick={() => window.open('/upgrade', '_blank')}
                                           >
                                             <Crown className="w-3 h-3 mr-1" />
-                                            Upgrade to Access Co-Pay
+                                            Upgrade for Co-Pay Access
                                           </Button>
                                         )}
                                       </div>
