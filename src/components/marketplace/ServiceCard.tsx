@@ -125,7 +125,6 @@ export const ServiceCard = ({
       const activePackage = getActivePackage(service);
       if (activePackage) {
         const { retail, pro, coPay } = getPricesForPackage(service, activePackage, isProMember);
-        console.log(`[${service.title}] Package pricing:`, { retail, pro, coPay, activePackage });
         return {
           retail,
           pro,
@@ -144,12 +143,6 @@ export const ServiceCard = ({
   };
 
   const effectivePricing = getEffectivePricing();
-  console.log(`[${service.title}] Final pricing:`, { 
-    effectivePricing, 
-    isVerified: service.is_verified, 
-    copayAllowed: service.copay_allowed,
-    respaSplitLimit: service.respa_split_limit
-  });
 
   const ensureDisclaimerLoaded = async () => {
     if (disclaimerContent) return;
@@ -804,82 +797,72 @@ export const ServiceCard = ({
                     </div>
                    ) : null}
                     
-                  {showDiscountPending ? (
-                    <div className="space-y-2">
-                      {/* Show Circle Pro price only if service is verified and has pro price */}
-                      {service.is_verified && effectivePricing.pro > 0 ? (
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-muted-foreground">{t('serviceCard.circlePro')}</span>
-                          <span className="font-semibold text-primary">
-                            {formatPrice(effectivePricing.pro, service.price_duration || 'mo')}
-                          </span>
-                        </div>
-                      ) : (service.vendor?.contact_email && (
-                        <div className="p-2 bg-amber-50 rounded-lg border border-amber-200">
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs text-amber-700">
-                              {t('serviceCard.upvoteDiscount')}
-                            </span>
+                  {/* Always show Circle Pro price for verified services with pro pricing */}
+                  {service.is_verified && effectivePricing.pro > 0 && (
+                    <div className="space-y-1">
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="flex items-center justify-between p-2 bg-circle-primary/5 rounded-lg border border-circle-primary/20 opacity-75 cursor-pointer">
                             <div className="flex items-center gap-1">
-                              {demandSignals.totalLikes > 0 && (
-                                <span className="text-xs text-amber-700">
-                                  {demandSignals.totalLikes}
-                                </span>
-                              )}
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      demandSignals.likeService();
-                                    }}
-                                    disabled={demandSignals.hasLiked}
-                                    className={`p-1 rounded transition-colors ${
-                                      demandSignals.hasLiked 
-                                        ? 'bg-amber-200 text-amber-800' 
-                                        : 'hover:bg-amber-100 text-amber-600'
-                                    }`}
-                                  >
-                                    <ThumbsUp className={`w-4 h-4 ${demandSignals.hasLiked ? 'fill-current' : ''}`} />
-                                  </button>
-                                </TooltipTrigger>
-                                <TooltipContent className="w-64 p-3">
-                                  <p className="text-sm leading-relaxed">
-                                    {demandSignals.hasLiked 
-                                      ? "Thanks for your interest! We'll notify vendors and work on securing a discount."
-                                      : "Vendors unlock Pro discounts when enough agents show interest. Every upvote notifies the vendor and increases the chance of Circle securing a discount."
-                                    }
-                                  </p>
-                                </TooltipContent>
-                              </Tooltip>
+                              <Lock className="w-3 h-3 text-circle-primary" />
+                              <span className="text-sm font-medium text-circle-primary">{t('serviceCard.circleProPrice')}</span>
+                              <Crown className="w-4 h-4 text-circle-primary" />
                             </div>
+                            <span className="text-lg font-bold text-circle-primary">
+                              {formatPrice(effectivePricing.pro, service.price_duration || 'mo')}
+                            </span>
                           </div>
-                        </div>
-                      ))}
+                        </TooltipTrigger>
+                        <TooltipContent className="w-40 sm:w-48 p-3 cursor-pointer" onClick={handleUpgradeClick}>
+                          <p className="text-sm leading-relaxed">Join Circle Pro membership to unlock this price</p>
+                          <p className="text-xs text-muted-foreground mt-1">Click to upgrade →</p>
+                        </TooltipContent>
+                      </Tooltip>
                     </div>
-                  ) : (
-                    service.is_verified && effectivePricing.pro > 0 && (
-                      <div className="space-y-1">
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <div className="flex items-center justify-between p-2 bg-circle-primary/5 rounded-lg border border-circle-primary/20 opacity-75 cursor-pointer">
-                              <div className="flex items-center gap-1">
-                                <Lock className="w-3 h-3 text-circle-primary" />
-                                <span className="text-sm font-medium text-circle-primary">{t('serviceCard.circleProPrice')}</span>
-                                <Crown className="w-4 h-4 text-circle-primary" />
-                              </div>
-                              <span className="text-lg font-bold text-circle-primary">
-                                {formatPrice(effectivePricing.pro, service.price_duration || 'mo')}
-                              </span>
-                            </div>
-                          </TooltipTrigger>
-                          <TooltipContent className="w-40 sm:w-48 p-3 cursor-pointer" onClick={handleUpgradeClick}>
-                            <p className="text-sm leading-relaxed">Join Circle Pro membership to unlock this price</p>
-                            <p className="text-xs text-muted-foreground mt-1">Click to upgrade →</p>
-                          </TooltipContent>
-                        </Tooltip>
+                  )}
+                  
+                  {/* Show discount pending upvote section only for non-verified services */}
+                  {showDiscountPending && !service.is_verified && service.vendor?.contact_email && (
+                    <div className="p-2 bg-amber-50 rounded-lg border border-amber-200">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-amber-700">
+                          {t('serviceCard.upvoteDiscount')}
+                        </span>
+                        <div className="flex items-center gap-1">
+                          {demandSignals.totalLikes > 0 && (
+                            <span className="text-xs text-amber-700">
+                              {demandSignals.totalLikes}
+                            </span>
+                          )}
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  demandSignals.likeService();
+                                }}
+                                disabled={demandSignals.hasLiked}
+                                className={`p-1 rounded transition-colors ${
+                                  demandSignals.hasLiked 
+                                    ? 'bg-amber-200 text-amber-800' 
+                                    : 'hover:bg-amber-100 text-amber-600'
+                                }`}
+                              >
+                                <ThumbsUp className={`w-4 h-4 ${demandSignals.hasLiked ? 'fill-current' : ''}`} />
+                              </button>
+                            </TooltipTrigger>
+                            <TooltipContent className="w-64 p-3">
+                              <p className="text-sm leading-relaxed">
+                                {demandSignals.hasLiked 
+                                  ? "Thanks for your interest! We'll notify vendors and work on securing a discount."
+                                  : "Vendors unlock Pro discounts when enough agents show interest. Every upvote notifies the vendor and increases the chance of Circle securing a discount."
+                                }
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </div>
                       </div>
-                    )
+                    </div>
                   )}
                    
                     {service.copay_allowed && service.respa_split_limit && ((service.is_verified && effectivePricing.pro > 0) || (!service.is_verified && effectivePricing.retail > 0)) && (
