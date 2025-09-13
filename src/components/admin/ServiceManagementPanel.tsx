@@ -1617,12 +1617,32 @@ export const ServiceManagementPanel = () => {
                     <div className="flex gap-2">
                       <Button 
                         onClick={() => {
-                          console.log('Save button clicked:', { isDetailsDirty, saving, saveInProgress });
-                          handleServiceUpdate();
+                          if (!selectedService || !isDetailsDirty) return;
+                          
+                          // Validate required fields
+                          if (!editForm.title || !editForm.category) {
+                            toast({
+                              title: 'Missing required fields',
+                              description: 'Please provide both Title and Category before saving.',
+                              variant: 'destructive'
+                            });
+                            return;
+                          }
+                          
+                          // Use the queued save system with diff-only patches
+                          const patch = diffPatch(selectedService, editForm);
+                          if (Object.keys(patch).length > 0) {
+                            saveService(selectedService.id, patch);
+                            setIsEditingDetails(false);
+                            toast({
+                              title: 'Saving changes...',
+                              description: 'Your updates are being saved.'
+                            });
+                          }
                         }} 
-                        disabled={saving || saveInProgress}
+                        disabled={!isDetailsDirty || !selectedService}
                       >
-                        {saving || saveInProgress ? 'Saving...' : 'Save Changes'}
+                        Save Changes
                       </Button>
                       <Button variant="outline" onClick={() => {
                   if (selectedService) {
