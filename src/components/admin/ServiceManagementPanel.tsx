@@ -502,7 +502,18 @@ export const ServiceManagementPanel = () => {
     }
   };
   const handleServiceUpdate = async () => {
-    if (!selectedService || saving || saveInProgress) return;
+    console.log('handleServiceUpdate called:', { selectedService: !!selectedService, saving, saveInProgress });
+    
+    if (!selectedService || saving || saveInProgress) {
+      console.log('Early return from handleServiceUpdate:', { 
+        hasSelectedService: !!selectedService, 
+        saving, 
+        saveInProgress 
+      });
+      return;
+    }
+    
+    console.log('Starting save process...');
     setSaveInProgress(true);
     setSaving(true);
     try {
@@ -622,6 +633,8 @@ export const ServiceManagementPanel = () => {
       });
       // Narrow cache invalidation - only invalidate services, not everything
       invalidateCache.invalidateServices();
+      
+      console.log('Save completed successfully!');
       toast({
         title: 'Success',
         description: 'Service updated successfully'
