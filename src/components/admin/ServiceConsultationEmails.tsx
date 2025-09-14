@@ -36,22 +36,43 @@ export const ServiceConsultationEmails = ({
     console.log("🔄 Saving consultation emails:", { serviceId, emails });
     setSaving(true);
     try {
-      await saveWithTimeout(async () => {
-        console.log("📤 Making Supabase update call...");
-        const { error, data } = await supabase
-          .from("services")
-          .update({ consultation_emails: emails })
-          .eq("id", serviceId)
-          .select();
-        
-        console.log("📨 Supabase response:", { data, error });
-        if (error) throw error;
-      });
+      // Validate emails before saving
+      const filtered = (emails || [])
+        .map((e) => (e || "").trim().toLowerCase())
+        .filter(Boolean);
+
+      const invalid = filtered.filter((e) => !/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(e));
+      if (invalid.length) {
+        toast.error(`Invalid email address${invalid.length > 1 ? "es" : ""}: ${invalid.join(", ")}`);
+        return;
+      }
+
+      const unique = Array.from(new Set(filtered)).slice(0, 4);
+
+      console.log("📤 Making Supabase update call...", { unique });
+      
+      // Use promise-based timeout instead of function-based
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Save operation timed out')), 15000)
+      );
+      
+      const savePromise = supabase
+        .from("services")
+        .update({ consultation_emails: unique })
+        .eq("id", serviceId)
+        .select();
+
+      await Promise.race([savePromise, timeoutPromise]);
+      
       console.log("✅ Save successful");
       toast.success("Consultation emails saved");
     } catch (e: any) {
       console.error("❌ Save failed:", e);
-      toast.error(e?.message ?? "Failed to save emails");
+      // Helpful message if RLS/permissions issue
+      const msg = e?.message?.includes("permission") 
+        ? "Permission denied: need admin access to update emails" 
+        : e?.message;
+      toast.error(msg || "Failed to save emails");
     } finally {
       setSaving(false);
     }
