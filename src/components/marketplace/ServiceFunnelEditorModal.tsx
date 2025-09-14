@@ -266,6 +266,13 @@ export const ServiceFunnelEditorModal = ({
       } else {
         setVerified(null);
       }
+      
+      // Update baseline after successful save to prevent "stale dirty" state
+      setBaseline({
+        funnel: JSON.stringify(funnelContent),
+        tiers: JSON.stringify(pricingTiers || [])
+      });
+      console.log('[FunnelEditorModal] Baseline updated after save - button should be enabled for next edit');
       // Snapshot current as baseline now that it's saved
       setBaseline(currentSerialized);
       toast({
