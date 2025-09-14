@@ -459,7 +459,9 @@ export const ServiceManagementPanel = () => {
       const {
         data,
         error
-      } = await supabase.from('services').select('*').order('created_at', {
+      } = await supabase.from('services').select('*').order('sort_order', {
+        ascending: true
+      }).order('created_at', {
         ascending: false
       });
       if (error) throw error;
@@ -1703,7 +1705,7 @@ export const ServiceManagementPanel = () => {
       <AIServiceUpdater services={services} onServiceUpdate={serviceId => {
       // Invalidate queries to trigger refresh without full refetch
       queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.SERVICES]
+        queryKey: QUERY_KEYS.services
       });
       toast({
         title: 'Service Updated',

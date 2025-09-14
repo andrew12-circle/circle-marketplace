@@ -11,6 +11,7 @@ import { Bot, Sparkles, CheckCircle, AlertCircle, Loader2, FileText, Zap, Share,
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AutoRecoverySystem } from '@/components/marketplace/AutoRecoverySystem';
 import { useAutoRecovery } from '@/hooks/useAutoRecovery';
+import { dlog, dwarn } from '@/utils/debugLogger';
 
 interface Service {
   id: string;
@@ -624,7 +625,7 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
       if (error) {
         console.error('Error logging AI update note:', error);
       } else {
-        console.log(`✅ Logged AI update note for ${serviceName}`);
+        dlog(`✅ Logged AI update note for ${serviceName}`);
       }
     } catch (error) {
       console.error('Error logging AI update note:', error);
@@ -633,7 +634,7 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
 
   const checkIfAIUpdated = async (serviceId: string): Promise<boolean> => {
     try {
-      console.log(`🔍 Checking AI update status for service: ${serviceId}`);
+      dlog(`🔍 Checking AI update status for service: ${serviceId}`);
       
       const { data, error } = await supabase
         .from('admin_notes')
@@ -648,7 +649,7 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
       }
 
       const isUpdated = data.length > 0;
-      console.log(`📊 Service ${serviceId} AI update status: ${isUpdated ? 'already updated' : 'needs update'}`);
+      dlog(`📊 Service ${serviceId} AI update status: ${isUpdated ? 'already updated' : 'needs update'}`);
       return isUpdated;
     } catch (error) {
       console.error('Error checking AI update status:', error);
@@ -657,7 +658,7 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
   };
 
   const verifyServiceCompletion = async (service: Service): Promise<boolean> => {
-    console.log(`Verifying completion for ${service.title}...`);
+    dlog(`Verifying completion for ${service.title}...`);
     updateSectionProgress(service.id, 'verification', 'generating');
     
     try {
@@ -959,7 +960,7 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
       // Verify completion and auto-verify if all fields are present
       await verifyServiceCompletion(service);
       
-      console.log(`✅ Completed processing: ${service.title}`);
+      dlog(`✅ Completed processing: ${service.title}`);
       
     } catch (error) {
       console.error(`❌ Error processing ${service.title}:`, error);
@@ -968,10 +969,10 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
   };
 
   const runAIUpdater = async () => {
-    console.log('🚀 runAIUpdater called with selectedServices:', selectedServices);
+    dlog('🚀 runAIUpdater called with selectedServices:', selectedServices);
     
     if (selectedServices.length === 0) {
-      console.log('❌ No services selected');
+      dlog('❌ No services selected');
       toast({
         title: 'No Services Selected',
         description: 'Please select at least one service to update.',
@@ -980,30 +981,30 @@ export const AIServiceUpdater = ({ services, onServiceUpdate }: AIServiceUpdater
       return;
     }
 
-    console.log('✅ Starting AI updater with', selectedServices.length, 'services');
+    dlog('✅ Starting AI updater with', selectedServices.length, 'services');
     setIsRunning(true);
     setActiveTab('progress');
     setHasStuckState(false);
     setErrorCount(0);
     
     let servicesToUpdate = services.filter(s => selectedServices.includes(s.id));
-    console.log('📋 Services to update:', servicesToUpdate.map(s => s.title));
+    dlog('📋 Services to update:', servicesToUpdate.map(s => s.title));
     
     // Filter out already AI-updated services if overwrite is disabled
     if (!overwriteAIUpdated) {
       const originalCount = servicesToUpdate.length;
       const filteredServices = [];
       
-      console.log('🔍 Checking AI update status for', originalCount, 'services...');
+      dlog('🔍 Checking AI update status for', originalCount, 'services...');
       
       for (const service of servicesToUpdate) {
         try {
           const isAIUpdated = await checkIfAIUpdated(service.id);
           if (!isAIUpdated) {
             filteredServices.push(service);
-            console.log(`✅ ${service.title} - will be updated`);
+            dlog(`✅ ${service.title} - will be updated`);
           } else {
-            console.log(`⏭️ ${service.title} - already AI updated, skipping`);
+            dlog(`⏭️ ${service.title} - already AI updated, skipping`);
           }
         } catch (error) {
           console.error(`Error checking AI status for ${service.title}:`, error);
