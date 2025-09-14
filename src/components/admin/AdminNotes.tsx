@@ -1,7 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { saveWithTimeout } from "@/lib/saveWithTimeout";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MessageSquare, Plus, Trash2 } from "lucide-react";
@@ -80,29 +79,41 @@ export const AdminNotes = ({ serviceId, serviceName }: AdminNotesProps) => {
     }
     const note_text = draft.trim();
     if (!note_text) return;
+    
     try {
       const { data: user } = await supabase.auth.getUser();
       const created_by = user?.user?.id ?? null;
 
-      const { data, error } = await saveWithTimeout(async () =>
-        supabase.from("admin_notes").insert({ service_id: serviceId, note_text, created_by }).select("*").single()
-      );
+      const { data, error } = await supabase
+        .from("admin_notes")
+        .insert({ service_id: serviceId, note_text, created_by })
+        .select("*")
+        .single();
+        
       if (error) throw error;
+      
       setNotes(prev => [data as Note, ...prev]);
       setDraft("");
+      toast.success("Note added successfully");
     } catch (e: any) {
+      console.error('[AdminNotes] Failed to add note:', e);
       toast.error(e?.message ?? "Failed to add note");
     }
   }
 
   async function deleteNote(id: string) {
     try {
-      const { error } = await saveWithTimeout(async () =>
-        supabase.from("admin_notes").delete().eq("id", id)
-      );
+      const { error } = await supabase
+        .from("admin_notes")
+        .delete()
+        .eq("id", id);
+        
       if (error) throw error;
+      
       setNotes(prev => prev.filter(n => n.id !== id));
+      toast.success("Note deleted successfully");
     } catch (e: any) {
+      console.error('[AdminNotes] Failed to delete note:', e);
       toast.error(e?.message ?? "Failed to delete note");
     }
   }
