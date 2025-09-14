@@ -900,13 +900,21 @@ export const ServiceManagementPanel = () => {
       }).eq('id' as any, selectedService.id);
       if (updateError) throw updateError;
 
-      // Read back to verify persistence
+      // Read back to verify persistence with detailed logging
       const {
         data: verifyRow,
         error: fetchError
-      } = await supabase.from('services').select('id, funnel_content, pricing_tiers, updated_at').eq('id' as any, selectedService.id as any).maybeSingle();
+      } = await supabase.from('services').select('id, funnel_content, pricing_tiers, updated_at').eq('id' as any, selectedService.id as any).single();
       if (fetchError) throw fetchError;
+      
       const rowData = verifyRow as any;
+      console.log("🔍 Fresh row data from database:", {
+        id: rowData?.id,
+        funnelContentSize: JSON.stringify(rowData?.funnel_content || {}).length,
+        pricingTiersSize: JSON.stringify(rowData?.pricing_tiers || {}).length,
+        updatedAt: rowData?.updated_at
+      });
+      
       const savedAt = rowData?.updated_at || new Date().toISOString();
       const verified = !!rowData && JSON.stringify(rowData.funnel_content ?? null) === JSON.stringify(funnelContent) && JSON.stringify(rowData.pricing_tiers ?? null) === JSON.stringify(pricingTiers);
 
@@ -934,20 +942,49 @@ export const ServiceManagementPanel = () => {
         };
         return updated;
       });
+      // Enhanced success feedback with debugging info
+      const payloadSize = JSON.stringify(funnelContent).length + JSON.stringify(pricingTiers).length;
+      console.log("💾 Save completed:", { verified, payloadSize, serviceName: selectedService.title });
+      
+      if (payloadSize > 50000) {
+        console.warn("⚠️ Large payload detected:", { payloadSize, serviceName: selectedService.title });
+      }
+      
       toast({
         title: 'Success',
-        description: verified ? 'Service funnel saved and verified' : 'Service funnel saved'
+        description: verified 
+          ? `Service funnel saved and verified (${Math.round(payloadSize/1024)}KB)` 
+          : `Service funnel saved (${Math.round(payloadSize/1024)}KB) - verification pending`
       });
-      // Narrow cache invalidation - only invalidate services, not everything
-      invalidateCache.invalidateServices();
+      
+      // Broad cache invalidation to ensure all marketplace data refreshes
+      invalidateCache.invalidateAll();
+      
+      // Warm cache with fresh data after invalidation
+      setTimeout(() => {
+        console.log("🔄 Warming cache after save...");
+        queryClient.prefetchQuery({ queryKey: QUERY_KEYS.services });
+        queryClient.prefetchQuery({ queryKey: QUERY_KEYS.marketplaceCombined });
+      }, 100);
       return {
         savedAt,
         verified
       };
     } catch (error) {
-      console.error('Error saving funnel:', error);
+      console.error('❌ Error saving funnel:', error);
       const err: any = error;
-      const message = err?.message || err?.error_description || 'Failed to save funnel changes';
+      
+      // Enhanced error messaging for common issues
+      let message = err?.message || err?.error_description || 'Failed to save funnel changes';
+      if (message.includes('permission') || message.includes('RLS')) {
+        message = 'Permission denied: Admin access required to save service data';
+      } else if (message.includes('timeout')) {
+        message = 'Save timed out - please try again with smaller changes';
+      } else if (message.includes('JSON')) {
+        message = 'Invalid data format - please check for special characters';
+      }
+      
+      console.error('💥 Save failed with enhanced error:', { originalError: err?.message, enhancedMessage: message });
       const code = err?.code;
       toast({
         title: 'Save failed',
