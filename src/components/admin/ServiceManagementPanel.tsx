@@ -272,8 +272,7 @@ export const ServiceManagementPanel = () => {
           setEditForm(prev => ({ ...prev, ...updatedService }));
         }
         
-        // Clear dirty state
-        setIsDetailsDirty(false);
+        // Clear saving state
         setSaving(false);
         
         // Invalidate cache to ensure consistency
