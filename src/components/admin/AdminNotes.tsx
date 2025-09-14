@@ -23,26 +23,61 @@ export const AdminNotes = ({ serviceId, serviceName }: AdminNotesProps) => {
   const [notes, setNotes] = useState<Note[]>([]);
   const [draft, setDraft] = useState("");
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
+
+    // If no service chosen, don't sit in a loading state forever
+    if (!serviceId) {
+      setNotes([]);
+      setLoading(false);
+      setLoadError(null);
+      return;
+    }
+
     (async () => {
       setLoading(true);
-      const { data, error } = await supabase
-        .from("admin_notes")
-        .select("id, service_id, note_text, created_at, created_by")
-        .eq("service_id", serviceId)
-        .order("created_at", { ascending: false });
-      if (!cancelled) {
-        if (error) toast.error(error.message);
-        setNotes(data ?? []);
-        setLoading(false);
+      setLoadError(null);
+      try {
+        // 15s protection so the UI never spins forever
+        const timeout = new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error("Timed out loading notes")), 15000)
+        );
+        const query = supabase
+          .from("admin_notes")
+          .select("id, service_id, note_text, created_at, created_by")
+          .eq("service_id", serviceId)
+          .order("created_at", { ascending: false });
+
+        const { data, error } = await Promise.race([query, timeout]) as any;
+        if (cancelled) return;
+        if (error) {
+          setLoadError(error.message);
+          toast.error(error.message);
+          setNotes([]);
+        } else {
+          setNotes(data ?? []);
+        }
+      } catch (e: any) {
+        if (!cancelled) {
+          const msg = e?.message || "Failed to load admin notes";
+          setLoadError(msg);
+          toast.error(msg);
+          setNotes([]);
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
       }
     })();
     return () => { cancelled = true; };
   }, [serviceId]);
 
   async function addNote() {
+    if (!serviceId) {
+      toast.error("Select a service first");
+      return;
+    }
     const note_text = draft.trim();
     if (!note_text) return;
     try {
@@ -81,6 +116,11 @@ export const AdminNotes = ({ serviceId, serviceName }: AdminNotesProps) => {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        {loadError && (
+          <div className="text-sm text-destructive">
+            {loadError.includes("permission") ? "You don't have permission to view notes." : loadError}
+          </div>
+        )}
         <div className="flex gap-2">
           <textarea
             className="flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
@@ -91,7 +131,8 @@ export const AdminNotes = ({ serviceId, serviceName }: AdminNotesProps) => {
           />
           <button 
             onClick={addNote} 
-            className="rounded-md bg-primary px-3 py-2 text-primary-foreground text-sm hover:bg-primary/90"
+            disabled={loading || !draft.trim()}
+            className="rounded-md bg-primary px-3 py-2 text-primary-foreground text-sm hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Plus className="w-4 h-4" />
           </button>
