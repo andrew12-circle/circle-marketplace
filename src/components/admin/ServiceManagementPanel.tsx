@@ -255,11 +255,47 @@ export const ServiceManagementPanel = () => {
   const [saving, setSaving] = useState(false);
   const [saveInProgress, setSaveInProgress] = useState(false);
   
-  // Queued service saver to prevent concurrent updates
-  const { save: saveService } = useServiceSaver(async (id: string, patch: any, signal: AbortSignal) => {
-    const { updateServiceResilient } = await import('@/lib/resilientServiceUpdate');
-    await updateServiceResilient(id, patch, signal);
-  });
+  // Bulletproof service saver with success/error callbacks
+  const { save: saveService } = useServiceSaver(
+    async (id: string, patch: any, signal: AbortSignal) => {
+      const { updateServiceResilient } = await import('@/lib/resilientServiceUpdate');
+      return await updateServiceResilient(id, patch, signal);
+    },
+    {
+      onSuccess: async (id: string, updatedService: any) => {
+        console.log('[ServicePanel] Save successful', { id, updatedService });
+        
+        // Update local state with fresh data
+        setServices(prev => prev.map(s => s.id === id ? { ...s, ...updatedService } : s));
+        if (selectedService?.id === id) {
+          setSelectedService(prev => prev ? { ...prev, ...updatedService } : null);
+          setEditForm(prev => ({ ...prev, ...updatedService }));
+        }
+        
+        // Clear dirty state
+        setIsDetailsDirty(false);
+        setSaving(false);
+        
+        // Invalidate cache to ensure consistency
+        await invalidateCache();
+        
+        toast({
+          title: 'Changes saved successfully',
+          description: 'Your service updates have been saved.',
+        });
+      },
+      onError: (id: string, error: any) => {
+        console.error('[ServicePanel] Save failed', { id, error });
+        setSaving(false);
+        
+        toast({
+          title: 'Failed to save changes',
+          description: error?.message || 'An error occurred while saving. Please try again.',
+          variant: 'destructive',
+        });
+      }
+    }
+  );
   
   // Memoize service lookup for performance
   const serviceById = useMemo(() => new Map(services.map(s => [s.id, s])), [services]);
@@ -1641,7 +1677,7 @@ export const ServiceManagementPanel = () => {
                             return;
                           }
                           
-                          // Use the queued save system with diff-only patches
+                          // Generate diff-only patch
                           const patch = diffPatch(selectedService, editForm);
                           console.log('[ServicePanel] Generated patch', {
                             patchKeys: Object.keys(patch),
@@ -1649,24 +1685,30 @@ export const ServiceManagementPanel = () => {
                             patch
                           });
                           
-                          if (Object.keys(patch).length > 0) {
-                            console.log('[ServicePanel] Calling saveService with patch');
-                            saveService(selectedService.id, patch);
-                            setIsEditingDetails(false);
-                            toast({
-                              title: 'Saving changes...',
-                              description: 'Your updates are being saved.'
-                            });
-                          } else {
+                          if (Object.keys(patch).length === 0) {
                             console.log('[ServicePanel] No changes detected - patch is empty');
                             toast({
                               title: 'No changes detected',
                               description: 'No modifications found to save.',
                               variant: 'destructive'
                             });
+                            return;
                           }
+                          
+                          // Start bulletproof save with loading state
+                          setSaving(true);
+                          setIsEditingDetails(false);
+                          console.log('[ServicePanel] Starting bulletproof save');
+                          
+                          toast({
+                            title: 'Saving changes...',
+                            description: 'Your updates are being processed.'
+                          });
+                          
+                          // The actual save and success/error handling is now in useServiceSaver callbacks
+                          saveService(selectedService.id, patch);
                         }}
-                        disabled={!isDetailsDirty || !selectedService}
+                        disabled={!isDetailsDirty || !selectedService || saving}
                       >
                         Save Changes
                       </Button>

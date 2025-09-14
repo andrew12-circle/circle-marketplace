@@ -1,22 +1,29 @@
-type Job = () => Promise<void>;
+type Job<T = any> = () => Promise<T>;
+type JobWithCallbacks<T = any> = {
+  job: Job<T>;
+  onSuccess?: (result: T) => void;
+  onError?: (error: any) => void;
+};
 
 class SaveQueue {
-  private q: Job[] = [];
+  private q: JobWithCallbacks[] = [];
   private running = false;
 
-  enqueue(job: Job) {
-    this.q.push(job);
+  enqueue<T = any>(job: Job<T>, callbacks?: { onSuccess?: (result: T) => void; onError?: (error: any) => void }) {
+    this.q.push({ job, ...callbacks });
     if (!this.running) this.run();
   }
 
   private async run() {
     this.running = true;
     while (this.q.length) {
-      const job = this.q.shift()!;
+      const { job, onSuccess, onError } = this.q.shift()!;
       try { 
-        await job(); 
+        const result = await job();
+        onSuccess?.(result);
       } catch (e) { 
         console.error('Save queue job failed:', e);
+        onError?.(e);
       }
     }
     this.running = false;
