@@ -182,19 +182,15 @@ export const ServiceImageUploader = ({
 
         <div className="space-y-3">
           <div className="space-y-2">
-            <Label htmlFor="service-image-upload" className="cursor-pointer">
-              <Button
-                variant="outline"
-                disabled={uploading}
-                className="w-full"
-                asChild
-              >
-                <span>
-                  <Upload className="w-4 h-4 mr-2" />
-                  {uploading ? "Uploading..." : "Upload service image"}
-                </span>
-              </Button>
-            </Label>
+            <Button
+              variant="outline"
+              disabled={uploading}
+              className="w-full"
+              onClick={() => document.getElementById('service-image-upload')?.click()}
+            >
+              <Upload className="w-4 h-4 mr-2" />
+              {uploading ? "Uploading..." : "Upload service image"}
+            </Button>
             <input
               id="service-image-upload"
               type="file"
