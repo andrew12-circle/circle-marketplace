@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { trackServiceEvent } from '@/lib/events';
 import { ServiceFunnelModal } from '@/components/marketplace/ServiceFunnelModal';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent } from '@/components/ui/card';
@@ -118,13 +119,12 @@ export default function FunnelPage() {
           setService(data);
           setError(null);
           
-          // Track funnel view event
+          // Track funnel view event (fire and forget)
           if (ref) {
             console.log('📊 Tracking funnel view with ref:', ref);
-            // Track the visit for analytics
-            supabase.from('service_tracking_events').insert({
+            trackServiceEvent({
               service_id: serviceId,
-              event_type: 'funnel_view',
+              event_type: 'view', // Use allowed event type
               user_id: null, // Public access
               metadata: {
                 ref,
@@ -133,10 +133,9 @@ export default function FunnelPage() {
                 utm_campaign: utmCampaign,
                 utm_term: utmTerm,
                 utm_content: utmContent,
-                view
+                view,
+                funnel_context: true
               }
-            }).then(({ error }) => {
-              if (error) console.warn('Analytics tracking failed:', error);
             });
           }
         }
