@@ -1613,10 +1613,26 @@ export const ServiceManagementPanel = () => {
                     <div className="flex gap-2">
                       <Button 
                         onClick={() => {
-                          if (!selectedService || !isDetailsDirty) return;
+                          console.log('[ServicePanel] Save button clicked', {
+                            hasSelectedService: !!selectedService,
+                            isDetailsDirty,
+                            selectedServiceId: selectedService?.id
+                          });
+                          
+                          if (!selectedService || !isDetailsDirty) {
+                            console.log('[ServicePanel] Save blocked - no service or not dirty', {
+                              hasService: !!selectedService,
+                              isDirty: isDetailsDirty
+                            });
+                            return;
+                          }
                           
                           // Validate required fields
                           if (!editForm.title || !editForm.category) {
+                            console.log('[ServicePanel] Save blocked - missing required fields', {
+                              title: editForm.title,
+                              category: editForm.category
+                            });
                             toast({
                               title: 'Missing required fields',
                               description: 'Please provide both Title and Category before saving.',
@@ -1627,15 +1643,29 @@ export const ServiceManagementPanel = () => {
                           
                           // Use the queued save system with diff-only patches
                           const patch = diffPatch(selectedService, editForm);
+                          console.log('[ServicePanel] Generated patch', {
+                            patchKeys: Object.keys(patch),
+                            patchSize: Object.keys(patch).length,
+                            patch
+                          });
+                          
                           if (Object.keys(patch).length > 0) {
+                            console.log('[ServicePanel] Calling saveService with patch');
                             saveService(selectedService.id, patch);
                             setIsEditingDetails(false);
                             toast({
                               title: 'Saving changes...',
                               description: 'Your updates are being saved.'
                             });
+                          } else {
+                            console.log('[ServicePanel] No changes detected - patch is empty');
+                            toast({
+                              title: 'No changes detected',
+                              description: 'No modifications found to save.',
+                              variant: 'destructive'
+                            });
                           }
-                        }} 
+                        }}
                         disabled={!isDetailsDirty || !selectedService}
                       >
                         Save Changes
