@@ -515,6 +515,9 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
               retail_price: localPricing.retail_price ?? service.retail_price,
               pro_price: localPricing.pro_price ?? service.pro_price,
               co_pay_price: localPricing.co_pay_price ?? service.co_pay_price,
+              // Ensure price_duration and pricing_mode are always current
+              price_duration: service.price_duration,
+              pricing_mode: localPricing.pricing_mode ?? service.pricing_mode,
             }}
             onPricingChange={handlePricingFieldChange}
             onChange={(data) => {
@@ -539,19 +542,42 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
                   image_url: image_url || service.image_url,
                   logo_url: logo_url || service.logo_url
                 });
+                
+                // Trigger debounced save for service-level changes
+                setTimeout(() => {
+                  const payload = prepareSavePayload();
+                  debouncedSave(service.id, payload, 'service-fields-change');
+                }, 100);
               }
               
               // Update pricing if changed
               if (retail_price !== localPricing.retail_price || pro_price !== localPricing.pro_price || 
                   price_duration !== service.price_duration || pricing_mode !== localPricing.pricing_mode) {
-                handlePricingFieldChange('retail_price', retail_price);
-                handlePricingFieldChange('pro_price', pro_price);
-                handlePricingFieldChange('pricing_mode', pricing_mode);
-                // Update service with price duration
-                onUpdate({
-                  ...service,
-                  price_duration: price_duration
-                });
+                
+                // Handle pricing fields through the pricing change handler
+                if (retail_price !== localPricing.retail_price) {
+                  handlePricingFieldChange('retail_price', retail_price);
+                }
+                if (pro_price !== localPricing.pro_price) {
+                  handlePricingFieldChange('pro_price', pro_price);
+                }
+                if (pricing_mode !== localPricing.pricing_mode) {
+                  handlePricingFieldChange('pricing_mode', pricing_mode);
+                }
+                
+                // Update service with price duration directly and trigger save
+                if (price_duration !== service.price_duration) {
+                  onUpdate({
+                    ...service,
+                    price_duration: price_duration
+                  });
+                  
+                  // Trigger debounced save for price_duration change
+                  setTimeout(() => {
+                    const payload = prepareSavePayload();
+                    debouncedSave(service.id, payload, 'price-duration-change');
+                  }, 100);
+                }
               }
               
               // Update pricing tiers if changed
