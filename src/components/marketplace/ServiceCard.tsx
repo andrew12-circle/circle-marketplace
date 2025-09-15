@@ -718,18 +718,18 @@ export const ServiceCard = ({
                       {/* Show retail price as fallback */}
                       {effectivePricing.retail > 0 && (
                         <div className="text-xl font-bold text-foreground">
-                          <Editable
+                          <EditableText
                             entity="services"
                             id={service.id}
                             field="retail_price"
                             value={service.retail_price}
-                            type="price"
-                            onApply={(updatedService) => {
+                            onSaved={(updatedService) => {
                               console.log('Retail price updated:', updatedService);
                             }}
-                          >
-                            {formatPrice(effectivePricing.retail, service.price_duration || 'mo')}
-                          </Editable>
+                          />
+                          {!service.retail_price && (
+                            <span>{formatPrice(effectivePricing.retail, service.price_duration || 'mo')}</span>
+                          )}
                         </div>
                       )}
                     </div>
@@ -747,18 +747,18 @@ export const ServiceCard = ({
                           <div className="flex items-center justify-center gap-2 text-xl font-bold text-blue-600">
                             <Crown className="w-4 h-4" />
                             <span>
-                              <Editable
+                              <EditableText
                                 entity="services"
                                 id={service.id}
                                 field="pro_price"
                                 value={service.pro_price}
-                                type="price"
-                                onApply={(updatedService) => {
+                                onSaved={(updatedService) => {
                                   console.log('Pro price updated:', updatedService);
                                 }}
-                              >
-                                {formatPrice(effectivePricing.pro, service.price_duration || 'mo')}
-                              </Editable>
+                              />
+                              {!service.pro_price && (
+                                <span>{formatPrice(effectivePricing.pro, service.price_duration || 'mo')}</span>
+                              )}
                             </span>
                           </div>
                           <div className="text-xs text-blue-600 font-medium">Circle Pro Price</div>
@@ -836,11 +836,12 @@ export const ServiceCard = ({
                   ) : effectivePricing.retail > 0 ? (
                     <div className="flex items-center justify-between mt-4">
                       <span className="text-sm text-muted-foreground">{t('serviceCard.listPrice')}</span>
-                       <Editable entity="services" id={service.id} field="retail_price" value={service.retail_price}>
+                       <EditableText entity="services" id={service.id} field="retail_price" value={service.retail_price} />
+                       {!service.retail_price && (
                          <span className="text-xl font-bold text-foreground">
                             {formatPrice(effectivePricing.retail, service.price_duration || 'month')}
                          </span>
-                       </Editable>
+                       )}
                     </div>
                    ) : null}
                     
@@ -855,11 +856,12 @@ export const ServiceCard = ({
                               <span className="text-sm font-medium text-circle-primary">{t('serviceCard.circleProPrice')}</span>
                               <Crown className="w-4 h-4 text-circle-primary" />
                             </div>
-                             <Editable entity="services" id={service.id} field="pro_price" value={service.pro_price}>
+                             <EditableText entity="services" id={service.id} field="pro_price" value={service.pro_price} />
+                             {!service.pro_price && (
                                <span className="text-lg font-bold text-circle-primary">
                                   {formatPrice(effectivePricing.pro, service.price_duration || 'month')}
                                </span>
-                             </Editable>
+                             )}
                           </div>
                         </TooltipTrigger>
                         <TooltipContent className="w-40 sm:w-48 p-3 cursor-pointer" onClick={handleUpgradeClick}>
