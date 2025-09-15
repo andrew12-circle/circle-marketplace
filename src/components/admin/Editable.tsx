@@ -1,196 +1,149 @@
-import React, { useState, ReactNode } from 'react';
+import React, { useState } from 'react';
 import { useEditMode } from '@/contexts/EditModeContext';
-import { Edit3, X, Check, AlertCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { nanoid } from 'nanoid';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
-interface EditableProps {
-  children: ReactNode;
-  entity: 'service' | 'package';
-  entityId: string;
-  field: string;
-  value: any;
-  type?: 'text' | 'textarea' | 'price' | 'select';
-  options?: { value: string; label: string; }[];
-  onSave?: (newValue: any) => void;
+async function patchServiceField(id: string, field: string, value: any) {
+  const { error } = await supabase.from('services').update({ [field]: value }).eq('id', id);
+  if (error) throw error;
+  const { data, error: fetchError } = await supabase.from('services').select('*').eq('id', id).single();
+  if (fetchError) throw fetchError;
+  return data;
 }
 
 export function Editable({
-  children,
-  entity,
-  entityId,
-  field,
-  value,
-  type = 'text',
+  entity = 'services', 
+  id, 
+  field, 
+  value: initial, 
+  children, 
+  type = 'text', 
   options = [],
-  onSave
-}: EditableProps) {
-  const { isEditMode, isAdmin } = useEditMode();
+  onApply
+}: {
+  entity?: 'services' | string; 
+  id: string; 
+  field: string; 
+  value?: any; 
+  type?: 'text' | 'textarea' | 'price' | 'select';
+  options?: { value: string; label: string; }[];
+  children: React.ReactNode; 
+  onApply?: (row: any) => void;
+}) {
+  const { isEditMode } = useEditMode();
   const { toast } = useToast();
-  const [isEditing, setIsEditing] = useState(false);
-  const [editValue, setEditValue] = useState(value || '');
-  const [isSaving, setIsSaving] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [val, setVal] = useState(initial ?? '');
+  const [saving, setSaving] = useState(false);
 
-  // Don't show edit UI if not admin or not in edit mode
-  if (!isAdmin || !isEditMode) {
-    return <>{children}</>;
-  }
-
-  const handleSave = async () => {
-    const traceId = nanoid();
-    setIsSaving(true);
-
-    try {
-      // Call the update function
-      const { data, error } = await supabase
-        .from(`${entity}s`)
-        .update({ [field]: editValue })
-        .eq('id', entityId)
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      // Success
-      toast({
-        title: "Saved",
-        description: `${field} updated successfully (${traceId})`,
-        duration: 2000
-      });
-
-      setIsEditing(false);
-      onSave?.(editValue);
-    } catch (error) {
-      console.error('Save failed:', error);
-      toast({
-        title: "Save Failed",
-        description: error instanceof Error ? error.message : 'Unknown error occurred',
-        variant: "destructive",
-        duration: 5000
-      });
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleCancel = () => {
-    setEditValue(value || '');
-    setIsEditing(false);
-  };
-
-  const renderEditor = () => {
-    switch (type) {
-      case 'textarea':
-        return (
-          <Textarea
-            value={editValue}
-            onChange={(e) => setEditValue(e.target.value)}
-            className="min-h-[120px] resize-none"
-            placeholder={`Enter ${field}...`}
-          />
-        );
-      
-      case 'price':
-        return (
-          <Input
-            type="number"
-            step="0.01"
-            value={editValue}
-            onChange={(e) => setEditValue(parseFloat(e.target.value) || 0)}
-            placeholder={`Enter ${field}...`}
-          />
-        );
-      
-      case 'select':
-        return (
-          <Select value={editValue} onValueChange={setEditValue}>
-            <SelectTrigger>
-              <SelectValue placeholder={`Select ${field}...`} />
-            </SelectTrigger>
-            <SelectContent>
-              {options.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        );
-      
-      default:
-        return (
-          <Input
-            value={editValue}
-            onChange={(e) => setEditValue(e.target.value)}
-            placeholder={`Enter ${field}...`}
-          />
-        );
-    }
-  };
-
-  if (isEditing) {
-    return (
-      <div className="space-y-3 p-3 border border-primary/20 rounded-lg bg-muted/30">
-        <div className="flex items-center gap-2 text-sm font-medium text-primary">
-          <Edit3 className="h-4 w-4" />
-          Editing {field}
-        </div>
-        
-        {renderEditor()}
-        
-        <div className="flex items-center gap-2">
-          <Button
-            size="sm"
-            onClick={handleSave}
-            disabled={isSaving}
-            className="h-8"
-          >
-            {isSaving ? (
-              <>
-                <AlertCircle className="h-3 w-3 mr-1 animate-spin" />
-                Saving...
-              </>
-            ) : (
-              <>
-                <Check className="h-3 w-3 mr-1" />
-                Save
-              </>
-            )}
-          </Button>
-          
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={handleCancel}
-            disabled={isSaving}
-            className="h-8"
-          >
-            <X className="h-3 w-3 mr-1" />
-            Cancel
-          </Button>
-        </div>
-      </div>
-    );
-  }
+  if (!isEditMode) return <>{children}</>;
 
   return (
-    <div className="relative group">
+    <span className="relative group inline-block">
       {children}
-      <button
-        onClick={() => {
-          setEditValue(value || '');
-          setIsEditing(true);
+      <button 
+        type="button" 
+        onClick={(e) => {
+          e.preventDefault(); 
+          e.stopPropagation(); 
+          setOpen(true);
         }}
-        className="absolute -top-1 -right-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-primary text-primary-foreground rounded-full p-1 shadow-md hover:bg-primary/90"
-        aria-label={`Edit ${field}`}
+        className="absolute -top-2 -right-2 hidden group-hover:block rounded-full bg-white border shadow px-2 py-0.5 text-xs hover:bg-gray-50"
       >
-        <Edit3 className="h-3 w-3" />
+        ✎
       </button>
-    </div>
+
+      {open && (
+        <div className="fixed top-0 right-0 w-[420px] h-full bg-white shadow-2xl p-4 z-[9999] border-l">
+          <div className="flex items-center justify-between mb-3">
+            <strong>Edit: {field}</strong>
+            <button 
+              type="button" 
+              onClick={() => setOpen(false)}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              ✕
+            </button>
+          </div>
+          {type === 'textarea' ? (
+            <textarea 
+              className="w-full h-60 border rounded p-2 resize-none" 
+              value={val} 
+              onChange={e => setVal(e.target.value)} 
+              placeholder={`Enter ${field}...`}
+            />
+          ) : type === 'price' ? (
+            <input 
+              type="number"
+              step="0.01"
+              className="w-full border rounded p-2" 
+              value={val} 
+              onChange={e => setVal(parseFloat(e.target.value) || 0)} 
+              placeholder={`Enter ${field}...`}
+            />
+          ) : type === 'select' ? (
+            <select 
+              className="w-full border rounded p-2" 
+              value={val} 
+              onChange={e => setVal(e.target.value)}
+            >
+              <option value="">Select {field}...</option>
+              {options.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <input 
+              className="w-full border rounded p-2" 
+              value={val} 
+              onChange={e => setVal(e.target.value)} 
+              placeholder={`Enter ${field}...`}
+            />
+          )}
+          <div className="mt-3 flex gap-2">
+            <button 
+              type="button" 
+              disabled={saving} 
+              className="bg-blue-600 text-white px-3 py-1 rounded disabled:opacity-50"
+              onClick={async () => {
+                try { 
+                  setSaving(true);
+                  const row = entity === 'services'
+                    ? await patchServiceField(id, field, val)
+                    : null;
+                  onApply?.(row);
+                  setOpen(false);
+                  toast({
+                    title: "Saved",
+                    description: `${field} updated successfully`,
+                    duration: 2000
+                  });
+                } catch (error) {
+                  toast({
+                    title: "Save Failed",
+                    description: error instanceof Error ? error.message : 'Unknown error',
+                    variant: "destructive",
+                    duration: 5000
+                  });
+                } finally { 
+                  setSaving(false); 
+                }
+              }}
+            >
+              {saving ? 'Saving…' : 'Save'}
+            </button>
+            <button 
+              type="button"
+              onClick={() => setOpen(false)}
+              className="border px-3 py-1 rounded"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+    </span>
   );
 }

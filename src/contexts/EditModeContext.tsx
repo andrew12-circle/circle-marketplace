@@ -1,13 +1,11 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { useAdminStatus } from '@/hooks/useAdminStatus';
 
-interface EditModeContextType {
+const EditModeContext = createContext<{
   isEditMode: boolean;
-  setEditMode: (enabled: boolean) => void;
+  setEditMode: (v: boolean) => void;
   isAdmin: boolean;
-}
-
-const EditModeContext = createContext<EditModeContextType>({
+}>({
   isEditMode: false,
   setEditMode: () => {},
   isAdmin: false,
@@ -15,55 +13,40 @@ const EditModeContext = createContext<EditModeContextType>({
 
 export const useEditMode = () => useContext(EditModeContext);
 
-interface EditModeProviderProps {
-  children: ReactNode;
-}
-
-export function EditModeProvider({ children }: EditModeProviderProps) {
-  const { data: isAdmin = false } = useAdminStatus();
+export function EditModeProvider({ children }: { children: React.ReactNode }) {
+  const { data: isAdmin } = useAdminStatus();
   const [isEditMode, setIsEditMode] = useState(false);
 
-  // Check URL for edit mode on mount
   useEffect(() => {
-    if (!isAdmin) return;
-    
-    const url = new URL(window.location.href);
-    if (url.searchParams.get('edit') === '1') {
-      setIsEditMode(true);
-    }
+    const qp = new URL(window.location.href).searchParams.get('edit');
+    setIsEditMode(!!isAdmin && qp === '1');
   }, [isAdmin]);
 
-  // Keyboard shortcut: Ctrl+E to toggle edit mode
   useEffect(() => {
-    if (!isAdmin) return;
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.ctrlKey && e.key.toLowerCase() === 'e') {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.key.toLowerCase() === 'e' && isAdmin) {
         e.preventDefault();
-        console.log('Ctrl+E pressed, current edit mode:', isEditMode);
-        setIsEditMode(prev => !prev);
-        
-        // Update URL
-        const url = new URL(window.location.href);
-        if (!isEditMode) {
-          url.searchParams.set('edit', '1');
-        } else {
-          url.searchParams.delete('edit');
-        }
-        window.history.replaceState({}, '', url.toString());
+        setIsEditMode(v => {
+          const newValue = !v;
+          // Update URL
+          const url = new URL(window.location.href);
+          if (newValue) {
+            url.searchParams.set('edit', '1');
+          } else {
+            url.searchParams.delete('edit');
+          }
+          window.history.replaceState({}, '', url.toString());
+          return newValue;
+        });
       }
     };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isAdmin]);
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isAdmin, isEditMode]);
-
-  const handleSetEditMode = (enabled: boolean) => {
+  const setEditMode = (enabled: boolean) => {
     if (!isAdmin) return;
-    
-    console.log('Setting edit mode:', enabled, 'isAdmin:', isAdmin);
     setIsEditMode(enabled);
-    
     // Update URL
     const url = new URL(window.location.href);
     if (enabled) {
@@ -74,9 +57,11 @@ export function EditModeProvider({ children }: EditModeProviderProps) {
     window.history.replaceState({}, '', url.toString());
   };
 
-  return (
-    <EditModeContext.Provider value={{ isEditMode, setEditMode: handleSetEditMode, isAdmin }}>
-      {children}
-    </EditModeContext.Provider>
-  );
+  const value = useMemo(() => ({ 
+    isEditMode, 
+    setEditMode, 
+    isAdmin: !!isAdmin 
+  }), [isEditMode, isAdmin]);
+
+  return <EditModeContext.Provider value={value}>{children}</EditModeContext.Provider>;
 }

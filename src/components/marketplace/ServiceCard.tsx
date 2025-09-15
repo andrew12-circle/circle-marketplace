@@ -521,7 +521,7 @@ export const ServiceCard = ({
               </div>
             )}
             <div className="flex-1 min-w-0">
-              <Editable entity="services" entityId={service.id} field="title" value={service.title}>
+              <Editable entity="services" id={service.id} field="title" value={service.title}>
                 <h3 className="font-semibold text-foreground leading-tight text-base line-clamp-2 mb-1">
                   {getLocalizedTitle().split(' - ').pop() || getLocalizedTitle().split(': ').pop() || getLocalizedTitle()}
                 </h3>
@@ -598,9 +598,19 @@ export const ServiceCard = ({
 
           {/* Description with dynamic height for expansion */}
           <div className={`px-4 py-3 flex flex-col transition-all duration-300 ${isDescriptionExpanded ? '' : 'h-[5.5rem]'}`}>
-            <p className={`text-sm text-muted-foreground leading-tight whitespace-pre-line transition-all duration-300 ${isDescriptionExpanded ? 'overflow-visible' : 'line-clamp-2 overflow-hidden'}`}>
-              {getLocalizedDescription()}
-            </p>
+            <Editable
+              id={service.id}
+              field="description"
+              value={service.description}
+              type="textarea"
+              onApply={(row) => {
+                console.log('Description updated:', row);
+              }}
+            >
+              <p className={`text-sm text-muted-foreground leading-tight whitespace-pre-line transition-all duration-300 ${isDescriptionExpanded ? 'overflow-visible' : 'line-clamp-2 overflow-hidden'}`}>
+                {getLocalizedDescription()}
+              </p>
+            </Editable>
             {getLocalizedDescription() && getLocalizedDescription().length > 100 && (
               <button
                 className="text-sm text-primary hover:text-primary/80 font-medium mt-2 transition-colors self-start"
@@ -794,7 +804,7 @@ export const ServiceCard = ({
                   ) : effectivePricing.retail > 0 ? (
                     <div className="flex items-center justify-between mt-4">
                       <span className="text-sm text-muted-foreground">{t('serviceCard.listPrice')}</span>
-                       <Editable entity="services" entityId={service.id} field="retail_price" value={service.retail_price}>
+                       <Editable entity="services" id={service.id} field="retail_price" value={service.retail_price}>
                          <span className="text-xl font-bold text-foreground">
                             {formatPrice(effectivePricing.retail, service.price_duration || 'month')}
                          </span>
@@ -813,7 +823,7 @@ export const ServiceCard = ({
                               <span className="text-sm font-medium text-circle-primary">{t('serviceCard.circleProPrice')}</span>
                               <Crown className="w-4 h-4 text-circle-primary" />
                             </div>
-                             <Editable entity="services" entityId={service.id} field="pro_price" value={service.pro_price}>
+                             <Editable entity="services" id={service.id} field="pro_price" value={service.pro_price}>
                                <span className="text-lg font-bold text-circle-primary">
                                   {formatPrice(effectivePricing.pro, service.price_duration || 'month')}
                                </span>

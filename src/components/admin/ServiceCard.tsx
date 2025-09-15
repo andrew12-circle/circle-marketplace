@@ -59,14 +59,13 @@ const ServiceCard = React.memo<ServiceCardProps>(({
                 #{service.sort_order ?? '-'}
               </Badge>
               <Editable
-                entity="service"
-                entityId={service.id}
+                entity="services"
+                id={service.id}
                 field="title"
                 value={service.title}
                 type="text"
-                onSave={(newValue) => {
-                  // Update local state if needed
-                  console.log('Title updated:', newValue);
+                onApply={(updatedRow) => {
+                  console.log('Title updated:', updatedRow);
                 }}
               >
                 <h3 className="font-semibold truncate">{service.title}</h3>
@@ -102,8 +101,8 @@ const ServiceCard = React.memo<ServiceCardProps>(({
             
             <div className="space-y-2">
               <Editable
-                entity="service"
-                entityId={service.id}
+                entity="services"
+                id={service.id}
                 field="category"
                 value={service.category}
                 type="select"
@@ -130,8 +129,8 @@ const ServiceCard = React.memo<ServiceCardProps>(({
                   { value: 'Client Retention', label: 'Client Retention' },
                   { value: 'Transaction Coordinator', label: 'Transaction Coordinator' }
                 ]}
-                onSave={(newValue) => {
-                  console.log('Category updated:', newValue);
+                onApply={(updatedRow) => {
+                  console.log('Category updated:', updatedRow);
                 }}
               >
                 <Badge variant="outline" className="text-xs">
@@ -142,13 +141,13 @@ const ServiceCard = React.memo<ServiceCardProps>(({
               {service.retail_price && (
                 <div className="flex gap-2 text-xs">
                   <Editable
-                    entity="service"
-                    entityId={service.id}
+                    entity="services"
+                    id={service.id}
                     field="retail_price"
                     value={service.retail_price}
                     type="price"
-                    onSave={(newValue) => {
-                      console.log('Retail price updated:', newValue);
+                    onApply={(updatedRow) => {
+                      console.log('Retail price updated:', updatedRow);
                     }}
                   >
                     <span className="text-muted-foreground">
@@ -158,13 +157,13 @@ const ServiceCard = React.memo<ServiceCardProps>(({
                   
                   {service.pro_price && (
                     <Editable
-                      entity="service"
-                      entityId={service.id}
+                      entity="services"
+                      id={service.id}
                       field="pro_price"
                       value={service.pro_price}
                       type="price"
-                      onSave={(newValue) => {
-                        console.log('Pro price updated:', newValue);
+                      onApply={(updatedRow) => {
+                        console.log('Pro price updated:', updatedRow);
                       }}
                     >
                       <span className="text-primary font-medium">
