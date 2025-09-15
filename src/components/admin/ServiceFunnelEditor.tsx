@@ -381,26 +381,28 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
       clearDraft(); // Clear localStorage draft on successful explicit save
       
       // Only run heavy operations on explicit save
-      setTimeout(async () => {
-        try {
-          // Add cache busting to ensure fresh data
-          const cacheBuster = Date.now();
-          await fetch(
-            `${window.location.origin}/functions/v1/warm-marketplace-cache?v=${cacheBuster}`,
-            { 
-              method: 'POST', 
-              headers: { 
-                'cache-control': 'no-store',
-                'pragma': 'no-cache'
-              } 
-            }
-          );
-          console.log("[Admin ServiceFunnelEditor] Cache warmed with cache busting");
-        } catch (e) {
-          console.warn('[Admin ServiceFunnelEditor] Cache warm failed', e);
-        }
-        // Full invalidation after explicit save
-        invalidateServices();
+      setTimeout(() => {
+        (async () => {
+          try {
+            // Add cache busting to ensure fresh data
+            const cacheBuster = Date.now();
+            await fetch(
+              `${window.location.origin}/functions/v1/warm-marketplace-cache?v=${cacheBuster}`,
+              { 
+                method: 'POST', 
+                headers: { 
+                  'cache-control': 'no-store',
+                  'pragma': 'no-cache'
+                } 
+              }
+            );
+            console.log("[Admin ServiceFunnelEditor] Cache warmed with cache busting");
+          } catch (e) {
+            console.warn('[Admin ServiceFunnelEditor] Cache warm failed', e);
+          }
+          // Full invalidation after explicit save
+          invalidateServices();
+        })();
       }, 100);
     } catch (error: any) {
       // Error handling is managed by useResilientSave
