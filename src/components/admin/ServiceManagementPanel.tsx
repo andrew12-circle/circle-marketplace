@@ -1381,78 +1381,134 @@ export const ServiceManagementPanel = () => {
                       label
                     }) => <div key={tag} className="flex items-center space-x-2">
                               <Switch checked={(editForm.tags || []).includes(tag)} onCheckedChange={checked => {
-                        const currentTags = editForm.tags || [];
-                        if (checked) {
-                          setEditForm({
-                            ...editForm,
-                            tags: [...currentTags, tag]
-                          });
-                        } else {
-                          setEditForm({
-                            ...editForm,
-                            tags: currentTags.filter(t => t !== tag)
-                          });
-                        }
-                      }} />
+                                const currentTags = editForm.tags || [];
+                                let newTags;
+                                if (checked) {
+                                  newTags = [...currentTags, tag];
+                                  setEditForm({
+                                    ...editForm,
+                                    tags: newTags
+                                  });
+                                } else {
+                                  newTags = currentTags.filter(t => t !== tag);
+                                  setEditForm({
+                                    ...editForm,
+                                    tags: newTags
+                                  });
+                                }
+                                
+                                // Trigger debounced save for category tag change
+                                if (selectedService?.id) {
+                                  debouncedSave(selectedService.id, { tags: newTags }, 'category-tag-change');
+                                }
+                              }} />
                               <label className="text-xs font-medium">{label}</label>
                             </div>)}
                         </div>
                          <div className="mt-2">
                            <label className="text-sm font-medium">Additional Search Keywords</label>
                            <p className="text-xs text-muted-foreground">Extra searchable terms beyond the standard categories (comma-separated)</p>
-                           <Input value={(editForm.tags || []).filter(tag => !tag.startsWith('cat:')).join(', ')} onChange={e => {
-                      const categoryTags = (editForm.tags || []).filter(tag => tag.startsWith('cat:'));
-                      const additionalTags = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
-                      setEditForm({
-                        ...editForm,
-                        tags: [...categoryTags, ...additionalTags]
-                      });
-                    }} placeholder="automation, luxury, enterprise, local" />
+                            <Input value={(editForm.tags || []).filter(tag => !tag.startsWith('cat:')).join(', ')} onChange={e => {
+                              const categoryTags = (editForm.tags || []).filter(tag => tag.startsWith('cat:'));
+                              const additionalTags = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
+                              const newTags = [...categoryTags, ...additionalTags];
+                              setEditForm({
+                                ...editForm,
+                                tags: newTags
+                              });
+                              
+                              // Trigger debounced save for tags change
+                              if (selectedService?.id) {
+                                debouncedSave(selectedService.id, { tags: newTags }, 'tags-change');
+                              }
+                            }} placeholder="automation, luxury, enterprise, local" />
                          </div>
                       </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
                      <div className="flex items-center space-x-2">
-                       <Switch checked={editForm.is_verified || false} onCheckedChange={checked => setEditForm({
-                    ...editForm,
-                    is_verified: checked
-                  })} />
+                        <Switch checked={editForm.is_verified || false} onCheckedChange={checked => {
+                          setEditForm({
+                            ...editForm,
+                            is_verified: checked
+                          });
+                          
+                          // Trigger debounced save for verified status change
+                          if (selectedService?.id) {
+                            debouncedSave(selectedService.id, { is_verified: checked }, 'verified-change');
+                          }
+                        }} />
                        <label className="text-sm font-medium">Verified</label>
                      </div>
                      <div className="flex items-center space-x-2">
-                       <Switch checked={editForm.is_featured || false} onCheckedChange={checked => setEditForm({
-                    ...editForm,
-                    is_featured: checked
-                  })} />
+                        <Switch checked={editForm.is_featured || false} onCheckedChange={checked => {
+                          setEditForm({
+                            ...editForm,
+                            is_featured: checked
+                          });
+                          
+                          // Trigger debounced save for featured status change
+                          if (selectedService?.id) {
+                            debouncedSave(selectedService.id, { is_featured: checked }, 'featured-change');
+                          }
+                        }} />
                        <label className="text-sm font-medium">Featured</label>
                      </div>
                      <div className="flex items-center space-x-2">
-                       <Switch checked={editForm.is_top_pick || false} onCheckedChange={checked => setEditForm({
-                    ...editForm,
-                    is_top_pick: checked
-                  })} />
+                        <Switch checked={editForm.is_top_pick || false} onCheckedChange={checked => {
+                          setEditForm({
+                            ...editForm,
+                            is_top_pick: checked
+                          });
+                          
+                          // Trigger debounced save for top pick status change
+                          if (selectedService?.id) {
+                            debouncedSave(selectedService.id, { is_top_pick: checked }, 'top-pick-change');
+                          }
+                        }} />
                        <label className="text-sm font-medium">Top Pick</label>
                      </div>
                      <div className="flex items-center space-x-2">
-                       <Switch checked={editForm.requires_quote || false} onCheckedChange={checked => setEditForm({
-                    ...editForm,
-                    requires_quote: checked
-                  })} />
+                        <Switch checked={editForm.requires_quote || false} onCheckedChange={checked => {
+                          setEditForm({
+                            ...editForm,
+                            requires_quote: checked
+                          });
+                          
+                          // Trigger debounced save for requires quote change
+                          if (selectedService?.id) {
+                            debouncedSave(selectedService.id, { requires_quote: checked }, 'requires-quote-change');
+                          }
+                        }} />
                        <label className="text-sm font-medium">Requires Quote</label>
                      </div>
                      <div className="flex items-center space-x-2">
-                       <Switch checked={editForm.copay_allowed || false} onCheckedChange={checked => setEditForm({
-                    ...editForm,
-                    copay_allowed: checked
-                  })} />
+                        <Switch checked={editForm.copay_allowed || false} onCheckedChange={checked => {
+                          setEditForm({
+                            ...editForm,
+                            copay_allowed: checked
+                          });
+                          
+                          // Trigger debounced save for copay allowed change
+                          if (selectedService?.id) {
+                            debouncedSave(selectedService.id, { copay_allowed: checked }, 'copay-allowed-change');
+                          }
+                        }} />
                        <label className="text-sm font-medium">Co-Pay Allowed</label>
                      </div>
                      <div className="flex items-center space-x-2">
-                       <Switch checked={editForm.direct_purchase_enabled || false} onCheckedChange={checked => setEditForm({
-                    ...editForm,
-                    direct_purchase_enabled: checked
-                  })} />
+                        <Switch checked={editForm.direct_purchase_enabled || false} onCheckedChange={checked => {
+                          setEditForm({
+                            ...editForm,
+                            direct_purchase_enabled: checked
+                          });
+                          
+                          // Trigger debounced save for direct purchase change
+                          if (selectedService?.id) {
+                            debouncedSave(selectedService.id, { direct_purchase_enabled: checked }, 'direct-purchase-change');
+                          }
+                        }} />
                        <div className="flex items-center gap-1">
                          <ShoppingCart className="h-3 w-3 text-green-600" />
                          <label className="text-sm font-medium">Direct Purchase</label>
@@ -1482,15 +1538,20 @@ export const ServiceManagementPanel = () => {
                         <div className="space-y-2">
                           <label className="text-sm font-medium">Max SSP Percentage (0–100)</label>
                           <div className="relative">
-                            <Input type="number" min="0" max="100" step="1" className="pr-10" disabled={editForm.ssp_allowed === false} value={editForm.ssp_allowed === false ? 0 : editForm.max_split_percentage_ssp || ''} onChange={e => {
-                        const value = Number(e.target.value);
-                        if (value >= 0 && value <= 100) {
-                          setEditForm({
-                            ...editForm,
-                            max_split_percentage_ssp: value
-                          });
-                        }
-                      }} placeholder="Enter percentage" />
+                             <Input type="number" min="0" max="100" step="1" className="pr-10" disabled={editForm.ssp_allowed === false} value={editForm.ssp_allowed === false ? 0 : editForm.max_split_percentage_ssp || ''} onChange={e => {
+                              const value = Number(e.target.value);
+                              if (value >= 0 && value <= 100) {
+                                setEditForm({
+                                  ...editForm,
+                                  max_split_percentage_ssp: value
+                                });
+                                
+                                // Trigger debounced save for max SSP percentage change
+                                if (selectedService?.id) {
+                                  debouncedSave(selectedService.id, { max_split_percentage_ssp: value }, 'max-ssp-percentage-change');
+                                }
+                              }
+                            }} placeholder="Enter percentage" />
                             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">%</span>
                           </div>
                           {editForm.max_split_percentage_ssp && (editForm.max_split_percentage_ssp < 0 || editForm.max_split_percentage_ssp > 100) && <p className="text-red-500 text-xs">Percentage must be between 0 and 100</p>}
@@ -1503,15 +1564,20 @@ export const ServiceManagementPanel = () => {
                         <div className="space-y-2">
                           <label className="text-sm font-medium">Max Non-SSP Percentage (0–100)</label>
                           <div className="relative">
-                            <Input type="number" min="0" max="100" step="1" className="pr-10" value={editForm.max_split_percentage_non_ssp || ''} onChange={e => {
-                        const value = Number(e.target.value);
-                        if (value >= 0 && value <= 100) {
-                          setEditForm({
-                            ...editForm,
-                            max_split_percentage_non_ssp: value
-                          });
-                        }
-                      }} placeholder="Enter percentage" />
+                             <Input type="number" min="0" max="100" step="1" className="pr-10" value={editForm.max_split_percentage_non_ssp || ''} onChange={e => {
+                              const value = Number(e.target.value);
+                              if (value >= 0 && value <= 100) {
+                                setEditForm({
+                                  ...editForm,
+                                  max_split_percentage_non_ssp: value
+                                });
+                                
+                                // Trigger debounced save for max non-SSP percentage change
+                                if (selectedService?.id) {
+                                  debouncedSave(selectedService.id, { max_split_percentage_non_ssp: value }, 'max-non-ssp-percentage-change');
+                                }
+                              }
+                            }} placeholder="Enter percentage" />
                             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">%</span>
                           </div>
                           {editForm.max_split_percentage_non_ssp && (editForm.max_split_percentage_non_ssp < 0 || editForm.max_split_percentage_non_ssp > 100) && <p className="text-red-500 text-xs">Percentage must be between 0 and 100</p>}
