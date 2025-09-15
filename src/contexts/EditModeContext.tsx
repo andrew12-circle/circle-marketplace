@@ -19,7 +19,9 @@ export function EditModeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const qp = new URL(window.location.href).searchParams.get('edit');
-    setIsEditMode(!!isAdmin && qp === '1');
+    const newEditMode = !!isAdmin && qp === '1';
+    console.log('🔧 EditMode: URL parameter check', { isAdmin, editParam: qp, newEditMode });
+    setIsEditMode(newEditMode);
   }, [isAdmin]);
 
   useEffect(() => {
@@ -28,6 +30,7 @@ export function EditModeProvider({ children }: { children: React.ReactNode }) {
         e.preventDefault();
         setIsEditMode(v => {
           const newValue = !v;
+          console.log('🔧 EditMode: Ctrl+E toggle', { oldValue: v, newValue });
           // Update URL
           const url = new URL(window.location.href);
           if (newValue) {
@@ -45,7 +48,11 @@ export function EditModeProvider({ children }: { children: React.ReactNode }) {
   }, [isAdmin]);
 
   const setEditMode = (enabled: boolean) => {
-    if (!isAdmin) return;
+    if (!isAdmin) {
+      console.log('🔧 EditMode: Blocked - not admin', { isAdmin });
+      return;
+    }
+    console.log('🔧 EditMode: Manual toggle', { enabled, isAdmin });
     setIsEditMode(enabled);
     // Update URL
     const url = new URL(window.location.href);
@@ -63,5 +70,16 @@ export function EditModeProvider({ children }: { children: React.ReactNode }) {
     isAdmin: !!isAdmin 
   }), [isEditMode, isAdmin]);
 
-  return <EditModeContext.Provider value={value}>{children}</EditModeContext.Provider>;
+  return (
+    <EditModeContext.Provider value={value}>
+      {isEditMode && (
+        <div className="fixed top-0 left-0 right-0 bg-orange-500 text-white px-4 py-2 text-center text-sm font-medium z-50 shadow-lg">
+          🔧 Edit Mode Active - Click pencil icons to edit content | Press Ctrl+E to toggle
+        </div>
+      )}
+      <div className={isEditMode ? "pt-10" : ""}>
+        {children}
+      </div>
+    </EditModeContext.Provider>
+  );
 }

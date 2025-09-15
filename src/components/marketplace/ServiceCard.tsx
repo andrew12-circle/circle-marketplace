@@ -521,7 +521,16 @@ export const ServiceCard = ({
               </div>
             )}
             <div className="flex-1 min-w-0">
-              <Editable entity="services" id={service.id} field="title" value={service.title}>
+              <Editable 
+                entity="services" 
+                id={service.id} 
+                field="title" 
+                value={service.title}
+                type="text"
+                onApply={(updatedService) => {
+                  console.log('Service title updated:', updatedService);
+                }}
+              >
                 <h3 className="font-semibold text-foreground leading-tight text-base line-clamp-2 mb-1">
                   {getLocalizedTitle().split(' - ').pop() || getLocalizedTitle().split(': ').pop() || getLocalizedTitle()}
                 </h3>
@@ -599,12 +608,13 @@ export const ServiceCard = ({
           {/* Description with dynamic height for expansion */}
           <div className={`px-4 py-3 flex flex-col transition-all duration-300 ${isDescriptionExpanded ? '' : 'h-[5.5rem]'}`}>
             <Editable
+              entity="services"
               id={service.id}
               field="description"
               value={service.description}
               type="textarea"
-              onApply={(row) => {
-                console.log('Description updated:', row);
+              onApply={(updatedService) => {
+                console.log('Service description updated:', updatedService);
               }}
             >
               <p className={`text-sm text-muted-foreground leading-tight whitespace-pre-line transition-all duration-300 ${isDescriptionExpanded ? 'overflow-visible' : 'line-clamp-2 overflow-hidden'}`}>
@@ -710,7 +720,18 @@ export const ServiceCard = ({
                       {/* Show retail price as fallback */}
                       {effectivePricing.retail > 0 && (
                         <div className="text-xl font-bold text-foreground">
-                          {formatPrice(effectivePricing.retail, service.price_duration || 'mo')}
+                          <Editable
+                            entity="services"
+                            id={service.id}
+                            field="retail_price"
+                            value={service.retail_price}
+                            type="price"
+                            onApply={(updatedService) => {
+                              console.log('Retail price updated:', updatedService);
+                            }}
+                          >
+                            {formatPrice(effectivePricing.retail, service.price_duration || 'mo')}
+                          </Editable>
                         </div>
                       )}
                     </div>
@@ -727,7 +748,20 @@ export const ServiceCard = ({
                           )}
                           <div className="flex items-center justify-center gap-2 text-xl font-bold text-blue-600">
                             <Crown className="w-4 h-4" />
-                            <span>{formatPrice(effectivePricing.pro, service.price_duration || 'mo')}</span>
+                            <span>
+                              <Editable
+                                entity="services"
+                                id={service.id}
+                                field="pro_price"
+                                value={service.pro_price}
+                                type="price"
+                                onApply={(updatedService) => {
+                                  console.log('Pro price updated:', updatedService);
+                                }}
+                              >
+                                {formatPrice(effectivePricing.pro, service.price_duration || 'mo')}
+                              </Editable>
+                            </span>
                           </div>
                           <div className="text-xs text-blue-600 font-medium">Circle Pro Price</div>
                         </>
