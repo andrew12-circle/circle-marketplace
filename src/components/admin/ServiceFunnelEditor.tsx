@@ -96,12 +96,24 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
     debounceMs: 3000,
     autoSave: true,
     onSaveSuccess: (serviceId, result) => {
-      setLastSavedAt(new Date().toISOString());
+      console.log('[ServiceFunnelEditor] Save successful:', result);
       setHasChanges(false);
+      setLastSavedAt(new Date().toISOString());
+      toast({
+        title: "Saved Successfully", 
+        description: "All changes have been saved",
+        duration: 2000
+      });
       onUpdate(service); // Trigger parent update
     },
     onSaveError: (serviceId, error) => {
       console.error('[ServiceFunnelEditor] Save failed:', error);
+      toast({
+        title: "Save Failed",
+        description: "Please try again",
+        variant: "destructive",
+        duration: 3000
+      });
     }
   });
   
@@ -473,9 +485,11 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
                 onClick={handleSave} 
                 disabled={!hasChanges || isSaving}
                 size="sm"
+                variant={lastSavedAt && !hasChanges ? "outline" : "default"}
               >
                 <Save className="w-4 h-4 mr-2" />
-                {isSaving ? 'Saving...' : 'Save Changes'}
+                {isSaving ? 'Saving...' : 
+                 lastSavedAt && !hasChanges ? 'Saved' : 'Save Changes'}
               </Button>
             </div>
           </div>
