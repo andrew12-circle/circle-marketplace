@@ -350,6 +350,14 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
       const payload = prepareSavePayload();
       await saveImmediately(service.id, payload);
       setHasChanges(false);
+      setLastSavedAt(new Date().toISOString());
+      
+      // Show explicit save confirmation
+      toast({
+        title: "Saved Successfully",
+        description: "All changes have been saved",
+        duration: 2000
+      });
       
       // Only run heavy operations on explicit save
       setTimeout(() => {
@@ -376,7 +384,13 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
         })();
       }, 100);
     } catch (error: any) {
-      // Error handling is managed by unified save system
+      // Show explicit save error
+      toast({
+        title: "Save Failed",
+        description: "Please try again",
+        variant: "destructive",
+        duration: 3000
+      });
       console.error('[Admin ServiceFunnelEditor] Save operation failed:', error);
     }
   };
