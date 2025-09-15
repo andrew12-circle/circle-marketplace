@@ -42,6 +42,11 @@ interface Service {
   title: string;
   description: string;
   image_url?: string;
+  logo_url?: string;
+  website_url?: string;
+  time_to_results?: string;
+  setup_time?: string;
+  price_duration?: string;
   funnel_content?: any;
   pricing_tiers?: any[];
   pricing_mode?: string;
@@ -321,6 +326,16 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
     const { data: updatedService, error } = await supabase
       .from('services')
       .update({
+        // Service-level fields that can be edited in funnel
+        title: service.title,
+        description: service.description,
+        website_url: service.website_url,
+        time_to_results: service.time_to_results,
+        setup_time: service.setup_time,
+        image_url: service.image_url,
+        logo_url: service.logo_url,
+        price_duration: service.price_duration,
+        // Funnel content
         funnel_content: sanitizedFunnel,
         pricing_tiers: updatedPackages,
         // Use normalized pricing values to prevent NaN database errors
@@ -370,7 +385,7 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
     queryClient.invalidateQueries({ queryKey: QUERY_KEYS.serviceById(service.id) });
     
     return true;
-  }, [service.id, localPricing, onUpdate, invalidateServices]);
+  }, [service, localPricing, onUpdate, invalidateServices, selectedDefaultPackageId]);
 
   const handleSave = async () => {
     if (isSaving) return;
@@ -537,9 +552,52 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
 
         <TabsContent value="content" className="space-y-4">
           <FunnelSectionEditor
-            data={funnelData}
+            data={{
+              ...service,
+              ...funnelData
+            }}
             onChange={(data) => {
-              setFunnelData(data);
+              // Extract funnel-specific fields
+              const { id, title, description, website_url, time_to_results, setup_time, image_url, logo_url, retail_price, pro_price, price_duration, pricing_tiers, pricing_mode, ...funnelContent } = data;
+              
+              // Update funnel content
+              setFunnelData(funnelContent);
+              
+              // Update service-level fields if they changed
+              if (title !== service.title || description !== service.description || website_url !== service.website_url || 
+                  time_to_results !== service.time_to_results || setup_time !== service.setup_time ||
+                  image_url !== service.image_url || logo_url !== service.logo_url) {
+                // Update the service directly via parent
+                onUpdate({
+                  ...service,
+                  title: title || service.title,
+                  description: description || service.description,
+                  website_url: website_url || service.website_url,
+                  time_to_results: time_to_results || service.time_to_results,
+                  setup_time: setup_time || service.setup_time,
+                  image_url: image_url || service.image_url,
+                  logo_url: logo_url || service.logo_url
+                });
+              }
+              
+              // Update pricing if changed
+              if (retail_price !== localPricing.retail_price || pro_price !== localPricing.pro_price || 
+                  price_duration !== service.price_duration || pricing_mode !== localPricing.pricing_mode) {
+                handlePricingFieldChange('retail_price', retail_price);
+                handlePricingFieldChange('pro_price', pro_price);
+                handlePricingFieldChange('pricing_mode', pricing_mode);
+                // Update service with price duration
+                onUpdate({
+                  ...service,
+                  price_duration: price_duration
+                });
+              }
+              
+              // Update pricing tiers if changed
+              if (pricing_tiers !== pricingTiers) {
+                setPricingTiers(pricing_tiers || []);
+              }
+              
               setHasChanges(true);
             }}
           />

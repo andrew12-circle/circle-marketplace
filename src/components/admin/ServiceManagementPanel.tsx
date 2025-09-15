@@ -1161,7 +1161,7 @@ export const ServiceManagementPanel = () => {
           <CardContent>
             <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
               <TabsList className="grid w-full grid-cols-6">
-                <TabsTrigger value="details">Service Details</TabsTrigger>
+                <TabsTrigger value="details">Marketplace Settings</TabsTrigger>
                 <TabsTrigger value="disclaimer">Disclaimer</TabsTrigger>
                 <TabsTrigger value="ai-research">AI Research</TabsTrigger>
                 <TabsTrigger value="compliance">Compliance</TabsTrigger>
@@ -1183,41 +1183,6 @@ export const ServiceManagementPanel = () => {
 
               <TabsContent value="details" className="space-y-4">
                 {isEditingDetails ? <div className="space-y-4">
-                    {/* Service Images Section */}
-                    <div className="space-y-4 p-4 border rounded-lg bg-blue-50/50">
-                      <h4 className="font-medium text-blue-900">Service Images</h4>
-                      
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium text-blue-900">Profile Image</label>
-                        <p className="text-xs text-muted-foreground">Small circular image shown on service cards (like a user profile photo)</p>
-                        <ServiceImageUploader serviceId={selectedService.id} serviceName={selectedService.title} currentImageUrl={selectedService.profile_image_url} onImageUpdated={newImageUrl => {
-                    setEditForm({
-                      ...editForm,
-                      profile_image_url: newImageUrl
-                    });
-                    setSelectedService({
-                      ...selectedService,
-                      profile_image_url: newImageUrl
-                    });
-                  }} />
-                      </div>
-
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium text-blue-900">Main Service Image</label>
-                        <p className="text-xs text-muted-foreground">Large banner image used in funnel pages and detailed views</p>
-                        <ServiceImageUploader serviceId={selectedService.id} serviceName={`${selectedService.title}-banner`} currentImageUrl={selectedService.image_url} onImageUpdated={newImageUrl => {
-                    setEditForm({
-                      ...editForm,
-                      image_url: newImageUrl
-                    });
-                    setSelectedService({
-                      ...selectedService,
-                      image_url: newImageUrl
-                    });
-                  }} />
-                      </div>
-                    </div>
-
                     {/* Current Performance Metrics (Read-only) */}
                     <div className="space-y-4 p-4 border rounded-lg bg-gray-50/50">
                       <h4 className="font-medium text-gray-900">Current Performance</h4>
@@ -1244,7 +1209,7 @@ export const ServiceManagementPanel = () => {
                         </div>
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        Ratings and reviews are managed automatically. Sort order and verification status can be changed in other tabs.
+                        Ratings and reviews are managed automatically. Sort order and verification status can be changed below.
                       </p>
                     </div>
                     
