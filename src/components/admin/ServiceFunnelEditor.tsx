@@ -510,7 +510,11 @@ export const ServiceFunnelEditor = ({ service, onUpdate }: ServiceFunnelEditorPr
           <FunnelSectionEditor
             data={{
               ...service,
-              ...funnelData
+              ...funnelData,
+              // Use local pricing state for accurate display
+              retail_price: localPricing.retail_price ?? service.retail_price,
+              pro_price: localPricing.pro_price ?? service.pro_price,
+              co_pay_price: localPricing.co_pay_price ?? service.co_pay_price,
             }}
             onPricingChange={handlePricingFieldChange}
             onChange={(data) => {
