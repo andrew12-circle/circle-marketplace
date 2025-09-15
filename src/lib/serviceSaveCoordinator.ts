@@ -14,15 +14,26 @@ class ServiceSaveCoordinator {
   private activeSaves = new Map<string, Promise<any>>();
   private saveQueue = new Map<string, SaveOperation[]>();
   private lastSaveTime = new Map<string, number>();
+  private saveTimeouts = new Map<string, NodeJS.Timeout>();
   
   // Minimum time between saves (ms)
   private readonly SAVE_DEBOUNCE = 1000;
+  // Maximum time to wait for a save (ms)
+  private readonly SAVE_TIMEOUT = 10000;
   
   async save(serviceId: string, patch: Record<string, any>, source = 'unknown'): Promise<any> {
     logger.log(`🔒 ServiceSaveCoordinator: Save requested`, { serviceId, source, patchKeys: Object.keys(patch) });
     
+    // Clear any existing timeout for this service
+    const existingTimeout = this.saveTimeouts.get(serviceId);
+    if (existingTimeout) {
+      clearTimeout(existingTimeout);
+      this.saveTimeouts.delete(serviceId);
+    }
+    
     // If there's already an active save for this service, queue this one
     if (this.activeSaves.has(serviceId)) {
+      logger.log(`🔄 ServiceSaveCoordinator: Queuing save (active save in progress)`, { serviceId });
       return this.queueSave(serviceId, patch, source);
     }
     
@@ -67,12 +78,31 @@ class ServiceSaveCoordinator {
   }
   
   private async executeSave(serviceId: string, patch: Record<string, any>, source: string): Promise<any> {
+    logger.log(`🚀 ServiceSaveCoordinator: Starting save execution`, { serviceId, source });
+    
     const savePromise = this.performSave(serviceId, patch, source);
     this.activeSaves.set(serviceId, savePromise);
+    
+    // Set up timeout to prevent stuck saves
+    const timeout = setTimeout(() => {
+      logger.error(`⏰ ServiceSaveCoordinator: Save timeout, clearing active save`, { serviceId });
+      this.activeSaves.delete(serviceId);
+      this.saveTimeouts.delete(serviceId);
+      // Process queue after timeout
+      this.processQueue(serviceId).catch(err => 
+        logger.error(`Error processing queue after timeout`, { serviceId, error: err })
+      );
+    }, this.SAVE_TIMEOUT);
+    
+    this.saveTimeouts.set(serviceId, timeout);
     
     try {
       const result = await savePromise;
       this.lastSaveTime.set(serviceId, Date.now());
+      
+      // Clear timeout since save completed successfully
+      clearTimeout(timeout);
+      this.saveTimeouts.delete(serviceId);
       
       // Process next item in queue
       await this.processQueue(serviceId);
@@ -80,6 +110,9 @@ class ServiceSaveCoordinator {
       return result;
     } catch (error) {
       logger.error(`❌ ServiceSaveCoordinator: Save failed`, { serviceId, error });
+      // Clear timeout on error
+      clearTimeout(timeout);
+      this.saveTimeouts.delete(serviceId);
       throw error;
     } finally {
       this.activeSaves.delete(serviceId);
@@ -164,6 +197,16 @@ class ServiceSaveCoordinator {
       queue.forEach(op => op.reject(new Error('Save cancelled')));
       this.saveQueue.delete(serviceId);
     }
+    
+    // Clear timeout if any
+    const timeout = this.saveTimeouts.get(serviceId);
+    if (timeout) {
+      clearTimeout(timeout);
+      this.saveTimeouts.delete(serviceId);
+    }
+    
+    // Clear active save
+    this.activeSaves.delete(serviceId);
   }
 }
 
