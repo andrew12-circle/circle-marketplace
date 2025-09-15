@@ -149,7 +149,7 @@ export const VendorPricingModal = ({ isOpen, onClose, onPlanSelected }: VendorPr
                   {plan.features.map((feature, index) => (
                     <div key={index} className="flex items-start gap-2">
                       <Check className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                      <span className="text-sm">{feature}</span>
+                      <span className="text-sm">{feature ? (typeof feature === 'object' ? (feature as any).text || JSON.stringify(feature) : String(feature)) : ''}</span>
                     </div>
                   ))}
                 </div>

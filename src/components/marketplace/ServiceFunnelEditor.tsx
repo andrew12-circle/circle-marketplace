@@ -1866,7 +1866,7 @@ export const ServiceFunnelEditor = ({ funnelContent, onChange }: ServiceFunnelEd
                                 {pkg.features.slice(0, 3).map((feature, index) => (
                                   <li key={index} className="flex items-center gap-2 text-sm">
                                     <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
-                                    {feature}
+                                    {feature ? (typeof feature === 'object' ? (feature as any).text || JSON.stringify(feature) : String(feature)) : ''}
                                   </li>
                                 ))}
                               </ul>
