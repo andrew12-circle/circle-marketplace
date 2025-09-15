@@ -40,6 +40,7 @@ export function EditModeProvider({ children }: EditModeProviderProps) {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.key.toLowerCase() === 'e') {
         e.preventDefault();
+        console.log('Ctrl+E pressed, current edit mode:', isEditMode);
         setIsEditMode(prev => !prev);
         
         // Update URL
@@ -57,9 +58,10 @@ export function EditModeProvider({ children }: EditModeProviderProps) {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isAdmin, isEditMode]);
 
-  const setEditMode = (enabled: boolean) => {
+  const handleSetEditMode = (enabled: boolean) => {
     if (!isAdmin) return;
     
+    console.log('Setting edit mode:', enabled, 'isAdmin:', isAdmin);
     setIsEditMode(enabled);
     
     // Update URL
@@ -73,7 +75,7 @@ export function EditModeProvider({ children }: EditModeProviderProps) {
   };
 
   return (
-    <EditModeContext.Provider value={{ isEditMode, setEditMode, isAdmin }}>
+    <EditModeContext.Provider value={{ isEditMode, setEditMode: handleSetEditMode, isAdmin }}>
       {children}
     </EditModeContext.Provider>
   );
