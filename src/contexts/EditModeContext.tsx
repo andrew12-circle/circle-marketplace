@@ -55,11 +55,12 @@ export function EditModeProvider({ children }: { children: React.ReactNode }) {
   }, [isAdmin]);
 
   const setEditMode = (enabled: boolean) => {
+    console.log('🔧 EditMode: setEditMode called', { enabled, isAdmin, currentEditMode: isEditMode });
     if (!isAdmin) {
       console.log('🔧 EditMode: Blocked - not admin', { isAdmin });
       return;
     }
-    console.log('🔧 EditMode: Manual toggle START', { enabled, isAdmin, currentEditMode: isEditMode });
+    console.log('🔧 EditMode: About to call setIsEditMode', { enabled });
     setIsEditMode(enabled);
     console.log('🔧 EditMode: setIsEditMode called with', enabled);
     // Update URL
@@ -70,7 +71,7 @@ export function EditModeProvider({ children }: { children: React.ReactNode }) {
       url.searchParams.delete('edit');
     }
     window.history.replaceState({}, '', url.toString());
-    console.log('🔧 EditMode: URL updated', { url: url.toString() });
+    console.log('🔧 EditMode: URL updated', { url: url.toString(), newEditMode: enabled });
   };
 
   const value = useMemo(() => ({ 
