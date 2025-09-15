@@ -1591,7 +1591,7 @@ export const ServiceManagementPanel = () => {
 
                     <div className="flex gap-2">
                       <Button 
-                        onClick={() => {
+                        onClick={async () => {
                           console.log('[ServicePanel] Save button clicked', {
                             hasSelectedService: !!selectedService,
                             isDetailsDirty,
