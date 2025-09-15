@@ -26,8 +26,10 @@ export function EditModeProvider({ children }: { children: React.ReactNode }) {
     const qp = new URL(window.location.href).searchParams.get('edit');
     const newEditMode = !!isAdmin && qp === '1';
     console.log('🔧 EditMode: URL parameter check', { isAdmin, editParam: qp, newEditMode });
-    setIsEditMode(newEditMode);
-  }, [isAdmin]);
+    if (newEditMode !== isEditMode) {
+      setIsEditMode(newEditMode);
+    }
+  }, [isAdmin, isEditMode]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {

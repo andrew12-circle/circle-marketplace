@@ -191,20 +191,9 @@ export const UserMenu = () => {
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem 
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
+              onClick={() => {
                 console.log('🔧 Edit Mode toggle clicked!', { currentEditMode: isEditMode, isAdmin });
-                console.log('🔧 setEditMode function:', setEditMode);
-                
-                // Try direct URL manipulation as backup
-                const url = new URL(window.location.href);
-                if (isEditMode) {
-                  url.searchParams.delete('edit');
-                } else {
-                  url.searchParams.set('edit', '1');
-                }
-                window.location.href = url.toString();
+                setEditMode(!isEditMode);
               }}
               className="flex items-center cursor-pointer"
             >
