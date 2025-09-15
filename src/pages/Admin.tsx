@@ -7,6 +7,8 @@ import { ServiceEditorErrorBoundary } from "@/lib/errorBoundary";
 import { useAuth } from "@/contexts/AuthContext";
 import { SecureAdminGuard } from "@/components/admin/SecureAdminGuard";
 import { AdminAuthWrapper } from "@/components/admin/AdminAuthWrapper";
+import { EditModeProvider } from "@/contexts/EditModeContext";
+import { EditModeToggle } from "@/components/admin/EditModeToggle";
 
 const Admin = () => {
   const { user } = useAuth();
@@ -14,8 +16,9 @@ const Admin = () => {
   return (
     <AdminAuthWrapper>
       <SecureAdminGuard>
-        <ServiceEditorErrorBoundary>
-          <SidebarProvider>
+        <EditModeProvider>
+          <ServiceEditorErrorBoundary>
+            <SidebarProvider>
             <div className="min-h-screen flex w-full" data-testid="admin-content">
               <AdminSidebar />
               <div className="flex-1 flex flex-col">
@@ -28,6 +31,7 @@ const Admin = () => {
                       <h1 className="text-lg font-semibold">Admin Dashboard</h1>
                     </div>
                     <div className="flex items-center space-x-4">
+                      <EditModeToggle />
                       <button
                         onClick={() => window.location.href = '/'}
                         className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-muted-foreground hover:text-primary hover:bg-accent rounded-md transition-colors"
@@ -47,6 +51,7 @@ const Admin = () => {
             </div>
           </SidebarProvider>
         </ServiceEditorErrorBoundary>
+        </EditModeProvider>
       </SecureAdminGuard>
     </AdminAuthWrapper>
   );

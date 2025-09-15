@@ -4,12 +4,15 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Package, Star, Building, Clock } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { Editable } from './Editable';
 
 interface Service {
   id: string;
   title: string;
   description: string;
   category: string;
+  retail_price?: number;
+  pro_price?: number;
   image_url?: string;
   is_featured?: boolean;
   is_top_pick?: boolean;
@@ -55,7 +58,19 @@ const ServiceCard = React.memo<ServiceCardProps>(({
               <Badge variant="secondary" className="text-[10px] shrink-0">
                 #{service.sort_order ?? '-'}
               </Badge>
-              <h3 className="font-semibold truncate">{service.title}</h3>
+              <Editable
+                entity="service"
+                entityId={service.id}
+                field="title"
+                value={service.title}
+                type="text"
+                onSave={(newValue) => {
+                  // Update local state if needed
+                  console.log('Title updated:', newValue);
+                }}
+              >
+                <h3 className="font-semibold truncate">{service.title}</h3>
+              </Editable>
             </div>
             {service.image_url ? (
               <img 
@@ -85,19 +100,95 @@ const ServiceCard = React.memo<ServiceCardProps>(({
               )}
             </div>
             
-            <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
-              {service.service_providers?.name && service.service_providers.name !== 'Circle Marketplace' && (
-                <span className="flex items-center gap-1">
-                  <Building className="h-3 w-3" />
-                  {service.service_providers.name}
-                </span>
+            <div className="space-y-2">
+              <Editable
+                entity="service"
+                entityId={service.id}
+                field="category"
+                value={service.category}
+                type="select"
+                options={[
+                  { value: 'CRMs', label: 'CRMs' },
+                  { value: 'Ads & Lead Gen', label: 'Ads & Lead Gen' },
+                  { value: 'Website / IDX', label: 'Website / IDX' },
+                  { value: 'SEO', label: 'SEO' },
+                  { value: 'Coaching', label: 'Coaching' },
+                  { value: 'Marketing Automation & Content', label: 'Marketing Automation & Content' },
+                  { value: 'Video & Media Tools', label: 'Video & Media Tools' },
+                  { value: 'Listing & Showing Tools', label: 'Listing & Showing Tools' },
+                  { value: 'Data & Analytics', label: 'Data & Analytics' },
+                  { value: 'Finance & Business Tools', label: 'Finance & Business Tools' },
+                  { value: 'Productivity & Collaboration', label: 'Productivity & Collaboration' },
+                  { value: 'Virtual Assistants & Dialers', label: 'Virtual Assistants & Dialers' },
+                  { value: 'Team & Recruiting Tools', label: 'Team & Recruiting Tools' },
+                  { value: 'CE & Licensing', label: 'CE & Licensing' },
+                  { value: 'Client Event Kits', label: 'Client Event Kits' },
+                  { value: 'Print & Mail', label: 'Print & Mail' },
+                  { value: 'Signage & Branding', label: 'Signage & Branding' },
+                  { value: 'Presentations', label: 'Presentations' },
+                  { value: 'Branding', label: 'Branding' },
+                  { value: 'Client Retention', label: 'Client Retention' },
+                  { value: 'Transaction Coordinator', label: 'Transaction Coordinator' }
+                ]}
+                onSave={(newValue) => {
+                  console.log('Category updated:', newValue);
+                }}
+              >
+                <Badge variant="outline" className="text-xs">
+                  {service.category}
+                </Badge>
+              </Editable>
+
+              {service.retail_price && (
+                <div className="flex gap-2 text-xs">
+                  <Editable
+                    entity="service"
+                    entityId={service.id}
+                    field="retail_price"
+                    value={service.retail_price}
+                    type="price"
+                    onSave={(newValue) => {
+                      console.log('Retail price updated:', newValue);
+                    }}
+                  >
+                    <span className="text-muted-foreground">
+                      Retail: ${service.retail_price}
+                    </span>
+                  </Editable>
+                  
+                  {service.pro_price && (
+                    <Editable
+                      entity="service"
+                      entityId={service.id}
+                      field="pro_price"
+                      value={service.pro_price}
+                      type="price"
+                      onSave={(newValue) => {
+                        console.log('Pro price updated:', newValue);
+                      }}
+                    >
+                      <span className="text-primary font-medium">
+                        Pro: ${service.pro_price}
+                      </span>
+                    </Editable>
+                  )}
+                </div>
               )}
-              <span className="flex items-center gap-1">
-                <Clock className="h-3 w-3" />
-                {service.updated_at ? formatDistanceToNow(new Date(service.updated_at), {
-                  addSuffix: true
-                }) : 'Unknown'}
-              </span>
+
+              <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                {service.service_providers?.name && service.service_providers.name !== 'Circle Marketplace' && (
+                  <span className="flex items-center gap-1">
+                    <Building className="h-3 w-3" />
+                    {service.service_providers.name}
+                  </span>
+                )}
+                <span className="flex items-center gap-1">
+                  <Clock className="h-3 w-3" />
+                  {service.updated_at ? formatDistanceToNow(new Date(service.updated_at), {
+                    addSuffix: true
+                  }) : 'Unknown'}
+                </span>
+              </div>
             </div>
             
             <div className="flex justify-between items-start mt-2">
